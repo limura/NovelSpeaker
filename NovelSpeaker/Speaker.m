@@ -10,12 +10,16 @@
 
 @implementation Speaker
 
+@synthesize delegate;
+
 - (id) init {
     self = [super init];
     
     m_Synthesizer = [[AVSpeechSynthesizer alloc] init];
     m_Voice = [AVSpeechSynthesisVoice voiceWithLanguage:@"ja-JP"];
-    m_Rate = 0.5f;
+    m_Rate = 1.0f;
+    m_Pitch = 1.0f;
+    m_Interval = 0.0;
     m_CurrentStatus = STSpeakingStatusNone;
     
     m_Synthesizer.delegate = self;
@@ -34,6 +38,8 @@
     AVSpeechUtterance* utterance = [AVSpeechUtterance speechUtteranceWithString:text];
     utterance.voice = m_Voice;
     utterance.rate = m_Rate;
+    utterance.pitchMultiplier = m_Pitch;
+    utterance.postUtteranceDelay = m_Interval;
     [m_Synthesizer speakUtterance:utterance];
     return TRUE;
 }
@@ -46,6 +52,16 @@
 - (void) SetRate: (float) rate
 {
     m_Rate = rate;
+}
+
+- (void) SetPitch: (float) pitch
+{
+    m_Rate = pitch;
+}
+
+- (void) SetDelay: (NSTimeInterval) interval
+{
+    m_Interval = interval;
 }
 
 - (STSpeakingStatus) GetStatus
@@ -80,37 +96,29 @@
 
 - (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didStartSpeechUtterance:(AVSpeechUtterance *)utterance
 {
-    
 	[self changeStatus:STSpeakingStatusSpeak];
-    
 }
 - (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didFinishSpeechUtterance:(AVSpeechUtterance *)utterance{
-    
 	[self changeStatus:STSpeakingStatusStop];
-    
 }
 - (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didPauseSpeechUtterance:(AVSpeechUtterance *)utterance{
-    
 	[self changeStatus:STSpeakingStatusPause];
-    
 }
 - (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didContinueSpeechUtterance:(AVSpeechUtterance *)utterance{
-    
 	[self changeStatus:STSpeakingStatusSpeak];
-    
 }
 - (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didCancelSpeechUtterance:(AVSpeechUtterance *)utterance{
-    
 	[self changeStatus:STSpeakingStatusStop];
-    
 }
 
 - (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer willSpeakRangeOfSpeechString:(NSRange)characterRange utterance:(AVSpeechUtterance *)utterance{
     
 	//NSLog(@"willSpeakRangeOfSpeechString with %lu %lu",(unsigned long)characterRange.location,characterRange.length);
     
-	NSString* strTarget = [utterance.speechString substringWithRange:characterRange];
-    
+	//NSString* strTarget = [utterance.speechString substringWithRange:characterRange];
+    //NSLog(@"willSpeak: %@", strTarget);
+    [self.delegate willSpeakRange:characterRange speakText:utterance.speechString];
+
 	//NSLog(@" target is %@",strTarget);
 	//self.readingWord.text = strTarget;
     

@@ -9,8 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "Speaker.h"
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController<SpeakRangeDelegate>
 {
     Speaker* m_Speaker;
 }
+@property (weak, nonatomic) IBOutlet UITextView *textView;
 @end
