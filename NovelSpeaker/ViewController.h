@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Speaker.h"
 
 @interface ViewController : UIViewController
-
+{
+    Speaker* m_Speaker;
+}
 @end

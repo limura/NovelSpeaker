@@ -18,6 +18,10 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+    
+    m_Speaker = [[Speaker alloc] init];
+    
+    [m_Speaker Speech:@"こんにちは、世界"];
 }
 
 - (void)didReceiveMemoryWarning
