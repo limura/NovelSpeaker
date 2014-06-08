@@ -67,4 +67,14 @@ typedef enum {
 /// 現在の読み上げ状態を取得します
 - (STSpeakingStatus) GetStatus;
 
+/// 読み上げを終了します
+- (BOOL) StopSpeech;
+
+/// 読み上げを一時中断します。
+/// 再開する場合は ResumeSpeech を使用します
+- (BOOL) PauseSpeech;
+
+/// 読み上げを再開します
+- (BOOL) ResumeSpeech;
+
 @end

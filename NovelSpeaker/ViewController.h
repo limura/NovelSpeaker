@@ -12,6 +12,9 @@
 @interface ViewController : UIViewController<SpeakRangeDelegate>
 {
     Speaker* m_Speaker;
+    NSInteger m_SpeechStartPosition;
 }
 @property (weak, nonatomic) IBOutlet UITextView *textView;
+@property (weak, nonatomic) IBOutlet UIButton *startStopButton;
+@property (weak, nonatomic) IBOutlet UIButton *loadButton;
 @end

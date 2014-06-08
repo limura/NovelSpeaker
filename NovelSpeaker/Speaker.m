@@ -17,7 +17,7 @@
     
     m_Synthesizer = [[AVSpeechSynthesizer alloc] init];
     m_Voice = [AVSpeechSynthesisVoice voiceWithLanguage:@"ja-JP"];
-    m_Rate = 1.0f;
+    m_Rate = 0.7f;
     m_Pitch = 1.0f;
     m_Interval = 0.0;
     m_CurrentStatus = STSpeakingStatusNone;
@@ -67,6 +67,21 @@
 - (STSpeakingStatus) GetStatus
 {
     return m_CurrentStatus;
+}
+
+- (BOOL) StopSpeech
+{
+    return [m_Synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
+}
+
+- (BOOL) PauseSpeech
+{
+    return [m_Synthesizer pauseSpeakingAtBoundary:AVSpeechBoundaryImmediate];
+}
+
+- (BOOL) ResumeSpeech
+{
+    return [m_Synthesizer 	continueSpeaking];
 }
 
 - (void)changeStatus:(STSpeakingStatus)status
