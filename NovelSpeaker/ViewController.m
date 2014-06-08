@@ -22,7 +22,14 @@
     m_Speaker = [[Speaker alloc] init];
     m_Speaker.delegate = self;
     
-    [m_Speaker Speech:@"準備完了"];
+    self.rateSlider.minimumValue = AVSpeechUtteranceMinimumSpeechRate;
+    self.rateSlider.maximumValue = AVSpeechUtteranceMaximumSpeechRate;
+    self.rateSlider.value = AVSpeechUtteranceDefaultSpeechRate;
+    self.pitchSlider.minimumValue = 0.5f;
+    self.pitchSlider.maximumValue = 2.0f;
+    self.pitchSlider.value = 1.0f;
+
+    //[m_Speaker Speech:@"準備完了"];
 }
 
 - (void)didReceiveMemoryWarning
@@ -49,6 +56,8 @@
     [self.startStopButton setTitle:@"Stop" forState:UIControlStateNormal];
     self.loadButton.enabled = FALSE;
     [m_Speaker StopSpeech]; // 一旦停止させてから、読み上げさせます
+    [m_Speaker SetPitch:self.pitchSlider.value];
+    [m_Speaker SetRate:self.rateSlider.value];
     [m_Speaker Speech:speechText];
 }
 
@@ -71,12 +80,10 @@
 - (IBAction)loadButtonClick:(id)sender {
     //NSString* text = [self HttpGet:@"http://ncode.syosetu.com/txtdownload/dlstart/ncode/316737/?no=1&hankaku=0&code=utf-8&kaigyo=CR"];
     
-    
     NSString* text = [self HttpGet:@"http://uirou.no-ip.org/syousetu/ftc.txt"];
     NSRange range;
     range.location = NSNotFound;
     [self setSpeechText:text range:range];
-    [self startSpeech];
     return;
     
     NSArray* lines = [self SplitSpeakText:text];

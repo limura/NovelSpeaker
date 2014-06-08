@@ -17,4 +17,6 @@
 @property (weak, nonatomic) IBOutlet UITextView *textView;
 @property (weak, nonatomic) IBOutlet UIButton *startStopButton;
 @property (weak, nonatomic) IBOutlet UIButton *loadButton;
+@property (weak, nonatomic) IBOutlet UISlider *rateSlider;
+@property (weak, nonatomic) IBOutlet UISlider *pitchSlider;
 @end

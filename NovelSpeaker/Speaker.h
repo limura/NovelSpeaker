@@ -54,10 +54,14 @@ typedef enum {
 
 /// 音声の読み上げ速度を指定します。1.0f が通常の速度で、2.0f だと二倍速、0.5f だと半分の速度です。
 /// この設定は次回以降の読み上げから有効になります
+/// 最小値は AVSpeechUtteranceMinimumSpeechRate
+/// 最大値は AVSpeechUtteranceMaximumSpeechRate
+/// 標準値は AVSpeechUtteranceDefaultSpeechRate です。
 - (void) SetRate: (float) rate;
 
 /// 音声のピッチを指定します。小さい値は男性っぽく、大きい値は女性っぽくなります
 /// この設定は次回以降の読み上げから有効になります
+/// 値は 0.5f から 2.0f までで、標準値は 1.0f です。
 - (void) SetPitch: (float) pitch;
 
 /// 音声を読み上げるときの前から開ける時間を指定します

@@ -51,6 +51,13 @@
 
 - (void) SetRate: (float) rate
 {
+    if(rate < AVSpeechUtteranceMinimumSpeechRate)
+    {
+        rate = AVSpeechUtteranceMinimumSpeechRate;
+    }else if(rate > AVSpeechUtteranceMaximumSpeechRate)
+    {
+        rate = AVSpeechUtteranceMaximumSpeechRate;
+    }
     m_Rate = rate;
 }
 
