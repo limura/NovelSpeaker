@@ -8,11 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "Speaker.h"
+#import "SpeechTextBox.h"
 
-@interface ViewController : UIViewController<SpeakRangeDelegate>
+@interface ViewController : UIViewController
 {
-    Speaker* m_Speaker;
     NSInteger m_SpeechStartPosition;
+    SpeechTextBox* m_SpeechTextBox;
 }
 @property (weak, nonatomic) IBOutlet UITextView *textView;
 @property (weak, nonatomic) IBOutlet UIButton *startStopButton;

@@ -35,12 +35,15 @@
         return FALSE;
     }
 
-    AVSpeechUtterance* utterance = [AVSpeechUtterance speechUtteranceWithString:text];
+    AVSpeechUtterance *utterance = [AVSpeechUtterance speechUtteranceWithString:text];
     utterance.voice = m_Voice;
     utterance.rate = m_Rate;
     utterance.pitchMultiplier = m_Pitch;
     utterance.postUtteranceDelay = m_Interval;
+    
+    NSLog(@"rate: %f, pitch: %f, text: %@", m_Rate, m_Pitch, text);
     [m_Synthesizer speakUtterance:utterance];
+    
     return TRUE;
 }
 
@@ -63,7 +66,7 @@
 
 - (void) SetPitch: (float) pitch
 {
-    m_Rate = pitch;
+    m_Pitch = pitch;
 }
 
 - (void) SetDelay: (NSTimeInterval) interval
@@ -107,6 +110,7 @@
             break;
         case STSpeakingStatusStop:
             NSLog(@"speak status -> Stop");
+            [self.delegate finishSpeak];
             break;
         default:
             NSLog(@"speak status -> Unknown");

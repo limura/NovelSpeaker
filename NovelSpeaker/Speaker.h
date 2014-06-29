@@ -18,6 +18,9 @@
 ///    [text substringWithRange:range]
 /// とします。
 - (void) willSpeakRange:(NSRange)range speakText:(NSString*)text;
+
+/// 読み上げが停止したことを知らせます
+- (void) finishSpeak;
 @end
 
 /// 音声の読み上げ状態

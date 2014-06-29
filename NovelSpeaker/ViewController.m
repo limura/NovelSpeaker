@@ -19,17 +19,15 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    m_Speaker = [[Speaker alloc] init];
-    m_Speaker.delegate = self;
-    
     self.rateSlider.minimumValue = AVSpeechUtteranceMinimumSpeechRate;
     self.rateSlider.maximumValue = AVSpeechUtteranceMaximumSpeechRate;
     self.rateSlider.value = AVSpeechUtteranceDefaultSpeechRate;
     self.pitchSlider.minimumValue = 0.5f;
     self.pitchSlider.maximumValue = 2.0f;
     self.pitchSlider.value = 1.0f;
-
-    //[m_Speaker Speech:@"準備完了"];
+    
+    m_SpeechTextBox = [[SpeechTextBox alloc] init];
+    m_SpeechTextBox.textView = self.textView;
 }
 
 - (void)didReceiveMemoryWarning
@@ -41,29 +39,22 @@
 /// 読み上げを開始します。
 /// 読み上げ開始点(選択範囲)がなければ一番最初から読み上げを開始することにします
 - (void)startSpeech {
+    // 読み上げ位置を m_SpeechTextBox に指示します
     NSRange range = self.textView.selectedRange;
-    if(range.location == NSNotFound
-       || range.location >= [self.textView.text length])
-    {
-        // 範囲指定がおかしいので読み上げ開始位置は初期状態のものとします。
-        range.location = 0;
-        range.length = 0;
-    }
-    
+    [m_SpeechTextBox SetSpeechStartPoint:range];
+
     // 読み上げ開始位置以降の文字列について、読み上げを開始します。
-    m_SpeechStartPosition = range.location;
-    NSString* speechText = [self.textView.text substringFromIndex:range.location];
     [self.startStopButton setTitle:@"Stop" forState:UIControlStateNormal];
     self.loadButton.enabled = FALSE;
-    [m_Speaker StopSpeech]; // 一旦停止させてから、読み上げさせます
-    [m_Speaker SetPitch:self.pitchSlider.value];
-    [m_Speaker SetRate:self.rateSlider.value];
-    [m_Speaker Speech:speechText];
+
+    [m_SpeechTextBox SetPitch:self.pitchSlider.value];
+    [m_SpeechTextBox SetRate:self.rateSlider.value];
+    [m_SpeechTextBox StartSpeech];
 }
 
 /// 読み上げを停止します
 - (void)stopSpeech{
-    [m_Speaker StopSpeech];
+    [m_SpeechTextBox StopSpeech];
     [self.startStopButton setTitle:@"Start" forState:UIControlStateNormal];
     self.loadButton.enabled = TRUE;
 }
@@ -75,6 +66,7 @@
     [self stopSpeech];
     [self.textView setText:text];
     self.textView.selectedRange = range;
+    [m_SpeechTextBox SetText:text];
 }
 
 - (IBAction)loadButtonClick:(id)sender {
@@ -83,27 +75,9 @@
     NSString* text = [self HttpGet:@"http://uirou.no-ip.org/syousetu/ftc.txt"];
     NSRange range;
     range.location = NSNotFound;
+    range.length = 0;
     [self setSpeechText:text range:range];
     return;
-    
-    NSArray* lines = [self SplitSpeakText:text];
-    for(NSString* str in lines)
-    {
-        NSLog(@"%@", str);
-        NSRange searchResult = [str rangeOfString:@"「"];
-        if(searchResult.location == NSNotFound)
-        {
-            [m_Speaker SetPitch:1.0f];
-        }else{
-            [m_Speaker SetPitch:0.8f];
-        }
-        [m_Speaker SetDelay: 0.05];
-        [m_Speaker Speech:str];
-        while([m_Speaker GetStatus] != STSpeakingStatusStop)
-        {
-            [NSThread sleepForTimeInterval:0.1];
-        }
-    }
 }
 
 - (IBAction)startStopButtonClick:(id)sender {
@@ -116,16 +90,6 @@
     {
         [self stopSpeech];
     }
-}
-
-/// Speaker からのイベントを受け取ります
-- (void) willSpeakRange:(NSRange)range speakText:(NSString *)text
-{
-    NSRange currentRange;
-    currentRange.location = m_SpeechStartPosition + range.location;
-    currentRange.length = range.length;
-    self.textView.selectedRange = currentRange;
-    [self.textView scrollRangeToVisible:currentRange];
 }
 
 /// 長い文字列を読み上げ時の読み上げやすい長さに分割した NSArray に変換します。
