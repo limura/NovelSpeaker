@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13D65" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="NarouContent" representedClassName="NarouContent" syncable="YES">
+        <attribute name="ncode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="story" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="userid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="writer" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="childStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
+    </entity>
+    <entity name="SpeechRegexPitchSetting" syncable="YES"/>
+    <entity name="Story" representedClassName="Story" syncable="YES">
+        <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="NarouContent" positionX="-263" positionY="-90" width="128" height="133"/>
+        <element name="Story" positionX="-72" positionY="-31" width="128" height="73"/>
+        <element name="SpeechRegexPitchSetting" positionX="-153" positionY="-18" width="128" height="45"/>
+    </elements>
+</model>

@@ -6,7 +6,10 @@
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
+#import <CoreData/CoreData.h>
 #import "ViewController.h"
+#import "Story.h"
+#import "NarouContent.h"
 
 @interface ViewController ()
 
@@ -81,6 +84,40 @@
     range.location = NSNotFound;
     range.length = 0;
     [self setSpeechText:text range:range];
+    
+    return;
+    // TODO: load save をする場合はこんな感じでやるらしい。
+    // CoreData で text を保存してみます
+    Story* story = (Story*)[NSEntityDescription insertNewObjectForEntityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
+    story.content = text;
+    NSError* err = nil;
+    [self.managedObjectContext save:&err];
+    if(err != nil)
+    {
+        NSLog(@"save error: %@, %@", err, [err userInfo]);
+        return;
+    }
+    
+    // CoreData で読みだしてみます
+    NSLog(@"original story.content: %@", story.content);
+
+    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription* entity = [NSEntityDescription entityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"content" ascending:NO];
+    NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+    [fetchRequest setSortDescriptors:sortDescriptors];
+    sortDescriptors = nil;
+    sortDescriptor = nil;
+    err = nil;
+    NSMutableArray* fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+    if(fetchResults == nil)
+    {
+        NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
+        return;
+    }
+    NSLog(@"%lu story loaded.", (unsigned long)[fetchResults count]);
+    
     return;
 }
 

@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreData/CoreData.h>
 #import "Speaker.h"
 #import "SpeechTextBox.h"
 
@@ -20,4 +21,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *loadButton;
 @property (weak, nonatomic) IBOutlet UISlider *rateSlider;
 @property (weak, nonatomic) IBOutlet UISlider *pitchSlider;
+
+@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+
 @end
