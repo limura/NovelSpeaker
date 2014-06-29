@@ -28,6 +28,10 @@
     
     m_SpeechTextBox = [[SpeechTextBox alloc] init];
     m_SpeechTextBox.textView = self.textView;
+
+    [m_SpeechTextBox SetDelay: 0.001];
+    [m_SpeechTextBox AddPitchSetting:@"」$" pitch:1.5f];
+    [m_SpeechTextBox AddPitchSetting:@"』$" pitch:1.5f];
 }
 
 - (void)didReceiveMemoryWarning

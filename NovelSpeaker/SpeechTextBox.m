@@ -7,6 +7,7 @@
 //
 
 #import "SpeechTextBox.h"
+#import "SpeechRegexPitchSetting.h"
 
 @implementation SpeechTextBox
 
@@ -25,6 +26,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     m_SpeechTextLocationCache = 0;
     m_SpeechTextBlockStartLocation = 0;
     m_isSpeaking = false;
+    m_PitchSettingList = [[NSArray alloc] init];
     
     return self;
 }
@@ -119,7 +121,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     return true;
 }
 
-/// 読み上げ位置を更新します。
+/// 読み上げindexを更新します。
 /// これ以上読み上げできない場合は false を返します
 - (BOOL) UpdateSpeechTextIndex
 {
@@ -127,22 +129,44 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     {
         return false;
     }
-    // 今読み上げていた分のtextの長さを計算しておきます。
-    NSUInteger current_text_length = [m_SpeechTextList[m_SpeechTextListIndex] length];
-    current_text_length += [SPEECH_TEXT_SEPARATOR length];
-
     // 読み上げ位置を更新します。
     m_SpeechTextBlockStartLocation = 0;
     do {
+        NSUInteger current_text_length = [m_SpeechTextList[m_SpeechTextListIndex] length];
+        current_text_length += [SPEECH_TEXT_SEPARATOR length];
         m_SpeechTextListIndex++;
         if([m_SpeechTextList count] < m_SpeechTextListIndex)
         {
             return false;
         }
+        m_SpeechTextLocationCache += current_text_length;
+        m_SpeechPosition.location += current_text_length;
+        // 長さが0の文字列の場合は更新させます。
     }while([m_SpeechTextList[m_SpeechTextListIndex] length] <= 0);
 
-    m_SpeechTextLocationCache += current_text_length;
-    m_SpeechPosition.location += current_text_length;
+    m_SpeechPosition.length = 0;
+    m_SpeechPosition.location = m_SpeechTextLocationCache;
+
+    return true;
+}
+
+///
+- (BOOL) _AssignSpeechSetting: (NSString*)text
+{
+    for(SpeechRegexPitchSetting* setting in m_PitchSettingList)
+    {
+        NSTextCheckingResult* result = [setting.regex firstMatchInString:text options:0 range:NSMakeRange(0, [text length])];
+        if(result.numberOfRanges <= 0)
+        {
+            continue;
+        }
+        [m_Speaker SetPitch:setting.pitch];
+        //NSLog(@"hit. use pitch: %f in %@", setting.pitch, text);
+        return true;
+    }
+    // どれにもhitしなかったので、default値を設定します。
+    //NSLog(@"not hit. use default pitch: %f in %@", m_DefaultPitch, text);
+    [m_Speaker SetPitch:m_DefaultPitch];
     return true;
 }
 
@@ -159,6 +183,10 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     }
     
     NSString* target_text = m_SpeechTextList[m_SpeechTextListIndex];
+
+    // 文字列のピッチの設定は、読み上げ開始点ではなく細切れにしたテキストに対して適用するので、
+    // このタイミングでピッチの設定を行います。
+    [self _AssignSpeechSetting:target_text];
     
     m_SpeechTextBlockStartLocation = 0;
     if(m_SpeechPosition.location > m_SpeechTextLocationCache)
@@ -168,7 +196,8 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
         {
             // 何故か読み上げ位置が現在指定されている文字の範囲を超えているので再計算させます
             // TODO: ここに陥るということはなにかおかしいです。計算が間違えているか、
-            // 読み上げのStopイベントが意図しないタイミングで飛んできているか……
+            // 読み上げのStopイベントが意図しないタイミングで飛んできているかどちらか？
+            // (一つの細切れtextの途中でStopイベントが飛ぶと m_SpeechTextListIndex が +1 されておかしな事になるはず)
             [self SetSpeechStartPoint:m_SpeechPosition];
         }
         m_SpeechTextBlockStartLocation = m_SpeechPosition.location - m_SpeechTextLocationCache;
@@ -264,6 +293,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
 /// 標準値は AVSpeechUtteranceDefaultSpeechRate です。
 - (void) SetRate: (float) rate
 {
+    m_DefaultRate = rate;
     [m_Speaker SetRate:rate];
 }
 
@@ -272,7 +302,31 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
 /// 値は 0.5f から 2.0f までで、標準値は 1.0f です。
 - (void) SetPitch: (float) pitch
 {
+    m_DefaultPitch = pitch;
     [m_Speaker SetPitch:pitch];
 }
 
+/// 正規表現マッチでのピッチ指定を追加します。
+- (BOOL) AddPitchSetting: (NSString*)regexPattern pitch:(float)pitch
+{
+    SpeechRegexPitchSetting* setting = [[SpeechRegexPitchSetting alloc] init];
+    setting.pitch = pitch;
+    NSError* error = nil;
+    setting.regex = [NSRegularExpression regularExpressionWithPattern:regexPattern options:NSRegularExpressionDotMatchesLineSeparators error:&error];
+    if(error != nil)
+    {
+        NSLog(@"NSRegularExpression create failed. maybe invalid pattern in string: '%@'", regexPattern);
+        return false;
+    }
+    
+    m_PitchSettingList = [m_PitchSettingList arrayByAddingObject:setting];
+    return true;
+}
+
+/// 音声を読み上げるときの前から開ける時間を指定します
+/// この設定は次回以降の読み上げから有効になります
+- (void) SetDelay: (NSTimeInterval) interval
+{
+    [m_Speaker SetDelay:interval];
+}
 @end

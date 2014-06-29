@@ -38,6 +38,14 @@
     /// 読み上げ終了イベントは自分で読み上げを終わらせた時も、
     /// 自動で終わった時もどちらも呼び出されるので、どちらの条件で発生したかを判定するために使います。
     BOOL m_isSpeaking;
+    
+    /// 細切れ文字列毎に正規表現にマッチしたら設定されるピッチのlist
+    NSArray* m_PitchSettingList;
+    
+    /// 読み上げに使われる標準のrate
+    float m_DefaultRate;
+    /// 読み上げに使われる標準のpitch
+    float m_DefaultPitch;
 }
 
 /// textView へのlink
@@ -72,9 +80,18 @@
 /// 標準値は AVSpeechUtteranceDefaultSpeechRate です。
 - (void) SetRate: (float) rate;
 
-/// 音声のピッチを指定します。小さい値は男性っぽく、大きい値は女性っぽくなります
+/// 標準の音声のピッチを指定します。小さい値は男性っぽく、大きい値は女性っぽくなります
 /// この設定は次回以降の読み上げから有効になります
 /// 値は 0.5f から 2.0f までで、標準値は 1.0f です。
 - (void) SetPitch: (float) pitch;
 
+/// これから読み上げる文字列について、regexPatternで正規表現マッチを行い、
+/// マッチするものであれば指定されたpitchのピッチで読み上げを行うようにします。
+/// マッチは登録された順に行われ、一番最初にマッチしたものが採用されます。
+/// 何にもマッチしない場合には、SetPitch で指定された標準の音声ピッチが採用されます。
+- (BOOL) AddPitchSetting: (NSString*)regexPattern pitch:(float)pitch;
+
+/// 音声を読み上げるときの前から開ける時間を指定します
+/// この設定は次回以降の読み上げから有効になります
+- (void) SetDelay: (NSTimeInterval) interval;
 @end
