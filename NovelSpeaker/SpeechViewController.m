@@ -7,27 +7,22 @@
 //
 
 #import <CoreData/CoreData.h>
-#import "ViewController.h"
+#import "SpeechViewController.h"
 #import "Story.h"
 #import "NarouContent.h"
+#import "GlobalDataSingleton.h"
 
-@interface ViewController ()
+@interface SpeechViewController ()
 
 @end
 
-@implementation ViewController
+@implementation SpeechViewController
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    self.rateSlider.minimumValue = AVSpeechUtteranceMinimumSpeechRate;
-    self.rateSlider.maximumValue = AVSpeechUtteranceMaximumSpeechRate;
-    self.rateSlider.value = AVSpeechUtteranceDefaultSpeechRate;
-    self.pitchSlider.minimumValue = 0.5f;
-    self.pitchSlider.maximumValue = 2.0f;
-    self.pitchSlider.value = 1.0f;
     
     m_SpeechTextBox = [[SpeechTextBox alloc] init];
     m_SpeechTextBox.textView = self.textView;
@@ -46,6 +41,9 @@
 /// 読み上げを開始します。
 /// 読み上げ開始点(選択範囲)がなければ一番最初から読み上げを開始することにします
 - (void)startSpeech {
+    // 選択範囲を表示するようにします。
+    [self.textView becomeFirstResponder];
+    
     // 読み上げ位置を m_SpeechTextBox に指示します
     NSRange range = self.textView.selectedRange;
     [m_SpeechTextBox SetSpeechStartPoint:range];
@@ -54,8 +52,9 @@
     [self.startStopButton setTitle:@"Stop" forState:UIControlStateNormal];
     self.loadButton.enabled = FALSE;
 
-    [m_SpeechTextBox SetPitch:self.pitchSlider.value];
-    [m_SpeechTextBox SetRate:self.rateSlider.value];
+    GlobalState* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
+    [m_SpeechTextBox SetPitch:[globalState.defaultPitch floatValue]];
+    [m_SpeechTextBox SetRate:[globalState.defaultRate floatValue]];
     [m_SpeechTextBox StartSpeech];
 }
 
@@ -86,6 +85,7 @@
     [self setSpeechText:text range:range];
     
     return;
+    /*
     // TODO: load save をする場合はこんな感じでやるらしい。
     // CoreData で text を保存してみます
     Story* story = (Story*)[NSEntityDescription insertNewObjectForEntityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
@@ -117,6 +117,7 @@
         return;
     }
     NSLog(@"%lu story loaded.", (unsigned long)[fetchResults count]);
+     */
     
     return;
 }

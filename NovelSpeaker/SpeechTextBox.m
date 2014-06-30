@@ -293,6 +293,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
 /// 標準値は AVSpeechUtteranceDefaultSpeechRate です。
 - (void) SetRate: (float) rate
 {
+    NSLog(@"set rate: %f", rate);
     m_DefaultRate = rate;
     [m_Speaker SetRate:rate];
 }
@@ -302,6 +303,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
 /// 値は 0.5f から 2.0f までで、標準値は 1.0f です。
 - (void) SetPitch: (float) pitch
 {
+    NSLog(@"set pitch: %f", pitch);
     m_DefaultPitch = pitch;
     [m_Speaker SetPitch:pitch];
 }

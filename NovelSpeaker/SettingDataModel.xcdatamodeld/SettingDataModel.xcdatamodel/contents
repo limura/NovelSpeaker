@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13D65" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="GlobalState" representedClassName="GlobalState" syncable="YES">
+        <attribute name="defaultPitch" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="defaultRate" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="readLocation" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" syncable="YES"/>
+    </entity>
     <entity name="NarouContent" representedClassName="NarouContent" syncable="YES">
         <attribute name="ncode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="novelupdated_at" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="story" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="updated_at" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="userid" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="writer" optional="YES" attributeType="String" syncable="YES"/>
-        <relationship name="childStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
+        <relationship name="childStory" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
     </entity>
-    <entity name="SpeechRegexPitchSetting" syncable="YES"/>
     <entity name="Story" representedClassName="Story" syncable="YES">
         <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
-        <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
+        <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
     </entity>
     <elements>
-        <element name="NarouContent" positionX="-263" positionY="-90" width="128" height="133"/>
-        <element name="Story" positionX="-72" positionY="-31" width="128" height="73"/>
-        <element name="SpeechRegexPitchSetting" positionX="-153" positionY="-18" width="128" height="45"/>
+        <element name="NarouContent" positionX="-387" positionY="-340" width="128" height="163"/>
+        <element name="Story" positionX="-81" positionY="-280" width="128" height="73"/>
+        <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="103"/>
     </elements>
 </model>

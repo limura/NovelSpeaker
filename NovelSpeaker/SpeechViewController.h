@@ -11,7 +11,7 @@
 #import "Speaker.h"
 #import "SpeechTextBox.h"
 
-@interface ViewController : UIViewController
+@interface SpeechViewController : UIViewController
 {
     NSInteger m_SpeechStartPosition;
     SpeechTextBox* m_SpeechTextBox;
@@ -19,9 +19,5 @@
 @property (weak, nonatomic) IBOutlet UITextView *textView;
 @property (weak, nonatomic) IBOutlet UIButton *startStopButton;
 @property (weak, nonatomic) IBOutlet UIButton *loadButton;
-@property (weak, nonatomic) IBOutlet UISlider *rateSlider;
-@property (weak, nonatomic) IBOutlet UISlider *pitchSlider;
-
-@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
 @end
