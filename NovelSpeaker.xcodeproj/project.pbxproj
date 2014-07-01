@@ -42,6 +42,8 @@
 		21F054EE1917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
 		21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21F054F41917E0F200CC6BA9 /* InfoPlist.strings */; };
 		21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */; };
+		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
+		4E776B1D1962566F00C36AD1 /* NarouLoadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouLoadTableViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,6 +104,10 @@
 		21F054F31917E0F200CC6BA9 /* NovelSpeakerTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NovelSpeakerTests-Info.plist"; sourceTree = "<group>"; };
 		21F054F51917E0F200CC6BA9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NovelSpeakerTests.m; sourceTree = "<group>"; };
+		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
+		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
+		4E776B1B1962566F00C36AD1 /* NarouLoadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoadTableViewController.h; sourceTree = "<group>"; };
+		4E776B1C1962566F00C36AD1 /* NarouLoadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoadTableViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -185,27 +191,26 @@
 				21F054DB1917E0F200CC6BA9 /* AppDelegate.h */,
 				21F054DC1917E0F200CC6BA9 /* AppDelegate.m */,
 				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
-				21F054E11917E0F200CC6BA9 /* SpeechViewController.h */,
-				21F054E21917E0F200CC6BA9 /* SpeechViewController.m */,
+				4E776B17196247BE00C36AD1 /* ViewControllers */,
 				217F6E1A1942F14B008E432E /* Speaker.h */,
 				217F6E1B1942F14B008E432E /* Speaker.m */,
+				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
+				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
+				4E776B18196247FB00C36AD1 /* NarouLoader.h */,
+				4E776B19196247FB00C36AD1 /* NarouLoader.m */,
 				21F054E41917E0F200CC6BA9 /* Images.xcassets */,
 				21F054D31917E0F200CC6BA9 /* Supporting Files */,
 				21B5394E195C60C6009658B7 /* SpeechTextBox.h */,
 				21B5394F195C60C6009658B7 /* SpeechTextBox.m */,
 				21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */,
 				21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */,
-				21B53A1219619615009658B7 /* Story.h */,
-				21B53A1319619615009658B7 /* Story.m */,
 				21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */,
 				21B53A2E1961A8F3009658B7 /* GlobalState.h */,
 				21B53A2F1961A8F3009658B7 /* GlobalState.m */,
+				21B53A1219619615009658B7 /* Story.h */,
+				21B53A1319619615009658B7 /* Story.m */,
 				21B53A09196194A8009658B7 /* NarouContent.h */,
 				21B53A0A196194A8009658B7 /* NarouContent.m */,
-				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
-				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
-				21B53A311961B30F009658B7 /* SettingsViewController.h */,
-				21B53A321961B30F009658B7 /* SettingsViewController.m */,
 			);
 			path = NovelSpeaker;
 			sourceTree = "<group>";
@@ -237,6 +242,19 @@
 				21F054F41917E0F200CC6BA9 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4E776B17196247BE00C36AD1 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				21F054E11917E0F200CC6BA9 /* SpeechViewController.h */,
+				21F054E21917E0F200CC6BA9 /* SpeechViewController.m */,
+				21B53A311961B30F009658B7 /* SettingsViewController.h */,
+				21B53A321961B30F009658B7 /* SettingsViewController.m */,
+				4E776B1B1962566F00C36AD1 /* NarouLoadTableViewController.h */,
+				4E776B1C1962566F00C36AD1 /* NarouLoadTableViewController.m */,
+			);
+			name = ViewControllers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -351,9 +369,11 @@
 				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
 				21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */,
 				21B53A1419619615009658B7 /* Story.m in Sources */,
+				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
 				21B53A0B196194A8009658B7 /* NarouContent.m in Sources */,
 				21B53950195C60C6009658B7 /* SpeechTextBox.m in Sources */,
+				4E776B1D1962566F00C36AD1 /* NarouLoadTableViewController.m in Sources */,
 				21B53A301961A8F3009658B7 /* GlobalState.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,

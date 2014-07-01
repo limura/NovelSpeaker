@@ -19,6 +19,7 @@
     {
         return NO;
     }
+    [globalData UpdateContentList];
     return YES;
 }
 							

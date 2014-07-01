@@ -8,6 +8,7 @@
 
 #import "GlobalDataSingleton.h"
 #import <AVFoundation/AVFoundation.h>
+#import "NarouLoader.h"
 
 @implementation GlobalDataSingleton
 
@@ -74,6 +75,90 @@ static GlobalDataSingleton* _singleton = nil;
     }
     return fetchResults[0];
 }
+
+/// CoreData で保存している NarouContent のうち、Ncode で検索した結果
+/// 得られた NovelContent を取得します。
+/// 登録がなければ nil を返します
+- (NarouContent*) SearchNarouContentFromNcode:(NSString*) ncode
+{
+    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode = %@", ncode];
+    [fetchRequest setPredicate:predicate];
+
+    NSError* err = nil;
+    NSMutableArray* fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+    if(fetchResults == nil)
+    {
+        NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
+        return nil;
+    }
+    if([fetchResults count] == 0)
+    {
+        // 何もなかった。
+        return nil;
+    }
+    if([fetchResults count] != 1)
+    {
+        NSLog(@"duplicate ncode!!! %@", ncode);
+        return nil;
+    }
+    return fetchResults[0];
+}
+
+/// 新しい NarouContent を生成して返します。
+- (NarouContent*) CreateNewNarouContent
+{
+    // まだ登録されてなかったので新しく作ります。
+    return [NSEntityDescription insertNewObjectForEntityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
+}
+
+/// 保存されている NarouContent の数を取得します。
+- (NSUInteger) GetNarouContentCount
+{
+    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    // 数を数えるだけなのでidしか返却しないようにします。
+    [fetchRequest setIncludesPropertyValues:NO];
+
+    NSError* err = nil;
+    NSMutableArray* fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+    if(fetchResults == nil)
+    {
+        return 0;
+    }
+    return [fetchResults count];
+}
+
+/// NarouContent のリストを更新します。
+/// 怪しく検索条件を内部で勝手に作ります。
+- (BOOL)UpdateContentList
+{
+    NarouLoader* loader = [NarouLoader new];
+    return [loader UpdateContentList];
+}
+
+/// NarouContent の全てを NSArray で取得します
+- (NSMutableArray*) GetAllNarouContent
+{
+    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    NSError* err = nil;
+    NSMutableArray* result = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+    if(err != nil)
+    {
+        NSLog(@"fetch failed. %@, %@", err, [err userInfo]);
+        return nil;
+    }
+    return result;
+    
+}
+
 
 /// Core Data用にディレクトリを(なければ)作ります。
 - (BOOL)CreateCoreDataDirectory

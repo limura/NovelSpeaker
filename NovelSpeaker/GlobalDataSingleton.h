@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 #import "GlobalState.h"
+#import "NarouContent.h"
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -32,5 +33,23 @@
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
 - (GlobalState*) GetGlobalState;
+
+/// CoreData で保存している NarouContent のうち、Ncode で検索した結果
+/// 得られた NovelContent を取得します。
+/// 登録がなければ nil を返します
+- (NarouContent*) SearchNarouContentFromNcode:(NSString*) ncode;
+
+/// 新しい NarouContent を生成して返します。
+- (NarouContent*) CreateNewNarouContent;
+
+/// 保存されている NarouContent の数を取得します。
+- (NSUInteger) GetNarouContentCount;
+
+/// NarouContent のリストを更新します。
+/// 怪しく検索条件を内部で勝手に作ります。
+- (BOOL)UpdateContentList;
+
+/// NarouContent の全てを NSArray で取得します
+- (NSMutableArray*) GetAllNarouContent;
 
 @end

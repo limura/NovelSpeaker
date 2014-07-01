@@ -11,7 +11,6 @@
         <attribute name="novelupdated_at" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="story" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="updated_at" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="userid" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="writer" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="childStory" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
@@ -21,8 +20,8 @@
         <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
     </entity>
     <elements>
-        <element name="NarouContent" positionX="-387" positionY="-340" width="128" height="163"/>
-        <element name="Story" positionX="-81" positionY="-280" width="128" height="73"/>
         <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="103"/>
+        <element name="NarouContent" positionX="-387" positionY="-340" width="128" height="150"/>
+        <element name="Story" positionX="-81" positionY="-280" width="128" height="73"/>
     </elements>
 </model>
