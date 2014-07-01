@@ -62,9 +62,32 @@
     }
     else
     {
-        cell.textLabel.text = ((NarouContent*)contentList[indexPath.row]).title;
+        NarouContent* narouContent = (NarouContent*)contentList[indexPath.row];
+        cell.textLabel.text = [[NSString alloc] initWithFormat:@"%@ %@"
+                               , narouContent.ncode
+                               , narouContent.title];
+                               
     }
     return cell;
+}
+
+/// セルが選択された時
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
+    NSLog(@"row %ld selected.", indexPath.row);
+    NSString* text = cell.textLabel.text;
+    NSArray* splited_text = [text componentsSeparatedByString:@" "];
+    NSString* ncode = splited_text[0];
+    
+    NarouContent* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:ncode];
+    if (content == nil) {
+        NSLog(@"content not found %@", ncode);
+        return;
+    }
+    
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:content.title message:content.story delegate:nil cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
+    [alert show];
 }
 
 @end

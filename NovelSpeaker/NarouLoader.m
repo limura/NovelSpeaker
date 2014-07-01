@@ -14,6 +14,14 @@
 /// SettingDataModel の NarouContent に追加するなどします。
 @implementation NarouLoader
 
+/// 小説になろうの時間フォーマットからNSDateに変換します
+- (NSDate*)ConvertNarouDate2NSDate: (NSString*)narouDate
+{
+    NSDateFormatter* formatter = [NSDateFormatter new];
+    [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+    return [formatter dateFromString:narouDate];
+}
+
 /// NarouContent のリストを更新します。
 /// 怪しく検索条件を内部で勝手に作ります。
 - (BOOL)UpdateContentList
@@ -27,9 +35,14 @@
     for(NSDictionary* jsonContent in contentList)
     {
         NSString* ncode = [jsonContent objectForKey:@"ncode"];
+        if (ncode == nil || [ncode length] <= 0) {
+            // 何も入っていないようなので無視します。(たぶんallcountって奴しか入ってない部分だと思う)
+            continue;
+        }
         NarouContent* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:ncode];
         
         if (content == nil) {
+            NSLog(@"ncode: %@ %@ not found. adding.", ncode, [jsonContent objectForKey:@"title"]);
             content = [[GlobalDataSingleton GetInstance] CreateNewNarouContent];
         }
 
@@ -38,7 +51,10 @@
         content.userid = [jsonContent objectForKey:@"userid"];
         content.story = [jsonContent objectForKey:@"story"];
         content.writer = [jsonContent objectForKey:@"writer"];
-        //NSString* novelupdated_at_string = [jsonContent objectForKey:@"novelupdated_at"];
+
+        // 小説の更新時間を取り出します。
+        NSString* novelupdated_at_string = [jsonContent objectForKey:@"novelupdated_at"];
+        content.novelupdated_at = [self ConvertNarouDate2NSDate:novelupdated_at_string];
     }
     return true;
 }

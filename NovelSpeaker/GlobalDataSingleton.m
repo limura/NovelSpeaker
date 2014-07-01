@@ -85,7 +85,7 @@ static GlobalDataSingleton* _singleton = nil;
     NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
     [fetchRequest setEntity:entity];
     
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode = %@", ncode];
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@", ncode];
     [fetchRequest setPredicate:predicate];
 
     NSError* err = nil;
@@ -142,12 +142,17 @@ static GlobalDataSingleton* _singleton = nil;
 }
 
 /// NarouContent の全てを NSArray で取得します
+/// novelupdated_at で sort されて返されます。
 - (NSMutableArray*) GetAllNarouContent
 {
     NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
     NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
     [fetchRequest setEntity:entity];
-    
+
+    NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"novelupdated_at" ascending:NO];
+    NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+    [fetchRequest setSortDescriptors:sortDescriptors];
+
     NSError* err = nil;
     NSMutableArray* result = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
     if(err != nil)

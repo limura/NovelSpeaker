@@ -50,6 +50,7 @@
 - (BOOL)UpdateContentList;
 
 /// NarouContent の全てを NSArray で取得します
+/// novelupdated_at で sort されて返されます。
 - (NSMutableArray*) GetAllNarouContent;
 
 @end
