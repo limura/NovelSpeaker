@@ -259,9 +259,15 @@ static GlobalDataSingleton* _singleton = nil;
          Lightweight migration will only work for a limited set of schema changes; consult "Core Data Model Versioning and Data Migration Programming Guide" for details.
          
          */
-        NSLog(@"store coordinator add error %@, %@ database clear and abort.", error, [error userInfo]);
+        // TODO: 一旦ファイルを消してみて、もう一回やってみます。
+        // ただ、これはなにかデータが壊れてるか、CoreDataの設定を書き換えたからなので、リリースした後ではこの対応だとひどいです。
+        // つかデータ消してるってことはユーザの履歴とか全部吹き飛んでるわけで。('A`)
         [[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil];
-        abort();
+        if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error])
+        {
+            NSLog(@"store cordinator add error 2th. %@, %@", error, [error userInfo]);
+            abort();
+        }
     }
     
     return _persistentStoreCoordinator;
