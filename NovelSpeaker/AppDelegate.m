@@ -19,7 +19,7 @@
     {
         return NO;
     }
-    [globalData UpdateContentList];
+    //[globalData UpdateContentList];
     return YES;
 }
 							

@@ -46,7 +46,7 @@
     self.GeneralAllNoLabel.text = [self.NarouContentDetail.general_all_no stringValue];
     self.GlobalPointLabel.text = [self.NarouContentDetail.global_point stringValue];
     self.KeywordLabel.text = self.NarouContentDetail.keyword;
-    self.StoryTextView.text = self.NarouContentDetail.story;
+    self.StoryTextLabel.text = self.NarouContentDetail.story;
     
     float averagePoint = [self.NarouContentDetail.all_point floatValue] / [self.NarouContentDetail.all_hyoka_cnt floatValue];
     if (isnan(averagePoint) ) {
@@ -58,12 +58,21 @@
     NSDateFormatter* dateFormatter = [NSDateFormatter new];
     [dateFormatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
     self.NovelupdatedAtLabel.text = [dateFormatter stringFromDate:self.NarouContentDetail.novelupdated_at];
-
-    NSRange startRange;
-    startRange.length = 0;
-    startRange.location = 0;
-    [self.StoryTextView scrollRangeToVisible:startRange];
+    
+    NSLog(@"ScrollView size: %f,%f", self.PageScrollView.bounds.size.width, self.PageScrollView.bounds.size.height);
+    NSLog(@"ScrollView content size: %f,%f", self.PageScrollView.contentSize.width, self.PageScrollView.contentSize.height);
 }
+
+/*
+- (void)viewDidLayoutSubviews
+{
+    [super viewDidLayoutSubviews];
+    [self.view layoutSubviews];
+
+    NSLog(@"layout SubViews ScrollView size: %f,%f", self.PageScrollView.bounds.size.width, self.PageScrollView.bounds.size.height);
+    NSLog(@"layout SubViews ScrollView content size: %f,%f", self.PageScrollView.contentSize.width, self.PageScrollView.contentSize.height);
+}
+ */
 
 - (void)didReceiveMemoryWarning
 {
