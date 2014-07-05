@@ -7,7 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "NarouContentAllData.h"
 
-@interface NarouLoadTableViewController : UITableViewController
+@interface NarouSearchResultTableViewController : UITableViewController
+{
+    NarouContentAllData* m_NextViewDetail;
+}
+@property NSArray* SearchResultList;
 
 @end

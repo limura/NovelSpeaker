@@ -164,6 +164,16 @@ static GlobalDataSingleton* _singleton = nil;
     
 }
 
+/// ダウンロードqueueに追加しようとします
+/// 追加した場合は nil を返します。
+/// 追加できなかった場合はエラーメッセージを返します。
+- (NSString*) AddDownloadQueueForNarou:(NarouContentAllData*) content
+{
+    // TODO: これから作ります。
+    return nil;
+}
+
+
 
 /// Core Data用にディレクトリを(なければ)作ります。
 - (BOOL)CreateCoreDataDirectory

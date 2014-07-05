@@ -10,6 +10,7 @@
 #import <CoreData/CoreData.h>
 #import "GlobalState.h"
 #import "NarouContent.h"
+#import "NarouContentAllData.h"
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -52,5 +53,10 @@
 /// NarouContent の全てを NSArray で取得します
 /// novelupdated_at で sort されて返されます。
 - (NSMutableArray*) GetAllNarouContent;
+
+/// ダウンロードqueueに追加しようとします
+/// 追加した場合は nil を返します。
+/// 追加できなかった場合はエラーメッセージを返します。
+- (NSString*) AddDownloadQueueForNarou:(NarouContentAllData*) content;
 
 @end

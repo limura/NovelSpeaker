@@ -9,63 +9,112 @@
 #import "NarouLoader.h"
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
+#import "NarouContentAllData.h"
 
 /// 小説家になろう の API 個を使って小説情報を読み出すclass。
 /// SettingDataModel の NarouContent に追加するなどします。
 @implementation NarouLoader
 
-/// 小説になろうの時間フォーマットからNSDateに変換します
-- (NSDate*)ConvertNarouDate2NSDate: (NSString*)narouDate
+/// 小説家になろうで検索を行います。
+/// searchString: 検索文字列
+/// wname: 作者名を検索対象に含むか否か
+/// title: タイトルを検索対象に含むか否か
+/// keyword: キーワードを検索対象に含むか否か
+/// ex: あらすじを検索対象に含むか否か
++ (NSMutableArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex
 {
-    NSDateFormatter* formatter = [NSDateFormatter new];
-    [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
-    return [formatter dateFromString:narouDate];
+    NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500", nil];
+    //NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://ein.iimura/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500", nil];
+    
+    if (searchString != nil) {
+        queryUrl = [queryUrl stringByAppendingFormat:@"&word=%@", [self URIEncode:searchString]];
+    }
+    if (wname)
+    {
+        queryUrl = [queryUrl stringByAppendingString:@"&wname=1"];
+    }
+    if (title)
+    {
+        queryUrl = [queryUrl stringByAppendingString:@"&title=1"];
+    }
+    if (keyword)
+    {
+        queryUrl = [queryUrl stringByAppendingString:@"&keyword=1"];
+    }
+    if (ex)
+    {
+        queryUrl = [queryUrl stringByAppendingString:@"&ex=1"];
+    }
+    
+    NSLog(@"search: %@", queryUrl);
+    NSData* jsonData = [self HttpGetBinary:queryUrl];
+    NSError* err = nil;
+    
+    // TODO: これ NSArray と NSDictionary のどっちが帰ってくるのが正しいのかわからない形式で呼んでる？
+    NSArray* contentList = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&err];
+    NSMutableArray* result = [NSMutableArray new];
+    for(NSDictionary* jsonContent in contentList)
+    {
+        NarouContentAllData* content = [[NarouContentAllData alloc] initWithJsonData:jsonContent];
+        if (content.ncode == nil || [content.ncode length] <= 0) {
+            continue;
+        }
+        
+        [result addObject:content];
+    }
+
+    return result;
 }
 
 /// NarouContent のリストを更新します。
 /// 怪しく検索条件を内部で勝手に作ります。
 - (BOOL)UpdateContentList
 {
-    NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=10", nil];
-    NSData* jsonData = [self HttpGetBinary:queryUrl];
-    NSError* err = nil;
+    NSMutableArray* searchResultList = [NarouLoader Search:nil wname:NO title:NO keyword:NO ex:NO];
     
-    // TODO: これ NSArray と NSDictionary のどっちが帰ってくるのが正しいのだろ。
-    NSArray* contentList = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&err];
-    for(NSDictionary* jsonContent in contentList)
+    for(NarouContentAllData* remoteContent in searchResultList)
     {
-        NSString* ncode = [jsonContent objectForKey:@"ncode"];
+        NSString* ncode = remoteContent.ncode;
         if (ncode == nil || [ncode length] <= 0) {
-            // 何も入っていないようなので無視します。(たぶんallcountって奴しか入ってない部分だと思う)
             continue;
         }
+        
         NarouContent* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:ncode];
         
         if (content == nil) {
-            NSLog(@"ncode: %@ %@ not found. adding.", ncode, [jsonContent objectForKey:@"title"]);
+            NSLog(@"ncode: %@ %@ not found. adding.", ncode, remoteContent.title);
             content = [[GlobalDataSingleton GetInstance] CreateNewNarouContent];
         }
 
-        content.title = [jsonContent objectForKey:@"title"];
+        content.title = remoteContent.title;
         content.ncode = ncode;
-        content.userid = [jsonContent objectForKey:@"userid"];
-        content.story = [jsonContent objectForKey:@"story"];
-        content.writer = [jsonContent objectForKey:@"writer"];
-
-        // 小説の更新時間を取り出します。
-        NSString* novelupdated_at_string = [jsonContent objectForKey:@"novelupdated_at"];
-        content.novelupdated_at = [self ConvertNarouDate2NSDate:novelupdated_at_string];
+        content.userid = remoteContent.userid;
+        content.story = remoteContent.story;
+        content.writer = remoteContent.writer;
+        content.novelupdated_at = remoteContent.novelupdated_at;
     }
     return true;
 }
 
+/// 文字列をURIエンコードします。
++ (NSString*) URIEncode:(NSString*)str
+{
+    NSString *encodedText = (__bridge_transfer NSString *)
+    CFURLCreateStringByAddingPercentEscapes(NULL,
+                                            (__bridge CFStringRef)str, //元の文字列
+                                            NULL,
+                                            CFSTR("!*'();:@&=+$,/?%#[]"),
+                                            CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+    return encodedText;
+}
+
 /// HTTP GET request for binary
-- (NSData*)HttpGetBinary:(NSString*)url {
++ (NSData*)HttpGetBinary:(NSString*)url {
     NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
     return [NSURLConnection sendSynchronousRequest:request returningResponse: nil error:nil];
 }
 /// HTTP GET request
-- (NSString*)HttpGet:(NSString*)url {
++ (NSString*)HttpGet:(NSString*)url {
     NSData* data = [self HttpGetBinary:url];
     NSString* str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return str;

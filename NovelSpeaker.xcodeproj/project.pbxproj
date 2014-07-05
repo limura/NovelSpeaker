@@ -16,18 +16,24 @@
 		21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
 		21B53A0B196194A8009658B7 /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A0A196194A8009658B7 /* NarouContent.m */; };
 		21B53A1419619615009658B7 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A1319619615009658B7 /* Story.m */; };
-		21B53A1C19619C00009658B7 /* sound_24.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1919619C00009658B7 /* sound_24.png */; };
-		21B53A1D19619C00009658B7 /* sound_48.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1A19619C00009658B7 /* sound_48.png */; };
+		21B53A1C19619C00009658B7 /* sound.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1919619C00009658B7 /* sound.png */; };
+		21B53A1D19619C00009658B7 /* sound@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1A19619C00009658B7 /* sound@2x.png */; };
 		21B53A1E19619C00009658B7 /* sound_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1B19619C00009658B7 /* sound_64.png */; };
-		21B53A2219619C50009658B7 /* gear_24.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1F19619C50009658B7 /* gear_24.png */; };
-		21B53A2319619C50009658B7 /* gear_48.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2019619C50009658B7 /* gear_48.png */; };
+		21B53A2219619C50009658B7 /* gear.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1F19619C50009658B7 /* gear.png */; };
+		21B53A2319619C50009658B7 /* gear@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2019619C50009658B7 /* gear@2x.png */; };
 		21B53A2419619C50009658B7 /* gear_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2119619C50009658B7 /* gear_64.png */; };
-		21B53A2819619D23009658B7 /* app_globe_24.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2519619D23009658B7 /* app_globe_24.png */; };
-		21B53A2919619D23009658B7 /* app_globe_48.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe_48.png */; };
+		21B53A2819619D23009658B7 /* app_globe.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2519619D23009658B7 /* app_globe.png */; };
+		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
 		21B53A2A19619D23009658B7 /* app_globe_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2719619D23009658B7 /* app_globe_64.png */; };
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
 		21B53A301961A8F3009658B7 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2F1961A8F3009658B7 /* GlobalState.m */; };
 		21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A321961B30F009658B7 /* SettingsViewController.m */; };
+		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
+		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
+		21C74F981964502A0039A706 /* arrow_down_64.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F951964502A0039A706 /* arrow_down_64.png */; };
+		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
+		21C74F9E1965A5300039A706 /* NarouContentAllData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentAllData.m */; };
+		21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
 		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
 		21F054D11917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
@@ -43,7 +49,7 @@
 		21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21F054F41917E0F200CC6BA9 /* InfoPlist.strings */; };
 		21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */; };
 		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
-		4E776B1D1962566F00C36AD1 /* NarouLoadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouLoadTableViewController.m */; };
+		4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,14 +76,14 @@
 		21B53A0A196194A8009658B7 /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContent.m; sourceTree = "<group>"; };
 		21B53A1219619615009658B7 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Story.h; sourceTree = "<group>"; };
 		21B53A1319619615009658B7 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Story.m; sourceTree = "<group>"; };
-		21B53A1919619C00009658B7 /* sound_24.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sound_24.png; sourceTree = "<group>"; };
-		21B53A1A19619C00009658B7 /* sound_48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sound_48.png; sourceTree = "<group>"; };
+		21B53A1919619C00009658B7 /* sound.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sound.png; sourceTree = "<group>"; };
+		21B53A1A19619C00009658B7 /* sound@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sound@2x.png"; sourceTree = "<group>"; };
 		21B53A1B19619C00009658B7 /* sound_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sound_64.png; sourceTree = "<group>"; };
-		21B53A1F19619C50009658B7 /* gear_24.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gear_24.png; sourceTree = "<group>"; };
-		21B53A2019619C50009658B7 /* gear_48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gear_48.png; sourceTree = "<group>"; };
+		21B53A1F19619C50009658B7 /* gear.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gear.png; sourceTree = "<group>"; };
+		21B53A2019619C50009658B7 /* gear@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gear@2x.png"; sourceTree = "<group>"; };
 		21B53A2119619C50009658B7 /* gear_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gear_64.png; sourceTree = "<group>"; };
-		21B53A2519619D23009658B7 /* app_globe_24.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = app_globe_24.png; sourceTree = "<group>"; };
-		21B53A2619619D23009658B7 /* app_globe_48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = app_globe_48.png; sourceTree = "<group>"; };
+		21B53A2519619D23009658B7 /* app_globe.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = app_globe.png; sourceTree = "<group>"; };
+		21B53A2619619D23009658B7 /* app_globe@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_globe@2x.png"; sourceTree = "<group>"; };
 		21B53A2719619D23009658B7 /* app_globe_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = app_globe_64.png; sourceTree = "<group>"; };
 		21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalDataSingleton.h; sourceTree = "<group>"; };
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
@@ -85,6 +91,15 @@
 		21B53A2F1961A8F3009658B7 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalState.m; sourceTree = "<group>"; };
 		21B53A311961B30F009658B7 /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
 		21B53A321961B30F009658B7 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
+		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
+		21C74F941964502A0039A706 /* arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@2x.png"; sourceTree = "<group>"; };
+		21C74F951964502A0039A706 /* arrow_down_64.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down_64.png; sourceTree = "<group>"; };
+		21C74F99196456490039A706 /* NarouSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchViewController.h; sourceTree = "<group>"; };
+		21C74F9A196456490039A706 /* NarouSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchViewController.m; sourceTree = "<group>"; };
+		21C74F9C1965A5300039A706 /* NarouContentAllData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContentAllData.h; sourceTree = "<group>"; };
+		21C74F9D1965A5300039A706 /* NarouContentAllData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContentAllData.m; sourceTree = "<group>"; };
+		21C74F9F196707B20039A706 /* NarouSearchResultDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultDetailViewController.h; sourceTree = "<group>"; };
+		21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchResultDetailViewController.m; sourceTree = "<group>"; };
 		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21F054CC1917E0F200CC6BA9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -106,8 +121,8 @@
 		21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NovelSpeakerTests.m; sourceTree = "<group>"; };
 		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
 		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
-		4E776B1B1962566F00C36AD1 /* NarouLoadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoadTableViewController.h; sourceTree = "<group>"; };
-		4E776B1C1962566F00C36AD1 /* NarouLoadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoadTableViewController.m; sourceTree = "<group>"; };
+		4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultTableViewController.h; sourceTree = "<group>"; };
+		4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchResultTableViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,14 +154,17 @@
 		21B53A1819619BE7009658B7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				21B53A2519619D23009658B7 /* app_globe_24.png */,
-				21B53A2619619D23009658B7 /* app_globe_48.png */,
+				21C74F931964502A0039A706 /* arrow_down.png */,
+				21C74F941964502A0039A706 /* arrow_down@2x.png */,
+				21C74F951964502A0039A706 /* arrow_down_64.png */,
+				21B53A2519619D23009658B7 /* app_globe.png */,
+				21B53A2619619D23009658B7 /* app_globe@2x.png */,
 				21B53A2719619D23009658B7 /* app_globe_64.png */,
-				21B53A1F19619C50009658B7 /* gear_24.png */,
-				21B53A2019619C50009658B7 /* gear_48.png */,
+				21B53A1F19619C50009658B7 /* gear.png */,
+				21B53A2019619C50009658B7 /* gear@2x.png */,
 				21B53A2119619C50009658B7 /* gear_64.png */,
-				21B53A1919619C00009658B7 /* sound_24.png */,
-				21B53A1A19619C00009658B7 /* sound_48.png */,
+				21B53A1919619C00009658B7 /* sound.png */,
+				21B53A1A19619C00009658B7 /* sound@2x.png */,
 				21B53A1B19619C00009658B7 /* sound_64.png */,
 			);
 			name = Resources;
@@ -198,6 +216,8 @@
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
 				4E776B18196247FB00C36AD1 /* NarouLoader.h */,
 				4E776B19196247FB00C36AD1 /* NarouLoader.m */,
+				21C74F9C1965A5300039A706 /* NarouContentAllData.h */,
+				21C74F9D1965A5300039A706 /* NarouContentAllData.m */,
 				21F054E41917E0F200CC6BA9 /* Images.xcassets */,
 				21F054D31917E0F200CC6BA9 /* Supporting Files */,
 				21B5394E195C60C6009658B7 /* SpeechTextBox.h */,
@@ -251,8 +271,12 @@
 				21F054E21917E0F200CC6BA9 /* SpeechViewController.m */,
 				21B53A311961B30F009658B7 /* SettingsViewController.h */,
 				21B53A321961B30F009658B7 /* SettingsViewController.m */,
-				4E776B1B1962566F00C36AD1 /* NarouLoadTableViewController.h */,
-				4E776B1C1962566F00C36AD1 /* NarouLoadTableViewController.m */,
+				4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */,
+				4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */,
+				21C74F99196456490039A706 /* NarouSearchViewController.h */,
+				21C74F9A196456490039A706 /* NarouSearchViewController.m */,
+				21C74F9F196707B20039A706 /* NarouSearchResultDetailViewController.h */,
+				21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -333,19 +357,22 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */,
 				21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */,
 				21B53A1E19619C00009658B7 /* sound_64.png in Resources */,
-				21B53A2219619C50009658B7 /* gear_24.png in Resources */,
-				21B53A2319619C50009658B7 /* gear_48.png in Resources */,
+				21B53A2219619C50009658B7 /* gear.png in Resources */,
+				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
 				21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */,
-				21B53A2819619D23009658B7 /* app_globe_24.png in Resources */,
-				21B53A1C19619C00009658B7 /* sound_24.png in Resources */,
-				21B53A2919619D23009658B7 /* app_globe_48.png in Resources */,
+				21B53A2819619D23009658B7 /* app_globe.png in Resources */,
+				21B53A1C19619C00009658B7 /* sound.png in Resources */,
+				21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */,
 				21F054D71917E0F200CC6BA9 /* InfoPlist.strings in Resources */,
 				21F054E01917E0F200CC6BA9 /* Main.storyboard in Resources */,
 				21B53A2419619C50009658B7 /* gear_64.png in Resources */,
+				21C74F961964502A0039A706 /* arrow_down.png in Resources */,
 				21B53A2A19619D23009658B7 /* app_globe_64.png in Resources */,
-				21B53A1D19619C00009658B7 /* sound_48.png in Resources */,
+				21B53A1D19619C00009658B7 /* sound@2x.png in Resources */,
+				21C74F981964502A0039A706 /* arrow_down_64.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,7 +392,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
+				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
+				21C74F9E1965A5300039A706 /* NarouContentAllData.m in Sources */,
 				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
 				21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */,
 				21B53A1419619615009658B7 /* Story.m in Sources */,
@@ -373,9 +402,10 @@
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
 				21B53A0B196194A8009658B7 /* NarouContent.m in Sources */,
 				21B53950195C60C6009658B7 /* SpeechTextBox.m in Sources */,
-				4E776B1D1962566F00C36AD1 /* NarouLoadTableViewController.m in Sources */,
+				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
 				21B53A301961A8F3009658B7 /* GlobalState.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
+				21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
 				217F6E1C1942F14B008E432E /* Speaker.m in Sources */,
 			);
