@@ -11,9 +11,35 @@
 #import "GlobalState.h"
 #import "NarouContent.h"
 #import "NarouContentAllData.h"
+#import "DownloadQueue.h"
+#import "Story.h"
+
+/// ダウンロード状態が更新されたときに呼び出されるdelegate
+@protocol NarouDownloadStatusUpdateDelegate <NSObject>
+/// ダウンロード状態が更新されたときに呼び出されます。
+/// currentDownloadingContent が nil で呼び出された場合はダウンロードが完了した時です。
+- (void)NarouDownloadStatusUpdate:(NarouContentAllData*)currentDownloadingContent;
+
+@end
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
+{
+    // main queue
+    dispatch_queue_t m_MainQueue;
+    // Core Data アクセス用queue
+    dispatch_queue_t m_CoreDataAccessQueue;
+    // download 用 queue
+    dispatch_queue_t m_DownloadQueue;
+    // コンテンツ download 用 queue
+    dispatch_queue_t m_ContentsDownloadQueue;
+    
+    // 現在のダウンロードprogress用
+    NarouContentAllData* m_CurrentDownloadingContent;
+}
+
+/// この delegate に登録すると、ダウンロード状態が更新されたときに呼び出されます。
+@property (nonatomic, assign) id<NarouDownloadStatusUpdateDelegate> NarouDownloadStatusUpdate;
 
 /// シングルトンを取得します。
 + (GlobalDataSingleton*)GetInstance;
@@ -58,5 +84,22 @@
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
 - (NSString*) AddDownloadQueueForNarou:(NarouContentAllData*) content;
+
+/// コンテンツダウンロード用のqueueを返します
+- (dispatch_queue_t)GetContentsDownloadQueue;
+
+/// 現在ダウンロード中のコンテンツ情報を更新します。
+- (void)UpdateCurrentDownloadingInfo:(NarouContentAllData*)currentContent;
+
+/// 現在ダウンロード中のコンテンツ情報を取得します。
+- (NarouContentAllData*)GetCurrentDownloadingInfo;
+
+/// CoreData で保存している Story のうち、Ncode と chapter_number で検索した結果
+/// 得られた Story を取得します。
+/// 登録がなければ nil を返します
+- (Story*) SearchStory:(NSString*) ncode chapter_no:(int)chapter_number;
+
+/// Story を新しく生成します。必要な情報をすべて伝える必要があります。
+- (Story*) CreateNewStory:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
 
 @end

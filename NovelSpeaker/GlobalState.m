@@ -2,7 +2,7 @@
 //  GlobalState.m
 //  NovelSpeaker
 //
-//  Created by 飯村卓司 on 2014/06/30.
+//  Created by 飯村卓司 on 2014/07/05.
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
@@ -12,9 +12,9 @@
 
 @implementation GlobalState
 
-@dynamic readLocation;
 @dynamic defaultPitch;
 @dynamic defaultRate;
+@dynamic readLocation;
 @dynamic currentReadingStory;
 
 @end

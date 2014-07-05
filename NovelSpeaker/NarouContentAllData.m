@@ -50,7 +50,36 @@
     // 小説の更新時間を取り出します。
     NSString* novelupdated_at_string = [jsonContent objectForKey:@"novelupdated_at"];
     self.novelupdated_at = [self ConvertNarouDate2NSDate:novelupdated_at_string];
+    
+    self.current_download_complete_count = 0;
 
+    return self;
+}
+
+// CoreData側の値を使って初期化します。
+- (id)initWithCoreData: (NarouContent*)coreDatacontent
+{
+    self = [super init];
+    
+    self.title = coreDatacontent.title;
+    self.ncode = coreDatacontent.ncode;
+    self.userid = coreDatacontent.userid;
+    self.writer = coreDatacontent.writer;
+    self.story = coreDatacontent.story;
+    self.genre = coreDatacontent.genre;
+    self.keyword = coreDatacontent.keyword;
+    self.general_all_no = coreDatacontent.general_all_no;
+    self.end = coreDatacontent.end;
+    self.global_point = coreDatacontent.global_point;
+    self.fav_novel_cnt = coreDatacontent.fav_novel_cnt;
+    self.review_cnt = coreDatacontent.review_cnt;
+    self.all_point = coreDatacontent.all_point;
+    self.all_hyoka_cnt = coreDatacontent.all_hyoka_cnt;
+    self.sasie_cnt = coreDatacontent.sasie_cnt;
+    self.novelupdated_at = coreDatacontent.novelupdated_at;
+    
+    self.current_download_complete_count = 0;
+    
     return self;
 }
 

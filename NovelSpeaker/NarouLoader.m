@@ -108,6 +108,41 @@
     return encodedText;
 }
 
+/// 小説家になろうでtextダウンロードを行うためのURLを取得します。
+/// 失敗した場合は nil を返します。
+/// 解説：
+/// 小説家になろうでは ncode というもので個々のコンテンツを管理しているのですが、
+/// テキストのダウンロードではこの ncode ではない別の code を使っているようです。
+/// この code の取得方法はその小説のページのHTMLを読み込まないとわからないため、
+/// ここではその小説のページのHTMLを読み込んで、ダウンロード用の FORM GET に渡すURLを生成します。
++ (NSString*)GetTextDownloadURL:(NSString*)ncode
+{
+    // まずは通常のHTMLを取得します。
+    NSString* htmlURL = [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/%@/", ncode];
+    NSString* html = [self HttpGet:htmlURL];
+    // この html から、正規表現を使って
+    // onclick="javascript:window.open('http://ncode.syosetu.com/txtdownload/top/ncode/562600/'
+    // といった文字列の、562600 の部分を取得します。
+    NSString* matchPattern = @"onclick=\"javascript:window.open\\('http://ncode.syosetu.com/txtdownload/top/ncode/([^/]*)/'";
+    NSError* err = nil;
+    NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:matchPattern options:NSRegularExpressionCaseInsensitive error:&err];
+    if (err != nil) {
+        NSLog(@"Regex create failed: %@, %@", err, [err userInfo]);
+        return nil;
+    }
+    
+    NSTextCheckingResult* checkResult = [regex firstMatchInString:html options:NSMatchingReportProgress range:NSMakeRange(0, [html length])];
+    NSString* result = [html substringWithRange:[checkResult rangeAtIndex:1]];
+    return [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/txtdownload/top/ncode/%@/", result];
+}
+
+/// 小説家になろうでTextダウンロードを行います。
++ (NSString*)TextDownload:(NSString*)download_url count:(int)count
+{
+    NSString* url = [[NSString alloc] initWithFormat:@"%@?hankaku=0&code=utf-8&kaigyo=CRLF&no=%d", download_url, count];
+    return [self HttpGet:url];
+}
+
 /// HTTP GET request for binary
 + (NSData*)HttpGetBinary:(NSString*)url {
     NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];

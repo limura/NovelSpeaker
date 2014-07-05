@@ -7,10 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "NarouContent.h"
 
 @interface NarouContentAllData : NSObject
 
 - (id)initWithJsonData: (NSDictionary*)jsonContent;
+- (id)initWithCoreData: (NarouContent*)coreDatacontent;
 
 @property (nonatomic) NSString* title;
 @property (nonatomic) NSString* ncode;
@@ -28,5 +30,8 @@
 @property (nonatomic) NSNumber* all_hyoka_cnt;
 @property (nonatomic) NSNumber* sasie_cnt;
 @property (nonatomic) NSDate* novelupdated_at;
+
+// ダウンロード進捗確認用。現在ダウンロードが完了しているコンテンツの数(最大値は general_all_no のはずです)
+@property (nonatomic) int current_download_complete_count;
 
 @end

@@ -26,6 +26,19 @@
 /// ex: あらすじを検索対象に含むか否か
 + (NSMutableArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex;
 
+/// 小説家になろうでtextダウンロードを行うためのURLを取得します。
+/// 失敗した場合は nil を返します。
+/// 解説：
+/// 小説家になろうでは ncode というもので個々のコンテンツを管理しているのですが、
+/// テキストのダウンロードではこの ncode ではない別の code を使っているようです。
+/// この code の取得方法はその小説のページのHTMLを読み込まないとわからないため、
+/// ここではその小説のページのHTMLを読み込んで、ダウンロード用の FORM GET に渡すURLを生成します。
++ (NSString*)GetTextDownloadURL:(NSString*)ncode;
+
+/// 小説家になろうでTextダウンロードを行います。
+/// ここで指定される download_url は、GetTextDownloadURL で得られたダウンロード用のURLを用います。
++ (NSString*)TextDownload:(NSString*)download_url count:(int)count;
+
 /// HTTP Get Request を投げて、バイナリを返します
 + (NSData*)HttpGetBinary:(NSString*)url;
 /// HTTP Get Request を投げて、文字列として返します。

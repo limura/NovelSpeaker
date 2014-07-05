@@ -14,8 +14,6 @@
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
 		21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F9196037BB009658B7 /* AVFoundation.framework */; };
 		21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
-		21B53A0B196194A8009658B7 /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A0A196194A8009658B7 /* NarouContent.m */; };
-		21B53A1419619615009658B7 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A1319619615009658B7 /* Story.m */; };
 		21B53A1C19619C00009658B7 /* sound.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1919619C00009658B7 /* sound.png */; };
 		21B53A1D19619C00009658B7 /* sound@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1A19619C00009658B7 /* sound@2x.png */; };
 		21B53A2219619C50009658B7 /* gear.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1F19619C50009658B7 /* gear.png */; };
@@ -23,13 +21,18 @@
 		21B53A2819619D23009658B7 /* app_globe.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2519619D23009658B7 /* app_globe.png */; };
 		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
-		21B53A301961A8F3009658B7 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2F1961A8F3009658B7 /* GlobalState.m */; };
 		21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A321961B30F009658B7 /* SettingsViewController.m */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
 		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
 		21C74F9E1965A5300039A706 /* NarouContentAllData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentAllData.m */; };
 		21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */; };
+		21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA31967FD390039A706 /* NarouDownloadQueue.m */; };
+		21C74FC819682BF30039A706 /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FC719682BF30039A706 /* NarouContent.m */; };
+		21C74FCB19682BF40039A706 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FCA19682BF40039A706 /* Story.m */; };
+		21C74FCE19682BF40039A706 /* DownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FCD19682BF40039A706 /* DownloadQueue.m */; };
+		21C74FD119682BF40039A706 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD019682BF40039A706 /* GlobalState.m */; };
+		21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD3196831070039A706 /* DownloadStatusViewController.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
 		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
 		21F054D11917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
@@ -68,10 +71,6 @@
 		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
 		21B539F719603737009658B7 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		21B539F9196037BB009658B7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		21B53A09196194A8009658B7 /* NarouContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContent.h; sourceTree = "<group>"; };
-		21B53A0A196194A8009658B7 /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContent.m; sourceTree = "<group>"; };
-		21B53A1219619615009658B7 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Story.h; sourceTree = "<group>"; };
-		21B53A1319619615009658B7 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Story.m; sourceTree = "<group>"; };
 		21B53A1919619C00009658B7 /* sound.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sound.png; sourceTree = "<group>"; };
 		21B53A1A19619C00009658B7 /* sound@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sound@2x.png"; sourceTree = "<group>"; };
 		21B53A1F19619C50009658B7 /* gear.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gear.png; sourceTree = "<group>"; };
@@ -80,8 +79,6 @@
 		21B53A2619619D23009658B7 /* app_globe@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_globe@2x.png"; sourceTree = "<group>"; };
 		21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalDataSingleton.h; sourceTree = "<group>"; };
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
-		21B53A2E1961A8F3009658B7 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalState.h; sourceTree = "<group>"; };
-		21B53A2F1961A8F3009658B7 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalState.m; sourceTree = "<group>"; };
 		21B53A311961B30F009658B7 /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
 		21B53A321961B30F009658B7 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
@@ -92,6 +89,18 @@
 		21C74F9D1965A5300039A706 /* NarouContentAllData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContentAllData.m; sourceTree = "<group>"; };
 		21C74F9F196707B20039A706 /* NarouSearchResultDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultDetailViewController.h; sourceTree = "<group>"; };
 		21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchResultDetailViewController.m; sourceTree = "<group>"; };
+		21C74FA21967FD390039A706 /* NarouDownloadQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouDownloadQueue.h; sourceTree = "<group>"; };
+		21C74FA31967FD390039A706 /* NarouDownloadQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouDownloadQueue.m; sourceTree = "<group>"; };
+		21C74FC619682BF30039A706 /* NarouContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContent.h; sourceTree = "<group>"; };
+		21C74FC719682BF30039A706 /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContent.m; sourceTree = "<group>"; };
+		21C74FC919682BF40039A706 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Story.h; sourceTree = "<group>"; };
+		21C74FCA19682BF40039A706 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Story.m; sourceTree = "<group>"; };
+		21C74FCC19682BF40039A706 /* DownloadQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadQueue.h; sourceTree = "<group>"; };
+		21C74FCD19682BF40039A706 /* DownloadQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadQueue.m; sourceTree = "<group>"; };
+		21C74FCF19682BF40039A706 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalState.h; sourceTree = "<group>"; };
+		21C74FD019682BF40039A706 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalState.m; sourceTree = "<group>"; };
+		21C74FD2196831070039A706 /* DownloadStatusViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadStatusViewController.h; sourceTree = "<group>"; };
+		21C74FD3196831070039A706 /* DownloadStatusViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadStatusViewController.m; sourceTree = "<group>"; };
 		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21F054CC1917E0F200CC6BA9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -206,6 +215,8 @@
 				4E776B19196247FB00C36AD1 /* NarouLoader.m */,
 				21C74F9C1965A5300039A706 /* NarouContentAllData.h */,
 				21C74F9D1965A5300039A706 /* NarouContentAllData.m */,
+				21C74FA21967FD390039A706 /* NarouDownloadQueue.h */,
+				21C74FA31967FD390039A706 /* NarouDownloadQueue.m */,
 				21F054E41917E0F200CC6BA9 /* Images.xcassets */,
 				21F054D31917E0F200CC6BA9 /* Supporting Files */,
 				21B5394E195C60C6009658B7 /* SpeechTextBox.h */,
@@ -213,12 +224,14 @@
 				21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */,
 				21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */,
 				21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */,
-				21B53A2E1961A8F3009658B7 /* GlobalState.h */,
-				21B53A2F1961A8F3009658B7 /* GlobalState.m */,
-				21B53A1219619615009658B7 /* Story.h */,
-				21B53A1319619615009658B7 /* Story.m */,
-				21B53A09196194A8009658B7 /* NarouContent.h */,
-				21B53A0A196194A8009658B7 /* NarouContent.m */,
+				21C74FC619682BF30039A706 /* NarouContent.h */,
+				21C74FC719682BF30039A706 /* NarouContent.m */,
+				21C74FC919682BF40039A706 /* Story.h */,
+				21C74FCA19682BF40039A706 /* Story.m */,
+				21C74FCC19682BF40039A706 /* DownloadQueue.h */,
+				21C74FCD19682BF40039A706 /* DownloadQueue.m */,
+				21C74FCF19682BF40039A706 /* GlobalState.h */,
+				21C74FD019682BF40039A706 /* GlobalState.m */,
 			);
 			path = NovelSpeaker;
 			sourceTree = "<group>";
@@ -265,6 +278,8 @@
 				21C74F9A196456490039A706 /* NarouSearchViewController.m */,
 				21C74F9F196707B20039A706 /* NarouSearchResultDetailViewController.h */,
 				21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */,
+				21C74FD2196831070039A706 /* DownloadStatusViewController.h */,
+				21C74FD3196831070039A706 /* DownloadStatusViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -376,18 +391,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
+				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
+				21C74FCB19682BF40039A706 /* Story.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentAllData.m in Sources */,
+				21C74FC819682BF30039A706 /* NarouContent.m in Sources */,
+				21C74FCE19682BF40039A706 /* DownloadQueue.m in Sources */,
+				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
+				21C74FD119682BF40039A706 /* GlobalState.m in Sources */,
 				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
 				21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */,
-				21B53A1419619615009658B7 /* Story.m in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
-				21B53A0B196194A8009658B7 /* NarouContent.m in Sources */,
 				21B53950195C60C6009658B7 /* SpeechTextBox.m in Sources */,
 				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
-				21B53A301961A8F3009658B7 /* GlobalState.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
 				21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
