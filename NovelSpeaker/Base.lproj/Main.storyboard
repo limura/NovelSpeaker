@@ -53,7 +53,7 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="設定" image="gear_24.png" id="1t6-5Y-ZGQ"/>
+                    <tabBarItem key="tabBarItem" title="設定" image="gear.png" id="1t6-5Y-ZGQ"/>
                     <connections>
                         <outlet property="defaultPitchSetting" destination="XYp-eH-3pv" id="TF2-1i-uH0"/>
                         <outlet property="defaultRateSetting" destination="BFq-G8-ZW7" id="RrO-FF-0ew"/>
@@ -476,7 +476,7 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="ダウンロード状態" image="arrow_down_24.png" id="Z25-tO-3hh"/>
+                    <tabBarItem key="tabBarItem" title="ダウンロード状態" image="arrow_down.png" id="Z25-tO-3hh"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1Ae-cX-Tqs" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -486,7 +486,7 @@
         <scene sceneID="fIy-nG-msd">
             <objects>
                 <navigationController definesPresentationContext="YES" id="LfY-GE-Mgm" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="なろう検索" image="app_globe_24.png" id="ZSv-78-9lg"/>
+                    <tabBarItem key="tabBarItem" title="なろう検索" image="app_globe.png" id="ZSv-78-9lg"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="6vb-08-2I9">
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
@@ -561,7 +561,7 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="読み上げ" image="sound_24.png" id="2in-tz-U6N"/>
+                    <tabBarItem key="tabBarItem" title="読み上げ" image="sound.png" id="2in-tz-U6N"/>
                     <connections>
                         <outlet property="loadButton" destination="RFx-sn-PLD" id="3eG-n6-1hS"/>
                         <outlet property="startStopButton" destination="WMV-h1-E9A" id="a7z-O4-5G8"/>
@@ -574,10 +574,10 @@
         </scene>
     </scenes>
     <resources>
-        <image name="app_globe_24.png" width="24" height="24"/>
-        <image name="arrow_down_24.png" width="24" height="24"/>
-        <image name="gear_24.png" width="24" height="24"/>
-        <image name="sound_24.png" width="24" height="24"/>
+        <image name="app_globe.png" width="24" height="24"/>
+        <image name="arrow_down.png" width="24" height="24"/>
+        <image name="gear.png" width="24" height="24"/>
+        <image name="sound.png" width="24" height="24"/>
     </resources>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
         <simulatedStatusBarMetrics key="statusBar"/>
