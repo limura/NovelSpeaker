@@ -133,7 +133,7 @@
     
     NSTextCheckingResult* checkResult = [regex firstMatchInString:html options:NSMatchingReportProgress range:NSMakeRange(0, [html length])];
     NSString* result = [html substringWithRange:[checkResult rangeAtIndex:1]];
-    return [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/txtdownload/top/ncode/%@/", result];
+    return [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/txtdownload/dlstart/ncode/%@/", result];
 }
 
 /// 小説家になろうでTextダウンロードを行います。

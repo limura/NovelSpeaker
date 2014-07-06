@@ -47,7 +47,7 @@ typedef enum {
 }
 
 /// delegate プロパティ
-@property (nonatomic, assign) id<SpeakRangeDelegate> delegate;
+@property (nonatomic, assign) id<SpeakRangeDelegate> speakRangeChangeDelegate;
 
 /// 音声の読み上げを開始します。開始できた場合は TRUE を返します
 - (BOOL) Speech: (NSString*) text;

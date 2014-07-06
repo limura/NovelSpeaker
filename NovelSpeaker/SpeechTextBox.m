@@ -17,7 +17,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     self = [super init];
     
     m_Speaker = [[Speaker alloc] init];
-    m_Speaker.delegate = self;
+    m_Speaker.speakRangeChangeDelegate = self;
     
     m_SpeechPosition.length = 0;
     m_SpeechPosition.location = 0;
@@ -31,9 +31,22 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     return self;
 }
 
+- (void)dealloc
+{
+    [m_Speaker StopSpeech];
+    m_Speaker.speakRangeChangeDelegate = nil;
+}
+
 /// 読み上げる文字列を初期化します
 - (BOOL) SetText: (NSString*) text
 {
+    // 読み上げ文字列を使って読み上げlocale?を取得します。
+    CFStringRef cftext = (CFStringRef)CFBridgingRetain(text);
+    CFRange cfrange = CFRangeMake(0, CFStringGetLength(cftext));
+    NSString* language = (NSString*)CFBridgingRelease(CFStringTokenizerCopyBestStringLanguage(cftext, cfrange));
+    NSLog(@"guess language: %@", language);
+    //[m_Speaker SetVoice:language]; // TODO: これで帰ってくるのは "ja" で、"ja-JP" じゃないので使えない……(´・ω・`)
+    
     m_SpeechTextList = [text componentsSeparatedByString:SPEECH_TEXT_SEPARATOR];
     m_SpeechTextListIndex = 0;
     m_SpeechTextLocationCache = 0;
@@ -54,6 +67,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
         m_SpeechTextBlockStartLocation = 0;
         m_SpeechPosition.length = 0;
         m_SpeechPosition.location = 0;
+        [self.textView scrollRangeToVisible:m_SpeechPosition];
         return false;
     }
     
@@ -84,13 +98,16 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
         m_SpeechTextBlockStartLocation = 0;
         m_SpeechPosition.length = 0;
         m_SpeechPosition.location = 0;
+        [self.textView scrollRangeToVisible:m_SpeechPosition];
         return false;
     }
     m_SpeechTextListIndex = index;
     m_SpeechTextBlockStartLocation = 0;
     
     //NSLog(@"position update: %lu, index: %d, cache: %lu", (unsigned long)m_SpeechPosition.location, m_SpeechTextListIndex, (unsigned long)m_SpeechTextLocationCache);
-    
+
+    [self.textView scrollRangeToVisible:m_SpeechPosition];
+
     return true;
 }
 
@@ -125,7 +142,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
 /// これ以上読み上げできない場合は false を返します
 - (BOOL) UpdateSpeechTextIndex
 {
-    if(m_SpeechTextList == NULL || [m_SpeechTextList count] < m_SpeechTextListIndex)
+    if(m_SpeechTextList == NULL || [m_SpeechTextList count] <= m_SpeechTextListIndex || [m_SpeechTextList count] <= 0)
     {
         return false;
     }
@@ -135,7 +152,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
         NSUInteger current_text_length = [m_SpeechTextList[m_SpeechTextListIndex] length];
         current_text_length += [SPEECH_TEXT_SEPARATOR length];
         m_SpeechTextListIndex++;
-        if([m_SpeechTextList count] < m_SpeechTextListIndex)
+        if([m_SpeechTextList count] <= m_SpeechTextListIndex)
         {
             return false;
         }

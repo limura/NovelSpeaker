@@ -10,7 +10,7 @@
 
 @implementation Speaker
 
-@synthesize delegate;
+@synthesize speakRangeChangeDelegate;
 
 - (id) init {
     self = [super init];
@@ -110,7 +110,9 @@
             break;
         case STSpeakingStatusStop:
             NSLog(@"speak status -> Stop");
-            [self.delegate finishSpeak];
+            if (self.speakRangeChangeDelegate != nil) {
+                [self.speakRangeChangeDelegate finishSpeak];
+            }
             break;
         default:
             NSLog(@"speak status -> Unknown");
@@ -138,16 +140,11 @@
 }
 
 - (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer willSpeakRangeOfSpeechString:(NSRange)characterRange utterance:(AVSpeechUtterance *)utterance{
-    
-	//NSLog(@"willSpeakRangeOfSpeechString with %lu %lu",(unsigned long)characterRange.location,characterRange.length);
-    
-	//NSString* strTarget = [utterance.speechString substringWithRange:characterRange];
-    //NSLog(@"willSpeak: %@", strTarget);
-    [self.delegate willSpeakRange:characterRange speakText:utterance.speechString];
+    if (self.speakRangeChangeDelegate == nil) {
+        return;
+    }
+    [self.speakRangeChangeDelegate willSpeakRange:characterRange speakText:utterance.speechString];
 
-	//NSLog(@" target is %@",strTarget);
-	//self.readingWord.text = strTarget;
-    
 }
 
 @end

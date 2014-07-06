@@ -10,14 +10,19 @@
 #import <CoreData/CoreData.h>
 #import "Speaker.h"
 #import "SpeechTextBox.h"
+#import "NarouContentAllData.h"
 
 @interface SpeechViewController : UIViewController
 {
     NSInteger m_SpeechStartPosition;
     SpeechTextBox* m_SpeechTextBox;
+    UIBarButtonItem* startStopButton;
+    UIBarButtonItem* detailButton;
+    int m_CurrentChapter;
 }
 @property (weak, nonatomic) IBOutlet UITextView *textView;
-@property (weak, nonatomic) IBOutlet UIButton *startStopButton;
-@property (weak, nonatomic) IBOutlet UIButton *loadButton;
+
+// 前のページから得られる表示するための情報
+@property NarouContentAllData* NarouContentDetail;
 
 @end

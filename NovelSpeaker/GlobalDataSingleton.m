@@ -339,7 +339,7 @@ static GlobalDataSingleton* _singleton = nil;
         NSEntityDescription* entity = [NSEntityDescription entityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
         [fetchRequest setEntity:entity];
         
-        NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@ AND chapter_no == %d", ncode, chapter_number];
+        NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@ AND chapter_number == %d", ncode, chapter_number];
         [fetchRequest setPredicate:predicate];
         
         err = nil;

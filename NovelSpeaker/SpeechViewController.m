@@ -11,6 +11,7 @@
 #import "Story.h"
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
+#import "NarouSearchResultDetailViewController.h"
 
 @interface SpeechViewController ()
 
@@ -30,12 +31,58 @@
     [m_SpeechTextBox SetDelay: 0.001];
     [m_SpeechTextBox AddPitchSetting:@"」$" pitch:1.5f];
     [m_SpeechTextBox AddPitchSetting:@"』$" pitch:1.5f];
+
+    // NavitationBar にボタンを配置します。
+    startStopButton = [[UIBarButtonItem alloc] initWithTitle:@"Speak" style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
+    detailButton = [[UIBarButtonItem alloc] initWithTitle:@"詳細" style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:startStopButton, detailButton, nil];
+    self.navigationItem.title = self.NarouContentDetail.title;
+    
+    // 左右のスワイプを設定してみます。
+    UISwipeGestureRecognizer* rightSwipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(RightSwipe:)];
+    rightSwipe.direction = UISwipeGestureRecognizerDirectionRight;
+    [self.view addGestureRecognizer:rightSwipe];
+    UISwipeGestureRecognizer* leftSwipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(LeftSwipe:)];
+    leftSwipe.direction = UISwipeGestureRecognizerDirectionLeft;
+    [self.view addGestureRecognizer:leftSwipe];
+    
+    // 読み上げる文章を設定します。
+    if([self ChangeChapter:1] != true)
+    {
+        [self setSpeechText:@"読み込みに失敗しました。" range:NSMakeRange(0,0)];
+    }
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)RightSwipe:(UISwipeGestureRecognizer *)sender
+{
+    [self ChangeChapter:m_CurrentChapter-1];
+}
+- (void)LeftSwipe:(UISwipeGestureRecognizer *)sender
+{
+    [self ChangeChapter:m_CurrentChapter+1];
+}
+
+/// 読み上げる文章の章を変更します
+- (BOOL)ChangeChapter:(int)chapter
+{
+    if (chapter <= 0 || chapter > [self.NarouContentDetail.general_all_no intValue]) {
+        NSLog(@"chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)", chapter, self.NarouContentDetail.general_all_no);
+        return false;
+    }
+    
+    Story* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:chapter];
+    if (story == nil || story.content == nil || [story.content length] <= 0) {
+        return false;
+    }
+    [self setSpeechText:story.content range:NSMakeRange(0, 0)];
+    m_CurrentChapter = chapter;
+    return true;
 }
 
 /// 読み上げを開始します。
@@ -49,8 +96,7 @@
     [m_SpeechTextBox SetSpeechStartPoint:range];
 
     // 読み上げ開始位置以降の文字列について、読み上げを開始します。
-    [self.startStopButton setTitle:@"Stop" forState:UIControlStateNormal];
-    self.loadButton.enabled = FALSE;
+    startStopButton.title = @"Stop";
 
     GlobalState* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     [m_SpeechTextBox SetPitch:[globalState.defaultPitch floatValue]];
@@ -61,8 +107,7 @@
 /// 読み上げを停止します
 - (void)stopSpeech{
     [m_SpeechTextBox StopSpeech];
-    [self.startStopButton setTitle:@"Start" forState:UIControlStateNormal];
-    self.loadButton.enabled = TRUE;
+    startStopButton.title = @"Speak";
 }
 
 /// 読み上げ用の文字列を設定します。
@@ -75,55 +120,12 @@
     [m_SpeechTextBox SetText:text];
 }
 
-- (IBAction)loadButtonClick:(id)sender {
-    //NSString* text = [self HttpGet:@"http://ncode.syosetu.com/txtdownload/dlstart/ncode/316737/?no=1&hankaku=0&code=utf-8&kaigyo=CR"];
-    
-    NSString* text = [self HttpGet:@"http://uirou.no-ip.org/syousetu/ftc.txt"];
-    NSRange range;
-    range.location = NSNotFound;
-    range.length = 0;
-    [self setSpeechText:text range:range];
-    
-    return;
-    /*
-    // TODO: load save をする場合はこんな感じでやるらしい。
-    // CoreData で text を保存してみます
-    Story* story = (Story*)[NSEntityDescription insertNewObjectForEntityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
-    story.content = text;
-    NSError* err = nil;
-    [self.managedObjectContext save:&err];
-    if(err != nil)
-    {
-        NSLog(@"save error: %@, %@", err, [err userInfo]);
-        return;
-    }
-    
-    // CoreData で読みだしてみます
-    NSLog(@"original story.content: %@", story.content);
-
-    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription* entity = [NSEntityDescription entityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
-    [fetchRequest setEntity:entity];
-    NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"content" ascending:NO];
-    NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
-    [fetchRequest setSortDescriptors:sortDescriptors];
-    sortDescriptors = nil;
-    sortDescriptor = nil;
-    err = nil;
-    NSMutableArray* fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-    if(fetchResults == nil)
-    {
-        NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
-        return;
-    }
-    NSLog(@"%lu story loaded.", (unsigned long)[fetchResults count]);
-     */
-    
-    return;
+- (void)detailButtonClick:(id)sender {    
+    [self performSegueWithIdentifier:@"speechToDetailSegue" sender:self];
 }
 
-- (IBAction)startStopButtonClick:(id)sender {
-    if([self.startStopButton.titleLabel.text compare:@"Start"] == NSOrderedSame)
+- (void)startStopButtonClick:(id)sender {
+    if([startStopButton.title compare:@"Speak"] == NSOrderedSame)
     {
         // 停止中だったので読み上げを開始します
         [self startSpeech];
@@ -140,11 +142,16 @@
     return result;
 }
 
-- (NSString*)HttpGet:(NSString*)url {
-    NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse: nil error:nil];
-    NSString* str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    return str;
+#pragma mark - Navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    NSLog(@"next view load!");
+    // 次のビューをloadする前に呼び出してくれるらしいので、そこで検索結果を放り込みます。
+    if ([[segue identifier] isEqualToString:@"speechToDetailSegue"]) {
+        NarouSearchResultDetailViewController* nextViewController = [segue destinationViewController];
+        nextViewController.NarouContentDetail = self.NarouContentDetail;
+    }
 }
+
 
 @end

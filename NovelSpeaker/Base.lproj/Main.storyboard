@@ -467,7 +467,7 @@
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     </tabBar>
                     <connections>
-                        <segue destination="vXZ-lx-hvc" kind="relationship" relationship="viewControllers" id="oVb-7g-ps7"/>
+                        <segue destination="v42-xJ-9mb" kind="relationship" relationship="viewControllers" id="ktK-js-zfL"/>
                         <segue destination="LfY-GE-Mgm" kind="relationship" relationship="viewControllers" id="BMz-0y-0Ux"/>
                         <segue destination="QQl-Cw-XTx" kind="relationship" relationship="viewControllers" id="0rH-Qu-il9"/>
                         <segue destination="aeS-Iv-UfJ" kind="relationship" relationship="viewControllers" id="Poe-gr-Kx6"/>
@@ -477,7 +477,45 @@
             </objects>
             <point key="canvasLocation" x="-1352" y="15"/>
         </scene>
-        <!--Speech View Controller - 読み上げ-->
+        <!--Book Shelf Table View Controller - 本棚-->
+        <scene sceneID="RKf-an-ikt">
+            <objects>
+                <tableViewController id="P5f-rJ-SqP" customClass="BookShelfTableViewController" sceneMemberID="viewController">
+                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="Upr-4M-chC">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <connections>
+                            <outlet property="dataSource" destination="P5f-rJ-SqP" id="Ufr-WH-5fX"/>
+                            <outlet property="delegate" destination="P5f-rJ-SqP" id="BVA-BY-Qwt"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="本棚" id="9HG-U0-i5q"/>
+                    <connections>
+                        <segue destination="vXZ-lx-hvc" kind="push" identifier="bookShelfToReaderSegue" id="5UE-vN-cKc"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Gvt-2h-g6g" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-22" y="-565"/>
+        </scene>
+        <!--Navigation Controller - 本棚-->
+        <scene sceneID="fHI-C2-mKL">
+            <objects>
+                <navigationController definesPresentationContext="YES" id="v42-xJ-9mb" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="本棚" image="sound.png" id="48f-BN-UmV"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="kzS-si-TDC">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="P5f-rJ-SqP" kind="relationship" relationship="rootViewController" id="ANo-Ex-OXJ"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Pmo-cD-y4U" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-514" y="-565"/>
+        </scene>
+        <!--Speech View Controller - title-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
                 <viewController id="vXZ-lx-hvc" customClass="SpeechViewController" sceneMemberID="viewController">
@@ -489,46 +527,31 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RFx-sn-PLD">
-                                <rect key="frame" x="20" y="30" width="46" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Load">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="loadButtonClick:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="9EW-mv-Vb0"/>
-                                </connections>
-                            </button>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" editable="NO" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pQC-dc-iJy">
-                                <rect key="frame" x="11" y="68" width="298" height="442"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pQC-dc-iJy">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="519"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <attributedString key="attributedText"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WMV-h1-E9A">
-                                <rect key="frame" x="93" y="30" width="46" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Start">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="startStopButtonClick:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="ljk-bq-NAX"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="pQC-dc-iJy" secondAttribute="trailing" id="AIm-FJ-MhL"/>
+                            <constraint firstItem="pQC-dc-iJy" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" id="aHY-nx-6pw"/>
+                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="pQC-dc-iJy" secondAttribute="bottom" id="kHp-eH-MDv"/>
+                            <constraint firstItem="pQC-dc-iJy" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="sJr-iZ-9ho"/>
+                        </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="読み上げ" image="sound.png" id="2in-tz-U6N"/>
+                    <navigationItem key="navigationItem" title="title" id="voJ-dX-pOH"/>
                     <connections>
-                        <outlet property="loadButton" destination="RFx-sn-PLD" id="3eG-n6-1hS"/>
-                        <outlet property="startStopButton" destination="WMV-h1-E9A" id="a7z-O4-5G8"/>
                         <outlet property="textView" destination="pQC-dc-iJy" id="X0A-ws-pvA"/>
+                        <segue destination="ubt-4C-R8U" kind="push" identifier="speechToDetailSegue" id="0zP-nv-fmY"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-526" y="-576"/>
+            <point key="canvasLocation" x="450" y="-565"/>
         </scene>
     </scenes>
     <resources>
@@ -542,4 +565,7 @@
         <simulatedOrientationMetrics key="orientation"/>
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
+    <inferredMetricsTieBreakers>
+        <segue reference="0zP-nv-fmY"/>
+    </inferredMetricsTieBreakers>
 </document>
