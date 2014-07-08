@@ -27,13 +27,9 @@ static GlobalDataSingleton* _singleton = nil;
     m_MainQueue = dispatch_get_main_queue();
     // CoreDataアクセス用の直列queueを作ります。
     m_CoreDataAccessQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.coredataaccess", NULL);
-    // ダウンロード用の直列queueを作ります。
-    m_DownloadQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.download", NULL);
-    // コンテンツダウンロード用の直列queueを作ります。
-    m_ContentsDownloadQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.contentsdownload", NULL);
 
-    m_CurrentDownloadingContent = nil;
-
+    m_DownloadQueue = [NarouDownloadQueue new];
+    
     return self;
 }
 
@@ -56,7 +52,6 @@ static GlobalDataSingleton* _singleton = nil;
     });
     return _singleton;
 }
-
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
 - (GlobalState*) GetGlobalState
@@ -203,48 +198,6 @@ static GlobalDataSingleton* _singleton = nil;
     return fetchResults;
 }
 
-/// 新しい DownloadQueue を生成します。
-/// 生成された DownloadQueue.sort_index は、現在登録されている一番番号の大きいものよりも大きな値に設定されます。
-- (DownloadQueue*)CreateNewDownloadQueue
-{
-    __block DownloadQueue* result = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
-        // まずは sort_index の一番数の多いものを取得します。
-        NSError* err = nil;
-        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-        NSEntityDescription* entity = [NSEntityDescription entityForName:@"DownloadQueue" inManagedObjectContext:    self.managedObjectContext];
-        [fetchRequest setEntity:entity];
-        
-        NSExpression* expressionKeyPath = [NSExpression expressionForKeyPath:@"sort_index"];
-        NSExpression* expression = [NSExpression expressionForFunction:@"max:" arguments:[NSArray arrayWithObject:expressionKeyPath]];
-        
-        NSExpressionDescription* description = [NSExpressionDescription new];
-        [description setName:@"max_sort_index"];
-        [description setExpression:expression];
-        [description setExpressionResultType:NSInteger32AttributeType];
-        [fetchRequest setResultType:NSDictionaryResultType];
-        [fetchRequest setPropertiesToFetch:[NSArray arrayWithObject:description]];
-        
-        err = nil;
-        NSMutableArray* fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-        
-        int max_sort_index = 0;
-        if (fetchResults != nil && [fetchResults count] >= 1) {
-            max_sort_index = [[fetchResults[0] valueForKey:@"max_sort_index"] intValue];
-        }
-        
-        // 最大値が得られたので、それに +1 することで最新のものの index とします。
-        int new_sort_index = max_sort_index + 1;
-        
-        // 新しい DownloadQueue を生成します。
-        result = [NSEntityDescription insertNewObjectForEntityForName:@"DownloadQueue" inManagedObjectContext:self.managedObjectContext];
-        // sort_index を設定します。
-        result.sort_index = [[NSNumber alloc] initWithInt:new_sort_index];
-    });
-    
-    return result;
-}
-
 /// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
@@ -279,52 +232,55 @@ static GlobalDataSingleton* _singleton = nil;
         });
     }
     
-    if(targetContent.downloadQueueStatus != nil)
-    {
-        return @"既にダウンロードキューに入っています。";
+    if ([targetContent.general_all_no intValue] <= [self CountContentChapter:targetContent] ) {
+        return @"既にダウンロード済です。";
     }
     
-    // queue を新たに生成します。
-    DownloadQueue* queue = [self CreateNewDownloadQueue];
-    
-    // リレーションシップを張ります。
-    dispatch_sync(m_CoreDataAccessQueue, ^{
-        targetContent.downloadQueueStatus = queue;
-        queue.targetContent = targetContent;
-    });
-    
-    // この時点で保存しておきます。
-    [self saveContext];
-    
-    // このqueue用のダウンロードqueueを生成しておきます。
-    dispatch_async(m_DownloadQueue, ^{
-        NarouDownloadQueue* downloadQueue = [NarouDownloadQueue new];
-        [downloadQueue startDownload:targetContent.ncode];
-    });
+    // download queue に追加します。
+    NSLog(@"add download queue.");
+    [[GlobalDataSingleton GetInstance] PushContentDownloadQueue:content];
     
     return nil;
 }
 
-/// コンテンツダウンロード用のqueueを返します
-- (dispatch_queue_t)GetContentsDownloadQueue
+/// download queue の最後に対象の content を追加します。
+- (void)PushContentDownloadQueue:(NarouContentAllData*)content
 {
-    return m_ContentsDownloadQueue;
-}
-
-/// 現在ダウンロード中のコンテンツ情報を更新します。
-- (void)UpdateCurrentDownloadingInfo:(NarouContentAllData*)currentContent
-{
-    m_CurrentDownloadingContent = currentContent;
-    // delegate にも通達します。通達するときは main thread にしておきます。
-    dispatch_async(m_MainQueue, ^{
-        [self.NarouDownloadStatusUpdate NarouDownloadStatusUpdate:currentContent];
-    });
+    [m_DownloadQueue AddDownloadQueue:content];
 }
 
 /// 現在ダウンロード中のコンテンツ情報を取得します。
 - (NarouContentAllData*)GetCurrentDownloadingInfo
 {
-    return m_CurrentDownloadingContent;
+    return [m_DownloadQueue GetCurrentDownloadingInfo];
+}
+
+/// 現在ダウンロード待ち中のコンテンツ情報のリストを取得します。
+- (NSArray*) GetCurrentDownloadWaitingInfo
+{
+    return [m_DownloadQueue GetCurrentWaitingList];
+}
+
+/// ダウンロードイベントハンドラを設定します
+- (BOOL)SetDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate
+{
+    [m_DownloadQueue AddDownloadEventHandler:delegate];
+    return true;
+}
+
+
+/// ダウンロードイベントハンドラから削除します。
+- (BOOL)UnsetDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate
+{
+    [m_DownloadQueue DelDownloadEventHandler:delegate];
+    return true;
+}
+
+
+/// 現在ダウンロード待ち中のものから、ncode を持つものをリストから外します。
+- (BOOL)DeleteDownloadQueue:(NSString*)ncode
+{
+    return [m_DownloadQueue DeleteDownloadQueue:ncode];
 }
 
 /// CoreData で保存している Story のうち、Ncode と chapter_no で検索した結果
@@ -380,6 +336,59 @@ static GlobalDataSingleton* _singleton = nil;
     return story;
 }
 
+/// 小説を一つ削除します
+- (BOOL)DeleteContent:(NarouContent*)content
+{
+    if (content == nil) {
+        return false;
+    }
+    [self.managedObjectContext deleteObject:content];
+    // 保存しておきます。
+    [self saveContext];
+    return true;
+}
+
+/// 章を一つ削除します
+- (BOOL)DeleteStory:(Story *)story
+{
+    if (story == nil) {
+        return false;
+    }
+    [self.managedObjectContext deleteObject:story];
+    // 保存しておきます。
+    [self saveContext];
+    return true;
+}
+
+/// 対象の小説でCoreDataに保存されている章の数を取得します。
+- (NSUInteger)CountContentChapter:(NarouContent*)content
+{
+    if (content == nil || content.ncode == nil) {
+        return 0;
+    }
+    
+    __block NSError* err;
+    __block NSMutableArray* fetchResults = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+        NSEntityDescription* entity = [NSEntityDescription entityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
+        [fetchRequest setEntity:entity];
+        // 数を数えるだけなのでidしか返却しないようにします。
+        [fetchRequest setIncludesPropertyValues:NO];
+        
+        NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@", content.ncode];
+        [fetchRequest setPredicate:predicate];
+
+        err = nil;
+        fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+    });
+    if(fetchResults == nil)
+    {
+        return 0;
+    }
+    return [fetchResults count];
+}
+
 
 /// Core Data用にディレクトリを(なければ)作ります。
 - (BOOL)CreateCoreDataDirectory
@@ -396,7 +405,6 @@ static GlobalDataSingleton* _singleton = nil;
 
 - (void)saveContext
 {
-    NSLog(@"saveContext called.");
     dispatch_sync(m_CoreDataAccessQueue, ^{
         NSError *error = nil;
         NSManagedObjectContext *managedObjectContext = self.managedObjectContext;
@@ -407,6 +415,7 @@ static GlobalDataSingleton* _singleton = nil;
             }
         }
     });
+    NSLog(@"CoreData saved.");
 }
 
 #pragma mark - Core Data stack

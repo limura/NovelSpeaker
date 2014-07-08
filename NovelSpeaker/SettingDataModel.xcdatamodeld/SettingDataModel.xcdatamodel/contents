@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13D65" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
-    <entity name="DownloadQueue" representedClassName="DownloadQueue" syncable="YES">
-        <attribute name="sort_index" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
-        <relationship name="targetContent" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="NarouContent" inverseName="downloadQueueStatus" inverseEntity="NarouContent" syncable="YES"/>
-    </entity>
     <entity name="GlobalState" representedClassName="GlobalState" syncable="YES">
         <attribute name="defaultPitch" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
         <attribute name="defaultRate" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
@@ -28,7 +24,6 @@
         <attribute name="userid" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="writer" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="childStory" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
-        <relationship name="downloadQueueStatus" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DownloadQueue" inverseName="targetContent" inverseEntity="DownloadQueue" syncable="YES"/>
     </entity>
     <entity name="Story" representedClassName="Story" syncable="YES">
         <attribute name="chapter_number" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
@@ -38,8 +33,7 @@
     </entity>
     <elements>
         <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="103"/>
-        <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="313"/>
+        <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="28"/>
         <element name="Story" positionX="-81" positionY="-280" width="128" height="103"/>
-        <element name="DownloadQueue" positionX="81" positionY="-24" width="128" height="73"/>
     </elements>
 </model>

@@ -9,12 +9,13 @@
 #import <UIKit/UIKit.h>
 #import "GlobalDataSingleton.h"
 
-@interface DownloadStatusViewController : UIViewController<NarouDownloadStatusUpdateDelegate>
+@interface DownloadStatusViewController : UIViewController<NarouDownloadQueueDelegate, UITableViewDataSource, UITableViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UILabel *DownloadingTitleLabel;
 @property (weak, nonatomic) IBOutlet UIProgressView *DownloadingProgressView;
 @property (weak, nonatomic) IBOutlet UILabel *DownloadingProgressLabel;
 @property (weak, nonatomic) IBOutlet UILabel *ErrorLabel;
 @property (weak, nonatomic) IBOutlet UITableView *WaitDownloadQueueTableView;
+@property (weak, nonatomic) IBOutlet UITableView *DownloadWaitingQueueTableView;
 
 @end

@@ -36,6 +36,15 @@
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     //[self.navigationController setNavigationBarHidden:FALSE animated:TRUE];
+    
+    // 編集ボタンをつけます。
+    self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    [[GlobalDataSingleton GetInstance] SetDownloadEventHandler:self];
+}
+
+- (void)dealloc
+{
+    [[GlobalDataSingleton GetInstance] UnsetDownloadEventHandler:self];
 }
 
 - (void)didReceiveMemoryWarning
@@ -104,37 +113,52 @@
     [self performSegueWithIdentifier:@"bookShelfToReaderSegue" sender:self];
 }
 
-/*
-// Override to support conditional editing of the table view.
+// 編集できるか否かのYES/NOを返す。
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // Return NO if you do not want the specified item to be editable.
     return YES;
 }
-*/
 
-/*
-// Override to support editing the table view.
+// 編集されるときに呼び出される。
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
+        NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
+        if(contentList == nil
+           || [contentList count] < indexPath.row)
+        {
+            NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], indexPath.row);
+            return;
+        }
+        NarouContent* content = (NarouContent*)contentList[indexPath.row];
+        [[GlobalDataSingleton GetInstance] DeleteContent:content];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
     }   
 }
-*/
+
+// 個々の章のダウンロードが行われようとする度に呼び出されます。
+- (void)DownloadStatusUpdate:(NarouContentAllData*)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
+{
+    [self.tableView reloadData];
+}
+// 全ての download queue がなくなった時に呼び出されます。
+- (void)DownloadEnd
+{
+    [self.tableView reloadData];
+}
 
 /*
 // Override to support rearranging the table view.
+// 移動されたときに呼び出される。
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
 {
 }
 */
 
 /*
-// Override to support conditional rearranging of the table view.
+// 移動できるかどうかのYES/NOを返す。
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Return NO if you do not want the item to be re-orderable.

@@ -132,6 +132,10 @@
     }
     
     NSTextCheckingResult* checkResult = [regex firstMatchInString:html options:NSMatchingReportProgress range:NSMakeRange(0, [html length])];
+    if (checkResult == nil) {
+        NSLog(@"FATAL: textdownload regex not match.");
+        return nil;
+    }
     NSString* result = [html substringWithRange:[checkResult rangeAtIndex:1]];
     return [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/txtdownload/dlstart/ncode/%@/", result];
 }

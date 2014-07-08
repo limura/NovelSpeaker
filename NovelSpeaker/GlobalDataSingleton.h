@@ -11,16 +11,8 @@
 #import "GlobalState.h"
 #import "NarouContent.h"
 #import "NarouContentAllData.h"
-#import "DownloadQueue.h"
 #import "Story.h"
-
-/// ダウンロード状態が更新されたときに呼び出されるdelegate
-@protocol NarouDownloadStatusUpdateDelegate <NSObject>
-/// ダウンロード状態が更新されたときに呼び出されます。
-/// currentDownloadingContent が nil で呼び出された場合はダウンロードが完了した時です。
-- (void)NarouDownloadStatusUpdate:(NarouContentAllData*)currentDownloadingContent;
-
-@end
+#import "NarouDownloadQueue.h"
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -30,16 +22,15 @@
     // Core Data アクセス用queue
     dispatch_queue_t m_CoreDataAccessQueue;
     // download 用 queue
-    dispatch_queue_t m_DownloadQueue;
+    //dispatch_queue_t m_DownloadQueue;
     // コンテンツ download 用 queue
-    dispatch_queue_t m_ContentsDownloadQueue;
+    //dispatch_queue_t m_ContentsDownloadQueue;
     
-    // 現在のダウンロードprogress用
-    NarouContentAllData* m_CurrentDownloadingContent;
+    // ダウンロードキュー
+    NarouDownloadQueue* m_DownloadQueue;
+    // コンテンツダウンロードを終了するべきかどうかのbool値
+    //bool m_isNeedQuit;
 }
-
-/// この delegate に登録すると、ダウンロード状態が更新されたときに呼び出されます。
-@property (nonatomic, assign) id<NarouDownloadStatusUpdateDelegate> NarouDownloadStatusUpdate;
 
 /// シングルトンを取得します。
 + (GlobalDataSingleton*)GetInstance;
@@ -85,14 +76,11 @@
 /// 追加できなかった場合はエラーメッセージを返します。
 - (NSString*) AddDownloadQueueForNarou:(NarouContentAllData*) content;
 
-/// コンテンツダウンロード用のqueueを返します
-- (dispatch_queue_t)GetContentsDownloadQueue;
-
-/// 現在ダウンロード中のコンテンツ情報を更新します。
-- (void)UpdateCurrentDownloadingInfo:(NarouContentAllData*)currentContent;
-
 /// 現在ダウンロード中のコンテンツ情報を取得します。
 - (NarouContentAllData*)GetCurrentDownloadingInfo;
+
+/// 現在ダウンロード待ち中のコンテンツ情報のリストを取得します。
+- (NSArray*) GetCurrentDownloadWaitingInfo;
 
 /// CoreData で保存している Story のうち、Ncode と chapter_number で検索した結果
 /// 得られた Story を取得します。
@@ -101,5 +89,23 @@
 
 /// Story を新しく生成します。必要な情報をすべて伝える必要があります。
 - (Story*) CreateNewStory:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
+
+/// 小説を一つ削除します
+- (BOOL)DeleteContent:(NarouContent*)content;
+
+/// 章を一つ削除します
+- (BOOL)DeleteStory:(Story*)story;
+
+/// 対象の小説でCoreDataに保存されている章の数を取得します。
+- (NSUInteger)CountContentChapter:(NarouContent*)content;
+
+/// ダウンロードイベントハンドラを設定します。
+- (BOOL)SetDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
+
+/// ダウンロードイベントハンドラから削除します。
+- (BOOL)UnsetDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
+
+/// 現在ダウンロード待ち中のものから、ncode を持つものをリストから外します。
+- (BOOL)DeleteDownloadQueue:(NSString*)ncode;
 
 @end

@@ -429,6 +429,7 @@
                     </view>
                     <tabBarItem key="tabBarItem" title="ダウンロード状態" image="arrow_down.png" id="Z25-tO-3hh"/>
                     <connections>
+                        <outlet property="DownloadWaitingQueueTableView" destination="Hmy-c2-vHv" id="d0r-s1-waU"/>
                         <outlet property="DownloadingProgressLabel" destination="uPW-20-0nL" id="zPv-cM-Ymk"/>
                         <outlet property="DownloadingProgressView" destination="DG3-7G-4Ll" id="Eh0-UG-KOn"/>
                         <outlet property="DownloadingTitleLabel" destination="s4M-39-dxp" id="5sJ-gs-zuo"/>

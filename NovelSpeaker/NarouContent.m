@@ -2,12 +2,11 @@
 //  NarouContent.m
 //  NovelSpeaker
 //
-//  Created by 飯村卓司 on 2014/07/05.
+//  Created by 飯村卓司 on 2014/07/06.
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
 #import "NarouContent.h"
-#import "DownloadQueue.h"
 #import "Story.h"
 
 

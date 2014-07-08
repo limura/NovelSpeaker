@@ -7,6 +7,7 @@
 //
 
 #import "DownloadStatusViewController.h"
+#import "NarouContentAllData.h"
 
 @interface DownloadStatusViewController ()
 
@@ -27,14 +28,31 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    globalData.NarouDownloadStatusUpdate = self;
+    self.DownloadWaitingQueueTableView.delegate = self;
     
-    self.DownloadingTitleLabel.text = @"ダウンロード中のものはありません";
-    self.DownloadingProgressView.progress = 0.0f;
-    self.DownloadingProgressLabel.text = @"0/0";
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    [globalData SetDownloadEventHandler:self];
+
+    NarouContentAllData* content = [[GlobalDataSingleton GetInstance] GetCurrentDownloadingInfo];
+    if (content == nil) {
+        self.DownloadingTitleLabel.text = @"ダウンロード中のものはありません";
+        self.DownloadingProgressView.progress = 0.0f;
+        self.DownloadingProgressLabel.text = @"0/0";
+        self.ErrorLabel.text = @"";
+        return;
+    }
+    self.DownloadingTitleLabel.text = content.title;
+    float n = content.current_download_complete_count;
+    float max = [content.general_all_no floatValue];
+    self.DownloadingProgressView.progress = n / max;
+    self.DownloadingProgressLabel.text = [[NSString alloc] initWithFormat:@"%d/%d", (int)n, (int)max];
     self.ErrorLabel.text = @"";
     //self.WaitDownloadQueueTableView;
+}
+
+- (void)dealloc
+{
+    [[GlobalDataSingleton GetInstance] UnsetDownloadEventHandler:self];
 }
 
 - (void)didReceiveMemoryWarning
@@ -55,22 +73,110 @@
 */
 
 /// ダウンロード状態が更新されたときに呼び出されます。
-- (void)NarouDownloadStatusUpdate:(NarouContentAllData*)currentDownloadingContent
+- (void)DownloadStatusUpdate:(NarouContentAllData *)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
 {
-    if (currentDownloadingContent == nil) {
+    if (content == nil) {
         self.DownloadingTitleLabel.text = @"ダウンロード中のものはありません";
         self.DownloadingProgressView.progress = 0.0f;
         self.DownloadingProgressLabel.text = @"0/0";
         self.ErrorLabel.text = @"";
         return;
     }
-    self.DownloadingTitleLabel.text = currentDownloadingContent.title;
-    float n = currentDownloadingContent.current_download_complete_count;
-    float max = [currentDownloadingContent.general_all_no floatValue];
+    self.DownloadingTitleLabel.text = content.title;
+    float n = currentPosition;
+    float max = maxPosition;
     self.DownloadingProgressView.progress = n / max;
-    self.DownloadingProgressLabel.text = [[NSString alloc] initWithFormat:@"%d/%d", (int)n, (int)max];
+    self.DownloadingProgressLabel.text = [[NSString alloc] initWithFormat:@"%d/%d", currentPosition, maxPosition];
     self.ErrorLabel.text = @"";
 }
 
+- (void)DownloadEnd
+{
+    self.DownloadingTitleLabel.text = @"ダウンロード中のものはありません";
+    self.DownloadingProgressView.progress = 0.0f;
+    self.DownloadingProgressLabel.text = @"0/0";
+    self.ErrorLabel.text = @"";
+    return;
+}
+
+// ダウンロード待ちの TableView用
+
+// セクションの数
+- (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+
+// セクションのヘッダ
+- (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    return @"ダウンロード待ち";
+}
+
+// 個々のセクションのセルの数
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    NSArray* currentWaitingList = [[GlobalDataSingleton GetInstance] GetCurrentDownloadWaitingInfo];
+    if (currentWaitingList == nil) {
+        return 0;
+    }
+    return [currentWaitingList count];
+}
+
+// セルの中身
+- (UITableViewCell*) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // 利用できる cell があるなら再利用します
+    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
+    if(cell == nil)
+    {
+        // 無いようなので生成します。
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"];
+    }
+    
+    // ラベルを設定します。
+    NSArray* currentWaitingList = [[GlobalDataSingleton GetInstance] GetCurrentDownloadWaitingInfo];
+    if(currentWaitingList == nil
+       || [currentWaitingList count] < indexPath.row)
+    {
+        NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[currentWaitingList count], indexPath.row);
+        cell.textLabel.text = @"undefined";
+    }
+    else
+    {
+        NarouContentAllData* narouContent = (NarouContentAllData*)currentWaitingList[indexPath.row];
+        cell.textLabel.text = [[NSString alloc] initWithFormat:@"%@"
+                               , narouContent.title];
+    }
+    return cell;
+}
+
+// 編集できるか否かのYES/NOを返す。
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+
+// 編集されるときに呼び出される。
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        NSArray* contentList = [[GlobalDataSingleton GetInstance] GetCurrentDownloadWaitingInfo];
+        if(contentList == nil
+           || [contentList count] < indexPath.row)
+        {
+            NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], indexPath.row);
+            return;
+        }
+        NarouContentAllData* content = contentList[indexPath.row];
+        if([[GlobalDataSingleton GetInstance] DeleteDownloadQueue:content.ncode] != true)
+        {
+            return;
+        }
+        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
+        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+    }
+}
 
 @end

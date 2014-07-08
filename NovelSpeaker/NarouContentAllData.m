@@ -83,5 +83,27 @@
     return self;
 }
 
+/// 自分の持つ情報を CoreData側 に書き込みます。
+- (BOOL)AssignToNarouContent: (NarouContent*)content
+{
+    content.title = self.title;
+    content.ncode = self.ncode;
+    content.userid = self.userid;
+    content.writer = self.writer;
+    content.story = self.story;
+    content.genre = self.genre;
+    content.keyword = self.keyword;
+    content.general_all_no = self.general_all_no;
+    content.end = self.end;
+    content.global_point = self.global_point;
+    content.fav_novel_cnt = self.fav_novel_cnt;
+    content.review_cnt = self.review_cnt;
+    content.all_point = self.all_point;
+    content.all_hyoka_cnt = self.all_hyoka_cnt;
+    content.sasie_cnt = self.sasie_cnt;
+    content.novelupdated_at = self.novelupdated_at;
+    
+    return true;
+}
 
 @end

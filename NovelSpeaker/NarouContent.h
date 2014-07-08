@@ -2,14 +2,14 @@
 //  NarouContent.h
 //  NovelSpeaker
 //
-//  Created by 飯村卓司 on 2014/07/05.
+//  Created by 飯村卓司 on 2014/07/06.
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class DownloadQueue, Story;
+@class Story;
 
 @interface NarouContent : NSManagedObject
 
@@ -30,7 +30,7 @@
 @property (nonatomic, retain) NSNumber * all_hyoka_cnt;
 @property (nonatomic, retain) NSNumber * sasie_cnt;
 @property (nonatomic, retain) NSSet *childStory;
-@property (nonatomic, retain) DownloadQueue *downloadQueueStatus;
+@property (nonatomic, retain) NSManagedObject *downloadQueueStatus;
 @end
 
 @interface NarouContent (CoreDataGeneratedAccessors)
