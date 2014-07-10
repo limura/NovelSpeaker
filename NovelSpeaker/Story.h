@@ -2,7 +2,7 @@
 //  Story.h
 //  NovelSpeaker
 //
-//  Created by 飯村卓司 on 2014/07/06.
+//  Created by 飯村卓司 on 2014/07/11.
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
@@ -13,9 +13,10 @@
 
 @interface Story : NSManagedObject
 
-@property (nonatomic, retain) NSString * content;
 @property (nonatomic, retain) NSNumber * chapter_number;
+@property (nonatomic, retain) NSString * content;
 @property (nonatomic, retain) NSString * ncode;
+@property (nonatomic, retain) NSNumber * readLocation;
 @property (nonatomic, retain) NarouContent *parentContent;
 
 @end

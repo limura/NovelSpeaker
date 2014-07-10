@@ -2,7 +2,7 @@
 //  GlobalState.h
 //  NovelSpeaker
 //
-//  Created by 飯村卓司 on 2014/07/06.
+//  Created by 飯村卓司 on 2014/07/11.
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
@@ -15,7 +15,6 @@
 
 @property (nonatomic, retain) NSNumber * defaultPitch;
 @property (nonatomic, retain) NSNumber * defaultRate;
-@property (nonatomic, retain) NSNumber * readLocation;
 @property (nonatomic, retain) Story *currentReadingStory;
 
 @end

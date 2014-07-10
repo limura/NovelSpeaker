@@ -20,9 +20,11 @@
     UIBarButtonItem* detailButton;
     int m_CurrentChapter;
 }
+@property (weak, nonatomic) IBOutlet UISlider *ChapterSlider;
 @property (weak, nonatomic) IBOutlet UITextView *textView;
 
 // 前のページから得られる表示するための情報
 @property NarouContentAllData* NarouContentDetail;
 
+- (IBAction)ChapterSliderChanged:(UISlider *)sender;
 @end

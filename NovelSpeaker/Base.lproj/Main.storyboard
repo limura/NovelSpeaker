@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="13D65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="5056" systemVersion="13E28" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="Ktg-AW-K7m">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
     </dependencies>
     <scenes>
-        <!--Settings View Controller - 設定-->
+        <!--Settings View Controller-->
         <scene sceneID="B8i-wc-AkM">
             <objects>
                 <viewController id="aeS-Iv-UfJ" customClass="SettingsViewController" sceneMemberID="viewController">
@@ -50,10 +50,20 @@
                                     <action selector="DefaultPitchChanged:" destination="aeS-Iv-UfJ" eventType="valueChanged" id="NpV-DW-LoZ"/>
                                 </connections>
                             </slider>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KCu-WV-V5o">
+                                <rect key="frame" x="16" y="458" width="75" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="クレジット">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <segue destination="NmR-c8-ccH" kind="push" id="pYR-F2-52c"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="設定" image="gear.png" id="1t6-5Y-ZGQ"/>
+                    <navigationItem key="navigationItem" id="6oR-RT-E3s"/>
                     <connections>
                         <outlet property="defaultPitchSetting" destination="XYp-eH-3pv" id="TF2-1i-uH0"/>
                         <outlet property="defaultRateSetting" destination="BFq-G8-ZW7" id="RrO-FF-0ew"/>
@@ -61,7 +71,82 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vWu-2H-lOp" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="40" y="925"/>
+            <point key="canvasLocation" x="450" y="925"/>
+        </scene>
+        <!--View Controller - クレジット-->
+        <scene sceneID="g6V-SU-Uql">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="bLn-TN-oKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <viewController id="NmR-c8-ccH" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="3t6-WC-V9G"/>
+                        <viewControllerLayoutGuide type="bottom" id="K9H-u7-FHM"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="HG2-YY-ylY">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <string key="text"> ----- DTCoreText  Copyright (c) 2011, Oliver Drobnik All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+- Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer. 
+
+- Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  ----- LTCoreText  MIT
+
+Copyright © 2011-12 Yusuke Ito
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="クレジット" id="dcE-Gm-Rdn"/>
+                </viewController>
+            </objects>
+            <point key="canvasLocation" x="945" y="925"/>
+        </scene>
+        <!--Navigation Controller - 設定-->
+        <scene sceneID="jLN-GL-WMq">
+            <objects>
+                <navigationController definesPresentationContext="YES" id="SVO-uL-7kp" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="設定" image="gear.png" id="RLW-4z-oWd"/>
+                    <navigationItem key="navigationItem" id="n1k-4X-225"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="mIp-pB-YHg">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="aeS-Iv-UfJ" kind="relationship" relationship="rootViewController" id="DXy-nl-s8N"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ejC-0w-H3j" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-22" y="925"/>
         </scene>
         <!--Narou Search View Controller - 小説家になろうで検索-->
         <scene sceneID="UWl-PZ-0Xb">
@@ -406,14 +491,8 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="ダウンロード待機中のもの" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IHU-vu-cV8">
-                                <rect key="frame" x="20" y="195" width="212" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="Hmy-c2-vHv">
-                                <rect key="frame" x="20" y="224" width="280" height="284"/>
+                                <rect key="frame" x="9" y="224" width="304" height="284"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </tableView>
@@ -434,7 +513,6 @@
                         <outlet property="DownloadingProgressView" destination="DG3-7G-4Ll" id="Eh0-UG-KOn"/>
                         <outlet property="DownloadingTitleLabel" destination="s4M-39-dxp" id="5sJ-gs-zuo"/>
                         <outlet property="ErrorLabel" destination="E6Q-tH-I2D" id="RUh-jy-K2s"/>
-                        <outlet property="WaitDownloadQueueTableView" destination="Hmy-c2-vHv" id="g61-Xv-5Hd"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1Ae-cX-Tqs" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -471,7 +549,7 @@
                         <segue destination="v42-xJ-9mb" kind="relationship" relationship="viewControllers" id="ktK-js-zfL"/>
                         <segue destination="LfY-GE-Mgm" kind="relationship" relationship="viewControllers" id="BMz-0y-0Ux"/>
                         <segue destination="QQl-Cw-XTx" kind="relationship" relationship="viewControllers" id="0rH-Qu-il9"/>
-                        <segue destination="aeS-Iv-UfJ" kind="relationship" relationship="viewControllers" id="Poe-gr-Kx6"/>
+                        <segue destination="SVO-uL-7kp" kind="relationship" relationship="viewControllers" id="4ul-nd-jaO"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="miF-Ra-PIu" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -528,24 +606,26 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pQC-dc-iJy">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="519"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" editable="NO" usesAttributedText="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pQC-dc-iJy">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="474"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <attributedString key="attributedText"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="Zgn-c8-PuZ">
+                                <rect key="frame" x="18" y="482" width="284" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="ChapterSliderChanged:" destination="vXZ-lx-hvc" eventType="valueChanged" id="oWD-X6-6fE"/>
+                                </connections>
+                            </slider>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstAttribute="trailing" secondItem="pQC-dc-iJy" secondAttribute="trailing" id="AIm-FJ-MhL"/>
-                            <constraint firstItem="pQC-dc-iJy" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" id="aHY-nx-6pw"/>
-                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="pQC-dc-iJy" secondAttribute="bottom" id="kHp-eH-MDv"/>
-                            <constraint firstItem="pQC-dc-iJy" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="sJr-iZ-9ho"/>
-                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="title" id="voJ-dX-pOH"/>
                     <connections>
+                        <outlet property="ChapterSlider" destination="Zgn-c8-PuZ" id="PWp-dv-VXX"/>
                         <outlet property="textView" destination="pQC-dc-iJy" id="X0A-ws-pvA"/>
                         <segue destination="ubt-4C-R8U" kind="push" identifier="speechToDetailSegue" id="0zP-nv-fmY"/>
                     </connections>

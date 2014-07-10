@@ -52,6 +52,7 @@
     self.novelupdated_at = [self ConvertNarouDate2NSDate:novelupdated_at_string];
     
     self.current_download_complete_count = 0;
+    self.reading_chapter = [[NSNumber alloc] initWithInt:1];
 
     return self;
 }
@@ -77,6 +78,7 @@
     self.all_hyoka_cnt = coreDatacontent.all_hyoka_cnt;
     self.sasie_cnt = coreDatacontent.sasie_cnt;
     self.novelupdated_at = coreDatacontent.novelupdated_at;
+    self.reading_chapter = coreDatacontent.reading_chapter;
     
     self.current_download_complete_count = 0;
     
@@ -102,6 +104,7 @@
     content.all_hyoka_cnt = self.all_hyoka_cnt;
     content.sasie_cnt = self.sasie_cnt;
     content.novelupdated_at = self.novelupdated_at;
+    content.reading_chapter = self.reading_chapter;
     
     return true;
 }

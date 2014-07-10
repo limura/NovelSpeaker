@@ -31,7 +31,7 @@
     [m_SpeechTextBox SetDelay: 0.001];
     [m_SpeechTextBox AddPitchSetting:@"」$" pitch:1.5f];
     [m_SpeechTextBox AddPitchSetting:@"』$" pitch:1.5f];
-
+    
     // NavitationBar にボタンを配置します。
     startStopButton = [[UIBarButtonItem alloc] initWithTitle:@"Speak" style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
     detailButton = [[UIBarButtonItem alloc] initWithTitle:@"詳細" style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
@@ -46,30 +46,61 @@
     leftSwipe.direction = UISwipeGestureRecognizerDirectionLeft;
     [self.view addGestureRecognizer:leftSwipe];
     
+    self.ChapterSlider.minimumValue = 1;
+    self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue];
+    
     // 読み上げる文章を設定します。
-    if([self ChangeChapter:1] != true)
+    GlobalState* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
+    if(globalState == nil
+       || globalState.currentReadingStory == nil
+       || globalState.currentReadingStory.readLocation == nil
+       || globalState.currentReadingStory.chapter_number == nil
+       || [self ChangeChapterWithLastestReadLocation:[globalState.currentReadingStory.readLocation intValue]] != true)
     {
         [self setSpeechText:@"読み込みに失敗しました。" range:NSMakeRange(0,0)];
     }
+    int chapterNumber = [globalState.currentReadingStory.chapter_number intValue];
+    [self ChangeChapterWithLastestReadLocation:chapterNumber];
+    self.ChapterSlider.value = chapterNumber;
+}
+
+/// 現在の読み込み位置を保存します。
+- (void)SaveCurrentReadingPoint
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    GlobalState* globalState = [globalData GetGlobalState];
+    Story* currentStory = [globalData SearchStory:self.NarouContentDetail.ncode chapter_no:m_CurrentChapter];
+    if (currentStory == nil) {
+        return;
+    }
+    currentStory.readLocation = [[NSNumber alloc] initWithUnsignedLong: self.textView.selectedRange.location];
+    globalState.currentReadingStory = currentStory;
+    
+    [globalData saveContext];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+    [self SaveCurrentReadingPoint];
 }
 
 - (void)RightSwipe:(UISwipeGestureRecognizer *)sender
 {
-    [self ChangeChapter:m_CurrentChapter-1];
+    [self stopSpeech];
+    [self ChangeChapterWithoutLastestReadLocation:m_CurrentChapter-1];
+    [self SaveCurrentReadingPoint];
 }
 - (void)LeftSwipe:(UISwipeGestureRecognizer *)sender
 {
-    [self ChangeChapter:m_CurrentChapter+1];
+    [self stopSpeech];
+    [self ChangeChapterWithoutLastestReadLocation:m_CurrentChapter+1];
+    [self SaveCurrentReadingPoint];
 }
 
-/// 読み上げる文章の章を変更します
-- (BOOL)ChangeChapter:(int)chapter
+/// 読み上げる文章の章を変更します(最終読み上げ位置を無視して最初の位置から読み上げる版)
+- (BOOL)ChangeChapterWithoutLastestReadLocation:(int)chapter
 {
     if (chapter <= 0 || chapter > [self.NarouContentDetail.general_all_no intValue]) {
         NSLog(@"chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)", chapter, self.NarouContentDetail.general_all_no);
@@ -81,6 +112,23 @@
         return false;
     }
     [self setSpeechText:story.content range:NSMakeRange(0, 0)];
+    m_CurrentChapter = chapter;
+    return true;
+}
+
+/// 読み上げる文章の章を変更します(最終読み上げ位置を保存する版)
+- (BOOL)ChangeChapterWithLastestReadLocation:(int)chapter
+{
+    if (chapter <= 0 || chapter > [self.NarouContentDetail.general_all_no intValue]) {
+        NSLog(@"chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)", chapter, self.NarouContentDetail.general_all_no);
+        return false;
+    }
+    
+    Story* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:chapter];
+    if (story == nil || story.content == nil || [story.content length] <= 0) {
+        return false;
+    }
+    [self setSpeechText:story.content range:NSMakeRange([story.readLocation intValue], 0)];
     m_CurrentChapter = chapter;
     return true;
 }
@@ -102,12 +150,20 @@
     [m_SpeechTextBox SetPitch:[globalState.defaultPitch floatValue]];
     [m_SpeechTextBox SetRate:[globalState.defaultRate floatValue]];
     [m_SpeechTextBox StartSpeech];
+    [self SaveCurrentReadingPoint];
+    
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    [session setActive:true error:nil];
 }
 
 /// 読み上げを停止します
 - (void)stopSpeech{
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    [session setActive:false error:nil];
+
     [m_SpeechTextBox StopSpeech];
     startStopButton.title = @"Speak";
+    [self SaveCurrentReadingPoint];
 }
 
 /// 読み上げ用の文字列を設定します。
@@ -153,5 +209,13 @@
     }
 }
 
-
+// スライダーが変更されたとき。
+- (IBAction)ChapterSliderChanged:(UISlider *)sender {
+    [self stopSpeech];
+    int chapter = self.ChapterSlider.value;
+    if([self ChangeChapterWithLastestReadLocation:chapter] != true)
+    {
+        [self setSpeechText:@"読み込みに失敗しました。" range:NSMakeRange(0,0)];
+    }
+}
 @end

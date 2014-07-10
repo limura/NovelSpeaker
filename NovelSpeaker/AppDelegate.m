@@ -8,6 +8,7 @@
 
 #import "AppDelegate.h"
 #import "GlobalDataSingleton.h"
+#import <AVFoundation/AVFoundation.h>
 
 @implementation AppDelegate
 
@@ -20,6 +21,9 @@
         return NO;
     }
     //[globalData UpdateContentList];
+    
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    [session setCategory:AVAudioSessionCategoryPlayback error:nil];
     return YES;
 }
 							

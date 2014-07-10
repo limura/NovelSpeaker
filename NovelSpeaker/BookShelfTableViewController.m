@@ -10,6 +10,7 @@
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
 #import "SpeechViewController.h"
+#import <AVFoundation/AVFoundation.h>
 
 @interface BookShelfTableViewController ()
 

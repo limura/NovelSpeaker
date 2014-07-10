@@ -29,6 +29,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.DownloadWaitingQueueTableView.delegate = self;
+    self.DownloadWaitingQueueTableView.dataSource = self;
     
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     [globalData SetDownloadEventHandler:self];
@@ -47,7 +48,6 @@
     self.DownloadingProgressView.progress = n / max;
     self.DownloadingProgressLabel.text = [[NSString alloc] initWithFormat:@"%d/%d", (int)n, (int)max];
     self.ErrorLabel.text = @"";
-    //self.WaitDownloadQueueTableView;
 }
 
 - (void)dealloc
@@ -75,6 +75,7 @@
 /// ダウンロード状態が更新されたときに呼び出されます。
 - (void)DownloadStatusUpdate:(NarouContentAllData *)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
 {
+    [self.DownloadWaitingQueueTableView reloadData];
     if (content == nil) {
         self.DownloadingTitleLabel.text = @"ダウンロード中のものはありません";
         self.DownloadingProgressView.progress = 0.0f;
@@ -96,6 +97,7 @@
     self.DownloadingProgressView.progress = 0.0f;
     self.DownloadingProgressLabel.text = @"0/0";
     self.ErrorLabel.text = @"";
+    [self.DownloadWaitingQueueTableView reloadData];
     return;
 }
 

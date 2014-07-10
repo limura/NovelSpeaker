@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13D65" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13E28" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="GlobalState" representedClassName="GlobalState" syncable="YES">
         <attribute name="defaultPitch" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
         <attribute name="defaultRate" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="readLocation" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" syncable="YES"/>
     </entity>
     <entity name="NarouContent" representedClassName="NarouContent" syncable="YES">
@@ -17,6 +16,7 @@
         <attribute name="keyword" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ncode" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="novelupdated_at" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="reading_chapter" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="review_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="sasie_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="story" optional="YES" attributeType="String" syncable="YES"/>
@@ -29,11 +29,12 @@
         <attribute name="chapter_number" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ncode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="readLocation" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
     </entity>
     <elements>
-        <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="103"/>
-        <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="28"/>
-        <element name="Story" positionX="-81" positionY="-280" width="128" height="103"/>
+        <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="90"/>
+        <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="315"/>
+        <element name="Story" positionX="-81" positionY="-280" width="128" height="120"/>
     </elements>
 </model>

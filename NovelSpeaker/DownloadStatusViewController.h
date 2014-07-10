@@ -15,7 +15,6 @@
 @property (weak, nonatomic) IBOutlet UIProgressView *DownloadingProgressView;
 @property (weak, nonatomic) IBOutlet UILabel *DownloadingProgressLabel;
 @property (weak, nonatomic) IBOutlet UILabel *ErrorLabel;
-@property (weak, nonatomic) IBOutlet UITableView *WaitDownloadQueueTableView;
 @property (weak, nonatomic) IBOutlet UITableView *DownloadWaitingQueueTableView;
 
 @end

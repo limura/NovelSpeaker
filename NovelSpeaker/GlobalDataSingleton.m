@@ -83,7 +83,6 @@ static GlobalDataSingleton* _singleton = nil;
             NSLog(@"GlobalState create failed.");
             return nil;
         }
-        globalState.readLocation = [[NSNumber alloc] initWithInt:0];
         globalState.defaultRate = [[NSNumber alloc] initWithFloat:AVSpeechUtteranceDefaultSpeechRate];
         globalState.defaultPitch = [[NSNumber alloc] initWithFloat:1.0f];
         return globalState;
