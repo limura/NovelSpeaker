@@ -76,7 +76,6 @@
         <!--View Controller - クレジット-->
         <scene sceneID="g6V-SU-Uql">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="bLn-TN-oKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <viewController id="NmR-c8-ccH" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="3t6-WC-V9G"/>
@@ -128,6 +127,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     </view>
                     <navigationItem key="navigationItem" title="クレジット" id="dcE-Gm-Rdn"/>
                 </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="bLn-TN-oKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="945" y="925"/>
         </scene>

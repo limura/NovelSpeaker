@@ -2,7 +2,7 @@
 //  NarouContent.h
 //  NovelSpeaker
 //
-//  Created by 飯村卓司 on 2014/07/11.
+//  Created by 飯村卓司 on 2014/07/12.
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
@@ -23,14 +23,15 @@
 @property (nonatomic, retain) NSString * keyword;
 @property (nonatomic, retain) NSString * ncode;
 @property (nonatomic, retain) NSDate * novelupdated_at;
+@property (nonatomic, retain) NSNumber * reading_chapter;
 @property (nonatomic, retain) NSNumber * review_cnt;
 @property (nonatomic, retain) NSNumber * sasie_cnt;
 @property (nonatomic, retain) NSString * story;
 @property (nonatomic, retain) NSString * title;
 @property (nonatomic, retain) NSString * userid;
 @property (nonatomic, retain) NSString * writer;
-@property (nonatomic, retain) NSNumber * reading_chapter;
 @property (nonatomic, retain) NSSet *childStory;
+@property (nonatomic, retain) Story *currentReadingStory;
 @end
 
 @interface NarouContent (CoreDataGeneratedAccessors)

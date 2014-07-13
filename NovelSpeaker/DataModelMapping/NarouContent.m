@@ -2,7 +2,7 @@
 //  NarouContent.m
 //  NovelSpeaker
 //
-//  Created by 飯村卓司 on 2014/07/11.
+//  Created by 飯村卓司 on 2014/07/12.
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
@@ -22,13 +22,14 @@
 @dynamic keyword;
 @dynamic ncode;
 @dynamic novelupdated_at;
+@dynamic reading_chapter;
 @dynamic review_cnt;
 @dynamic sasie_cnt;
 @dynamic story;
 @dynamic title;
 @dynamic userid;
 @dynamic writer;
-@dynamic reading_chapter;
 @dynamic childStory;
+@dynamic currentReadingStory;
 
 @end

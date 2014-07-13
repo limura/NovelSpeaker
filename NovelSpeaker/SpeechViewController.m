@@ -50,18 +50,29 @@
     self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue];
     
     // 読み上げる文章を設定します。
-    GlobalState* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
-    if(globalState == nil
-       || globalState.currentReadingStory == nil
-       || globalState.currentReadingStory.readLocation == nil
-       || globalState.currentReadingStory.chapter_number == nil
-       || [self ChangeChapterWithLastestReadLocation:[globalState.currentReadingStory.readLocation intValue]] != true)
-    {
-        [self setSpeechText:@"読み込みに失敗しました。" range:NSMakeRange(0,0)];
+    [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+}
+
+/// 読み込みに失敗した旨を表示します。
+- (void)SetReadingPointFailedMessage
+{
+    [self setSpeechText:@"読み込みに失敗しました。" range:NSMakeRange(0,0)];
+}
+
+/// 保存されている読み上げ位置を元に、現在の文書を設定します。
+- (BOOL)SetCurrentReadingPointFromSavedData:(NarouContentAllData*)content
+{
+    if (content == nil) {
+        [self SetReadingPointFailedMessage];
+        return false;
     }
-    int chapterNumber = [globalState.currentReadingStory.chapter_number intValue];
-    [self ChangeChapterWithLastestReadLocation:chapterNumber];
-    self.ChapterSlider.value = chapterNumber;
+    NarouContent* narouContent = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:content.ncode];
+    if (narouContent == nil) {
+        [self SetReadingPointFailedMessage];
+        return false;
+    }
+    
+    return [self ChangeChapterWithLastestReadLocation:[narouContent.currentReadingStory.chapter_number intValue]];
 }
 
 /// 現在の読み込み位置を保存します。
@@ -75,6 +86,11 @@
     }
     currentStory.readLocation = [[NSNumber alloc] initWithUnsignedLong: self.textView.selectedRange.location];
     globalState.currentReadingStory = currentStory;
+    
+    NarouContent* narouContent = [globalData SearchNarouContentFromNcode:self.NarouContentDetail.ncode];
+    if (narouContent != nil) {
+        narouContent.currentReadingStory = currentStory;
+    }
     
     [globalData saveContext];
 }
@@ -103,12 +119,13 @@
 - (BOOL)ChangeChapterWithoutLastestReadLocation:(int)chapter
 {
     if (chapter <= 0 || chapter > [self.NarouContentDetail.general_all_no intValue]) {
-        NSLog(@"chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)", chapter, self.NarouContentDetail.general_all_no);
-        return false;
+        NSLog(@"chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)指定された値は無視して 1 が指定されたものとして動作します。", chapter, self.NarouContentDetail.general_all_no);
+        chapter = 1;
     }
     
     Story* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:chapter];
     if (story == nil || story.content == nil || [story.content length] <= 0) {
+        [self SetReadingPointFailedMessage];
         return false;
     }
     [self setSpeechText:story.content range:NSMakeRange(0, 0)];
@@ -116,20 +133,28 @@
     return true;
 }
 
-/// 読み上げる文章の章を変更します(最終読み上げ位置を保存する版)
+/// 読み上げる文章の章を変更します(最終読み上げ位置を保存されたものから読み出す版)
 - (BOOL)ChangeChapterWithLastestReadLocation:(int)chapter
 {
     if (chapter <= 0 || chapter > [self.NarouContentDetail.general_all_no intValue]) {
-        NSLog(@"chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)", chapter, self.NarouContentDetail.general_all_no);
-        return false;
+        NSLog(@"chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)指定された値は無視して 1 が指定されたものとして動作します。", chapter, self.NarouContentDetail.general_all_no);
+        chapter = 1;
     }
     
     Story* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:chapter];
     if (story == nil || story.content == nil || [story.content length] <= 0) {
+        [self SetReadingPointFailedMessage];
         return false;
     }
-    [self setSpeechText:story.content range:NSMakeRange([story.readLocation intValue], 0)];
+    int readLocation = [story.readLocation intValue];
+    if ([story.content length] < readLocation)
+    {
+        NSLog(@"Story に保存されている読み込み位置(%d)が Story の長さ(%lu)を超えています。0 として扱います。", readLocation, [story.content length]);
+        readLocation = 0;
+    }
+    [self setSpeechText:story.content range:NSMakeRange(readLocation, 0)];
     m_CurrentChapter = chapter;
+    self.ChapterSlider.value = chapter;
     return true;
 }
 

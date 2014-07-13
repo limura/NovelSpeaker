@@ -72,4 +72,5 @@
     GlobalState* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     globalState.defaultPitch = [[NSNumber alloc] initWithFloat:sender.value];
 }
+
 @end

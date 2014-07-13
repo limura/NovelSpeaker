@@ -388,6 +388,12 @@ static GlobalDataSingleton* _singleton = nil;
     return [fetchResults count];
 }
 
+/// 保存されているコンテンツの再読み込みを開始します。
+- (BOOL)ReloadBookShelfContents
+{
+    return true;
+}
+
 
 /// Core Data用にディレクトリを(なければ)作ります。
 - (BOOL)CreateCoreDataDirectory
@@ -454,45 +460,49 @@ static GlobalDataSingleton* _singleton = nil;
     if (_persistentStoreCoordinator != nil) {
         return _persistentStoreCoordinator;
     }
+
+        NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"SettingDataModel.sqlite"];
     
-    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"SettingDataModel.sqlite"];
+        NSDictionary* options = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                 [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption, [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, nil];
     
-    NSError *error = nil;
-    _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
-    if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error]) {
-        /*
-         Replace this implementation with code to handle the error appropriately.
+        NSError *error = nil;
+        _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
+        if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:options error:&error]) {
+            /*
+             Replace this implementation with code to handle the error appropriately.
          
-         abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+             abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
          
-         Typical reasons for an error here include:
-         * The persistent store is not accessible;
-         * The schema for the persistent store is incompatible with current managed object model.
-         Check the error message to determine what the actual problem was.
+             Typical reasons for an error here include:
+             * The persistent store is not accessible;
+             * The schema for the persistent store is incompatible with current managed object model.
+             Check the error message to determine what the actual problem was.
+             
+             
+             If the persistent store is not accessible, there is typically something wrong with the file path. Often, a file URL is pointing into the application's resources directory instead of a writeable directory.
          
+             If you encounter schema incompatibility errors during development, you can reduce their frequency  by:
+             * Simply deleting the existing store:
+             [[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil]
          
-         If the persistent store is not accessible, there is typically something wrong with the file path. Often, a file URL is pointing into the application's resources directory instead of a writeable directory.
+             * Performing automatic lightweight migration by passing the following dictionary as the options parameter:
+             @{NSMigratePersistentStoresAutomaticallyOption:@YES, NSInferMappingModelAutomaticallyOption:@YES}
          
-         If you encounter schema incompatibility errors during development, you can reduce their frequency by:
-         * Simply deleting the existing store:
-         [[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil]
+             Lightweight migration will only work for a limited set of schema changes; consult "Core Data Model Versioning and Data Migration Programming Guide" for details.
          
-         * Performing automatic lightweight migration by passing the following dictionary as the options parameter:
-         @{NSMigratePersistentStoresAutomaticallyOption:@YES, NSInferMappingModelAutomaticallyOption:@YES}
-         
-         Lightweight migration will only work for a limited set of schema changes; consult "Core Data Model Versioning and Data Migration Programming Guide" for details.
-         
-         */
-        // TODO: 一旦ファイルを消してみて、もう一回やってみます。
-        // ただ、これはなにかデータが壊れてるか、CoreDataの設定を書き換えたからなので、リリースした後ではこの対応だとひどいです。
-        // つかデータ消してるってことはユーザの履歴とか全部吹き飛んでるわけで。('A`)
-        [[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil];
-        if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error])
-        {
-            NSLog(@"store cordinator add error 2th. %@, %@", error, [error userInfo]);
-            abort();
+             */
+            // TODO: 一旦ファイルを消してみて、もう一回やってみます。
+            // ただ、これはなにかデータが壊れてるか、CoreDataの設定を書き換えたからなので、
+            // リリースした後ではこの対応だとひどいです。
+            // つかデータ消してるってことはユーザの履歴とか全部吹き飛んでるわけで。('A`)
+            //[[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil];
+            if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error])
+            {
+                NSLog(@"store cordinator add error 2th. %@, %@", error, [error userInfo]);
+                abort();
+            }
         }
-    }
     
     return _persistentStoreCoordinator;
 }
