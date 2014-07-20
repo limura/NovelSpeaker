@@ -55,18 +55,17 @@ static GlobalDataSingleton* _singleton = nil;
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
 // 非公開インタフェースになりました。
-- (GlobalState*) GetCoreDataGlobalState
+- (GlobalState*) GetCoreDataGlobalStateThreadUnsafe
 {
-    __block NSError* err;
-    __block NSMutableArray* fetchResults = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
-        // CoreData で読みだします
-        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-        NSEntityDescription* entity = [NSEntityDescription entityForName:@"GlobalState" inManagedObjectContext: self.managedObjectContext];
-        [fetchRequest setEntity:entity];
-        err = nil;
-        fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-    });
+    NSError* err;
+    NSMutableArray* fetchResults = nil;
+    // CoreData で読みだします
+    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription* entity = [NSEntityDescription entityForName:@"GlobalState" inManagedObjectContext: self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    err = nil;
+    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+
     if(fetchResults == nil)
     {
         NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
@@ -75,10 +74,8 @@ static GlobalDataSingleton* _singleton = nil;
     if([fetchResults count] == 0)
     {
         // まだ登録されてなかったので新しく作ります。
-        __block GlobalState* globalState = nil;
-        dispatch_sync(m_CoreDataAccessQueue, ^{
-            globalState = (GlobalState*)[NSEntityDescription insertNewObjectForEntityForName:@"GlobalState" inManagedObjectContext:self.managedObjectContext];
-        });
+        GlobalState* globalState = nil;
+        globalState = (GlobalState*)[NSEntityDescription insertNewObjectForEntityForName:@"GlobalState" inManagedObjectContext:self.managedObjectContext];
         if(globalState == nil)
         {
             NSLog(@"GlobalState create failed.");
@@ -99,15 +96,23 @@ static GlobalDataSingleton* _singleton = nil;
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
 - (GlobalStateCacheData*) GetGlobalState
 {
-    GlobalState* state = [self GetCoreDataGlobalState];
-    return [[GlobalStateCacheData alloc] initWithCoreData:state];
+    __block GlobalStateCacheData* stateCache = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        GlobalState* state = [self GetCoreDataGlobalStateThreadUnsafe];
+        stateCache = [[GlobalStateCacheData alloc] initWithCoreData:state];
+    });
+    return stateCache;
 }
 
 /// GlobalState を更新します。
 - (BOOL)UpdateGlobalState:(GlobalStateCacheData*)globalState
 {
-    GlobalState* state = [self GetCoreDataGlobalState];
-    return [globalState AssignToCoreData:state];
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        GlobalState* state = [self GetCoreDataGlobalStateThreadUnsafe];
+        result = [globalState AssignToCoreData:state];
+    });
+    return result;
 }
 
 
@@ -193,8 +198,7 @@ static GlobalDataSingleton* _singleton = nil;
 /// 保存されている NarouContent の数を取得します。
 - (NSUInteger) GetNarouContentCount
 {
-    __block NSError* err;
-    __block NSMutableArray* fetchResults = nil;
+    __block NSUInteger result = 0;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
         NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
@@ -202,17 +206,20 @@ static GlobalDataSingleton* _singleton = nil;
         // 数を数えるだけなのでidしか返却しないようにします。
         [fetchRequest setIncludesPropertyValues:NO];
 
-        err = nil;
-        fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+        NSError* err = nil;
+        NSMutableArray* fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+
+        if(fetchResults == nil)
+        {
+            result = 0;
+        }else{
+            result = [fetchResults count];
+        }
     });
-    if(fetchResults == nil)
-    {
-        return 0;
-    }
-    return [fetchResults count];
+    return result;
 }
 
-/// NarouContent の全てを NSArray で取得します
+/// NarouContent の全てを NarouContentCacheData の NSArray で取得します
 /// novelupdated_at で sort されて返されます。
 - (NSMutableArray*) GetAllNarouContent
 {
@@ -467,8 +474,7 @@ static GlobalDataSingleton* _singleton = nil;
         return 0;
     }
     
-    __block NSError* err;
-    __block NSMutableArray* fetchResults = nil;
+    __block NSUInteger result = 0;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
         NSEntityDescription* entity = [NSEntityDescription entityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
@@ -479,14 +485,16 @@ static GlobalDataSingleton* _singleton = nil;
         NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@", content.ncode];
         [fetchRequest setPredicate:predicate];
 
-        err = nil;
-        fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+        NSError* err = nil;
+        NSMutableArray* fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+        if(fetchResults == nil)
+        {
+            result = 0;
+        }else{
+            result = [fetchResults count];
+        }
     });
-    if(fetchResults == nil)
-    {
-        return 0;
-    }
-    return [fetchResults count];
+    return result;
 }
 
 /// 最後に読んでいた小説を取得します
@@ -522,7 +530,7 @@ static GlobalDataSingleton* _singleton = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
         Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:[story.chapter_number intValue]];
-        GlobalState* globalState = [self GetCoreDataGlobalState];
+        GlobalState* globalState = [self GetCoreDataGlobalStateThreadUnsafe];
         if (coreDataContent == nil || coreDataStory == nil || globalState == nil) {
             result = false;
         }else{
@@ -599,7 +607,7 @@ static GlobalDataSingleton* _singleton = nil;
         NSManagedObjectContext *managedObjectContext = self.managedObjectContext;
         if (managedObjectContext != nil) {
             if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
-                NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+                NSLog(@"Unresolved error. save failed. %@, %@", error, [error userInfo]);
                 abort();
             }
         }
