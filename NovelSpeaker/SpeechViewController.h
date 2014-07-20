@@ -10,7 +10,8 @@
 #import <CoreData/CoreData.h>
 #import "Speaker.h"
 #import "SpeechTextBox.h"
-#import "NarouContentAllData.h"
+#import "NarouContentCacheData.h"
+#import "StoryCacheData.h"
 
 @interface SpeechViewController : UIViewController
 {
@@ -19,12 +20,13 @@
     UIBarButtonItem* startStopButton;
     UIBarButtonItem* detailButton;
     int m_CurrentChapter;
+    StoryCacheData* m_CurrentReadingStory;
 }
 @property (weak, nonatomic) IBOutlet UISlider *ChapterSlider;
 @property (weak, nonatomic) IBOutlet UITextView *textView;
 
 // 前のページから得られる表示するための情報
-@property NarouContentAllData* NarouContentDetail;
+@property NarouContentCacheData* NarouContentDetail;
 
 - (IBAction)ChapterSliderChanged:(UISlider *)sender;
 @end

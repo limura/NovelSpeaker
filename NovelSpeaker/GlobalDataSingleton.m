@@ -54,7 +54,8 @@ static GlobalDataSingleton* _singleton = nil;
 }
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
-- (GlobalState*) GetGlobalState
+// 非公開インタフェースになりました。
+- (GlobalState*) GetCoreDataGlobalState
 {
     __block NSError* err;
     __block NSMutableArray* fetchResults = nil;
@@ -95,24 +96,38 @@ static GlobalDataSingleton* _singleton = nil;
     return fetchResults[0];
 }
 
+/// CoreData で保存している GlobalState object (一つしかないはず) を取得します
+- (GlobalStateCacheData*) GetGlobalState
+{
+    GlobalState* state = [self GetCoreDataGlobalState];
+    return [[GlobalStateCacheData alloc] initWithCoreData:state];
+}
+
+/// GlobalState を更新します。
+- (BOOL)UpdateGlobalState:(GlobalStateCacheData*)globalState
+{
+    GlobalState* state = [self GetCoreDataGlobalState];
+    return [globalState AssignToCoreData:state];
+}
+
+
 /// CoreData で保存している NarouContent のうち、Ncode で検索した結果
 /// 得られた NovelContent を取得します。
 /// 登録がなければ nil を返します
-- (NarouContent*) SearchNarouContentFromNcode:(NSString*) ncode
+- (NarouContent*) SearchCoreDataNarouContentFromNcodeThreadUnsafe:(NSString*) ncode
 {
-    __block NSError* err;
-    __block NSMutableArray* fetchResults = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-        NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
-        [fetchRequest setEntity:entity];
+    NSError* err;
+    NSMutableArray* fetchResults = nil;
+    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
     
-        NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@", ncode];
-        [fetchRequest setPredicate:predicate];
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@", ncode];
+    [fetchRequest setPredicate:predicate];
 
-        err = nil;
-        fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-    });
+    err = nil;
+    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+
     if(fetchResults == nil)
     {
         NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
@@ -131,13 +146,47 @@ static GlobalDataSingleton* _singleton = nil;
     return fetchResults[0];
 }
 
-/// 新しい NarouContent を生成して返します。
-- (NarouContent*) CreateNewNarouContent
+/// CoreData で保存している NarouContent のうち、Ncode で検索した結果
+/// 得られた NovelContent を取得します。
+/// 登録がなければ nil を返します
+- (NarouContentCacheData*) SearchNarouContentFromNcode:(NSString*) ncode
 {
-    __block NarouContent* content = nil;
+    __block NarouContentCacheData* result = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
-        content = [NSEntityDescription insertNewObjectForEntityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
+        NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:ncode];
+        if (coreDataContent != nil) {
+            result = [[NarouContentCacheData alloc] initWithCoreData:coreDataContent];
+        }
     });
+    return result;
+}
+
+
+/// 指定されたNarouContentの情報を更新します。
+/// CoreData側に登録されていなければ新規に作成し、
+/// 既に登録済みであれば情報を更新します。
+- (BOOL)UpdateNarouContent:(NarouContentCacheData*)content
+{
+    if (content == nil || content.ncode == nil) {
+        return false;
+    }
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
+        if (coreDataContent == nil) {
+            coreDataContent = [self CreateNewNarouContentThreadUnsafe];
+        }
+        result = [content AssignToCoreData:coreDataContent];
+    });
+    return result;
+}
+
+
+/// 新しい NarouContent を生成して返します。
+- (NarouContent*) CreateNewNarouContentThreadUnsafe
+{
+    NarouContent* content = nil;
+    content = [NSEntityDescription insertNewObjectForEntityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
     return content;
 }
 
@@ -163,14 +212,6 @@ static GlobalDataSingleton* _singleton = nil;
     return [fetchResults count];
 }
 
-/// NarouContent のリストを更新します。
-/// 怪しく検索条件を内部で勝手に作ります。
-- (BOOL)UpdateContentList
-{
-    NarouLoader* loader = [NarouLoader new];
-    return [loader UpdateContentList];
-}
-
 /// NarouContent の全てを NSArray で取得します
 /// novelupdated_at で sort されて返されます。
 - (NSMutableArray*) GetAllNarouContent
@@ -187,7 +228,11 @@ static GlobalDataSingleton* _singleton = nil;
         [fetchRequest setSortDescriptors:sortDescriptors];
 
         err = nil;
-        fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+        NSArray* results = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+        fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
+        for (int i = 0; i < [results count]; i++) {
+            fetchResults[i] = [[NarouContentCacheData alloc] initWithCoreData:results[i]];
+        }
     });
     if(err != nil)
     {
@@ -200,18 +245,18 @@ static GlobalDataSingleton* _singleton = nil;
 /// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
-- (NSString*) AddDownloadQueueForNarou:(NarouContentAllData*) content
+- (NSString*) AddDownloadQueueForNarou:(NarouContentCacheData*) content
 {
     if(content == nil || content.ncode == nil || [content.ncode length] <= 0)
     {
         return @"有効な NCODE を取得できませんでした。";
     }
     NSString* targetNcode = content.ncode;
-    __block NarouContent* targetContent = [self SearchNarouContentFromNcode:targetNcode];
-    if (targetContent == nil) {
+    __block NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:targetNcode];
+    if (targetContentCacheData == nil) {
         // 登録がないようなのでとりあえず NarouContent を登録します。
-        targetContent = [self CreateNewNarouContent];
         dispatch_sync(m_CoreDataAccessQueue, ^{
+            NarouContent* targetContent = [self CreateNewNarouContentThreadUnsafe];
             targetContent.title = content.title;
             targetContent.ncode = content.ncode;
             targetContent.userid = content.userid;
@@ -228,10 +273,11 @@ static GlobalDataSingleton* _singleton = nil;
             targetContent.all_hyoka_cnt = content.all_hyoka_cnt;
             targetContent.sasie_cnt = content.sasie_cnt;
             targetContent.novelupdated_at = content.novelupdated_at;
+            targetContentCacheData = [[NarouContentCacheData alloc] initWithCoreData:targetContent];
         });
     }
     
-    if ([targetContent.general_all_no intValue] <= [self CountContentChapter:targetContent] ) {
+    if ([targetContentCacheData.general_all_no intValue] <= [self CountContentChapter:targetContentCacheData] ) {
         return @"既にダウンロード済です。";
     }
     
@@ -243,13 +289,13 @@ static GlobalDataSingleton* _singleton = nil;
 }
 
 /// download queue の最後に対象の content を追加します。
-- (void)PushContentDownloadQueue:(NarouContentAllData*)content
+- (void)PushContentDownloadQueue:(NarouContentCacheData*)content
 {
     [m_DownloadQueue AddDownloadQueue:content];
 }
 
 /// 現在ダウンロード中のコンテンツ情報を取得します。
-- (NarouContentAllData*)GetCurrentDownloadingInfo
+- (NarouContentCacheData*)GetCurrentDownloadingInfo
 {
     return [m_DownloadQueue GetCurrentDownloadingInfo];
 }
@@ -261,7 +307,7 @@ static GlobalDataSingleton* _singleton = nil;
 }
 
 /// ダウンロードイベントハンドラを設定します
-- (BOOL)SetDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate
+- (BOOL)AddDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate
 {
     [m_DownloadQueue AddDownloadEventHandler:delegate];
     return true;
@@ -269,7 +315,7 @@ static GlobalDataSingleton* _singleton = nil;
 
 
 /// ダウンロードイベントハンドラから削除します。
-- (BOOL)UnsetDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate
+- (BOOL)DeleteDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate
 {
     [m_DownloadQueue DelDownloadEventHandler:delegate];
     return true;
@@ -285,21 +331,20 @@ static GlobalDataSingleton* _singleton = nil;
 /// CoreData で保存している Story のうち、Ncode と chapter_no で検索した結果
 /// 得られた Story を取得します。
 /// 登録がなければ nil を返します
-- (Story*) SearchStory:(NSString*) ncode chapter_no:(int)chapter_number
+- (Story*) SearchCoreDataStoryThreadUnsafe:(NSString*) ncode chapter_no:(int)chapter_number
 {
-    __block NSError* err;
-    __block NSMutableArray* fetchResults = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-        NSEntityDescription* entity = [NSEntityDescription entityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
-        [fetchRequest setEntity:entity];
+    NSError* err;
+    NSMutableArray* fetchResults = nil;
+    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription* entity = [NSEntityDescription entityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
         
-        NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@ AND chapter_number == %d", ncode, chapter_number];
-        [fetchRequest setPredicate:predicate];
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@ AND chapter_number == %d", ncode, chapter_number];
+    [fetchRequest setPredicate:predicate];
         
-        err = nil;
-        fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-    });
+    err = nil;
+    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+
     if(fetchResults == nil)
     {
         NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
@@ -312,55 +357,111 @@ static GlobalDataSingleton* _singleton = nil;
     }
     if([fetchResults count] != 1)
     {
-        NSLog(@"duplicate ncode!!! %@", ncode);
+        NSLog(@"duplicate ncode+chapter_number!!! %@/%d", ncode, chapter_number);
         return nil;
     }
     return fetchResults[0];
-    
+}
+
+/// Story を検索します。(公開用method)
+- (StoryCacheData*) SearchStory:(NSString*)ncode chapter_no:(int)chapter_number
+{
+    __block StoryCacheData* result = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        Story* story = [self SearchCoreDataStoryThreadUnsafe:ncode chapter_no:chapter_number];
+        if (story != nil) {
+            result = [[StoryCacheData alloc] initWithCoreData:story];
+        }
+    });
+    return result;
 }
 
 /// Story を新しく生成します。必要な情報をすべて指定する必要があります
-- (Story*) CreateNewStory:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
+- (Story*) CreateNewStoryThreadUnsafe:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
 {
-    __block Story* story = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
-        story = [NSEntityDescription insertNewObjectForEntityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
-        story.parentContent = parentContent;
-        [parentContent addChildStoryObject:story];
+    Story* story = nil;
+    story = [NSEntityDescription insertNewObjectForEntityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
+    story.parentContent = parentContent;
+    [parentContent addChildStoryObject:story];
         
-        story.ncode = parentContent.ncode;
-        story.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
-        story.content = content;
-    });
+    story.ncode = parentContent.ncode;
+    story.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
+    story.content = content;
     return story;
 }
 
+/// 指定されたStoryの情報を更新します。
+/// CoreData側に登録されていなければ新規に作成し、
+/// 既に登録済みであれば情報を更新します。
+- (BOOL)UpdateStory:(NSString*)content chapter_number:(int)chapter_number parentContent:(NarouContentCacheData *)parentContent
+{
+    if (parentContent == nil || content == nil) {
+        return false;
+    }
+    
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        NarouContent* parentCoreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:parentContent.ncode];
+        if (parentCoreDataContent == nil) {
+            result = false;
+        }else{
+            Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:parentContent.ncode chapter_no:chapter_number];
+            if (coreDataStory == nil) {
+                coreDataStory = [self CreateNewStoryThreadUnsafe:parentCoreDataContent content:content chapter_number:  chapter_number];
+            }
+            coreDataStory.content = content;
+            coreDataStory.parentContent = parentCoreDataContent;
+            coreDataStory.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
+            result = true;
+        }
+    });
+    
+    return result;
+}
+
+
 /// 小説を一つ削除します
-- (BOOL)DeleteContent:(NarouContent*)content
+- (BOOL)DeleteContent:(NarouContentCacheData*)content
 {
     if (content == nil) {
         return false;
     }
-    [self.managedObjectContext deleteObject:content];
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
+        if (coreDataContent != nil) {
+            [self.managedObjectContext deleteObject:coreDataContent];
+            result = true;
+        }
+    });
     // 保存しておきます。
     [self saveContext];
     return true;
 }
 
 /// 章を一つ削除します
-- (BOOL)DeleteStory:(Story *)story
+- (BOOL)DeleteStory:(StoryCacheData *)story
 {
     if (story == nil) {
         return false;
     }
-    [self.managedObjectContext deleteObject:story];
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:[story.chapter_number intValue]];
+        if (coreDataStory == nil) {
+            result = false;
+        }else{
+            [self.managedObjectContext deleteObject:coreDataStory];
+            result = true;
+        }
+    });
     // 保存しておきます。
     [self saveContext];
-    return true;
+    return result;
 }
 
 /// 対象の小説でCoreDataに保存されている章の数を取得します。
-- (NSUInteger)CountContentChapter:(NarouContent*)content
+- (NSUInteger)CountContentChapter:(NarouContentCacheData*)content
 {
     if (content == nil || content.ncode == nil) {
         return 0;
@@ -387,6 +488,89 @@ static GlobalDataSingleton* _singleton = nil;
     }
     return [fetchResults count];
 }
+
+/// 最後に読んでいた小説を取得します
+- (NarouContentCacheData*)GetCurrentReadingContent
+{
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    if (globalState == nil) {
+        return nil;
+    }
+    StoryCacheData* story = globalState.currentReadingStory;
+    if (story == nil) {
+        return nil;
+    }
+    return [self SearchNarouContentFromNcode:story.ncode];
+}
+
+/// 小説で読んでいた章を取得します
+- (StoryCacheData*)GetReadingChapter:(NarouContentCacheData*)content
+{
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    return globalState.currentReadingStory;
+}
+
+/// 読み込み中の場所を指定された小説と章で更新します。
+- (BOOL)ReadingPointUpdate:(NarouContentCacheData*)content story:(StoryCacheData*)story
+{
+    if (content == nil || story == nil
+        || content.ncode == nil
+        || ![content.ncode isEqual:story.ncode]) {
+        return false;
+    }
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
+        Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:[story.chapter_number intValue]];
+        GlobalState* globalState = [self GetCoreDataGlobalState];
+        if (coreDataContent == nil || coreDataStory == nil || globalState == nil) {
+            result = false;
+        }else{
+            coreDataStory.readLocation = story.readLocation;
+            coreDataContent.currentReadingStory = coreDataStory;
+            globalState.currentReadingStory = coreDataStory;
+            result = true;
+        }
+    });
+    return result;
+}
+
+/// 次の章を読み出します。
+/// 次の章がなければ nil を返します。
+- (StoryCacheData*)GetNextChapter:(StoryCacheData*)story
+{
+    if (story == nil) {
+        return nil;
+    }
+    int target_chapter_number = [story.chapter_number intValue] + 1;
+    __block StoryCacheData* result = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        Story* nextCoreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:target_chapter_number];
+        if (nextCoreDataStory != nil) {
+            result = [[StoryCacheData alloc] initWithCoreData:nextCoreDataStory];
+        }
+    });
+    return result;
+}
+
+/// 前の章を読み出します。
+/// 前の章がなければ nil を返します。
+- (StoryCacheData*)GetPreviousChapter:(StoryCacheData*)story
+{
+    if (story == nil) {
+        return nil;
+    }
+    int target_chapter_number = [story.chapter_number intValue] - 1;
+    __block StoryCacheData* result = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        Story* previousCoreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:target_chapter_number];
+        if (previousCoreDataStory != nil) {
+            result = [[StoryCacheData alloc] initWithCoreData:previousCoreDataStory];
+        }
+    });
+    return result;
+}
+
 
 /// 保存されているコンテンツの再読み込みを開始します。
 - (BOOL)ReloadBookShelfContents

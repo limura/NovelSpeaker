@@ -23,7 +23,7 @@
         <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="userid" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="writer" optional="YES" attributeType="String" syncable="YES"/>
-        <relationship name="childStory" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
+        <relationship name="childStory" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
         <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" syncable="YES"/>
     </entity>
     <entity name="Story" representedClassName="Story" syncable="YES">
@@ -31,7 +31,7 @@
         <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ncode" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="readLocation" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
-        <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
+        <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
     </entity>
     <elements>
         <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="90"/>

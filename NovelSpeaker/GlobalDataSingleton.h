@@ -10,9 +10,10 @@
 #import <CoreData/CoreData.h>
 #import "GlobalState.h"
 #import "NarouContent.h"
-#import "NarouContentAllData.h"
-#import "Story.h"
+#import "NarouContentCacheData.h"
+#import "StoryCacheData.h"
 #import "NarouDownloadQueue.h"
+#import "GlobalStateCacheData.h"
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -50,22 +51,29 @@
 - (NSURL *)applicationDocumentsDirectory;
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
-- (GlobalState*) GetGlobalState;
+// 非公開インタフェースになりました。
+//- (GlobalState*) GetGlobalState;
+- (GlobalStateCacheData*) GetGlobalState;
+
+/// GlobalState を更新します。
+- (BOOL)UpdateGlobalState:(GlobalStateCacheData*)globalState;
 
 /// CoreData で保存している NarouContent のうち、Ncode で検索した結果
 /// 得られた NovelContent を取得します。
 /// 登録がなければ nil を返します
-- (NarouContent*) SearchNarouContentFromNcode:(NSString*) ncode;
+- (NarouContentCacheData*) SearchNarouContentFromNcode:(NSString*) ncode;
+
+/// 指定されたNarouContentの情報を更新します。
+/// CoreData側に登録されていなければ新規に作成し、
+/// 既に登録済みであれば情報を更新します。
+- (BOOL)UpdateNarouContent:(NarouContentCacheData*)content;
 
 /// 新しい NarouContent を生成して返します。
-- (NarouContent*) CreateNewNarouContent;
+// 非公開インタフェースになりました。
+//- (NarouContent*) CreateNewNarouContent;
 
 /// 保存されている NarouContent の数を取得します。
 - (NSUInteger) GetNarouContentCount;
-
-/// NarouContent のリストを更新します。
-/// 怪しく検索条件を内部で勝手に作ります。
-- (BOOL)UpdateContentList;
 
 /// NarouContent の全てを NSArray で取得します
 /// novelupdated_at で sort されて返されます。
@@ -74,10 +82,10 @@
 /// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
-- (NSString*) AddDownloadQueueForNarou:(NarouContentAllData*) content;
+- (NSString*) AddDownloadQueueForNarou:(NarouContentCacheData*) content;
 
 /// 現在ダウンロード中のコンテンツ情報を取得します。
-- (NarouContentAllData*)GetCurrentDownloadingInfo;
+- (NarouContentCacheData*)GetCurrentDownloadingInfo;
 
 /// 現在ダウンロード待ち中のコンテンツ情報のリストを取得します。
 - (NSArray*) GetCurrentDownloadWaitingInfo;
@@ -85,27 +93,50 @@
 /// CoreData で保存している Story のうち、Ncode と chapter_number で検索した結果
 /// 得られた Story を取得します。
 /// 登録がなければ nil を返します
-- (Story*) SearchStory:(NSString*) ncode chapter_no:(int)chapter_number;
+- (StoryCacheData*) SearchStory:(NSString*)ncode chapter_no:(int)chapter_number;
 
 /// Story を新しく生成します。必要な情報をすべて伝える必要があります。
-- (Story*) CreateNewStory:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
+/// private method になりました。
+//- (Story*) CreateNewStory:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
+
+/// 指定されたStoryの情報を更新します。
+/// CoreData側に登録されていなければ新規に作成し、
+/// 既に登録済みであれば情報を更新します。
+- (BOOL)UpdateStory:(NSString*)content chapter_number:(int)chapter_number parentContent:(NarouContentCacheData*)parentContent;
 
 /// 小説を一つ削除します
-- (BOOL)DeleteContent:(NarouContent*)content;
+- (BOOL)DeleteContent:(NarouContentCacheData*)content;
 
 /// 章を一つ削除します
-- (BOOL)DeleteStory:(Story*)story;
+- (BOOL)DeleteStory:(StoryCacheData*)story;
 
 /// 対象の小説でCoreDataに保存されている章の数を取得します。
-- (NSUInteger)CountContentChapter:(NarouContent*)content;
+- (NSUInteger)CountContentChapter:(NarouContentCacheData*)content;
 
 /// ダウンロードイベントハンドラを設定します。
-- (BOOL)SetDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
+- (BOOL)AddDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
 
 /// ダウンロードイベントハンドラから削除します。
-- (BOOL)UnsetDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
+- (BOOL)DeleteDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
 
 /// 現在ダウンロード待ち中のものから、ncode を持つものをリストから外します。
 - (BOOL)DeleteDownloadQueue:(NSString*)ncode;
+
+/// 最後に読んでいた小説を取得します
+- (NarouContentCacheData*)GetCurrentReadingContent;
+
+/// 小説で読んでいた章を取得します
+- (StoryCacheData*)GetReadingChapter:(NarouContentCacheData*)content;
+
+/// 読み込み中の場所を指定された小説と章で更新します。
+- (BOOL)ReadingPointUpdate:(NarouContentCacheData*)content story:(StoryCacheData*)story;
+
+/// 次の章を読み出します。
+/// 次の章がなければ nil を返します。
+- (StoryCacheData*)GetNextChapter:(StoryCacheData*)story;
+
+/// 前の章を読み出します。
+/// 前の章がなければ nil を返します。
+- (StoryCacheData*)GetPreviousChapter:(StoryCacheData*)story;
 
 @end

@@ -7,7 +7,7 @@
 //
 
 #import "DownloadStatusViewController.h"
-#import "NarouContentAllData.h"
+#import "NarouContentCacheData.h"
 
 @interface DownloadStatusViewController ()
 
@@ -32,9 +32,9 @@
     self.DownloadWaitingQueueTableView.dataSource = self;
     
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    [globalData SetDownloadEventHandler:self];
+    [globalData AddDownloadEventHandler:self];
 
-    NarouContentAllData* content = [[GlobalDataSingleton GetInstance] GetCurrentDownloadingInfo];
+    NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] GetCurrentDownloadingInfo];
     if (content == nil) {
         self.DownloadingTitleLabel.text = @"ダウンロード中のものはありません";
         self.DownloadingProgressView.progress = 0.0f;
@@ -52,7 +52,7 @@
 
 - (void)dealloc
 {
-    [[GlobalDataSingleton GetInstance] UnsetDownloadEventHandler:self];
+    [[GlobalDataSingleton GetInstance] DeleteDownloadEventHandler:self];
 }
 
 - (void)didReceiveMemoryWarning
@@ -73,7 +73,7 @@
 */
 
 /// ダウンロード状態が更新されたときに呼び出されます。
-- (void)DownloadStatusUpdate:(NarouContentAllData *)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
+- (void)DownloadStatusUpdate:(NarouContentCacheData *)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
 {
     [self.DownloadWaitingQueueTableView reloadData];
     if (content == nil) {
@@ -129,24 +129,24 @@
 - (UITableViewCell*) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // 利用できる cell があるなら再利用します
-    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
+    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"DownloadStatusTableViewCell"];
     if(cell == nil)
     {
         // 無いようなので生成します。
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"DownloadStatusTableViewCell"];
     }
     
     // ラベルを設定します。
     NSArray* currentWaitingList = [[GlobalDataSingleton GetInstance] GetCurrentDownloadWaitingInfo];
     if(currentWaitingList == nil
-       || [currentWaitingList count] < indexPath.row)
+       || [currentWaitingList count] <= indexPath.row)
     {
-        NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[currentWaitingList count], indexPath.row);
+        NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[currentWaitingList count], (long)indexPath.row);
         cell.textLabel.text = @"undefined";
     }
     else
     {
-        NarouContentAllData* narouContent = (NarouContentAllData*)currentWaitingList[indexPath.row];
+        NarouContentCacheData* narouContent = (NarouContentCacheData*)currentWaitingList[indexPath.row];
         cell.textLabel.text = [[NSString alloc] initWithFormat:@"%@"
                                , narouContent.title];
     }
@@ -167,10 +167,10 @@
         if(contentList == nil
            || [contentList count] < indexPath.row)
         {
-            NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], indexPath.row);
+            NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], (long)indexPath.row);
             return;
         }
-        NarouContentAllData* content = contentList[indexPath.row];
+        NarouContentCacheData* content = contentList[indexPath.row];
         if([[GlobalDataSingleton GetInstance] DeleteDownloadQueue:content.ncode] != true)
         {
             return;

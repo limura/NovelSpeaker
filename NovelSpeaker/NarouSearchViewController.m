@@ -62,7 +62,7 @@
         m_SearchResult = searchResult;
         dispatch_async(m_MainQueue, ^{
             [alertView dismissWithClickedButtonIndex:0 animated:NO];
-            NSLog(@"search end. count: %lu", [m_SearchResult count]);
+            NSLog(@"search end. count: %lu", (unsigned long)[m_SearchResult count]);
             [self performSegueWithIdentifier:@"searchResultPushSegue" sender:self];
         });
     });

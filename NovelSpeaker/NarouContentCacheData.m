@@ -6,9 +6,10 @@
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
-#import "NarouContentAllData.h"
+#import "NarouContentCacheData.h"
+#import "GlobalDataSingleton.h"
 
-@implementation NarouContentAllData
+@implementation NarouContentCacheData
 
 /// 小説になろうの時間フォーマットからNSDateに変換します
 - (NSDate*)ConvertNarouDate2NSDate: (NSString*)narouDate
@@ -53,6 +54,7 @@
     
     self.current_download_complete_count = 0;
     self.reading_chapter = [[NSNumber alloc] initWithInt:1];
+    self.currentReadingStory = nil;
 
     return self;
 }
@@ -82,11 +84,17 @@
     
     self.current_download_complete_count = 0;
     
+    if (coreDatacontent.currentReadingStory == nil) {
+        self.currentReadingStory = nil;
+    }else{
+        self.currentReadingStory = [[StoryCacheData alloc] initWithCoreData:coreDatacontent.currentReadingStory];
+    }
+    
     return self;
 }
 
 /// 自分の持つ情報を CoreData側 に書き込みます。
-- (BOOL)AssignToNarouContent: (NarouContent*)content
+- (BOOL)AssignToCoreData: (NarouContent*)content
 {
     content.title = self.title;
     content.ncode = self.ncode;
@@ -105,6 +113,12 @@
     content.sasie_cnt = self.sasie_cnt;
     content.novelupdated_at = self.novelupdated_at;
     content.reading_chapter = self.reading_chapter;
+    
+    if (self.currentReadingStory == nil) {
+        content.currentReadingStory = nil;
+    }else{
+        [[GlobalDataSingleton GetInstance] UpdateStory:self.currentReadingStory.content chapter_number:[self.currentReadingStory.chapter_number intValue] parentContent:self];
+    }
     
     return true;
 }

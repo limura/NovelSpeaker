@@ -8,15 +8,16 @@
 
 #import <Foundation/Foundation.h>
 #import "NarouContent.h"
+#import "StoryCacheData.h"
 
-@interface NarouContentAllData : NSObject
+@interface NarouContentCacheData : NSObject
 
 /// JOSN のデータから初期化します。
 - (id)initWithJsonData: (NSDictionary*)jsonContent;
 /// CoreData のデータから初期化します。
 - (id)initWithCoreData: (NarouContent*)coreDatacontent;
 /// 自分の持つ情報を CoreData側 に書き込みます。
-- (BOOL)AssignToNarouContent: (NarouContent*)content;
+- (BOOL)AssignToCoreData: (NarouContent*)content;
 
 @property (nonatomic) NSString* title;
 @property (nonatomic) NSString* ncode;
@@ -35,6 +36,7 @@
 @property (nonatomic) NSNumber* sasie_cnt;
 @property (nonatomic) NSDate* novelupdated_at;
 @property (nonatomic) NSNumber* reading_chapter;
+@property (nonatomic) StoryCacheData* currentReadingStory;
 
 // ダウンロード進捗確認用。現在ダウンロードが完了しているコンテンツの数(最大値は general_all_no のはずです)
 @property (nonatomic) int current_download_complete_count;

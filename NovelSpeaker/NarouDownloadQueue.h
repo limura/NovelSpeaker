@@ -7,12 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NarouContentAllData.h"
+#import "NarouContentCacheData.h"
 
 @protocol NarouDownloadQueueDelegate <NSObject>
 
 // 個々の章のダウンロードが行われようとする度に呼び出されます。
-- (void)DownloadStatusUpdate:(NarouContentAllData*)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition;
+- (void)DownloadStatusUpdate:(NarouContentCacheData*)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition;
 // 全ての download queue がなくなった時に呼び出されます。
 - (void)DownloadEnd;
 
@@ -39,7 +39,7 @@
     NSMutableArray* m_DownloadEventHandlerList;
     
     /// 現在ダウンロード中のものの情報
-    NarouContentAllData* m_CurrentDownloadContentAllData;
+    NarouContentCacheData* m_CurrentDownloadContentAllData;
     
     /// 小説家になろうからダウンロードした回数
     int m_DownloadCount;
@@ -57,7 +57,7 @@
 - (void)StopDownloadThread;
 
 /// ncode のコンテンツをダウンロードをqueueに入れます。
-- (BOOL)AddDownloadQueue:(NarouContentAllData*)ncode;
+- (BOOL)AddDownloadQueue:(NarouContentCacheData*)ncode;
 
 /// 現在ダウンロード待ち中の NarouContentAllData* のリストを返します。
 - (NSArray*)GetCurrentWaitingList;
@@ -67,6 +67,6 @@
 
 /// 現在ダウンロード中のNarouContentAllDataを取得します。
 /// 何もダウンロードしていなければ nil が帰ります。
-- (NarouContentAllData*)GetCurrentDownloadingInfo;
+- (NarouContentCacheData*)GetCurrentDownloadingInfo;
 
 @end

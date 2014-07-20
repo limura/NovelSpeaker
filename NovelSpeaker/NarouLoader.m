@@ -9,7 +9,7 @@
 #import "NarouLoader.h"
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
-#import "NarouContentAllData.h"
+#import "NarouContentCacheData.h"
 
 /// 小説家になろう の API 個を使って小説情報を読み出すclass。
 /// SettingDataModel の NarouContent に追加するなどします。
@@ -55,7 +55,7 @@
     NSMutableArray* result = [NSMutableArray new];
     for(NSDictionary* jsonContent in contentList)
     {
-        NarouContentAllData* content = [[NarouContentAllData alloc] initWithJsonData:jsonContent];
+        NarouContentCacheData* content = [[NarouContentCacheData alloc] initWithJsonData:jsonContent];
         if (content.ncode == nil || [content.ncode length] <= 0) {
             continue;
         }
@@ -64,36 +64,6 @@
     }
 
     return result;
-}
-
-/// NarouContent のリストを更新します。
-/// 怪しく検索条件を内部で勝手に作ります。
-- (BOOL)UpdateContentList
-{
-    NSMutableArray* searchResultList = [NarouLoader Search:nil wname:NO title:NO keyword:NO ex:NO];
-    
-    for(NarouContentAllData* remoteContent in searchResultList)
-    {
-        NSString* ncode = remoteContent.ncode;
-        if (ncode == nil || [ncode length] <= 0) {
-            continue;
-        }
-        
-        NarouContent* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:ncode];
-        
-        if (content == nil) {
-            NSLog(@"ncode: %@ %@ not found. adding.", ncode, remoteContent.title);
-            content = [[GlobalDataSingleton GetInstance] CreateNewNarouContent];
-        }
-
-        content.title = remoteContent.title;
-        content.ncode = ncode;
-        content.userid = remoteContent.userid;
-        content.story = remoteContent.story;
-        content.writer = remoteContent.writer;
-        content.novelupdated_at = remoteContent.novelupdated_at;
-    }
-    return true;
 }
 
 /// 文字列をURIエンコードします。

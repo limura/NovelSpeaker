@@ -47,7 +47,7 @@
     [self.view addGestureRecognizer:leftSwipe];
     
     self.ChapterSlider.minimumValue = 1;
-    self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue];
+    self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] - 0.5f;
     
     // 読み上げる文章を設定します。
     [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
@@ -60,38 +60,30 @@
 }
 
 /// 保存されている読み上げ位置を元に、現在の文書を設定します。
-- (BOOL)SetCurrentReadingPointFromSavedData:(NarouContentAllData*)content
+- (BOOL)SetCurrentReadingPointFromSavedData:(NarouContentCacheData*)content
 {
     if (content == nil) {
         [self SetReadingPointFailedMessage];
         return false;
     }
-    NarouContent* narouContent = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:content.ncode];
-    if (narouContent == nil) {
+    StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
+    if (story == nil) {
         [self SetReadingPointFailedMessage];
         return false;
     }
-    
-    return [self ChangeChapterWithLastestReadLocation:[narouContent.currentReadingStory.chapter_number intValue]];
+    m_CurrentReadingStory = story;
+    return [self UpdateCurrentReadingStory:m_CurrentReadingStory];
 }
 
 /// 現在の読み込み位置を保存します。
 - (void)SaveCurrentReadingPoint
 {
-    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    GlobalState* globalState = [globalData GetGlobalState];
-    Story* currentStory = [globalData SearchStory:self.NarouContentDetail.ncode chapter_no:m_CurrentChapter];
-    if (currentStory == nil) {
+    if (m_CurrentReadingStory == nil) {
         return;
     }
-    currentStory.readLocation = [[NSNumber alloc] initWithUnsignedLong: self.textView.selectedRange.location];
-    globalState.currentReadingStory = currentStory;
-    
-    NarouContent* narouContent = [globalData SearchNarouContentFromNcode:self.NarouContentDetail.ncode];
-    if (narouContent != nil) {
-        narouContent.currentReadingStory = currentStory;
-    }
-    
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:self.textView.selectedRange.location];
+    [globalData ReadingPointUpdate:self.NarouContentDetail story:m_CurrentReadingStory];
     [globalData saveContext];
 }
 
@@ -105,35 +97,46 @@
 - (void)RightSwipe:(UISwipeGestureRecognizer *)sender
 {
     [self stopSpeech];
-    [self ChangeChapterWithoutLastestReadLocation:m_CurrentChapter-1];
+    StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetPreviousChapter:m_CurrentReadingStory];
+    if (story == nil) {
+        return;
+    }
+    story.readLocation = [[NSNumber alloc] initWithInt:0];
+    [self UpdateCurrentReadingStory:story];
     [self SaveCurrentReadingPoint];
 }
 - (void)LeftSwipe:(UISwipeGestureRecognizer *)sender
 {
     [self stopSpeech];
-    [self ChangeChapterWithoutLastestReadLocation:m_CurrentChapter+1];
+    StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetNextChapter:m_CurrentReadingStory];
+    if (story == nil) {
+        return;
+    }
+    story.readLocation = [[NSNumber alloc] initWithInt:0];
+    [self UpdateCurrentReadingStory:story];
     [self SaveCurrentReadingPoint];
 }
 
-/// 読み上げる文章の章を変更します(最終読み上げ位置を無視して最初の位置から読み上げる版)
-- (BOOL)ChangeChapterWithoutLastestReadLocation:(int)chapter
+/// 読み上げる文章の章を変更します。
+- (BOOL)UpdateCurrentReadingStory:(StoryCacheData*)story
 {
-    if (chapter <= 0 || chapter > [self.NarouContentDetail.general_all_no intValue]) {
-        NSLog(@"chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)指定された値は無視して 1 が指定されたものとして動作します。", chapter, self.NarouContentDetail.general_all_no);
-        chapter = 1;
-    }
-    
-    Story* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:chapter];
     if (story == nil || story.content == nil || [story.content length] <= 0) {
         [self SetReadingPointFailedMessage];
         return false;
     }
-    [self setSpeechText:story.content range:NSMakeRange(0, 0)];
-    m_CurrentChapter = chapter;
+    if ([story.content length] < [story.readLocation intValue])
+    {
+        NSLog(@"Story に保存されている読み込み位置(%d)が Story の長さ(%lu)を超えています。0 に上書きします。", [story.readLocation intValue], (unsigned long)[story.content length]);
+        story.readLocation = [[NSNumber alloc] initWithInt:0];
+    }
+
+    [self setSpeechText:story.content range:NSMakeRange([story.readLocation intValue], 0)];
+    self.ChapterSlider.value = [story.chapter_number floatValue];
+    m_CurrentReadingStory = story;
     return true;
 }
 
-/// 読み上げる文章の章を変更します(最終読み上げ位置を保存されたものから読み出す版)
+/// 読み上げる文章の章を変更します(chapter指定版)
 - (BOOL)ChangeChapterWithLastestReadLocation:(int)chapter
 {
     if (chapter <= 0 || chapter > [self.NarouContentDetail.general_all_no intValue]) {
@@ -141,21 +144,8 @@
         chapter = 1;
     }
     
-    Story* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:chapter];
-    if (story == nil || story.content == nil || [story.content length] <= 0) {
-        [self SetReadingPointFailedMessage];
-        return false;
-    }
-    int readLocation = [story.readLocation intValue];
-    if ([story.content length] < readLocation)
-    {
-        NSLog(@"Story に保存されている読み込み位置(%d)が Story の長さ(%lu)を超えています。0 として扱います。", readLocation, [story.content length]);
-        readLocation = 0;
-    }
-    [self setSpeechText:story.content range:NSMakeRange(readLocation, 0)];
-    m_CurrentChapter = chapter;
-    self.ChapterSlider.value = chapter;
-    return true;
+    StoryCacheData* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:chapter];
+    return [self UpdateCurrentReadingStory:story];
 }
 
 /// 読み上げを開始します。
@@ -171,7 +161,7 @@
     // 読み上げ開始位置以降の文字列について、読み上げを開始します。
     startStopButton.title = @"Stop";
 
-    GlobalState* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
+    GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     [m_SpeechTextBox SetPitch:[globalState.defaultPitch floatValue]];
     [m_SpeechTextBox SetRate:[globalState.defaultRate floatValue]];
     [m_SpeechTextBox StartSpeech];
@@ -199,6 +189,7 @@
     [self.textView setText:text];
     self.textView.selectedRange = range;
     [m_SpeechTextBox SetText:text];
+    [m_SpeechTextBox SetSpeechStartPoint:range];
 }
 
 - (void)detailButtonClick:(id)sender {    

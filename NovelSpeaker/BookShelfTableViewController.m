@@ -11,6 +11,7 @@
 #import "GlobalDataSingleton.h"
 #import "SpeechViewController.h"
 #import <AVFoundation/AVFoundation.h>
+#import "BookShelfTableViewCell.h"
 
 @interface BookShelfTableViewController ()
 
@@ -40,18 +41,41 @@
     
     // 編集ボタンをつけます。
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
-    [[GlobalDataSingleton GetInstance] SetDownloadEventHandler:self];
+    
+    UIBarButtonItem* refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshButtonClick:)];
+
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:self.editButtonItem, refreshButton, nil];
+
+    // カスタマイズしたセルをテーブルビューにセット
+    UINib *nib = [UINib nibWithNibName:@"BookShelfTableViewCell" bundle:nil];
+    [self.tableView registerNib:nib forCellReuseIdentifier:@"BookShelfTableViewCell"];
+    [self.searchDisplayController.searchResultsTableView registerNib:nib forCellReuseIdentifier:@"BookShelfTableViewCell"];
+    
+    [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
 }
 
 - (void)dealloc
 {
-    [[GlobalDataSingleton GetInstance] UnsetDownloadEventHandler:self];
+    [[GlobalDataSingleton GetInstance] DeleteDownloadEventHandler:self];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)refreshButtonClick:(id)sender
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NSMutableArray* contentList = [globalData GetAllNarouContent];
+    if (contentList == nil) {
+        return;
+    }
+    for (NarouContent* content in contentList) {
+        NarouContentCacheData* contentAllData = [[NarouContentCacheData alloc] initWithCoreData:content];
+        [globalData AddDownloadQueueForNarou:contentAllData];
+    }
 }
 
 #pragma mark - Table view data source
@@ -76,24 +100,24 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // 利用できる cell があるなら再利用します
-    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
+    BookShelfTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"BookShelfTableViewCell"];
     if(cell == nil)
     {
         // 無いようなので生成します。
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"];
+        cell = [[BookShelfTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"BookShelfTableViewCell"];
     }
     
     NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
     if(contentList == nil
-       || [contentList count] < indexPath.row)
+       || [contentList count] <= indexPath.row)
     {
-        NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], indexPath.row);
-        cell.textLabel.text = @"undefined";
+        NSLog(@"indexPath.row is out of range %lu <= %ld", (unsigned long)[contentList count], (long)indexPath.row);
+        [cell initWithTitleLabel:@"unknown error" ncode:nil];
         return cell;
     }
 
     NarouContent* narouContent = (NarouContent*)contentList[indexPath.row];
-    cell.textLabel.text = [[NSString alloc] initWithFormat:@"%@", narouContent.title];
+    [cell initWithTitleLabel:narouContent.title ncode:narouContent.ncode];
     return cell;
 }
 
@@ -104,13 +128,13 @@
     if(contentList == nil
        || [contentList count] < indexPath.row)
     {
-        NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], indexPath.row);
+        NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], (long)indexPath.row);
         return;
     }
     NarouContent* narouContent = (NarouContent*)contentList[indexPath.row];
     
     // 次のビューに飛ばします。
-    m_NextViewDetail = [[NarouContentAllData alloc] initWithCoreData:narouContent];
+    m_NextViewDetail = [[NarouContentCacheData alloc] initWithCoreData:narouContent];
     [self performSegueWithIdentifier:@"bookShelfToReaderSegue" sender:self];
 }
 
@@ -126,12 +150,12 @@
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
         if(contentList == nil
-           || [contentList count] < indexPath.row)
+           || [contentList count] <= indexPath.row)
         {
-            NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], indexPath.row);
+            NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], (long)indexPath.row);
             return;
         }
-        NarouContent* content = (NarouContent*)contentList[indexPath.row];
+        NarouContentCacheData* content = contentList[indexPath.row];
         [[GlobalDataSingleton GetInstance] DeleteContent:content];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
@@ -140,7 +164,7 @@
 }
 
 // 個々の章のダウンロードが行われようとする度に呼び出されます。
-- (void)DownloadStatusUpdate:(NarouContentAllData*)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
+- (void)DownloadStatusUpdate:(NarouContentCacheData*)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
 {
     [self.tableView reloadData];
 }

@@ -7,11 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "NarouContentAllData.h"
+#import "NarouContentCacheData.h"
 
 @interface NarouSearchResultTableViewController : UITableViewController
 {
-    NarouContentAllData* m_NextViewDetail;
+    NarouContentCacheData* m_NextViewDetail;
 }
 @property NSArray* SearchResultList;
 

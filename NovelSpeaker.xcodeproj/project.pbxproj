@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
+		21724EEC1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21724EEA1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib */; };
+		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
+		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
 		217F6E1C1942F14B008E432E /* Speaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 217F6E1B1942F14B008E432E /* Speaker.m */; };
 		21B53950195C60C6009658B7 /* SpeechTextBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B5394F195C60C6009658B7 /* SpeechTextBox.m */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
@@ -25,7 +29,7 @@
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
 		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
-		21C74F9E1965A5300039A706 /* NarouContentAllData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentAllData.m */; };
+		21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
 		21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */; };
 		21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA31967FD390039A706 /* NarouDownloadQueue.m */; };
 		21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD3196831070039A706 /* DownloadStatusViewController.m */; };
@@ -63,6 +67,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
+		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
+		21724EEA1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BookShelfTableViewCell.xib; sourceTree = "<group>"; };
+		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
+		21724EEE1974163700DF6DC4 /* StoryCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoryCacheData.m; sourceTree = "<group>"; };
+		2177634F19756781004F22FD /* GlobalStateCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalStateCacheData.h; sourceTree = "<group>"; };
+		2177635019756781004F22FD /* GlobalStateCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalStateCacheData.m; sourceTree = "<group>"; };
 		217F6E1A1942F14B008E432E /* Speaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Speaker.h; sourceTree = "<group>"; };
 		217F6E1B1942F14B008E432E /* Speaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Speaker.m; sourceTree = "<group>"; };
 		21B5394E195C60C6009658B7 /* SpeechTextBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechTextBox.h; sourceTree = "<group>"; };
@@ -86,8 +97,8 @@
 		21C74F941964502A0039A706 /* arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@2x.png"; sourceTree = "<group>"; };
 		21C74F99196456490039A706 /* NarouSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchViewController.h; sourceTree = "<group>"; };
 		21C74F9A196456490039A706 /* NarouSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchViewController.m; sourceTree = "<group>"; };
-		21C74F9C1965A5300039A706 /* NarouContentAllData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContentAllData.h; sourceTree = "<group>"; };
-		21C74F9D1965A5300039A706 /* NarouContentAllData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContentAllData.m; sourceTree = "<group>"; };
+		21C74F9C1965A5300039A706 /* NarouContentCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContentCacheData.h; sourceTree = "<group>"; };
+		21C74F9D1965A5300039A706 /* NarouContentCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContentCacheData.m; sourceTree = "<group>"; };
 		21C74F9F196707B20039A706 /* NarouSearchResultDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultDetailViewController.h; sourceTree = "<group>"; };
 		21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchResultDetailViewController.m; sourceTree = "<group>"; };
 		21C74FA21967FD390039A706 /* NarouDownloadQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouDownloadQueue.h; sourceTree = "<group>"; };
@@ -161,6 +172,16 @@
 				21E294E71970E2C40012A3AA /* SettingDataModelMapping_1to2.xcmappingmodel */,
 			);
 			name = MappingModel;
+			sourceTree = "<group>";
+		};
+		21724EE51972C7B400DF6DC4 /* CustomCells */ = {
+			isa = PBXGroup;
+			children = (
+				21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */,
+				21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */,
+				21724EEA1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib */,
+			);
+			name = CustomCells;
 			sourceTree = "<group>";
 		};
 		21B53A1819619BE7009658B7 /* Resources */ = {
@@ -244,8 +265,12 @@
 				21C74FA31967FD390039A706 /* NarouDownloadQueue.m */,
 				4E776B18196247FB00C36AD1 /* NarouLoader.h */,
 				4E776B19196247FB00C36AD1 /* NarouLoader.m */,
-				21C74F9C1965A5300039A706 /* NarouContentAllData.h */,
-				21C74F9D1965A5300039A706 /* NarouContentAllData.m */,
+				2177634F19756781004F22FD /* GlobalStateCacheData.h */,
+				2177635019756781004F22FD /* GlobalStateCacheData.m */,
+				21724EED1974163700DF6DC4 /* StoryCacheData.h */,
+				21724EEE1974163700DF6DC4 /* StoryCacheData.m */,
+				21C74F9C1965A5300039A706 /* NarouContentCacheData.h */,
+				21C74F9D1965A5300039A706 /* NarouContentCacheData.m */,
 				21F054E41917E0F200CC6BA9 /* Images.xcassets */,
 				21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */,
 				21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */,
@@ -286,6 +311,7 @@
 		4E776B17196247BE00C36AD1 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				21724EE51972C7B400DF6DC4 /* CustomCells */,
 				21C74FD5196843280039A706 /* BookShelfTableViewController.h */,
 				21C74FD6196843280039A706 /* BookShelfTableViewController.m */,
 				21F054E11917E0F200CC6BA9 /* SpeechViewController.h */,
@@ -393,6 +419,7 @@
 				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
 				21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */,
 				21B53A2819619D23009658B7 /* app_globe.png in Resources */,
+				21724EEC1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib in Resources */,
 				21B53A1C19619C00009658B7 /* sound.png in Resources */,
 				21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */,
 				21F054D71917E0F200CC6BA9 /* InfoPlist.strings in Resources */,
@@ -420,18 +447,21 @@
 				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
 				21E294E81970E2C40012A3AA /* SettingDataModelMapping_1to2.xcmappingmodel in Sources */,
+				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
 				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
-				21C74F9E1965A5300039A706 /* NarouContentAllData.m in Sources */,
+				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
 				21E294EC1970E45B0012A3AA /* GlobalState.m in Sources */,
 				21E294EF1970E45B0012A3AA /* NarouContent.m in Sources */,
 				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
 				21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */,
 				21E294F21970E45C0012A3AA /* Story.m in Sources */,
+				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
+				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
 				21B53950195C60C6009658B7 /* SpeechTextBox.m in Sources */,
 				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,

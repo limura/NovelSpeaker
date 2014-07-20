@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "NarouContentAllData.h"
+#import "NarouContentCacheData.h"
 
 @interface NarouSearchResultDetailViewController : UIViewController<UIAlertViewDelegate>
 {
@@ -15,7 +15,7 @@
     BOOL m_bNeedBack;
 }
 // 前のページから得られる表示するための情報
-@property NarouContentAllData* NarouContentDetail;
+@property NarouContentCacheData* NarouContentDetail;
 
 @property (weak, nonatomic) IBOutlet UILabel *WriterLabel;
 @property (weak, nonatomic) IBOutlet UILabel *TitleLabel;

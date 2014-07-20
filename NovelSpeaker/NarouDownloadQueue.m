@@ -10,8 +10,8 @@
 #import "GlobalDataSingleton.h"
 #import "NarouLoader.h"
 #import "NarouContent.h"
-#import "NarouContentAllData.h"
-#import "Story.h"
+#import "NarouContentCacheData.h"
+#import "StoryCacheData.h"
 
 @implementation NarouDownloadQueue
 
@@ -79,7 +79,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
 
     // なんか HTML っぽかったら駄目。
     // これは連続ダウンロードで失敗したときにも引っかかるはず。
-    if ([self regexMatch:text pattern:@"^\\s*<"] == false) {
+    if ([self regexMatch:text pattern:@"^\\s*<"] == true) {
         return false;
     }
     
@@ -88,7 +88,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
 
 /// story が正しいものかどうかを判定します。
 /// ダウンロードに失敗しているなどを検出するために使います。
-- (BOOL)isValidStory:(Story*)story
+- (BOOL)isValidStory:(StoryCacheData*)story
 {
     if (story == nil) {
         return false;
@@ -137,7 +137,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     }
 }
 /// DownloadStatusUpdate イベントを発生させます。
-- (void)KickDownloadStatusUpdate:(NarouContentAllData*)content n:(int)n maxpos:(int)maxpos
+- (void)KickDownloadStatusUpdate:(NarouContentCacheData*)content n:(int)n maxpos:(int)maxpos
 {
     for (id<NarouDownloadQueueDelegate> handler in m_DownloadEventHandlerList){
         [handler DownloadStatusUpdate:content currentPosition:n maxPosition:maxpos];
@@ -154,7 +154,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         }
         [NSThread sleepForTimeInterval:0.1];
         
-        __block NarouContentAllData* targetContent = nil;
+        __block NarouContentCacheData* targetContent = nil;
         dispatch_sync(m_DownloadQueueReadWriteDispatchQueue, ^{
             if ([m_DownloadQueue count] > 0) {
                 targetContent = m_DownloadQueue[0];
@@ -179,7 +179,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
 }
 
 /// ncode のコンテンツのダウンロードを指示します。
-- (BOOL)AddDownloadQueue:(NarouContentAllData*)content
+- (BOOL)AddDownloadQueue:(NarouContentCacheData*)content
 {
     dispatch_async(m_DownloadQueueReadWriteDispatchQueue, ^{
         [m_DownloadQueue addObject:content];
@@ -188,29 +188,25 @@ static float SLEEP_TIME_SECOND = 10.5f;
 }
 
 /// ncode のコンテンツのダウンロードを開始します。
-- (BOOL)ChapterDownload:(NarouContentAllData*)localContent
+- (BOOL)ChapterDownload:(NarouContentCacheData*)localContent
 {
     NSString* downloadURL = [NarouLoader GetTextDownloadURL:localContent.ncode];
     if (downloadURL == nil) {
         NSLog(@"can not get download url for ncode: %@", localContent.ncode);
         return false;
     }
-     NarouContent* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:localContent.ncode];
-    if (content == nil) {
-        // CoreData側には content が保存されていないようなので、作成します。
-        content = [[GlobalDataSingleton GetInstance] CreateNewNarouContent];
-    }
     // 与えられた情報が最新のものなのだろうと思い込んで、CoreData側の情報を上書きします。
-    [localContent AssignToNarouContent:content];
+    [[GlobalDataSingleton GetInstance] UpdateNarouContent:localContent];
+
     // 現在ダウンロード中とするデータを copy で作っておきます。
     dispatch_async(m_MainDispatchQueue, ^{
         m_CurrentDownloadContentAllData = localContent;
         m_CurrentDownloadContentAllData.current_download_complete_count = 0;
     });
 
-    int max_content_count = [content.general_all_no intValue];
+    int max_content_count = [localContent.general_all_no intValue];
         
-    NSLog(@"download queue for %@ started max: %d", content.title, max_content_count);
+    NSLog(@"download queue for %@ started max: %d", localContent.title, max_content_count);
     for (int n = 1; n < max_content_count; n++) {
         // ダウンロード状態を更新します。
         dispatch_async(m_MainDispatchQueue, ^{
@@ -218,15 +214,21 @@ static float SLEEP_TIME_SECOND = 10.5f;
             m_CurrentDownloadContentAllData.current_download_complete_count = n;
         });
 
+        NSLog(@"Story の query をかけます。");
         // 既に読みこんであるか否かを判定します。
-        Story* story = [[GlobalDataSingleton GetInstance] SearchStory:content.ncode chapter_no:n];
+        StoryCacheData* story = [[GlobalDataSingleton GetInstance] SearchStory:localContent.ncode chapter_no:n];
+        NSLog(@"Story の query が終わりました。");
         if (story != nil) {
             // 何かデータがありました。
             if ([self isValidStory:story] == false) {
                 // 駄目なデータでした。削除して読み込みを行います。
+                NSLog(@"すでにあるデータは 駄目なデータだったので削除して読み込みを行います。(%d)", n);
+                NSLog(@"content: %p", localContent);
                 [[GlobalDataSingleton GetInstance] DeleteStory:story];
+                NSLog(@"content: %p", localContent);
             }else{
                 // 既に読み込んであるようなので読み込まないで良いことにします。
+                NSLog(@"読み込み済みなのでスキップします。%d/%d %@", n, max_content_count, localContent.title);
                 continue;
             }
         }
@@ -255,9 +257,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
             NSLog(@"text download failed. ncode: %@, download in %d/%d", localContent.ncode, n, max_content_count);
             return false;
         }
-        NSLog(@"create new story: %d, %@", n, content.title);
+        NSLog(@"create new story: %d, %@", n, localContent.title);
         // コンテンツを生成します。
-        [[GlobalDataSingleton GetInstance] CreateNewStory:content content:text chapter_number:n];
+        [[GlobalDataSingleton GetInstance] UpdateStory:text chapter_number:n parentContent:localContent];
    }
    // すべてのダウンロードが完了したら、nil で状態を更新します。
     dispatch_async(m_MainDispatchQueue, ^{
@@ -285,7 +287,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     dispatch_sync(m_DownloadQueueReadWriteDispatchQueue, ^{
         int index = -1;
         for (int i = 0; i < [m_DownloadQueue count]; i++) {
-            NarouContentAllData* content = m_DownloadQueue[i];
+            NarouContentCacheData* content = m_DownloadQueue[i];
             if ([content.ncode isEqualToString:ncode]) {
                 index = i;
                 break;
@@ -301,7 +303,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
 
 /// 現在ダウンロード中のNarouContentAllDataを取得します。
 /// 何もダウンロードしていなければ nil が帰ります。
-- (NarouContentAllData*)GetCurrentDownloadingInfo
+- (NarouContentCacheData*)GetCurrentDownloadingInfo
 {
     return m_CurrentDownloadContentAllData;
 }

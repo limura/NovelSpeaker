@@ -7,11 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "NarouContentAllData.h"
+#import "NarouContentCacheData.h"
 #import "GlobalDataSingleton.h"
 
 @interface BookShelfTableViewController : UITableViewController<NarouDownloadQueueDelegate>
 {
-    NarouContentAllData* m_NextViewDetail;
+    NarouContentCacheData* m_NextViewDetail;
 }
 @end

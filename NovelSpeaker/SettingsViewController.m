@@ -35,7 +35,7 @@
     self.defaultPitchSetting.minimumValue = 0.5f;
     self.defaultPitchSetting.maximumValue = 2.0f;
     
-    GlobalState* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
+    GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     if (globalState != nil) {
         self.defaultRateSetting.value = [globalState.defaultRate floatValue];
         self.defaultPitchSetting.value = [globalState.defaultPitch floatValue];
@@ -64,13 +64,15 @@
 */
 
 - (IBAction)DefaultRateChanged:(UISlider *)sender {
-    GlobalState* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
+    GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     globalState.defaultRate = [[NSNumber alloc] initWithFloat:sender.value];
+    [[GlobalDataSingleton GetInstance] UpdateGlobalState:globalState];
 }
 
 - (IBAction)DefaultPitchChanged:(UISlider *)sender {
-    GlobalState* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
+    GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     globalState.defaultPitch = [[NSNumber alloc] initWithFloat:sender.value];
+    [[GlobalDataSingleton GetInstance] UpdateGlobalState:globalState];
 }
 
 @end
