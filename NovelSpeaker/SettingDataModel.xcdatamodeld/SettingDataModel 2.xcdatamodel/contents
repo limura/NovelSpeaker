@@ -3,7 +3,7 @@
     <entity name="GlobalState" representedClassName="GlobalState" syncable="YES">
         <attribute name="defaultPitch" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
         <attribute name="defaultRate" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
-        <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" syncable="YES"/>
+        <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="globalStateCurrentReadingInverse" inverseEntity="Story" syncable="YES"/>
     </entity>
     <entity name="NarouContent" representedClassName="NarouContent" syncable="YES">
         <attribute name="all_hyoka_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
@@ -24,18 +24,20 @@
         <attribute name="userid" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="writer" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="childStory" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
-        <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" syncable="YES"/>
+        <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="contentCurrentReadingInverse" inverseEntity="Story" syncable="YES"/>
     </entity>
     <entity name="Story" representedClassName="Story" syncable="YES">
         <attribute name="chapter_number" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ncode" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="readLocation" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <relationship name="contentCurrentReadingInverse" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="currentReadingStory" inverseEntity="NarouContent" syncable="YES"/>
+        <relationship name="globalStateCurrentReadingInverse" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="GlobalState" inverseName="currentReadingStory" inverseEntity="GlobalState" syncable="YES"/>
         <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
     </entity>
     <elements>
         <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="90"/>
         <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="328"/>
-        <element name="Story" positionX="-81" positionY="-280" width="128" height="120"/>
+        <element name="Story" positionX="-81" positionY="-280" width="128" height="148"/>
     </elements>
 </model>

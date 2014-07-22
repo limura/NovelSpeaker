@@ -71,6 +71,7 @@
         [self SetReadingPointFailedMessage];
         return false;
     }
+    NSLog(@"set currentreading story: %@ (content: %@ %@)", story.ncode, content.ncode, content.title);
     m_CurrentReadingStory = story;
     return [self UpdateCurrentReadingStory:m_CurrentReadingStory];
 }

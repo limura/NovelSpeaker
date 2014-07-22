@@ -131,10 +131,11 @@
         NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], (long)indexPath.row);
         return;
     }
-    NarouContent* narouContent = (NarouContent*)contentList[indexPath.row];
+    NarouContentCacheData* narouContent = (NarouContentCacheData*)contentList[indexPath.row];
     
     // 次のビューに飛ばします。
-    m_NextViewDetail = [[NarouContentCacheData alloc] initWithCoreData:narouContent];
+    m_NextViewDetail = narouContent;
+    NSLog(@"next view: %@ %@", narouContent.ncode, narouContent.title);
     [self performSegueWithIdentifier:@"bookShelfToReaderSegue" sender:self];
 }
 

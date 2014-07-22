@@ -35,9 +35,6 @@
 		21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD3196831070039A706 /* DownloadStatusViewController.m */; };
 		21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD6196843280039A706 /* BookShelfTableViewController.m */; };
 		21E294E81970E2C40012A3AA /* SettingDataModelMapping_1to2.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 21E294E71970E2C40012A3AA /* SettingDataModelMapping_1to2.xcmappingmodel */; };
-		21E294EC1970E45B0012A3AA /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E294EB1970E45B0012A3AA /* GlobalState.m */; };
-		21E294EF1970E45B0012A3AA /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E294EE1970E45B0012A3AA /* NarouContent.m */; };
-		21E294F21970E45C0012A3AA /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E294F11970E45C0012A3AA /* Story.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
 		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
 		21F054D11917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
@@ -52,6 +49,9 @@
 		21F054EE1917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
 		21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21F054F41917E0F200CC6BA9 /* InfoPlist.strings */; };
 		21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */; };
+		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
+		21F7DE48197EB33A00BD2899 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE47197EB33A00BD2899 /* GlobalState.m */; };
+		21F7DE4B197EB33A00BD2899 /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE4A197EB33A00BD2899 /* NarouContent.m */; };
 		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
 		4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */; };
 /* End PBXBuildFile section */
@@ -109,12 +109,6 @@
 		21C74FD6196843280039A706 /* BookShelfTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewController.m; sourceTree = "<group>"; };
 		21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 2.xcdatamodel"; sourceTree = "<group>"; };
 		21E294E71970E2C40012A3AA /* SettingDataModelMapping_1to2.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; name = SettingDataModelMapping_1to2.xcmappingmodel; path = DataModelMapping/SettingDataModelMapping_1to2.xcmappingmodel; sourceTree = "<group>"; };
-		21E294EA1970E45B0012A3AA /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
-		21E294EB1970E45B0012A3AA /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
-		21E294ED1970E45B0012A3AA /* NarouContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NarouContent.h; path = DataModelMapping/NarouContent.h; sourceTree = "<group>"; };
-		21E294EE1970E45B0012A3AA /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
-		21E294F01970E45C0012A3AA /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Story.h; path = DataModelMapping/Story.h; sourceTree = "<group>"; };
-		21E294F11970E45C0012A3AA /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
 		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21F054CC1917E0F200CC6BA9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -134,6 +128,12 @@
 		21F054F31917E0F200CC6BA9 /* NovelSpeakerTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NovelSpeakerTests-Info.plist"; sourceTree = "<group>"; };
 		21F054F51917E0F200CC6BA9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NovelSpeakerTests.m; sourceTree = "<group>"; };
+		21F7DE43197EB33900BD2899 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Story.h; path = DataModelMapping/Story.h; sourceTree = "<group>"; };
+		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
+		21F7DE46197EB33A00BD2899 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
+		21F7DE47197EB33A00BD2899 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
+		21F7DE49197EB33A00BD2899 /* NarouContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NarouContent.h; path = DataModelMapping/NarouContent.h; sourceTree = "<group>"; };
+		21F7DE4A197EB33A00BD2899 /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
 		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
 		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
 		4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultTableViewController.h; sourceTree = "<group>"; };
@@ -203,13 +203,13 @@
 			isa = PBXGroup;
 			children = (
 				21724EE119721D3600DF6DC4 /* MappingModel */,
+				21F7DE43197EB33900BD2899 /* Story.h */,
+				21F7DE49197EB33A00BD2899 /* NarouContent.h */,
+				21F7DE4A197EB33A00BD2899 /* NarouContent.m */,
+				21F7DE46197EB33A00BD2899 /* GlobalState.h */,
+				21F7DE47197EB33A00BD2899 /* GlobalState.m */,
+				21F7DE44197EB33900BD2899 /* Story.m */,
 				21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */,
-				21E294F01970E45C0012A3AA /* Story.h */,
-				21E294F11970E45C0012A3AA /* Story.m */,
-				21E294ED1970E45B0012A3AA /* NarouContent.h */,
-				21E294EE1970E45B0012A3AA /* NarouContent.m */,
-				21E294EA1970E45B0012A3AA /* GlobalState.h */,
-				21E294EB1970E45B0012A3AA /* GlobalState.m */,
 			);
 			name = DataModel;
 			sourceTree = "<group>";
@@ -445,19 +445,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
+				21F7DE4B197EB33A00BD2899 /* NarouContent.m in Sources */,
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
+				21F7DE48197EB33A00BD2899 /* GlobalState.m in Sources */,
 				21E294E81970E2C40012A3AA /* SettingDataModelMapping_1to2.xcmappingmodel in Sources */,
+				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
 				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
-				21E294EC1970E45B0012A3AA /* GlobalState.m in Sources */,
-				21E294EF1970E45B0012A3AA /* NarouContent.m in Sources */,
 				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
 				21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */,
-				21E294F21970E45C0012A3AA /* Story.m in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,

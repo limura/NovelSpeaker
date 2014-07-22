@@ -514,8 +514,11 @@ static GlobalDataSingleton* _singleton = nil;
 /// 小説で読んでいた章を取得します
 - (StoryCacheData*)GetReadingChapter:(NarouContentCacheData*)content
 {
-    GlobalStateCacheData* globalState = [self GetGlobalState];
-    return globalState.currentReadingStory;
+    if (content == nil) {
+        return nil;
+    }
+    NarouContentCacheData* narouContent = [self SearchNarouContentFromNcode:content.ncode];
+    return narouContent.currentReadingStory;
 }
 
 /// 読み込み中の場所を指定された小説と章で更新します。
@@ -688,7 +691,7 @@ static GlobalDataSingleton* _singleton = nil;
             // ただ、これはなにかデータが壊れてるか、CoreDataの設定を書き換えたからなので、
             // リリースした後ではこの対応だとひどいです。
             // つかデータ消してるってことはユーザの履歴とか全部吹き飛んでるわけで。('A`)
-            //[[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil];
+            [[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil];
             if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error])
             {
                 NSLog(@"store cordinator add error 2th. %@, %@", error, [error userInfo]);
