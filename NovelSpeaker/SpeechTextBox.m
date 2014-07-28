@@ -27,6 +27,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     m_SpeechTextBlockStartLocation = 0;
     m_isSpeaking = false;
     m_PitchSettingList = [[NSArray alloc] init];
+    m_pDelegateArray = [NSMutableArray new];
     
     return self;
 }
@@ -36,6 +37,20 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     [m_Speaker StopSpeech];
     m_Speaker.speakRangeChangeDelegate = nil;
 }
+
+/// delegate の登録
+- (BOOL)AddDelegate:(id<SpeakTextBoxDelegate>)delegate
+{
+    [m_pDelegateArray addObject:delegate];
+    return true;
+}
+/// delegate の削除
+- (BOOL)RemoveDelegate:(id<SpeakTextBoxDelegate>)delegate
+{
+    [m_pDelegateArray removeObject:delegate];
+    return true;
+}
+
 
 /// 読み上げる文字列を初期化します
 - (BOOL) SetText: (NSString*) text
@@ -287,6 +302,14 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     [self.textView scrollRangeToVisible:currentRange];
 }
 
+/// finishSpeak delegate を呼び出します
+- (void) invokeFinishSpeakEvent
+{
+    for (id<SpeakTextBoxDelegate> delegate in m_pDelegateArray) {
+        [delegate SpeakTextBoxFinishSpeak];
+    }
+}
+
 /// Speaker からの読み上げ終了イベントを受け取ります
 - (void) finishSpeak
 {
@@ -297,6 +320,7 @@ NSString* const SPEECH_TEXT_SEPARATOR = @"\r\n";
     }
     if([self UpdateSpeechTextIndex] == false)
     {
+        [self invokeFinishSpeakEvent];
         return;
     }
     // 次があるなら読み上げを開始します。

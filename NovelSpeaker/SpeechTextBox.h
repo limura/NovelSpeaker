@@ -9,6 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "Speaker.h"
 
+@protocol SpeakTextBoxDelegate <NSObject>
+
+/// 与えられた text の読み上げが終了したことを知らせます
+- (void) SpeakTextBoxFinishSpeak;
+@end
+
 /**
  指定された文字列を読み上げます。
  ただ、小説を読むための怪しい拡張をこのclassである程度吸収させます。
@@ -46,10 +52,18 @@
     float m_DefaultRate;
     /// 読み上げに使われる標準のpitch
     float m_DefaultPitch;
+    
+    /// delegate のリスト
+    NSMutableArray* m_pDelegateArray;
 }
 
 /// textView へのlink
 @property (weak, nonatomic) UITextView *textView;
+
+/// delegate の登録
+- (BOOL)AddDelegate:(id<SpeakTextBoxDelegate>)delegate;
+/// delegate の削除
+- (BOOL)RemoveDelegate:(id<SpeakTextBoxDelegate>)delegate;
 
 /// 読み上げる文字列を初期化します
 - (BOOL) SetText: (NSString*) text;

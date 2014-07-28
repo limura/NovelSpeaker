@@ -31,6 +31,7 @@
     [m_SpeechTextBox SetDelay: 0.001];
     [m_SpeechTextBox AddPitchSetting:@"」$" pitch:1.5f];
     [m_SpeechTextBox AddPitchSetting:@"』$" pitch:1.5f];
+    [m_SpeechTextBox AddDelegate:self];
     
     // NavitationBar にボタンを配置します。
     startStopButton = [[UIBarButtonItem alloc] initWithTitle:@"Speak" style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
@@ -51,6 +52,8 @@
     
     // 読み上げる文章を設定します。
     [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+    
+    m_bIsSpeaking = NO;
 }
 
 /// 読み込みに失敗した旨を表示します。
@@ -95,27 +98,39 @@
     [self SaveCurrentReadingPoint];
 }
 
-- (void)RightSwipe:(UISwipeGestureRecognizer *)sender
+- (BOOL)SetPreviousChapter
 {
     [self stopSpeech];
     StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetPreviousChapter:m_CurrentReadingStory];
     if (story == nil) {
-        return;
+        return false;
     }
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
     [self SaveCurrentReadingPoint];
+    return true;
 }
-- (void)LeftSwipe:(UISwipeGestureRecognizer *)sender
+
+- (BOOL)SetNextChapter
 {
     [self stopSpeech];
     StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetNextChapter:m_CurrentReadingStory];
     if (story == nil) {
-        return;
+        return false;
     }
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
     [self SaveCurrentReadingPoint];
+    return true;
+}
+
+- (void)RightSwipe:(UISwipeGestureRecognizer *)sender
+{
+    [self SetPreviousChapter];
+}
+- (void)LeftSwipe:(UISwipeGestureRecognizer *)sender
+{
+    [self SetNextChapter];
 }
 
 /// 読み上げる文章の章を変更します。
@@ -174,8 +189,10 @@
 
 /// 読み上げを停止します
 - (void)stopSpeech{
-    AVAudioSession* session = [AVAudioSession sharedInstance];
-    [session setActive:false error:nil];
+    if (m_bIsSpeaking == NO) {
+        AVAudioSession* session = [AVAudioSession sharedInstance];
+        [session setActive:false error:nil];
+    }
 
     [m_SpeechTextBox StopSpeech];
     startStopButton.title = @"Speak";
@@ -201,10 +218,12 @@
     if([startStopButton.title compare:@"Speak"] == NSOrderedSame)
     {
         // 停止中だったので読み上げを開始します
+        m_bIsSpeaking = YES;
         [self startSpeech];
     }
     else
     {
+        m_bIsSpeaking = NO;
         [self stopSpeech];
     }
 }
@@ -234,5 +253,14 @@
     {
         [self setSpeechText:@"読み込みに失敗しました。" range:NSMakeRange(0,0)];
     }
+}
+
+// SpeachTextBox が読み終わった時
+- (void)SpeakTextBoxFinishSpeak
+{
+    if ([self SetNextChapter] != true) {
+        return;
+    }
+    [self startSpeech];
 }
 @end

@@ -63,16 +63,51 @@
     NSLog(@"ScrollView content size: %f,%f", self.PageScrollView.contentSize.width, self.PageScrollView.contentSize.height);
 }
 
-/*
+
 - (void)viewDidLayoutSubviews
 {
+    CGSize size;
+    size.width = self.PageScrollView.bounds.size.width;
+    size.height = 0
+    + 10 + self.TitleLabel.bounds.size.height
+    +  8 + self.WriterLabel.bounds.size.height
+    +  8 + self.KeywordLabel.bounds.size.height
+    +  8 + self.FavNovelCntLabel.bounds.size.height
+    +  8 + self.GeneralAllNoLabel.bounds.size.height
+    +  8 + self.GlobalPointLabel.bounds.size.height
+    +  8 + self.KeywordLabel.bounds.size.height
+    +  8 + self.StoryInfoLabel.bounds.size.height
+    +  8 + self.StoryTextLabel.bounds.size.height
+    +  8;
+    NSLog(@"size: w/h: %f/%f", size.width, size.height);
+    [self.PageScrollView setContentSize:size];
+
     [super viewDidLayoutSubviews];
     [self.view layoutSubviews];
+    NSLog(@"A layout SubViews ScrollView size: %f,%f", self.PageScrollView.bounds.size.width, self.PageScrollView.bounds.size.height);
+    NSLog(@"A layout SubViews ScrollView content size: %f,%f", self.PageScrollView.contentSize.width, self.PageScrollView.contentSize.height);
 
-    NSLog(@"layout SubViews ScrollView size: %f,%f", self.PageScrollView.bounds.size.width, self.PageScrollView.bounds.size.height);
-    NSLog(@"layout SubViews ScrollView content size: %f,%f", self.PageScrollView.contentSize.width, self.PageScrollView.contentSize.height);
+    size.width = self.PageScrollView.bounds.size.width;
+    size.height = 0
+    + 10 + self.TitleLabel.bounds.size.height
+    +  8 + self.WriterLabel.bounds.size.height
+    +  8 + self.KeywordLabel.bounds.size.height
+    +  8 + self.FavNovelCntLabel.bounds.size.height
+    +  8 + self.GeneralAllNoLabel.bounds.size.height
+    +  8 + self.GlobalPointLabel.bounds.size.height
+    +  8 + self.KeywordLabel.bounds.size.height
+    +  8 + self.StoryInfoLabel.bounds.size.height
+    +  8 + self.StoryTextLabel.bounds.size.height
+    +  8;
+    NSLog(@"size: w/h: %f/%f", size.width, size.height);
+    [self.PageScrollView setContentSize:size];
+    
+    [super viewDidLayoutSubviews];
+    [self.view layoutSubviews];
+    NSLog(@"B layout SubViews ScrollView size: %f,%f", self.PageScrollView.bounds.size.width, self.PageScrollView.bounds.size.height);
+    NSLog(@"B layout SubViews ScrollView content size: %f,%f", self.PageScrollView.contentSize.width, self.PageScrollView.contentSize.height);
+
 }
- */
 
 - (void)didReceiveMemoryWarning
 {

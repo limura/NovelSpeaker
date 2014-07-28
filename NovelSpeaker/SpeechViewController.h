@@ -13,7 +13,7 @@
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
 
-@interface SpeechViewController : UIViewController
+@interface SpeechViewController : UIViewController<SpeakTextBoxDelegate>
 {
     NSInteger m_SpeechStartPosition;
     SpeechTextBox* m_SpeechTextBox;
@@ -21,6 +21,7 @@
     UIBarButtonItem* detailButton;
     int m_CurrentChapter;
     StoryCacheData* m_CurrentReadingStory;
+    BOOL m_bIsSpeaking;
 }
 @property (weak, nonatomic) IBOutlet UISlider *ChapterSlider;
 @property (weak, nonatomic) IBOutlet UITextView *textView;

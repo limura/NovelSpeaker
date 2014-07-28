@@ -27,5 +27,6 @@
 @property (weak, nonatomic) IBOutlet UILabel *PointLabel;
 @property (weak, nonatomic) IBOutlet UILabel *KeywordLabel;
 @property (weak, nonatomic) IBOutlet UILabel *StoryTextLabel;
+@property (weak, nonatomic) IBOutlet UILabel *StoryInfoLabel;
 @property (weak, nonatomic) IBOutlet UIScrollView *PageScrollView;
 @end
