@@ -25,6 +25,7 @@
     
     return self;
 }
+
 /// 自分の持つ情報を CoreData側 に書き込みます。
 - (BOOL)AssignToCoreData: (GlobalState*)coreDataState
 {

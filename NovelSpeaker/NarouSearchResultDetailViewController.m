@@ -63,7 +63,7 @@
     NSLog(@"ScrollView content size: %f,%f", self.PageScrollView.contentSize.width, self.PageScrollView.contentSize.height);
 }
 
-
+/*
 - (void)viewDidLayoutSubviews
 {
     CGSize size;
@@ -108,6 +108,7 @@
     NSLog(@"B layout SubViews ScrollView content size: %f,%f", self.PageScrollView.contentSize.width, self.PageScrollView.contentSize.height);
 
 }
+ */
 
 - (void)didReceiveMemoryWarning
 {

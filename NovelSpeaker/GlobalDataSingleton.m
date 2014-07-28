@@ -110,7 +110,33 @@ static GlobalDataSingleton* _singleton = nil;
     __block BOOL result = false;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         GlobalState* state = [self GetCoreDataGlobalStateThreadUnsafe];
-        result = [globalState AssignToCoreData:state];
+
+        state.defaultPitch = globalState.defaultPitch;
+        state.defaultRate = globalState.defaultRate;
+        
+        if (globalState.currentReadingStory == nil) {
+            state.currentReadingStory = nil;
+            result = true;
+            return;
+        }
+        
+        GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+        NarouContent* content = [globalData SearchCoreDataNarouContentFromNcodeThreadUnsafe:globalState.currentReadingStory.ncode];
+        if (content == nil) {
+            state.currentReadingStory = nil;
+            result = false;
+            return;
+        }
+        Story* story = [self SearchCoreDataStoryThreadUnsafe:globalState.currentReadingStory.ncode chapter_no:[globalState.currentReadingStory.chapter_number intValue]];
+        if (story == nil) {
+            state.currentReadingStory = nil;
+            content.currentReadingStory = nil;
+        }else{
+            story.readLocation = globalState.currentReadingStory.readLocation;
+            state.currentReadingStory = story;
+            content.currentReadingStory = story;
+        }
+        result = true;
     });
     return result;
 }
