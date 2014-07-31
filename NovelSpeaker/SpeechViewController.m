@@ -31,6 +31,8 @@
     [m_SpeechTextBox SetDelay: 0.001];
     [m_SpeechTextBox AddPitchSetting:@"」$" pitch:1.5f];
     [m_SpeechTextBox AddPitchSetting:@"』$" pitch:1.5f];
+    [m_SpeechTextBox AddPitchSetting:@"^「" pitch:1.5f];
+    [m_SpeechTextBox AddPitchSetting:@"^『" pitch:1.5f];
     [m_SpeechTextBox AddDelegate:self];
     
     // NavitationBar にボタンを配置します。
