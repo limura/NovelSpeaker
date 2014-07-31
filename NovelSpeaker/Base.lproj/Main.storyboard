@@ -612,41 +612,41 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="ダウンロード" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="F6g-5M-6q0">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ダウンロード" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="F6g-5M-6q0">
                                 <rect key="frame" x="20" y="34" width="280" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DG3-7G-4Ll">
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DG3-7G-4Ll">
                                 <rect key="frame" x="20" y="125" width="212" height="2"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </progressView>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="ダウンロード中のものはありません" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="s4M-39-dxp">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ダウンロード中のものはありません" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="280" translatesAutoresizingMaskIntoConstraints="NO" id="s4M-39-dxp">
                                 <rect key="frame" x="20" y="74" width="280" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="0/0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uPW-20-0nL">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="0/0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uPW-20-0nL">
                                 <rect key="frame" x="240" y="115" width="73" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="error label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E6Q-tH-I2D">
-                                <rect key="frame" x="20" y="156" width="275" height="21"/>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="error label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="280" translatesAutoresizingMaskIntoConstraints="NO" id="E6Q-tH-I2D">
+                                <rect key="frame" x="20" y="156" width="280" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="Hmy-c2-vHv">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="Hmy-c2-vHv">
                                 <rect key="frame" x="9" y="224" width="304" height="284"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </tableView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OE6-pb-ts4">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OE6-pb-ts4">
                                 <rect key="frame" x="247" y="191" width="53" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Edit">
@@ -655,6 +655,28 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="E6Q-tH-I2D" firstAttribute="top" secondItem="uPW-20-0nL" secondAttribute="bottom" constant="20" id="1Wk-9Z-KOV"/>
+                            <constraint firstItem="DG3-7G-4Ll" firstAttribute="leading" secondItem="kLg-U0-U0f" secondAttribute="leading" constant="20" id="3rS-Wy-Jah"/>
+                            <constraint firstItem="Hmy-c2-vHv" firstAttribute="leading" secondItem="kLg-U0-U0f" secondAttribute="leading" constant="9" id="9jd-YJ-6xu"/>
+                            <constraint firstAttribute="trailing" secondItem="s4M-39-dxp" secondAttribute="trailing" constant="20" id="B2Z-cD-hhS"/>
+                            <constraint firstAttribute="trailing" secondItem="DG3-7G-4Ll" secondAttribute="trailing" constant="88" id="Clx-Vy-vBo"/>
+                            <constraint firstItem="DG3-7G-4Ll" firstAttribute="top" secondItem="s4M-39-dxp" secondAttribute="bottom" constant="30" id="JkW-Oa-lkj"/>
+                            <constraint firstItem="Hmy-c2-vHv" firstAttribute="top" secondItem="OE6-pb-ts4" secondAttribute="bottom" constant="3" id="Qnr-Jk-gnH"/>
+                            <constraint firstItem="OE6-pb-ts4" firstAttribute="top" secondItem="E6Q-tH-I2D" secondAttribute="bottom" constant="14" id="YjD-qN-Agn"/>
+                            <constraint firstAttribute="trailing" secondItem="Hmy-c2-vHv" secondAttribute="trailing" constant="7" id="Z4Y-hO-CAc"/>
+                            <constraint firstItem="F6g-5M-6q0" firstAttribute="leading" secondItem="kLg-U0-U0f" secondAttribute="leading" constant="20" id="cwu-dD-XlB"/>
+                            <constraint firstAttribute="trailing" secondItem="OE6-pb-ts4" secondAttribute="trailing" constant="20" id="e2y-Lr-vvw"/>
+                            <constraint firstItem="zBX-QX-sFZ" firstAttribute="top" secondItem="Hmy-c2-vHv" secondAttribute="bottom" constant="11" id="ehT-6U-W72"/>
+                            <constraint firstItem="E6Q-tH-I2D" firstAttribute="leading" secondItem="kLg-U0-U0f" secondAttribute="leading" constant="20" id="hxb-7t-Vmy"/>
+                            <constraint firstItem="uPW-20-0nL" firstAttribute="top" secondItem="s4M-39-dxp" secondAttribute="bottom" constant="20" id="iQn-af-SVe"/>
+                            <constraint firstItem="s4M-39-dxp" firstAttribute="top" secondItem="F6g-5M-6q0" secondAttribute="bottom" constant="19" id="kh5-N7-cjz"/>
+                            <constraint firstAttribute="trailing" secondItem="uPW-20-0nL" secondAttribute="trailing" constant="7" id="lF3-Xe-r5Q"/>
+                            <constraint firstAttribute="trailing" secondItem="E6Q-tH-I2D" secondAttribute="trailing" constant="20" id="puI-Ou-44V"/>
+                            <constraint firstItem="s4M-39-dxp" firstAttribute="leading" secondItem="kLg-U0-U0f" secondAttribute="leading" constant="20" id="qTS-Qy-A1f"/>
+                            <constraint firstItem="F6g-5M-6q0" firstAttribute="top" secondItem="cpY-Qj-Zuh" secondAttribute="bottom" constant="14" id="ugs-y7-M3j"/>
+                            <constraint firstAttribute="trailing" secondItem="F6g-5M-6q0" secondAttribute="trailing" constant="20" id="yfu-Xv-fjO"/>
+                        </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="ダウンロード状態" image="arrow_down.png" id="Z25-tO-3hh"/>
                     <connections>
