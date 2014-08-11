@@ -8,6 +8,7 @@
 
 #import "GlobalDataSingleton.h"
 #import <AVFoundation/AVFoundation.h>
+#import <MediaPlayer/MediaPlayer.h>
 #import "NarouLoader.h"
 #import "NarouDownloadQueue.h"
 
@@ -29,7 +30,24 @@ static GlobalDataSingleton* _singleton = nil;
     m_CoreDataAccessQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.coredataaccess", NULL);
 
     m_DownloadQueue = [NarouDownloadQueue new];
-    
+
+    /// NiftySpeaker は default config が必要です。
+    SpeechConfig* speechConfig = [SpeechConfig new];
+    GlobalState* globalState = [self GetCoreDataGlobalStateThreadUnsafe];
+    speechConfig.pitch = [globalState.defaultPitch floatValue];
+    speechConfig.rate = [globalState.defaultRate floatValue];
+    speechConfig.beforeDelay = 0.0f;
+    m_NiftySpeaker = [[NiftySpeaker alloc] initWithSpeechConfig:speechConfig];;
+    [self InitializeNiftySpeaker];
+
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    NSError* err = nil;
+    [session setCategory:AVAudioSessionCategoryPlayback error:&err];
+    if (err) {
+        NSLog(@"AVAudioSessionCategoryPlayback set failed. %@ %@", err, err.userInfo);
+    }
+    [session setActive:NO error:nil];
+
     return self;
 }
 
@@ -51,6 +69,36 @@ static GlobalDataSingleton* _singleton = nil;
         [_singleton InitializeData];
     });
     return _singleton;
+}
+
+/// NiftySpeaker を初期化します
+- (void) InitializeNiftySpeaker
+{
+    SpeechConfig* normalSpeakConfig = [SpeechConfig new];
+    normalSpeakConfig.pitch = 1.5f;
+    normalSpeakConfig.rate = 0.5f;
+    SpeechConfig* specialSpeakConfig = [SpeechConfig new];
+    specialSpeakConfig.pitch = 1.2f;
+    specialSpeakConfig.rate = 0.5;
+    
+    [m_NiftySpeaker AddBlockStartSeparator:@"「" endString:@"」" speechConfig:normalSpeakConfig];
+    [m_NiftySpeaker AddBlockStartSeparator:@"『" endString:@"』" speechConfig:specialSpeakConfig];
+    [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02f];
+    //[m_NiftySpeaker AddDelayBlockSeparator:@"\n\n" delay:0.1f];
+    //[m_NiftySpeaker AddDelayBlockSeparator:@"。" delay:0.1f];
+    [m_NiftySpeaker AddSpeechModText:@"異世界" to:@"イセカイ"];
+    [m_NiftySpeaker AddSpeechModText:@"術師" to:@"ジュツシ"];
+    [m_NiftySpeaker AddSpeechModText:@"美味い" to:@"うまい"];
+    [m_NiftySpeaker AddSpeechModText:@"照ら" to:@"てら"];
+    [m_NiftySpeaker AddSpeechModText:@"〜" to:@"ー"];
+    //[m_NiftySpeaker AddSpeechModText:@"身体" to:@"からだ"];
+    [m_NiftySpeaker AddSpeechModText:@"真っ暗" to:@"まっくら"];
+    [m_NiftySpeaker AddSpeechModText:@"行って" to:@"いって"];
+    [m_NiftySpeaker AddSpeechModText:@"行く" to:@"いく"];
+    [m_NiftySpeaker AddSpeechModText:@"小柄" to:@"こがら"];
+
+    [m_NiftySpeaker AddSpeechModText:@"直継" to:@"ナオツグ"];
+    [m_NiftySpeaker AddSpeechModText:@"にゃん太" to:@"にゃんた"];
 }
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
@@ -606,6 +654,89 @@ static GlobalDataSingleton* _singleton = nil;
         }
     });
     return result;
+}
+
+- (void)UpdatePlayingInfo:(StoryCacheData*)story
+{
+    NSString* titleName = @"再生していません";
+    NSString* artist = @"-";
+    
+    if (story != nil) {
+        NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:story.ncode];
+        if (content != nil) {
+            artist = content.writer;
+            titleName = [[NSString alloc] initWithFormat:@"%@ (%d/%d)", content.title, [story.chapter_number intValue], [content.general_all_no intValue]];
+        }
+    }
+    
+    NSMutableDictionary* songInfo = [NSMutableDictionary new];
+    [songInfo setObject:titleName forKey:MPMediaItemPropertyTitle];
+    [songInfo setObject:artist forKey:MPMediaItemPropertyArtist];
+    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:songInfo];
+}
+
+/// 読み上げる文書を設定します。
+- (BOOL)SetSpeechStory:(StoryCacheData *)story
+{
+    if(![m_NiftySpeaker SetText:story.content])
+    {
+        return false;
+    }
+    [self UpdatePlayingInfo:story];
+    NSRange range = NSMakeRange([story.readLocation unsignedLongValue], 0);
+    return [m_NiftySpeaker UpdateCurrentReadingPoint:range];
+}
+
+/// 読み上げ位置を設定します。
+- (BOOL)SetSpeechRange:(NSRange)range
+{
+    return [m_NiftySpeaker UpdateCurrentReadingPoint:range];
+}
+
+/// 現在の読み上げ位置を取り出します
+- (NSRange)GetCurrentReadingPoint
+{
+    return [m_NiftySpeaker GetCurrentReadingPoint];
+}
+
+/// 読み上げを開始します。
+- (BOOL)StartSpeech
+{
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    NSError* err;
+    NSLog(@"setActive YES.");
+    [session setActive:YES error:&err];
+    if (err != nil) {
+        NSLog(@"setActive error: %@ %@", err, err.userInfo);
+    }
+    return [m_NiftySpeaker StartSpeech];
+}
+
+/// 読み上げを停止します。
+- (BOOL)StopSpeech
+{
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    NSLog(@"setActive NO.");
+    [session setActive:NO error:nil];
+    return [m_NiftySpeaker StopSpeech];
+}
+
+/// 読み上げ時のイベントハンドラを追加します。
+- (BOOL)AddSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate
+{
+    return [m_NiftySpeaker AddSpeakRangeDelegate:delegate];
+}
+
+/// 読み上げ時のイベントハンドラを削除します。
+- (void)DeleteSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate
+{
+    return [m_NiftySpeaker DeleteSpeakRangeDelegate:delegate];
+}
+
+/// 読み上げ中か否かを取得します
+- (BOOL)isSpeaking
+{
+    return [m_NiftySpeaker isSpeaking];
 }
 
 

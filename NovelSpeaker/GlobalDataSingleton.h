@@ -14,6 +14,7 @@
 #import "StoryCacheData.h"
 #import "NarouDownloadQueue.h"
 #import "GlobalStateCacheData.h"
+#import "NiftySpeaker.h"
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -31,6 +32,9 @@
     NarouDownloadQueue* m_DownloadQueue;
     // コンテンツダウンロードを終了するべきかどうかのbool値
     //bool m_isNeedQuit;
+    
+    // 読み上げを管理します。
+    NiftySpeaker* m_NiftySpeaker;
 }
 
 /// シングルトンを取得します。
@@ -138,5 +142,29 @@
 /// 前の章を読み出します。
 /// 前の章がなければ nil を返します。
 - (StoryCacheData*)GetPreviousChapter:(StoryCacheData*)story;
+
+/// 読み上げる章を設定します。
+- (BOOL)SetSpeechStory:(StoryCacheData*)story;
+
+/// 読み上げ位置を設定します。
+- (BOOL)SetSpeechRange:(NSRange)range;
+
+/// 現在の読み上げ位置を取り出します
+- (NSRange)GetCurrentReadingPoint;
+
+/// 読み上げを開始します。
+- (BOOL)StartSpeech;
+
+/// 読み上げを停止します。
+- (BOOL)StopSpeech;
+
+/// 読み上げ時のイベントハンドラを追加します。
+- (BOOL)AddSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate;
+
+/// 読み上げ時のイベントハンドラを削除します。
+- (void)DeleteSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate;
+
+/// 読み上げ中か否かを取得します
+- (BOOL)isSpeaking;
 
 @end

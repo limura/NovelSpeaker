@@ -14,8 +14,8 @@
 		21724EEC1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21724EEA1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
+		217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 217E683A1998F6A000C656AA /* MediaPlayer.framework */; };
 		217F6E1C1942F14B008E432E /* Speaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 217F6E1B1942F14B008E432E /* Speaker.m */; };
-		21B53950195C60C6009658B7 /* SpeechTextBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B5394F195C60C6009658B7 /* SpeechTextBox.m */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
 		21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -83,10 +83,9 @@
 		21724EEE1974163700DF6DC4 /* StoryCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoryCacheData.m; sourceTree = "<group>"; };
 		2177634F19756781004F22FD /* GlobalStateCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalStateCacheData.h; sourceTree = "<group>"; };
 		2177635019756781004F22FD /* GlobalStateCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalStateCacheData.m; sourceTree = "<group>"; };
+		217E683A1998F6A000C656AA /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		217F6E1A1942F14B008E432E /* Speaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Speaker.h; sourceTree = "<group>"; };
 		217F6E1B1942F14B008E432E /* Speaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Speaker.m; sourceTree = "<group>"; };
-		21B5394E195C60C6009658B7 /* SpeechTextBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechTextBox.h; sourceTree = "<group>"; };
-		21B5394F195C60C6009658B7 /* SpeechTextBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechTextBox.m; sourceTree = "<group>"; };
 		21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechRegexPitchSetting.h; sourceTree = "<group>"; };
 		21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechRegexPitchSetting.m; sourceTree = "<group>"; };
 		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
@@ -154,6 +153,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */,
 				21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */,
 				21B539F819603737009658B7 /* CoreData.framework in Frameworks */,
 				21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */,
@@ -180,8 +180,6 @@
 			children = (
 				217F6E1A1942F14B008E432E /* Speaker.h */,
 				217F6E1B1942F14B008E432E /* Speaker.m */,
-				21B5394E195C60C6009658B7 /* SpeechTextBox.h */,
-				21B5394F195C60C6009658B7 /* SpeechTextBox.m */,
 				211BA5F619973BA500560842 /* SpeechBlock.h */,
 				211BA5F719973BA500560842 /* SpeechBlock.m */,
 				211BA5F919973CFB00560842 /* SpeechConfig.h */,
@@ -262,6 +260,7 @@
 		21F054CB1917E0F200CC6BA9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				217E683A1998F6A000C656AA /* MediaPlayer.framework */,
 				21B539F9196037BB009658B7 /* AVFoundation.framework */,
 				21B539F719603737009658B7 /* CoreData.framework */,
 				21F054CC1917E0F200CC6BA9 /* Foundation.framework */,
@@ -486,7 +485,6 @@
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
 				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
-				21B53950195C60C6009658B7 /* SpeechTextBox.m in Sources */,
 				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
 				21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */,

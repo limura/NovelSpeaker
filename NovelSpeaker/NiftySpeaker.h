@@ -13,7 +13,7 @@
 /// 「イイカンジ」の読み上げclass
 /// 与えられた文字列を、読み上げの声色や区切り毎で分割した
 /// SpeechBlock の配列に変換してから読み上げを行う。
-@interface NiftySpeaker : NSObject<SpeakRangeDelegate>
+@interface NiftySpeaker : NSObject<SpeakRangeDelegate, AVAudioSessionDelegate>
 {
     /// 読み上げ用object
     Speaker* m_Speaker;
@@ -42,13 +42,12 @@
     /// 現在読み上げている m_SpeechBlockArray における、speakText での読み上げ位置
     NSRange m_NowSpeechBlockSpeachRange;
     
-    /// 読み上げを開始したときに読み上げ位置がズレていた場合のズレ
-    NSRange m_SpeakAdjustRange;
+    // delegate を保存します。
+    NSMutableArray* m_SpeakRangeDelegateArray;
 }
 
-/// delegate プロパティ
-@property (nonatomic, assign) id<SpeakRangeDelegate> speakRangeChangeDelegate;
-
+/// GlobalDataSingletonを使わない初期化
+- (id)initWithSpeechConfig:(SpeechConfig*)speechConfig;
 
 /// 読み上げ用の文字列を設定します。同時に SpeechBlock への変換が走ります。
 - (BOOL)SetText:(NSString*)text;
@@ -77,5 +76,14 @@
 
 /// 読み上げ位置を指定した座標に更新します。
 - (BOOL)UpdateCurrentReadingPoint:(NSRange)point;
+
+/// 読み上げ時のイベントハンドラを追加します。
+- (BOOL)AddSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate;
+
+/// 読み上げ時のイベントハンドラを削除します。
+- (void)DeleteSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate;
+
+/// 読み上げ中か否かを取得します
+- (BOOL)isSpeaking;
 
 @end

@@ -77,36 +77,4 @@
     [[GlobalDataSingleton GetInstance] UpdateGlobalState:globalState];
 }
 
-NiftySpeaker* g_Speaker;
-
-- (IBAction)testButtonClicked:(id)sender {
-    g_Speaker = [NiftySpeaker new];
-    SpeechConfig* speakConfig = [SpeechConfig new];
-    speakConfig.pitch = 1.5f;
-    speakConfig.rate = 0.5f;
-    [g_Speaker AddBlockStartSeparator:@"「" endString:@"」" speechConfig:speakConfig];
-    [g_Speaker AddBlockStartSeparator:@"『" endString:@"』" speechConfig:speakConfig];
-    [g_Speaker AddDelayBlockSeparator:@"\n\n" delay:0.1f];
-    [g_Speaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.1f];
-    //[speaker AddDelayBlockSeparator:@"。" delay:0.1f];
-    [g_Speaker AddSpeechModText:@"異世界" to:@"イセカイ"];
-    [g_Speaker AddSpeechModText:@"直継" to:@"ナオツグ"];
-    [g_Speaker AddSpeechModText:@"術師" to:@"ジュツシ"];
-    //[g_Speaker AddSpeechModText:@"辛い" to:@"ツライ"];
-    //[g_Speaker AddSpeechModText:@"辛く" to:@"ツラク"];
-    
-    NSString* text = @"異世界の始まり\n"
-    @"「なんで直継がいるんだ？」\n"
-    @"突然炎の剣が振るわれた。\n"
-    @"\n"
-    @"（身体は思い通りに動く。……違和感があるのは、手足のサイズが微妙に違うせいみたいだな……。大きい差じゃなくて良かったけど）\n"
-    @"\n"
-    @"目の前に広がっているのはアキバの街。\n"
-    @"「これは辛くて辛いな」シロエは直継に言った。\n"
-    ;
-    
-    [g_Speaker SetText:text];
-    [g_Speaker StartSpeech];
-}
-
 @end

@@ -48,7 +48,7 @@ typedef enum {
     if (self == nil) {
         return self;
     }
-    
+
     m_Speaker = [Speaker new];
     m_Speaker.speakRangeChangeDelegate = self;
     
@@ -57,8 +57,8 @@ typedef enum {
     m_DelaySettingArray = [NSMutableArray new];
     m_SpeechModDictionary = [NSMutableDictionary new];
 
-    GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     m_DefaultSpeechConfig = [SpeechConfig new];
+    GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     m_DefaultSpeechConfig.pitch = [globalState.defaultPitch floatValue];
     m_DefaultSpeechConfig.rate = [globalState.defaultRate floatValue];
     m_DefaultSpeechConfig.beforeDelay = 0.0f;
@@ -67,6 +67,38 @@ typedef enum {
     m_NowSpeechBlockIndex = 0;
     m_NowSpeechBlockSpeachRange.location = 0;
     m_NowSpeechBlockSpeachRange.length = 0;
+    
+    m_SpeakRangeDelegateArray = [NSMutableArray new];
+    
+    return self;
+}
+
+- (id)initWithSpeechConfig:(SpeechConfig*)speechConfig
+{
+    self = [super init];
+    if (self == nil) {
+        return self;
+    }
+    
+    m_Speaker = [Speaker new];
+    m_Speaker.speakRangeChangeDelegate = self;
+    
+    m_SpeechBlockArray = nil;
+    m_BlockSeparatorArray = [NSMutableArray new];
+    m_DelaySettingArray = [NSMutableArray new];
+    m_SpeechModDictionary = [NSMutableDictionary new];
+    
+    m_DefaultSpeechConfig = [SpeechConfig new];
+    m_DefaultSpeechConfig.pitch = speechConfig.pitch;
+    m_DefaultSpeechConfig.rate = speechConfig.rate;
+    m_DefaultSpeechConfig.beforeDelay = speechConfig.beforeDelay;
+    
+    m_bIsSpeaking = false;
+    m_NowSpeechBlockIndex = 0;
+    m_NowSpeechBlockSpeachRange.location = 0;
+    m_NowSpeechBlockSpeachRange.length = 0;
+    
+    m_SpeakRangeDelegateArray = [NSMutableArray new];
     
     return self;
 }
@@ -325,7 +357,6 @@ typedef enum {
     NSString* speakText = [currentBlock GetSpeechText];
     NSRange targetRange = NSMakeRange(m_NowSpeechBlockSpeachRange.location, [speakText length] - m_NowSpeechBlockSpeachRange.location);
     speakText = [speakText substringWithRange:targetRange];
-    m_SpeakAdjustRange = targetRange;
     [m_Speaker SetRate:currentBlock.speechConfig.rate];
     [m_Speaker SetPitch:currentBlock.speechConfig.pitch];
     [m_Speaker SetDelay:currentBlock.speechConfig.beforeDelay];
@@ -345,7 +376,7 @@ typedef enum {
 {
     m_bIsSpeaking = false;
     [m_Speaker StopSpeech];
-    return false;
+    return true;
 }
 
 /// 現在の読み上げ位置を取得します
@@ -400,6 +431,32 @@ typedef enum {
     return true;
 }
 
+/// 読み上げ時のイベントハンドラを追加します。
+- (BOOL)AddSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate
+{
+    if (delegate == nil) {
+        return false;
+    }
+    if ([m_SpeakRangeDelegateArray containsObject:delegate]) {
+        return true;
+    }
+    [m_SpeakRangeDelegateArray addObject:delegate];
+    return true;
+}
+
+/// 読み上げ時のイベントハンドラを削除します。
+- (void)DeleteSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate
+{
+    [m_SpeakRangeDelegateArray removeObject:delegate];
+}
+
+/// 読み上げ中か否かを取得します
+- (BOOL)isSpeaking
+{
+    return m_bIsSpeaking;
+}
+
+
 /// 読み上げの位置が変わりますよのイベントハンドラ
 /// 自分の delegate に向けて投げなおす。
 - (void) willSpeakRange:(NSRange)range speakText:(NSString*)text
@@ -410,10 +467,19 @@ typedef enum {
     SpeechBlock* currentBlock = [m_SpeechBlockArray objectAtIndex:m_NowSpeechBlockIndex];
     
     NSRange adjustedRange = range;
-    adjustedRange.location += m_SpeakAdjustRange.location;
+    adjustedRange.location += m_NowSpeechBlockSpeachRange.location;
     NSRange displayRange = [currentBlock ConvertSpeakRangeToDisplayRange:adjustedRange];
+    // ここまでで、displayRange に現在読み上げているブロックの location が入っているはず。
+    // ということで、これより前のブロックの長さを加える。
+    for (int i = 0; i < m_NowSpeechBlockIndex; i++) {
+        SpeechBlock* block = [m_SpeechBlockArray objectAtIndex:i];
+        NSString* text = [block GetDisplayText];
+        displayRange.location += [text length];
+    }
     NSString* displayText = [currentBlock GetDisplayText];
-    [self.speakRangeChangeDelegate willSpeakRange:displayRange speakText:displayText];
+    for (id<SpeakRangeDelegate> delegate in m_SpeakRangeDelegateArray) {
+        [delegate willSpeakRange:displayRange speakText:displayText];
+    }
 }
 
 /// 次の SpeechBlock を読み上げ用に設定します。
@@ -440,10 +506,30 @@ typedef enum {
     }
     if (![self SetNextSpeechBlock]) {
         // 与えられた分の読み上げが終了したので終了イベントを投げます。
-        [self.speakRangeChangeDelegate finishSpeak];
+        for (id<SpeakRangeDelegate> delegate in m_SpeakRangeDelegateArray) {
+            [delegate finishSpeak];
+        }
         return;
     }
     // 次のblockの読み上げを開始します。
+    [self StartSpeech];
+}
+
+#pragma mark -
+#pragma mark Interruption event handling
+// 電話がかかってきたなどで再生中止したときの処理(再生は既に中止されている)
+- (void)beginInterruption
+{
+    // 一応止める。(m_bIsSpeaking はいじらない)
+    //[m_Speaker StopSpeech];
+}
+
+// 電話がかかってきたなどでの再生再開時の処理
+- (void)endInterruptionWithFlags:(NSUInteger)flags
+{
+    if (!m_bIsSpeaking) {
+        return;
+    }
     [self StartSpeech];
 }
 

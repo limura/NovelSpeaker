@@ -73,16 +73,6 @@
                                             <segue destination="NmR-c8-ccH" kind="push" id="pYR-F2-52c"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="q3u-o5-qAL">
-                                        <rect key="frame" x="145" y="125" width="30" height="30"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <state key="normal" title="test">
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                        </state>
-                                        <connections>
-                                            <action selector="testButtonClicked:" destination="aeS-Iv-UfJ" eventType="touchUpInside" id="oWR-rG-7ST"/>
-                                        </connections>
-                                    </button>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="etG-2W-MQz" firstAttribute="leading" secondItem="apF-6v-z2p" secondAttribute="leading" constant="20" id="1bT-eX-ff5"/>

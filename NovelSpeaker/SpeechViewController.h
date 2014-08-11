@@ -9,14 +9,13 @@
 #import <UIKit/UIKit.h>
 #import <CoreData/CoreData.h>
 #import "Speaker.h"
-#import "SpeechTextBox.h"
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
+#import "Speaker.h"
 
-@interface SpeechViewController : UIViewController<SpeakTextBoxDelegate>
+@interface SpeechViewController : UIViewController<SpeakRangeDelegate>
 {
     NSInteger m_SpeechStartPosition;
-    SpeechTextBox* m_SpeechTextBox;
     UIBarButtonItem* startStopButton;
     UIBarButtonItem* detailButton;
     int m_CurrentChapter;

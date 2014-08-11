@@ -79,7 +79,7 @@
     unsigned long displayP = 0;
     unsigned long speechP = 0;
     NSRange result;
-    result.length = 0;
+    result.length = range.length;
     result.location = NSNotFound;
     for (FakeSpeechText* fakeText in m_FakeSpeechTextArray) {
         unsigned long speechTextLength = [fakeText.speechText length];
@@ -88,16 +88,21 @@
                  // 同じ文字列(同じ長さ)なので、一応その長さまでずらした値を返します。
                 unsigned long diffLength = range.location - speechP;
                 result.location = displayP + diffLength;
-                result.length = speechTextLength - diffLength;
+                if (result.length > speechTextLength - diffLength) {
+                    result.length = speechTextLength - diffLength;
+                }
                 break;
             }
-            result.length = [fakeText.displayText length];
+            if (result.length > [fakeText.displayText length] - displayP) {
+                result.length = [fakeText.displayText length] - displayP;
+            }
             result.location = displayP;
             break;
         }
         speechP += speechTextLength;
         displayP += [fakeText.displayText length];
     }
+    
     return result;
 }
 
