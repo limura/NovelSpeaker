@@ -41,7 +41,7 @@
     utterance.pitchMultiplier = m_Pitch;
     utterance.postUtteranceDelay = m_Interval;
     
-    NSLog(@"rate: %f, pitch: %f, text: %@", m_Rate, m_Pitch, text);
+    //NSLog(@"rate: %f, pitch: %f, text: %@", m_Rate, m_Pitch, text);
     [m_Synthesizer speakUtterance:utterance];
     
     return TRUE;

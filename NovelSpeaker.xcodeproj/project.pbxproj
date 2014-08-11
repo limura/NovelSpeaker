@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		211BA5F819973BA500560842 /* SpeechBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5F719973BA500560842 /* SpeechBlock.m */; };
+		211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FA19973CFB00560842 /* SpeechConfig.m */; };
+		211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FD199742CF00560842 /* NiftySpeaker.m */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEC1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21724EEA1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
@@ -67,6 +70,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		211BA5F619973BA500560842 /* SpeechBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechBlock.h; sourceTree = "<group>"; };
+		211BA5F719973BA500560842 /* SpeechBlock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechBlock.m; sourceTree = "<group>"; };
+		211BA5F919973CFB00560842 /* SpeechConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechConfig.h; sourceTree = "<group>"; };
+		211BA5FA19973CFB00560842 /* SpeechConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechConfig.m; sourceTree = "<group>"; };
+		211BA5FC199742CF00560842 /* NiftySpeaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftySpeaker.h; sourceTree = "<group>"; };
+		211BA5FD199742CF00560842 /* NiftySpeaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftySpeaker.m; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
 		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
 		21724EEA1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BookShelfTableViewCell.xib; sourceTree = "<group>"; };
@@ -166,6 +175,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		211BA5F219973AAD00560842 /* TextSpeech */ = {
+			isa = PBXGroup;
+			children = (
+				217F6E1A1942F14B008E432E /* Speaker.h */,
+				217F6E1B1942F14B008E432E /* Speaker.m */,
+				21B5394E195C60C6009658B7 /* SpeechTextBox.h */,
+				21B5394F195C60C6009658B7 /* SpeechTextBox.m */,
+				211BA5F619973BA500560842 /* SpeechBlock.h */,
+				211BA5F719973BA500560842 /* SpeechBlock.m */,
+				211BA5F919973CFB00560842 /* SpeechConfig.h */,
+				211BA5FA19973CFB00560842 /* SpeechConfig.m */,
+				211BA5FC199742CF00560842 /* NiftySpeaker.h */,
+				211BA5FD199742CF00560842 /* NiftySpeaker.m */,
+			);
+			name = TextSpeech;
+			sourceTree = "<group>";
+		};
 		21724EE119721D3600DF6DC4 /* MappingModel */ = {
 			isa = PBXGroup;
 			children = (
@@ -204,11 +230,11 @@
 			children = (
 				21724EE119721D3600DF6DC4 /* MappingModel */,
 				21F7DE43197EB33900BD2899 /* Story.h */,
+				21F7DE44197EB33900BD2899 /* Story.m */,
 				21F7DE49197EB33A00BD2899 /* NarouContent.h */,
 				21F7DE4A197EB33A00BD2899 /* NarouContent.m */,
 				21F7DE46197EB33A00BD2899 /* GlobalState.h */,
 				21F7DE47197EB33A00BD2899 /* GlobalState.m */,
-				21F7DE44197EB33900BD2899 /* Story.m */,
 				21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */,
 			);
 			name = DataModel;
@@ -249,16 +275,13 @@
 		21F054D21917E0F200CC6BA9 /* NovelSpeaker */ = {
 			isa = PBXGroup;
 			children = (
+				211BA5F219973AAD00560842 /* TextSpeech */,
 				21E294E91970E2D00012A3AA /* DataModel */,
 				21B53A1819619BE7009658B7 /* Resources */,
 				21F054DB1917E0F200CC6BA9 /* AppDelegate.h */,
 				21F054DC1917E0F200CC6BA9 /* AppDelegate.m */,
 				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
 				4E776B17196247BE00C36AD1 /* ViewControllers */,
-				217F6E1A1942F14B008E432E /* Speaker.h */,
-				217F6E1B1942F14B008E432E /* Speaker.m */,
-				21B5394E195C60C6009658B7 /* SpeechTextBox.h */,
-				21B5394F195C60C6009658B7 /* SpeechTextBox.m */,
 				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
 				21C74FA21967FD390039A706 /* NarouDownloadQueue.h */,
@@ -453,6 +476,7 @@
 				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
+				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
 				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
@@ -466,7 +490,9 @@
 				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
 				21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */,
+				211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
+				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
 				217F6E1C1942F14B008E432E /* Speaker.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
