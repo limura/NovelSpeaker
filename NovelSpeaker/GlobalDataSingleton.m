@@ -91,14 +91,16 @@ static GlobalDataSingleton* _singleton = nil;
     [m_NiftySpeaker AddSpeechModText:@"美味い" to:@"うまい"];
     [m_NiftySpeaker AddSpeechModText:@"照ら" to:@"てら"];
     [m_NiftySpeaker AddSpeechModText:@"〜" to:@"ー"];
-    //[m_NiftySpeaker AddSpeechModText:@"身体" to:@"からだ"];
+    [m_NiftySpeaker AddSpeechModText:@"身体" to:@"からだ"];
     [m_NiftySpeaker AddSpeechModText:@"真っ暗" to:@"まっくら"];
     [m_NiftySpeaker AddSpeechModText:@"行って" to:@"いって"];
     [m_NiftySpeaker AddSpeechModText:@"行く" to:@"いく"];
     [m_NiftySpeaker AddSpeechModText:@"小柄" to:@"こがら"];
+    [m_NiftySpeaker AddSpeechModText:@"召喚獣" to:@"ショウカンジュウ"];
 
     [m_NiftySpeaker AddSpeechModText:@"直継" to:@"ナオツグ"];
     [m_NiftySpeaker AddSpeechModText:@"にゃん太" to:@"にゃんた"];
+    [m_NiftySpeaker AddSpeechModText:@"大地人" to:@"だいちじん"];
 }
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
