@@ -10,6 +10,7 @@
 #import "SpeechConfig.h"
 #import "Speaker.h"
 
+
 /// 「イイカンジ」の読み上げclass
 /// 与えられた文字列を、読み上げの声色や区切り毎で分割した
 /// SpeechBlock の配列に変換してから読み上げを行う。
@@ -85,5 +86,8 @@
 
 /// 読み上げ中か否かを取得します
 - (BOOL)isSpeaking;
+
+/// 読み上げ用に確保されたSpeechBlockの配列を取得します(テスト用)
+- (NSArray*)GetGeneratedSpeechBlockArray_ForTest;
 
 @end

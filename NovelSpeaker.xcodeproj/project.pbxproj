@@ -15,6 +15,7 @@
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
 		217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 217E683A1998F6A000C656AA /* MediaPlayer.framework */; };
+		217E683E199A80A200C656AA /* NiftySpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 217E683D199A80A200C656AA /* NiftySpeakerTests.m */; };
 		217F6E1C1942F14B008E432E /* Speaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 217F6E1B1942F14B008E432E /* Speaker.m */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
 		21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
@@ -84,6 +85,7 @@
 		2177634F19756781004F22FD /* GlobalStateCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalStateCacheData.h; sourceTree = "<group>"; };
 		2177635019756781004F22FD /* GlobalStateCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalStateCacheData.m; sourceTree = "<group>"; };
 		217E683A1998F6A000C656AA /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		217E683D199A80A200C656AA /* NiftySpeakerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftySpeakerTests.m; sourceTree = "<group>"; };
 		217F6E1A1942F14B008E432E /* Speaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Speaker.h; sourceTree = "<group>"; };
 		217F6E1B1942F14B008E432E /* Speaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Speaker.m; sourceTree = "<group>"; };
 		21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechRegexPitchSetting.h; sourceTree = "<group>"; };
@@ -317,6 +319,7 @@
 			children = (
 				21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */,
 				21F054F21917E0F200CC6BA9 /* Supporting Files */,
+				217E683D199A80A200C656AA /* NiftySpeakerTests.m */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -499,6 +502,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				217E683E199A80A200C656AA /* NiftySpeakerTests.m in Sources */,
 				21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -620,6 +624,7 @@
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -633,6 +638,7 @@
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

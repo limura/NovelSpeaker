@@ -642,17 +642,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                 <nil key="highlightedColor"/>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="Hmy-c2-vHv">
-                                <rect key="frame" x="9" y="224" width="304" height="284"/>
+                                <rect key="frame" x="9" y="190" width="304" height="318"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </tableView>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OE6-pb-ts4">
-                                <rect key="frame" x="247" y="191" width="53" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Edit">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -662,16 +655,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                             <constraint firstAttribute="trailing" secondItem="s4M-39-dxp" secondAttribute="trailing" constant="20" id="B2Z-cD-hhS"/>
                             <constraint firstAttribute="trailing" secondItem="DG3-7G-4Ll" secondAttribute="trailing" constant="88" id="Clx-Vy-vBo"/>
                             <constraint firstItem="DG3-7G-4Ll" firstAttribute="top" secondItem="s4M-39-dxp" secondAttribute="bottom" constant="30" id="JkW-Oa-lkj"/>
-                            <constraint firstItem="Hmy-c2-vHv" firstAttribute="top" secondItem="OE6-pb-ts4" secondAttribute="bottom" constant="3" id="Qnr-Jk-gnH"/>
-                            <constraint firstItem="OE6-pb-ts4" firstAttribute="top" secondItem="E6Q-tH-I2D" secondAttribute="bottom" constant="14" id="YjD-qN-Agn"/>
                             <constraint firstAttribute="trailing" secondItem="Hmy-c2-vHv" secondAttribute="trailing" constant="7" id="Z4Y-hO-CAc"/>
                             <constraint firstItem="F6g-5M-6q0" firstAttribute="leading" secondItem="kLg-U0-U0f" secondAttribute="leading" constant="20" id="cwu-dD-XlB"/>
-                            <constraint firstAttribute="trailing" secondItem="OE6-pb-ts4" secondAttribute="trailing" constant="20" id="e2y-Lr-vvw"/>
                             <constraint firstItem="zBX-QX-sFZ" firstAttribute="top" secondItem="Hmy-c2-vHv" secondAttribute="bottom" constant="11" id="ehT-6U-W72"/>
                             <constraint firstItem="E6Q-tH-I2D" firstAttribute="leading" secondItem="kLg-U0-U0f" secondAttribute="leading" constant="20" id="hxb-7t-Vmy"/>
                             <constraint firstItem="uPW-20-0nL" firstAttribute="top" secondItem="s4M-39-dxp" secondAttribute="bottom" constant="20" id="iQn-af-SVe"/>
                             <constraint firstItem="s4M-39-dxp" firstAttribute="top" secondItem="F6g-5M-6q0" secondAttribute="bottom" constant="19" id="kh5-N7-cjz"/>
                             <constraint firstAttribute="trailing" secondItem="uPW-20-0nL" secondAttribute="trailing" constant="7" id="lF3-Xe-r5Q"/>
+                            <constraint firstItem="Hmy-c2-vHv" firstAttribute="top" secondItem="E6Q-tH-I2D" secondAttribute="bottom" constant="13" id="oDb-cK-zQ4"/>
                             <constraint firstAttribute="trailing" secondItem="E6Q-tH-I2D" secondAttribute="trailing" constant="20" id="puI-Ou-44V"/>
                             <constraint firstItem="s4M-39-dxp" firstAttribute="leading" secondItem="kLg-U0-U0f" secondAttribute="leading" constant="20" id="qTS-Qy-A1f"/>
                             <constraint firstItem="F6g-5M-6q0" firstAttribute="top" secondItem="cpY-Qj-Zuh" secondAttribute="bottom" constant="14" id="ugs-y7-M3j"/>

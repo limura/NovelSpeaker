@@ -88,6 +88,7 @@ static GlobalDataSingleton* _singleton = nil;
     //[m_NiftySpeaker AddDelayBlockSeparator:@"。" delay:0.1f];
     [m_NiftySpeaker AddSpeechModText:@"異世界" to:@"イセカイ"];
     [m_NiftySpeaker AddSpeechModText:@"術師" to:@"ジュツシ"];
+    [m_NiftySpeaker AddSpeechModText:@"術者" to:@"ジュツシャ"];
     [m_NiftySpeaker AddSpeechModText:@"美味い" to:@"うまい"];
     [m_NiftySpeaker AddSpeechModText:@"照ら" to:@"てら"];
     [m_NiftySpeaker AddSpeechModText:@"〜" to:@"ー"];

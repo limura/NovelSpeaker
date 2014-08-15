@@ -11,13 +11,12 @@
 #import "SpeechBlock.h"
 #import "SpeechConfig.h"
 
-
-@interface BlockSeparator : NSObject 
+@interface BlockSeparator : NSObject
 @property (nonatomic, retain) NSString* startString;
 @property (nonatomic, retain) NSString* endString;
 @property (nonatomic, retain) SpeechConfig* speechConfig;
 @end
-@implementation BlockSeparator  
+@implementation BlockSeparator
 @end
 
 @interface DelaySetting : NSObject
@@ -107,7 +106,10 @@ typedef enum {
 - (SpeechBlock*)CreateSpeechBlockFromDisplayText:(NSString*)displayText speechModDictionary:(NSDictionary*)speechModDictionary config:(SpeechConfig*)config
 {
     SpeechBlock* result = [SpeechBlock new];
-    result.speechConfig = config;
+    result.speechConfig = [SpeechConfig new];
+    result.speechConfig.beforeDelay = config.beforeDelay;
+    result.speechConfig.pitch = config.pitch;
+    result.speechConfig.rate = config.rate;
     unsigned long p = 0;
     unsigned long displayTextLength = [displayText length];
     while (p < displayTextLength) {
@@ -145,7 +147,7 @@ typedef enum {
     return result;
 }
 
-/// 読み上げ用の文字列を。SpeechBlockの配列への変換を行います。
+/// 読み上げ用の文字列からSpeechBlockの配列への変換を行います。
 - (NSArray*)ConvertTextToSpeechBlockArray:(NSString*)text
 {
     //NSArray* BlockSeparatedTextArray = [self SplitDelayedText:m_BlockSeparatorArray text:text];
@@ -162,7 +164,7 @@ typedef enum {
             if (searchResult.location == NSNotFound) {
                 break;
             }
-            NSNumber* targetKey = [[NSNumber alloc] initWithUnsignedLong:p];
+            NSNumber* targetKey = [[NSNumber alloc] initWithUnsignedLong:searchResult.location];
             SpeechSetting* currentSetting = [speechSettingMap objectForKey:targetKey];
             if (currentSetting == nil) {
                 currentSetting = [SpeechSetting new];
@@ -178,17 +180,17 @@ typedef enum {
             p = searchResult.location + searchResult.length;
         }
     }
-    
+
     for (BlockSeparator* blockSeparator in m_BlockSeparatorArray)
     {
         unsigned long p = 0;
         while (p < textLength) {
             NSRange targetRange = NSMakeRange(p, textLength - p);
             NSRange startSearchResult = [text rangeOfString:blockSeparator.startString options:0 range:targetRange];
-            if (startSearchResult.location == NSNotFound) {
+            if (startSearchResult.location == NSNotFound || (startSearchResult.location + 1) >= textLength) {
                 break;
             }
-            NSRange endTargetRange = NSMakeRange(startSearchResult.location, textLength - startSearchResult.location);
+            NSRange endTargetRange = NSMakeRange(startSearchResult.location + 1, textLength - (startSearchResult.location+1));
             NSRange endSearchResult = [text rangeOfString:blockSeparator.endString options:0 range:endTargetRange];
             if (endSearchResult.location == NSNotFound) {
                 break;
@@ -209,7 +211,7 @@ typedef enum {
             [speechSettingMap setObject:startSetting forKey:startKey];
             //NSLog(@"set start: %lu -> delay: %.2f, pitch: %.2f, rate: %.2f", [startKey unsignedLongValue], startSetting.config.beforeDelay, startSetting.config.pitch, startSetting.config.rate);
             
-            NSNumber* endKey = [[NSNumber alloc] initWithUnsignedLong:endSearchResult.location + endSearchResult.length];
+            NSNumber* endKey = [[NSNumber alloc] initWithUnsignedLong:endSearchResult.location];
             SpeechSetting* endSetting = [speechSettingMap objectForKey:endKey];
             if (endSetting == nil) {
                 endSetting = [SpeechSetting new];
@@ -234,6 +236,23 @@ typedef enum {
     locationArray = [locationArray sortedArrayUsingComparator:^NSComparisonResult(NSNumber* a, NSNumber* b){
         return [a compare:b];
     }];
+
+    /*
+    for (NSNumber* key in locationArray) {
+        unsigned long location = [key unsignedLongValue];
+        SpeechSetting* setting = [speechSettingMap objectForKey:key];
+        NSString* str = [text substringWithRange:NSMakeRange(location, [text length] - location)];
+        NSLog(@"target: %lu, %@%@%@, pitch: %f, rate: %f, delay: %f, %@"
+              , location
+              , setting.type & SPEECH_SETTING_TYPE_DELAY ? @"DELAY|" : @""
+              , setting.type & SPEECH_SETTING_TYPE_TONE_CHANGE_IN ? @"IN|" : @""
+              , setting.type & SPEECH_SETTING_TYPE_TONE_CHANGE_OUT ? @"OUT|" : @""
+              , setting.config.pitch
+              , setting.config.rate
+              , setting.config.beforeDelay
+              , str);
+    }
+     */
     
     unsigned long p = 0;
     NSMutableArray* speechBlockArray = [NSMutableArray new];
@@ -276,7 +295,7 @@ typedef enum {
         NSRange textRange = NSMakeRange(p, [key unsignedLongValue] - p);
         NSString* targetString = [text substringWithRange:textRange];
         SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString speechModDictionary:m_SpeechModDictionary config:currentConfig];
-        //NSLog(@"block: delay: %.2f, pitch: %.2f, rate: %.2f %@ → %@", currentConfig.beforeDelay, currentConfig.pitch, currentConfig.rate, targetString, [block GetSpeechText]);
+        //NSLog(@"block(%p): delay: %.2f, pitch: %.2f, rate: %.2f %@ → %@", block, block.speechConfig.beforeDelay, block.speechConfig.pitch, block.speechConfig.rate, targetString, [block GetSpeechText]);
         [speechBlockArray addObject:block];
         p = [key unsignedIntegerValue];
     }
@@ -285,7 +304,7 @@ typedef enum {
         NSRange textRange = NSMakeRange(p, [text length] - p);
         NSString* targetString = [text substringWithRange:textRange];
         SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString speechModDictionary:m_SpeechModDictionary config:config];
-        //NSLog(@"block: delay: %.2f, pitch: %.2f, rate: %.2f %@ → %@", config.beforeDelay, config.pitch, config.rate, targetString, [block GetSpeechText]);
+        //NSLog(@"block(%p): delay: %.2f, pitch: %.2f, rate: %.2f %@ → %@", block, block.speechConfig.beforeDelay, block.speechConfig.pitch, block.speechConfig.rate, targetString, [block GetSpeechText]);
         [speechBlockArray addObject:block];
     }
     
@@ -531,6 +550,12 @@ typedef enum {
         return;
     }
     [self StartSpeech];
+}
+
+/// 読み上げ用に確保されたSpeechBlockの配列を取得します(テスト用)
+- (NSArray*)GetGeneratedSpeechBlockArray_ForTest
+{
+    return m_SpeechBlockArray;
 }
 
 @end
