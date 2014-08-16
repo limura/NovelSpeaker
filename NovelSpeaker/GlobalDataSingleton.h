@@ -16,6 +16,7 @@
 #import "GlobalStateCacheData.h"
 #import "NiftySpeaker.h"
 #import "SpeakPitchConfigCacheData.h"
+#import "SpeechModSettingCacheData.h"
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -36,6 +37,9 @@
     
     // 読み上げを管理します。
     NiftySpeaker* m_NiftySpeaker;
+    
+    // 次回読み上げ時に読み上げ設定を読み直すべきか否か
+    BOOL m_isNeedReloadSpeakSetting;
 }
 
 /// シングルトンを取得します。
@@ -134,7 +138,7 @@
 - (StoryCacheData*)GetReadingChapter:(NarouContentCacheData*)content;
 
 /// 読み込み中の場所を指定された小説と章で更新します。
-- (BOOL)ReadingPointUpdate:(NarouContentCacheData*)content story:(StoryCacheData*)story;
+- (BOOL)UpdateReadingPoint:(NarouContentCacheData*)content story:(StoryCacheData*)story;
 
 /// 次の章を読み出します。
 /// 次の章がなければ nil を返します。
@@ -143,6 +147,9 @@
 /// 前の章を読み出します。
 /// 前の章がなければ nil を返します。
 - (StoryCacheData*)GetPreviousChapter:(StoryCacheData*)story;
+
+/// 読み上げ設定を読み直します。
+- (BOOL)ReloadSpeechSetting;
 
 /// 読み上げる章を設定します。
 - (BOOL)SetSpeechStory:(StoryCacheData*)story;
@@ -181,5 +188,17 @@
 /// 読み上げの会話文の音声設定を削除します。
 - (BOOL)DeleteSpeakPitchConfig:(SpeakPitchConfigCacheData*)config;
 
+/// 読み上げ時の読み替え設定を全て読み出します。
+/// NSArray の中身は SpeechModSettingCacheData で、beforeString で sort された値が取得されます。
+- (NSArray*)GetAllSpeechModSettings;
+
+/// 読み上げ時の読み替え設定を beforeString指定 で読み出します
+- (SpeechModSettingCacheData*)GetSpeechModSettingWithBeforeString:(NSString*)beforeString;
+
+/// 読み上げ時の読み替え設定を更新します。無ければ新しく登録されます。
+- (BOOL)UpdateSpeechModSetting:(SpeechModSettingCacheData*)modSetting;
+
+/// 読み上げ時の読み替え設定を削除します。
+- (BOOL)DeleteSpeechModSetting:(SpeechModSettingCacheData*)modSetting;
 
 @end

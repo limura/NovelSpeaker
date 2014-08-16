@@ -552,6 +552,15 @@ typedef enum {
     [self StartSpeech];
 }
 
+/// 読み上げ設定を初期化します
+- (void)ClearSpeakSettings
+{
+    [m_BlockSeparatorArray removeAllObjects];
+    [m_DelaySettingArray removeAllObjects];
+    [m_SpeechModDictionary removeAllObjects];
+}
+
+
 /// 読み上げ用に確保されたSpeechBlockの配列を取得します(テスト用)
 - (NSArray*)GetGeneratedSpeechBlockArray_ForTest
 {

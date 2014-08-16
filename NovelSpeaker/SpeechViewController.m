@@ -114,7 +114,7 @@
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:self.textView.selectedRange.location];
     NSLog(@"update read location %lu (%@)", [m_CurrentReadingStory.readLocation unsignedLongValue], m_CurrentReadingStory.ncode);
-    [globalData ReadingPointUpdate:self.NarouContentDetail story:m_CurrentReadingStory];
+    [globalData UpdateReadingPoint:self.NarouContentDetail story:m_CurrentReadingStory];
     [globalData saveContext];
 }
 

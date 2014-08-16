@@ -68,10 +68,10 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     switch(indexPath.row)
     {
         case 0:
-            cell.textLabel.text = @"音声";
+            cell.textLabel.text = @"音声設定";
             break;
         case 1:
-            cell.textLabel.text = @"読み上げ文字矯正";
+            cell.textLabel.text = @"発音の矯正";
             break;
         default:
             cell.textLabel.text = @"-";

@@ -32,6 +32,10 @@
         <attribute name="startText" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
+    <entity name="SpeechModSetting" representedClassName="SpeechModSetting" syncable="YES">
+        <attribute name="afterString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="beforeString" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
     <entity name="Story" representedClassName="Story" syncable="YES">
         <attribute name="chapter_number" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
@@ -46,5 +50,6 @@
         <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="328"/>
         <element name="Story" positionX="-81" positionY="-280" width="128" height="148"/>
         <element name="SpeakPitchConfig" positionX="-162" positionY="-279" width="128" height="105"/>
+        <element name="SpeechModSetting" positionX="-153" positionY="-270" width="128" height="75"/>
     </elements>
 </model>

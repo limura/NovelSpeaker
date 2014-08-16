@@ -30,6 +30,8 @@ static GlobalDataSingleton* _singleton = nil;
     m_CoreDataAccessQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.coredataaccess", NULL);
 
     m_DownloadQueue = [NarouDownloadQueue new];
+    
+    m_isNeedReloadSpeakSetting = false;
 
     /// NiftySpeaker は default config が必要です。
     SpeechConfig* speechConfig = [SpeechConfig new];
@@ -74,48 +76,7 @@ static GlobalDataSingleton* _singleton = nil;
 /// NiftySpeaker を初期化します
 - (void) InitializeNiftySpeaker
 {
-    SpeechConfig* normalSpeakConfig = [SpeechConfig new];
-    normalSpeakConfig.pitch = 1.5f;
-    normalSpeakConfig.rate = 0.5f;
-    SpeechConfig* specialSpeakConfig = [SpeechConfig new];
-    specialSpeakConfig.pitch = 1.2f;
-    specialSpeakConfig.rate = 0.5;
-    
-    if ([[[GlobalDataSingleton GetInstance] GetAllSpeakPitchConfig] count] <= 0) {
-        SpeakPitchConfigCacheData* speakConfig = [SpeakPitchConfigCacheData new];
-        speakConfig.title = @"会話文";
-        speakConfig.pitch = [[NSNumber alloc] initWithFloat:1.5f];
-        speakConfig.startText = @"「";
-        speakConfig.endText = @"」";
-        [self UpdateSpeakPitchConfig:speakConfig];
-        speakConfig.title = @"会話文 2";
-        speakConfig.pitch = [[NSNumber alloc] initWithFloat:1.2f];
-        speakConfig.startText = @"『";
-        speakConfig.endText = @"』";
-        [self UpdateSpeakPitchConfig:speakConfig];
-    }
-    
-    [m_NiftySpeaker AddBlockStartSeparator:@"「" endString:@"」" speechConfig:normalSpeakConfig];
-    [m_NiftySpeaker AddBlockStartSeparator:@"『" endString:@"』" speechConfig:specialSpeakConfig];
-    [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02f];
-    //[m_NiftySpeaker AddDelayBlockSeparator:@"\n\n" delay:0.1f];
-    //[m_NiftySpeaker AddDelayBlockSeparator:@"。" delay:0.1f];
-    [m_NiftySpeaker AddSpeechModText:@"異世界" to:@"イセカイ"];
-    [m_NiftySpeaker AddSpeechModText:@"術師" to:@"ジュツシ"];
-    [m_NiftySpeaker AddSpeechModText:@"術者" to:@"ジュツシャ"];
-    [m_NiftySpeaker AddSpeechModText:@"美味い" to:@"うまい"];
-    [m_NiftySpeaker AddSpeechModText:@"照ら" to:@"てら"];
-    [m_NiftySpeaker AddSpeechModText:@"〜" to:@"ー"];
-    [m_NiftySpeaker AddSpeechModText:@"身体" to:@"からだ"];
-    [m_NiftySpeaker AddSpeechModText:@"真っ暗" to:@"まっくら"];
-    [m_NiftySpeaker AddSpeechModText:@"行って" to:@"いって"];
-    [m_NiftySpeaker AddSpeechModText:@"行く" to:@"いく"];
-    [m_NiftySpeaker AddSpeechModText:@"小柄" to:@"こがら"];
-    [m_NiftySpeaker AddSpeechModText:@"召喚獣" to:@"ショウカンジュウ"];
-
-    [m_NiftySpeaker AddSpeechModText:@"直継" to:@"ナオツグ"];
-    [m_NiftySpeaker AddSpeechModText:@"にゃん太" to:@"にゃんた"];
-    [m_NiftySpeaker AddSpeechModText:@"大地人" to:@"だいちじん"];
+    [self ReloadSpeechSetting];
 }
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
@@ -176,6 +137,11 @@ static GlobalDataSingleton* _singleton = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         GlobalState* state = [self GetCoreDataGlobalStateThreadUnsafe];
 
+        // pitch か rate が変わってたら読み直し指示をします。
+        if ([state.defaultPitch compare:globalState.defaultPitch] != NSOrderedSame
+            || [state.defaultRate compare:globalState.defaultRate] != NSOrderedSame) {
+            m_isNeedReloadSpeakSetting = true;
+        }
         state.defaultPitch = globalState.defaultPitch;
         state.defaultRate = globalState.defaultRate;
         
@@ -613,7 +579,7 @@ static GlobalDataSingleton* _singleton = nil;
 }
 
 /// 読み込み中の場所を指定された小説と章で更新します。
-- (BOOL)ReadingPointUpdate:(NarouContentCacheData*)content story:(StoryCacheData*)story
+- (BOOL)UpdateReadingPoint:(NarouContentCacheData*)content story:(StoryCacheData*)story
 {
     if (content == nil || story == nil
         || content.ncode == nil
@@ -692,6 +658,89 @@ static GlobalDataSingleton* _singleton = nil;
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:songInfo];
 }
 
+/// 読み上げ設定を読み直します。
+- (BOOL)ReloadSpeechSetting
+{
+    [m_NiftySpeaker ClearSpeakSettings];
+
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    SpeechConfig* defaultSetting = [SpeechConfig new];
+    defaultSetting.pitch = [globalState.defaultPitch floatValue];
+    defaultSetting.rate = [globalState.defaultRate floatValue];
+    defaultSetting.beforeDelay = 0.0f;
+    [m_NiftySpeaker SetDefaultSpeechConfig:defaultSetting];
+    
+    NSArray* speechConfigArray = [self GetAllSpeakPitchConfig];
+    if (speechConfigArray == nil || [speechConfigArray count] <= 0) {
+        // 設定が無いようなので勝手に作ります。
+        SpeakPitchConfigCacheData* speakConfig = [SpeakPitchConfigCacheData new];
+        speakConfig.title = @"会話文";
+        speakConfig.pitch = [[NSNumber alloc] initWithFloat:1.5f];
+        speakConfig.startText = @"「";
+        speakConfig.endText = @"」";
+        [self UpdateSpeakPitchConfig:speakConfig];
+        speakConfig.title = @"会話文 2";
+        speakConfig.pitch = [[NSNumber alloc] initWithFloat:1.2f];
+        speakConfig.startText = @"『";
+        speakConfig.endText = @"』";
+        [self UpdateSpeakPitchConfig:speakConfig];
+
+        // 読み直します。
+        speechConfigArray = [self GetAllSpeakPitchConfig];
+    }
+    if (speechConfigArray != nil) {
+        for (SpeakPitchConfigCacheData* pitchConfig in speechConfigArray) {
+            SpeechConfig* speechConfig = [SpeechConfig new];
+            speechConfig.pitch = [pitchConfig.pitch floatValue];
+            speechConfig.rate = [globalState.defaultRate floatValue];
+            speechConfig.beforeDelay = 0.0f;
+            [m_NiftySpeaker AddBlockStartSeparator:pitchConfig.startText endString:pitchConfig.endText speechConfig:speechConfig];
+        }
+    }
+
+    // delay については設定ページを作っていないので固定値になります。
+    [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02f];
+    
+    NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
+    if (speechModConfigArray == nil || [speechModConfigArray count] <= 0) {
+        // これも無いようなので勝手に作ります。
+        NSArray* dataArray = [[NSArray alloc] initWithObjects:
+                              @"異世界", @"イセカイ"
+                              , @"術者", @"ジュツシャ"
+                              , @"術師", @"ジュツシ"
+                              , @"美味い", @"うまい"
+                              , @"照ら", @"てら"
+                              , @"身体", @"からだ"
+                              , @"真っ暗", @"まっくら"
+                              , @"行って", @"いって"
+                              , @"行く", @"いく"
+                              , @"小柄", @"こがら"
+                              , @"召喚獣", @"ショウカンジュウ"
+
+                              , @"直継", @"ナオツグ"
+                              , @"にゃん太", @"ニャンタ"
+                              , @"大地人", @"だいちじん"
+                              , @"地底人", @"ちていじん"
+                              
+                              , nil];
+        SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
+        for (int i = 0; i < [dataArray count]; i += 2) {
+            speechModSetting.beforeString = [dataArray objectAtIndex:i];
+            speechModSetting.afterString = [dataArray objectAtIndex:i+1];
+            [self UpdateSpeechModSetting:speechModSetting];
+        }
+
+        speechModConfigArray = [self GetAllSpeechModSettings];
+    }
+    if (speechModConfigArray != nil) {
+        for (SpeechModSettingCacheData* speechModSetting in speechModConfigArray) {
+            [m_NiftySpeaker AddSpeechModText:speechModSetting.beforeString to:speechModSetting.afterString];
+        }
+    }
+    
+    return true;
+}
+
 /// 読み上げる文書を設定します。
 - (BOOL)SetSpeechStory:(StoryCacheData *)story
 {
@@ -719,6 +768,18 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げを開始します。
 - (BOOL)StartSpeech
 {
+    if (m_isNeedReloadSpeakSetting) {
+        NSLog(@"読み上げ設定を読み直します。");
+        [self ReloadSpeechSetting];
+        // 読み直された読み上げ設定で発音情報を再定義させます。
+        StoryCacheData* story = [self GetReadingChapter:[self GetCurrentReadingContent]];
+        if (story != nil) {
+            NSLog(@"発音情報を更新します。");
+            [self SetSpeechStory:story];
+        }
+        m_isNeedReloadSpeakSetting = false;
+    }
+
     AVAudioSession* session = [AVAudioSession sharedInstance];
     NSError* err;
     NSLog(@"setActive YES.");
@@ -735,7 +796,11 @@ static GlobalDataSingleton* _singleton = nil;
     AVAudioSession* session = [AVAudioSession sharedInstance];
     NSLog(@"setActive NO.");
     [session setActive:NO error:nil];
-    return [m_NiftySpeaker StopSpeech];
+    if([m_NiftySpeaker StopSpeech] == false)
+    {
+        return false;
+    }
+    return true;
 }
 
 /// 読み上げ時のイベントハンドラを追加します。
@@ -893,6 +958,10 @@ static GlobalDataSingleton* _singleton = nil;
             result = [config AssignToCoreData:coreDataConfig];
         }
     });
+    if (result) {
+        NSLog(@"isNeedReloadSpeakSetting = true (pitch)");
+        m_isNeedReloadSpeakSetting = true;
+    }
     return result;
 }
 
@@ -909,11 +978,143 @@ static GlobalDataSingleton* _singleton = nil;
             result = true;
         }
     });
+    if (result) {
+        m_isNeedReloadSpeakSetting = true;
+    }
     // 保存しておきます。
     [self saveContext];
     return result;
 }
 
+
+/// 読み上げ時の読み替え設定を全て読み出します。
+/// NSArray の中身は SpeechModSettingCacheData で、beforeString で sort された値が取得されます。
+- (NSArray*)GetAllSpeechModSettings
+{
+    __block NSError* err;
+    __block NSMutableArray* fetchResults = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+        NSEntityDescription* entity = [NSEntityDescription entityForName:@"SpeechModSetting" inManagedObjectContext: self.managedObjectContext];
+        [fetchRequest setEntity:entity];
+        
+        NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"beforeString" ascending:NO];
+        NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        
+        err = nil;
+        NSArray* results = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+        fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
+        for (int i = 0; i < [results count]; i++) {
+            fetchResults[i] = [[SpeechModSettingCacheData alloc] initWithCoreData:results[i]];
+        }
+    });
+    if(err != nil)
+    {
+        NSLog(@"fetch failed. %@, %@", err, [err userInfo]);
+        return nil;
+    }
+    return fetchResults;
+}
+
+/// 読み上げ時の読み替え設定を beforeString指定 で読み出します(内部版)
+- (SpeechModSetting*)GetSpeechModSettingWithBeforeStringThreadUnsafe:(NSString*)beforeString
+{
+    NSError* err;
+    NSMutableArray* fetchResults = nil;
+    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription* entity = [NSEntityDescription entityForName:@"SpeechModSetting" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"beforeString == %@", beforeString];
+    [fetchRequest setPredicate:predicate];
+    
+    err = nil;
+    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+    
+    if(fetchResults == nil)
+    {
+        NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
+        return nil;
+    }
+    if([fetchResults count] == 0)
+    {
+        // 何もなかった。
+        return nil;
+    }
+    if([fetchResults count] != 1)
+    {
+        NSLog(@"duplicate beforeString!!! %@", beforeString);
+        return nil;
+    }
+    return fetchResults[0];
+}
+
+/// 読み上げ時の読み替え設定を beforeString指定 で読み出します
+- (SpeechModSettingCacheData*)GetSpeechModSettingWithBeforeString:(NSString*)beforeString
+{
+    __block SpeechModSettingCacheData* result = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        SpeechModSetting* coreDataSetting = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:beforeString];
+        if (coreDataSetting != nil) {
+            result = [[SpeechModSettingCacheData alloc] initWithCoreData:coreDataSetting];
+        }
+    });
+    return result;
+}
+
+/// 読み上げ時の読み替え設定を追加します。
+- (SpeechModSetting*) CreateNewSpeechModSettingThreadUnsafe:(SpeechModSettingCacheData*)data
+{
+    SpeechModSetting* setting = nil;
+    setting = [NSEntityDescription insertNewObjectForEntityForName:@"SpeechModSetting" inManagedObjectContext:self.managedObjectContext];
+    [data AssignToCoreData:setting];
+    return setting;
+}
+
+/// 読み上げ時の読み替え設定を更新します。無ければ新しく登録されます。
+- (BOOL)UpdateSpeechModSetting:(SpeechModSettingCacheData*)modSetting
+{
+    if (modSetting == nil) {
+        return false;
+    }
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:modSetting.beforeString];
+        if (coreDataConfig == nil) {
+            coreDataConfig = [self CreateNewSpeechModSettingThreadUnsafe:modSetting];
+        }
+        if (coreDataConfig != nil) {
+            result = [modSetting AssignToCoreData:coreDataConfig];
+        }
+    });
+    if (result) {
+        NSLog(@"isNeedReloadSpeakSetting = true (speechMod)");
+        m_isNeedReloadSpeakSetting = true;
+    }
+    return result;
+}
+
+/// 読み上げ時の読み替え設定を削除します。
+- (BOOL)DeleteSpeechModSetting:(SpeechModSettingCacheData*)modSetting
+{
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:modSetting.beforeString];
+        if (coreDataConfig == nil) {
+            result = false;
+        }else{
+            [self.managedObjectContext deleteObject:coreDataConfig];
+            result = true;
+        }
+    });
+    if (result) {
+        m_isNeedReloadSpeakSetting = true;
+    }
+    // 保存しておきます。
+    [self saveContext];
+    return result;
+}
 
 #pragma mark - Core Data stack
 
