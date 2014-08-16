@@ -4,7 +4,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3733"/>
     </dependencies>
     <scenes>
-        <!--Speak Settings Table View Controller - 音声設定-->
+        <!--Speak Settings Table View Controller - 声質の設定-->
         <scene sceneID="AH2-bb-f0h">
             <objects>
                 <tableViewController id="0kw-MK-hET" customClass="SpeakSettingsTableViewController" sceneMemberID="viewController">
@@ -17,7 +17,7 @@
                             <outlet property="delegate" destination="0kw-MK-hET" id="Brp-rt-oOv"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="音声設定" id="wON-7v-4wD"/>
+                    <navigationItem key="navigationItem" title="声質の設定" id="wON-7v-4wD"/>
                     <connections>
                         <segue destination="xdH-CR-6Et" kind="push" identifier="newSpeakSettingSegue" id="86x-CI-9SE"/>
                     </connections>
@@ -26,7 +26,7 @@
             </objects>
             <point key="canvasLocation" x="945" y="925"/>
         </scene>
-        <!--Create New Speak Pitch Setting View Controller - 音声設定範囲の作成-->
+        <!--Create New Speak Pitch Setting View Controller - 声質設定範囲の作成-->
         <scene sceneID="N8g-wT-gmr">
             <objects>
                 <viewController id="xdH-CR-6Et" customClass="CreateNewSpeakPitchSettingViewController" sceneMemberID="viewController">
@@ -63,7 +63,7 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
-                    <navigationItem key="navigationItem" title="音声設定範囲の作成" id="b1Y-Fj-Dcn"/>
+                    <navigationItem key="navigationItem" title="声質設定範囲の作成" id="b1Y-Fj-Dcn"/>
                     <connections>
                         <outlet property="titleTextField" destination="n8z-Qq-ERZ" id="iSZ-xx-rcY"/>
                     </connections>
@@ -71,6 +71,123 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EGA-cg-tKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1421" y="925"/>
+        </scene>
+        <!--Speech Mod Settings Table View Controller - 読みの修正-->
+        <scene sceneID="FXd-0y-Yzq">
+            <objects>
+                <tableViewController id="DcS-zk-4zM" customClass="SpeechModSettingsTableViewController" sceneMemberID="viewController">
+                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="IYP-gH-U8o">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <prototypes>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="speechModSettingsTableViewDefaultCell" id="W85-N7-Sen">
+                                <rect key="frame" x="0.0" y="86" width="320" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="W85-N7-Sen" id="ZbH-ye-pyG">
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="DcS-zk-4zM" id="bz3-9e-mGT"/>
+                            <outlet property="delegate" destination="DcS-zk-4zM" id="zlT-Qt-0MW"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="読みの修正" id="iy0-Ki-xeS"/>
+                    <connections>
+                        <segue destination="kSq-hq-E9G" kind="push" identifier="newSpeechSettingSegue" id="aiZ-8Y-r0V"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="0sO-5g-pqB" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="945" y="1618"/>
+        </scene>
+        <!--Create Speech Mod Setting View Controller - 読みの修正詳細-->
+        <scene sceneID="me1-xj-vfp">
+            <objects>
+                <viewController id="kSq-hq-E9G" customClass="CreateSpeechModSettingViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="nuc-Aj-YPy"/>
+                        <viewControllerLayoutGuide type="bottom" id="RCc-4e-xPL"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="bFW-Uf-w8T">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="cIY-9F-MLx">
+                                <rect key="frame" x="20" y="83" width="280" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7kv-GD-fng">
+                                <rect key="frame" x="20" y="150" width="280" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="から" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Hd-Nn-nzI">
+                                <rect key="frame" x="20" y="121" width="34" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="に読み替え" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nyU-9D-L22">
+                                <rect key="frame" x="20" y="188" width="85" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Lz-2c-zLQ">
+                                <rect key="frame" x="20" y="229" width="75" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="発音テスト">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="testSpeechButtonClicked:" destination="kSq-hq-E9G" eventType="touchUpInside" id="P4w-Nw-VqZ"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kRa-jS-1YP">
+                                <rect key="frame" x="270" y="229" width="30" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="確定">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="assignButtonClicked:" destination="kSq-hq-E9G" eventType="touchUpInside" id="6Ln-WW-sAj"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="cIY-9F-MLx" secondAttribute="trailing" constant="20" id="2Ls-pm-Jke"/>
+                            <constraint firstItem="7kv-GD-fng" firstAttribute="top" secondItem="1Hd-Nn-nzI" secondAttribute="bottom" constant="8" id="7EP-qc-amJ"/>
+                            <constraint firstItem="1Hd-Nn-nzI" firstAttribute="leading" secondItem="bFW-Uf-w8T" secondAttribute="leading" constant="20" id="7Kx-sF-zCe"/>
+                            <constraint firstItem="nyU-9D-L22" firstAttribute="leading" secondItem="bFW-Uf-w8T" secondAttribute="leading" constant="20" id="BC4-AZ-5LP"/>
+                            <constraint firstItem="7kv-GD-fng" firstAttribute="leading" secondItem="bFW-Uf-w8T" secondAttribute="leading" constant="20" id="Bwb-aM-3te"/>
+                            <constraint firstItem="0Lz-2c-zLQ" firstAttribute="top" secondItem="nyU-9D-L22" secondAttribute="bottom" constant="20" id="F52-nJ-DkG"/>
+                            <constraint firstItem="cIY-9F-MLx" firstAttribute="leading" secondItem="bFW-Uf-w8T" secondAttribute="leading" constant="20" id="HjI-f2-yg7"/>
+                            <constraint firstItem="0Lz-2c-zLQ" firstAttribute="leading" secondItem="bFW-Uf-w8T" secondAttribute="leading" constant="20" id="JWB-0e-KVQ"/>
+                            <constraint firstAttribute="trailing" secondItem="7kv-GD-fng" secondAttribute="trailing" constant="20" id="OfU-Zh-2Hb"/>
+                            <constraint firstItem="cIY-9F-MLx" firstAttribute="top" secondItem="nuc-Aj-YPy" secondAttribute="bottom" constant="19" id="g1E-zs-8Gx"/>
+                            <constraint firstItem="1Hd-Nn-nzI" firstAttribute="top" secondItem="cIY-9F-MLx" secondAttribute="bottom" constant="8" id="ibh-0M-Z3d"/>
+                            <constraint firstAttribute="trailing" secondItem="kRa-jS-1YP" secondAttribute="trailing" constant="20" id="kwz-gt-Aki"/>
+                            <constraint firstItem="nyU-9D-L22" firstAttribute="top" secondItem="7kv-GD-fng" secondAttribute="bottom" constant="8" id="lSD-Lg-cQE"/>
+                            <constraint firstItem="kRa-jS-1YP" firstAttribute="top" secondItem="0Lz-2c-zLQ" secondAttribute="top" id="tj9-B1-VXs"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="読みの修正詳細" id="jOk-mr-1xo"/>
+                    <connections>
+                        <outlet property="afterTextField" destination="7kv-GD-fng" id="NjU-7G-iFH"/>
+                        <outlet property="beforeTextField" destination="cIY-9F-MLx" id="AjZ-pI-aYx"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Qga-R3-4OQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1421" y="1618"/>
         </scene>
         <!--View Controller - クレジット-->
         <scene sceneID="g6V-SU-Uql">
@@ -134,7 +251,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bLn-TN-oKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="945" y="1747"/>
+            <point key="canvasLocation" x="945" y="2325"/>
         </scene>
         <!--Navigation Controller - 設定-->
         <scene sceneID="jLN-GL-WMq">
@@ -188,6 +305,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     <navigationItem key="navigationItem" title="設定" id="Nbg-ez-a84"/>
                     <connections>
                         <segue destination="0kw-MK-hET" kind="push" identifier="speakSettingsSegue" id="B7T-Wg-yhB"/>
+                        <segue destination="DcS-zk-4zM" kind="push" identifier="speechModSettingSegue" id="NN9-Wl-Axe"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2y7-9M-CWR" userLabel="First Responder" sceneMemberID="firstResponder"/>

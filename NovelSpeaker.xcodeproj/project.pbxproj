@@ -30,6 +30,8 @@
 		21916372199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */; };
 		21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916374199F143E003FF7FC /* SpeechModSetting.m */; };
 		21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
+		2191637B199F4514003FF7FC /* SpeechModSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191637A199F4514003FF7FC /* SpeechModSettingsTableViewController.m */; };
+		2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
 		21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -125,6 +127,10 @@
 		21916374199F143E003FF7FC /* SpeechModSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSetting.m; sourceTree = "<group>"; };
 		21916376199F1463003FF7FC /* SpeechModSettingCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechModSettingCacheData.h; sourceTree = "<group>"; };
 		21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSettingCacheData.m; sourceTree = "<group>"; };
+		21916379199F4514003FF7FC /* SpeechModSettingsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechModSettingsTableViewController.h; sourceTree = "<group>"; };
+		2191637A199F4514003FF7FC /* SpeechModSettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSettingsTableViewController.m; sourceTree = "<group>"; };
+		2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateSpeechModSettingViewController.h; sourceTree = "<group>"; };
+		2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateSpeechModSettingViewController.m; sourceTree = "<group>"; };
 		21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechRegexPitchSetting.h; sourceTree = "<group>"; };
 		21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechRegexPitchSetting.m; sourceTree = "<group>"; };
 		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
@@ -411,6 +417,10 @@
 				21916367199E5D43003FF7FC /* SettingsTableViewController.m */,
 				21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */,
 				21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */,
+				21916379199F4514003FF7FC /* SpeechModSettingsTableViewController.h */,
+				2191637A199F4514003FF7FC /* SpeechModSettingsTableViewController.m */,
+				2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */,
+				2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -536,12 +546,14 @@
 				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
 				21916372199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m in Sources */,
 				21916364199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m in Sources */,
+				2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
 				21F7DE4B197EB33A00BD2899 /* NarouContent.m in Sources */,
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
 				21F7DE48197EB33A00BD2899 /* GlobalState.m in Sources */,
 				21E294E81970E2C40012A3AA /* SettingDataModelMapping_1to2.xcmappingmodel in Sources */,
 				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
+				2191637B199F4514003FF7FC /* SpeechModSettingsTableViewController.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,

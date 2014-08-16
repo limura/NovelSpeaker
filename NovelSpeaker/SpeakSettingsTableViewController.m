@@ -31,7 +31,7 @@
 {
     [super viewDidLoad];
 
-    // 追加ボタンをつけます。
+    // 追加ボタンとEditボタンをつけます。
     UIBarButtonItem* addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonClicked)];
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addButton, self.editButtonItem, nil];
 
