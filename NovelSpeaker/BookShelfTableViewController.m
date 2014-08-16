@@ -47,9 +47,9 @@
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:self.editButtonItem, refreshButton, nil];
 
     // カスタマイズしたセルをテーブルビューにセット
-    UINib *nib = [UINib nibWithNibName:@"BookShelfTableViewCell" bundle:nil];
-    [self.tableView registerNib:nib forCellReuseIdentifier:@"BookShelfTableViewCell"];
-    [self.searchDisplayController.searchResultsTableView registerNib:nib forCellReuseIdentifier:@"BookShelfTableViewCell"];
+    UINib *nib = [UINib nibWithNibName:BookShelfTableViewCellID bundle:nil];
+    [self.tableView registerNib:nib forCellReuseIdentifier:BookShelfTableViewCellID];
+    //[self.searchDisplayController.searchResultsTableView registerNib:nib forCellReuseIdentifier:BookShelfTableViewCellID];
     
     [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
 }
@@ -100,11 +100,11 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // 利用できる cell があるなら再利用します
-    BookShelfTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"BookShelfTableViewCell"];
+    BookShelfTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:BookShelfTableViewCellID];
     if(cell == nil)
     {
         // 無いようなので生成します。
-        cell = [[BookShelfTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"BookShelfTableViewCell"];
+        cell = [[BookShelfTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:BookShelfTableViewCellID];
     }
     
     NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];

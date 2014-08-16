@@ -15,6 +15,7 @@
 #import "NarouDownloadQueue.h"
 #import "GlobalStateCacheData.h"
 #import "NiftySpeaker.h"
+#import "SpeakPitchConfigCacheData.h"
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -166,5 +167,19 @@
 
 /// 読み上げ中か否かを取得します
 - (BOOL)isSpeaking;
+
+/// 読み上げの会話文の音程設定を全て読み出します。
+/// NSArray の中身は SpeakPitchConfigCacheData で、title でsortされた値が取得されます。
+- (NSArray*)GetAllSpeakPitchConfig;
+
+/// 読み上げの会話文の音程設定をタイトル指定で読み出します。
+- (SpeakPitchConfigCacheData*)GetSpeakPitchConfigWithTitle:(NSString*)title;
+
+/// 読み上げの会話文の音程設定を更新します。
+- (BOOL)UpdateSpeakPitchConfig:(SpeakPitchConfigCacheData*)config;
+
+/// 読み上げの会話文の音声設定を削除します。
+- (BOOL)DeleteSpeakPitchConfig:(SpeakPitchConfigCacheData*)config;
+
 
 @end

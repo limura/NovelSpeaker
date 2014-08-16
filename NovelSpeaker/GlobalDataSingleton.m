@@ -81,6 +81,20 @@ static GlobalDataSingleton* _singleton = nil;
     specialSpeakConfig.pitch = 1.2f;
     specialSpeakConfig.rate = 0.5;
     
+    if ([[[GlobalDataSingleton GetInstance] GetAllSpeakPitchConfig] count] <= 0) {
+        SpeakPitchConfigCacheData* speakConfig = [SpeakPitchConfigCacheData new];
+        speakConfig.title = @"会話文";
+        speakConfig.pitch = [[NSNumber alloc] initWithFloat:1.5f];
+        speakConfig.startText = @"「";
+        speakConfig.endText = @"」";
+        [self UpdateSpeakPitchConfig:speakConfig];
+        speakConfig.title = @"会話文 2";
+        speakConfig.pitch = [[NSNumber alloc] initWithFloat:1.2f];
+        speakConfig.startText = @"『";
+        speakConfig.endText = @"』";
+        [self UpdateSpeakPitchConfig:speakConfig];
+    }
+    
     [m_NiftySpeaker AddBlockStartSeparator:@"「" endString:@"」" speechConfig:normalSpeakConfig];
     [m_NiftySpeaker AddBlockStartSeparator:@"『" endString:@"』" speechConfig:specialSpeakConfig];
     [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02f];
@@ -777,6 +791,129 @@ static GlobalDataSingleton* _singleton = nil;
     });
     NSLog(@"CoreData saved.");
 }
+
+/// 読み上げの会話文の音程設定を全て読み出します。
+/// NSArray の中身は SpeakPitchConfigCacheData で、title でsortされた値が取得されます。
+- (NSArray*)GetAllSpeakPitchConfig
+{
+    __block NSError* err;
+    __block NSMutableArray* fetchResults = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+        NSEntityDescription* entity = [NSEntityDescription entityForName:@"SpeakPitchConfig" inManagedObjectContext: self.managedObjectContext];
+        [fetchRequest setEntity:entity];
+        
+        NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"title" ascending:NO];
+        NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        
+        err = nil;
+        NSArray* results = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+        fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
+        for (int i = 0; i < [results count]; i++) {
+            fetchResults[i] = [[SpeakPitchConfigCacheData alloc] initWithCoreData:results[i]];
+        }
+    });
+    if(err != nil)
+    {
+        NSLog(@"fetch failed. %@, %@", err, [err userInfo]);
+        return nil;
+    }
+    return fetchResults;
+}
+
+/// 読み上げの会話文の音程設定をタイトル指定で読み出します。(内部版)
+- (SpeakPitchConfig*)GetSpeakPitchConfigWithTitleThreadUnsafe:(NSString*)title
+{
+    NSError* err;
+    NSMutableArray* fetchResults = nil;
+    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription* entity = [NSEntityDescription entityForName:@"SpeakPitchConfig" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"title == %@", title];
+    [fetchRequest setPredicate:predicate];
+    
+    err = nil;
+    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
+    
+    if(fetchResults == nil)
+    {
+        NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
+        return nil;
+    }
+    if([fetchResults count] == 0)
+    {
+        // 何もなかった。
+        return nil;
+    }
+    if([fetchResults count] != 1)
+    {
+        NSLog(@"duplicate title!!! %@", title);
+        return nil;
+    }
+    return fetchResults[0];
+}
+
+/// 読み上げの会話文の音程設定をタイトル指定で読み出します。
+- (SpeakPitchConfigCacheData*)GetSpeakPitchConfigWithTitle:(NSString*)title
+{
+    __block SpeakPitchConfigCacheData* result = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        SpeakPitchConfig* coreDataConfig = [self GetSpeakPitchConfigWithTitleThreadUnsafe:title];
+        if (coreDataConfig != nil) {
+            result = [[SpeakPitchConfigCacheData alloc] initWithCoreData:coreDataConfig];
+        }
+    });
+    return result;
+}
+
+/// 読み上げの会話文の音程設定を追加します。
+- (SpeakPitchConfig*) CreateNewSpeakPitchConfigThreadUnsafe:(SpeakPitchConfigCacheData*)data
+{
+    SpeakPitchConfig* config = nil;
+    config = [NSEntityDescription insertNewObjectForEntityForName:@"SpeakPitchConfig" inManagedObjectContext:self.managedObjectContext];
+    [data AssignToCoreData:config];
+    return config;
+}
+
+/// 読み上げの会話文の音程設定を更新します。
+- (BOOL)UpdateSpeakPitchConfig:(SpeakPitchConfigCacheData*)config
+{
+    if (config == nil) {
+        return false;
+    }
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        SpeakPitchConfig* coreDataConfig = [self GetSpeakPitchConfigWithTitleThreadUnsafe:config.title];
+        if (coreDataConfig == nil) {
+            coreDataConfig = [self CreateNewSpeakPitchConfigThreadUnsafe:config];
+        }
+        if (coreDataConfig != nil) {
+            result = [config AssignToCoreData:coreDataConfig];
+        }
+    });
+    return result;
+}
+
+/// 読み上げの会話文の音声設定を削除します。
+- (BOOL)DeleteSpeakPitchConfig:(SpeakPitchConfigCacheData*)config
+{
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        SpeakPitchConfig* coreDataConfig = [self GetSpeakPitchConfigWithTitleThreadUnsafe:config.title];
+        if (coreDataConfig == nil) {
+            result = false;
+        }else{
+            [self.managedObjectContext deleteObject:coreDataConfig];
+            result = true;
+        }
+    });
+    // 保存しておきます。
+    [self saveContext];
+    return result;
+}
+
 
 #pragma mark - Core Data stack
 

@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "NarouDownloadQueue.h"
 
+static NSString* const BookShelfTableViewCellID = @"BookShelfTableViewCell";
+
 @interface BookShelfTableViewCell : UITableViewCell<NarouDownloadQueueDelegate>
 {
     NSString* m_Ncode;

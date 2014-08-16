@@ -16,8 +16,6 @@
 {
     // Initialization code
     m_Ncode = nil;
-    
-    [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
 }
 
 - (void)dealloc
@@ -40,6 +38,8 @@
     self.NewIndicatorLabel.hidden = YES;
     self.DownloadProgressView.hidden = YES;
     self.DownloadActivityIndicatorView.hidden = YES;
+    
+    [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
     
     m_Ncode = ncode;
 }
