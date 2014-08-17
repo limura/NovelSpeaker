@@ -50,7 +50,7 @@
     UINib *nib = [UINib nibWithNibName:BookShelfTableViewCellID bundle:nil];
     [self.tableView registerNib:nib forCellReuseIdentifier:BookShelfTableViewCellID];
     //[self.searchDisplayController.searchResultsTableView registerNib:nib forCellReuseIdentifier:BookShelfTableViewCellID];
-    
+
     [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
 }
 
@@ -112,12 +112,12 @@
        || [contentList count] <= indexPath.row)
     {
         NSLog(@"indexPath.row is out of range %lu <= %ld", (unsigned long)[contentList count], (long)indexPath.row);
-        [cell initWithTitleLabel:@"unknown error" ncode:nil];
+        [cell setTitleLabel:@"unknown error" ncode:nil];
         return cell;
     }
 
     NarouContent* narouContent = (NarouContent*)contentList[indexPath.row];
-    [cell initWithTitleLabel:narouContent.title ncode:narouContent.ncode];
+    [cell setTitleLabel:narouContent.title ncode:narouContent.ncode];
     return cell;
 }
 

@@ -40,6 +40,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     m_isNeedQuit = false;
     
     m_DownloadEventHandlerList = [NSMutableArray new];
+    m_DownloadEventHandlerDictionary = [NSMutableDictionary new];
     
     m_CurrentDownloadContentAllData = nil;
     m_DownloadCount = 0;
@@ -128,6 +129,19 @@ static float SLEEP_TIME_SECOND = 10.5f;
     return true;
 }
 
+/// ダウンロード周りのイベントハンドラ用のdelegateに追加します。
+- (BOOL)AddDownloadEventHandlerWithNcode:(NSString*)string handler:(id<NarouDownloadQueueDelegate>)handler
+{
+    [m_DownloadEventHandlerDictionary setObject:handler forKey:string];
+    return true;
+}
+/// ダウンロード周りのイベントハンドラ用のdelegateから削除します。
+- (BOOL)DelDownloadEventHandlerWithNcode:(NSString*)string
+{
+    [m_DownloadEventHandlerDictionary removeObjectForKey:string];
+    return true;
+}
+
 
 /// DownloadEndイベントを発生させます。
 - (void)KickDoenloadEnd
@@ -135,12 +149,20 @@ static float SLEEP_TIME_SECOND = 10.5f;
     for (id<NarouDownloadQueueDelegate> handler in m_DownloadEventHandlerList){
         [handler DownloadEnd];
     }
+    for (NSString* ncode in m_DownloadEventHandlerDictionary) {
+        id<NarouDownloadQueueDelegate> ncodeHandler = [m_DownloadEventHandlerDictionary objectForKey:ncode];
+        [ncodeHandler DownloadEnd];
+    }
 }
 /// DownloadStatusUpdate イベントを発生させます。
 - (void)KickDownloadStatusUpdate:(NarouContentCacheData*)content n:(int)n maxpos:(int)maxpos
 {
     for (id<NarouDownloadQueueDelegate> handler in m_DownloadEventHandlerList){
         [handler DownloadStatusUpdate:content currentPosition:n maxPosition:maxpos];
+    }
+    id<NarouDownloadQueueDelegate> ncodeHandler = [m_DownloadEventHandlerDictionary objectForKey:content.ncode];
+    if (ncodeHandler != nil) {
+        [ncodeHandler DownloadStatusUpdate:content currentPosition:n maxPosition:maxpos];
     }
 }
 

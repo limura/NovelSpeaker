@@ -36,7 +36,7 @@
         coreDataState.currentReadingStory = nil;
         return true;
     }
-    
+    // TODO: これは内部で dispatch_sync() を呼ぶので上で dispatch_sync() が呼ばれてるとデッドロックになります。
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:self.currentReadingStory.ncode];
     if (content == nil) {

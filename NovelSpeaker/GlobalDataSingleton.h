@@ -101,7 +101,7 @@
 /// 現在ダウンロード中のコンテンツ情報を取得します。
 - (NarouContentCacheData*)GetCurrentDownloadingInfo;
 
-/// 現在ダウンロード待ち中のコンテンツ情報のリストを取得します。
+/// 現在ダウンロード待ち中のNarouContentCacheDataのリストを取得します。
 - (NSArray*) GetCurrentDownloadWaitingInfo;
 
 /// CoreData で保存している Story のうち、Ncode と chapter_number で検索した結果
@@ -112,6 +112,11 @@
 /// Story を新しく生成します。必要な情報をすべて伝える必要があります。
 /// private method になりました。
 //- (Story*) CreateNewStory:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
+
+/// 指定されたStoryの情報を更新します。(dispatch_sync で囲っていない版)
+/// CoreData側に登録されていなければ新規に作成し、
+/// 既に登録済みであれば情報を更新します。
+- (BOOL)UpdateStoryThreadUnsafe:(NSString*)content chapter_number:(int)chapter_number parentContent:(NarouContentCacheData *)parentContent;
 
 /// 指定されたStoryの情報を更新します。
 /// CoreData側に登録されていなければ新規に作成し、
@@ -132,6 +137,13 @@
 
 /// ダウンロードイベントハンドラから削除します。
 - (BOOL)DeleteDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
+
+/// ダウンロード周りのイベントハンドラ用のdelegateに追加します。(ncode で絞り込む版)
+- (BOOL)AddDownloadEventHandlerWithNcode:(NSString*)string handler:(id<NarouDownloadQueueDelegate>)handler;
+
+/// ダウンロード周りのイベントハンドラ用のdelegateから削除します。(ncode で絞り込む版)
+- (BOOL)DeleteDownloadEventHandlerWithNcode:(NSString*)string;
+
 
 /// 現在ダウンロード待ち中のものから、ncode を持つものをリストから外します。
 - (BOOL)DeleteDownloadQueue:(NSString*)ncode;
@@ -205,5 +217,11 @@
 
 /// 読み上げ時の読み替え設定を削除します。
 - (BOOL)DeleteSpeechModSetting:(SpeechModSettingCacheData*)modSetting;
+
+/// CoreData のマイグレーションが必要かどうかを確認します。
+- (BOOL)isRequiredCoreDataMigration;
+
+/// CoreData のマイグレーションを実行します。
+- (void)doCoreDataMigration;
 
 @end

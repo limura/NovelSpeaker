@@ -36,14 +36,13 @@ static GlobalDataSingleton* _singleton = nil;
     m_ManagedObjectContextPerThreadDictionary = [NSMutableDictionary new];
     m_MainManagedObjectContextHolderThreadID = nil;
 
-    /// NiftySpeaker は default config が必要です。
+    // NiftySpeaker は default config が必要ですが、これには core data の値を使いません。
+    // (というか使わないでおかないとマイグレーションの時にひどいことになります)
     SpeechConfig* speechConfig = [SpeechConfig new];
-    GlobalState* globalState = [self GetCoreDataGlobalStateThreadUnsafe];
-    speechConfig.pitch = [globalState.defaultPitch floatValue];
-    speechConfig.rate = [globalState.defaultRate floatValue];
+    speechConfig.pitch = 1.0f;
+    speechConfig.rate = 1.0f;
     speechConfig.beforeDelay = 0.0f;
     m_NiftySpeaker = [[NiftySpeaker alloc] initWithSpeechConfig:speechConfig];;
-    [self InitializeNiftySpeaker];
 
     AVAudioSession* session = [AVAudioSession sharedInstance];
     NSError* err = nil;
@@ -74,12 +73,6 @@ static GlobalDataSingleton* _singleton = nil;
         [_singleton InitializeData];
     });
     return _singleton;
-}
-
-/// NiftySpeaker を初期化します
-- (void) InitializeNiftySpeaker
-{
-    [self ReloadSpeechSetting];
 }
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
@@ -414,6 +407,17 @@ static GlobalDataSingleton* _singleton = nil;
     return true;
 }
 
+/// ダウンロード周りのイベントハンドラ用のdelegateに追加します。(ncode で絞り込む版)
+- (BOOL)AddDownloadEventHandlerWithNcode:(NSString*)string handler:(id<NarouDownloadQueueDelegate>)handler
+{
+    return [m_DownloadQueue AddDownloadEventHandlerWithNcode:string handler:handler];
+}
+/// ダウンロード周りのイベントハンドラ用のdelegateから削除します。(ncode で絞り込む版)
+- (BOOL)DeleteDownloadEventHandlerWithNcode:(NSString*)string
+{
+    return [m_DownloadQueue DelDownloadEventHandlerWithNcode:string];
+}
+
 
 /// 現在ダウンロード待ち中のものから、ncode を持つものをリストから外します。
 - (BOOL)DeleteDownloadQueue:(NSString*)ncode
@@ -491,6 +495,33 @@ static GlobalDataSingleton* _singleton = nil;
     return story;
 }
 
+/// 指定されたStoryの情報を更新します。(dispatch_sync で囲っていない版)
+/// CoreData側に登録されていなければ新規に作成し、
+/// 既に登録済みであれば情報を更新します。
+- (BOOL)UpdateStoryThreadUnsafe:(NSString*)content chapter_number:(int)chapter_number parentContent:(NarouContentCacheData *)parentContent
+{
+    if (parentContent == nil || content == nil) {
+        return false;
+    }
+    
+    BOOL result = false;
+    NarouContent* parentCoreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:parentContent.ncode];
+    if (parentCoreDataContent == nil) {
+        result = false;
+    }else{
+        Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:parentContent.ncode chapter_no:chapter_number];
+        if (coreDataStory == nil) {
+            coreDataStory = [self CreateNewStoryThreadUnsafe:parentCoreDataContent content:content chapter_number:  chapter_number];
+        }
+        coreDataStory.content = content;
+        coreDataStory.parentContent = parentCoreDataContent;
+        coreDataStory.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
+        result = true;
+    }
+
+    return result;
+}
+
 /// 指定されたStoryの情報を更新します。
 /// CoreData側に登録されていなければ新規に作成し、
 /// 既に登録済みであれば情報を更新します。
@@ -502,19 +533,7 @@ static GlobalDataSingleton* _singleton = nil;
     
     __block BOOL result = false;
     dispatch_sync(m_CoreDataAccessQueue, ^{
-        NarouContent* parentCoreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:parentContent.ncode];
-        if (parentCoreDataContent == nil) {
-            result = false;
-        }else{
-            Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:parentContent.ncode chapter_no:chapter_number];
-            if (coreDataStory == nil) {
-                coreDataStory = [self CreateNewStoryThreadUnsafe:parentCoreDataContent content:content chapter_number:  chapter_number];
-            }
-            coreDataStory.content = content;
-            coreDataStory.parentContent = parentCoreDataContent;
-            coreDataStory.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
-            result = true;
-        }
+        result = [self UpdateStoryThreadUnsafe:content chapter_number:chapter_number parentContent:parentContent];
     });
     
     return result;
@@ -766,9 +785,12 @@ static GlobalDataSingleton* _singleton = nil;
                               , @"真っ暗", @"まっくら"
                               , @"行って", @"いって"
                               , @"行く", @"いく"
+                              , @"行った", @"いった"
                               , @"小柄", @"こがら"
                               , @"召喚獣", @"ショウカンジュウ"
                               , @"お米", @"おこめ"
+                              , @"三々五々", @"さんさんごご"
+                              , @"漏ら", @"もら"
 
                               , @"直継", @"ナオツグ"
                               , @"にゃん太", @"ニャンタ"
@@ -1213,6 +1235,37 @@ static GlobalDataSingleton* _singleton = nil;
     [self saveContext];
     return result;
 }
+
+/// CoreData のマイグレーションが必要かどうかを確認します。
+- (BOOL)isRequiredCoreDataMigration
+{
+    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"SettingDataModel.sqlite"];
+    NSError* error = nil;
+    
+    NSDictionary* sourceMetaData =
+    [NSPersistentStoreCoordinator metadataForPersistentStoreOfType:NSSQLiteStoreType
+                                                               URL:storeURL
+                                                             error:&error];
+    if (sourceMetaData == nil) {
+        return NO;
+    } else if (error) {
+        NSLog(@"Checking migration was failed (%@, %@)", error, [error userInfo]);
+        abort();
+    }
+    
+    BOOL isCompatible = [self.managedObjectModel isConfiguration:nil
+                                        compatibleWithStoreMetadata:sourceMetaData]; 
+    
+    return !isCompatible;
+}
+
+/// CoreData のマイグレーションを実行します。
+- (void)doCoreDataMigration
+{
+    // core data のデータを使えば勝手にマイグレーションが走ります。
+    [self GetGlobalState];
+}
+
 
 #pragma mark - Core Data stack
 

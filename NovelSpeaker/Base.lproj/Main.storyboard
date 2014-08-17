@@ -826,7 +826,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="miF-Ra-PIu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1352" y="15"/>
+            <point key="canvasLocation" x="-1352" y="109"/>
         </scene>
         <!--Book Shelf Table View Controller - 本棚-->
         <scene sceneID="RKf-an-ikt">

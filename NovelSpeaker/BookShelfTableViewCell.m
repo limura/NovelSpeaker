@@ -20,7 +20,7 @@
 
 - (void)dealloc
 {
-    [[GlobalDataSingleton GetInstance] DeleteDownloadEventHandler:self];
+    [[GlobalDataSingleton GetInstance] DeleteDownloadEventHandlerWithNcode:m_Ncode];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
@@ -30,50 +30,95 @@
     // Configure the view for the selected state
 }
 
-///
-- (void)initWithTitleLabel:(NSString*)titleLabel ncode:(NSString*)ncode
+- (void)UpdateActivityIndicator
 {
-    self.TitleLabel.text = titleLabel;
-    self.TitleLabel.hidden = NO;
-    self.NewIndicatorLabel.hidden = YES;
-    self.DownloadProgressView.hidden = YES;
-    self.DownloadActivityIndicatorView.hidden = YES;
-    
-    [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
-    
+    BOOL hit = false;
+
+    NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] GetCurrentDownloadingInfo];
+    if (content == nil || [content.ncode compare:m_Ncode] != NSOrderedSame) {
+        hit = false;
+    }else{
+        hit = true;
+    }
+
+    if (hit == false) {
+        NSArray* downloadList = [[GlobalDataSingleton GetInstance] GetCurrentDownloadWaitingInfo];
+        for (NarouContentCacheData* content in downloadList) {
+            if ([content.ncode compare:m_Ncode] == NSOrderedSame) {
+                hit = true;
+                break;
+            }
+        }
+    }
+
+    if (hit) {
+        self.ActivityIndicator.hidden = NO;
+        if (![self.ActivityIndicator isAnimating]) {
+            [self.ActivityIndicator startAnimating];
+        }
+    }else{
+        self.ActivityIndicator.hidden = YES;
+    }
+}
+
+///
+- (void)setTitleLabel:(NSString*)titleLabel ncode:(NSString*)ncode
+{
     m_Ncode = ncode;
+    m_MainDispatchQueue = dispatch_get_main_queue();
+
+    self.TitleLabel.text = titleLabel;
+    self.NewImaveView.hidden = YES;
+    
+    [self UpdateActivityIndicator];
+    
+    NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] GetCurrentDownloadingInfo];
+    if (content == nil || [content.ncode compare:ncode] != NSOrderedSame) {
+        self.DownloadProgressView.hidden = YES;
+    }else{
+        self.DownloadProgressView.hidden = NO;
+    }
+    
+    [[GlobalDataSingleton GetInstance] AddDownloadEventHandlerWithNcode:ncode handler:self];
 }
 
 /// New! のインジケータを点けます
 - (void)NewIndicatorEnable
 {
-    self.NewIndicatorLabel.hidden = NO;
+    dispatch_async(m_MainDispatchQueue, ^{
+        self.NewImaveView.hidden = NO;
+    });
 }
 
 /// New! のインジケータを消します
 - (void)NewIndicatorDisable
 {
-    self.NewIndicatorLabel.hidden = YES;
+    dispatch_async(m_MainDispatchQueue, ^{
+        self.NewImaveView.hidden = YES;
+    });
 }
 
 // 個々の章のダウンロードが行われようとする度に呼び出されます。
 - (void)DownloadStatusUpdate:(NarouContentCacheData*)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
 {
-    if (content == nil || content.ncode == nil || ![content.ncode isEqualToString:m_Ncode] || maxPosition == 0) {
-        self.DownloadProgressView.hidden = YES;
-        self.DownloadActivityIndicatorView.hidden = YES;
-        return;
-    }
-    float progress = (float)currentPosition / (float)maxPosition;
-    self.DownloadProgressView.progress = progress;
-    self.DownloadProgressView.hidden = NO;
-    self.DownloadActivityIndicatorView.hidden = NO;
+    dispatch_async(m_MainDispatchQueue, ^{
+        [self UpdateActivityIndicator];
+        if (content == nil || content.ncode == nil || ![content.ncode isEqualToString:m_Ncode] || maxPosition == 0) {
+            self.DownloadProgressView.hidden = YES;
+            return;
+        }
+        float progress = (float)currentPosition / (float)maxPosition;
+        self.DownloadProgressView.progress = progress;
+        self.DownloadProgressView.hidden = NO;
+    });
 }
 // 全ての download queue がなくなった時に呼び出されます。
 - (void)DownloadEnd
 {
-    self.DownloadProgressView.hidden = YES;
-    self.DownloadActivityIndicatorView.hidden = YES;
+    dispatch_async(m_MainDispatchQueue, ^{
+        self.DownloadProgressView.hidden = YES;
+        self.ActivityIndicator.hidden = YES;
+    });
 }
 
 

@@ -32,6 +32,12 @@
 		21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
 		2191637B199F4514003FF7FC /* SpeechModSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191637A199F4514003FF7FC /* SpeechModSettingsTableViewController.m */; };
 		2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */; };
+		2191638919A09658003FF7FC /* updateLabel.png in Resources */ = {isa = PBXBuildFile; fileRef = 2191638719A09658003FF7FC /* updateLabel.png */; };
+		2191638A19A09658003FF7FC /* updateLabel@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2191638819A09658003FF7FC /* updateLabel@2x.png */; };
+		2191638D19A09685003FF7FC /* newLabel.png in Resources */ = {isa = PBXBuildFile; fileRef = 2191638B19A09685003FF7FC /* newLabel.png */; };
+		2191638E19A09685003FF7FC /* newLabel@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2191638C19A09685003FF7FC /* newLabel@2x.png */; };
+		2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */; };
+		2191639319A0B140003FF7FC /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2191639219A0B140003FF7FC /* coreDataMigration.storyboard */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
 		21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -131,6 +137,13 @@
 		2191637A199F4514003FF7FC /* SpeechModSettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSettingsTableViewController.m; sourceTree = "<group>"; };
 		2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateSpeechModSettingViewController.h; sourceTree = "<group>"; };
 		2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateSpeechModSettingViewController.m; sourceTree = "<group>"; };
+		2191638719A09658003FF7FC /* updateLabel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = updateLabel.png; sourceTree = "<group>"; };
+		2191638819A09658003FF7FC /* updateLabel@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "updateLabel@2x.png"; sourceTree = "<group>"; };
+		2191638B19A09685003FF7FC /* newLabel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = newLabel.png; sourceTree = "<group>"; };
+		2191638C19A09685003FF7FC /* newLabel@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "newLabel@2x.png"; sourceTree = "<group>"; };
+		2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataMigrationViewController.h; sourceTree = "<group>"; };
+		2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMigrationViewController.m; sourceTree = "<group>"; };
+		2191639219A0B140003FF7FC /* coreDataMigration.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = coreDataMigration.storyboard; sourceTree = "<group>"; };
 		21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechRegexPitchSetting.h; sourceTree = "<group>"; };
 		21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechRegexPitchSetting.m; sourceTree = "<group>"; };
 		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
@@ -265,6 +278,10 @@
 		21B53A1819619BE7009658B7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				2191638719A09658003FF7FC /* updateLabel.png */,
+				2191638819A09658003FF7FC /* updateLabel@2x.png */,
+				2191638B19A09685003FF7FC /* newLabel.png */,
+				2191638C19A09685003FF7FC /* newLabel@2x.png */,
 				21C74F931964502A0039A706 /* arrow_down.png */,
 				21C74F941964502A0039A706 /* arrow_down@2x.png */,
 				21B53A2519619D23009658B7 /* app_globe.png */,
@@ -342,12 +359,13 @@
 		21F054D21917E0F200CC6BA9 /* NovelSpeaker */ = {
 			isa = PBXGroup;
 			children = (
-				211BA5F219973AAD00560842 /* TextSpeech */,
-				21E294E91970E2D00012A3AA /* DataModel */,
-				21B53A1819619BE7009658B7 /* Resources */,
 				21F054DB1917E0F200CC6BA9 /* AppDelegate.h */,
 				21F054DC1917E0F200CC6BA9 /* AppDelegate.m */,
 				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
+				2191639219A0B140003FF7FC /* coreDataMigration.storyboard */,
+				211BA5F219973AAD00560842 /* TextSpeech */,
+				21E294E91970E2D00012A3AA /* DataModel */,
+				21B53A1819619BE7009658B7 /* Resources */,
 				4E776B17196247BE00C36AD1 /* ViewControllers */,
 				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
@@ -421,6 +439,8 @@
 				2191637A199F4514003FF7FC /* SpeechModSettingsTableViewController.m */,
 				2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */,
 				2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */,
+				2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */,
+				2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -514,7 +534,11 @@
 				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
 				21916365199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.xib in Resources */,
 				21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */,
+				2191638D19A09685003FF7FC /* newLabel.png in Resources */,
+				2191638A19A09658003FF7FC /* updateLabel@2x.png in Resources */,
+				2191638919A09658003FF7FC /* updateLabel.png in Resources */,
 				21916358199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.xib in Resources */,
+				2191638E19A09685003FF7FC /* newLabel@2x.png in Resources */,
 				21B53A2819619D23009658B7 /* app_globe.png in Resources */,
 				21724EEC1972CCFE00DF6DC4 /* BookShelfTableViewCell.xib in Resources */,
 				21B53A1C19619C00009658B7 /* sound.png in Resources */,
@@ -523,6 +547,7 @@
 				21F054E01917E0F200CC6BA9 /* Main.storyboard in Resources */,
 				21C74F961964502A0039A706 /* arrow_down.png in Resources */,
 				21B53A1D19619C00009658B7 /* sound@2x.png in Resources */,
+				2191639319A0B140003FF7FC /* coreDataMigration.storyboard in Resources */,
 				2191635D199DFECA003FF7FC /* SpeakSettingEditTableViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -578,6 +603,7 @@
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
+				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,
 				21916368199E5D43003FF7FC /* SettingsTableViewController.m in Sources */,
 				217F6E1C1942F14B008E432E /* Speaker.m in Sources */,
 			);

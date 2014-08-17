@@ -20,6 +20,17 @@
     {
         return NO;
     }
+    UIViewController* toplevelViewController = nil;
+    if ([globalData isRequiredCoreDataMigration]) {
+        UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"coreDataMigration" bundle:nil];
+        toplevelViewController = [storyboard instantiateInitialViewController];
+    }else{
+        UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        toplevelViewController = [storyboard instantiateInitialViewController];
+    }
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.window.rootViewController = toplevelViewController;
+    [self.window makeKeyAndVisible];
     
     return YES;
 }

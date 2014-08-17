@@ -42,7 +42,9 @@
     
     self.ChapterSlider.minimumValue = 1;
     self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] - 0.5f;
-    
+
+    // 読み上げ設定をloadします。
+    [[GlobalDataSingleton GetInstance] ReloadSpeechSetting];
     // 読み上げる文章を設定します。
     [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
     

@@ -13,15 +13,16 @@ static NSString* const BookShelfTableViewCellID = @"BookShelfTableViewCell";
 
 @interface BookShelfTableViewCell : UITableViewCell<NarouDownloadQueueDelegate>
 {
+    dispatch_queue_t m_MainDispatchQueue;
     NSString* m_Ncode;
 }
 
 @property (weak, nonatomic) IBOutlet UILabel *TitleLabel;
-@property (weak, nonatomic) IBOutlet UILabel *NewIndicatorLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *NewImaveView;
 @property (weak, nonatomic) IBOutlet UIProgressView *DownloadProgressView;
-@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *DownloadActivityIndicatorView;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *ActivityIndicator;
 
-- (void)initWithTitleLabel:(NSString*)titleLabel ncode:(NSString*)ncode;
+- (void)setTitleLabel:(NSString*)titleLabel ncode:(NSString*)ncode;
 
 - (void)NewIndicatorEnable;
 

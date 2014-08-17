@@ -38,6 +38,9 @@
     /// download event handler list
     NSMutableArray* m_DownloadEventHandlerList;
     
+    /// ncode match での download event handler list
+    NSMutableDictionary* m_DownloadEventHandlerDictionary;
+    
     /// 現在ダウンロード中のものの情報
     NarouContentCacheData* m_CurrentDownloadContentAllData;
     
@@ -50,6 +53,11 @@
 /// ダウンロード周りのイベントハンドラ用のdelegateから削除します。
 - (BOOL)DelDownloadEventHandler:(id<NarouDownloadQueueDelegate>)handler;
 
+/// ダウンロード周りのイベントハンドラ用のdelegateに追加します。(ncode で絞り込む版)
+- (BOOL)AddDownloadEventHandlerWithNcode:(NSString*)string handler:(id<NarouDownloadQueueDelegate>)handler;
+/// ダウンロード周りのイベントハンドラ用のdelegateから削除します。(ncode で絞り込む版)
+- (BOOL)DelDownloadEventHandlerWithNcode:(NSString*)string;
+
 /// ダウンロード用のthreadを起動します
 - (BOOL)StartDownloadThread;
 
@@ -59,13 +67,13 @@
 /// ncode のコンテンツをダウンロードをqueueに入れます。
 - (BOOL)AddDownloadQueue:(NarouContentCacheData*)ncode;
 
-/// 現在ダウンロード待ち中の NarouContentAllData* のリストを返します。
+/// 現在ダウンロード待ち中の NarouContentCacheData* のリストを返します。
 - (NSArray*)GetCurrentWaitingList;
 
 /// 現在ダウンロード待ち中のものから、ncode を持つものをリストから外します。
 - (BOOL)DeleteDownloadQueue:(NSString*)ncode;
 
-/// 現在ダウンロード中のNarouContentAllDataを取得します。
+/// 現在ダウンロード中のNarouContentCacheDataを取得します。
 /// 何もダウンロードしていなければ nil が帰ります。
 - (NarouContentCacheData*)GetCurrentDownloadingInfo;
 

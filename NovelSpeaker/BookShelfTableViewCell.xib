@@ -14,34 +14,35 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="小説名" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bz6-pW-kKv">
-                        <rect key="frame" x="16" y="11" width="257" height="21"/>
+                        <rect key="frame" x="20" y="11" width="294" height="21"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                        <nil key="highlightedColor"/>
-                    </label>
-                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="New!" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="L2s-gu-cjG">
-                        <rect key="frame" x="281" y="11" width="39" height="21"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                        <color key="textColor" red="1" green="0.12889330165038104" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="iqU-Yx-hCq">
                         <rect key="frame" x="11" y="35" width="303" height="2"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     </progressView>
-                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="YP8-ED-o67">
+                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="ZQR-BS-LAx">
                         <rect key="frame" x="277" y="3" width="37" height="37"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <color key="color" cocoaTouchSystemColor="darkTextColor"/>
                     </activityIndicatorView>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="updateLabel.png" translatesAutoresizingMaskIntoConstraints="NO" id="hmn-wc-hjO">
+                        <rect key="frame" x="277" y="0.0" width="43" height="43"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    </imageView>
                 </subviews>
             </tableViewCellContentView>
             <connections>
-                <outlet property="DownloadActivityIndicatorView" destination="YP8-ED-o67" id="zvA-cw-yrq"/>
+                <outlet property="ActivityIndicator" destination="ZQR-BS-LAx" id="nko-UW-8G3"/>
                 <outlet property="DownloadProgressView" destination="iqU-Yx-hCq" id="aNt-eO-aBc"/>
-                <outlet property="NewIndicatorLabel" destination="L2s-gu-cjG" id="62e-gB-l4A"/>
+                <outlet property="NewImaveView" destination="hmn-wc-hjO" id="hIL-bI-p9M"/>
                 <outlet property="TitleLabel" destination="Bz6-pW-kKv" id="NhK-H1-Hp1"/>
             </connections>
         </tableViewCell>
     </objects>
+    <resources>
+        <image name="updateLabel.png" width="43" height="43"/>
+    </resources>
 </document>
