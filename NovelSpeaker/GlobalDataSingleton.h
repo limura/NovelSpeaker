@@ -40,6 +40,11 @@
     
     // 次回読み上げ時に読み上げ設定を読み直すべきか否か
     BOOL m_isNeedReloadSpeakSetting;
+    
+    /// thread毎の NSManagedObjectContext
+    NSMutableDictionary* m_ManagedObjectContextPerThreadDictionary;
+    /// 最初に作られた thread が main の NSManagedObjectContext として登録される
+    NSString* m_MainManagedObjectContextHolderThreadID;
 }
 
 /// シングルトンを取得します。

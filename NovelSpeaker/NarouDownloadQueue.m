@@ -214,10 +214,10 @@ static float SLEEP_TIME_SECOND = 10.5f;
             m_CurrentDownloadContentAllData.current_download_complete_count = n;
         });
 
-        NSLog(@"Story の query をかけます。");
+        //NSLog(@"Story の query をかけます。");
         // 既に読みこんであるか否かを判定します。
         StoryCacheData* story = [[GlobalDataSingleton GetInstance] SearchStory:localContent.ncode chapter_no:n];
-        NSLog(@"Story の query が終わりました。");
+        //NSLog(@"Story の query が終わりました。");
         if (story != nil) {
             // 何かデータがありました。
             if ([self isValidStory:story] == false) {
@@ -228,7 +228,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
                 NSLog(@"content: %p", localContent);
             }else{
                 // 既に読み込んであるようなので読み込まないで良いことにします。
-                NSLog(@"読み込み済みなのでスキップします。%d/%d %@", n, max_content_count, localContent.title);
+                //NSLog(@"読み込み済みなのでスキップします。%d/%d %@", n, max_content_count, localContent.title);
                 continue;
             }
         }
@@ -249,7 +249,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
             break;
         }
         // ダウンロードします。
-        NSLog(@"download start %d %@", n, downloadURL);
+        //NSLog(@"download start %d %@", n, downloadURL);
         m_DownloadCount += 1;
         NSString* text = [NarouLoader TextDownload:downloadURL count:n];
         if (text == nil) {
@@ -257,9 +257,11 @@ static float SLEEP_TIME_SECOND = 10.5f;
             NSLog(@"text download failed. ncode: %@, download in %d/%d", localContent.ncode, n, max_content_count);
             return false;
         }
-        NSLog(@"create new story: %d, %@", n, localContent.title);
+        //NSLog(@"create new story: %d, %@", n, localContent.title);
         // コンテンツを生成します。
         [[GlobalDataSingleton GetInstance] UpdateStory:text chapter_number:n parentContent:localContent];
+        // 保存を走らせます。(でないと main thread側 の core data に反映されません……(´・ω・`)
+        [[GlobalDataSingleton GetInstance] saveContext];
    }
    // すべてのダウンロードが完了したら、nil で状態を更新します。
     dispatch_async(m_MainDispatchQueue, ^{
