@@ -93,6 +93,7 @@
     if (contentList == nil) {
         return 0;
     }
+    NSLog(@"numberOfRowsInSection called return %lu", (unsigned long)[contentList count]);
     return [contentList count];
 }
 
@@ -192,6 +193,22 @@
 }
 */
 
+/// NavigationController で戻ってきた時とかに呼び出される
+- (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+	[viewController viewWillAppear:animated];
+    
+    // 更新フラグとかを更新するために全部リロードしちゃいます
+    NSLog(@"didShowViewController: reloadData");
+    [self.tableView reloadData];
+}
+
+- (void)navigationController:(UINavigationController *)navigationController didShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+	[viewController viewWillAppear:animated];
+
+    // 更新フラグとかを更新するために全部リロードしちゃいます
+    NSLog(@"didShowViewController: reloadData");
+    [self.tableView reloadData];
+}
 
 #pragma mark - Navigation
 

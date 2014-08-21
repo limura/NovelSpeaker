@@ -208,12 +208,18 @@ static GlobalDataSingleton* _singleton = nil;
         // 何もなかった。
         return nil;
     }
-    if([fetchResults count] != 1)
+    if([fetchResults count] > 1)
     {
-        NSLog(@"duplicate ncode!!! %@", ncode);
+        NSLog(@"duplicate ncode!!! %@ delete all content...", ncode);
+        for (int i = 0; i < [fetchResults count]; i++) {
+            NarouContent* targetContent = [fetchResults objectAtIndex:i];
+            @synchronized(_persistentStoreCoordinator){
+                [self.managedObjectContext deleteObject:targetContent];
+            }
+        }
         return nil;
     }
-    return fetchResults[0];
+    return [fetchResults objectAtIndex:0];
 }
 
 /// CoreData で保存している NarouContent のうち、Ncode で検索した結果
@@ -228,6 +234,10 @@ static GlobalDataSingleton* _singleton = nil;
             result = [[NarouContentCacheData alloc] initWithCoreData:coreDataContent];
         }
     });
+    /// TODO: 何故か nil が帰ってくるときは、duplicate ncode で消されてる可能性があるのでsaveしておきます。
+    if (result == nil) {
+        [self saveContext];
+    }
     return result;
 }
 
@@ -342,7 +352,10 @@ static GlobalDataSingleton* _singleton = nil;
     if (targetContentCacheData == nil) {
         // 登録がないようなのでとりあえず NarouContent を登録します。
         dispatch_sync(m_CoreDataAccessQueue, ^{
-            NarouContent* targetContent = [self CreateNewNarouContentThreadUnsafe];
+            NarouContent* targetContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:targetNcode];
+            if (targetContent == nil) {
+                targetContent = [self CreateNewNarouContentThreadUnsafe];
+            }
             targetContent.title = content.title;
             targetContent.ncode = content.ncode;
             targetContent.userid = content.userid;
@@ -360,6 +373,8 @@ static GlobalDataSingleton* _singleton = nil;
             targetContent.sasie_cnt = content.sasie_cnt;
             targetContent.novelupdated_at = content.novelupdated_at;
             targetContentCacheData = [[NarouContentCacheData alloc] initWithCoreData:targetContent];
+            // 新しく作ったので save して main thread と sync しておきます。
+            [self saveContextThreadUnsafe];
         });
     }
     
@@ -684,8 +699,10 @@ static GlobalDataSingleton* _singleton = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         Story* nextCoreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:target_chapter_number];
         if (nextCoreDataStory != nil) {
+            NSLog(@"chapter: %d is alive", target_chapter_number);
             result = [[StoryCacheData alloc] initWithCoreData:nextCoreDataStory];
         }
+        NSLog(@"chapter: %d is NOT alive", target_chapter_number);
     });
     return result;
 }
@@ -791,6 +808,13 @@ static GlobalDataSingleton* _singleton = nil;
                               , @"お米", @"おこめ"
                               , @"三々五々", @"さんさんごご"
                               , @"漏ら", @"もら"
+                              , @"魔人", @"まじん"
+                              , @"異次元", @"いじげん"
+                              , @"爆炎", @"ばくえん"
+                              , @"大賢者", @"だいけんじゃ"
+                              , @"分身", @"ぶんしん"
+                              , @"シュミレー", @"シミュレー"
+                              , @"お米", @"おこめ"
 
                               , @"直継", @"ナオツグ"
                               , @"にゃん太", @"ニャンタ"
@@ -816,14 +840,54 @@ static GlobalDataSingleton* _singleton = nil;
     return true;
 }
 
+/// ncode の new flag を落とします。
+- (void)DropNewFlag:(NSString*)ncode
+{
+    __block bool isNeedSave = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        NarouContent* content = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:ncode];
+        if ([content.is_new_flug boolValue] == true) {
+            NSLog(@"new flag drop: %@", ncode);
+            content.is_new_flug = [[NSNumber alloc] initWithBool:false];
+            isNeedSave = true;
+        }
+    });
+    if (isNeedSave) {
+        [self saveContext];
+    }
+}
+
+/// &amp; を & とかに変換します
+- (NSString*)UnescapeHTMLEntities:(NSString*)str
+{
+    NSString    *returnStr = nil;
+    
+    if( str )
+    {
+        returnStr = [ str stringByReplacingOccurrencesOfString:@"&amp;" withString: @"&"  ];
+        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""  ];
+        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&#x27;" withString:@"'"  ];
+        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&#x39;" withString:@"'"  ];
+        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&#x92;" withString:@"'"  ];
+        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&#x96;" withString:@"'"  ];
+        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"  ];
+        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"  ];
+        returnStr = [ [ NSString alloc ] initWithString:returnStr ];
+    }
+    
+    return returnStr;
+}
+
 /// 読み上げる文書を設定します。
 - (BOOL)SetSpeechStory:(StoryCacheData *)story
 {
-    if(![m_NiftySpeaker SetText:story.content])
+    
+    if(![m_NiftySpeaker SetText:[self UnescapeHTMLEntities:story.content]])
     {
         return false;
     }
     [self UpdatePlayingInfo:story];
+    [self DropNewFlag:story.ncode];
     NSRange range = NSMakeRange([story.readLocation unsignedLongValue], 0);
     return [m_NiftySpeaker UpdateCurrentReadingPoint:range];
 }
@@ -857,7 +921,7 @@ static GlobalDataSingleton* _singleton = nil;
 
     AVAudioSession* session = [AVAudioSession sharedInstance];
     NSError* err;
-    NSLog(@"setActive YES.");
+    //NSLog(@"setActive YES.");
     [session setActive:YES error:&err];
     if (err != nil) {
         NSLog(@"setActive error: %@ %@", err, err.userInfo);
@@ -869,7 +933,7 @@ static GlobalDataSingleton* _singleton = nil;
 - (BOOL)StopSpeech
 {
     AVAudioSession* session = [AVAudioSession sharedInstance];
-    NSLog(@"setActive NO.");
+    //NSLog(@"setActive NO.");
     [session setActive:NO error:nil];
     if([m_NiftySpeaker StopSpeech] == false)
     {
@@ -917,28 +981,33 @@ static GlobalDataSingleton* _singleton = nil;
     return YES;
 }
 
-- (void)saveContext
+- (void)saveContextThreadUnsafe
 {
-    dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSError *error = nil;
-        NSManagedObjectContext *managedObjectContext = self.managedObjectContext;
-        if (managedObjectContext != nil) {
-            //NSLog(@"%@ saveContext %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-            @synchronized(_persistentStoreCoordinator){
-                [[NSNotificationCenter defaultCenter] addObserver:self
-                                                         selector:@selector(backgroundContextDidSave:)
-                                                             name:NSManagedObjectContextDidSaveNotification
-                                                           object:managedObjectContext];
+    NSError *error = nil;
+    NSManagedObjectContext *managedObjectContext = self.managedObjectContext;
+    if (managedObjectContext != nil) {
+        //NSLog(@"%@ saveContext %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
+        @synchronized(_persistentStoreCoordinator){
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(backgroundContextDidSave:)
+                                                         name:NSManagedObjectContextDidSaveNotification
+                                                       object:managedObjectContext];
             if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
                 NSLog(@"Unresolved error. save failed. %@, %@", error, [error userInfo]);
                 abort();
             }
-            }
-            [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                            name:NSManagedObjectContextDidSaveNotification
-                                                          object:managedObjectContext];
-            //NSLog(@"%@ out saveContext %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 5, __FUNCTION__);
         }
+        [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                        name:NSManagedObjectContextDidSaveNotification
+                                                      object:managedObjectContext];
+        //NSLog(@"%@ out saveContext %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 5, __FUNCTION__);
+    }
+}
+
+- (void)saveContext
+{
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        [self saveContextThreadUnsafe];
     });
     NSLog(@"CoreData saved.");
 }

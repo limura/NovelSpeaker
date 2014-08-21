@@ -55,6 +55,7 @@
     self.current_download_complete_count = 0;
     self.reading_chapter = [[NSNumber alloc] initWithInt:1];
     self.currentReadingStory = nil;
+    self.is_new_flug = [[NSNumber alloc] initWithBool:false];
 
     return self;
 }
@@ -81,6 +82,7 @@
     self.sasie_cnt = coreDatacontent.sasie_cnt;
     self.novelupdated_at = coreDatacontent.novelupdated_at;
     self.reading_chapter = coreDatacontent.reading_chapter;
+    self.is_new_flug = coreDatacontent.is_new_flug;
     
     self.current_download_complete_count = 0;
     
@@ -113,6 +115,7 @@
     content.sasie_cnt = self.sasie_cnt;
     content.novelupdated_at = self.novelupdated_at;
     content.reading_chapter = self.reading_chapter;
+    content.is_new_flug = self.is_new_flug;
     
     if (self.currentReadingStory == nil) {
         content.currentReadingStory = nil;

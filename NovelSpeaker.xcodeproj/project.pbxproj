@@ -38,6 +38,8 @@
 		2191638E19A09685003FF7FC /* newLabel@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2191638C19A09685003FF7FC /* newLabel@2x.png */; };
 		2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */; };
 		2191639319A0B140003FF7FC /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2191639219A0B140003FF7FC /* coreDataMigration.storyboard */; };
+		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
+		2191639C19A38643003FF7FC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 2191639B19A38643003FF7FC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
 		21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -76,7 +78,6 @@
 		21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */; };
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
 		21F7DE48197EB33A00BD2899 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE47197EB33A00BD2899 /* GlobalState.m */; };
-		21F7DE4B197EB33A00BD2899 /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE4A197EB33A00BD2899 /* NarouContent.m */; };
 		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
 		4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */; };
 /* End PBXBuildFile section */
@@ -144,6 +145,10 @@
 		2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataMigrationViewController.h; sourceTree = "<group>"; };
 		2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMigrationViewController.m; sourceTree = "<group>"; };
 		2191639219A0B140003FF7FC /* coreDataMigration.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = coreDataMigration.storyboard; sourceTree = "<group>"; };
+		2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 4.xcdatamodel"; sourceTree = "<group>"; };
+		2191639819A38414003FF7FC /* NarouContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NarouContent.h; path = DataModelMapping/NarouContent.h; sourceTree = "<group>"; };
+		2191639919A38414003FF7FC /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
+		2191639B19A38643003FF7FC /* SettingDataModelMapping_3to4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; name = SettingDataModelMapping_3to4.xcmappingmodel; path = DataModelMapping/SettingDataModelMapping_3to4.xcmappingmodel; sourceTree = "<group>"; };
 		21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechRegexPitchSetting.h; sourceTree = "<group>"; };
 		21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechRegexPitchSetting.m; sourceTree = "<group>"; };
 		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
@@ -198,8 +203,6 @@
 		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
 		21F7DE46197EB33A00BD2899 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
 		21F7DE47197EB33A00BD2899 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
-		21F7DE49197EB33A00BD2899 /* NarouContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NarouContent.h; path = DataModelMapping/NarouContent.h; sourceTree = "<group>"; };
-		21F7DE4A197EB33A00BD2899 /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
 		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
 		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
 		4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultTableViewController.h; sourceTree = "<group>"; };
@@ -252,6 +255,7 @@
 			isa = PBXGroup;
 			children = (
 				21E294E71970E2C40012A3AA /* SettingDataModelMapping_1to2.xcmappingmodel */,
+				2191639B19A38643003FF7FC /* SettingDataModelMapping_3to4.xcmappingmodel */,
 			);
 			name = MappingModel;
 			sourceTree = "<group>";
@@ -302,8 +306,8 @@
 				21F7DE47197EB33A00BD2899 /* GlobalState.m */,
 				2177634F19756781004F22FD /* GlobalStateCacheData.h */,
 				2177635019756781004F22FD /* GlobalStateCacheData.m */,
-				21F7DE49197EB33A00BD2899 /* NarouContent.h */,
-				21F7DE4A197EB33A00BD2899 /* NarouContent.m */,
+				2191639819A38414003FF7FC /* NarouContent.h */,
+				2191639919A38414003FF7FC /* NarouContent.m */,
 				21C74F9C1965A5300039A706 /* NarouContentCacheData.h */,
 				21C74F9D1965A5300039A706 /* NarouContentCacheData.m */,
 				2191636A199E65B9003FF7FC /* SpeakPitchConfig.h */,
@@ -573,9 +577,9 @@
 				21916364199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m in Sources */,
 				2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
-				21F7DE4B197EB33A00BD2899 /* NarouContent.m in Sources */,
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
 				21F7DE48197EB33A00BD2899 /* GlobalState.m in Sources */,
+				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
 				21E294E81970E2C40012A3AA /* SettingDataModelMapping_1to2.xcmappingmodel in Sources */,
 				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
 				2191637B199F4514003FF7FC /* SpeechModSettingsTableViewController.m in Sources */,
@@ -606,6 +610,7 @@
 				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,
 				21916368199E5D43003FF7FC /* SettingsTableViewController.m in Sources */,
 				217F6E1C1942F14B008E432E /* Speaker.m in Sources */,
+				2191639C19A38643003FF7FC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -830,11 +835,12 @@
 		21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */,
 				21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */,
 				21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */,
 				21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */,
 			);
-			currentVersion = 21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */;
+			currentVersion = 2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */;
 			path = SettingDataModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

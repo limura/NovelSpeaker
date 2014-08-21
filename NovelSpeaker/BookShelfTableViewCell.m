@@ -61,6 +61,17 @@
     }
 }
 
+- (void)UpdateNewLabel
+{
+    NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:m_Ncode];
+    if ([content.is_new_flug boolValue]) {
+        self.NewImaveView.hidden = NO;
+        NSLog(@"is new: %@", m_Ncode);
+    }else{
+        self.NewImaveView.hidden = YES;
+    }
+}
+
 ///
 - (void)setTitleLabel:(NSString*)titleLabel ncode:(NSString*)ncode
 {
@@ -71,6 +82,7 @@
     self.NewImaveView.hidden = YES;
     
     [self UpdateActivityIndicator];
+    [self UpdateNewLabel];
     
     NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] GetCurrentDownloadingInfo];
     if (content == nil || [content.ncode compare:ncode] != NSOrderedSame) {
@@ -82,27 +94,12 @@
     [[GlobalDataSingleton GetInstance] AddDownloadEventHandlerWithNcode:ncode handler:self];
 }
 
-/// New! のインジケータを点けます
-- (void)NewIndicatorEnable
-{
-    dispatch_async(m_MainDispatchQueue, ^{
-        self.NewImaveView.hidden = NO;
-    });
-}
-
-/// New! のインジケータを消します
-- (void)NewIndicatorDisable
-{
-    dispatch_async(m_MainDispatchQueue, ^{
-        self.NewImaveView.hidden = YES;
-    });
-}
-
 // 個々の章のダウンロードが行われようとする度に呼び出されます。
 - (void)DownloadStatusUpdate:(NarouContentCacheData*)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
 {
     dispatch_async(m_MainDispatchQueue, ^{
         [self UpdateActivityIndicator];
+        [self UpdateNewLabel];
         if (content == nil || content.ncode == nil || ![content.ncode isEqualToString:m_Ncode] || maxPosition == 0) {
             self.DownloadProgressView.hidden = YES;
             return;
@@ -118,6 +115,7 @@
     dispatch_async(m_MainDispatchQueue, ^{
         self.DownloadProgressView.hidden = YES;
         self.ActivityIndicator.hidden = YES;
+        [self UpdateNewLabel];
     });
 }
 

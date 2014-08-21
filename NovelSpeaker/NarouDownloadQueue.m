@@ -132,6 +132,10 @@ static float SLEEP_TIME_SECOND = 10.5f;
 /// ダウンロード周りのイベントハンドラ用のdelegateに追加します。
 - (BOOL)AddDownloadEventHandlerWithNcode:(NSString*)string handler:(id<NarouDownloadQueueDelegate>)handler
 {
+    if(string == nil)
+    {
+        return false;
+    }
     [m_DownloadEventHandlerDictionary setObject:handler forKey:string];
     return true;
 }
@@ -229,12 +233,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     int max_content_count = [localContent.general_all_no intValue];
         
     NSLog(@"download queue for %@ started max: %d", localContent.title, max_content_count);
-    for (int n = 1; n < max_content_count; n++) {
-        // ダウンロード状態を更新します。
-        dispatch_async(m_MainDispatchQueue, ^{
-            [self KickDownloadStatusUpdate:localContent n:n maxpos:max_content_count];
-            m_CurrentDownloadContentAllData.current_download_complete_count = n;
-        });
+    for (int n = 1; n <= max_content_count; n++) {
 
         //NSLog(@"Story の query をかけます。");
         // 既に読みこんであるか否かを判定します。
@@ -270,6 +269,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         if (m_isNeedQuit) {
             break;
         }
+
         // ダウンロードします。
         //NSLog(@"download start %d %@", n, downloadURL);
         m_DownloadCount += 1;
@@ -282,15 +282,32 @@ static float SLEEP_TIME_SECOND = 10.5f;
         //NSLog(@"create new story: %d, %@", n, localContent.title);
         // コンテンツを生成します。
         [[GlobalDataSingleton GetInstance] UpdateStory:text chapter_number:n parentContent:localContent];
+        // new flag を立てます
+        if ([localContent.is_new_flug boolValue] == false) {
+            localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
+            [[GlobalDataSingleton GetInstance] UpdateNarouContent:localContent];
+        }
         // 保存を走らせます。(でないと main thread側 の core data に反映されません……(´・ω・`)
         [[GlobalDataSingleton GetInstance] saveContext];
-   }
+
+        // ダウンロードされたので、ダウンロード状態を更新します。
+        dispatch_async(m_MainDispatchQueue, ^{
+            [self KickDownloadStatusUpdate:localContent n:n maxpos:max_content_count];
+            m_CurrentDownloadContentAllData.current_download_complete_count = n;
+        });
+    }
    // すべてのダウンロードが完了したら、nil で状態を更新します。
     dispatch_async(m_MainDispatchQueue, ^{
         [self KickDownloadStatusUpdate:nil n:0 maxpos:0];
         m_CurrentDownloadContentAllData = nil;
     });
-
+    
+    // ncode で監視している奴には ちゃんと DownloadEnd を送ってやります。
+    id<NarouDownloadQueueDelegate> ncodeHandler = [m_DownloadEventHandlerDictionary objectForKey:localContent.ncode];
+    if (ncodeHandler != nil) {
+        [ncodeHandler DownloadEnd];
+    }
+    
     return true;
 }
 

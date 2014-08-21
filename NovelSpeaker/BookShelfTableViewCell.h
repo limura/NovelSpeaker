@@ -24,9 +24,5 @@ static NSString* const BookShelfTableViewCellID = @"BookShelfTableViewCell";
 
 - (void)setTitleLabel:(NSString*)titleLabel ncode:(NSString*)ncode;
 
-- (void)NewIndicatorEnable;
-
-- (void)NewIndicatorDisable;
-
 
 @end

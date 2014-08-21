@@ -2,7 +2,7 @@
 //  NarouContent.h
 //  NovelSpeaker
 //
-//  Created by 飯村卓司 on 2014/07/22.
+//  Created by 飯村卓司 on 2014/08/19.
 //  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
 //
 
@@ -30,6 +30,7 @@
 @property (nonatomic, retain) NSString * title;
 @property (nonatomic, retain) NSString * userid;
 @property (nonatomic, retain) NSString * writer;
+@property (nonatomic, retain) NSNumber * is_new_flug;
 @property (nonatomic, retain) NSSet *childStory;
 @property (nonatomic, retain) Story *currentReadingStory;
 @end
