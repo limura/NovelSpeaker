@@ -988,18 +988,11 @@ static GlobalDataSingleton* _singleton = nil;
     if (managedObjectContext != nil) {
         //NSLog(@"%@ saveContext %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
         @synchronized(_persistentStoreCoordinator){
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(backgroundContextDidSave:)
-                                                         name:NSManagedObjectContextDidSaveNotification
-                                                       object:managedObjectContext];
             if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
                 NSLog(@"Unresolved error. save failed. %@, %@", error, [error userInfo]);
                 abort();
             }
         }
-        [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                        name:NSManagedObjectContextDidSaveNotification
-                                                      object:managedObjectContext];
         //NSLog(@"%@ out saveContext %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 5, __FUNCTION__);
     }
 }
@@ -1369,9 +1362,27 @@ static GlobalDataSingleton* _singleton = nil;
             context = [[NSManagedObjectContext alloc] init];
             [context setPersistentStoreCoordinator:coordinator];
         }
+        // 全部のthreadで同じselfを渡してNotificationを登録するならここ。
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(backgroundContextDidSave:)
+                                                     name:NSManagedObjectContextDidSaveNotification
+                                                   object:context];
         [m_ManagedObjectContextPerThreadDictionary setObject:context forKey:threadID];
         if (m_MainManagedObjectContextHolderThreadID == nil) {
             m_MainManagedObjectContextHolderThreadID = threadID;
+            // ここで backgroundContextDidSave をNotificationCenterに登録します。
+            // これで多分登録部分は一つに絞れると思うんだけれど、そもそも複数thredで同じselfを使ってる場合はどう対応させるといいんだろ？
+            /*
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                    selector:@selector(backgroundContextDidSave:)
+                                                        name:NSManagedObjectContextDidSaveNotification
+                                                       object:context];
+*/
+            // TODO:
+            //[[NSNotificationCenter defaultCenter] removeObserver:self
+            //                                      name:NSManagedObjectContextDidSaveNotification
+            //                                      object:managedObjectContext];
+            // ということを多分 dealloc あたりでやらないと駄目そうなのだけれどやってない。
         }
     }
     
