@@ -213,6 +213,32 @@ static float SLEEP_TIME_SECOND = 10.5f;
     return true;
 }
 
+/// ダウンロード状態が変わったことのアナウンスを行います。
+- (void)announceDownloadStatus:(NarouContentCacheData*)content n:(int)n maxPos:(int)maxPos
+{
+    NSDictionary* args = [[NSDictionary alloc] initWithObjectsAndKeys:
+                          [[NSNumber alloc] initWithBool:true], @"isDownloading"
+                          , [[NSNumber alloc] initWithInt:n], @"currentPosition"
+                          , [[NSNumber alloc] initWithInt:maxPos], @"maxPosition"
+                          , nil];
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentDownloadStatusChanged_%@", content.ncode];
+    NSNotification* notification = [NSNotification notificationWithName:notificationName object:self userInfo:args];
+    [notificationCenter postNotification:notification];
+}
+
+/// ダウンロード状態が終わった事のアナウンスを行います。
+- (void)announceDownloadStatusEnd:(NarouContentCacheData*)content
+{
+    NSDictionary* args = [[NSDictionary alloc] initWithObjectsAndKeys:
+                          [[NSNumber alloc] initWithBool:false], @"isDownloading"
+                          , nil];
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentDownloadStatusChanged_%@", content.ncode];
+    NSNotification* notification = [NSNotification notificationWithName:notificationName object:self userInfo:args];
+    [notificationCenter postNotification:notification];
+}
+
 /// ncode のコンテンツのダウンロードを開始します。
 - (BOOL)ChapterDownload:(NarouContentCacheData*)localContent
 {
@@ -295,12 +321,14 @@ static float SLEEP_TIME_SECOND = 10.5f;
             [self KickDownloadStatusUpdate:localContent n:n maxpos:max_content_count];
             m_CurrentDownloadContentAllData.current_download_complete_count = n;
         });
+        [self announceDownloadStatus:localContent n:n maxPos:max_content_count];
     }
    // すべてのダウンロードが完了したら、nil で状態を更新します。
     dispatch_async(m_MainDispatchQueue, ^{
         [self KickDownloadStatusUpdate:nil n:0 maxpos:0];
         m_CurrentDownloadContentAllData = nil;
     });
+    [self announceDownloadStatusEnd:localContent];
     
     // ncode で監視している奴には ちゃんと DownloadEnd を送ってやります。
     id<NarouDownloadQueueDelegate> ncodeHandler = [m_DownloadEventHandlerDictionary objectForKey:localContent.ncode];

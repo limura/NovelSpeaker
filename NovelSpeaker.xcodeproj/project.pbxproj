@@ -40,6 +40,7 @@
 		2191639319A0B140003FF7FC /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2191639219A0B140003FF7FC /* coreDataMigration.storyboard */; };
 		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
 		2191639C19A38643003FF7FC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 2191639B19A38643003FF7FC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
+		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
 		21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -149,6 +150,8 @@
 		2191639819A38414003FF7FC /* NarouContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NarouContent.h; path = DataModelMapping/NarouContent.h; sourceTree = "<group>"; };
 		2191639919A38414003FF7FC /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
 		2191639B19A38643003FF7FC /* SettingDataModelMapping_3to4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; name = SettingDataModelMapping_3to4.xcmappingmodel; path = DataModelMapping/SettingDataModelMapping_3to4.xcmappingmodel; sourceTree = "<group>"; };
+		2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataObjectHolder.h; sourceTree = "<group>"; };
+		2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataObjectHolder.m; sourceTree = "<group>"; };
 		21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechRegexPitchSetting.h; sourceTree = "<group>"; };
 		21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechRegexPitchSetting.m; sourceTree = "<group>"; };
 		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
@@ -373,6 +376,8 @@
 				4E776B17196247BE00C36AD1 /* ViewControllers */,
 				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
+				2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */,
+				2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */,
 				21C74FA21967FD390039A706 /* NarouDownloadQueue.h */,
 				21C74FA31967FD390039A706 /* NarouDownloadQueue.m */,
 				4E776B18196247FB00C36AD1 /* NarouLoader.h */,
@@ -584,6 +589,7 @@
 				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
 				2191637B199F4514003FF7FC /* SpeechModSettingsTableViewController.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
+				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,

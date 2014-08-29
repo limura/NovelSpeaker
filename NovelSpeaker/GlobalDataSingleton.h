@@ -17,6 +17,7 @@
 #import "NiftySpeaker.h"
 #import "SpeakPitchConfigCacheData.h"
 #import "SpeechModSettingCacheData.h"
+#import "CoreDataObjectHolder.h"
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -29,6 +30,8 @@
     //dispatch_queue_t m_DownloadQueue;
     // コンテンツ download 用 queue
     //dispatch_queue_t m_ContentsDownloadQueue;
+    // CoreData 関係の object の保持用 object
+    CoreDataObjectHolder* m_CoreDataObjectHolder;
     
     // ダウンロードキュー
     NarouDownloadQueue* m_DownloadQueue;
@@ -51,18 +54,18 @@
 + (GlobalDataSingleton*)GetInstance;
 
 // Core Data 用
-@property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
-@property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
-@property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+//@property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+//@property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
+//@property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
 /// Core Data用にディレクトリを(なければ)作ります。
-- (BOOL)CreateCoreDataDirectory;
+//- (BOOL)CreateCoreDataDirectory;
 
 /// 保持しているデータをストレージに保存します。
 - (void)saveContext;
 
 /// CoreDataが保存する時に使うディレクトリを取得します。
-- (NSURL *)applicationDocumentsDirectory;
+//- (NSURL *)applicationDocumentsDirectory;
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
 // 非公開インタフェースになりました。

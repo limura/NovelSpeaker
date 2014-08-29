@@ -20,7 +20,38 @@
 
 - (void)dealloc
 {
+    [self removeNotificationReciver];
     [[GlobalDataSingleton GetInstance] DeleteDownloadEventHandlerWithNcode:m_Ncode];
+}
+
+/// NotificationCenter の受信者の設定をします。
+- (void)setNotificationReciver
+{
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+
+    NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentDownloadStatusChanged_%@", m_Ncode];
+    [notificationCenter addObserver:self selector:@selector(NarouContentDowonloadStatusChanged:) name:notificationName object:nil];
+
+    notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusUp_%@", m_Ncode];
+    [notificationCenter addObserver:self selector:@selector(NarouContentNewStatusUp:) name:notificationName object:nil];
+
+    notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusDown_%@", m_Ncode];
+    [notificationCenter addObserver:self selector:@selector(NarouContentNewStatusDown:) name:notificationName object:nil];
+}
+
+/// NotificationCenter の受信者の設定を解除します。
+- (void)removeNotificationReciver
+{
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+
+    NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentDownloadStatusChanged_%@", m_Ncode];
+    [notificationCenter removeObserver:self name:notificationName object:nil];
+
+    notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusUp_%@", m_Ncode];
+    [notificationCenter removeObserver:self name:notificationName object:nil];
+    
+    notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusDown_%@", m_Ncode];
+    [notificationCenter removeObserver:self name:notificationName object:nil];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated
@@ -91,6 +122,7 @@
         self.DownloadProgressView.hidden = NO;
     }
     
+    [self setNotificationReciver];
     [[GlobalDataSingleton GetInstance] AddDownloadEventHandlerWithNcode:ncode handler:self];
 }
 
@@ -119,5 +151,30 @@
     });
 }
 
+- (void)NarouContentDowonloadStatusChanged:(NSNotification*)notification
+{
+    NSDictionary* args = [notification userInfo];
+    NSNumber* isDownloading = [args objectForKey:@"isDownloading"];
+    if ([isDownloading boolValue]) {
+        self.DownloadProgressView.hidden = YES;
+        self.ActivityIndicator.hidden = YES;
+    }else{
+        NSNumber* currentPosition = [args objectForKey:@"currentPosition"];
+        NSNumber* maxPosition = [args objectForKey:@"maxPosition"];
+        float progress = (float)[currentPosition intValue] / (float)[maxPosition intValue];
+        self.DownloadProgressView.progress = progress;
+        self.DownloadProgressView.hidden = NO;
+        [self UpdateActivityIndicator];
+    }
+}
+
+- (void)NarouContentNewStatusUp:(NSNotification*)notification
+{
+    self.NewImaveView.hidden = NO;
+}
+- (void)NarouContentNewStatusDown:(NSNotification*)notification
+{
+    self.NewImaveView.hidden = YES;
+}
 
 @end

@@ -15,9 +15,9 @@
 @implementation GlobalDataSingleton
 
 // Core Data 用
-@synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
-@synthesize managedObjectModel = _managedObjectModel;
-@synthesize managedObjectContext = _managedObjectContext;
+//@synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
+//@synthesize managedObjectModel = _managedObjectModel;
+//@synthesize managedObjectContext = _managedObjectContext;
 
 static GlobalDataSingleton* _singleton = nil;
 
@@ -35,9 +35,11 @@ static GlobalDataSingleton* _singleton = nil;
     
     m_ManagedObjectContextPerThreadDictionary = [NSMutableDictionary new];
     m_MainManagedObjectContextHolderThreadID = nil;
+    
+    m_CoreDataObjectHolder = [[CoreDataObjectHolder alloc] initWithModelName:@"SettingDataModel" fileName:@"SettingDataModel" folderType:DOCUMENTS_FOLDER_TYPE mergePolicy:NSMergeByPropertyObjectTrumpMergePolicy];
 
     // NiftySpeaker は default config が必要ですが、これには core data の値を使いません。
-    // (というか使わないでおかないとマイグレーションの時にひどいことになります)
+    // (というか使わないでおかないとここで取得しようとした時にマイグレーションが発生してしまいます)
     SpeechConfig* speechConfig = [SpeechConfig new];
     speechConfig.pitch = 1.0f;
     speechConfig.rate = 1.0f;
@@ -59,10 +61,6 @@ static GlobalDataSingleton* _singleton = nil;
 /// CoreData の初期化とかいろいろやります。
 - (void) InitializeData
 {
-    if([self CreateCoreDataDirectory] == NO)
-    {
-        NSLog(@"WARNING: CreateCoreDataDirectory failed.");
-    }
 }
 
 + (GlobalDataSingleton*) GetInstance
@@ -80,18 +78,8 @@ static GlobalDataSingleton* _singleton = nil;
 - (GlobalState*) GetCoreDataGlobalStateThreadUnsafe
 {
     NSError* err;
-    NSMutableArray* fetchResults = nil;
     // CoreData で読みだします
-    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription* entity = [NSEntityDescription entityForName:@"GlobalState" inManagedObjectContext: self.managedObjectContext];
-    [fetchRequest setEntity:entity];
-    err = nil;
-    //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-    @synchronized(_persistentStoreCoordinator){
-    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-    }
-    //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
-
+    NSArray* fetchResults = [m_CoreDataObjectHolder FetchAllEntity:@"GlobalState"];
     if(fetchResults == nil)
     {
         NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
@@ -100,12 +88,7 @@ static GlobalDataSingleton* _singleton = nil;
     if([fetchResults count] == 0)
     {
         // まだ登録されてなかったので新しく作ります。
-        GlobalState* globalState = nil;
-        //NSLog(@"%@ insertNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-        @synchronized(_persistentStoreCoordinator){
-        globalState = (GlobalState*)[NSEntityDescription insertNewObjectForEntityForName:@"GlobalState" inManagedObjectContext:self.managedObjectContext];
-        }
-        //NSLog(@"%@ out insertNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+        GlobalState* globalState = [m_CoreDataObjectHolder CreateNewEntity:@"GlobalState"];
         if(globalState == nil)
         {
             NSLog(@"GlobalState create failed.");
@@ -113,6 +96,7 @@ static GlobalDataSingleton* _singleton = nil;
         }
         globalState.defaultRate = [[NSNumber alloc] initWithFloat:AVSpeechUtteranceDefaultSpeechRate];
         globalState.defaultPitch = [[NSNumber alloc] initWithFloat:1.0f];
+        [m_CoreDataObjectHolder save];
         return globalState;
     }
     if([fetchResults count] > 1)
@@ -173,6 +157,7 @@ static GlobalDataSingleton* _singleton = nil;
         }
         result = true;
     });
+    [m_CoreDataObjectHolder save];
     return result;
 }
 
@@ -183,21 +168,9 @@ static GlobalDataSingleton* _singleton = nil;
 - (NarouContent*) SearchCoreDataNarouContentFromNcodeThreadUnsafe:(NSString*) ncode
 {
     NSError* err;
-    NSMutableArray* fetchResults = nil;
-    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
-    [fetchRequest setEntity:entity];
-    
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@", ncode];
-    [fetchRequest setPredicate:predicate];
-
-    err = nil;
-    //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-    @synchronized(_persistentStoreCoordinator){
-    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-    }
-    //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
-
+    NSArray* fetchResults = [m_CoreDataObjectHolder
+                             SearchEntity:@"NarouContent"
+                             predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode]];
     if(fetchResults == nil)
     {
         NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
@@ -213,9 +186,8 @@ static GlobalDataSingleton* _singleton = nil;
         NSLog(@"duplicate ncode!!! %@ delete all content...", ncode);
         for (int i = 0; i < [fetchResults count]; i++) {
             NarouContent* targetContent = [fetchResults objectAtIndex:i];
-            @synchronized(_persistentStoreCoordinator){
-                [self.managedObjectContext deleteObject:targetContent];
-            }
+            [m_CoreDataObjectHolder DeleteEntity:targetContent];
+            [m_CoreDataObjectHolder save];
         }
         return nil;
     }
@@ -257,6 +229,7 @@ static GlobalDataSingleton* _singleton = nil;
             coreDataContent = [self CreateNewNarouContentThreadUnsafe];
         }
         result = [content AssignToCoreData:coreDataContent];
+        [m_CoreDataObjectHolder save];
     });
     return result;
 }
@@ -265,12 +238,7 @@ static GlobalDataSingleton* _singleton = nil;
 /// 新しい NarouContent を生成して返します。
 - (NarouContent*) CreateNewNarouContentThreadUnsafe
 {
-    NarouContent* content = nil;
-    //NSLog(@"%@ insertNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-    @synchronized(_persistentStoreCoordinator){
-    content = [NSEntityDescription insertNewObjectForEntityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
-    }
-    //NSLog(@"%@ out insertNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+    NarouContent* content = [m_CoreDataObjectHolder CreateNewEntity:@"NarouContent"];
     return content;
 }
 
@@ -279,26 +247,7 @@ static GlobalDataSingleton* _singleton = nil;
 {
     __block NSUInteger result = 0;
     dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-        NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:self.managedObjectContext];
-        [fetchRequest setEntity:entity];
-        // 数を数えるだけなのでidしか返却しないようにします。
-        [fetchRequest setIncludesPropertyValues:NO];
-
-        NSError* err = nil;
-        //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-        NSMutableArray* fetchResults;
-        @synchronized(_persistentStoreCoordinator){
-        fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-        }
-        //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
-
-        if(fetchResults == nil)
-        {
-            result = 0;
-        }else{
-            result = [fetchResults count];
-        }
+        result = [m_CoreDataObjectHolder CountEntity:@"NarouContent"];
     });
     return result;
 }
@@ -310,21 +259,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block NSError* err;
     __block NSMutableArray* fetchResults = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-        NSEntityDescription* entity = [NSEntityDescription entityForName:@"NarouContent" inManagedObjectContext:    self.managedObjectContext];
-        [fetchRequest setEntity:entity];
-
-        NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"novelupdated_at" ascending:NO];
-        NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
-        [fetchRequest setSortDescriptors:sortDescriptors];
-
-        err = nil;
-        //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-        NSArray* results;
-        @synchronized(_persistentStoreCoordinator){
-        results = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-        }
-        //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"NarouContent" sortAttributeName:@"novelupdated_at" ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[NarouContentCacheData alloc] initWithCoreData:results[i]];
@@ -374,7 +309,7 @@ static GlobalDataSingleton* _singleton = nil;
             targetContent.novelupdated_at = content.novelupdated_at;
             targetContentCacheData = [[NarouContentCacheData alloc] initWithCoreData:targetContent];
             // 新しく作ったので save して main thread と sync しておきます。
-            [self saveContextThreadUnsafe];
+            [m_CoreDataObjectHolder save];
         });
     }
     
@@ -445,25 +380,11 @@ static GlobalDataSingleton* _singleton = nil;
 /// 登録がなければ nil を返します
 - (Story*) SearchCoreDataStoryThreadUnsafe:(NSString*) ncode chapter_no:(int)chapter_number
 {
-    NSError* err;
-    NSMutableArray* fetchResults = nil;
-    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription* entity = [NSEntityDescription entityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
-    [fetchRequest setEntity:entity];
-        
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@ AND chapter_number == %d", ncode, chapter_number];
-    [fetchRequest setPredicate:predicate];
-        
-    err = nil;
-    //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-    @synchronized(_persistentStoreCoordinator){
-    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-    }
-    //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
-
+    NSArray* fetchResults = [m_CoreDataObjectHolder SearchEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@ AND chapter_number == %d", ncode, chapter_number]];
+    
     if(fetchResults == nil)
     {
-        NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
+        NSLog(@"fetch from CoreData failed.");
         return nil;
     }
     if([fetchResults count] == 0)
@@ -495,18 +416,16 @@ static GlobalDataSingleton* _singleton = nil;
 /// Story を新しく生成します。必要な情報をすべて指定する必要があります
 - (Story*) CreateNewStoryThreadUnsafe:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
 {
-    Story* story = nil;
-    //NSLog(@"%@ insetNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-    @synchronized(_persistentStoreCoordinator){
-    story = [NSEntityDescription insertNewObjectForEntityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
-    }
-    //NSLog(@"%@ out insertNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+    Story* story = [m_CoreDataObjectHolder CreateNewEntity:@"Story"];
+
     story.parentContent = parentContent;
     [parentContent addChildStoryObject:story];
         
     story.ncode = parentContent.ncode;
     story.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
     story.content = content;
+    [m_CoreDataObjectHolder save];
+
     return story;
 }
 
@@ -526,11 +445,12 @@ static GlobalDataSingleton* _singleton = nil;
     }else{
         Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:parentContent.ncode chapter_no:chapter_number];
         if (coreDataStory == nil) {
-            coreDataStory = [self CreateNewStoryThreadUnsafe:parentCoreDataContent content:content chapter_number:  chapter_number];
+            coreDataStory = [self CreateNewStoryThreadUnsafe:parentCoreDataContent content:content chapter_number: chapter_number];
         }
         coreDataStory.content = content;
         coreDataStory.parentContent = parentCoreDataContent;
         coreDataStory.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
+        [m_CoreDataObjectHolder save];
         result = true;
     }
 
@@ -565,17 +485,12 @@ static GlobalDataSingleton* _singleton = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
         if (coreDataContent != nil) {
-            //NSLog(@"%@ deleteObject %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-            @synchronized(_persistentStoreCoordinator){
-            [self.managedObjectContext deleteObject:coreDataContent];
-            }
-            //NSLog(@"%@ out deleteObject %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+            [m_CoreDataObjectHolder DeleteEntity:coreDataContent];
+            [m_CoreDataObjectHolder save];
             result = true;
         }
     });
-    // 保存しておきます。
-    [self saveContext];
-    return true;
+    return result;
 }
 
 /// 章を一つ削除します
@@ -590,16 +505,11 @@ static GlobalDataSingleton* _singleton = nil;
         if (coreDataStory == nil) {
             result = false;
         }else{
-            //NSLog(@"%@ deleteObject %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-            @synchronized(_persistentStoreCoordinator){
-            [self.managedObjectContext deleteObject:coreDataStory];
-            }
-            //NSLog(@"%@ out deleteObject %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+            [m_CoreDataObjectHolder DeleteEntity:coreDataStory];
+            [m_CoreDataObjectHolder save];
             result = true;
         }
     });
-    // 保存しておきます。
-    [self saveContext];
     return result;
 }
 
@@ -612,28 +522,7 @@ static GlobalDataSingleton* _singleton = nil;
     
     __block NSUInteger result = 0;
     dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-        NSEntityDescription* entity = [NSEntityDescription entityForName:@"Story" inManagedObjectContext:self.managedObjectContext];
-        [fetchRequest setEntity:entity];
-        // 数を数えるだけなのでidしか返却しないようにします。
-        [fetchRequest setIncludesPropertyValues:NO];
-        
-        NSPredicate* predicate = [NSPredicate predicateWithFormat:@"ncode == %@", content.ncode];
-        [fetchRequest setPredicate:predicate];
-
-        NSError* err = nil;
-        NSMutableArray* fetchResults;
-        //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-        @synchronized(_persistentStoreCoordinator){
-        fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-        }
-        //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
-        if(fetchResults == nil)
-        {
-            result = 0;
-        }else{
-            result = [fetchResults count];
-        }
+        result = [m_CoreDataObjectHolder CountEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", content.ncode]];
     });
     return result;
 }
@@ -681,6 +570,7 @@ static GlobalDataSingleton* _singleton = nil;
             coreDataStory.readLocation = story.readLocation;
             coreDataContent.currentReadingStory = coreDataStory;
             globalState.currentReadingStory = coreDataStory;
+            [m_CoreDataObjectHolder save];
             result = true;
         }
     });
@@ -843,18 +733,14 @@ static GlobalDataSingleton* _singleton = nil;
 /// ncode の new flag を落とします。
 - (void)DropNewFlag:(NSString*)ncode
 {
-    __block bool isNeedSave = false;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* content = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:ncode];
         if ([content.is_new_flug boolValue] == true) {
             NSLog(@"new flag drop: %@", ncode);
             content.is_new_flug = [[NSNumber alloc] initWithBool:false];
-            isNeedSave = true;
+            [m_CoreDataObjectHolder save];
         }
     });
-    if (isNeedSave) {
-        [self saveContext];
-    }
 }
 
 /// &amp; を & とかに変換します
@@ -881,7 +767,6 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げる文書を設定します。
 - (BOOL)SetSpeechStory:(StoryCacheData *)story
 {
-    
     if(![m_NiftySpeaker SetText:[self UnescapeHTMLEntities:story.content]])
     {
         return false;
@@ -967,101 +852,37 @@ static GlobalDataSingleton* _singleton = nil;
     return true;
 }
 
-
-/// Core Data用にディレクトリを(なければ)作ります。
-- (BOOL)CreateCoreDataDirectory
-{
-    NSURL* directory = [self applicationDocumentsDirectory];
-    NSError* err = nil;
-    if(![[NSFileManager defaultManager] createDirectoryAtPath:[directory path] withIntermediateDirectories:YES attributes:nil error:&err])
-    {
-        NSLog(@"can not create directory %@, %@", err, [err userInfo]);
-        return NO;
-    }
-    return YES;
-}
-
-- (void)saveContextThreadUnsafe
-{
-    NSError *error = nil;
-    NSManagedObjectContext *managedObjectContext = self.managedObjectContext;
-    if (managedObjectContext != nil) {
-        //NSLog(@"%@ saveContext %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-        @synchronized(_persistentStoreCoordinator){
-            if ([managedObjectContext hasChanges] && ![managedObjectContext save:&error]) {
-                NSLog(@"Unresolved error. save failed. %@, %@", error, [error userInfo]);
-                abort();
-            }
-        }
-        //NSLog(@"%@ out saveContext %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 5, __FUNCTION__);
-    }
-}
-
 - (void)saveContext
 {
     dispatch_sync(m_CoreDataAccessQueue, ^{
-        [self saveContextThreadUnsafe];
+        [m_CoreDataObjectHolder save];
     });
-    NSLog(@"CoreData saved.");
+    //NSLog(@"CoreData saved.");
 }
 
 /// 読み上げの会話文の音程設定を全て読み出します。
 /// NSArray の中身は SpeakPitchConfigCacheData で、title でsortされた値が取得されます。
 - (NSArray*)GetAllSpeakPitchConfig
 {
-    __block NSError* err;
     __block NSMutableArray* fetchResults = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-        NSEntityDescription* entity = [NSEntityDescription entityForName:@"SpeakPitchConfig" inManagedObjectContext: self.managedObjectContext];
-        [fetchRequest setEntity:entity];
-        
-        NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"title" ascending:NO];
-        NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
-        [fetchRequest setSortDescriptors:sortDescriptors];
-        
-        err = nil;
-        NSArray* results;
-        //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-        @synchronized(_persistentStoreCoordinator){
-        results = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-        }
-        //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeakPitchConfig" sortAttributeName:@"title" ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[SpeakPitchConfigCacheData alloc] initWithCoreData:results[i]];
         }
     });
-    if(err != nil)
-    {
-        NSLog(@"fetch failed. %@, %@", err, [err userInfo]);
-        return nil;
-    }
     return fetchResults;
 }
 
 /// 読み上げの会話文の音程設定をタイトル指定で読み出します。(内部版)
 - (SpeakPitchConfig*)GetSpeakPitchConfigWithTitleThreadUnsafe:(NSString*)title
 {
-    NSError* err;
-    NSMutableArray* fetchResults = nil;
-    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription* entity = [NSEntityDescription entityForName:@"SpeakPitchConfig" inManagedObjectContext:self.managedObjectContext];
-    [fetchRequest setEntity:entity];
-    
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"title == %@", title];
-    [fetchRequest setPredicate:predicate];
-    
-    err = nil;
-    //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-    @synchronized(_persistentStoreCoordinator){
-    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-    }
-    //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+    NSArray* fetchResults = [m_CoreDataObjectHolder SearchEntity:@"SpeakPitchConfig" predicate:[NSPredicate predicateWithFormat:@"title == %@", title]];
     
     if(fetchResults == nil)
     {
-        NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
+        NSLog(@"fetch from CoreData failed.");
         return nil;
     }
     if([fetchResults count] == 0)
@@ -1093,13 +914,12 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げの会話文の音程設定を追加します。
 - (SpeakPitchConfig*) CreateNewSpeakPitchConfigThreadUnsafe:(SpeakPitchConfigCacheData*)data
 {
-    SpeakPitchConfig* config = nil;
-    //NSLog(@"%@ insertNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-    @synchronized(_persistentStoreCoordinator){
-    config = [NSEntityDescription insertNewObjectForEntityForName:@"SpeakPitchConfig" inManagedObjectContext:self.managedObjectContext];
+    SpeakPitchConfig* config = [m_CoreDataObjectHolder CreateNewEntity:@"SpeakPitchConfig"];
+    if (config == nil) {
+        return nil;
     }
-    //NSLog(@"%@ out insertNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
     [data AssignToCoreData:config];
+    [m_CoreDataObjectHolder save];
     return config;
 }
 
@@ -1117,6 +937,7 @@ static GlobalDataSingleton* _singleton = nil;
         }
         if (coreDataConfig != nil) {
             result = [config AssignToCoreData:coreDataConfig];
+            [m_CoreDataObjectHolder save];
         }
     });
     if (result) {
@@ -1135,19 +956,14 @@ static GlobalDataSingleton* _singleton = nil;
         if (coreDataConfig == nil) {
             result = false;
         }else{
-            //NSLog(@"%@ deleteObject %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-            @synchronized(_persistentStoreCoordinator){
-            [self.managedObjectContext deleteObject:coreDataConfig];
-            }
-            //NSLog(@"%@ out deleteObject %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+            [m_CoreDataObjectHolder DeleteEntity:coreDataConfig];
+            [m_CoreDataObjectHolder save];
             result = true;
         }
     });
     if (result) {
         m_isNeedReloadSpeakSetting = true;
     }
-    // 保存しておきます。
-    [self saveContext];
     return result;
 }
 
@@ -1156,59 +972,24 @@ static GlobalDataSingleton* _singleton = nil;
 /// NSArray の中身は SpeechModSettingCacheData で、beforeString で sort された値が取得されます。
 - (NSArray*)GetAllSpeechModSettings
 {
-    __block NSError* err;
     __block NSMutableArray* fetchResults = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-        NSEntityDescription* entity = [NSEntityDescription entityForName:@"SpeechModSetting" inManagedObjectContext: self.managedObjectContext];
-        [fetchRequest setEntity:entity];
-        
-        NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"beforeString" ascending:NO];
-        NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
-        [fetchRequest setSortDescriptors:sortDescriptors];
-        
-        err = nil;
-        NSArray* results;
-        //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-        @synchronized(_persistentStoreCoordinator){
-        results = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-        }
-        //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeechModSetting" sortAttributeName:@"beforeString" ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[SpeechModSettingCacheData alloc] initWithCoreData:results[i]];
         }
     });
-    if(err != nil)
-    {
-        NSLog(@"fetch failed. %@, %@", err, [err userInfo]);
-        return nil;
-    }
     return fetchResults;
 }
 
 /// 読み上げ時の読み替え設定を beforeString指定 で読み出します(内部版)
 - (SpeechModSetting*)GetSpeechModSettingWithBeforeStringThreadUnsafe:(NSString*)beforeString
 {
-    NSError* err;
-    NSMutableArray* fetchResults = nil;
-    NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
-    NSEntityDescription* entity = [NSEntityDescription entityForName:@"SpeechModSetting" inManagedObjectContext:self.managedObjectContext];
-    [fetchRequest setEntity:entity];
-    
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"beforeString == %@", beforeString];
-    [fetchRequest setPredicate:predicate];
-    
-    err = nil;
-    //NSLog(@"%@ executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-    @synchronized(_persistentStoreCoordinator){
-    fetchResults = [[self.managedObjectContext executeFetchRequest:fetchRequest error:&err] mutableCopy];
-    }
-    //NSLog(@"%@ out executeFetchRequest %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
-    
+    NSArray* fetchResults = [m_CoreDataObjectHolder SearchEntity:@"SpeechModSetting" predicate:[NSPredicate predicateWithFormat:@"beforeString == %@", beforeString]];
     if(fetchResults == nil)
     {
-        NSLog(@"fetch from CoreData failed. %@, %@", err, [err userInfo]);
+        NSLog(@"fetch from CoreData failed.");
         return nil;
     }
     if([fetchResults count] == 0)
@@ -1240,13 +1021,9 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げ時の読み替え設定を追加します。
 - (SpeechModSetting*) CreateNewSpeechModSettingThreadUnsafe:(SpeechModSettingCacheData*)data
 {
-    SpeechModSetting* setting = nil;
-    //NSLog(@"%@ insertNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-    @synchronized(_persistentStoreCoordinator){
-    setting = [NSEntityDescription insertNewObjectForEntityForName:@"SpeechModSetting" inManagedObjectContext:self.managedObjectContext];
-    }
-    //NSLog(@"%@ out insertNewObjectForEntityForName %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+    SpeechModSetting* setting = [m_CoreDataObjectHolder CreateNewEntity:@"SpeechModSetting"];
     [data AssignToCoreData:setting];
+    [m_CoreDataObjectHolder save];
     return setting;
 }
 
@@ -1264,6 +1041,7 @@ static GlobalDataSingleton* _singleton = nil;
         }
         if (coreDataConfig != nil) {
             result = [modSetting AssignToCoreData:coreDataConfig];
+            [m_CoreDataObjectHolder save];
         }
     });
     if (result) {
@@ -1282,53 +1060,30 @@ static GlobalDataSingleton* _singleton = nil;
         if (coreDataConfig == nil) {
             result = false;
         }else{
-            //NSLog(@"%@ deleteObject %s %d %s", [NSThread currentThread], __FILE__, __LINE__, __FUNCTION__);
-            @synchronized(_persistentStoreCoordinator){
-            [self.managedObjectContext deleteObject:coreDataConfig];
-            }
-            //NSLog(@"%@ out deleteObject %s %d %s", [NSThread currentThread], __FILE__, __LINE__ - 2, __FUNCTION__);
+            [m_CoreDataObjectHolder DeleteEntity:coreDataConfig];
+            [m_CoreDataObjectHolder save];
             result = true;
         }
     });
     if (result) {
         m_isNeedReloadSpeakSetting = true;
     }
-    // 保存しておきます。
-    [self saveContext];
     return result;
 }
 
 /// CoreData のマイグレーションが必要かどうかを確認します。
 - (BOOL)isRequiredCoreDataMigration
 {
-    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"SettingDataModel.sqlite"];
-    NSError* error = nil;
-    
-    NSDictionary* sourceMetaData =
-    [NSPersistentStoreCoordinator metadataForPersistentStoreOfType:NSSQLiteStoreType
-                                                               URL:storeURL
-                                                             error:&error];
-    if (sourceMetaData == nil) {
-        return NO;
-    } else if (error) {
-        NSLog(@"Checking migration was failed (%@, %@)", error, [error userInfo]);
-        abort();
-    }
-    
-    BOOL isCompatible = [self.managedObjectModel isConfiguration:nil
-                                        compatibleWithStoreMetadata:sourceMetaData]; 
-    
-    return !isCompatible;
+    return [m_CoreDataObjectHolder isNeedMigration];
 }
 
 /// CoreData のマイグレーションを実行します。
 - (void)doCoreDataMigration
 {
-    // core data のデータを使えば勝手にマイグレーションが走ります。
-    [self GetGlobalState];
+    [m_CoreDataObjectHolder doMigration];
 }
 
-
+#if 0
 #pragma mark - Core Data stack
 
 // from http://stackoverflow.com/questions/4264540/grand-central-dispatch-gcd-with-coredata
@@ -1358,10 +1113,15 @@ static GlobalDataSingleton* _singleton = nil;
     NSManagedObjectContext* context = [m_ManagedObjectContextPerThreadDictionary objectForKey:threadID];
     if (context == nil) {
         NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
-        if (coordinator != nil) {
-            context = [[NSManagedObjectContext alloc] init];
-            [context setPersistentStoreCoordinator:coordinator];
+        if (coordinator == nil) {
+            NSLog(@"unresolved error. persistentStoreCordinator is null.");
+            abort();
         }
+        context = [[NSManagedObjectContext alloc] init];
+        [context setPersistentStoreCoordinator:coordinator];
+        // マージはメモリ側(store側は消される)
+        [context setMergePolicy:NSMergeByPropertyObjectTrumpMergePolicy];
+        
         // 全部のthreadで同じselfを渡してNotificationを登録するならここ。
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(backgroundContextDidSave:)
@@ -1462,5 +1222,6 @@ static GlobalDataSingleton* _singleton = nil;
 {
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
+#endif // #if 0
 
 @end

@@ -51,12 +51,30 @@
     [self.tableView registerNib:nib forCellReuseIdentifier:BookShelfTableViewCellID];
     //[self.searchDisplayController.searchResultsTableView registerNib:nib forCellReuseIdentifier:BookShelfTableViewCellID];
 
+    [self setNotificationReciver];
     [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
 }
 
 - (void)dealloc
 {
+    [self removeNotificationReciver];
     [[GlobalDataSingleton GetInstance] DeleteDownloadEventHandler:self];
+}
+
+/// NotificationCenter の受信者の設定をします。
+- (void)setNotificationReciver
+{
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    
+    [notificationCenter addObserver:self selector:@selector(NarouContentListChanged:) name:@"NarouContentListChanged" object:nil];
+}
+
+/// NotificationCenter の受信者の設定を解除します。
+- (void)removeNotificationReciver
+{
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    
+    [notificationCenter removeObserver:self name:@"NarouContentListChanged" object:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -158,8 +176,13 @@
             return;
         }
         NarouContentCacheData* content = contentList[indexPath.row];
-        [[GlobalDataSingleton GetInstance] DeleteContent:content];
+        NSLog(@"tableView row deleting. before content.length: %lu", (unsigned long)[contentList count]);
+        if([[GlobalDataSingleton GetInstance] DeleteContent:content] != true)
+        {
+            NSLog(@"delete content failed ncode: %@ title: %@", content.ncode, content.title);
+        }
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        NSLog(@"tableView row delete.    after content.length: %lu", (unsigned long)[contentList count]);
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
     }   
@@ -172,6 +195,12 @@
 }
 // 全ての download queue がなくなった時に呼び出されます。
 - (void)DownloadEnd
+{
+    [self.tableView reloadData];
+}
+
+/// NotificationCenter越しに呼び出されるイベントのイベントハンドラ
+- (void)NarouContentListChanged:(NSNotification*)notification
 {
     [self.tableView reloadData];
 }

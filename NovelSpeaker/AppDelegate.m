@@ -16,10 +16,6 @@
 {
     // Override point for customization after application launch.
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    if([globalData CreateCoreDataDirectory] == NO)
-    {
-        return NO;
-    }
     UIViewController* toplevelViewController = nil;
     if ([globalData isRequiredCoreDataMigration]) {
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"coreDataMigration" bundle:nil];
