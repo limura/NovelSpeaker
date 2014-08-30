@@ -1,0 +1,171 @@
+
+/* Class = "IBUIButton"; normalTitle = "発音テスト"; ObjectID = "0Lz-2c-zLQ"; */
+"0Lz-2c-zLQ.normalTitle" = "Speak test";
+
+/* Class = "IBUILabel"; text = "から"; ObjectID = "1Hd-Nn-nzI"; */
+"1Hd-Nn-nzI.text" = "to";
+
+/* Class = "IBUILabel"; text = "-"; ObjectID = "1XQ-W9-Dvn"; */
+"1XQ-W9-Dvn.text" = "-";
+
+/* Class = "IBUIButton"; normalTitle = "作成"; ObjectID = "2IR-cM-v3n"; */
+"2IR-cM-v3n.normalTitle" = "Create";
+
+/* Class = "IBUILabel"; text = "-"; ObjectID = "3Wn-rj-DVb"; */
+"3Wn-rj-DVb.text" = "-";
+
+/* Class = "IBUITabBarItem"; title = "本棚"; ObjectID = "48f-BN-UmV"; */
+"48f-BN-UmV.title" = "Bookshelf";
+
+/* Class = "IBUIButton"; normalTitle = "検索開始"; ObjectID = "57a-Pg-j5k"; */
+"57a-Pg-j5k.normalTitle" = "Search";
+
+/* Class = "IBUILabel"; text = "あらすじ"; ObjectID = "6vn-Hz-h0v"; */
+"6vn-Hz-h0v.text" = "Summary";
+
+/* Class = "IBUINavigationItem"; title = "本棚"; ObjectID = "9HG-U0-i5q"; */
+"9HG-U0-i5q.title" = "Bookshelf";
+
+/* Class = "IBUILabel"; text = "小説名"; ObjectID = "9mZ-qa-NJe"; */
+"9mZ-qa-NJe.text" = "Name";
+
+/* Class = "IBUILabel"; text = "平均評価点/評価数"; ObjectID = "AQq-iW-Jsd"; */
+"AQq-iW-Jsd.text" = "Point mean/count";
+
+/* Class = "IBUILabel"; text = "タイトル"; ObjectID = "COj-Rr-gBt"; */
+"COj-Rr-gBt.text" = "Title";
+
+/* Class = "IBUILabel"; text = "ブックマーク数"; ObjectID = "CVN-SK-Hpn"; */
+"CVN-SK-Hpn.text" = "Bookmark num";
+
+/* Class = "IBUILabel"; text = "error label"; ObjectID = "E6Q-tH-I2D"; */
+"E6Q-tH-I2D.text" = "error label";
+
+/* Class = "IBUILabel"; text = "ダウンロード"; ObjectID = "F6g-5M-6q0"; */
+"F6g-5M-6q0.text" = "Downloading state";
+
+/* Class = "IBUILabel"; text = "キーワード"; ObjectID = "GaQ-EU-TxN"; */
+"GaQ-EU-TxN.text" = "Keyword";
+
+/* Class = "IBUILabel"; text = "タイトル"; ObjectID = "KE3-wT-Goi"; */
+"KE3-wT-Goi.text" = "Title";
+
+/* Class = "IBUILabel"; text = "掲載話数"; ObjectID = "KJR-wg-Gk1"; */
+"KJR-wg-Gk1.text" = "Storys";
+
+/* Class = "IBUINavigationItem"; title = "設定"; ObjectID = "Nbg-ez-a84"; */
+"Nbg-ez-a84.title" = "Settings";
+
+/* Class = "IBUILabel"; text = "検索文字列"; ObjectID = "P9D-DS-Z1l"; */
+"P9D-DS-Z1l.text" = "Search";
+
+/* Class = "IBUILabel"; text = "-"; ObjectID = "PCx-06-eEF"; */
+"PCx-06-eEF.text" = "-";
+
+/* Class = "IBUILabel"; text = "作者名"; ObjectID = "Qoe-ZB-GuL"; */
+"Qoe-ZB-GuL.text" = "Author";
+
+/* Class = "IBUITabBarItem"; title = "設定"; ObjectID = "RLW-4z-oWd"; */
+"RLW-4z-oWd.title" = "Settings";
+
+/* Class = "IBUILabel"; text = "-"; ObjectID = "VMK-l4-SWS"; */
+"VMK-l4-SWS.text" = "-";
+
+/* Class = "IBUILabel"; text = "Title"; ObjectID = "Vj8-Pr-577"; */
+"Vj8-Pr-577.text" = "Title";
+
+/* Class = "IBUINavigationItem"; title = "詳細"; ObjectID = "XJd-XT-qbJ"; */
+"XJd-XT-qbJ.title" = "Details";
+
+/* Class = "IBUILabel"; text = "作者"; ObjectID = "YPT-L5-eNR"; */
+"YPT-L5-eNR.text" = "Author";
+
+/* Class = "IBUITabBarItem"; title = "ダウンロード状態"; ObjectID = "Z25-tO-3hh"; */
+"Z25-tO-3hh.title" = "Downloading state";
+
+/* Class = "IBUITabBarItem"; title = "なろう検索"; ObjectID = "ZSv-78-9lg"; */
+"ZSv-78-9lg.title" = "Search";
+
+/* Class = "IBUILabel"; text = "-"; ObjectID = "Zz8-CV-no1"; */
+"Zz8-CV-no1.text" = "-";
+
+/* Class = "IBUINavigationItem"; title = "声質設定範囲の作成"; ObjectID = "b1Y-Fj-Dcn"; */
+"b1Y-Fj-Dcn.title" = "Quality of voice range";
+
+/* Class = "IBUINavigationItem"; title = "クレジット"; ObjectID = "dcE-Gm-Rdn"; */
+"dcE-Gm-Rdn.title" = "Credits";
+
+/* Class = "IBUITextView"; text = "
+-----
+DTCoreText
+
+Copyright (c) 2011, Oliver Drobnik All rights reserved.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are met:\n\n- Redistributions of source code must retain the above copyright notice, this\n  list of conditions and the following disclaimer. \n\n- Redistributions in binary form must reproduce the above copyright notice,\n  this list of conditions and the following disclaimer in the documentation\n  and/or other materials provided with the distribution.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\nAND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\nIMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\nDISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE\nFOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\nDAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\nSERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\nCAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,\nOR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-----
+LTCoreText
+
+MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."; ObjectID = "em1-qg-D62"; */
+"em1-qg-D62.text" = "
+-----
+DTCoreText
+
+Copyright (c) 2011, Oliver Drobnik All rights reserved.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are met:\n\n- Redistributions of source code must retain the above copyright notice, this\n  list of conditions and the following disclaimer. \n\n- Redistributions in binary form must reproduce the above copyright notice,\n  this list of conditions and the following disclaimer in the documentation\n  and/or other materials provided with the distribution.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\nAND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\nIMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\nDISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE\nFOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\nDAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\nSERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\nCAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,\nOR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-----
+LTCoreText
+
+MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.";
+
+/* Class = "IBUILabel"; text = "-"; ObjectID = "g0W-gO-BlM"; */
+"g0W-gO-BlM.text" = "-";
+
+/* Class = "IBUINavigationItem"; title = "読みの修正"; ObjectID = "iy0-Ki-xeS"; */
+"iy0-Ki-xeS.title" = "Correction of the reading";
+
+/* Class = "IBUINavigationItem"; title = "読みの修正詳細"; ObjectID = "jOk-mr-1xo"; */
+"jOk-mr-1xo.title" = "Correction of the reading";
+
+/* Class = "IBUIButton"; normalTitle = "確定"; ObjectID = "kRa-jS-1YP"; */
+"kRa-jS-1YP.normalTitle" = "add";
+
+/* Class = "IBUILabel"; text = "キーワード"; ObjectID = "le2-Ox-6kL"; */
+"le2-Ox-6kL.text" = "Keyword";
+
+/* Class = "IBUILabel"; text = "に読み替え"; ObjectID = "nyU-9D-L22"; */
+"nyU-9D-L22.text" = "";
+
+/* Class = "IBUILabel"; text = "あらすじ"; ObjectID = "rNh-Ad-3g5"; */
+"rNh-Ad-3g5.text" = "Summary";
+
+/* Class = "IBUILabel"; text = "総合点"; ObjectID = "ro2-t1-7LL"; */
+"ro2-t1-7LL.text" = "Point";
+
+/* Class = "IBUILabel"; text = "ダウンロード中のものはありません"; ObjectID = "s4M-39-dxp"; */
+"s4M-39-dxp.text" = "There is no thing downloading";
+
+/* Class = "IBUINavigationItem"; title = "検索結果"; ObjectID = "tJL-2M-reV"; */
+"tJL-2M-reV.title" = "Search result";
+
+/* Class = "IBUILabel"; text = "0/0"; ObjectID = "uPW-20-0nL"; */
+"uPW-20-0nL.text" = "0/0";
+
+/* Class = "IBUINavigationItem"; title = "title"; ObjectID = "voJ-dX-pOH"; */
+"voJ-dX-pOH.title" = "Title";
+
+/* Class = "IBUINavigationItem"; title = "声質の設定"; ObjectID = "wON-7v-4wD"; */
+"wON-7v-4wD.title" = "Quality of voice";
+
+/* Class = "IBUILabel"; text = "更新日時"; ObjectID = "wyA-PN-led"; */
+"wyA-PN-led.text" = "Date";
+
+/* Class = "IBUILabel"; text = "-"; ObjectID = "xXn-q0-jX5"; */
+"xXn-q0-jX5.text" = "-";
+
+/* Class = "IBUILabel"; text = "-"; ObjectID = "xwQ-rt-BZg"; */
+"xwQ-rt-BZg.text" = "-";
+
+/* Class = "IBUILabel"; text = "-"; ObjectID = "yWP-hK-Eyd"; */
+"yWP-hK-Eyd.text" = "-";
+
+/* Class = "IBUINavigationItem"; title = "小説家になろうで検索"; ObjectID = "z7j-iL-mrn"; */
+"z7j-iL-mrn.title" = "Search in Narou";

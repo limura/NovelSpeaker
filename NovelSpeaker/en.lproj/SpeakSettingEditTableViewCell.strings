@@ -1,0 +1,21 @@
+
+/* Class = "IBUILabel"; text = "まで"; ObjectID = "8Wf-Ww-07S"; */
+"8Wf-Ww-07S.text" = "";
+
+/* Class = "IBUITextField"; placeholder = "終了文字"; ObjectID = "QgX-Je-mVV"; */
+"QgX-Je-mVV.placeholder" = "end string";
+
+/* Class = "IBUIButton"; normalTitle = "発音テスト"; ObjectID = "T6Z-4S-dHh"; */
+"T6Z-4S-dHh.normalTitle" = "speak test";
+
+/* Class = "IBUILabel"; text = "から"; ObjectID = "VrA-kz-5kO"; */
+"VrA-kz-5kO.text" = "to";
+
+/* Class = "IBUILabel"; text = "title"; ObjectID = "d7p-yW-fKq"; */
+"d7p-yW-fKq.text" = "title";
+
+/* Class = "IBUILabel"; text = "高さ"; ObjectID = "mOX-NR-x7e"; */
+"mOX-NR-x7e.text" = "pitch";
+
+/* Class = "IBUITextField"; placeholder = "開始文字"; ObjectID = "vbO-Jc-aZQ"; */
+"vbO-Jc-aZQ.placeholder" = "start string";
