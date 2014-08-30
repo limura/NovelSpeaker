@@ -31,7 +31,7 @@
     // Do any additional setup after loading the view.
     
     // ダウンロードボタンを右上に配置します
-    UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithTitle:@"download" style:UIBarButtonItemStylePlain target:self action:@selector(downloadButtonClicked)];
+    UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DownloadButton", @"download") style:UIBarButtonItemStylePlain target:self action:@selector(downloadButtonClicked)];
     self.navigationItem.rightBarButtonItem = buttonItem;
     
     // 内容をラベル等に反映します
@@ -56,7 +56,9 @@
                             , [self.NarouContentDetail.all_hyoka_cnt intValue]];
 
     NSDateFormatter* dateFormatter = [NSDateFormatter new];
-    [dateFormatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+    [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
+    [dateFormatter setTimeStyle:NSDateFormatterMediumStyle];
+    //[dateFormatter setDateFormat:NSLocalizedString(@"DisplayDateFormat", @"YYYY-MM-dd HH:mm:ss")];
     self.NovelupdatedAtLabel.text = [dateFormatter stringFromDate:self.NarouContentDetail.novelupdated_at];
     
     //NSLog(@"ScrollView size: %f,%f", self.PageScrollView.bounds.size.width, self.PageScrollView.bounds.size.height);
@@ -132,14 +134,14 @@
     NSString* errString = [[GlobalDataSingleton GetInstance] AddDownloadQueueForNarou:self.NarouContentDetail];
     if (errString != nil) {
         NSString* msg = [[NSString alloc] initWithString:errString];
-        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"ダウンロードキューへの追加に失敗" message:msg delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
+        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue", @"ダウンロードキューへの追加に失敗") message:msg delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
         m_bNeedBack = false;
         [alertView show];
         return;
     }
     
-    NSString* msg = [[NSString alloc] initWithFormat:@"作品名: %@", self.NarouContentDetail.title];
-    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"ダウンロードキューに追加されました" message:msg delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
+    NSString* msg = [[NSString alloc] initWithFormat:NSLocalizedString(@"NarouSearchResultDetailViewController_AddSuccess_Title", @"作品名: %@"), self.NarouContentDetail.title];
+    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue", @"ダウンロードキューに追加されました") message:msg delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
     m_bNeedBack = true;
     [alertView show];
 }

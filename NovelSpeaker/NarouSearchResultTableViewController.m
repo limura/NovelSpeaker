@@ -31,7 +31,7 @@
 // セクションのヘッダ
 - (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return @"検索結果";
+    return NSLocalizedString(@"NarouSearchResultTableViewController_SearchResult", @"検索結果");
 }
 
 // 個々のセクションのセルの数

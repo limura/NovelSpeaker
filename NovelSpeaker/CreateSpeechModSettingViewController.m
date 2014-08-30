@@ -45,14 +45,14 @@
 }
 
 - (IBAction)testSpeechButtonClicked:(id)sender {
-    NSString* sampleText = [[NSString alloc] initWithFormat:@"%@を%@に読み替えます。", self.beforeTextField.text, self.afterTextField.text];
+    NSString* sampleText = [[NSString alloc] initWithFormat:NSLocalizedString(@"CreateSpeechModSettingView_ReadItForAAAinBBB", @"%@を%@に読み替えます。"), self.beforeTextField.text, self.afterTextField.text];
     [m_Speaker Speech:sampleText];
 }
 
 - (IBAction)assignButtonClicked:(id)sender {
     if ([self.beforeTextField.text length] <= 0
         || [self.afterTextField.text length] <= 0) {
-        [self showAlertView:@"変換元か変換先の文字列が設定されていません。"];
+        [self showAlertView:NSLocalizedString(@"CreateSpeechModSettingView_ERROR_NoStringSetting", @"変換元か変換先の文字列が設定されていません。")];
         return;
     }
     
@@ -60,7 +60,7 @@
     speechMod.beforeString = self.beforeTextField.text;
     speechMod.afterString = self.afterTextField.text;
     if ([[GlobalDataSingleton GetInstance] UpdateSpeechModSetting:speechMod] == false) {
-        [self showAlertView:@"設定に失敗しました。"];
+        [self showAlertView:NSLocalizedString(@"CreateSpeechModSettingView_SettingFailed", @"設定に失敗しました。")];
         return;
     }
     [self.createNewSpeechModSettingDelegate NewSpeechModSettingAdded];

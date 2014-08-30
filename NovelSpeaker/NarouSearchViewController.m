@@ -55,7 +55,7 @@
 
 // 検索ボタンがクリックされた
 - (IBAction)SearchButtonClicked:(id)sender {
-    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"searching" message:@"now searching" delegate:self cancelButtonTitle:nil otherButtonTitles:nil, nil];
+    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching") message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching") delegate:self cancelButtonTitle:nil otherButtonTitles:nil, nil];
     [alertView show];
     dispatch_async(m_SearchQueue, ^{
         NSArray* searchResult = [NarouLoader Search:self.SearchTextBox.text wname:self.WriterSwitch.on title:self.TitleSwitch.on keyword:self.KeywordSwitch.on ex:self.ExSwitch.on];

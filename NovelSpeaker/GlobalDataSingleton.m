@@ -280,7 +280,7 @@ static GlobalDataSingleton* _singleton = nil;
 {
     if(content == nil || content.ncode == nil || [content.ncode length] <= 0)
     {
-        return @"有効な NCODE を取得できませんでした。";
+        return NSLocalizedString(@"GlobalDataSingleton_CanNotGetValidNCODE", @"有効な NCODE を取得できませんでした。");
     }
     NSString* targetNcode = content.ncode;
     __block NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:targetNcode];
@@ -315,7 +315,7 @@ static GlobalDataSingleton* _singleton = nil;
     
     /*
     if (targetContentCacheData != nil && ([targetContentCacheData.general_all_no intValue] <= [self CountContentChapter:targetContentCacheData]) ) {
-        return @"既にダウンロード済です。";
+        return NSLocalizedString(@"GlobalDataSingleton_AlreadyDownloaded", @"既にダウンロード済です。");
     }
      */
     
@@ -619,7 +619,7 @@ static GlobalDataSingleton* _singleton = nil;
 
 - (void)UpdatePlayingInfo:(StoryCacheData*)story
 {
-    NSString* titleName = @"再生していません";
+    NSString* titleName = NSLocalizedString(@"GlobalDataSingleton_NoPlaing", @"再生していません");
     NSString* artist = @"-";
     
     if (story != nil) {
@@ -652,12 +652,12 @@ static GlobalDataSingleton* _singleton = nil;
     if (speechConfigArray == nil || [speechConfigArray count] <= 0) {
         // 設定が無いようなので勝手に作ります。
         SpeakPitchConfigCacheData* speakConfig = [SpeakPitchConfigCacheData new];
-        speakConfig.title = @"会話文";
+        speakConfig.title = NSLocalizedString(@"GlobalDataSingleton_Conversation1", @"会話文");
         speakConfig.pitch = [[NSNumber alloc] initWithFloat:1.5f];
         speakConfig.startText = @"「";
         speakConfig.endText = @"」";
         [self UpdateSpeakPitchConfig:speakConfig];
-        speakConfig.title = @"会話文 2";
+        speakConfig.title = NSLocalizedString(@"GlobalDataSingleton_Conversation2", @"会話文 2");
         speakConfig.pitch = [[NSNumber alloc] initWithFloat:1.2f];
         speakConfig.startText = @"『";
         speakConfig.endText = @"』";

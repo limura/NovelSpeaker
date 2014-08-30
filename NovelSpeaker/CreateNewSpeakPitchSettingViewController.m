@@ -41,7 +41,7 @@
 - (IBAction)createButtonClicked:(id)sender {
     NSString* title = self.titleTextField.text;
     if ([title length] <= 0) {
-        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"タイトルにする文字列を入れてください。" message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
+        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"SpeakPitchSettingView_NoTitleStringAlert", @"タイトルにする文字列を入れてください。") message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
         m_isNeedBack = false;
         [alertView show];
         return;
@@ -49,7 +49,7 @@
     
     SpeakPitchConfigCacheData* pitchConfig = [[GlobalDataSingleton GetInstance] GetSpeakPitchConfigWithTitle:title];
     if (pitchConfig != nil) {
-        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"既に存在する設定です。" message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
+        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"SpeakPitchSettingView_AlreadyExistingSetting", @"既に存在する設定です。") message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
         m_isNeedBack = false;
         [alertView show];
         return;
@@ -60,12 +60,12 @@
     pitchConfig.endText = @"』";
     pitchConfig.title = title;
     if (![[GlobalDataSingleton GetInstance] UpdateSpeakPitchConfig:pitchConfig]) {
-        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"音声設定の追加に失敗しました。" message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
+        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"SpeakPitchSettingView_AppendFailed.", @"音声設定の追加に失敗しました。") message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
         m_isNeedBack = true;
         [alertView show];
         return;
     }
-    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"音声設定を追加しました。" message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
+    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"SpeakPitchSettingView_AppendSuccess", @"音声設定を追加しました。") message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
     m_isNeedBack = true;
     [alertView show];
 }

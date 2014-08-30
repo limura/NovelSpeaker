@@ -36,7 +36,7 @@
 
     NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] GetCurrentDownloadingInfo];
     if (content == nil) {
-        self.DownloadingTitleLabel.text = @"ダウンロード中のものはありません";
+        self.DownloadingTitleLabel.text = NSLocalizedString(@"DownloadStatusViewController_ThereIsNoThingDownloading", @"ダウンロード中のものはありません");
         self.DownloadingProgressView.progress = 0.0f;
         self.DownloadingProgressLabel.text = @"0/0";
         self.ErrorLabel.text = @"";
@@ -77,7 +77,7 @@
 {
     [self.DownloadWaitingQueueTableView reloadData];
     if (content == nil) {
-        self.DownloadingTitleLabel.text = @"ダウンロード中のものはありません";
+        self.DownloadingTitleLabel.text = NSLocalizedString(@"DownloadStatusViewController_ThereIsNoThingDownloading", @"ダウンロード中のものはありません");
         self.DownloadingProgressView.progress = 0.0f;
         self.DownloadingProgressLabel.text = @"0/0";
         self.ErrorLabel.text = @"";
@@ -93,7 +93,7 @@
 
 - (void)DownloadEnd
 {
-    self.DownloadingTitleLabel.text = @"ダウンロード中のものはありません";
+    self.DownloadingTitleLabel.text = NSLocalizedString(@"DownloadStatusViewController_ThereIsNoThingDownloading", @"ダウンロード中のものはありません");
     self.DownloadingProgressView.progress = 0.0f;
     self.DownloadingProgressLabel.text = @"0/0";
     self.ErrorLabel.text = @"";
@@ -112,7 +112,7 @@
 // セクションのヘッダ
 - (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return @"ダウンロード待ち";
+    return NSLocalizedString(@"DownloadStatusViewController_WaitingDownloading", @"ダウンロード待ち");
 }
 
 // 個々のセクションのセルの数

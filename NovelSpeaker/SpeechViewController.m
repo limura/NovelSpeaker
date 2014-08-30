@@ -27,8 +27,8 @@
     [[GlobalDataSingleton GetInstance] AddSpeakRangeDelegate:self];
     
     // NavitationBar にボタンを配置します。
-    startStopButton = [[UIBarButtonItem alloc] initWithTitle:@"Speak" style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
-    detailButton = [[UIBarButtonItem alloc] initWithTitle:@"詳細" style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
+    startStopButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SpeechViewController_Speak", @"Speak") style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
+    detailButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"pseechViewController_Detail", @"詳細") style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:startStopButton, detailButton, nil];
     self.navigationItem.title = self.NarouContentDetail.title;
     
@@ -81,7 +81,7 @@
 - (void)SetReadingPointFailedMessage
 {
     StoryCacheData* story = [StoryCacheData new];
-    story.content = @"文書の読み込みに失敗しました。";
+    story.content = NSLocalizedString(@"SpeechViewController_ContentReadFailed", @"文書の読み込みに失敗しました。");
     story.readLocation = 0;
     [self setSpeechStory:story];
 }
@@ -205,7 +205,7 @@
     [self SaveCurrentReadingPoint];
 
     // 読み上げ開始位置以降の文字列について、読み上げを開始します。
-    startStopButton.title = @"Stop";
+    startStopButton.title = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");
     
     // 読み上げを開始します
     [[GlobalDataSingleton GetInstance] StartSpeech];
@@ -215,7 +215,7 @@
 - (void)stopSpeech{
     [[GlobalDataSingleton GetInstance] StopSpeech];
 
-    startStopButton.title = @"Speak";
+    startStopButton.title = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
     [self SaveCurrentReadingPoint];
 }
 
@@ -238,7 +238,7 @@
 }
 
 - (void)startStopButtonClick:(id)sender {
-    if([startStopButton.title compare:@"Speak"] == NSOrderedSame)
+    if([startStopButton.title compare:NSLocalizedString(@"SpeechViewController_Speak", @"Speak")] == NSOrderedSame)
     {
         // 停止中だったので読み上げを開始します
         m_bIsSpeaking = YES;

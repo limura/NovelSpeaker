@@ -23,8 +23,9 @@
 /// ex: あらすじを検索対象に含むか否か
 + (NSMutableArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex
 {
+    // 18禁のに接続したければ、ここの URL を api.syousetu.com/novelapi/... って所を api.syousetu.com/novel18api/ に書き換えればOKらしいよ？
+    // 試してないけど。
     NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500", nil];
-    //NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://ein.iimura/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500", nil];
     
     if (searchString != nil) {
         queryUrl = [queryUrl stringByAppendingFormat:@"&word=%@", [self URIEncode:searchString]];

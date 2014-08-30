@@ -1,0 +1,42 @@
+/* 
+  Localized.strings
+  NovelSpeaker
+
+  Created by 飯村卓司 on 2014/08/30.
+  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
+*/
+
+"OK_button" = "OK";
+"DownloadButton" = "Download";
+//"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
+
+"SpeakPitchSettingView_NoTitleStringAlert" = "タイトルにする文字列を入れてください。";
+"SpeakPitchSettingView_AlreadyExistingSetting" = "既に存在する設定です。";
+"SpeakPitchSettingView_AppendFailed." = "音声設定の追加に失敗しました。";
+"SpeakPitchSettingView_AppendSuccess" = "音声設定を追加しました。";
+"CreateSpeechModSettingView_ReadItForAAAinBBB" = "%@を%@に読み替えます。";
+"CreateSpeechModSettingView_ERROR_NoStringSetting" = "変換元か変換先の文字列が設定されていません。";
+"CreateSpeechModSettingView_SettingFailed" = "設定に失敗しました。";
+"DownloadStatusViewController_ThereIsNoThingDownloading" = "ダウンロード中のものはありません";
+"DownloadStatusViewController_WaitingDownloading" = "ダウンロード待ち";
+"GlobalDataSingleton_CanNotGetValidNCODE" = "有効な NCODE を取得できませんでした。";
+"GlobalDataSingleton_AlreadyDownloaded" = "既にダウンロード済です。";
+"GlobalDataSingleton_NoPlaing" = "再生していません";
+"GlobalDataSingleton_Conversation1" = "会話文";
+"GlobalDataSingleton_Conversation2" = "会話文 2";
+"NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "ダウンロードキューへの追加に失敗";
+"NarouSearchResultDetailViewController_AddSuccess_Title" = "作品名: %@";
+"NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "ダウンロードキューに追加されました";
+"NarouSearchResultTableViewController_SearchResult" = "検索結果";
+"NarouSearchViewController_SearchTitle_Searching" = "Searching";
+"NarouSearchViewController_SearchMessage_NowSearching" = "Now searching";
+"SettingsTableViewController_SettingOfTheQualityOfVoice" = "声質の設定";
+"SettingTableViewController_CorrectionOfTheReading" = "読みの修正";
+"SpeakSettingsTableViewController_ReadTheSentenceForTest" = "ここに書いた文をテストで読み上げます。";
+"SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" を \"%@\" に";
+"SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";
+"SpeechViewController_Speak" = "Speak";
+"pseechViewController_Detail" = "詳細";
+"SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。";
+"SpeechViewController_Stop" = "Stop";
+

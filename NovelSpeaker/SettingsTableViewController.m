@@ -7,6 +7,7 @@
 //
 
 #import "SettingsTableViewController.h"
+#import "GlobalDataSingleton.h"
 
 static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellDefault";
 
@@ -34,6 +35,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
+    // 読み上げ設定をloadします。
+    [[GlobalDataSingleton GetInstance] ReloadSpeechSetting];
 }
 
 - (void)didReceiveMemoryWarning
@@ -68,10 +72,10 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     switch(indexPath.row)
     {
         case 0:
-            cell.textLabel.text = @"声質の設定";
+            cell.textLabel.text = NSLocalizedString(@"SettingsTableViewController_SettingOfTheQualityOfVoice", @"声質の設定");
             break;
         case 1:
-            cell.textLabel.text = @"読みの修正";
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_CorrectionOfTheReading", @"読みの修正");
             break;
         default:
             cell.textLabel.text = @"-";

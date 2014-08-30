@@ -1,0 +1,43 @@
+/* 
+  Localized.strings
+  NovelSpeaker
+
+  Created by 飯村卓司 on 2014/08/30.
+  Copyright (c) 2014年 IIMURA Takuji. All rights reserved.
+*/
+
+"OK_button" = "OK";
+"DownloadButton" = "Download";
+//"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
+
+"SpeakPitchSettingView_NoTitleStringAlert" = "No title string.";
+"SpeakPitchSettingView_AlreadyExistingSetting" = "Already existing setting.";
+"SpeakPitchSettingView_AppendFailed." = "Append failed.";
+"SpeakPitchSettingView_AppendSuccess" = "Append Success.";
+"CreateSpeechModSettingView_ReadItForAAAinBBB" = "%@を%@に読み替えます。";
+"CreateSpeechModSettingView_ERROR_NoStringSetting" = "No string setting.";
+"CreateSpeechModSettingView_SettingFailed" = "Setting failed.";
+"DownloadStatusViewController_ThereIsNoThingDownloading" = "There is nothing downloading.";
+"DownloadStatusViewController_WaitingDownloading" = "Waiting downloading";
+"GlobalDataSingleton_CanNotGetValidNCODE" = "Can not get valid NCODE";
+"GlobalDataSingleton_AlreadyDownloaded" = "Already Downloaded";
+"GlobalDataSingleton_NoPlaing" = "No Playing";
+"GlobalDataSingleton_Conversation1" = "Conversation 1";
+"GlobalDataSingleton_Conversation2" = "Conversation 2";
+"NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";
+"NarouSearchResultDetailViewController_AddSuccess_Title" = "Title: %@";
+"NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "It was added to download queue.";
+"NarouSearchResultTableViewController_SearchResult" = "Search result";
+"NarouSearchViewController_SearchTitle_Searching" = "Searching";
+"NarouSearchViewController_SearchMessage_NowSearching" = "Now searching";
+"SettingsTableViewController_SettingOfTheQualityOfVoice" = "Quality of voice";
+"SettingTableViewController_CorrectionOfTheReading" = "Correction of the reading";
+
+// "ここに書いた文をテストで読み上げます。";
+"SpeakSettingsTableViewController_ReadTheSentenceForTest" = "Speak the sentence for test.";
+"SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" to \"%@\"";
+"SpeechModSettingsTableViewController_SpeakTestPattern" = "%@ to %@";
+"SpeechViewController_Speak" = "Speak";
+"pseechViewController_Detail" = "Detail";
+"SpeechViewController_ContentReadFailed" = "Content read failed.";
+"SpeechViewController_Stop" = "Stop";

@@ -93,7 +93,7 @@ static NSString* const speechModSettingsTableViewDefaultCellID = @"speechModSett
     if (modSetting == nil) {
         cell.textLabel.text = @"-";
     }else{
-        cell.textLabel.text = [[NSString alloc] initWithFormat:@"\"%@\" を \"%@\" に", modSetting.beforeString, modSetting.afterString];
+        cell.textLabel.text = [[NSString alloc] initWithFormat:NSLocalizedString(@"SpeechModSettingsTableViewController_DisplayPattern", @"\"%@\" を \"%@\" に"), modSetting.beforeString, modSetting.afterString];
     }
     return cell;
 }
@@ -142,7 +142,7 @@ static NSString* const speechModSettingsTableViewDefaultCellID = @"speechModSett
     if (modSetting == nil) {
         return;
     }
-    NSString* sampleText = [[NSString alloc] initWithFormat:@"%@を%@に", modSetting.beforeString, modSetting.afterString];
+    NSString* sampleText = [[NSString alloc] initWithFormat:NSLocalizedString(@"SpeechModSettingsTableViewController_SpeakTestPattern", @"%@を%@に"), modSetting.beforeString, modSetting.afterString];
     [m_Speaker Speech:sampleText];
 }
 /*

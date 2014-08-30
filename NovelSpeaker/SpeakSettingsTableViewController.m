@@ -35,7 +35,7 @@
     UIBarButtonItem* addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonClicked)];
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addButton, self.editButtonItem, nil];
 
-    testSpeechSampleText = @"ここに書いた文をテストで読み上げます。";
+    testSpeechSampleText = NSLocalizedString(@"SpeakSettingsTableViewController_ReadTheSentenceForTest", @"ここに書いた文をテストで読み上げます。");
     m_Speaker = [Speaker new];
     
     UINib* defaultSpeakSettingTableViewCellNib = [UINib nibWithNibName:DefaultSpeakSettingEditTableViewCellID bundle:nil];
