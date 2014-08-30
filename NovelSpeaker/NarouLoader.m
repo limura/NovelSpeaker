@@ -48,11 +48,14 @@
     
     NSLog(@"search: %@", queryUrl);
     NSData* jsonData = [self HttpGetBinary:queryUrl];
-    NSError* err = nil;
+    NSMutableArray* result = [NSMutableArray new];
+    if (jsonData == nil) {
+        return result;
+    }
     
+    NSError* err = nil;
     // TODO: これ NSArray と NSDictionary のどっちが帰ってくるのが正しいのかわからない形式で呼んでる？
     NSArray* contentList = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&err];
-    NSMutableArray* result = [NSMutableArray new];
     for(NSDictionary* jsonContent in contentList)
     {
         NarouContentCacheData* content = [[NarouContentCacheData alloc] initWithJsonData:jsonContent];
@@ -90,6 +93,9 @@
     // まずは通常のHTMLを取得します。
     NSString* htmlURL = [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/%@/", ncode];
     NSString* html = [self HttpGet:htmlURL];
+    if (html == nil) {
+        return nil;
+    }
     // この html から、正規表現を使って
     // onclick="javascript:window.open('http://ncode.syosetu.com/txtdownload/top/ncode/562600/'
     // といった文字列の、562600 の部分を取得します。
@@ -120,11 +126,14 @@
 /// HTTP GET request for binary
 + (NSData*)HttpGetBinary:(NSString*)url {
     NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
-    return [NSURLConnection sendSynchronousRequest:request returningResponse: nil error:nil];
+    return [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
 }
 /// HTTP GET request
 + (NSString*)HttpGet:(NSString*)url {
     NSData* data = [self HttpGetBinary:url];
+    if (data == nil) {
+        return nil;
+    }
     NSString* str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     return str;
 }

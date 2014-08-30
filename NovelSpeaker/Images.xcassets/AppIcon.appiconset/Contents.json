@@ -3,19 +3,19 @@
     {
       "size" : "29x29",
       "idiom" : "iphone",
-      "filename" : "NovelSpeakerIcon@2x.png",
+      "filename" : "NovelSpeakerIcon-58px.png",
       "scale" : "2x"
     },
     {
       "size" : "40x40",
       "idiom" : "iphone",
-      "filename" : "NovelSpeakerIcon-small-40@2x.png",
+      "filename" : "NovelSpeakerIcon-80px.png",
       "scale" : "2x"
     },
     {
       "size" : "60x60",
       "idiom" : "iphone",
-      "filename" : "NovelSpeakerIcon-60@2x.png",
+      "filename" : "NovelSpeakerIcon-120px.png",
       "scale" : "2x"
     }
   ],
