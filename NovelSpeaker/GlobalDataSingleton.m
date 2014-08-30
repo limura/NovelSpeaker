@@ -313,9 +313,11 @@ static GlobalDataSingleton* _singleton = nil;
         });
     }
     
-    if ([targetContentCacheData.general_all_no intValue] <= [self CountContentChapter:targetContentCacheData] ) {
+    /*
+    if (targetContentCacheData != nil && ([targetContentCacheData.general_all_no intValue] <= [self CountContentChapter:targetContentCacheData]) ) {
         return @"既にダウンロード済です。";
     }
+     */
     
     // download queue に追加します。
     NSLog(@"add download queue.");
