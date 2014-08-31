@@ -223,14 +223,19 @@ static GlobalDataSingleton* _singleton = nil;
         return false;
     }
     __block BOOL result = false;
+    __block BOOL isCreated = false;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
         if (coreDataContent == nil) {
             coreDataContent = [self CreateNewNarouContentThreadUnsafe];
+            isCreated = true;
         }
         result = [content AssignToCoreData:coreDataContent];
         [m_CoreDataObjectHolder save];
     });
+    if (isCreated) {
+        [self NarouContentListChangedAnnounce];
+    }
     return result;
 }
 
@@ -286,10 +291,12 @@ static GlobalDataSingleton* _singleton = nil;
     __block NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:targetNcode];
     if (targetContentCacheData == nil) {
         // 登録がないようなのでとりあえず NarouContent を登録します。
+        __block isNarouContentCreated = false;
         dispatch_sync(m_CoreDataAccessQueue, ^{
             NarouContent* targetContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:targetNcode];
             if (targetContent == nil) {
                 targetContent = [self CreateNewNarouContentThreadUnsafe];
+                isNarouContentCreated = true;
             }
             targetContent.title = content.title;
             targetContent.ncode = content.ncode;
@@ -311,6 +318,9 @@ static GlobalDataSingleton* _singleton = nil;
             // 新しく作ったので save して main thread と sync しておきます。
             [m_CoreDataObjectHolder save];
         });
+        if (isNarouContentCreated) {
+            [self NarouContentListChangedAnnounce];
+        }
     }
     
     /*
@@ -476,6 +486,13 @@ static GlobalDataSingleton* _singleton = nil;
     return result;
 }
 
+- (void)NarouContentListChangedAnnounce
+{
+    NSLog(@"NarouContentListChangedAnnounced.");
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    NSNotification* notification = [NSNotification notificationWithName:@"NarouContentListChanged" object:self];
+    [notificationCenter postNotification:notification];
+}
 
 /// 小説を一つ削除します
 - (BOOL)DeleteContent:(NarouContentCacheData*)content
@@ -492,6 +509,9 @@ static GlobalDataSingleton* _singleton = nil;
             result = true;
         }
     });
+    if (result) {
+        [self NarouContentListChangedAnnounce];
+    }
     return result;
 }
 
@@ -686,6 +706,7 @@ static GlobalDataSingleton* _singleton = nil;
                               @"異世界", @"イセカイ"
                               , @"術者", @"ジュツシャ"
                               , @"術師", @"ジュツシ"
+                              , @"術式", @"ジュツシキ"
                               , @"美味い", @"うまい"
                               , @"不味い", @"まずい"
                               , @"俺達", @"おれたち"
@@ -697,19 +718,45 @@ static GlobalDataSingleton* _singleton = nil;
                               , @"行った", @"いった"
                               , @"小柄", @"こがら"
                               , @"召喚獣", @"ショウカンジュウ"
+                              , @"召喚術", @"ショウカンジュツ"
                               , @"お米", @"おこめ"
                               , @"三々五々", @"さんさんごご"
                               , @"漏ら", @"もら"
                               , @"魔人", @"まじん"
+                              , @"魔導", @"まどう"
                               , @"異次元", @"いじげん"
+                              , @"異能", @"イノウ"
+                              , @"異界", @"イカイ"
                               , @"爆炎", @"ばくえん"
                               , @"大賢者", @"だいけんじゃ"
                               , @"分身", @"ぶんしん"
                               , @"シュミレー", @"シミュレー"
                               , @"お米", @"おこめ"
+                              , @"願わくば", @"ねがわくば"
+                              , @"静寂", @"せいじゃく"
+                              , @"霊子", @"れいし"
+                              , @"身体能力", @"しんたい能力"
+                              , @"荷馬車", @"ニバシャ"
+                              , @"脳筋", @"ノウキン"
+                              , @"聖騎士", @"セイキシ"
+                              , @"真っ暗", @"まっくら"
+                              , @"気弾", @"キダン"
+                              , @"殺人鬼", @"サツジンキ"
+                              , @"極悪人", @"ゴクアクニン"
+                              , @"支配下", @"シハイカ"
+                              , @"念話", @"ネンワ"
+                              , @"姫君", @"ヒメギミ"
+                              , @"大泣き", @"オオナキ"
+                              , @"大慌て", @"おおあわて"
+                              , @"可笑し", @"おかし"
+                              , @"初見", @"しょけん"
+                              , @"俺達", @"おれたち"
+                              , @"の宴", @"のうたげ"
+                              , @"いつの間に", @"いつのまに"
 
                               , @"直継", @"ナオツグ"
                               , @"にゃん太", @"ニャンタ"
+                              , @"カズ彦", @"カズヒコ"
                               , @"大地人", @"だいちじん"
                               , @"地底人", @"ちていじん"
                               
@@ -741,35 +788,57 @@ static GlobalDataSingleton* _singleton = nil;
             NSLog(@"new flag drop: %@", ncode);
             content.is_new_flug = [[NSNumber alloc] initWithBool:false];
             [m_CoreDataObjectHolder save];
+        
         }
     });
+    // drop の Notification を飛ばします
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusDown_%@", ncode];
+    NSNotification* notification = [NSNotification notificationWithName:notificationName object:self];
+    [notificationCenter postNotification:notification];
 }
 
 /// &amp; を & とかに変換します
 - (NSString*)UnescapeHTMLEntities:(NSString*)str
 {
-    NSString    *returnStr = nil;
+    NSString *returnStr = nil;
     
-    if( str )
+    if(str == nil)
     {
-        returnStr = [ str stringByReplacingOccurrencesOfString:@"&amp;" withString: @"&"  ];
-        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""  ];
-        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&#x27;" withString:@"'"  ];
-        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&#x39;" withString:@"'"  ];
-        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&#x92;" withString:@"'"  ];
-        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&#x96;" withString:@"'"  ];
-        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"  ];
-        returnStr = [ returnStr stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"  ];
-        returnStr = [ [ NSString alloc ] initWithString:returnStr ];
+        return nil;
     }
-    
+    returnStr = [str stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"&#x27;" withString:@"'"];
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"&#x39;" withString:@"'"];
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"&#x92;" withString:@"'"];
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"&#x96;" withString:@"'"];
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"];
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"];
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"&amp;" withString: @"&"];
+
+    // 小説家になろうのタグ
+    // http://syosetu.com/man/tag/
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"<PBR>" withString: @"\r\n"]; // PCでの改行
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"<KBR>" withString: @""]; // 携帯での改行
+    returnStr = [returnStr stringByReplacingOccurrencesOfString:@"【改ページ】" withString: @""]; // 携帯での改ページ
+    returnStr = [[NSString alloc] initWithString:returnStr];
+
     return returnStr;
+}
+
+/// story の文章を表示用の文字列に変換します。
+- (NSString*)ConvertStoryContentToDisplayText:(StoryCacheData*)story
+{
+    if (story == nil) {
+        return nil;
+    }
+    return [self UnescapeHTMLEntities:story.content];
 }
 
 /// 読み上げる文書を設定します。
 - (BOOL)SetSpeechStory:(StoryCacheData *)story
 {
-    if(![m_NiftySpeaker SetText:[self UnescapeHTMLEntities:story.content]])
+    if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
         return false;
     }

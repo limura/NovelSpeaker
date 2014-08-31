@@ -171,6 +171,9 @@
 /// 読み上げ設定を読み直します。
 - (BOOL)ReloadSpeechSetting;
 
+/// story の文章を表示用の文字列に変換します。
+- (NSString*)ConvertStoryContentToDisplayText:(StoryCacheData*)story;
+
 /// 読み上げる章を設定します。
 - (BOOL)SetSpeechStory:(StoryCacheData*)story;
 

@@ -52,7 +52,7 @@
     //[self.searchDisplayController.searchResultsTableView registerNib:nib forCellReuseIdentifier:BookShelfTableViewCellID];
 
     [self setNotificationReciver];
-    [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
+    //[[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
 }
 
 - (void)dealloc
@@ -111,7 +111,7 @@
     if (contentList == nil) {
         return 0;
     }
-    NSLog(@"numberOfRowsInSection called return %lu", (unsigned long)[contentList count]);
+    //NSLog(@"numberOfRowsInSection called return %lu", (unsigned long)[contentList count]);
     return [contentList count];
 }
 
@@ -154,7 +154,7 @@
     
     // 次のビューに飛ばします。
     m_NextViewDetail = narouContent;
-    NSLog(@"next view: %@ %@", narouContent.ncode, narouContent.title);
+    //NSLog(@"next view: %@ %@", narouContent.ncode, narouContent.title);
     [self performSegueWithIdentifier:@"bookShelfToReaderSegue" sender:self];
 }
 
@@ -177,10 +177,14 @@
         }
         NarouContentCacheData* content = contentList[indexPath.row];
         NSLog(@"tableView row deleting. before content.length: %lu", (unsigned long)[contentList count]);
+        // Contentを消すことによって Notification が飛んで変なことになるので一旦切ります。
+        [self removeNotificationReciver];
         if([[GlobalDataSingleton GetInstance] DeleteContent:content] != true)
         {
             NSLog(@"delete content failed ncode: %@ title: %@", content.ncode, content.title);
         }
+        // NotificationReciver を復活させます
+        [self setNotificationReciver];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
         NSLog(@"tableView row delete.    after content.length: %lu", (unsigned long)[contentList count]);
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
@@ -202,6 +206,7 @@
 /// NotificationCenter越しに呼び出されるイベントのイベントハンドラ
 - (void)NarouContentListChanged:(NSNotification*)notification
 {
+    NSLog(@"NarouContentListChanged notification got.");
     [self.tableView reloadData];
 }
 

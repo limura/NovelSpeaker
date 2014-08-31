@@ -97,7 +97,7 @@
     NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:m_Ncode];
     if ([content.is_new_flug boolValue]) {
         self.NewImaveView.hidden = NO;
-        NSLog(@"is new: %@", m_Ncode);
+        //NSLog(@"is new: %@", m_Ncode);
     }else{
         self.NewImaveView.hidden = YES;
     }
@@ -123,7 +123,7 @@
     }
     
     [self setNotificationReciver];
-    [[GlobalDataSingleton GetInstance] AddDownloadEventHandlerWithNcode:ncode handler:self];
+    //[[GlobalDataSingleton GetInstance] AddDownloadEventHandlerWithNcode:ncode handler:self];
 }
 
 // 個々の章のダウンロードが行われようとする度に呼び出されます。
@@ -155,26 +155,42 @@
 {
     NSDictionary* args = [notification userInfo];
     NSNumber* isDownloading = [args objectForKey:@"isDownloading"];
-    if ([isDownloading boolValue]) {
-        self.DownloadProgressView.hidden = YES;
-        self.ActivityIndicator.hidden = YES;
+    if (![isDownloading boolValue]) {
+        //NSLog(@"NarouContentDownloadStatusChanged notification got. it is FINISH");
+        dispatch_async(m_MainDispatchQueue, ^{
+            self.DownloadProgressView.hidden = YES;
+            self.ActivityIndicator.hidden = YES;
+        });
     }else{
         NSNumber* currentPosition = [args objectForKey:@"currentPosition"];
         NSNumber* maxPosition = [args objectForKey:@"maxPosition"];
         float progress = (float)[currentPosition intValue] / (float)[maxPosition intValue];
-        self.DownloadProgressView.progress = progress;
-        self.DownloadProgressView.hidden = NO;
-        [self UpdateActivityIndicator];
+        dispatch_async(m_MainDispatchQueue, ^{
+            self.DownloadProgressView.progress = progress;
+            self.DownloadProgressView.hidden = NO;
+            self.ActivityIndicator.hidden = NO;
+            if (![self.ActivityIndicator isAnimating]) {
+                [self.ActivityIndicator startAnimating];
+            }
+            //NSLog(@"NarouContentDownloadStatusChanged notification got. it is position update. %d/%d", [currentPosition intValue], [maxPosition intValue]);
+        });
+        //[self UpdateActivityIndicator];
     }
 }
 
 - (void)NarouContentNewStatusUp:(NSNotification*)notification
 {
-    self.NewImaveView.hidden = NO;
+    //NSLog(@"NarouContentNewStatus Up!");
+    dispatch_async(m_MainDispatchQueue, ^{
+        self.NewImaveView.hidden = NO;
+    });
 }
 - (void)NarouContentNewStatusDown:(NSNotification*)notification
 {
-    self.NewImaveView.hidden = YES;
+    //NSLog(@"NarouContentNewStatus Down!");
+    dispatch_async(m_MainDispatchQueue, ^{
+        self.NewImaveView.hidden = YES;
+    });
 }
 
 @end

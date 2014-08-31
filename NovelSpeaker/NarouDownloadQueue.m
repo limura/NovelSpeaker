@@ -210,12 +210,14 @@ static float SLEEP_TIME_SECOND = 10.5f;
     dispatch_async(m_DownloadQueueReadWriteDispatchQueue, ^{
         [m_DownloadQueue addObject:content];
     });
+    [self announceDownloadStatus:content n:0 maxPos:[content.general_all_no intValue]];
     return true;
 }
 
 /// ダウンロード状態が変わったことのアナウンスを行います。
 - (void)announceDownloadStatus:(NarouContentCacheData*)content n:(int)n maxPos:(int)maxPos
 {
+    //NSLog(@"%@ position update notification %d/%d", content.ncode, n, maxPos);
     NSDictionary* args = [[NSDictionary alloc] initWithObjectsAndKeys:
                           [[NSNumber alloc] initWithBool:true], @"isDownloading"
                           , [[NSNumber alloc] initWithInt:n], @"currentPosition"
@@ -230,12 +232,23 @@ static float SLEEP_TIME_SECOND = 10.5f;
 /// ダウンロード状態が終わった事のアナウンスを行います。
 - (void)announceDownloadStatusEnd:(NarouContentCacheData*)content
 {
+    //NSLog(@"%@ FINISH notification", content.ncode);
     NSDictionary* args = [[NSDictionary alloc] initWithObjectsAndKeys:
                           [[NSNumber alloc] initWithBool:false], @"isDownloading"
                           , nil];
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentDownloadStatusChanged_%@", content.ncode];
     NSNotification* notification = [NSNotification notificationWithName:notificationName object:self userInfo:args];
+    [notificationCenter postNotification:notification];
+}
+
+// new! の Notification を飛ばします
+- (void)announceNarouContentNewStatusUp:(NarouContentCacheData*)content
+{
+    //NSLog(@"%@ New status UP!", content.ncode);
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusUp_%@", content.ncode];
+    NSNotification* notification = [NSNotification notificationWithName:notificationName object:self];
     [notificationCenter postNotification:notification];
 }
 
@@ -258,7 +271,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
 
     int max_content_count = [localContent.general_all_no intValue];
         
-    NSLog(@"download queue for %@ started max: %d", localContent.title, max_content_count);
+    //NSLog(@"download queue for %@ started max: %d", localContent.title, max_content_count);
     for (int n = 1; n <= max_content_count; n++) {
 
         //NSLog(@"Story の query をかけます。");
@@ -280,7 +293,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
             }
         }
         if (m_DownloadCount >= BULK_DOWNLOAD_COUNT) {
-            NSLog(@"download sleep.");
+            //NSLog(@"download sleep.");
             // 指定回数分までダウンロードされたので、ダウンロードを開始する前に指定の秒数だけ寝ます。
             // これをしないで連続ダウンロードを行うとゴミデータを掴まされる事になります。
             NSDate* endDate = [[NSDate date] dateByAddingTimeInterval:SLEEP_TIME_SECOND];
@@ -309,10 +322,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
         // コンテンツを生成します。
         [[GlobalDataSingleton GetInstance] UpdateStory:text chapter_number:n parentContent:localContent];
         // new flag を立てます
-        if ([localContent.is_new_flug boolValue] == false) {
-            localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
-            [[GlobalDataSingleton GetInstance] UpdateNarouContent:localContent];
-        }
+        localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
+        [[GlobalDataSingleton GetInstance] UpdateNarouContent:localContent];
+        [self announceNarouContentNewStatusUp:localContent];
         // 保存を走らせます。(でないと main thread側 の core data に反映されません……(´・ω・`)
         [[GlobalDataSingleton GetInstance] saveContext];
 

@@ -81,7 +81,7 @@
 
 - (BOOL) StopSpeech
 {
-    NSLog(@"StopSpeech called.");
+    //NSLog(@"StopSpeech called.");
     return [m_Synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
 }
 

@@ -47,7 +47,7 @@
     [[GlobalDataSingleton GetInstance] ReloadSpeechSetting];
     // 読み上げる文章を設定します。
     [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
-    
+        
     m_bIsSpeaking = NO;
 }
 
@@ -102,7 +102,7 @@
             return false;
         }
     }
-    NSLog(@"set currentreading story: %@ (content: %@ %@) location: %lu", story.ncode, content.ncode, content.title, [story.readLocation unsignedLongValue]);
+    //NSLog(@"set currentreading story: %@ (content: %@ %@) location: %lu", story.ncode, content.ncode, content.title, [story.readLocation unsignedLongValue]);
     [self setSpeechStory:story];
     return true;
 }
@@ -115,7 +115,7 @@
     }
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:self.textView.selectedRange.location];
-    NSLog(@"update read location %lu (%@)", [m_CurrentReadingStory.readLocation unsignedLongValue], m_CurrentReadingStory.ncode);
+    //NSLog(@"update read location %lu (%@)", [m_CurrentReadingStory.readLocation unsignedLongValue], m_CurrentReadingStory.ncode);
     [globalData UpdateReadingPoint:self.NarouContentDetail story:m_CurrentReadingStory];
     [globalData saveContext];
 }
@@ -224,7 +224,7 @@
 /// 読み上げられるのは text で、range で指定されている点を読み上げ開始点として読み上げを開始します。
 - (void)setSpeechStory:(StoryCacheData*)story {
     [self stopSpeech];
-    [self.textView setText:story.content];
+    [self.textView setText:[[GlobalDataSingleton GetInstance] ConvertStoryContentToDisplayText:story]];
     NSRange range = NSMakeRange([story.readLocation unsignedLongValue], 0);
     self.textView.selectedRange = range;
     [self.textView scrollRangeToVisible:range];
