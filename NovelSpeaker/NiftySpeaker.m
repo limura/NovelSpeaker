@@ -288,8 +288,8 @@ typedef enum {
         SpeechConfig* currentConfig = [configStack lastObject];
         SpeechConfig* nextConfig = [SpeechConfig new];
         nextConfig.beforeDelay = 0.0f;
-        nextConfig.pitch = m_DefaultSpeechConfig.pitch;
-        nextConfig.rate = m_DefaultSpeechConfig.rate;
+        nextConfig.pitch = currentConfig.pitch;
+        nextConfig.rate = currentConfig.rate;
         BOOL bNeedPushNextConfig = false;
         if (setting.type & SPEECH_SETTING_TYPE_DELAY) {
             nextConfig.beforeDelay = setting.config.beforeDelay;

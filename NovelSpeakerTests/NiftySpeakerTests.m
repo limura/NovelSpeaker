@@ -35,6 +35,12 @@
     //XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
     NiftySpeaker* speaker = [NiftySpeaker new];
     
+    SpeechConfig* defaultSpeechConfig = [SpeechConfig new];
+    defaultSpeechConfig.pitch = 1.0f;
+    defaultSpeechConfig.rate = 0.5f;
+    defaultSpeechConfig.beforeDelay = 0.0f;
+    [speaker SetDefaultSpeechConfig:defaultSpeechConfig];
+    
     SpeechConfig* normalSpeakConfig = [SpeechConfig new];
     normalSpeakConfig.pitch = 1.5f;
     normalSpeakConfig.rate = 0.5f;
@@ -60,6 +66,8 @@
      @"\r\n"
      @"通常の文章の中に「複数の」「会話文が」紛れる。\r\n"
      @"「会話文が『ネスト』する場合」\r\n"
+     @"「会話文の中に\r\n\r\n改行が複数ある場合」\r\n"
+     @"通常の文章"
      ];
     
     NSArray* blockArray = [speaker GetGeneratedSpeechBlockArray_ForTest];
@@ -179,6 +187,26 @@
     XCTAssertTrue(block.speechConfig.pitch == 1.0f);
     XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
 
+    block = [blockArray objectAtIndex:17];
+    displayText = [block GetDisplayText];
+    compareText = @"「会話文の中に";
+    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
+    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
+    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
+
+    block = [blockArray objectAtIndex:18];
+    displayText = [block GetDisplayText];
+    compareText = @"\r\n\r\n改行が複数ある場合";
+    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
+    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
+    XCTAssertTrue(block.speechConfig.beforeDelay > 0.0f, @"block(%p) beforeDelay: %f", block, block.speechConfig.beforeDelay);
+
+    block = [blockArray objectAtIndex:19];
+    displayText = [block GetDisplayText];
+    compareText = @"」\r\n通常の文章";
+    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
+    XCTAssertTrue(block.speechConfig.pitch == 1.5f, @"not same pitch: %f <-> %f", block.speechConfig.pitch, 1.0f);
+    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f, @"not same beforeDelay: %f <-> %f", block.speechConfig.beforeDelay, 0.0f);
 }
 
 @end
