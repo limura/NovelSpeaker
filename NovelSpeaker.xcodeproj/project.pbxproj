@@ -43,6 +43,7 @@
 		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
 		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
+		21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */ = {isa = PBXBuildFile; fileRef = 21AED5D419B335CF00CE846D /* ReleaseMemo.md */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
 		21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -166,6 +167,7 @@
 		21AED5D119B2142E00CE846D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SpeakSettingSampleTextTableViewCell.xib; sourceTree = "<group>"; };
 		21AED5D219B2146F00CE846D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		21AED5D319B214A500CE846D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/DefaultSpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
+		21AED5D419B335CF00CE846D /* ReleaseMemo.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReleaseMemo.md; sourceTree = "<group>"; };
 		21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechRegexPitchSetting.h; sourceTree = "<group>"; };
 		21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechRegexPitchSetting.m; sourceTree = "<group>"; };
 		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
@@ -379,6 +381,7 @@
 		21F054D21917E0F200CC6BA9 /* NovelSpeaker */ = {
 			isa = PBXGroup;
 			children = (
+				21AED5D419B335CF00CE846D /* ReleaseMemo.md */,
 				21F054DB1917E0F200CC6BA9 /* AppDelegate.h */,
 				21F054DC1917E0F200CC6BA9 /* AppDelegate.m */,
 				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
@@ -573,6 +576,7 @@
 				21B53A1D19619C00009658B7 /* sound@2x.png in Resources */,
 				212852DC19B1D101001A75DC /* Localizable.strings in Resources */,
 				2191639319A0B140003FF7FC /* coreDataMigration.storyboard in Resources */,
+				21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */,
 				21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
