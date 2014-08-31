@@ -14,7 +14,7 @@
 "SpeakPitchSettingView_AlreadyExistingSetting" = "Already existing setting.";
 "SpeakPitchSettingView_AppendFailed." = "Append failed.";
 "SpeakPitchSettingView_AppendSuccess" = "Append Success.";
-"CreateSpeechModSettingView_ReadItForAAAinBBB" = "%@を%@に読み替えます。";
+"CreateSpeechModSettingView_ReadItForAAAinBBB" = "read it for \"%@\" to \"%@\"";
 "CreateSpeechModSettingView_ERROR_NoStringSetting" = "No string setting.";
 "CreateSpeechModSettingView_SettingFailed" = "Setting failed.";
 "DownloadStatusViewController_ThereIsNoThingDownloading" = "There is nothing downloading.";
