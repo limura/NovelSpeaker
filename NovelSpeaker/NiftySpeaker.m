@@ -102,6 +102,23 @@ typedef enum {
     return self;
 }
 
+/// NSString* の入っている NSArray について、
+/// 文字列長の長いもの ＞ 文字sort の順で sort して返す
+- (NSArray*)SortSpeechModKey:(NSArray*)keys
+{
+    return [keys sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        NSString* a = obj1;
+        NSString* b = obj2;
+        if ([a length] > [b length]) {
+            return NSOrderedAscending;
+        }
+        if ([a length] < [b length]) {
+            return NSOrderedDescending;
+        }
+        return [a compare:b];
+    }];
+}
+
 /// 表示用の文字列を受け取って、SpeechBlock を生成します。
 - (SpeechBlock*)CreateSpeechBlockFromDisplayText:(NSString*)displayText speechModDictionary:(NSDictionary*)speechModDictionary config:(SpeechConfig*)config
 {
@@ -116,7 +133,9 @@ typedef enum {
         NSRange targetRange = NSMakeRange(p, displayTextLength - p);
         unsigned long min_p = displayTextLength;
         NSString* hitFrom = nil;
-        for (NSString* from in speechModDictionary) {
+        
+        NSArray* speechModDictionaryKeys = [self SortSpeechModKey:[speechModDictionary allKeys]];
+        for (NSString* from in speechModDictionaryKeys) {
             NSRange searchResult = [displayText rangeOfString:from options:0 range:targetRange];
             if (searchResult.location == NSNotFound) {
                 continue;
