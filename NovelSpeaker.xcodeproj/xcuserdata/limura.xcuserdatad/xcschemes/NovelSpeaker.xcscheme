@@ -17,7 +17,7 @@
                BlueprintIdentifier = "21F054C81917E0F200CC6BA9"
                BuildableName = "NovelSpeaker.app"
                BlueprintName = "NovelSpeaker"
-               ReferencedContainer = "container:NovelSpeaker.xcodeproj">
+               ReferencedContainer = "container:novelspeaker.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
                BlueprintIdentifier = "21F054E91917E0F200CC6BA9"
                BuildableName = "NovelSpeakerTests.xctest"
                BlueprintName = "NovelSpeakerTests"
-               ReferencedContainer = "container:NovelSpeaker.xcodeproj">
+               ReferencedContainer = "container:novelspeaker.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -45,7 +45,7 @@
             BlueprintIdentifier = "21F054C81917E0F200CC6BA9"
             BuildableName = "NovelSpeaker.app"
             BlueprintName = "NovelSpeaker"
-            ReferencedContainer = "container:NovelSpeaker.xcodeproj">
+            ReferencedContainer = "container:novelspeaker.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -64,7 +64,7 @@
             BlueprintIdentifier = "21F054C81917E0F200CC6BA9"
             BuildableName = "NovelSpeaker.app"
             BlueprintName = "NovelSpeaker"
-            ReferencedContainer = "container:NovelSpeaker.xcodeproj">
+            ReferencedContainer = "container:novelspeaker.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -82,7 +82,7 @@
             BlueprintIdentifier = "21F054C81917E0F200CC6BA9"
             BuildableName = "NovelSpeaker.app"
             BlueprintName = "NovelSpeaker"
-            ReferencedContainer = "container:NovelSpeaker.xcodeproj">
+            ReferencedContainer = "container:novelspeaker.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
