@@ -656,18 +656,8 @@ static GlobalDataSingleton* _singleton = nil;
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:songInfo];
 }
 
-/// 読み上げ設定を読み直します。
-- (BOOL)ReloadSpeechSetting
+- (void)InsertDefaultSpeakPitchConfig
 {
-    [m_NiftySpeaker ClearSpeakSettings];
-
-    GlobalStateCacheData* globalState = [self GetGlobalState];
-    SpeechConfig* defaultSetting = [SpeechConfig new];
-    defaultSetting.pitch = [globalState.defaultPitch floatValue];
-    defaultSetting.rate = [globalState.defaultRate floatValue];
-    defaultSetting.beforeDelay = 0.0f;
-    [m_NiftySpeaker SetDefaultSpeechConfig:defaultSetting];
-    
     NSArray* speechConfigArray = [self GetAllSpeakPitchConfig];
     if (speechConfigArray == nil || [speechConfigArray count] <= 0) {
         // 設定が無いようなので勝手に作ります。
@@ -682,23 +672,11 @@ static GlobalDataSingleton* _singleton = nil;
         speakConfig.startText = @"『";
         speakConfig.endText = @"』";
         [self UpdateSpeakPitchConfig:speakConfig];
-
-        // 読み直します。
-        speechConfigArray = [self GetAllSpeakPitchConfig];
     }
-    if (speechConfigArray != nil) {
-        for (SpeakPitchConfigCacheData* pitchConfig in speechConfigArray) {
-            SpeechConfig* speechConfig = [SpeechConfig new];
-            speechConfig.pitch = [pitchConfig.pitch floatValue];
-            speechConfig.rate = [globalState.defaultRate floatValue];
-            speechConfig.beforeDelay = 0.0f;
-            [m_NiftySpeaker AddBlockStartSeparator:pitchConfig.startText endString:pitchConfig.endText speechConfig:speechConfig];
-        }
-    }
+}
 
-    // delay については設定ページを作っていないので固定値になります。
-    [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02f];
-    
+- (void)InsertDefaultSpeechModConfig
+{
     NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
     if (speechModConfigArray == nil || [speechModConfigArray count] <= 0) {
         // これも無いようなので勝手に作ります。
@@ -750,7 +728,7 @@ static GlobalDataSingleton* _singleton = nil;
                               , @"俺達", @"おれたち"
                               , @"の宴", @"のうたげ"
                               , @"いつの間に", @"いつのまに"
-
+                              
                               , @"直継", @"ナオツグ"
                               , @"にゃん太", @"ニャンタ"
                               , @"カズ彦", @"カズヒコ"
@@ -764,9 +742,40 @@ static GlobalDataSingleton* _singleton = nil;
             speechModSetting.afterString = [dataArray objectAtIndex:i+1];
             [self UpdateSpeechModSetting:speechModSetting];
         }
-
+        
         speechModConfigArray = [self GetAllSpeechModSettings];
     }
+}
+
+/// 読み上げ設定を読み直します。
+- (BOOL)ReloadSpeechSetting
+{
+    [m_NiftySpeaker ClearSpeakSettings];
+
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    SpeechConfig* defaultSetting = [SpeechConfig new];
+    defaultSetting.pitch = [globalState.defaultPitch floatValue];
+    defaultSetting.rate = [globalState.defaultRate floatValue];
+    defaultSetting.beforeDelay = 0.0f;
+    [m_NiftySpeaker SetDefaultSpeechConfig:defaultSetting];
+
+    [self InsertDefaultSpeakPitchConfig];
+    NSArray* speechConfigArray = [self GetAllSpeakPitchConfig];
+    if (speechConfigArray != nil) {
+        for (SpeakPitchConfigCacheData* pitchConfig in speechConfigArray) {
+            SpeechConfig* speechConfig = [SpeechConfig new];
+            speechConfig.pitch = [pitchConfig.pitch floatValue];
+            speechConfig.rate = [globalState.defaultRate floatValue];
+            speechConfig.beforeDelay = 0.0f;
+            [m_NiftySpeaker AddBlockStartSeparator:pitchConfig.startText endString:pitchConfig.endText speechConfig:speechConfig];
+        }
+    }
+
+    // delay については設定ページを作っていないので固定値になります。
+    [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02f];
+    
+    [self InsertDefaultSpeechModConfig];
+    NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
     if (speechModConfigArray != nil) {
         for (SpeechModSettingCacheData* speechModSetting in speechModConfigArray) {
             [m_NiftySpeaker AddSpeechModText:speechModSetting.beforeString to:speechModSetting.afterString];
