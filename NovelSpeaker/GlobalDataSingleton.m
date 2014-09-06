@@ -291,7 +291,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:targetNcode];
     if (targetContentCacheData == nil) {
         // 登録がないようなのでとりあえず NarouContent を登録します。
-        __block isNarouContentCreated = false;
+        __block BOOL isNarouContentCreated = false;
         dispatch_sync(m_CoreDataAccessQueue, ^{
             NarouContent* targetContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:targetNcode];
             if (targetContent == nil) {
@@ -713,9 +713,6 @@ static GlobalDataSingleton* _singleton = nil;
                               , @"照ら", @"てら"
                               , @"身体", @"からだ"
                               , @"真っ暗", @"まっくら"
-                              , @"行って", @"いって"
-                              , @"行く", @"いく"
-                              , @"行った", @"いった"
                               , @"小柄", @"こがら"
                               , @"召喚獣", @"ショウカンジュウ"
                               , @"召喚術", @"ショウカンジュツ"
