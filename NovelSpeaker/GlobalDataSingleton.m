@@ -747,6 +747,13 @@ static GlobalDataSingleton* _singleton = nil;
     }
 }
 
+/// 何も設定されていなければ標準のデータを追加します。
+- (void)InsertDefaultSetting
+{
+    [self InsertDefaultSpeakPitchConfig];
+    [self InsertDefaultSpeechModConfig];
+}
+
 /// 読み上げ設定を読み直します。
 - (BOOL)ReloadSpeechSetting
 {
@@ -759,7 +766,6 @@ static GlobalDataSingleton* _singleton = nil;
     defaultSetting.beforeDelay = 0.0f;
     [m_NiftySpeaker SetDefaultSpeechConfig:defaultSetting];
 
-    [self InsertDefaultSpeakPitchConfig];
     NSArray* speechConfigArray = [self GetAllSpeakPitchConfig];
     if (speechConfigArray != nil) {
         for (SpeakPitchConfigCacheData* pitchConfig in speechConfigArray) {
@@ -774,7 +780,6 @@ static GlobalDataSingleton* _singleton = nil;
     // delay については設定ページを作っていないので固定値になります。
     [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02f];
     
-    [self InsertDefaultSpeechModConfig];
     NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
     if (speechModConfigArray != nil) {
         for (SpeechModSettingCacheData* speechModSetting in speechModConfigArray) {
@@ -1159,6 +1164,13 @@ static GlobalDataSingleton* _singleton = nil;
 {
     [m_CoreDataObjectHolder doMigration];
 }
+
+/// CoreData のデータファイルが存在するかどうかを取得します
+- (BOOL)isAliveCoreDataSaveFile
+{
+    return [m_CoreDataObjectHolder isAliveSaveDataFile];
+}
+
 
 #if 0
 #pragma mark - Core Data stack

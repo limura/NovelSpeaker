@@ -45,6 +45,22 @@
     return [[NSString alloc] initWithFormat:@"%@", [NSThread currentThread]];
 }
 
+/// SQLiteのファイルが存在するかどうかを取得します
+- (BOOL)isAliveSaveDataFile
+{
+    NSURL *storeURL = [self GetSqlFileURL];
+    if (storeURL == nil) {
+        return false;
+    }
+    
+    NSString* path = [storeURL path];
+    if (path == nil) {
+        return false;
+    }
+    
+    return [[NSFileManager defaultManager] fileExistsAtPath:path];
+}
+
 /// マイグレーションが必要かどうかを取得します。
 - (BOOL)isNeedMigration
 {

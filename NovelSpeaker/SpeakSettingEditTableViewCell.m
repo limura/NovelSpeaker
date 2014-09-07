@@ -26,7 +26,7 @@
     // Configure the view for the selected state
 }
 
-/// 速度のスライドバーの値が変わった
+/// 高さのスライドバーの値が変わった
 - (IBAction)pitchValueChanged:(id)sender {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     SpeakPitchConfigCacheData* pitchConfig = [globalData GetSpeakPitchConfigWithTitle:self.titleLabel.text];

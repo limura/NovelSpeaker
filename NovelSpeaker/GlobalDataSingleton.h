@@ -168,6 +168,9 @@
 /// 前の章がなければ nil を返します。
 - (StoryCacheData*)GetPreviousChapter:(StoryCacheData*)story;
 
+/// 何も設定されていなければ標準のデータを追加します。
+- (void)InsertDefaultSetting;
+
 /// 読み上げ設定を読み直します。
 - (BOOL)ReloadSpeechSetting;
 
@@ -229,5 +232,8 @@
 
 /// CoreData のマイグレーションを実行します。
 - (void)doCoreDataMigration;
+
+/// CoreData のデータファイルが存在するかどうかを取得します
+- (BOOL)isAliveCoreDataSaveFile;
 
 @end

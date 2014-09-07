@@ -45,6 +45,9 @@ typedef enum {
 /// mergePolicy は、NSErrorMergePolicy(default) や NSMergeByPropertyObjectTrumpMergePolicy 等を与えます。
 - (CoreDataObjectHolder*)initWithModelName:(NSString*)modelName fileName:(NSString*)fileName folderType:(CoreDataObjectHolderFolderType)folderType mergePolicy:(id)mergePolicy;
 
+/// SQLiteのファイルが存在するかどうかを取得します
+- (BOOL)isAliveSaveDataFile;
+
 /// マイグレーションが必要かどうかを取得します。
 - (BOOL)isNeedMigration;
 
