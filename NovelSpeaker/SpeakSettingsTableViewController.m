@@ -162,12 +162,26 @@
 /// TODO: 多分これはスクロールバーを表示させるために全部のcellに対して呼び出されるのでたくさんのcellがあった場合ひどいことになりそうな予感。
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    /*
     UITableViewCell* cell = [self tableView:tableView cellForRowAtIndexPath:indexPath];
     if (cell == nil) {
-        return 0;
+     */
+        switch (indexPath.row) {
+            case 0:
+                return 31.0f;
+            case 1:
+                return 125.0f;
+                break;
+            default:
+                break;
+        }
+        return 130.0f;
+    /*
     }
     CGSize size = [cell sizeThatFits:tableView.frame.size];
+    NSLog(@"row: %ld -> %f (%f)", (long)indexPath.row, size.height, cell.frame.size.height);
     return size.height;
+     */
 }
 
 /// セルを取得に来るので返す
