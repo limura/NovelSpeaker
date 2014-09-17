@@ -189,6 +189,9 @@
 /// 読み上げを開始します。
 - (BOOL)StartSpeech;
 
+/// 読み上げを「バックグラウンド再生としては止めずに」読み上げ部分だけ停止します
+- (BOOL)StopSpeechWithoutDiactivate;
+
 /// 読み上げを停止します。
 - (BOOL)StopSpeech;
 

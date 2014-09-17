@@ -129,7 +129,6 @@
 
 - (BOOL)SetPreviousChapter
 {
-    [self stopSpeech];
     StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetPreviousChapter:m_CurrentReadingStory];
     if (story == nil) {
         return false;
@@ -142,7 +141,6 @@
 
 - (BOOL)SetNextChapter
 {
-    [self stopSpeech];
     StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetNextChapter:m_CurrentReadingStory];
     if (story == nil) {
         return false;
@@ -155,10 +153,12 @@
 
 - (void)RightSwipe:(UISwipeGestureRecognizer *)sender
 {
+    [self stopSpeech];
     [self SetPreviousChapter];
 }
 - (void)LeftSwipe:(UISwipeGestureRecognizer *)sender
 {
+    [self stopSpeech];
     [self SetNextChapter];
 }
 
@@ -209,6 +209,14 @@
     
     // 読み上げを開始します
     [[GlobalDataSingleton GetInstance] StartSpeech];
+}
+
+/// 読み上げを「バックグラウンド再生としては止めずに」読み上げ部分だけ停止します
+- (void)stopSpeechWithoutDiactivate{
+    [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
+    
+    startStopButton.title = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
+    [self SaveCurrentReadingPoint];
 }
 
 /// 読み上げを停止します
@@ -274,6 +282,7 @@
 // SpeachTextBox が読み終わった時
 - (void)SpeakTextBoxFinishSpeak
 {
+    [self stopSpeechWithoutDiactivate];
     if ([self SetNextChapter] != true) {
         return;
     }
@@ -290,6 +299,7 @@
 /// 読み上げが停止したとき
 - (void) finishSpeak
 {
+    [self stopSpeechWithoutDiactivate];
     if ([self SetNextChapter]) {
         [self startSpeech];
     }
@@ -324,7 +334,7 @@
                 
         case UIEventSubtypeRemoteControlPreviousTrack:
             NSLog(@"event: prev");
-            [self stopSpeech];
+            [self stopSpeechWithoutDiactivate];
             if ([self SetPreviousChapter]) {
                 [self startSpeech];
             }
@@ -332,7 +342,7 @@
                 
         case UIEventSubtypeRemoteControlNextTrack:
             NSLog(@"event: next");
-            [self stopSpeech];
+            [self stopSpeechWithoutDiactivate];
             if ([self SetNextChapter]) {
                 [self startSpeech];
             }

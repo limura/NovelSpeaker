@@ -896,17 +896,23 @@ static GlobalDataSingleton* _singleton = nil;
     return [m_NiftySpeaker StartSpeech];
 }
 
+/// 読み上げを「バックグラウンド再生としては止めずに」読み上げ部分だけ停止します
+- (BOOL)StopSpeechWithoutDiactivate
+{
+    if([m_NiftySpeaker StopSpeech] == false)
+    {
+        return false;
+    }
+    return true;
+}
+
 /// 読み上げを停止します。
 - (BOOL)StopSpeech
 {
     AVAudioSession* session = [AVAudioSession sharedInstance];
     //NSLog(@"setActive NO.");
     [session setActive:NO error:nil];
-    if([m_NiftySpeaker StopSpeech] == false)
-    {
-        return false;
-    }
-    return true;
+    return [self StopSpeechWithoutDiactivate];
 }
 
 /// 読み上げ時のイベントハンドラを追加します。
