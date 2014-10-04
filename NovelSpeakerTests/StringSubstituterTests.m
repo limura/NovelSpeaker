@@ -57,7 +57,9 @@
     NSString* from = @"aaaa aaa aa a";
     NSString* answer = @"b cc ddd eeee";
     
-    NSString* conved = [substituter Convert:from];
+    SpeechConfig* conf = [SpeechConfig new];
+    SpeechBlock* block = [substituter Convert:from speechConfig:conf];
+    NSString* conved = [block GetSpeechText];
     XCTAssertEqual([answer compare:conved], NSOrderedSame, @"conv failed:\n  from:\"%@\"\nanswer:\"%@\"\n    to:\"%@\"", from, answer, conved);
 }
 
@@ -73,7 +75,9 @@
     NSString* from = @"ああああ あああ 漢漢 あ";
     NSString* answer = @"い 文文 字字字字 いいい";
     
-    NSString* conved = [substituter Convert:from];
+    SpeechConfig* conf = [SpeechConfig new];
+    SpeechBlock* block = [substituter Convert:from speechConfig:conf];
+    NSString* conved = [block GetSpeechText];
     XCTAssertEqual([answer compare:conved], NSOrderedSame, @"conv failed:\n  from:\"%@\"\nanswer:\"%@\"\n    to:\"%@\"", from, answer, conved);
 }
 
