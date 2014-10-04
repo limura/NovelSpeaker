@@ -55,6 +55,7 @@ typedef enum {
     m_BlockSeparatorArray = [NSMutableArray new];
     m_DelaySettingArray = [NSMutableArray new];
     m_SpeechModDictionary = [NSMutableDictionary new];
+    m_StringSubstituter = [StringSubstituter new];
 
     m_DefaultSpeechConfig = [SpeechConfig new];
     GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
@@ -86,6 +87,7 @@ typedef enum {
     m_BlockSeparatorArray = [NSMutableArray new];
     m_DelaySettingArray = [NSMutableArray new];
     m_SpeechModDictionary = [NSMutableDictionary new];
+    m_StringSubstituter = [StringSubstituter new];
     
     m_DefaultSpeechConfig = [SpeechConfig new];
     m_DefaultSpeechConfig.pitch = speechConfig.pitch;
@@ -164,6 +166,12 @@ typedef enum {
     }
     
     return result;
+}
+
+/// 表示用の文字列を受け取って、SpeechBlock を生成します。
+- (SpeechBlock*)CreateSpeechBlockFromDisplayText:(NSString*)displayText config:(SpeechConfig*)config
+{
+    return [m_StringSubstituter Convert:displayText speechConfig:config];
 }
 
 /// 読み上げ用の文字列からSpeechBlockの配列への変換を行います。
@@ -313,7 +321,11 @@ typedef enum {
         }
         NSRange textRange = NSMakeRange(p, [key unsignedLongValue] - p);
         NSString* targetString = [text substringWithRange:textRange];
+#if 0
         SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString speechModDictionary:m_SpeechModDictionary config:currentConfig];
+#else
+        SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString config:currentConfig];
+#endif
         //NSLog(@"block(%p): delay: %.2f, pitch: %.2f, rate: %.2f %@ → %@", block, block.speechConfig.beforeDelay, block.speechConfig.pitch, block.speechConfig.rate, targetString, [block GetSpeechText]);
         [speechBlockArray addObject:block];
         p = [key unsignedIntegerValue];
@@ -322,7 +334,11 @@ typedef enum {
         SpeechConfig* config = [configStack lastObject];
         NSRange textRange = NSMakeRange(p, [text length] - p);
         NSString* targetString = [text substringWithRange:textRange];
+#if 0
         SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString speechModDictionary:m_SpeechModDictionary config:config];
+#else
+        SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString config:config];
+#endif
         //NSLog(@"block(%p): delay: %.2f, pitch: %.2f, rate: %.2f %@ → %@", block, block.speechConfig.beforeDelay, block.speechConfig.pitch, block.speechConfig.rate, targetString, [block GetSpeechText]);
         [speechBlockArray addObject:block];
     }
@@ -382,6 +398,7 @@ typedef enum {
 - (BOOL)AddSpeechModText:(NSString*)from to:(NSString*)to
 {
     [m_SpeechModDictionary setObject:to forKey:from];
+    [m_StringSubstituter AddSetting_From:from to:to];
     return true;
 }
 
@@ -577,6 +594,7 @@ typedef enum {
     [m_BlockSeparatorArray removeAllObjects];
     [m_DelaySettingArray removeAllObjects];
     [m_SpeechModDictionary removeAllObjects];
+    [m_StringSubstituter ClearSetting];
 }
 
 

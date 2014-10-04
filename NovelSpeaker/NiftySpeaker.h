@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "SpeechConfig.h"
 #import "Speaker.h"
+#import "StringSubstituter.h"
 
 
 /// 「イイカンジ」の読み上げclass
@@ -33,6 +34,8 @@
     
     /// 読み上げ時の文字列を変更するためのテーブル(key が元文字列で value が読み上げ時に使われる文字列)
     NSMutableDictionary* m_SpeechModDictionary;
+    /// 新型の読み上げ時の文字列変更用 object
+    StringSubstituter* m_StringSubstituter;
     
     /// 読み上げをしているか否かのbool値
     BOOL m_bIsSpeaking;
