@@ -31,7 +31,8 @@
     detailButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"pseechViewController_Detail", @"詳細") style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:startStopButton, detailButton, nil];
     self.navigationItem.title = self.NarouContentDetail.title;
-    
+
+#if 0 // ボタンで章を移動するようにします。
     // 左右のスワイプを設定してみます。
     UISwipeGestureRecognizer* rightSwipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(RightSwipe:)];
     rightSwipe.direction = UISwipeGestureRecognizerDirectionRight;
@@ -39,6 +40,7 @@
     UISwipeGestureRecognizer* leftSwipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(LeftSwipe:)];
     leftSwipe.direction = UISwipeGestureRecognizerDirectionLeft;
     [self.view addGestureRecognizer:leftSwipe];
+#endif
     
     self.ChapterSlider.minimumValue = 1;
     self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
@@ -169,6 +171,8 @@
 {
     if (story == nil || story.content == nil || [story.content length] <= 0) {
         [self SetReadingPointFailedMessage];
+        self.PrevChapterButton.enabled = false;
+        self.NextChapterButton.enabled = false;
         return false;
     }
     if ([story.content length] < [story.readLocation intValue])
@@ -177,6 +181,14 @@
         story.readLocation = [[NSNumber alloc] initWithInt:0];
     }
 
+
+    if ([story.chapter_number intValue] <= 0) {
+        self.PrevChapterButton.enabled = false;
+    }else{
+        self.PrevChapterButton.enabled = true;
+    }
+    self.NextChapterButton.enabled = true;
+    
     [self setSpeechStory:story];
     self.ChapterSlider.value = [story.chapter_number floatValue];
     m_CurrentReadingStory = story;
@@ -285,6 +297,14 @@
     {
         [self SetReadingPointFailedMessage];
     }
+}
+- (IBAction)PrevChapterButtonClicked:(id)sender {
+    [self stopSpeech];
+    [self SetPreviousChapter];
+}
+- (IBAction)NextChapterButtonClicked:(id)sender {
+    [self stopSpeech];
+    [self SetNextChapter];
 }
 
 // SpeachTextBox が読み終わった時

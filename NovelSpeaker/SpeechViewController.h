@@ -24,6 +24,9 @@
 }
 @property (weak, nonatomic) IBOutlet UISlider *ChapterSlider;
 @property (weak, nonatomic) IBOutlet UITextView *textView;
+@property (weak, nonatomic) IBOutlet UIButton *NextChapterButton;
+
+@property (weak, nonatomic) IBOutlet UIButton *PrevChapterButton;
 
 // 前のページから得られる表示するための情報
 @property NarouContentCacheData* NarouContentDetail;
