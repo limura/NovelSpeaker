@@ -74,3 +74,14 @@ You can @mention a GitHub username to generate a link to their profile. The resu
 
 ### Support or Contact
 Having trouble with Pages? Check out the documentation at http://help.github.com/pages or contact support@github.com and we’ll help you sort it out.
+
+
+
+
+# Ver 1.1 リリースノート
+
+・バックグラウンド再生中に章を移動した時、再生が停止する可能性があった問題を修正
+・小説の表示がステータスバーやナビゲーションバーにかぶって表示されて見えなくなることがある問題を修正
+・読み替えの設定を増やすと再生開始時に長時間無反応になる問題を"ある程度"修正。(件数が増えれば遅くはなります)
+
+
