@@ -38,19 +38,22 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="タイトル" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KE3-wT-Goi">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="タイトル" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KE3-wT-Goi">
                                 <rect key="frame" x="20" y="87" width="68" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="68" id="5cI-SN-E55"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="n8z-Qq-ERZ">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="n8z-Qq-ERZ">
                                 <rect key="frame" x="103" y="83" width="197" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2IR-cM-v3n">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2IR-cM-v3n">
                                 <rect key="frame" x="215" y="127" width="85" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="作成">
@@ -62,6 +65,15 @@
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="2IR-cM-v3n" firstAttribute="top" secondItem="n8z-Qq-ERZ" secondAttribute="bottom" constant="14" id="5ja-yt-g4e"/>
+                            <constraint firstItem="KE3-wT-Goi" firstAttribute="top" secondItem="QBc-Cd-9o5" secondAttribute="bottom" constant="23" id="5yC-hb-t9A"/>
+                            <constraint firstItem="KE3-wT-Goi" firstAttribute="leading" secondItem="73j-uc-zbj" secondAttribute="leading" constant="20" id="8Xa-cf-Pru"/>
+                            <constraint firstAttribute="trailing" secondItem="n8z-Qq-ERZ" secondAttribute="trailing" constant="20" id="KLw-ge-pB5"/>
+                            <constraint firstItem="KE3-wT-Goi" firstAttribute="centerY" secondItem="n8z-Qq-ERZ" secondAttribute="centerY" id="Veo-XB-ptB"/>
+                            <constraint firstAttribute="trailing" secondItem="2IR-cM-v3n" secondAttribute="trailing" constant="20" id="X3W-r9-3x6"/>
+                            <constraint firstItem="n8z-Qq-ERZ" firstAttribute="leading" secondItem="KE3-wT-Goi" secondAttribute="trailing" constant="15" id="uqe-qC-gag"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="声質設定範囲の作成" id="b1Y-Fj-Dcn"/>
                     <connections>

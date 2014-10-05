@@ -85,3 +85,19 @@ Having trouble with Pages? Check out the documentation at http://help.github.com
 ・読み替えの設定を増やすと再生開始時に長時間無反応になる問題を"ある程度"修正。(件数が増えれば遅くはなります)
 
 
+# メモ
+
+## ナビゲーションバー(上に出てくる「戻る」ボタンとかタイトルとかが表示される領域)に埋まる問題を解消するには、
+インタフェースビルダの Adjust Scroll View Insets っていうチェックボックスを off にするといいっぽい。(理由理解してない)
+http://qiita.com/yimajo/items/7c7372e284e13827c989
+
+## iCloud で同期するには
+CoreData を使う時の初期化に
+NSPersistentStoreUbiquitousContentNameKey と NSPersistentStoreUbiquitousContentURLKey
+というのを使うらしい？
+
+Key-Value store とか Document Storage ってのでもできるっぽい。
+http://blog.gentlesoft.net/article/56456255.html
+
+
+http://d.hatena.ne.jp/glass-_-onion/20120728/1343471940
