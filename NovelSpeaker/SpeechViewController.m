@@ -53,6 +53,7 @@
 
 - (void)dealloc
 {
+    [self SaveCurrentReadingPoint];
     [[GlobalDataSingleton GetInstance] DeleteSpeakRangeDelegate:self];
 }
 
@@ -73,6 +74,7 @@
 {
     [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
     [self resignFirstResponder];
+    [self SaveCurrentReadingPoint];
     
     [super viewWillDisappear:animated];
 }
@@ -232,8 +234,14 @@
 /// 読み上げられるのは text で、range で指定されている点を読み上げ開始点として読み上げを開始します。
 - (void)setSpeechStory:(StoryCacheData*)story {
     [self stopSpeech];
-    [self.textView setText:[[GlobalDataSingleton GetInstance] ConvertStoryContentToDisplayText:story]];
-    NSRange range = NSMakeRange([story.readLocation unsignedLongValue], 0);
+    NSString* displayText = [[GlobalDataSingleton GetInstance] ConvertStoryContentToDisplayText:story];
+    [self.textView setText:displayText];
+    NSUInteger location = [story.readLocation unsignedLongValue];
+    NSUInteger length = 1;
+    if ((location + length) > [displayText length]) {
+        location -= 1;
+    }
+    NSRange range = NSMakeRange(location, length);
     self.textView.selectedRange = range;
     [self.textView scrollRangeToVisible:range];
     self.ChapterSlider.value = [story.chapter_number floatValue];
