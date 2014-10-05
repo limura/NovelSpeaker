@@ -613,8 +613,9 @@ static GlobalDataSingleton* _singleton = nil;
         if (nextCoreDataStory != nil) {
             NSLog(@"chapter: %d is alive", target_chapter_number);
             result = [[StoryCacheData alloc] initWithCoreData:nextCoreDataStory];
+        }else{
+            NSLog(@"chapter: %d is NOT alive", target_chapter_number);
         }
-        NSLog(@"chapter: %d is NOT alive", target_chapter_number);
     });
     return result;
 }
