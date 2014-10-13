@@ -34,13 +34,13 @@
 {
     self = [super init];
 
-    self.title = [jsonContent objectForKey:@"title"];
-    self.ncode = [jsonContent objectForKey:@"ncode"];
-    self.userid = [jsonContent objectForKey:@"userid"];
-    self.writer = [jsonContent objectForKey:@"writer"];
-    self.story = [jsonContent objectForKey:@"story"];
+    self.title = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"title"]];
+    self.ncode = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"ncode"]];
+    self.userid = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"userid"]];
+    self.writer = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"writer"]];
+    self.story = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"story"]];
     self.genre = [self String2Number:[jsonContent objectForKey:@"genre"]];
-    self.keyword = [jsonContent objectForKey:@"keyword"];
+    self.keyword = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"keyword"]];
     self.general_all_no = [self String2Number:[jsonContent objectForKey:@"general_all_no"]];
     self.fav_novel_cnt = [self String2Number:[jsonContent objectForKey:@"fav_novel_cnt"]];
     self.review_cnt = [self String2Number:[jsonContent objectForKey:@"review_cnt"]];

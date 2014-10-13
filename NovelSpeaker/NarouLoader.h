@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "NarouContentCacheData.h"
 
 /// 小説家になろう の API 個を使って小説情報を読み出すclass。
 /// SettingDataModel の NarouContent に追加するなどします。
@@ -35,6 +36,9 @@
 /// 小説家になろうでTextダウンロードを行います。
 /// ここで指定される download_url は、GetTextDownloadURL で得られたダウンロード用のURLを用います。
 + (NSString*)TextDownload:(NSString*)download_url count:(int)count;
+
+/// 小説家になろうで ncode を指定して最新の NarouContent情報 を取得します。
++ (NarouContentCacheData*)GetCurrentNcodeContentData:(NSString*)ncode;
 
 /// HTTP Get Request を投げて、バイナリを返します
 + (NSData*)HttpGetBinary:(NSString*)url;

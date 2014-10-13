@@ -255,13 +255,23 @@ static float SLEEP_TIME_SECOND = 10.5f;
 /// ncode のコンテンツのダウンロードを開始します。
 - (BOOL)ChapterDownload:(NarouContentCacheData*)localContent
 {
+    if (localContent == nil || localContent.ncode == nil) {
+        return false;
+    }
+    // 与えられた content の ncode を使って最新情報を読み込んでCoreData側の情報を上書きします。
+    NarouContentCacheData* currentContent = [NarouLoader GetCurrentNcodeContentData:localContent.ncode];
+    if (currentContent == nil) {
+        NSLog(@"ncode: %@ の最新情報の読み込みに失敗しました。", localContent.ncode);
+        return false;
+    }
+    [[GlobalDataSingleton GetInstance] UpdateNarouContent:currentContent];
+    localContent = currentContent;
+    
     NSString* downloadURL = [NarouLoader GetTextDownloadURL:localContent.ncode];
     if (downloadURL == nil) {
         NSLog(@"can not get download url for ncode: %@", localContent.ncode);
         return false;
     }
-    // 与えられた情報が最新のものなのだろうと思い込んで、CoreData側の情報を上書きします。
-    [[GlobalDataSingleton GetInstance] UpdateNarouContent:localContent];
 
     // 現在ダウンロード中とするデータを copy で作っておきます。
     dispatch_async(m_MainDispatchQueue, ^{

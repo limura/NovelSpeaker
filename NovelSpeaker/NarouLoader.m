@@ -23,8 +23,8 @@
 /// ex: あらすじを検索対象に含むか否か
 + (NSMutableArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex
 {
-    // 18禁のに接続したければ、ここの URL を api.syousetu.com/novelapi/... って所を api.syousetu.com/novel18api/ に書き換えればOKらしいよ？
-    // 試してないけど。
+    // 18禁のに接続したければ、ここの URL を api.syousetu.com/novelapi/... って所を
+    // api.syousetu.com/novel18api/ に書き換えればOKらしいよ？ 試してないけど。
     NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500", nil];
     
     if (searchString != nil) {
@@ -69,6 +69,35 @@
 
     return result;
 }
+
+/// 小説家になろうで ncode を指定して最新の NarouContent情報 を取得します。
++ (NarouContentCacheData*)GetCurrentNcodeContentData:(NSString*)ncode
+{
+    NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500&ncode=%@", ncode];
+
+    NSData* jsonData = [self HttpGetBinary:queryUrl];
+    if (jsonData == nil) {
+        return nil;
+    }
+    
+    NSError* err = nil;
+    // TODO: これ NSArray と NSDictionary のどっちが帰ってくるのが正しいのかわからない形式で呼んでる？
+    NSArray* contentList = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&err];
+    // 複数あるので探します。
+    for(NSDictionary* jsonContent in contentList)
+    {
+        NarouContentCacheData* content = [[NarouContentCacheData alloc] initWithJsonData:jsonContent];
+        if (content.ncode == nil || [content.ncode length] <= 0) {
+            continue;
+        }
+        if ([ncode compare:content.ncode] == NSOrderedSame) {
+            return content;
+        }
+    }
+    NSLog(@"ncode: %@ で検索しましたが、結果がありませんでした。", ncode);
+    return nil;
+}
+
 
 /// 文字列をURIエンコードします。
 + (NSString*) URIEncode:(NSString*)str
