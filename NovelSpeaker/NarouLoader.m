@@ -60,7 +60,8 @@
     for(NSDictionary* jsonContent in contentList)
     {
         NarouContentCacheData* content = [[NarouContentCacheData alloc] initWithJsonData:jsonContent];
-        if (content.ncode == nil || [content.ncode length] <= 0) {
+        if (content == nil || content.ncode == nil || [content.ncode length] <= 0
+            || [content.ncode compare:@"(null)"] == NSOrderedSame) {
             continue;
         }
         
