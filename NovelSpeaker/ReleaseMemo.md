@@ -102,6 +102,24 @@ Correction of the problem
 - I revise the problem that the indication of the novel is fogged in a status bar and navigation bar, and it may not seem that it is displayed.
 - I revise a reproduction start and the problem that I am replaced, and nothing sometimes reacts to for a long time of the chapter when I increase the setting of the reading substitute. (if the number increases, it becomes late)
 
+# レビュー用メモ
+
+修正項目以下の通りです。
+
+Change of the interface
+
+- I attached a button for the front and the movement to a later chapter with the screen which read a novel. By the right and left flick cannot move now.
+
+Correction of the problem
+
+- I revise the problem that the latest thing which I reloaded was not able to download.
+- When I moved a chapter during background reproduction, I revise the problem that reproduction might stop.
+- I revise the problem that the indication of the novel is fogged in a status bar and navigation bar, and it may not seem that it is displayed.
+- I revise a reproduction start and the problem that I am replaced, and nothing sometimes reacts to for a long time of the chapter when I increase the setting of the reading substitute. (if the number increases, it becomes late)
+
+
+
+
 # メモ
 
 ## ナビゲーションバー(上に出てくる「戻る」ボタンとかタイトルとかが表示される領域)に埋まる問題を解消するには、
