@@ -78,7 +78,7 @@ Having trouble with Pages? Check out the documentation at http://help.github.com
 
 
 
-# Ver 1.1 リリースノート
+# Ver 1.0.2 リリースノート
 
 インタフェースの変更
 ・小説を読んでいる画面で前と後の章への移動用にボタンをつけました。左右フリックでの移動はできなくなります。
@@ -88,6 +88,19 @@ Having trouble with Pages? Check out the documentation at http://help.github.com
 ・バックグラウンド再生中に章を移動した時、再生が停止する可能性があった問題を修正
 ・小説の表示がステータスバーやナビゲーションバーにかぶって表示されて見えなくなることがある問題を修正
 ・読み替えの設定を増やすと再生開始や章の切り替わり時に長時間無反応になる問題を"ある程度"修正。(件数が増えれば遅くはなります)
+
+# Version 1.0.2 release note
+
+Change of the interface
+
+- I attached a button for the front and the movement to a later chapter with the screen which read a novel. By the right and left flick cannot move now.
+
+Correction of the problem
+
+- I revise the problem that the latest thing which I reloaded was not able to download.
+- When I moved a chapter during background reproduction, I revise the problem that reproduction might stop.
+- I revise the problem that the indication of the novel is fogged in a status bar and navigation bar, and it may not seem that it is displayed.
+- I revise a reproduction start and the problem that I am replaced, and nothing sometimes reacts to for a long time of the chapter when I increase the setting of the reading substitute. (if the number increases, it becomes late)
 
 # メモ
 
