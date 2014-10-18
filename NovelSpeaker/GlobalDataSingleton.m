@@ -223,17 +223,19 @@ static GlobalDataSingleton* _singleton = nil;
         return false;
     }
     __block BOOL result = false;
-    __block BOOL isCreated = false;
+    __block BOOL isNeedContentListChangedAnnounce = false;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
         if (coreDataContent == nil) {
             coreDataContent = [self CreateNewNarouContentThreadUnsafe];
-            isCreated = true;
+            isNeedContentListChangedAnnounce = true;
+        }else if(coreDataContent.novelupdated_at != content.novelupdated_at){
+            isNeedContentListChangedAnnounce = true;
         }
         result = [content AssignToCoreData:coreDataContent];
         [m_CoreDataObjectHolder save];
     });
-    if (isCreated) {
+    if (isNeedContentListChangedAnnounce || true) {
         [self NarouContentListChangedAnnounce];
     }
     return result;
