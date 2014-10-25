@@ -107,6 +107,7 @@
 		211BA5FA19973CFB00560842 /* SpeechConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechConfig.m; sourceTree = "<group>"; };
 		211BA5FC199742CF00560842 /* NiftySpeaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftySpeaker.h; sourceTree = "<group>"; };
 		211BA5FD199742CF00560842 /* NiftySpeaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftySpeaker.m; sourceTree = "<group>"; };
+		212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 5.xcdatamodel"; sourceTree = "<group>"; };
 		212852CD19B1C4A7001A75DC /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = ja.lproj/updateLabel.png; sourceTree = "<group>"; };
 		212852CF19B1C4AB001A75DC /* en */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = en; path = en.lproj/updateLabel.png; sourceTree = "<group>"; };
 		212852D119B1C53D001A75DC /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/updateLabel@2x.png"; sourceTree = "<group>"; };
@@ -836,9 +837,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "5029455f-e905-497c-8c69-a725bd3da82e";
+				PROVISIONING_PROFILE = "45276cbc-8f9b-4c36-aa68-830e53884058";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -852,9 +853,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "5029455f-e905-497c-8c69-a725bd3da82e";
+				PROVISIONING_PROFILE = "45276cbc-8f9b-4c36-aa68-830e53884058";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -935,12 +936,13 @@
 		21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */,
 				2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */,
 				21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */,
 				21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */,
 				21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */,
 			);
-			currentVersion = 2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */;
+			currentVersion = 212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */;
 			path = SettingDataModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
