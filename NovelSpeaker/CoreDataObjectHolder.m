@@ -8,6 +8,7 @@
 
 #import "CoreDataObjectHolder.h"
 #import <CoreData/CoreData.h>
+#import "LPPerformanceChecker.h"
 
 @implementation CoreDataObjectHolder
 
@@ -280,14 +281,19 @@
 - (id)CreateNewEntity:(NSString*)entityName
 {
     NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
-    return [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:context];
+    NSDate* startDate = [NSDate date];
+    id entity = [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:context];
+    [LPPerformanceChecker CheckTimeInterval:@"CreateNewEntity時間かかりすぎ" startDate:startDate logTimeInterval:1.0f];
+    return entity;
 }
 
 /// Entity を一つ削除します
 - (void)DeleteEntity:(NSManagedObject*)entity
 {
     NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
+    NSDate* startDate = [NSDate date];
     [context deleteObject:entity];
+    [LPPerformanceChecker CheckTimeInterval:@"DeleteEntity時間かかりすぎ" startDate:startDate logTimeInterval:1.0f];
 }
 
 /// 全ての Entity を検索して返します
@@ -300,7 +306,9 @@
     
     NSError* err = nil;
     NSArray* results = nil;
+    NSDate* startDate = [NSDate date];
     results = [context executeFetchRequest:fetchRequest error:&err];
+    [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"FetchAllEntity (%@) 時間かかりすぎ", entityName] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
         results = nil;
@@ -322,8 +330,10 @@
     
     NSError* err = nil;
     NSArray* results;
+    NSDate* startDate = [NSDate date];
     results = [context executeFetchRequest:fetchRequest error:&err];
-    
+    [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"CountEntity (%@) 時間かかりすぎ", entityName] startDate:startDate logTimeInterval:1.0f];
+  
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
         count = 0;
@@ -348,7 +358,9 @@
     [fetchRequest setSortDescriptors:sortDescriptors];
     
     NSError* err = nil;
+    NSDate* startDate = [NSDate date];
     results = [context executeFetchRequest:fetchRequest error:&err];
+    [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"FetchAllEntity %@ sortAttributeName: %@ 時間かかりすぎ", entityName, sortAttributeName] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
         results = nil;
@@ -369,7 +381,9 @@
     
     NSError* err = nil;
     NSArray* results;
+    NSDate* startDate = [NSDate date];
     results = [context executeFetchRequest:fetchRequest error:&err];
+    [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"SearchEntity %@ predicate: %@ 時間かかりすぎ", entityName, predicate] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
         return nil;
@@ -394,7 +408,9 @@
 
     NSError* err = nil;
     NSArray* results;
+    NSDate* startDate = [NSDate date];
     results = [context executeFetchRequest:fetchRequest error:&err];
+    [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"SearchEntity %@ predicate: %@ sortAttributeName: %@ 時間かかりすぎ", entityName, predicate, sortAttributeName] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
         return nil;
@@ -419,7 +435,9 @@
 
     NSError* err = nil;
     NSArray* results;
+    NSDate* startDate = [NSDate date];
     results = [context executeFetchRequest:fetchRequest error:&err];
+    [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"CountEntity %@ predicate: %@ 時間かかりすぎ", entityName, predicate] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
         return 0;
@@ -427,8 +445,6 @@
 
     return [results count];
 }
-
-
 
 
 @end

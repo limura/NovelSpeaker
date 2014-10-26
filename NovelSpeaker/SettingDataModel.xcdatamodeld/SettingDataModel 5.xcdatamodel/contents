@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13E28" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6252" systemVersion="14A389" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Dummy" syncable="YES">
+        <attribute name="dummy" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+    </entity>
     <entity name="GlobalState" representedClassName="GlobalState" syncable="YES">
         <attribute name="defaultPitch" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
         <attribute name="defaultRate" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
@@ -15,7 +18,7 @@
         <attribute name="global_point" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="is_new_flug" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="keyword" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="ncode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="ncode" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="novelupdated_at" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="reading_chapter" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="review_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
@@ -38,9 +41,9 @@
         <attribute name="beforeString" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <entity name="Story" representedClassName="Story" syncable="YES">
-        <attribute name="chapter_number" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="chapter_number" optional="YES" attributeType="Integer 32" defaultValueString="0" indexed="YES" syncable="YES"/>
         <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="ncode" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="ncode" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="readLocation" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <relationship name="contentCurrentReadingInverse" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="currentReadingStory" inverseEntity="NarouContent" syncable="YES"/>
         <relationship name="globalStateCurrentReadingInverse" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="GlobalState" inverseName="currentReadingStory" inverseEntity="GlobalState" syncable="YES"/>
@@ -51,6 +54,7 @@
         <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="345"/>
         <element name="SpeakPitchConfig" positionX="-162" positionY="-279" width="128" height="105"/>
         <element name="SpeechModSetting" positionX="-153" positionY="-270" width="128" height="75"/>
-        <element name="Story" positionX="-81" positionY="-280" width="128" height="148"/>
+        <element name="Story" positionX="-81" positionY="-280" width="128" height="150"/>
+        <element name="Dummy" positionX="-171" positionY="-288" width="128" height="60"/>
     </elements>
 </model>
