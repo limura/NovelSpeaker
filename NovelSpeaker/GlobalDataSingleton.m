@@ -490,7 +490,7 @@ static GlobalDataSingleton* _singleton = nil;
 
 - (void)NarouContentListChangedAnnounce
 {
-    NSLog(@"NarouContentListChangedAnnounced.");
+    //NSLog(@"NarouContentListChangedAnnounced.");
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     NSNotification* notification = [NSNotification notificationWithName:@"NarouContentListChanged" object:self];
     [notificationCenter postNotification:notification];

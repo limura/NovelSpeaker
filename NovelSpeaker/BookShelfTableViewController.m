@@ -206,7 +206,7 @@
 /// NotificationCenter越しに呼び出されるイベントのイベントハンドラ
 - (void)NarouContentListChanged:(NSNotification*)notification
 {
-    NSLog(@"NarouContentListChanged notification got.");
+    //NSLog(@"NarouContentListChanged notification got.");
     [self.tableView reloadData];
 }
 
