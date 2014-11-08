@@ -559,7 +559,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="-" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="213" translatesAutoresizingMaskIntoConstraints="NO" id="xXn-q0-jX5">
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="213" translatesAutoresizingMaskIntoConstraints="NO" id="xXn-q0-jX5">
                                         <rect key="frame" x="95" y="10" width="213" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
@@ -572,7 +572,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="-" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="213" translatesAutoresizingMaskIntoConstraints="NO" id="3Wn-rj-DVb">
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="213" translatesAutoresizingMaskIntoConstraints="NO" id="3Wn-rj-DVb">
                                         <rect key="frame" x="95" y="39" width="213" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
@@ -593,7 +593,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g0W-gO-BlM">
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g0W-gO-BlM">
                                         <rect key="frame" x="158" y="155" width="150" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
@@ -606,7 +606,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1XQ-W9-Dvn">
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1XQ-W9-Dvn">
                                         <rect key="frame" x="95" y="97" width="213" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
@@ -619,7 +619,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PCx-06-eEF">
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PCx-06-eEF">
                                         <rect key="frame" x="95" y="68" width="213" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
@@ -632,7 +632,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" misplaced="YES" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VMK-l4-SWS">
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VMK-l4-SWS">
                                         <rect key="frame" x="95" y="126" width="213" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
@@ -645,17 +645,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xwQ-rt-BZg">
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xwQ-rt-BZg">
                                         <rect key="frame" x="158" y="184" width="150" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="あらすじ" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6vn-Hz-h0v">
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="あらすじ" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6vn-Hz-h0v">
                                         <rect key="frame" x="7" y="242" width="301" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="-" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="202" translatesAutoresizingMaskIntoConstraints="NO" id="Zz8-CV-no1">
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="202" translatesAutoresizingMaskIntoConstraints="NO" id="Zz8-CV-no1">
                                         <rect key="frame" x="106" y="213" width="202" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
@@ -668,6 +668,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Zh9-yA-FVY" userLabel="DummyView">
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    </view>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="KJR-wg-Gk1" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="0Lh-wz-S0s"/>
@@ -683,10 +686,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <constraint firstItem="xwQ-rt-BZg" firstAttribute="leading" secondItem="AQq-iW-Jsd" secondAttribute="trailing" constant="9" id="Djq-93-cgn"/>
                                     <constraint firstItem="VMK-l4-SWS" firstAttribute="leading" secondItem="KJR-wg-Gk1" secondAttribute="trailing" constant="13" id="DlG-x0-fub"/>
                                     <constraint firstItem="Zz8-CV-no1" firstAttribute="leading" secondItem="le2-Ox-6kL" secondAttribute="trailing" constant="14" id="ECZ-Lu-FzA"/>
+                                    <constraint firstItem="Zh9-yA-FVY" firstAttribute="width" secondItem="lSh-Mn-eoc" secondAttribute="width" id="EYC-sL-K8U"/>
                                     <constraint firstItem="AQq-iW-Jsd" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="EfN-Nh-vJF"/>
                                     <constraint firstItem="CVN-SK-Hpn" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="FBu-8I-6Jj"/>
                                     <constraint firstItem="Zz8-CV-no1" firstAttribute="top" secondItem="xwQ-rt-BZg" secondAttribute="bottom" constant="8" id="G0b-wv-Pgp"/>
                                     <constraint firstAttribute="trailing" secondItem="6vn-Hz-h0v" secondAttribute="trailing" constant="12" id="IED-Uc-43B"/>
+                                    <constraint firstItem="Zh9-yA-FVY" firstAttribute="top" secondItem="lSh-Mn-eoc" secondAttribute="top" id="NDG-Tr-fwP"/>
                                     <constraint firstItem="yWP-hK-Eyd" firstAttribute="top" secondItem="6vn-Hz-h0v" secondAttribute="bottom" constant="8" id="NPf-yV-s6l"/>
                                     <constraint firstAttribute="trailing" secondItem="yWP-hK-Eyd" secondAttribute="trailing" constant="12" id="QMv-J3-A5G"/>
                                     <constraint firstItem="3Wn-rj-DVb" firstAttribute="leading" secondItem="COj-Rr-gBt" secondAttribute="trailing" constant="13" id="Tfk-pp-Oxl"/>
@@ -694,9 +699,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <constraint firstItem="wyA-PN-led" firstAttribute="top" secondItem="PCx-06-eEF" secondAttribute="top" id="VoQ-dC-Alu"/>
                                     <constraint firstItem="AQq-iW-Jsd" firstAttribute="top" secondItem="xwQ-rt-BZg" secondAttribute="top" id="WKw-9A-V4l"/>
                                     <constraint firstItem="g0W-gO-BlM" firstAttribute="top" secondItem="VMK-l4-SWS" secondAttribute="bottom" constant="8" id="WbL-Yv-8lz"/>
+                                    <constraint firstAttribute="trailing" secondItem="Zh9-yA-FVY" secondAttribute="trailing" id="XJb-FW-grS"/>
                                     <constraint firstAttribute="trailing" secondItem="xwQ-rt-BZg" secondAttribute="trailing" constant="12" id="ZCg-tS-cjL"/>
                                     <constraint firstItem="g0W-gO-BlM" firstAttribute="leading" secondItem="CVN-SK-Hpn" secondAttribute="trailing" constant="9" id="aBT-23-tbD"/>
                                     <constraint firstItem="VMK-l4-SWS" firstAttribute="top" secondItem="KJR-wg-Gk1" secondAttribute="top" id="b8a-kQ-EOU"/>
+                                    <constraint firstItem="Zh9-yA-FVY" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" id="d1Z-ye-SM5"/>
                                     <constraint firstAttribute="trailing" secondItem="3Wn-rj-DVb" secondAttribute="trailing" constant="12" id="fBA-kk-U4s"/>
                                     <constraint firstItem="COj-Rr-gBt" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="fHN-8x-oiT"/>
                                     <constraint firstItem="CVN-SK-Hpn" firstAttribute="top" secondItem="g0W-gO-BlM" secondAttribute="top" id="fpE-sJ-QbE"/>
