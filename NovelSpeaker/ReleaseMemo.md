@@ -88,6 +88,7 @@ Having trouble with Pages? Check out the documentation at http://help.github.com
 ・バックグラウンド再生中に章を移動した時、再生が停止する可能性があった問題を修正
 ・小説の表示がステータスバーやナビゲーションバーにかぶって表示されて見えなくなることがある問題を修正
 ・読み替えの設定を増やすと再生開始や章の切り替わり時に長時間無反応になる問題を"ある程度"修正。(件数が増えれば遅くはなります)
+・大量の小説をダウンロードした状態だと動作が遅くなっていた問題を修正
 
 # Version 1.0.2 release note
 
@@ -101,6 +102,7 @@ Correction of the problem
 - When I moved a chapter during background reproduction, I revise the problem that reproduction might stop.
 - I revise the problem that the indication of the novel is fogged in a status bar and navigation bar, and it may not seem that it is displayed.
 - I revise a reproduction start and the problem that I am replaced, and nothing sometimes reacts to for a long time of the chapter when I increase the setting of the reading substitute. (if the number increases, it becomes late)
+- Movement revises the problem that became slow if in condition to have downloaded a large quantity of novels.
 
 # Ver 1.1 リリースノート
 
