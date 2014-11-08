@@ -122,6 +122,8 @@ MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of 
 /* Class = "IBUINavigationItem"; title = "読みの修正"; ObjectID = "iy0-Ki-xeS"; */
 "iy0-Ki-xeS.title" = "Correction of the reading";
 
+"PxM-wl-qYW.text" = "Size of text";
+
 /* Class = "IBUINavigationItem"; title = "読みの修正詳細"; ObjectID = "jOk-mr-1xo"; */
 "jOk-mr-1xo.title" = "Correction of the reading";
 

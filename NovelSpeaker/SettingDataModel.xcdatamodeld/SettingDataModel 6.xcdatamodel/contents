@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6252" systemVersion="14A389" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Dummy" syncable="YES">
+        <attribute name="dummy" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+    </entity>
+    <entity name="GlobalState" representedClassName="GlobalState" syncable="YES">
+        <attribute name="defaultPitch" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="defaultRate" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="textSizeValue" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="globalStateCurrentReadingInverse" inverseEntity="Story" syncable="YES"/>
+    </entity>
+    <entity name="NarouContent" representedClassName="NarouContent" syncable="YES">
+        <attribute name="all_hyoka_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="all_point" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="end" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="fav_novel_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="general_all_no" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="genre" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="global_point" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="is_new_flug" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="keyword" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="ncode" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="novelupdated_at" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="reading_chapter" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="review_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="sasie_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="story" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="userid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="writer" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="childStory" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
+        <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="contentCurrentReadingInverse" inverseEntity="Story" syncable="YES"/>
+    </entity>
+    <entity name="SpeakPitchConfig" representedClassName="SpeakPitchConfig" syncable="YES">
+        <attribute name="endText" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="pitch" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="startText" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="SpeechModSetting" representedClassName="SpeechModSetting" syncable="YES">
+        <attribute name="afterString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="beforeString" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="Story" representedClassName="Story" syncable="YES">
+        <attribute name="chapter_number" optional="YES" attributeType="Integer 32" defaultValueString="0" indexed="YES" syncable="YES"/>
+        <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="ncode" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="readLocation" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <relationship name="contentCurrentReadingInverse" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="currentReadingStory" inverseEntity="NarouContent" syncable="YES"/>
+        <relationship name="globalStateCurrentReadingInverse" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="GlobalState" inverseName="currentReadingStory" inverseEntity="GlobalState" syncable="YES"/>
+        <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Dummy" positionX="-171" positionY="-288" width="128" height="60"/>
+        <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="105"/>
+        <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="345"/>
+        <element name="SpeakPitchConfig" positionX="-162" positionY="-279" width="128" height="105"/>
+        <element name="SpeechModSetting" positionX="-153" positionY="-270" width="128" height="75"/>
+        <element name="Story" positionX="-81" positionY="-280" width="128" height="150"/>
+    </elements>
+</model>

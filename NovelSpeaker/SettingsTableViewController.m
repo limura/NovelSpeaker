@@ -57,7 +57,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return 2;
+    return 3;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -77,6 +77,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         case 1:
             cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_CorrectionOfTheReading", @"読みの修正");
             break;
+        case 2:
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_SettingOfTheTextSize", @"文字サイズの設定");
+            break;
         default:
             cell.textLabel.text = @"-";
             break;
@@ -94,6 +97,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             break;
         case 1:
             [self performSegueWithIdentifier:@"speechModSettingSegue" sender:self];
+            break;
+        case 2:
+            [self performSegueWithIdentifier:@"textSizeSettingSegue" sender:self];
             break;
         default:
             break;

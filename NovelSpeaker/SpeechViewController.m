@@ -44,6 +44,12 @@
     
     self.ChapterSlider.minimumValue = 1;
     self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
+    
+    // フォントサイズを設定された値に変更します。
+    [self loadAndSetFontSize];
+    
+    // フォントサイズ変更イベントを受け取るようにします。
+    [self setNotificationReciver];
 
     // 読み上げ設定をloadします。
     [[GlobalDataSingleton GetInstance] ReloadSpeechSetting];
@@ -55,6 +61,7 @@
 
 - (void)dealloc
 {
+    [self removeNotificationReciver];
     [self SaveCurrentReadingPoint];
     [[GlobalDataSingleton GetInstance] DeleteSpeakRangeDelegate:self];
 }
@@ -379,4 +386,53 @@
             break;
     }
 }
+
+/// 表示用のフォントサイズを変更します
+- (void)ChangeFontSize:(float)fontSize
+{
+    UIFont* font = [UIFont systemFontOfSize:140.0];
+    self.textView.font = [font fontWithSize:fontSize];
+}
+
+/// フォントサイズを設定されている値にします。
+- (void)loadAndSetFontSize
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    GlobalStateCacheData* globalState = [globalData GetGlobalState];
+    double fontSize = [GlobalDataSingleton ConvertFontSizeValueToFontSize:[globalState.textSizeValue floatValue]];
+    [self ChangeFontSize:fontSize];
+}
+
+/// NotificationCenter の受信者の設定をします。
+- (void)setNotificationReciver
+{
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    
+    [notificationCenter addObserver:self selector:@selector(FontSizeChanged:) name:@"StoryDisplayFontSizeChanged" object:nil];
+}
+
+/// NotificationCenter の受信者の設定を解除します。
+- (void)removeNotificationReciver
+{
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    
+    [notificationCenter removeObserver:self name:@"StoryDisplayFontSizeChanged" object:nil];
+}
+
+/// フォントサイズ変更イベントの受信
+/// NotificationCenter越しに呼び出されるイベントのイベントハンドラ
+- (void)FontSizeChanged:(NSNotification*)notification
+{
+    NSDictionary* userInfo = notification.userInfo;
+    if(userInfo == nil){
+        return;
+    }
+    NSNumber* fontSizeValue = [userInfo objectForKey:@"fontSizeValue"];
+    if (fontSizeValue == nil) {
+        return;
+    }
+    float floatFontSizeValue = [fontSizeValue floatValue];
+    [self ChangeFontSize:[GlobalDataSingleton ConvertFontSizeValueToFontSize:floatFontSizeValue]];
+}
+
 @end

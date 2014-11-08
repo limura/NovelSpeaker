@@ -21,6 +21,8 @@
 		210958EB1A0E1C5500E9171F /* NEW!.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958ED1A0E1C5500E9171F /* NEW!.png */; };
 		210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F01A0E1C5C00E9171F /* NEW!@2x.png */; };
 		210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F31A0E1C6100E9171F /* NEW!@3x.png */; };
+		210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */; };
+		210959001A0E3B1E00E9171F /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 210958FF1A0E3B1E00E9171F /* GlobalState.m */; };
 		2117251019B2064400FB97D2 /* BookShelfTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */; };
 		2117251519B2078200FB97D2 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117251719B2078200FB97D2 /* DefaultSpeakSettingEditTableViewCell.xib */; };
 		2117251E19B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117252019B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib */; };
@@ -94,7 +96,6 @@
 		21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21F054F41917E0F200CC6BA9 /* InfoPlist.strings */; };
 		21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */; };
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
-		21F7DE48197EB33A00BD2899 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE47197EB33A00BD2899 /* GlobalState.m */; };
 		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
 		4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */; };
 /* End PBXBuildFile section */
@@ -127,6 +128,11 @@
 		210958F41A0E1C6400E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!.png"; sourceTree = "<group>"; };
 		210958F51A0E1C6700E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!@2x.png"; sourceTree = "<group>"; };
 		210958F61A0E1C6A00E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!@3x.png"; sourceTree = "<group>"; };
+		210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSizeSettingViewController.h; sourceTree = "<group>"; };
+		210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextSizeSettingViewController.m; sourceTree = "<group>"; };
+		210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 6.xcdatamodel"; sourceTree = "<group>"; };
+		210958FE1A0E3B1E00E9171F /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
+		210958FF1A0E3B1E00E9171F /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
 		2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BookShelfTableViewCell.xib; sourceTree = "<group>"; };
 		2117251619B2078200FB97D2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/DefaultSpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		2117251F19B2093600FB97D2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/SpeakSettingSampleTextTableViewCell.xib; sourceTree = "<group>"; };
@@ -253,8 +259,6 @@
 		21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NovelSpeakerTests.m; sourceTree = "<group>"; };
 		21F7DE43197EB33900BD2899 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Story.h; path = DataModelMapping/Story.h; sourceTree = "<group>"; };
 		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
-		21F7DE46197EB33A00BD2899 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
-		21F7DE47197EB33A00BD2899 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
 		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
 		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
 		4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultTableViewController.h; sourceTree = "<group>"; };
@@ -378,8 +382,8 @@
 			isa = PBXGroup;
 			children = (
 				21724EE119721D3600DF6DC4 /* MappingModel */,
-				21F7DE46197EB33A00BD2899 /* GlobalState.h */,
-				21F7DE47197EB33A00BD2899 /* GlobalState.m */,
+				210958FE1A0E3B1E00E9171F /* GlobalState.h */,
+				210958FF1A0E3B1E00E9171F /* GlobalState.m */,
 				2177634F19756781004F22FD /* GlobalStateCacheData.h */,
 				2177635019756781004F22FD /* GlobalStateCacheData.m */,
 				2191639819A38414003FF7FC /* NarouContent.h */,
@@ -517,6 +521,8 @@
 				2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */,
 				21916366199E5D43003FF7FC /* SettingsTableViewController.h */,
 				21916367199E5D43003FF7FC /* SettingsTableViewController.m */,
+				210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */,
+				210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */,
 				21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */,
 				21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */,
 				21916379199F4514003FF7FC /* SpeechModSettingsTableViewController.h */,
@@ -674,14 +680,15 @@
 				212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
-				21F7DE48197EB33A00BD2899 /* GlobalState.m in Sources */,
 				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
 				217BD9E419CE72BB008A0D9D /* StringSubstituter.m in Sources */,
 				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
+				210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */,
 				2191637B199F4514003FF7FC /* SpeechModSettingsTableViewController.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
+				210959001A0E3B1E00E9171F /* GlobalState.m in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
@@ -1016,13 +1023,14 @@
 		21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */,
 				212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */,
 				2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */,
 				21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */,
 				21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */,
 				21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */,
 			);
-			currentVersion = 212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */;
+			currentVersion = 210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */;
 			path = SettingDataModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

@@ -18,6 +18,7 @@
     
     self.defaultPitch = coreDataState.defaultPitch;
     self.defaultRate = coreDataState.defaultRate;
+    self.textSizeValue = coreDataState.textSizeValue;
     self.currentReadingStory = nil;
     if (coreDataState.currentReadingStory != nil) {
         self.currentReadingStory = [[StoryCacheData alloc] initWithCoreData:coreDataState.currentReadingStory];
@@ -31,6 +32,7 @@
 {
     coreDataState.defaultPitch = self.defaultPitch;
     coreDataState.defaultRate = self.defaultRate;
+    coreDataState.textSizeValue = self.textSizeValue;
 
     if (self.currentReadingStory == nil) {
         coreDataState.currentReadingStory = nil;

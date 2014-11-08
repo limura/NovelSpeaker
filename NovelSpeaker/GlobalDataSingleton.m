@@ -132,6 +132,7 @@ static GlobalDataSingleton* _singleton = nil;
         }
         state.defaultPitch = globalState.defaultPitch;
         state.defaultRate = globalState.defaultRate;
+        state.textSizeValue = globalState.textSizeValue;
         
         if (globalState.currentReadingStory == nil) {
             state.currentReadingStory = nil;
@@ -1189,6 +1190,20 @@ static GlobalDataSingleton* _singleton = nil;
     return [m_CoreDataObjectHolder isAliveSaveDataFile];
 }
 
+
+/// フォントサイズ値を実際のフォントのサイズに変換します。
+/// 1 〜 100 までの float で、50 だと 14(default値)、1 だと 1、100 だと200 位になるような曲線でフォントサイズを計算します。
++ (double)ConvertFontSizeValueToFontSize:(float)value
+{
+    if (value < 1.0f) {
+        value = 50.0f;
+    }else if(value > 100.0f){
+        value = 100.0f;
+    }
+    double num = pow(1.05, value);
+    num += 1.0f;
+    return num;
+}
 
 #if 0
 #pragma mark - Core Data stack

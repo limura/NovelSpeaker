@@ -239,4 +239,7 @@
 /// CoreData のデータファイルが存在するかどうかを取得します
 - (BOOL)isAliveCoreDataSaveFile;
 
+/// フォントサイズ値を実際のフォントのサイズに変換します。
++ (double)ConvertFontSizeValueToFontSize:(float)fontSizeValue;
+
 @end
