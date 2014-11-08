@@ -102,6 +102,13 @@ Correction of the problem
 - I revise the problem that the indication of the novel is fogged in a status bar and navigation bar, and it may not seem that it is displayed.
 - I revise a reproduction start and the problem that I am replaced, and nothing sometimes reacts to for a long time of the chapter when I increase the setting of the reading substitute. (if the number increases, it becomes late)
 
+# Ver 1.1 リリースノート
+
+インタフェースの変更
+・本棚、なろう検索、ダウンロード状態 のアイコンを変更
+
+
+
 # レビュー用メモ
 
 修正項目以下の通りです。

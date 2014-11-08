@@ -17,6 +17,12 @@
       "idiom" : "iphone",
       "filename" : "NovelSpeakerIcon-120px.png",
       "scale" : "2x"
+    },
+    {
+      "size" : "60x60",
+      "idiom" : "iphone",
+      "filename" : "NovelSpeakerIcon-60@3x.png",
+      "scale" : "3x"
     }
   ],
   "info" : {
