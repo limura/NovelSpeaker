@@ -386,6 +386,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="E6g-DK-WqK">
                                         <rect key="frame" x="112" y="211" width="51" height="31"/>
                                     </switch>
+                                    <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GDs-eV-7IP" userLabel="DummyView">
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    </view>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="Qoe-ZB-GuL" firstAttribute="leading" secondItem="9mZ-qa-NJe" secondAttribute="leading" id="05w-Fv-iqJ"/>
@@ -399,16 +402,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <constraint firstItem="P9D-DS-Z1l" firstAttribute="leading" secondItem="GaQ-EU-TxN" secondAttribute="leading" id="ARu-vc-gLK"/>
                                     <constraint firstItem="x6k-iI-DqL" firstAttribute="top" secondItem="KM0-4j-Lhp" secondAttribute="bottom" constant="16" id="C8V-On-Mbj"/>
                                     <constraint firstItem="Qoe-ZB-GuL" firstAttribute="leading" secondItem="P9D-DS-Z1l" secondAttribute="leading" id="DbA-02-Ihh"/>
+                                    <constraint firstItem="GDs-eV-7IP" firstAttribute="top" secondItem="W6I-br-Cvi" secondAttribute="top" id="HgK-g5-Zbk"/>
                                     <constraint firstItem="gju-ZK-gVO" firstAttribute="centerY" secondItem="P9D-DS-Z1l" secondAttribute="centerY" id="Htn-Yn-evu"/>
                                     <constraint firstItem="x6k-iI-DqL" firstAttribute="leading" secondItem="KM0-4j-Lhp" secondAttribute="leading" id="JmV-5p-cez"/>
+                                    <constraint firstAttribute="trailing" secondItem="GDs-eV-7IP" secondAttribute="trailing" id="LIL-7N-EUG"/>
                                     <constraint firstAttribute="trailing" secondItem="57a-Pg-j5k" secondAttribute="trailing" constant="105" id="P52-3T-QmZ"/>
                                     <constraint firstItem="x6k-iI-DqL" firstAttribute="leading" secondItem="9mZ-qa-NJe" secondAttribute="trailing" constant="17" id="ReI-JH-YJk"/>
                                     <constraint firstItem="57a-Pg-j5k" firstAttribute="top" secondItem="E6g-DK-WqK" secondAttribute="bottom" constant="18" id="Z6d-0U-ltD"/>
                                     <constraint firstItem="P9D-DS-Z1l" firstAttribute="leading" secondItem="9mZ-qa-NJe" secondAttribute="leading" id="ZbK-um-CB2"/>
+                                    <constraint firstItem="GDs-eV-7IP" firstAttribute="leading" secondItem="W6I-br-Cvi" secondAttribute="leading" id="b33-Ps-K0R"/>
                                     <constraint firstItem="gju-ZK-gVO" firstAttribute="leading" secondItem="P9D-DS-Z1l" secondAttribute="trailing" constant="7" id="c5s-MX-9cs"/>
                                     <constraint firstItem="sKa-20-5wS" firstAttribute="leading" secondItem="KM0-4j-Lhp" secondAttribute="leading" id="cfG-XQ-9PI"/>
                                     <constraint firstItem="sKa-20-5wS" firstAttribute="leading" secondItem="E6g-DK-WqK" secondAttribute="leading" id="dou-4r-CQS"/>
                                     <constraint firstItem="P9D-DS-Z1l" firstAttribute="leading" secondItem="W6I-br-Cvi" secondAttribute="leading" constant="20" symbolic="YES" id="eMd-Jh-u73"/>
+                                    <constraint firstAttribute="width" secondItem="GDs-eV-7IP" secondAttribute="width" id="erY-KK-uOk"/>
                                     <constraint firstItem="Qoe-ZB-GuL" firstAttribute="top" secondItem="P9D-DS-Z1l" secondAttribute="bottom" constant="28" id="fWo-Ru-EdV"/>
                                     <constraint firstItem="x6k-iI-DqL" firstAttribute="centerY" secondItem="9mZ-qa-NJe" secondAttribute="centerY" id="gKE-Z5-mPI"/>
                                     <constraint firstAttribute="bottom" secondItem="57a-Pg-j5k" secondAttribute="bottom" constant="163" id="hAq-dB-u7u"/>
