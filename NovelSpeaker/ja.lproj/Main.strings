@@ -122,7 +122,7 @@ MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of 
 /* Class = "IBUINavigationItem"; title = "読みの修正"; ObjectID = "iy0-Ki-xeS"; */
 "iy0-Ki-xeS.title" = "読みの修正";
 
-"PxM-wl-qYW.text" = "文字サイズの設定";
+"PxM-wl-qYW.title" = "文字サイズの設定";
 
 /* Class = "IBUINavigationItem"; title = "読みの修正詳細"; ObjectID = "jOk-mr-1xo"; */
 "jOk-mr-1xo.title" = "読みの修正詳細";

@@ -40,5 +40,5 @@
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@ to %@";
 "SpeechViewController_Speak" = "Speak";
 "pseechViewController_Detail" = "Detail";
-"SpeechViewController_ContentReadFailed" = "Content read failed.";
+"SpeechViewController_ContentReadFailed" = "Content read failed. This problem may dissolve by choosing \"Detail\" and \"Download\", and performing a redownload.";
 "SpeechViewController_Stop" = "Stop";

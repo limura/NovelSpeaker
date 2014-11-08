@@ -38,6 +38,6 @@
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";
 "SpeechViewController_Speak" = "Speak";
 "pseechViewController_Detail" = "詳細";
-"SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。";
+"SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。「詳細」→「Download」を選択して再ダウンロードすることで解消するかもしれません。";
 "SpeechViewController_Stop" = "Stop";
 
