@@ -42,3 +42,4 @@
 "pseechViewController_Detail" = "Detail";
 "SpeechViewController_ContentReadFailed" = "Content read failed. This problem may dissolve by choosing \"Detail\" and \"Download\", and performing a redownload.";
 "SpeechViewController_Stop" = "Stop";
+"SpeechViewController_SpeechStopedByEnd" = "Because it reached at the end of a book, I stopped reading aloud.";

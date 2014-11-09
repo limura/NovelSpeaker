@@ -96,4 +96,9 @@
 /// 読み上げ用に確保されたSpeechBlockの配列を取得します(テスト用)
 - (NSArray*)GetGeneratedSpeechBlockArray_ForTest;
 
+/// 指定された文字列を読み上げでアナウンスします。
+/// ただし、読み上げを行っていない場合に限ります。
+/// 読み上げを行った場合には true を返します。
+- (BOOL)AnnounceBySpeech:(NSString*)speechString;
+
 @end

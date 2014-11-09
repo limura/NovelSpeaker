@@ -604,4 +604,16 @@ typedef enum {
     return m_SpeechBlockArray;
 }
 
+/// 指定された文字列を読み上げでアナウンスします。
+/// ただし、読み上げを行っていない場合に限ります。
+/// 読み上げを行った場合には true を返します。
+- (BOOL)AnnounceBySpeech:(NSString*)speechString
+{
+    if (m_bIsSpeaking) {
+        return false;
+    }
+    return [m_Speaker Speech:speechString];
+}
+
+
 @end
