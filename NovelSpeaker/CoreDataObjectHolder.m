@@ -78,6 +78,13 @@
         NSLog(@"Checking migration was failed (%@, %@)", error, [error userInfo]);
         abort();
     }
+    {
+        NSLog(@"metadata:");
+        for (NSString* key in sourceMetaData) {
+            NSLog(@"%@", key);
+        }
+        NSLog(@"done.");
+    }
     
     BOOL isCompatible = [[self GetManagedObjectModel] isConfiguration:nil
                                      compatibleWithStoreMetadata:sourceMetaData];
