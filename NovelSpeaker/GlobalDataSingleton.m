@@ -614,7 +614,7 @@ static GlobalDataSingleton* _singleton = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         Story* nextCoreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:target_chapter_number];
         if (nextCoreDataStory != nil) {
-            NSLog(@"chapter: %d is alive", target_chapter_number);
+            //NSLog(@"chapter: %d is alive", target_chapter_number);
             result = [[StoryCacheData alloc] initWithCoreData:nextCoreDataStory];
         }else{
             NSLog(@"chapter: %d is NOT alive", target_chapter_number);
@@ -939,12 +939,14 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げ時のイベントハンドラを追加します。
 - (BOOL)AddSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate
 {
+    NSLog(@"AddSpeakRangeDelegate");
     return [m_NiftySpeaker AddSpeakRangeDelegate:delegate];
 }
 
 /// 読み上げ時のイベントハンドラを削除します。
 - (void)DeleteSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate
 {
+    NSLog(@"delete speak range delegate.");
     return [m_NiftySpeaker DeleteSpeakRangeDelegate:delegate];
 }
 

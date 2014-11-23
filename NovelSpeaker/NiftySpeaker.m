@@ -415,11 +415,13 @@ typedef enum {
     [m_Speaker SetRate:currentBlock.speechConfig.rate];
     [m_Speaker SetPitch:currentBlock.speechConfig.pitch];
     [m_Speaker SetDelay:currentBlock.speechConfig.beforeDelay];
+    /*
     NSLog(@"speech: delay: %.2f, pitch: %.2f, rate: %.2f, %@"
           , currentBlock.speechConfig.beforeDelay
           , currentBlock.speechConfig.pitch
           , currentBlock.speechConfig.rate
           , speakText);
+     */
     [m_Speaker Speech:speakText];
     
     m_bIsSpeaking = true;

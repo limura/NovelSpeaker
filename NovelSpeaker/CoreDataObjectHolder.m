@@ -78,7 +78,7 @@
         NSLog(@"Checking migration was failed (%@, %@)", error, [error userInfo]);
         abort();
     }
-    {
+    if (false) {
         NSLog(@"metadata:");
         for (NSString* key in sourceMetaData) {
             NSLog(@"%@", key);

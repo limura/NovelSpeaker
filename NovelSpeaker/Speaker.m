@@ -101,16 +101,16 @@
     switch(status)
     {
         case STSpeakingStatusNone:
-            NSLog(@"speak status -> None");
+            //NSLog(@"speak status -> None");
             break;
         case STSpeakingStatusPause:
-            NSLog(@"speak status -> Pause");
+            //NSLog(@"speak status -> Pause");
             break;
         case STSpeakingStatusSpeak:
-            NSLog(@"speak status -> Speak");
+            //NSLog(@"speak status -> Speak");
             break;
         case STSpeakingStatusStop:
-            NSLog(@"speak status -> Stop");
+            //NSLog(@"speak status -> Stop");
             if (self.speakRangeChangeDelegate != nil) {
                 [self.speakRangeChangeDelegate finishSpeak];
             }
