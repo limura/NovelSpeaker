@@ -14,7 +14,7 @@
 
 @end
 
-@interface CreateNewSpeakPitchSettingViewController : UIViewController<UIAlertViewDelegate>
+@interface CreateNewSpeakPitchSettingViewController : UIViewController
 {
     BOOL m_isNeedBack;
 }

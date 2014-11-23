@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "NarouContentCacheData.h"
 
-@interface NarouSearchResultDetailViewController : UIViewController<UIAlertViewDelegate>
+@interface NarouSearchResultDetailViewController : UIViewController
 {
     // alertView で OK されたときに前のページに戻るべき(true)か否(false)か。
     BOOL m_bNeedBack;

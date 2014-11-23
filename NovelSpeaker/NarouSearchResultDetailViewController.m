@@ -9,6 +9,7 @@
 #import "NarouSearchResultDetailViewController.h"
 #import "GlobalDataSingleton.h"
 #import <math.h>
+#import "EasyAlert.h"
 
 @interface NarouSearchResultDetailViewController ()
 
@@ -134,24 +135,17 @@
     NSString* errString = [[GlobalDataSingleton GetInstance] AddDownloadQueueForNarou:self.NarouContentDetail];
     if (errString != nil) {
         NSString* msg = [[NSString alloc] initWithString:errString];
-        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue", @"ダウンロードキューへの追加に失敗") message:msg delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
-        m_bNeedBack = false;
-        [alertView show];
+        UIAlertController* alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue", @"ダウンロードキューへの追加に失敗") message:msg okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
+        [self presentViewController:alert animated:true completion:nil];
         return;
     }
     
     NSString* msg = [[NSString alloc] initWithFormat:NSLocalizedString(@"NarouSearchResultDetailViewController_AddSuccess_Title", @"作品名: %@"), self.NarouContentDetail.title];
-    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue", @"ダウンロードキューに追加されました") message:msg delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
-    m_bNeedBack = true;
-    [alertView show];
-}
-
-// alertView で何かがクリックされた
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (m_bNeedBack) {
-        [self.navigationController popViewControllerAnimated:YES];
-    }
+    UIAlertController* alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue", @"ダウンロードキューに追加されました")
+                                                       message:msg okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
+                                                           [self.navigationController popViewControllerAnimated:YES];
+                                                       }];
+    [self presentViewController:alert animated:true completion:nil];
 }
 
 @end

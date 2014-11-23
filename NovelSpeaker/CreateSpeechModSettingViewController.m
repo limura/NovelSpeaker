@@ -8,6 +8,7 @@
 
 #import "CreateSpeechModSettingViewController.h"
 #import "GlobalDataSingleton.h"
+#import "EasyAlert.h"
 
 @interface CreateSpeechModSettingViewController ()
 
@@ -40,8 +41,8 @@
 
 - (void)showAlertView:(NSString*)message
 {
-    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:message message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
-    [alertView show];
+    UIAlertController* alert = [EasyAlert CreateAlertOneButton:message message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
+    [self presentViewController:alert animated:TRUE completion:nil];
 }
 
 - (IBAction)testSpeechButtonClicked:(id)sender {

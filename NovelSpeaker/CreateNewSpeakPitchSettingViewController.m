@@ -8,6 +8,7 @@
 
 #import "CreateNewSpeakPitchSettingViewController.h"
 #import "GlobalDataSingleton.h"
+#import "EasyAlert.h"
 
 @interface CreateNewSpeakPitchSettingViewController ()
 
@@ -41,17 +42,17 @@
 - (IBAction)createButtonClicked:(id)sender {
     NSString* title = self.titleTextField.text;
     if ([title length] <= 0) {
-        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"SpeakPitchSettingView_NoTitleStringAlert", @"タイトルにする文字列を入れてください。") message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
-        m_isNeedBack = false;
-        [alertView show];
+        UIAlertController* alert = [EasyAlert CreateAlertOneButton: NSLocalizedString(@"SpeakPitchSettingView_NoTitleStringAlert", @"タイトルにする文字列を入れてください。")
+                                                           message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
+        [self presentViewController:alert animated:true completion:nil];
         return;
     }
     
     SpeakPitchConfigCacheData* pitchConfig = [[GlobalDataSingleton GetInstance] GetSpeakPitchConfigWithTitle:title];
     if (pitchConfig != nil) {
-        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"SpeakPitchSettingView_AlreadyExistingSetting", @"既に存在する設定です。") message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
-        m_isNeedBack = false;
-        [alertView show];
+        UIAlertController* alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeakPitchSettingView_AlreadyExistingSetting", @"既に存在する設定です。")
+                                                           message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
+        [self presentViewController:alert animated:true completion:nil];
         return;
     }
     pitchConfig = [SpeakPitchConfigCacheData new];
@@ -60,23 +61,20 @@
     pitchConfig.endText = @"』";
     pitchConfig.title = title;
     if (![[GlobalDataSingleton GetInstance] UpdateSpeakPitchConfig:pitchConfig]) {
-        UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"SpeakPitchSettingView_AppendFailed.", @"音声設定の追加に失敗しました。") message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
-        m_isNeedBack = true;
-        [alertView show];
+        UIAlertController* alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeakPitchSettingView_AppendFailed.", @"音声設定の追加に失敗しました。")
+                                                           message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
+                                                               [self.createNewSpeakPitchSettingDelegate NewPitchSettingAdded];
+                                                               [self.navigationController popViewControllerAnimated:YES];
+                                                           }];
+        [self presentViewController:alert animated:true completion:nil];
         return;
     }
-    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"SpeakPitchSettingView_AppendSuccess", @"音声設定を追加しました。") message:nil delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"OK_button", nil), nil];
-    m_isNeedBack = true;
-    [alertView show];
-}
-
-// alertView で何かがクリックされた
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (m_isNeedBack) {
-        [self.createNewSpeakPitchSettingDelegate NewPitchSettingAdded];
-        [self.navigationController popViewControllerAnimated:YES];
-    }
+    UIAlertController* alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeakPitchSettingView_AppendSuccess", @"音声設定を追加しました。")
+                                                       message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
+                                                           [self.createNewSpeakPitchSettingDelegate NewPitchSettingAdded];
+                                                           [self.navigationController popViewControllerAnimated:YES];
+                                                       }];
+    [self presentViewController:alert animated:true completion:nil];
 }
 
 /*
