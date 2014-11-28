@@ -27,7 +27,11 @@
     [[GlobalDataSingleton GetInstance] AddSpeakRangeDelegate:self];
     
     // NavitationBar にボタンを配置します。
-    startStopButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SpeechViewController_Speak", @"Speak") style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
+    NSString* speakText = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
+    if ([[GlobalDataSingleton GetInstance] isSpeaking]) {
+        speakText = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");
+    }
+    startStopButton = [[UIBarButtonItem alloc] initWithTitle:speakText style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
     detailButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"pseechViewController_Detail", @"詳細") style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:startStopButton, detailButton, nil];
     self.navigationItem.title = self.NarouContentDetail.title;
@@ -75,6 +79,17 @@
 {
     [super viewDidAppear:animated];
 
+    // なにやら登録が外れる事があるようなので、AddSpeakRangeDelegate をこのタイミングでも呼んでおきます。
+    // AddSpeakRangeDelegate は複数回呼んでも大丈夫なように作ってあるはずです
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    {
+        if ([globalData isSpeaking]) {
+            // なにやら読み上げ中のようなのでコンテントを読み直します。
+            // 多分、このViewが消えてる状態で再生中にViewが再度生成されたんだと思うきっとたぶん。
+            [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+        }
+    }
+    [globalData AddSpeakRangeDelegate:self];
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     [self becomeFirstResponder];
 }
@@ -252,7 +267,7 @@
 /// 読み上げ中の場合は読み上げは停止されます。
 /// 読み上げられるのは text で、range で指定されている点を読み上げ開始点として読み上げを開始します。
 - (void)setSpeechStory:(StoryCacheData*)story {
-    [self stopSpeech];
+    //[self stopSpeech];
     NSString* displayText = [[GlobalDataSingleton GetInstance] ConvertStoryContentToDisplayText:story];
     [self.textView setText:displayText];
     NSUInteger location = [story.readLocation unsignedLongValue];
