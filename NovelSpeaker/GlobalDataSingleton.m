@@ -25,6 +25,8 @@ static GlobalDataSingleton* _singleton = nil;
 {
     self = [super init];
 
+    m_bIsFirstPageShowed = false;
+    
     m_MainQueue = dispatch_get_main_queue();
     // CoreDataアクセス用の直列queueを作ります。
     m_CoreDataAccessQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.coredataaccess", NULL);
@@ -1221,6 +1223,18 @@ static GlobalDataSingleton* _singleton = nil;
 - (BOOL)AnnounceBySpeech:(NSString*)speechString
 {
     return [m_NiftySpeaker AnnounceBySpeech:speechString];
+}
+
+/// 最初のページを表示したかどうかのbool値を取得します。
+- (BOOL)IsFirstPageShowed
+{
+    return m_bIsFirstPageShowed;
+}
+
+/// 最初のページを表示した事を設定します。
+- (void)SetFirstPageShowed
+{
+    m_bIsFirstPageShowed = true;
 }
 
 

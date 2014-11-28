@@ -53,6 +53,12 @@
 
     [self setNotificationReciver];
     //[[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
+    
+    if(![[GlobalDataSingleton GetInstance] IsFirstPageShowed])
+    {
+        NarouContentCacheData* currentContent = [[GlobalDataSingleton GetInstance] GetCurrentReadingContent];
+        [self PushNextView:currentContent];
+    }
 }
 
 - (void)dealloc
@@ -140,6 +146,14 @@
     return cell;
 }
 
+// 次のビューに飛ばします。
+- (void)PushNextView:(NarouContentCacheData*)narouContent
+{
+    m_NextViewDetail = narouContent;
+    //NSLog(@"next view: %@ %@", narouContent.ncode, narouContent.title);
+    [self performSegueWithIdentifier:@"bookShelfToReaderSegue" sender:self];
+}
+
 /// セルが選択された時
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -153,9 +167,7 @@
     NarouContentCacheData* narouContent = (NarouContentCacheData*)contentList[indexPath.row];
     
     // 次のビューに飛ばします。
-    m_NextViewDetail = narouContent;
-    //NSLog(@"next view: %@ %@", narouContent.ncode, narouContent.title);
-    [self performSegueWithIdentifier:@"bookShelfToReaderSegue" sender:self];
+    [self PushNextView:narouContent];
 }
 
 // 編集できるか否かのYES/NOを返す。

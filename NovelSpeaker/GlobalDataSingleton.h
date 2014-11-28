@@ -22,6 +22,9 @@
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
 {
+    // 最初の表示をしたかどうかのbool値
+    bool m_bIsFirstPageShowed;
+    
     // main queue
     dispatch_queue_t m_MainQueue;
     // Core Data アクセス用queue
@@ -246,5 +249,11 @@
 /// ただし、読み上げを行っていない場合に限ります。
 /// 読み上げを行った場合には true を返します。
 - (BOOL)AnnounceBySpeech:(NSString*)speechString;
+
+/// 最初のページを表示したかどうかのbool値を取得します。
+- (BOOL)IsFirstPageShowed;
+
+/// 最初のページを表示した事を設定します。
+- (void)SetFirstPageShowed;
 
 @end
