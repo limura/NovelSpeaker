@@ -48,13 +48,28 @@
     NSLog(@"next view load!");
     // 次のビューをloadする前に呼び出してくれるらしいので、そこで検索結果を放り込みます。
     if ([[segue identifier] isEqualToString:@"searchResultPushSegue"]) {
-        NSLog(@"set SearchResultList!!!");
+        NSLog(@"set SearchResultList. count: %lu", (unsigned long)[m_SearchResult count]);
         NarouSearchResultTableViewController* nextViewController = [segue destinationViewController];
         nextViewController.SearchResultList = m_SearchResult;
     }
 }
 
 // 検索ボタンがクリックされた
+#if true // 古いやり方。UIAlertView を使ってると後で使えなくなるらしいのだけれどこれでないとこの場合は何故かうまく動かない。どういうことなんだ。
+- (IBAction)SearchButtonClicked:(id)sender {
+    UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching") message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching") delegate:self cancelButtonTitle:nil otherButtonTitles:nil, nil];
+    [alertView show];
+    dispatch_async(m_SearchQueue, ^{
+        NSArray* searchResult = [NarouLoader Search:self.SearchTextBox.text wname:self.WriterSwitch.on title:self.TitleSwitch.on keyword:self.KeywordSwitch.on ex:self.ExSwitch.on];
+        m_SearchResult = searchResult;
+        dispatch_async(m_MainQueue, ^{
+            [alertView dismissWithClickedButtonIndex:0 animated:NO];
+            NSLog(@"search end. count: %lu", (unsigned long)[m_SearchResult count]);
+            [self performSegueWithIdentifier:@"searchResultPushSegue" sender:self];
+        });
+    });
+}
+#else // 新しいやりかた。UIAlertController でないと後で使えなくなるらしいのだけれど何故かこれだと検索結果が微妙に少ないと次のシーンに移動できなくなる。(´・ω・`)
 - (IBAction)SearchButtonClicked:(id)sender {
     UIAlertController* alertView = [EasyAlert CreateAlertNoButton:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching") message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching")];
     [self presentViewController:alertView animated:TRUE completion:nil];
@@ -68,6 +83,7 @@
         });
     });
 }
+#endif
 
 // テキストフィールドでEnterが押された
 - (BOOL)textFieldShouldReturn:(UITextField *)sender {
