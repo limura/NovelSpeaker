@@ -20,6 +20,7 @@
     
     // 編集ボタンを追加する場合
     //self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    //NSLog(@"NarouSearchResultTableViewController: %p", self);
 }
 
 // セクションの数

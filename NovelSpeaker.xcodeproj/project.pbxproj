@@ -22,7 +22,6 @@
 		210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F01A0E1C5C00E9171F /* NEW!@2x.png */; };
 		210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F31A0E1C6100E9171F /* NEW!@3x.png */; };
 		210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */; };
-		210959001A0E3B1E00E9171F /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 210958FF1A0E3B1E00E9171F /* GlobalState.m */; };
 		2117251019B2064400FB97D2 /* BookShelfTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */; };
 		2117251519B2078200FB97D2 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117251719B2078200FB97D2 /* DefaultSpeakSettingEditTableViewCell.xib */; };
 		2117251E19B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117252019B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib */; };
@@ -32,6 +31,8 @@
 		212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */; };
 		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
+		213A4DAB1A616F9D00E9EC13 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DAA1A616F9D00E9EC13 /* GlobalState.m */; };
+		213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
@@ -70,6 +71,8 @@
 		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
 		21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A321961B30F009658B7 /* SettingsViewController.m */; };
+		21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */; };
+		21BDC2DF1A2B70A5002804DD /* EasyAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 21BDC2DE1A2B70A5002804DD /* EasyAlert.m */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
 		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
@@ -131,8 +134,6 @@
 		210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSizeSettingViewController.h; sourceTree = "<group>"; };
 		210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextSizeSettingViewController.m; sourceTree = "<group>"; };
 		210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 6.xcdatamodel"; sourceTree = "<group>"; };
-		210958FE1A0E3B1E00E9171F /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
-		210958FF1A0E3B1E00E9171F /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
 		2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BookShelfTableViewCell.xib; sourceTree = "<group>"; };
 		2117251619B2078200FB97D2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/DefaultSpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		2117251F19B2093600FB97D2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/SpeakSettingSampleTextTableViewCell.xib; sourceTree = "<group>"; };
@@ -147,12 +148,18 @@
 		212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_3to4.xcmappingmodel; sourceTree = "<group>"; };
 		212852DD19B1D101001A75DC /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		212852E019B1ECAD001A75DC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		213A4DA91A616F9D00E9EC13 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
+		213A4DAA1A616F9D00E9EC13 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
+		213A4DB01A61749600E9EC13 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
+		213A4DB11A61749B00E9EC13 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MaxSpeechTimeTableViewCell.xib; sourceTree = "<group>"; };
+		213A4DB31A6174AD00E9EC13 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
 		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
 		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
 		21724EEE1974163700DF6DC4 /* StoryCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoryCacheData.m; sourceTree = "<group>"; };
 		2177634F19756781004F22FD /* GlobalStateCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalStateCacheData.h; sourceTree = "<group>"; };
 		2177635019756781004F22FD /* GlobalStateCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalStateCacheData.m; sourceTree = "<group>"; };
+		21778D701A6168C30042F2F1 /* SettingDataModel 7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 7.xcdatamodel"; sourceTree = "<group>"; };
 		217BD9E219CE72BB008A0D9D /* StringSubstituter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StringSubstituter.h; sourceTree = "<group>"; };
 		217BD9E319CE72BB008A0D9D /* StringSubstituter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StringSubstituter.m; sourceTree = "<group>"; };
 		217BD9E519E038BE008A0D9D /* StringSubstituterTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StringSubstituterTests.m; sourceTree = "<group>"; };
@@ -217,6 +224,10 @@
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
 		21B53A311961B30F009658B7 /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
 		21B53A321961B30F009658B7 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
+		21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaxSpeechTimeTableViewCell.h; sourceTree = "<group>"; };
+		21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MaxSpeechTimeTableViewCell.m; sourceTree = "<group>"; };
+		21BDC2DD1A2B70A5002804DD /* EasyAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EasyAlert.h; sourceTree = "<group>"; };
+		21BDC2DE1A2B70A5002804DD /* EasyAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EasyAlert.m; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
 		21C74F941964502A0039A706 /* arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@2x.png"; sourceTree = "<group>"; };
 		21C74F99196456490039A706 /* NarouSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchViewController.h; sourceTree = "<group>"; };
@@ -334,6 +345,9 @@
 				21916361199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.h */,
 				21916362199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m */,
 				2117252019B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib */,
+				21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */,
+				21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */,
+				213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */,
 			);
 			name = CustomViews;
 			sourceTree = "<group>";
@@ -370,6 +384,8 @@
 		21D8FC4C19FC97DB00CCF1B6 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
+				21BDC2DD1A2B70A5002804DD /* EasyAlert.h */,
+				21BDC2DE1A2B70A5002804DD /* EasyAlert.m */,
 				2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */,
 				2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */,
 				21D8FC4D19FC985B00CCF1B6 /* LPPerformanceChecker.h */,
@@ -382,8 +398,8 @@
 			isa = PBXGroup;
 			children = (
 				21724EE119721D3600DF6DC4 /* MappingModel */,
-				210958FE1A0E3B1E00E9171F /* GlobalState.h */,
-				210958FF1A0E3B1E00E9171F /* GlobalState.m */,
+				213A4DA91A616F9D00E9EC13 /* GlobalState.h */,
+				213A4DAA1A616F9D00E9EC13 /* GlobalState.m */,
 				2177634F19756781004F22FD /* GlobalStateCacheData.h */,
 				2177635019756781004F22FD /* GlobalStateCacheData.m */,
 				2191639819A38414003FF7FC /* NarouContent.h */,
@@ -631,6 +647,7 @@
 				210958C41A0DF55600E9171F /* booksearch.png in Resources */,
 				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
 				210958EB1A0E1C5500E9171F /* NEW!.png in Resources */,
+				213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */,
 				21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */,
 				210958C61A0DF55600E9171F /* booksearch@3x.png in Resources */,
 				210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */,
@@ -688,10 +705,11 @@
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
-				210959001A0E3B1E00E9171F /* GlobalState.m in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
+				21BDC2DF1A2B70A5002804DD /* EasyAlert.m in Sources */,
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
+				21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */,
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
@@ -701,6 +719,7 @@
 				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
 				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
 				21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */,
+				213A4DAB1A616F9D00E9EC13 /* GlobalState.m in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */,
@@ -792,6 +811,16 @@
 				212852E019B1ECAD001A75DC /* en */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				213A4DB01A61749600E9EC13 /* en */,
+				213A4DB11A61749B00E9EC13 /* Base */,
+				213A4DB31A6174AD00E9EC13 /* ja */,
+			);
+			name = MaxSpeechTimeTableViewCell.xib;
 			sourceTree = "<group>";
 		};
 		21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */ = {
@@ -1025,6 +1054,7 @@
 		21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				21778D701A6168C30042F2F1 /* SettingDataModel 7.xcdatamodel */,
 				210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */,
 				212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */,
 				2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */,
@@ -1032,7 +1062,7 @@
 				21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */,
 				21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */,
 			);
-			currentVersion = 210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */;
+			currentVersion = 21778D701A6168C30042F2F1 /* SettingDataModel 7.xcdatamodel */;
 			path = SettingDataModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

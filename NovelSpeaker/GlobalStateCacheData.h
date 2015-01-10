@@ -20,6 +20,7 @@
 
 @property (nonatomic) NSNumber * defaultPitch;
 @property (nonatomic) NSNumber * defaultRate;
+@property (nonatomic) NSNumber * maxSpeechTimeInSec;
 @property (nonatomic) NSNumber * textSizeValue;
 @property (nonatomic) StoryCacheData *currentReadingStory;
 

@@ -51,6 +51,9 @@
     NSMutableDictionary* m_ManagedObjectContextPerThreadDictionary;
     /// 最初に作られた thread が main の NSManagedObjectContext として登録される
     NSString* m_MainManagedObjectContextHolderThreadID;
+    
+    /// 読み上げの最大連続再生時間のタイマー
+    NSTimer* m_MaxSpeechTimeInSecTimer;
 }
 
 /// シングルトンを取得します。

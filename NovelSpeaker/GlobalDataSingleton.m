@@ -135,6 +135,7 @@ static GlobalDataSingleton* _singleton = nil;
         state.defaultPitch = globalState.defaultPitch;
         state.defaultRate = globalState.defaultRate;
         state.textSizeValue = globalState.textSizeValue;
+        state.maxSpeechTimeInSec = globalState.maxSpeechTimeInSec;
         
         if (globalState.currentReadingStory == nil) {
             state.currentReadingStory = nil;
@@ -894,6 +895,36 @@ static GlobalDataSingleton* _singleton = nil;
     return [m_NiftySpeaker GetCurrentReadingPoint];
 }
 
+/// 読み上げ停止のタイマーを開始します
+- (void)StartMaxSpeechTimeInSecTimer
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NSNumber* maxSpeechTimeInSec = [globalData GetGlobalState].maxSpeechTimeInSec;
+    if (maxSpeechTimeInSec == nil) {
+        return;
+    }
+    [self StopMaxSpeechTimeInSecTimer];
+
+    m_MaxSpeechTimeInSecTimer = [NSTimer scheduledTimerWithTimeInterval:[maxSpeechTimeInSec intValue] target:self selector:@selector(MaxSpeechTimeInSecEventHandler:) userInfo:nil repeats:NO];
+    //[m_MaxSpeechTimeInSecTimer fire]; // fire すると時間経過に関係なくすぐにイベントが発生するっぽいです。単にタイマーを作った時点でもう時間計測は開始している模様
+}
+
+/// 読み上げ停止のタイマーを停止します
+- (void)StopMaxSpeechTimeInSecTimer
+{
+    return;
+    if (m_MaxSpeechTimeInSecTimer != nil && [m_MaxSpeechTimeInSecTimer isValid]) {
+        [m_MaxSpeechTimeInSecTimer invalidate];
+    }
+    m_MaxSpeechTimeInSecTimer = nil;
+}
+
+/// 読み上げ停止のタイマー呼び出しのイベントハンドラ
+- (void)MaxSpeechTimeInSecEventHandler:(NSTimer*)timer
+{
+    [self StopSpeech];
+}
+
 /// 読み上げを開始します。
 - (BOOL)StartSpeech
 {
@@ -916,12 +947,14 @@ static GlobalDataSingleton* _singleton = nil;
     if (err != nil) {
         NSLog(@"setActive error: %@ %@", err, err.userInfo);
     }
+    [self StartMaxSpeechTimeInSecTimer];
     return [m_NiftySpeaker StartSpeech];
 }
 
 /// 読み上げを「バックグラウンド再生としては止めずに」読み上げ部分だけ停止します
 - (BOOL)StopSpeechWithoutDiactivate
 {
+    [self StopMaxSpeechTimeInSecTimer];
     if([m_NiftySpeaker StopSpeech] == false)
     {
         return false;
@@ -933,22 +966,23 @@ static GlobalDataSingleton* _singleton = nil;
 - (BOOL)StopSpeech
 {
     AVAudioSession* session = [AVAudioSession sharedInstance];
+    bool result = [self StopSpeechWithoutDiactivate];
     //NSLog(@"setActive NO.");
     [session setActive:NO error:nil];
-    return [self StopSpeechWithoutDiactivate];
+    return result;
 }
 
 /// 読み上げ時のイベントハンドラを追加します。
 - (BOOL)AddSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate
 {
-    NSLog(@"AddSpeakRangeDelegate");
+    //NSLog(@"AddSpeakRangeDelegate");
     return [m_NiftySpeaker AddSpeakRangeDelegate:delegate];
 }
 
 /// 読み上げ時のイベントハンドラを削除します。
 - (void)DeleteSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate
 {
-    NSLog(@"delete speak range delegate.");
+    //NSLog(@"delete speak range delegate.");
     return [m_NiftySpeaker DeleteSpeakRangeDelegate:delegate];
 }
 

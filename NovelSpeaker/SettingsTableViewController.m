@@ -8,6 +8,7 @@
 
 #import "SettingsTableViewController.h"
 #import "GlobalDataSingleton.h"
+#import "MaxSpeechTimeTableViewCell.h"
 
 static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellDefault";
 
@@ -35,6 +36,10 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+
+    UINib* maxSpeechTimeTableViewCellNib = [UINib nibWithNibName:MaxSpeechTimeTableViewCellID bundle:nil];
+    [self.tableView registerNib:maxSpeechTimeTableViewCellNib forCellReuseIdentifier:MaxSpeechTimeTableViewCellID];
+
     
     // 読み上げ設定をloadします。
     [[GlobalDataSingleton GetInstance] ReloadSpeechSetting];
@@ -57,10 +62,10 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return 3;
+    return 4;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+- (UITableViewCell *)GetDefaultTableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:SettingsTableViewDefaultCellID forIndexPath:indexPath];
     
@@ -88,6 +93,36 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     return cell;
 }
 
+- (UITableViewCell *)GetMaxSpeechTimeTableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:MaxSpeechTimeTableViewCellID forIndexPath:indexPath];
+
+    if (cell != nil) {
+        return cell;
+    }
+
+    cell = [[MaxSpeechTimeTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:MaxSpeechTimeTableViewCellID];
+
+
+    return cell;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    switch (indexPath.row) {
+        case 0: case 1: case 2:
+            return [self GetDefaultTableView:tableView cellForRowAtIndexPath:indexPath];
+            break;
+        case 3:
+            return [self GetMaxSpeechTimeTableView:tableView cellForRowAtIndexPath:indexPath];
+            break;
+        default:
+            break;
+    }
+    return nil;
+}
+
+
 // セルが選択された時
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -105,6 +140,29 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             break;
     }
 }
+
+/// tableViewCell の縦の長さを返します。
+/// TODO: 多分これはスクロールバーを表示させるために全部のcellに対して呼び出されるのでたくさんのcellがあった場合ひどいことになりそうな予感。
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    //UITableViewCell* cell = [self tableView:tableView cellForRowAtIndexPath:indexPath];
+    UITableViewCell* cell = nil;
+    if (cell == nil) {
+        switch (indexPath.row) {
+            case 0: case 1: case 2:
+                return 40.0f;
+            case 3:
+                return 220.0f;
+                break;
+            default:
+                break;
+        }
+        return 31.0f;
+    }
+    return cell.frame.size.height;
+}
+
+
 
 /*
 // Override to support conditional editing of the table view.

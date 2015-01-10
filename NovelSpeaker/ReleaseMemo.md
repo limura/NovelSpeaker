@@ -116,6 +116,15 @@ Correction of the problem
 ・iPadでも表示できるようにしました(ユニバーサルアプリとなります)。iPadでは横画面でも利用できます。
 ・読み上げ中に最後の章を読みきった時に、「読み上げが最後に達しました」とアナウンスするようになります。
 ・起動時に最後に読んでいた小説を表示するようになります。
+・最大連続再生時間の指定を設定ページに入れました。標準では23時間55分になっています。再生を開始してから、ここで設定された時間が経つと再生が停止します。
+
+Interface change
+- Icon changed.
+- Text size change configuration is now on settings page.
+- iPad mode. NovelSpeaker is universal application now.
+- If reached at the end of a book then announce messsage: "Because it reached at the end of a book, I stopped reading aloud."
+- First open view is now "Last read page".
+- "Max continuation reproduction time" configuration is now on settings page.
 
 # レビュー用メモ
 
