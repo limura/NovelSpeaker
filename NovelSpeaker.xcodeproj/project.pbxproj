@@ -33,6 +33,8 @@
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
 		213A4DAB1A616F9D00E9EC13 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DAA1A616F9D00E9EC13 /* GlobalState.m */; };
 		213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */; };
+		213A4DB51A61974F00E9EC13 /* SettingDataModel5to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DB41A61974F00E9EC13 /* SettingDataModel5to7.xcmappingmodel */; };
+		213A4DB71A61979300E9EC13 /* SettingDataModel6to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DB61A61979300E9EC13 /* SettingDataModel6to7.xcmappingmodel */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
@@ -153,6 +155,8 @@
 		213A4DB01A61749600E9EC13 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
 		213A4DB11A61749B00E9EC13 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MaxSpeechTimeTableViewCell.xib; sourceTree = "<group>"; };
 		213A4DB31A6174AD00E9EC13 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
+		213A4DB41A61974F00E9EC13 /* SettingDataModel5to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModel5to7.xcmappingmodel; sourceTree = "<group>"; };
+		213A4DB61A61979300E9EC13 /* SettingDataModel6to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModel6to7.xcmappingmodel; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
 		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
 		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
@@ -326,6 +330,8 @@
 				212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */,
 				212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */,
 				21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */,
+				213A4DB41A61974F00E9EC13 /* SettingDataModel5to7.xcmappingmodel */,
+				213A4DB61A61979300E9EC13 /* SettingDataModel6to7.xcmappingmodel */,
 			);
 			name = MappingModel;
 			sourceTree = "<group>";
@@ -697,6 +703,7 @@
 				212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
+				213A4DB51A61974F00E9EC13 /* SettingDataModel5to7.xcmappingmodel in Sources */,
 				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
 				217BD9E419CE72BB008A0D9D /* StringSubstituter.m in Sources */,
 				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
@@ -713,6 +720,7 @@
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
+				213A4DB71A61979300E9EC13 /* SettingDataModel6to7.xcmappingmodel in Sources */,
 				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
