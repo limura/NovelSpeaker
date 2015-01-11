@@ -556,7 +556,6 @@ typedef enum {
 /// 読み上げが停止したよのイベントハンドラ
 - (void) finishSpeak
 {
-    //TODO: まだ書いてない
     if (!m_bIsSpeaking) {
         // 読み上げが停止なら続けません。
         return;
