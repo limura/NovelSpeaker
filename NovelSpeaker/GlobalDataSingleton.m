@@ -802,10 +802,10 @@ static GlobalDataSingleton* _singleton = nil;
     }
 
     // delay については設定ページを作っていないので固定値になります。
-    [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:1.0];
-    //[m_NiftySpeaker AddDelayBlockSeparator:@"…" delay:0.05];
-    //[m_NiftySpeaker AddDelayBlockSeparator:@"、" delay:0.02];
-    //[m_NiftySpeaker AddDelayBlockSeparator:@"。" delay:0.05];
+    [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02];
+    //[m_NiftySpeaker AddDelayBlockSeparator:@"…" delay:0.0005];
+    //[m_NiftySpeaker AddDelayBlockSeparator:@"、" delay:0.0002];
+    //[m_NiftySpeaker AddDelayBlockSeparator:@"。" delay:0.0005];
     
     NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
     if (speechModConfigArray != nil) {

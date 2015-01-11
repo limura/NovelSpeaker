@@ -31,8 +31,10 @@
 {
     if(m_CurrentStatus == STSpeakingStatusSpeak)
     {
-        // 再生中は失敗にします。
-        return FALSE;
+        // 再生中は失敗にしていましたが、再生中に登録できないと
+        // 長い文を読ませようとした時に音声を合成するまでの時間が待たされる事があるので
+        // 複数登録できるようにエラーはしないようにします。
+        //return FALSE;
     }
 
     AVSpeechUtterance *utterance = [AVSpeechUtterance speechUtteranceWithString:text];

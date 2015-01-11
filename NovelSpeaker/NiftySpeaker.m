@@ -65,6 +65,8 @@ typedef enum {
     
     m_bIsSpeaking = false;
     m_NowSpeechBlockIndex = 0;
+    m_NowQueuedBlockIndex = 0;
+    m_MaxQueueCharacterLength = 8192;
     m_NowSpeechBlockSpeachRange.location = 0;
     m_NowSpeechBlockSpeachRange.length = 0;
     
@@ -96,6 +98,8 @@ typedef enum {
     
     m_bIsSpeaking = false;
     m_NowSpeechBlockIndex = 0;
+    m_NowQueuedBlockIndex = 0;
+    m_MaxQueueCharacterLength = 8192;
     m_NowSpeechBlockSpeachRange.location = 0;
     m_NowSpeechBlockSpeachRange.length = 0;
     
@@ -405,27 +409,56 @@ typedef enum {
 /// 読み上げを開始します。
 - (BOOL)StartSpeech
 {
-    if (m_SpeechBlockArray == nil || [m_SpeechBlockArray count] <= 0 || m_NowSpeechBlockIndex >= [m_SpeechBlockArray count]) {
+    return [self EnqueueSpeechTextBlock];
+}
+
+/// 読み上げ文の複数ブロックを m_MaxQueueCharacterLength があふれるまで 読み上げqueue に突っ込みます。
+- (BOOL)EnqueueSpeechTextBlock
+{
+    unsigned int queuedCharacterLength = 0;
+    for (unsigned int i = m_NowSpeechBlockIndex; i < m_NowQueuedBlockIndex && i < [m_SpeechBlockArray count]; i++) {
+        SpeechBlock* block = [m_SpeechBlockArray objectAtIndex:i];
+        queuedCharacterLength += [[block GetSpeechText] length];
+    }
+    if(queuedCharacterLength > m_MaxQueueCharacterLength)
+    {
         return false;
     }
-    SpeechBlock* currentBlock = [m_SpeechBlockArray objectAtIndex:m_NowSpeechBlockIndex];
+    while (queuedCharacterLength < m_MaxQueueCharacterLength && m_NowQueuedBlockIndex < [m_SpeechBlockArray count]) {
+        if([self EnqueueOneSpeechTextBlock] == false)
+        {
+            break;
+        }
+        SpeechBlock* currentBlock = [m_SpeechBlockArray objectAtIndex:m_NowQueuedBlockIndex];
+        queuedCharacterLength += [[currentBlock GetSpeechText] length];
+
+        m_NowQueuedBlockIndex++;
+    }
+    return true;
+}
+
+/// 読み上げ文の 1ブロック を再生queueに突っ込みます。
+- (BOOL)EnqueueOneSpeechTextBlock
+{
+    if (m_SpeechBlockArray == nil || [m_SpeechBlockArray count] <= 0 || m_NowQueuedBlockIndex >= [m_SpeechBlockArray count]) {
+        return false;
+    }
+    SpeechBlock* currentBlock = [m_SpeechBlockArray objectAtIndex:m_NowQueuedBlockIndex];
     NSString* speakText = [currentBlock GetSpeechText];
-    NSRange targetRange = NSMakeRange(m_NowSpeechBlockSpeachRange.location, [speakText length] - m_NowSpeechBlockSpeachRange.location);
+    NSUInteger location = m_NowSpeechBlockSpeachRange.location;
+    if (m_NowQueuedBlockIndex != m_NowSpeechBlockIndex) {
+        // 読み上げ中の位置ならば location は使いますが、先行入力の場合は location は 0 に固定になります。
+        location = 0;
+    }
+    NSRange targetRange = NSMakeRange(location, [speakText length] - location);
     speakText = [speakText substringWithRange:targetRange];
     [m_Speaker SetRate:currentBlock.speechConfig.rate];
     [m_Speaker SetPitch:currentBlock.speechConfig.pitch];
     [m_Speaker SetDelay:currentBlock.speechConfig.beforeDelay];
-    /*
-    NSLog(@"speech: delay: %.2f, pitch: %.2f, rate: %.2f, %@"
-          , currentBlock.speechConfig.beforeDelay
-          , currentBlock.speechConfig.pitch
-          , currentBlock.speechConfig.rate
-          , speakText);
-     */
     [m_Speaker Speech:speakText];
     
     m_bIsSpeaking = true;
-    return false;
+    return true;
 }
 
 /// 読み上げを停止します。
@@ -484,6 +517,7 @@ typedef enum {
     NSRange speakRange = [foundBlock ConvertDisplayRangeToSpeakRange:currentRange];
     m_NowSpeechBlockSpeachRange = speakRange;
     m_NowSpeechBlockIndex = blockIndex;
+    m_NowQueuedBlockIndex = blockIndex;
     
     return true;
 }
@@ -542,12 +576,12 @@ typedef enum {
 /// 次の SpeechBlock を読み上げ用に設定します。
 - (BOOL) SetNextSpeechBlock
 {
-    if((m_NowSpeechBlockIndex + 1) >= [m_SpeechBlockArray count])
+    if((m_NowQueuedBlockIndex + 1) >= [m_SpeechBlockArray count])
     {
         return false;
     }
     
-    m_NowSpeechBlockIndex++;
+    m_NowQueuedBlockIndex++;
     m_NowSpeechBlockSpeachRange.location = 0;
     m_NowSpeechBlockSpeachRange.length = 0;
     return true;
@@ -560,15 +594,18 @@ typedef enum {
         // 読み上げが停止なら続けません。
         return;
     }
-    if (![self SetNextSpeechBlock]) {
+    m_NowSpeechBlockIndex++;
+    m_NowSpeechBlockSpeachRange.location = 0;
+    m_NowSpeechBlockSpeachRange.length = 0;
+    if (m_NowSpeechBlockIndex >= [m_SpeechBlockArray count]) {
         // 与えられた分の読み上げが終了したので終了イベントを投げます。
         for (id<SpeakRangeDelegate> delegate in m_SpeakRangeDelegateArray) {
             [delegate finishSpeak];
         }
         return;
     }
-    // 次のblockの読み上げを開始します。
-    [self StartSpeech];
+    // queueに余裕がありそうなら読み上げqueueに突っ込みます。
+    [self EnqueueSpeechTextBlock];
 }
 
 #pragma mark -
