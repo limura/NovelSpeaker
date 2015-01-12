@@ -18,14 +18,14 @@
         <attribute name="is_new_flug" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="keyword" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ncode" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
-        <attribute name="novelupdated_at" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="novelupdated_at" optional="YES" attributeType="Date" indexed="YES" syncable="YES"/>
         <attribute name="reading_chapter" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="review_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="sasie_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="story" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="userid" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="writer" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="userid" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="writer" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <relationship name="childStory" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
         <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="contentCurrentReadingInverse" inverseEntity="Story" syncable="YES"/>
     </entity>
@@ -36,8 +36,12 @@
         <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <entity name="SpeechModSetting" representedClassName="SpeechModSetting" syncable="YES">
-        <attribute name="afterString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="afterString" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="beforeString" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="SpeechWaitConfig" representedClassName="SpeechWaitConfig" syncable="YES">
+        <attribute name="delayTimeInSec" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="targetText" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
     </entity>
     <entity name="Story" representedClassName="Story" syncable="YES">
         <attribute name="chapter_number" optional="YES" attributeType="Integer 32" defaultValueString="0" indexed="YES" syncable="YES"/>
@@ -49,10 +53,11 @@
         <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
     </entity>
     <elements>
-        <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="118"/>
-        <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="345"/>
+        <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="120"/>
+        <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="343"/>
         <element name="SpeakPitchConfig" positionX="-162" positionY="-279" width="128" height="105"/>
-        <element name="SpeechModSetting" positionX="-153" positionY="-270" width="128" height="75"/>
+        <element name="SpeechModSetting" positionX="-153" positionY="-270" width="128" height="73"/>
         <element name="Story" positionX="-81" positionY="-280" width="128" height="150"/>
+        <element name="SpeechWaitConfig" positionX="-171" positionY="-288" width="128" height="75"/>
     </elements>
 </model>

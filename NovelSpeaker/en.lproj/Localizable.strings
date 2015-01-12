@@ -33,6 +33,7 @@
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "Quality of voice";
 "SettingTableViewController_CorrectionOfTheReading" = "Correction of the reading";
 "SettingTableViewController_SettingOfTheTextSize" = "Setting of the text size";
+"SettingTableViewController_SettingOfTheSpeechDelay" = "Setting of the speech delay";
 
 // "ここに書いた文をテストで読み上げます。";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "Speak the sentence for test.";

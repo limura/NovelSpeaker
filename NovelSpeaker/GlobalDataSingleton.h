@@ -18,6 +18,7 @@
 #import "SpeakPitchConfigCacheData.h"
 #import "SpeechModSettingCacheData.h"
 #import "CoreDataObjectHolder.h"
+#import "SpeechWaitConfigCacheData.h"
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -235,6 +236,16 @@
 
 /// 読み上げ時の読み替え設定を削除します。
 - (BOOL)DeleteSpeechModSetting:(SpeechModSettingCacheData*)modSetting;
+
+/// 読み上げ時の「間」の設定を全て読み出します。
+- (NSArray*)GetAllSpeechWaitConfig;
+
+/// 読み上げ時の「間」の設定を追加します。
+/// 既に同じ key (targetText) のものがあれば上書きになります。
+- (BOOL)AddSpeechWaitSetting:(SpeechWaitConfigCacheData*)waitConfigCacheData;
+
+/// 読み上げ時の「間」の設定を削除します。
+- (BOOL)DeleteSpeechWaitSetting:(NSString*)targetString;
 
 /// CoreData のマイグレーションが必要かどうかを確認します。
 - (BOOL)isRequiredCoreDataMigration;

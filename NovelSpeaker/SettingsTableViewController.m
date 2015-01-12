@@ -62,7 +62,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return 4;
+    return 5;
 }
 
 - (UITableViewCell *)GetDefaultTableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -84,6 +84,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             break;
         case 2:
             cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_SettingOfTheTextSize", @"文字サイズの設定");
+            break;
+        case 3:
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_SettingOfTheSpeechDelay", @"読み上げ時の間の設定");
             break;
         default:
             cell.textLabel.text = @"-";
@@ -110,10 +113,10 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     switch (indexPath.row) {
-        case 0: case 1: case 2:
+        case 0: case 1: case 2: case 3:
             return [self GetDefaultTableView:tableView cellForRowAtIndexPath:indexPath];
             break;
-        case 3:
+        case 4:
             return [self GetMaxSpeechTimeTableView:tableView cellForRowAtIndexPath:indexPath];
             break;
         default:
@@ -121,7 +124,6 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     }
     return nil;
 }
-
 
 // セルが選択された時
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -136,6 +138,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         case 2:
             [self performSegueWithIdentifier:@"textSizeSettingSegue" sender:self];
             break;
+        case 3:
+            [self performSegueWithIdentifier:@"textDelaySettingSegue" sender:self];
+            break;
         default:
             break;
     }
@@ -149,9 +154,10 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     UITableViewCell* cell = nil;
     if (cell == nil) {
         switch (indexPath.row) {
-            case 0: case 1: case 2:
+            case 0: case 1: case 2: case 3:
                 return 40.0f;
-            case 3:
+                break;
+            case 4:
                 return 220.0f;
                 break;
             default:

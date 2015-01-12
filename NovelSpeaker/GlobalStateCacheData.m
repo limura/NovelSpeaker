@@ -28,7 +28,6 @@
     if (self.maxSpeechTimeInSec == nil || [self.maxSpeechTimeInSec intValue] < 5 * 60) {
         self.maxSpeechTimeInSec = [[NSNumber alloc] initWithInt:((23*60)+55)*60];
     }
-    
     return self;
 }
 

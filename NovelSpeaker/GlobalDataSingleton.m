@@ -801,8 +801,19 @@ static GlobalDataSingleton* _singleton = nil;
         }
     }
 
-    // delay については設定ページを作っていないので固定値になります。
+    // delay については \r\n\r\n 以外を読み込むことにします
     [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02];
+    {
+        NSArray* speechWaitConfigList = [self GetAllSpeechWaitConfig];
+        if (speechWaitConfigList != nil) {
+            for (SpeechWaitConfigCacheData* speechWaitConfigCache in speechWaitConfigList) {
+                float delay = [speechWaitConfigCache.delayTimeInSec floatValue];
+                if (delay > 0.0f && [speechWaitConfigCache.targetText compare:@"\r\n\r\n"] != NSOrderedSame) {
+                    [m_NiftySpeaker AddDelayBlockSeparator:speechWaitConfigCache.targetText delay:delay];
+                }
+            }
+        }
+    }
     //[m_NiftySpeaker AddDelayBlockSeparator:@"…" delay:0.0005];
     //[m_NiftySpeaker AddDelayBlockSeparator:@"、" delay:0.0002];
     //[m_NiftySpeaker AddDelayBlockSeparator:@"。" delay:0.0005];
@@ -1220,6 +1231,98 @@ static GlobalDataSingleton* _singleton = nil;
     }
     return result;
 }
+
+/// 読み上げ時の「間」の設定を targetText指定 で読み出します(内部版)
+- (SpeechWaitConfig*)GetSpeechWaitSettingWithTargetTextThreadUnsafe:(NSString*)targetText
+{
+    NSArray* fetchResults = [m_CoreDataObjectHolder SearchEntity:@"SpeechWaitConfig" predicate:[NSPredicate predicateWithFormat:@"targetText == %@", targetText]];
+    if(fetchResults == nil)
+    {
+        NSLog(@"fetch from CoreData failed.");
+        return nil;
+    }
+    if([fetchResults count] == 0)
+    {
+        // 何もなかった。
+        return nil;
+    }
+    if([fetchResults count] != 1)
+    {
+        NSLog(@"duplicate SpeechWaitConfig.targetText!!! %@", targetText);
+        return nil;
+    }
+    return fetchResults[0];
+}
+
+/// 読み上げ時の「間」の設定を追加します。(内部版)
+- (SpeechWaitConfig*) CreateNewSpeechWaitConfigThreadUnsafe:(SpeechWaitConfigCacheData*)data
+{
+    SpeechWaitConfig* config = [m_CoreDataObjectHolder CreateNewEntity:@"SpeechWaitConfig"];
+    [data AssignToCoreData:config];
+    [m_CoreDataObjectHolder save];
+    return config;
+}
+
+/// 読み上げ時の「間」の設定を全て読み出します。
+- (NSArray*)GetAllSpeechWaitConfig
+{
+    __block NSMutableArray* fetchResults = nil;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeechWaitConfig" sortAttributeName:@"targetText" ascending:NO];
+        fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
+        for (int i = 0; i < [results count]; i++) {
+            fetchResults[i] = [[SpeechWaitConfigCacheData alloc] initWithCoreData:results[i]];
+        }
+    });
+    return fetchResults;
+}
+
+/// 読み上げ時の「間」の設定を追加します。
+/// 既に同じ key (targetText) のものがあれば上書きになります。
+- (BOOL)AddSpeechWaitSetting:(SpeechWaitConfigCacheData*)waitConfigCacheData
+{
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        SpeechWaitConfig* coreDataConfig = [self GetSpeechWaitSettingWithTargetTextThreadUnsafe:waitConfigCacheData.targetText];
+        if (coreDataConfig == nil) {
+            [self CreateNewSpeechWaitConfigThreadUnsafe:waitConfigCacheData];
+            result = true;
+        }else{
+            // float で == の比較がどれだけ意味があるのかわからんけれど、多分 0.0f には効くんじゃないかなぁ……
+            if (coreDataConfig.delayTimeInSec != waitConfigCacheData.delayTimeInSec) {
+                coreDataConfig.delayTimeInSec = waitConfigCacheData.delayTimeInSec;
+                [m_CoreDataObjectHolder save];
+                result = true;
+            }
+        }
+    });
+    if (result) {
+        m_isNeedReloadSpeakSetting = true;
+    }
+    return result;
+    
+}
+
+/// 読み上げ時の「間」の設定を削除します。
+- (BOOL)DeleteSpeechWaitSetting:(NSString*)targetString
+{
+    __block BOOL result = false;
+    dispatch_sync(m_CoreDataAccessQueue, ^{
+        SpeechWaitConfig* coreDataConfig = [self GetSpeechWaitSettingWithTargetTextThreadUnsafe:targetString];
+        if (coreDataConfig == nil) {
+            result = false;
+        }else{
+            [m_CoreDataObjectHolder DeleteEntity:coreDataConfig];
+            [m_CoreDataObjectHolder save];
+            result = true;
+        }
+    });
+    if (result) {
+        m_isNeedReloadSpeakSetting = true;
+    }
+    return result;
+}
+
 
 /// CoreData のマイグレーションが必要かどうかを確認します。
 - (BOOL)isRequiredCoreDataMigration

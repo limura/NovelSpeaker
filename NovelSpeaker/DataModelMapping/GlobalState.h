@@ -2,7 +2,7 @@
 //  GlobalState.h
 //  novelspeaker
 //
-//  Created by 飯村卓司 on 2015/01/10.
+//  Created by 飯村卓司 on 2015/01/12.
 //  Copyright (c) 2015年 IIMURA Takuji. All rights reserved.
 //
 

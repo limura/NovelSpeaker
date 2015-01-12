@@ -57,7 +57,9 @@
     if(![[GlobalDataSingleton GetInstance] IsFirstPageShowed])
     {
         NarouContentCacheData* currentContent = [[GlobalDataSingleton GetInstance] GetCurrentReadingContent];
-        [self PushNextView:currentContent];
+        if (currentContent != nil) {
+            [self PushNextView:currentContent];
+        }
     }
 }
 
