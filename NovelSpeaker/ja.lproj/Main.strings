@@ -171,3 +171,9 @@ MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of 
 
 /* Class = "IBUINavigationItem"; title = "小説家になろうで検索"; ObjectID = "z7j-iL-mrn"; */
 "z7j-iL-mrn.title" = "小説家になろうで検索";
+
+"r1G-Sf-NLc" = "読み上げ時の間の設定";
+"jA6-Pi-jzs" = "読み上げ時の間の詳細設定";
+"mEm-Ii-Fpd" = "対象文字列";
+"QVn-gx-50q" = "間を入れるかどうか";
+"Jyx-Pf-xD6" = "設定する";

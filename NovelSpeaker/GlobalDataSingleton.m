@@ -1102,7 +1102,7 @@ static GlobalDataSingleton* _singleton = nil;
         }
     });
     if (result) {
-        NSLog(@"isNeedReloadSpeakSetting = true (pitch)");
+        //NSLog(@"isNeedReloadSpeakSetting = true (pitch)");
         m_isNeedReloadSpeakSetting = true;
     }
     return result;
@@ -1206,7 +1206,7 @@ static GlobalDataSingleton* _singleton = nil;
         }
     });
     if (result) {
-        NSLog(@"isNeedReloadSpeakSetting = true (speechMod)");
+        //NSLog(@"isNeedReloadSpeakSetting = true (speechMod)");
         m_isNeedReloadSpeakSetting = true;
     }
     return result;
@@ -1268,7 +1268,7 @@ static GlobalDataSingleton* _singleton = nil;
 {
     __block NSMutableArray* fetchResults = nil;
     dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeechWaitConfig" sortAttributeName:@"targetText" ascending:NO];
+        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeechWaitConfig" sortAttributeName:@"targetText" ascending:YES];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[SpeechWaitConfigCacheData alloc] initWithCoreData:results[i]];

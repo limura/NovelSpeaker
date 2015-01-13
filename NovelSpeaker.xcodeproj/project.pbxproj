@@ -35,6 +35,8 @@
 		213A4DC31A63CF8A00E9EC13 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC21A63CF8A00E9EC13 /* GlobalState.m */; };
 		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
+		213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */; };
+		213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
@@ -159,6 +161,10 @@
 		213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SpeechWaitConfig.m; path = DataModelMapping/SpeechWaitConfig.m; sourceTree = "<group>"; };
 		213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitConfigCacheData.h; sourceTree = "<group>"; };
 		213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitConfigCacheData.m; sourceTree = "<group>"; };
+		213A4DCA1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitSettingTableViewController.h; sourceTree = "<group>"; };
+		213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingTableViewController.m; sourceTree = "<group>"; };
+		213A4DCD1A63FA5100E9EC13 /* SpeechWaitSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitSettingViewController.h; sourceTree = "<group>"; };
+		213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingViewController.m; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
 		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
 		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
@@ -557,6 +563,10 @@
 				2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */,
 				2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */,
 				2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */,
+				213A4DCA1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.h */,
+				213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */,
+				213A4DCD1A63FA5100E9EC13 /* SpeechWaitSettingViewController.h */,
+				213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -705,6 +715,7 @@
 				2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */,
 				212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */,
 				212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
+				213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
 				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
@@ -740,6 +751,7 @@
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
 				21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */,
 				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
+				213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */,
 				211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,

@@ -127,7 +127,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // 利用できる cell があるなら再利用します
-    BookShelfTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:BookShelfTableViewCellID];
+    BookShelfTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:BookShelfTableViewCellID forIndexPath:indexPath];
     if(cell == nil)
     {
         // 無いようなので生成します。
@@ -146,6 +146,30 @@
     NarouContent* narouContent = (NarouContent*)contentList[indexPath.row];
     [cell setTitleLabel:narouContent.title ncode:narouContent.ncode];
     return cell;
+}
+
+// 強引に(表示されている？)全ての cell について表示を更新します。
+- (void)ReloadAllTableViewData
+{
+    [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+    return;
+    
+    // CoreData 側に save されている数と表示されている数が違うと assertion failure で落ちるので封印します。
+    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
+    for (NSUInteger i = 0; i < [contentList count]; i++) {
+        NSIndexPath* indexPath = [NSIndexPath indexPathForRow:i inSection:0];
+        BookShelfTableViewCell* cell = [self.tableView dequeueReusableCellWithIdentifier:BookShelfTableViewCellID forIndexPath:indexPath];
+        if (cell == nil) {
+            // 無ければ表示もされていないはずなので無視します。
+            continue;
+        }
+        NarouContentCacheData* narouContent = contentList[i];
+        if (narouContent == nil) {
+            continue;
+        }
+        [cell setTitleLabel:narouContent.title ncode:narouContent.ncode];
+    }
+    //[self.tableView reloadData];
 }
 
 // 次のビューに飛ばします。
@@ -209,19 +233,19 @@
 // 個々の章のダウンロードが行われようとする度に呼び出されます。
 - (void)DownloadStatusUpdate:(NarouContentCacheData*)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition
 {
-    [self.tableView reloadData];
+    [self ReloadAllTableViewData];
 }
 // 全ての download queue がなくなった時に呼び出されます。
 - (void)DownloadEnd
 {
-    [self.tableView reloadData];
+    [self ReloadAllTableViewData];
 }
 
 /// NotificationCenter越しに呼び出されるイベントのイベントハンドラ
 - (void)NarouContentListChanged:(NSNotification*)notification
 {
     //NSLog(@"NarouContentListChanged notification got.");
-    [self.tableView reloadData];
+    [self ReloadAllTableViewData];
 }
 
 /*
@@ -246,16 +270,7 @@
 	[viewController viewWillAppear:animated];
     
     // 更新フラグとかを更新するために全部リロードしちゃいます
-    NSLog(@"didShowViewController: reloadData");
-    [self.tableView reloadData];
-}
-
-- (void)navigationController:(UINavigationController *)navigationController didShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
-	[viewController viewWillAppear:animated];
-
-    // 更新フラグとかを更新するために全部リロードしちゃいます
-    NSLog(@"didShowViewController: reloadData");
-    [self.tableView reloadData];
+    [self ReloadAllTableViewData];
 }
 
 #pragma mark - Navigation

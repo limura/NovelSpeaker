@@ -106,6 +106,10 @@
 ///
 - (void)setTitleLabel:(NSString*)titleLabel ncode:(NSString*)ncode
 {
+    if([m_Ncode length] > 0)
+    {
+        [self removeNotificationReciver];
+    }
     m_Ncode = ncode;
     m_MainDispatchQueue = dispatch_get_main_queue();
 

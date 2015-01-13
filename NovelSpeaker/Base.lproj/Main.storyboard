@@ -312,7 +312,127 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bLn-TN-oKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="945" y="2325"/>
+            <point key="canvasLocation" x="450" y="2323"/>
+        </scene>
+        <!--読み上げ時の間の設定-->
+        <scene sceneID="HXt-mb-frC">
+            <objects>
+                <tableViewController id="dQB-7t-eBi" customClass="SpeechWaitSettingTableViewController" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="at4-XT-JjX">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <prototypes>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="SpeechWaitSettingTableViewCellDefault" textLabel="fPT-JB-4oZ" detailTextLabel="dbX-Wt-GZI" style="IBUITableViewCellStyleValue1" id="rMi-jj-QG5">
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="rMi-jj-QG5" id="Hig-sS-p3H">
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="fPT-JB-4oZ">
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Subtitle" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="dbX-Wt-GZI">
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                            <color key="textColor" red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="calibratedRGB"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="dQB-7t-eBi" id="2es-7u-lID"/>
+                            <outlet property="delegate" destination="dQB-7t-eBi" id="Wh1-mN-dod"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="読み上げ時の間の設定" id="r1G-Sf-NLc"/>
+                    <connections>
+                        <segue destination="C7M-ZK-1Ak" kind="push" identifier="newTextDelaySettingSegue" id="6Jh-pj-kc3"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="mk2-ep-VO6" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="945" y="2323"/>
+        </scene>
+        <!--読み上げ時の間の詳細設定-->
+        <scene sceneID="7EH-So-dh4">
+            <objects>
+                <viewController id="C7M-ZK-1Ak" customClass="SpeechWaitSettingViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="4V8-Oh-ljF"/>
+                        <viewControllerLayoutGuide type="bottom" id="dbr-AK-NiB"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="meu-KG-fZD">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oMz-PI-mqu">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                                <subviews>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zZI-up-85G">
+                                        <rect key="frame" x="263" y="154" width="51" height="31"/>
+                                    </switch>
+                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Mte-mX-gvu">
+                                        <rect key="frame" x="8" y="111" width="304" height="30"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="対象文字列" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mEm-Ii-Fpd">
+                                        <rect key="frame" x="8" y="82" width="304" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="間を入れるかどうか" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QVn-gx-50q">
+                                        <rect key="frame" x="8" y="159" width="247" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Jyx-Pf-xD6">
+                                        <rect key="frame" x="98" y="209" width="124" height="30"/>
+                                        <state key="normal" title="設定する">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="commitButtonClicked:" destination="C7M-ZK-1Ak" eventType="touchUpInside" id="3sP-Zz-ZDP"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="zZI-up-85G" firstAttribute="top" secondItem="Mte-mX-gvu" secondAttribute="bottom" constant="13" id="ImB-V8-PO9"/>
+                                    <constraint firstItem="zZI-up-85G" firstAttribute="leading" secondItem="QVn-gx-50q" secondAttribute="trailing" constant="8" id="MyL-Em-fEo"/>
+                                    <constraint firstAttribute="trailing" secondItem="zZI-up-85G" secondAttribute="trailing" constant="8" id="Oh9-4c-plX"/>
+                                    <constraint firstItem="Jyx-Pf-xD6" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="98" id="Par-LN-OqJ"/>
+                                    <constraint firstItem="QVn-gx-50q" firstAttribute="top" secondItem="Mte-mX-gvu" secondAttribute="bottom" constant="18" id="VPB-MA-pZq"/>
+                                    <constraint firstItem="QVn-gx-50q" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="Wwl-ro-pf1"/>
+                                    <constraint firstItem="Mte-mX-gvu" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="f5T-zt-lGe"/>
+                                    <constraint firstAttribute="trailing" secondItem="Mte-mX-gvu" secondAttribute="trailing" constant="8" id="ghn-JY-nBP"/>
+                                    <constraint firstItem="Jyx-Pf-xD6" firstAttribute="top" secondItem="QVn-gx-50q" secondAttribute="bottom" constant="29" id="iEK-GV-f4o"/>
+                                    <constraint firstItem="mEm-Ii-Fpd" firstAttribute="top" secondItem="oMz-PI-mqu" secondAttribute="top" constant="82" id="oGz-uK-hCW"/>
+                                    <constraint firstItem="mEm-Ii-Fpd" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="pg6-Qx-Gpu"/>
+                                    <constraint firstItem="Mte-mX-gvu" firstAttribute="top" secondItem="mEm-Ii-Fpd" secondAttribute="bottom" constant="8" id="rEA-Qr-JRy"/>
+                                    <constraint firstAttribute="trailing" secondItem="mEm-Ii-Fpd" secondAttribute="trailing" constant="8" id="t2y-iv-jHK"/>
+                                    <constraint firstAttribute="trailing" secondItem="Jyx-Pf-xD6" secondAttribute="trailing" constant="98" id="zXu-er-0R9"/>
+                                </constraints>
+                            </scrollView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="読み上げ時の間の詳細設定" id="jA6-Pi-jzs"/>
+                    <connections>
+                        <outlet property="commitButton" destination="Jyx-Pf-xD6" id="gOB-MS-c9W"/>
+                        <outlet property="inputTextField" destination="Mte-mX-gvu" id="nZ2-ap-QMq"/>
+                        <outlet property="onOffSwitch" destination="zZI-up-85G" id="hb7-aW-vgW"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="PhH-X1-Ua4" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1421" y="2323"/>
         </scene>
         <!--設定-->
         <scene sceneID="jLN-GL-WMq">
@@ -368,6 +488,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         <segue destination="0kw-MK-hET" kind="push" identifier="speakSettingsSegue" id="B7T-Wg-yhB"/>
                         <segue destination="DcS-zk-4zM" kind="push" identifier="speechModSettingSegue" id="NN9-Wl-Axe"/>
                         <segue destination="Pb4-1M-Lvn" kind="push" identifier="textSizeSettingSegue" id="TN8-7S-JAt"/>
+                        <segue destination="dQB-7t-eBi" kind="push" identifier="textDelaySettingSegue" id="Taz-2K-ASG"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2y7-9M-CWR" userLabel="First Responder" sceneMemberID="firstResponder"/>
