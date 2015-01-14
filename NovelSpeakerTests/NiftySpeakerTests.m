@@ -10,6 +10,17 @@
 #import "NiftySpeaker.h"
 #import "SpeechBlock.h"
 
+@interface SpeechBlockConverter : NSObject
+
+@property NSString* text;
+@property float delay;
+@property float pitch;
+@property float rate;
+
+@end
+@implementation SpeechBlockConverter
+@end
+
 @interface NiftySpeakerTests : XCTestCase
 {
 }
@@ -29,6 +40,16 @@
     [super tearDown];
 }
 
+- (SpeechBlockConverter*)AllocSpeechBlockConverter:(NSString*)text delay:(float)delay pitch:(float)pitch rate:(float)rate
+{
+    SpeechBlockConverter* conv = [SpeechBlockConverter new];
+    conv.text = text;
+    conv.delay = delay;
+    conv.pitch = pitch;
+    conv.rate = rate;
+    return conv;
+}
+
 /// SpeechBlock への分割を確認する
 - (void)testNiftySpeakerBlockSeparate
 {
@@ -46,10 +67,10 @@
     normalSpeakConfig.rate = 0.5f;
     SpeechConfig* specialSpeakConfig = [SpeechConfig new];
     specialSpeakConfig.pitch = 1.2f;
-    specialSpeakConfig.rate = 0.5;
+    specialSpeakConfig.rate = 0.5f;
     [speaker AddBlockStartSeparator:@"「" endString:@"」" speechConfig:normalSpeakConfig];
     [speaker AddBlockStartSeparator:@"『" endString:@"』" speechConfig:specialSpeakConfig];
-    [speaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02f];
+    [speaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.5f];
     //[speaker AddDelayBlockSeparator:@"\n\n" delay:0.1f];
     //[speaker AddDelayBlockSeparator:@"。" delay:0.1f];
     [speaker AddSpeechModText:@"異世界" to:@"イセカイ"];
@@ -64,149 +85,48 @@
      @"通常の文章\r\n"
      @"通常の文章の中に「会話文」\r\n"
      @"\r\n"
-     @"通常の文章の中に「複数の」「会話文が」紛れる。\r\n"
+     @"通常の文章の中に「複数の」「会話文が」紛れる\r\n"
      @"「会話文が『ネスト』する場合」\r\n"
      @"「会話文の中に\r\n\r\n改行が複数ある場合」\r\n"
      @"通常の文章"
      ];
     
     NSArray* blockArray = [speaker GetGeneratedSpeechBlockArray_ForTest];
+
+    NSArray* answerArray = @[
+                             [self AllocSpeechBlockConverter:@"異世界" delay:0.0f pitch:1.0f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"\r\n\r\n" delay:0.5f pitch:1.0f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"「行頭から会話文" delay:0.0f pitch:1.5f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"」\r\n" delay:0.0f pitch:1.0f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"「続いて会話文" delay:0.0f pitch:1.5f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"」\r\n通常の文章\r\n通常の文章の中に" delay:0.0f pitch:1.0f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"「会話文" delay:0.0f pitch:1.5f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"」" delay:0.0f pitch:1.0f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"\r\n\r\n通常の文章の中に" delay:0.5f pitch:1.0f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"「複数の" delay:0.0f pitch:1.5f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"」" delay:0.0f pitch:1.0f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"「会話文が" delay:0.0f pitch:1.5f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"」紛れる\r\n" delay:0.0f pitch:1.0f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"「会話文が" delay:0.0f pitch:1.5f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"『ネスト" delay:0.0f pitch:1.2f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"』する場合" delay:0.0f pitch:1.5f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"」\r\n" delay:0.0f pitch:1.0f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"「会話文の中に" delay:0.0f pitch:1.5f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"\r\n\r\n改行が複数ある場合" delay:0.5f pitch:1.5f rate:0.5f]
+                             , [self AllocSpeechBlockConverter:@"」\r\n通常の文章" delay:0.0f pitch:1.5f rate:0.5f]
+                             ];
     
-    SpeechBlock* block = [blockArray objectAtIndex:0];
-    NSString* displayText = [block GetDisplayText];
-    NSString* compareText = @"異世界";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@(%lu) <-> %@(%lu)", displayText, [displayText length], compareText, [compareText length]);
-    XCTAssertTrue(block.speechConfig.pitch == 1.0f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-
-    block = [blockArray objectAtIndex:1];
-    displayText = [block GetDisplayText];
-    compareText = @"\r\n\r\n";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@(%lu) <-> %@(%lu)", displayText, [displayText length], compareText, [compareText length]);
-    XCTAssertTrue(block.speechConfig.pitch == 1.0f);
-    XCTAssertTrue(block.speechConfig.beforeDelay > 0.0f, @"block(%p) beforeDelay: %f", block, block.speechConfig.beforeDelay);
+    XCTAssertEqual([blockArray count], [answerArray count]);
     
-    block = [blockArray objectAtIndex:2];
-    displayText = [block GetDisplayText];
-    compareText = @"「行頭から会話文";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@(%lu) <-> %@(%lu)", displayText, [displayText length], compareText, [compareText length]);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-    
-    block = [blockArray objectAtIndex:3];
-    displayText = [block GetDisplayText];
-    compareText = @"」\r\n";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.0f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-
-    block = [blockArray objectAtIndex:4];
-    displayText = [block GetDisplayText];
-    compareText = @"「続いて会話文";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-
-    block = [blockArray objectAtIndex:5];
-    displayText = [block GetDisplayText];
-    compareText = @"」\r\n通常の文章\r\n通常の文章の中に";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.0f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-    
-    block = [blockArray objectAtIndex:6];
-    displayText = [block GetDisplayText];
-    compareText = @"「会話文";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-
-    block = [blockArray objectAtIndex:7];
-    displayText = [block GetDisplayText];
-    compareText = @"」";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-
-    block = [blockArray objectAtIndex:8];
-    displayText = [block GetDisplayText];
-    compareText = @"\r\n\r\n通常の文章の中に";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@(%lu) <-> %@(%lu)", displayText, [displayText length], compareText, [compareText length]);
-    XCTAssertTrue(block.speechConfig.pitch == 1.0f);
-    XCTAssertTrue(block.speechConfig.beforeDelay > 0.0f, @"block(%p) beforeDelay: %f", block, block.speechConfig.beforeDelay);
-    
-    block = [blockArray objectAtIndex:9];
-    displayText = [block GetDisplayText];
-    compareText = @"「複数の";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-    
-    block = [blockArray objectAtIndex:10];
-    displayText = [block GetDisplayText];
-    compareText = @"」";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-
-    block = [blockArray objectAtIndex:11];
-    displayText = [block GetDisplayText];
-    compareText = @"「会話文が";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-    
-    block = [blockArray objectAtIndex:12];
-    displayText = [block GetDisplayText];
-    compareText = @"」紛れる。\r\n";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.0f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-
-    block = [blockArray objectAtIndex:13];
-    displayText = [block GetDisplayText];
-    compareText = @"「会話文が";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-    
-    block = [blockArray objectAtIndex:14];
-    displayText = [block GetDisplayText];
-    compareText = @"『ネスト";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.2f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-    
-    block = [blockArray objectAtIndex:15];
-    displayText = [block GetDisplayText];
-    compareText = @"』する場合";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-
-    block = [blockArray objectAtIndex:16];
-    displayText = [block GetDisplayText];
-    compareText = @"」\r\n";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.0f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-
-    block = [blockArray objectAtIndex:17];
-    displayText = [block GetDisplayText];
-    compareText = @"「会話文の中に";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f);
-
-    block = [blockArray objectAtIndex:18];
-    displayText = [block GetDisplayText];
-    compareText = @"\r\n\r\n改行が複数ある場合";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f);
-    XCTAssertTrue(block.speechConfig.beforeDelay > 0.0f, @"block(%p) beforeDelay: %f", block, block.speechConfig.beforeDelay);
-
-    block = [blockArray objectAtIndex:19];
-    displayText = [block GetDisplayText];
-    compareText = @"」\r\n通常の文章";
-    XCTAssertTrue([displayText compare:compareText] == NSOrderedSame, @"not same: %@ <-> %@", displayText, compareText);
-    XCTAssertTrue(block.speechConfig.pitch == 1.5f, @"not same pitch: %f <-> %f", block.speechConfig.pitch, 1.0f);
-    XCTAssertTrue(block.speechConfig.beforeDelay == 0.0f, @"not same beforeDelay: %f <-> %f", block.speechConfig.beforeDelay, 0.0f);
+    for (int i = 0; i < [blockArray count]; i++) {
+        SpeechBlock* block = [blockArray objectAtIndex:i];
+        SpeechBlockConverter* answer = [answerArray objectAtIndex:i];
+        NSString* displayText = [block GetDisplayText];
+        XCTAssertTrue([displayText compare:answer.text] == NSOrderedSame, @"block %d not same: %@ <=> %@", i, displayText, answer.text);
+        XCTAssertEqual(block.speechConfig.pitch, answer.pitch);
+        XCTAssertEqual(block.speechConfig.rate, answer.rate);
+        XCTAssertEqual(block.speechConfig.beforeDelay, answer.delay);
+    }
 }
 
 @end
