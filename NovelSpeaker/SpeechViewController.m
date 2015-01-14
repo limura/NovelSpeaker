@@ -140,7 +140,12 @@
         return;
     }
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:self.textView.selectedRange.location];
+    NSUInteger location = self.textView.selectedRange.location;
+    if (location <= 0) {
+        NSRange readingRange = [globalData GetCurrentReadingPoint];
+        location = readingRange.location;
+    }
+    m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:location];
     //NSLog(@"update read location %lu (%@)", [m_CurrentReadingStory.readLocation unsignedLongValue], m_CurrentReadingStory.ncode);
     [globalData UpdateReadingPoint:self.NarouContentDetail story:m_CurrentReadingStory];
     [globalData saveContext];
