@@ -24,6 +24,10 @@
 /// ex: あらすじを検索対象に含むか否か
 + (NSMutableArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex;
 
+/// 小説家になろうで検索を行います
+/// 作者の user_id での検索です
++ (NSArray*)SearchUserID:(NSString*)userID;
+
 /// 小説家になろうでtextダウンロードを行うためのURLを取得します。
 /// 失敗した場合は nil を返します。
 /// 解説：

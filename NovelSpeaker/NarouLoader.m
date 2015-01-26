@@ -15,6 +15,34 @@
 /// SettingDataModel の NarouContent に追加するなどします。
 @implementation NarouLoader
 
+/// なろう検索APIのURLを使って検索結果を取得します。
++ (NSMutableArray*)SearchWithURL:(NSString*)queryUrl
+{
+    NSLog(@"search: %@", queryUrl);
+    NSData* jsonData = [self HttpGetBinary:queryUrl];
+    NSMutableArray* result = [NSMutableArray new];
+    if (jsonData == nil) {
+        return result;
+    }
+    
+    NSError* err = nil;
+    // TODO: これ NSArray と NSDictionary のどっちが帰ってくるのが正しいのかわからない形式で呼んでる？
+    NSArray* contentList = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&err];
+    for(NSDictionary* jsonContent in contentList)
+    {
+        NarouContentCacheData* content = [[NarouContentCacheData alloc] initWithJsonData:jsonContent];
+        if (content == nil || content.ncode == nil || [content.ncode length] <= 0
+            || [content.ncode compare:@"(null)"] == NSOrderedSame) {
+            continue;
+        }
+        
+        [result addObject:content];
+    }
+    
+    return result;
+    
+}
+
 /// 小説家になろうで検索を行います。
 /// searchString: 検索文字列
 /// wname: 作者名を検索対象に含むか否か
@@ -46,30 +74,17 @@
     {
         queryUrl = [queryUrl stringByAppendingString:@"&ex=1"];
     }
-    
-    NSLog(@"search: %@", queryUrl);
-    NSData* jsonData = [self HttpGetBinary:queryUrl];
-    NSMutableArray* result = [NSMutableArray new];
-    if (jsonData == nil) {
-        return result;
-    }
-    
-    NSError* err = nil;
-    // TODO: これ NSArray と NSDictionary のどっちが帰ってくるのが正しいのかわからない形式で呼んでる？
-    NSArray* contentList = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&err];
-    for(NSDictionary* jsonContent in contentList)
-    {
-        NarouContentCacheData* content = [[NarouContentCacheData alloc] initWithJsonData:jsonContent];
-        if (content == nil || content.ncode == nil || [content.ncode length] <= 0
-            || [content.ncode compare:@"(null)"] == NSOrderedSame) {
-            continue;
-        }
-        
-        [result addObject:content];
-    }
-
-    return result;
+    return [NarouLoader SearchWithURL:queryUrl];
 }
+
+/// 小説家になろうで検索を行います
+/// 作者の user_id での検索です
++ (NSArray*)SearchUserID:(NSString*)userID
+{
+    NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500&userid=%@", userID];
+    return [NarouLoader SearchWithURL:queryUrl];
+}
+
 
 /// 小説家になろうで ncode を指定して最新の NarouContent情報 を取得します。
 + (NarouContentCacheData*)GetCurrentNcodeContentData:(NSString*)ncode

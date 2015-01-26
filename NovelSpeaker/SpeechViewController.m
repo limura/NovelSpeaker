@@ -355,6 +355,7 @@
 - (void) finishSpeak
 {
     [self stopSpeechWithoutDiactivate];
+    [NSThread sleepForTimeInterval:1.0f];
     if ([self SetNextChapter]) {
         [self startSpeech];
     }else{

@@ -118,6 +118,7 @@ Correction of the problem
 ・起動時に最後に読んでいた小説を表示するようになります。
 ・最大連続再生時間の指定を設定ページに入れました。標準では23時間55分になっています。再生を開始してから、ここで設定された時間が経つと再生が停止します。
 ・読み上げ時に「……」や「、」「。」でも読み上げの間をつけられるような設定項目を設定ページに追加しました。標準では今までどおりの改行2つのものだけが有効です。ただ、「読み上げの間」の時間が思ったより長い時間しか止められず、短い時間の「間」が表現できないっぽいのと「間」に指定した場所で読み上げが一旦停止する事になり、今まで発音されなかった「……)」のようなものを「みぎまるかっこ」と発音するようになったりするのでちょっと使いづらいです……すみません。
+・小説の詳細ページの作者名を押すと、その作者の小説を検索するようになります。
 
 Interface change
 - Icon changed.
@@ -127,6 +128,7 @@ Interface change
 - First open view is now "Last read page".
 - "Max continuation reproduction time" configuration is now on settings page.
 - "Speak wait config" configuration is now on settings page.
+- Can search same writer novel, in novel details page.
 
 # レビュー用メモ
 

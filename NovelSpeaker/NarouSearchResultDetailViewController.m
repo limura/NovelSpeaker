@@ -10,6 +10,8 @@
 #import "GlobalDataSingleton.h"
 #import <math.h>
 #import "EasyAlert.h"
+#import "NarouLoader.h"
+#import "NarouSearchResultTableViewController.h"
 
 @interface NarouSearchResultDetailViewController ()
 
@@ -30,7 +32,10 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
+    m_SearchResult = nil;
+    m_MainQueue = dispatch_get_main_queue();
+    m_SearchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.search", NULL);
+
     // ダウンロードボタンを右上に配置します
     UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DownloadButton", @"download") style:UIBarButtonItemStylePlain target:self action:@selector(downloadButtonClicked)];
     self.navigationItem.rightBarButtonItem = buttonItem;
@@ -41,7 +46,7 @@
         return;
     }
     self.TitleLabel.text = self.NarouContentDetail.title;
-    self.WriterLabel.text = self.NarouContentDetail.writer;
+    [self.WriterButton setTitle:self.NarouContentDetail.writer forState:UIControlStateNormal];
     self.KeywordLabel.text = self.NarouContentDetail.keyword;
     self.FavNovelCntLabel.text = [self.NarouContentDetail.fav_novel_cnt stringValue];
     self.GeneralAllNoLabel.text = [self.NarouContentDetail.general_all_no stringValue];
@@ -148,4 +153,31 @@
     [self presentViewController:alert animated:true completion:nil];
 }
 
+- (IBAction)WriterButtonClicked:(id)sender {
+    UIAlertController* alertView = [EasyAlert CreateAlertNoButton:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching") message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching")];
+    // ここで animated を TRUE にしてしまうと、アニメーションしている間に dissmissViewControllerAnimated を発行してしまうと効かないので
+    // 検索がすげー時間かからないと駄目になっちゃうので FALSE にします。
+    [self presentViewController:alertView animated:FALSE completion:nil];
+    dispatch_async(m_SearchQueue, ^{
+        NSArray* searchResult = [NarouLoader SearchUserID: self.NarouContentDetail.userid];
+        m_SearchResult = searchResult;
+        dispatch_async(m_MainQueue, ^{
+            [alertView dismissViewControllerAnimated:FALSE completion:nil];
+            NSLog(@"search end. count: %lu", (unsigned long)[m_SearchResult count]);
+            [self performSegueWithIdentifier:@"searchUserIDResultPushSegue" sender:self];
+        });
+    });
+}
+
+// 次のページに移行する時に呼ばれる
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    NSLog(@"next view load!");
+    // 次のビューをloadする前に呼び出してくれるらしいので、そこで検索結果を放り込みます。
+    if ([[segue identifier] isEqualToString:@"searchUserIDResultPushSegue"]) {
+        NSLog(@"set SearchResultList. count: %lu", (unsigned long)[m_SearchResult count]);
+        NarouSearchResultTableViewController* nextViewController = [segue destinationViewController];
+        nextViewController.SearchResultList = m_SearchResult;
+    }
+}
 @end

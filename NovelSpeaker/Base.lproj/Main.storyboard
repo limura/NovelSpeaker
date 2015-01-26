@@ -683,11 +683,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="213" translatesAutoresizingMaskIntoConstraints="NO" id="xXn-q0-jX5">
-                                        <rect key="frame" x="95" y="10" width="213" height="21"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
                                     <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="タイトル" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="COj-Rr-gBt">
                                         <rect key="frame" x="7" y="39" width="75" height="21"/>
                                         <constraints>
@@ -798,6 +793,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                             <constraint firstAttribute="height" id="0v2-jr-m8A"/>
                                         </constraints>
                                     </view>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="V4j-gr-adO">
+                                        <rect key="frame" x="95" y="6" width="217" height="30"/>
+                                        <state key="normal" title="-">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="WriterButtonClicked:" destination="ubt-4C-R8U" eventType="touchUpInside" id="gVA-eN-AlD"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="KJR-wg-Gk1" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="0Lh-wz-S0s"/>
@@ -806,8 +810,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <constraint firstItem="xwQ-rt-BZg" firstAttribute="top" secondItem="g0W-gO-BlM" secondAttribute="bottom" constant="8" id="24v-t5-UN2"/>
                                     <constraint firstItem="PCx-06-eEF" firstAttribute="top" secondItem="3Wn-rj-DVb" secondAttribute="bottom" constant="8" id="6lj-dL-OYZ"/>
                                     <constraint firstItem="wyA-PN-led" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="7MW-d1-peI"/>
-                                    <constraint firstItem="xXn-q0-jX5" firstAttribute="top" secondItem="lSh-Mn-eoc" secondAttribute="top" constant="10" id="8tA-15-UPJ"/>
-                                    <constraint firstAttribute="trailing" secondItem="xXn-q0-jX5" secondAttribute="trailing" constant="12" id="ASP-DQ-dJA"/>
                                     <constraint firstAttribute="bottom" secondItem="yWP-hK-Eyd" secondAttribute="bottom" constant="8" id="D2N-jl-l4e"/>
                                     <constraint firstItem="1XQ-W9-Dvn" firstAttribute="leading" secondItem="ro2-t1-7LL" secondAttribute="trailing" constant="13" id="DKM-Dd-rPV"/>
                                     <constraint firstItem="xwQ-rt-BZg" firstAttribute="leading" secondItem="AQq-iW-Jsd" secondAttribute="trailing" constant="9" id="Djq-93-cgn"/>
@@ -817,6 +819,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <constraint firstItem="AQq-iW-Jsd" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="EfN-Nh-vJF"/>
                                     <constraint firstItem="CVN-SK-Hpn" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="FBu-8I-6Jj"/>
                                     <constraint firstItem="Zz8-CV-no1" firstAttribute="top" secondItem="xwQ-rt-BZg" secondAttribute="bottom" constant="8" id="G0b-wv-Pgp"/>
+                                    <constraint firstItem="V4j-gr-adO" firstAttribute="leading" secondItem="YPT-L5-eNR" secondAttribute="trailing" constant="13" id="Hh8-RT-7mT"/>
                                     <constraint firstAttribute="trailing" secondItem="6vn-Hz-h0v" secondAttribute="trailing" constant="12" id="IED-Uc-43B"/>
                                     <constraint firstItem="Zh9-yA-FVY" firstAttribute="top" secondItem="lSh-Mn-eoc" secondAttribute="top" id="NDG-Tr-fwP"/>
                                     <constraint firstItem="yWP-hK-Eyd" firstAttribute="top" secondItem="6vn-Hz-h0v" secondAttribute="bottom" constant="8" id="NPf-yV-s6l"/>
@@ -824,6 +827,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <constraint firstItem="3Wn-rj-DVb" firstAttribute="leading" secondItem="COj-Rr-gBt" secondAttribute="trailing" constant="13" id="Tfk-pp-Oxl"/>
                                     <constraint firstAttribute="trailing" secondItem="1XQ-W9-Dvn" secondAttribute="trailing" constant="12" id="Uwy-4Y-XAg"/>
                                     <constraint firstItem="wyA-PN-led" firstAttribute="top" secondItem="PCx-06-eEF" secondAttribute="top" id="VoQ-dC-Alu"/>
+                                    <constraint firstItem="3Wn-rj-DVb" firstAttribute="top" secondItem="V4j-gr-adO" secondAttribute="bottom" constant="3" id="Vv7-pU-0Wg"/>
                                     <constraint firstItem="AQq-iW-Jsd" firstAttribute="top" secondItem="xwQ-rt-BZg" secondAttribute="top" id="WKw-9A-V4l"/>
                                     <constraint firstItem="g0W-gO-BlM" firstAttribute="top" secondItem="VMK-l4-SWS" secondAttribute="bottom" constant="8" id="WbL-Yv-8lz"/>
                                     <constraint firstAttribute="trailing" secondItem="Zh9-yA-FVY" secondAttribute="trailing" id="XJb-FW-grS"/>
@@ -835,9 +839,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <constraint firstItem="COj-Rr-gBt" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="fHN-8x-oiT"/>
                                     <constraint firstItem="CVN-SK-Hpn" firstAttribute="top" secondItem="g0W-gO-BlM" secondAttribute="top" id="fpE-sJ-QbE"/>
                                     <constraint firstItem="PCx-06-eEF" firstAttribute="leading" secondItem="wyA-PN-led" secondAttribute="trailing" constant="13" id="gd4-1T-4X9"/>
-                                    <constraint firstItem="3Wn-rj-DVb" firstAttribute="top" secondItem="xXn-q0-jX5" secondAttribute="bottom" constant="8" id="iD8-94-L9z"/>
                                     <constraint firstAttribute="trailing" secondItem="g0W-gO-BlM" secondAttribute="trailing" constant="12" id="jcg-Bq-stp"/>
                                     <constraint firstAttribute="trailing" secondItem="VMK-l4-SWS" secondAttribute="trailing" constant="12" id="kFS-we-lpd"/>
+                                    <constraint firstAttribute="trailing" secondItem="V4j-gr-adO" secondAttribute="trailing" constant="8" id="kp4-1c-wtH"/>
                                     <constraint firstItem="le2-Ox-6kL" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="ktQ-bo-chP"/>
                                     <constraint firstAttribute="trailing" secondItem="Zz8-CV-no1" secondAttribute="trailing" constant="12" id="lXg-WM-KtR"/>
                                     <constraint firstItem="yWP-hK-Eyd" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="oHc-if-ZLS"/>
@@ -848,9 +852,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <constraint firstItem="VMK-l4-SWS" firstAttribute="top" secondItem="1XQ-W9-Dvn" secondAttribute="bottom" constant="8" id="tJs-nV-Mb0"/>
                                     <constraint firstItem="COj-Rr-gBt" firstAttribute="top" secondItem="3Wn-rj-DVb" secondAttribute="top" id="uvo-yi-jv3"/>
                                     <constraint firstItem="YPT-L5-eNR" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="vG8-69-9Yy"/>
+                                    <constraint firstItem="V4j-gr-adO" firstAttribute="top" secondItem="lSh-Mn-eoc" secondAttribute="top" constant="6" id="xco-X7-ZIU"/>
                                     <constraint firstItem="1XQ-W9-Dvn" firstAttribute="top" secondItem="PCx-06-eEF" secondAttribute="bottom" constant="8" id="ySg-Rx-oF1"/>
                                     <constraint firstItem="ro2-t1-7LL" firstAttribute="leading" secondItem="lSh-Mn-eoc" secondAttribute="leading" constant="7" id="ynR-Wz-vOC"/>
-                                    <constraint firstItem="xXn-q0-jX5" firstAttribute="leading" secondItem="YPT-L5-eNR" secondAttribute="trailing" constant="13" id="z2D-Eu-M5X"/>
                                 </constraints>
                             </scrollView>
                         </subviews>
@@ -874,7 +878,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         <outlet property="StoryInfoLabel" destination="6vn-Hz-h0v" id="VRI-Zr-vod"/>
                         <outlet property="StoryTextLabel" destination="yWP-hK-Eyd" id="xT6-iR-Uy6"/>
                         <outlet property="TitleLabel" destination="3Wn-rj-DVb" id="Mtm-FM-mGA"/>
-                        <outlet property="WriterLabel" destination="xXn-q0-jX5" id="HmB-Vs-RRj"/>
+                        <outlet property="WriterButton" destination="V4j-gr-adO" id="Pqn-aY-6mE"/>
+                        <segue destination="onA-gV-Goe" kind="push" identifier="searchUserIDResultPushSegue" id="vyW-HX-PLM"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GuK-Ec-by5" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1122,6 +1127,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
-        <segue reference="0zP-nv-fmY"/>
+        <segue reference="vyW-HX-PLM"/>
+        <segue reference="Sih-ID-qj2"/>
     </inferredMetricsTieBreakers>
 </document>

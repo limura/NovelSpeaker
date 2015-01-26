@@ -183,9 +183,11 @@ typedef enum {
 {
     //NSArray* BlockSeparatedTextArray = [self SplitDelayedText:m_BlockSeparatorArray text:text];
     //NSArray* DelaySeparateTextArray = [self SplitTextByDelaySettingArray:m_DelaySettingArray text:text];
-    
+
+    /// 読み上げ設定の変化する位置ごとに次の変化を記録するための辞書
     NSMutableDictionary* speechSettingMap = [NSMutableDictionary new];
 
+    // m_DelaySettingArray の設定を辞書に登録していきます。
     unsigned long textLength = [text length];
     for (DelaySetting* delaySetting in m_DelaySettingArray) {
         unsigned long p = 0;
@@ -268,7 +270,7 @@ typedef enum {
         return [a compare:b];
     }];
 
-    /*
+#if 1
     for (NSNumber* key in locationArray) {
         unsigned long location = [key unsignedLongValue];
         SpeechSetting* setting = [speechSettingMap objectForKey:key];
@@ -283,7 +285,7 @@ typedef enum {
               , setting.config.beforeDelay
               , str);
     }
-     */
+#endif
     
     unsigned long p = 0;
     NSMutableArray* speechBlockArray = [NSMutableArray new];
