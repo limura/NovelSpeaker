@@ -270,7 +270,7 @@ typedef enum {
         return [a compare:b];
     }];
 
-#if 1
+#if 0
     for (NSNumber* key in locationArray) {
         unsigned long location = [key unsignedLongValue];
         SpeechSetting* setting = [speechSettingMap objectForKey:key];
@@ -655,5 +655,16 @@ typedef enum {
     return [m_Speaker Speech:speechString];
 }
 
-
+#if 0
+// AVAudioSessionDelegate で受け取れる音声停止のイベント？
+- (void)inputIsAvailableChanged:(BOOL)isInputAvailable
+{
+    if (isInputAvailable == YES && m_bIsSpeaking) {
+        [self StartSpeech];
+    }
+    if (isInputAvailable == NO && m_bIsSpeaking) {
+        [self StopSpeech];
+    }
+}
+#endif
 @end
