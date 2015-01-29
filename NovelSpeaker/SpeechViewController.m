@@ -24,6 +24,8 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
+    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidLoad %@", self.NarouContentDetail.title]]; // NSLog
+    
     [[GlobalDataSingleton GetInstance] AddSpeakRangeDelegate:self];
     
     // NavitationBar にボタンを配置します。
@@ -59,6 +61,9 @@
     [[GlobalDataSingleton GetInstance] ReloadSpeechSetting];
     // 読み上げる文章を設定します。
     [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+    
+    // textView で選択範囲が変えられた時のイベントハンドラに自分を登録します
+    self.textView.delegate = self;
         
     m_bIsSpeaking = NO;
 }
@@ -79,16 +84,12 @@
 {
     [super viewDidAppear:animated];
 
+    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidAppear %@", self.NarouContentDetail.title]]; // NSLog
+
     // なにやら登録が外れる事があるようなので、AddSpeakRangeDelegate をこのタイミングでも呼んでおきます。
     // AddSpeakRangeDelegate は複数回呼んでも大丈夫なように作ってあるはずです
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    {
-        if ([globalData isSpeaking]) {
-            // なにやら読み上げ中のようなのでコンテントを読み直します。
-            // 多分、このViewが消えてる状態で再生中にViewが再度生成されたんだと思うきっとたぶん。
-            [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
-        }
-    }
+    [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
     [globalData AddSpeakRangeDelegate:self];
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     [self becomeFirstResponder];
@@ -101,6 +102,19 @@
     [self SaveCurrentReadingPoint];
     
     [super viewWillDisappear:animated];
+}
+
+/// UITextField でカーソルの位置が変わった時に呼び出されるはずです。
+- (void) textViewDidChangeSelection: (UITextView*) textView
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    if ([globalData isSpeaking]) {
+        // 話し中であればこれはバンバン呼び出されるはずだし、勝手に NiftySpeaker側 で読み上げ位置の更新をしているはずなので無視して良いです。
+        return;
+    }
+    NSRange range = self.textView.selectedRange;
+    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld", self.NarouContentDetail.title, range.location]]; // NSLog
+    [self SaveCurrentReadingPoint];
 }
 
 /// 読み込みに失敗した旨を表示します。
@@ -122,6 +136,9 @@
     StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
     if (story == nil) {
         // なにやら設定されていないようなので、最初の章を読み込むことにします。
+        [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController なにやら読み上げようの章が設定されていないようなので、最初の章を読み込みます"]]; // NSLog
+
+        NSLog(@"GetReadingChapter return nil. なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込むことにします。");
         story = [[GlobalDataSingleton GetInstance] SearchStory:content.ncode chapter_no:1];
         if (story == nil) {
             [self SetReadingPointFailedMessage];
@@ -151,11 +168,24 @@
     [globalData saveContext];
 }
 
+- (NSRange)LoadCurrentReadingPoint
+{
+    if (m_CurrentReadingStory == nil) {
+        return NSMakeRange(0, 0);
+    }
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    StoryCacheData* story = [globalData SearchStory:m_CurrentReadingStory.ncode chapter_no:[m_CurrentReadingStory.chapter_number intValue]];
+    if (story == nil) {
+        return NSMakeRange(0, 0);
+    }
+    return NSMakeRange([story.readLocation unsignedIntegerValue], 0);
+}
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-    [self SaveCurrentReadingPoint];
+    //[self SaveCurrentReadingPoint];
 }
 
 - (BOOL)SetPreviousChapter
@@ -204,6 +234,8 @@
     }
     if ([story.content length] < [story.readLocation intValue])
     {
+        [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController: Story に保存されている読み込み位置(%d)が Story の長さ(%lu)を超えています。0 に上書きします。", [story.readLocation intValue], (unsigned long)[story.content length]]]; // NSLog
+
         NSLog(@"Story に保存されている読み込み位置(%d)が Story の長さ(%lu)を超えています。0 に上書きします。", [story.readLocation intValue], (unsigned long)[story.content length]);
         story.readLocation = [[NSNumber alloc] initWithInt:0];
     }
@@ -226,6 +258,7 @@
 - (BOOL)ChangeChapterWithLastestReadLocation:(int)chapter
 {
     if (chapter <= 0 || chapter > [self.NarouContentDetail.general_all_no intValue]) {
+        [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController: chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)指定された値は無視して 1 が指定されたものとして動作します。", chapter, self.NarouContentDetail.general_all_no]]; // NSLog
         NSLog(@"chapter に不正な値(%d)が指定されました。(1 から %@ の間である必要があります)指定された値は無視して 1 が指定されたものとして動作します。", chapter, self.NarouContentDetail.general_all_no);
         chapter = 1;
     }
@@ -241,9 +274,14 @@
     [self.textView becomeFirstResponder];
     
     // 読み上げ位置を設定します
+#if 0 // 読み上げ位置を textView から取ってくると、textView が消えている事があって、selectedRange が 0,0 を返す事があるので信用しないことにします
     NSRange range = self.textView.selectedRange;
     [[GlobalDataSingleton GetInstance] SetSpeechRange:range];
     [self SaveCurrentReadingPoint];
+#else // 今は textViewDidChangeSelection でセレクションが移動した時のイベントをとっていて、読み上げ中でなければそちらで読み上げ位置を移動したのを保存するようにしているので、GlobalData側 が読み上げ位置の管理を行っています。ということで GlobalData から読み上げ位置を読み出すことにします。
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    [globalData SetSpeechRange:[self LoadCurrentReadingPoint]];
+#endif
 
     // 読み上げ開始位置以降の文字列について、読み上げを開始します。
     startStopButton.title = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");

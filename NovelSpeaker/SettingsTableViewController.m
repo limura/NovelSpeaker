@@ -10,6 +10,8 @@
 #import "GlobalDataSingleton.h"
 #import "MaxSpeechTimeTableViewCell.h"
 
+#define USE_LOG_VIEW
+
 static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellDefault";
 
 @interface SettingsTableViewController ()
@@ -62,7 +64,11 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return 5;
+    return 5
+#ifdef USE_LOG_VIEW
+    + 1
+#endif
+    ;
 }
 
 - (UITableViewCell *)GetDefaultTableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -88,6 +94,11 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         case 3:
             cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_SettingOfTheSpeechDelay", @"読み上げ時の間の設定");
             break;
+#ifdef USE_LOG_VIEW
+        case 5:
+            cell.textLabel.text = @"debug log";
+            break;
+#endif
         default:
             cell.textLabel.text = @"-";
             break;
@@ -114,6 +125,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 {
     switch (indexPath.row) {
         case 0: case 1: case 2: case 3:
+#ifdef USE_LOG_VIEW
+        case 5:
+#endif
             return [self GetDefaultTableView:tableView cellForRowAtIndexPath:indexPath];
             break;
         case 4:
@@ -141,6 +155,11 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         case 3:
             [self performSegueWithIdentifier:@"textDelaySettingSegue" sender:self];
             break;
+#ifdef USE_LOG_VIEW
+        case 5:
+            [self performSegueWithIdentifier:@"debugLogViewSegue" sender:self];
+            break;
+#endif
         default:
             break;
     }
@@ -155,6 +174,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     if (cell == nil) {
         switch (indexPath.row) {
             case 0: case 1: case 2: case 3:
+#ifdef USE_LOG_VIEW
+            case 5:
+#endif
                 return 40.0f;
                 break;
             case 4:

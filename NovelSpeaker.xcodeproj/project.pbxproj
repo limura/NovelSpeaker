@@ -37,6 +37,7 @@
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
 		213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */; };
 		213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */; };
+		213A4DD51A77D74F00E9EC13 /* DebugLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DD41A77D74F00E9EC13 /* DebugLogViewController.m */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
@@ -165,6 +166,8 @@
 		213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingTableViewController.m; sourceTree = "<group>"; };
 		213A4DCD1A63FA5100E9EC13 /* SpeechWaitSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitSettingViewController.h; sourceTree = "<group>"; };
 		213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingViewController.m; sourceTree = "<group>"; };
+		213A4DD31A77D74F00E9EC13 /* DebugLogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugLogViewController.h; sourceTree = "<group>"; };
+		213A4DD41A77D74F00E9EC13 /* DebugLogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DebugLogViewController.m; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
 		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
 		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
@@ -567,6 +570,8 @@
 				213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */,
 				213A4DCD1A63FA5100E9EC13 /* SpeechWaitSettingViewController.h */,
 				213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */,
+				213A4DD31A77D74F00E9EC13 /* DebugLogViewController.h */,
+				213A4DD41A77D74F00E9EC13 /* DebugLogViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -731,6 +736,7 @@
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
 				21BDC2DF1A2B70A5002804DD /* EasyAlert.m in Sources */,
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
+				213A4DD51A77D74F00E9EC13 /* DebugLogViewController.m in Sources */,
 				21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */,
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,

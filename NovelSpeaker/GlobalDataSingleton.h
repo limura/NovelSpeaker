@@ -55,7 +55,14 @@
     
     /// 読み上げの最大連続再生時間のタイマー
     NSTimer* m_MaxSpeechTimeInSecTimer;
+    
+    /// 実機用log のarray
+    NSMutableArray* m_LogStringArray;
 }
+
+// 実機log用
+- (NSString*)GetLogString;
+- (void)AddLogString:(NSString*)string;
 
 /// シングルトンを取得します。
 + (GlobalDataSingleton*)GetInstance;

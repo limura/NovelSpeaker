@@ -13,7 +13,7 @@
 #import "StoryCacheData.h"
 #import "Speaker.h"
 
-@interface SpeechViewController : UIViewController<SpeakRangeDelegate>
+@interface SpeechViewController : UIViewController<SpeakRangeDelegate, UITextViewDelegate>
 {
     NSInteger m_SpeechStartPosition;
     UIBarButtonItem* startStopButton;

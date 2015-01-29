@@ -24,6 +24,8 @@ static GlobalDataSingleton* _singleton = nil;
 - (id)init
 {
     self = [super init];
+    
+    m_LogStringArray = [NSMutableArray new];
 
     m_bIsFirstPageShowed = false;
     
@@ -46,7 +48,7 @@ static GlobalDataSingleton* _singleton = nil;
     speechConfig.pitch = 1.0f;
     speechConfig.rate = 1.0f;
     speechConfig.beforeDelay = 0.0f;
-    m_NiftySpeaker = [[NiftySpeaker alloc] initWithSpeechConfig:speechConfig];;
+    m_NiftySpeaker = [[NiftySpeaker alloc] initWithSpeechConfig:speechConfig];
 
     AVAudioSession* session = [AVAudioSession sharedInstance];
     NSError* err = nil;
@@ -587,6 +589,12 @@ static GlobalDataSingleton* _singleton = nil;
         || ![content.ncode isEqual:story.ncode]) {
         return false;
     }
+    NSUInteger location = [story.readLocation integerValue];
+    if (location == [story.content length] && [story.content length] > 0) {
+        location = [story.content length] - 1;
+    }
+    [self AddLogString:[[NSString alloc] initWithFormat:@"読み上げ位置を保存します。(%@) 章: %d 位置: %ld/%ld", content.title, [story.chapter_number intValue], (long)location, [story.content length]]]; // NSLog
+
     __block BOOL result = false;
     dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
@@ -595,7 +603,7 @@ static GlobalDataSingleton* _singleton = nil;
         if (coreDataContent == nil || coreDataStory == nil || globalState == nil) {
             result = false;
         }else{
-            coreDataStory.readLocation = story.readLocation;
+            coreDataStory.readLocation = [[NSNumber alloc] initWithUnsignedInteger:location];
             coreDataContent.currentReadingStory = coreDataStory;
             globalState.currentReadingStory = coreDataStory;
             [m_CoreDataObjectHolder save];
@@ -1377,5 +1385,26 @@ static GlobalDataSingleton* _singleton = nil;
     m_bIsFirstPageShowed = true;
 }
 
+// log用
+- (NSString*)GetLogString
+{
+    NSMutableString* string = [[NSMutableString alloc] init];
+    for (NSString* str in m_LogStringArray) {
+        [string appendFormat:@"%@\r\n", str];
+    }
+    return string;
+}
+- (void)AddLogString:(NSString*)string
+{
+    NSDate* date = [NSDate date];
+    NSDateFormatter* formatter = [NSDateFormatter new];
+    [formatter setDateFormat:@"HH:mm:ss"];
+    NSString* logString = [[NSString alloc] initWithFormat:@"%@ %@", [formatter stringFromDate:date], string];
+    [m_LogStringArray addObject:logString];
+    NSLog(@"%@", logString);
+    while ([m_LogStringArray count] > 1024) {
+        [m_LogStringArray removeObjectAtIndex:0];
+    }
+}
 
 @end

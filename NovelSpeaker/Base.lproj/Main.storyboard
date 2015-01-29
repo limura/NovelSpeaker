@@ -6,6 +6,42 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
+        <!--Debug Log View Controller-->
+        <scene sceneID="1sr-gi-zeQ">
+            <objects>
+                <viewController id="WI3-lq-RQn" customClass="DebugLogViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="kiS-5S-SFr"/>
+                        <viewControllerLayoutGuide type="bottom" id="sws-rR-hBh"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="l03-Ng-qdH">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gQM-YC-Qn8">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="gQM-YC-Qn8" secondAttribute="trailing" constant="-16" id="Cza-lx-hvB"/>
+                            <constraint firstItem="gQM-YC-Qn8" firstAttribute="bottom" secondItem="l03-Ng-qdH" secondAttribute="bottomMargin" id="avF-H3-1hF"/>
+                            <constraint firstItem="gQM-YC-Qn8" firstAttribute="leading" secondItem="l03-Ng-qdH" secondAttribute="leadingMargin" constant="-16" id="c3I-ff-FUp"/>
+                            <constraint firstItem="gQM-YC-Qn8" firstAttribute="top" secondItem="l03-Ng-qdH" secondAttribute="topMargin" id="fMZ-Kk-X6C"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="FcK-cJ-voF"/>
+                    <connections>
+                        <outlet property="logTextView" destination="gQM-YC-Qn8" id="IfM-fh-LLF"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="VU5-Wx-PIG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-22" y="1618"/>
+        </scene>
         <!--文字の大きさ-->
         <scene sceneID="KxK-FQ-fPF">
             <objects>
@@ -489,6 +525,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         <segue destination="DcS-zk-4zM" kind="push" identifier="speechModSettingSegue" id="NN9-Wl-Axe"/>
                         <segue destination="Pb4-1M-Lvn" kind="push" identifier="textSizeSettingSegue" id="TN8-7S-JAt"/>
                         <segue destination="dQB-7t-eBi" kind="push" identifier="textDelaySettingSegue" id="Taz-2K-ASG"/>
+                        <segue destination="WI3-lq-RQn" kind="push" identifier="debugLogViewSegue" id="iaU-6Z-vkf"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2y7-9M-CWR" userLabel="First Responder" sceneMemberID="firstResponder"/>
