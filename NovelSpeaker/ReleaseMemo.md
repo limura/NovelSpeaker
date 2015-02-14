@@ -119,6 +119,7 @@ Correction of the problem
 ・最大連続再生時間の指定を設定ページに入れました。標準では23時間55分になっています。再生を開始してから、ここで設定された時間が経つと再生が停止します。
 ・読み上げ時に「……」や「、」「。」等でも読み上げの間をつけられるような設定項目を設定ページに追加しました。ただ、今までの手法で間を開かせると間が長すぎる感じでしたので、ちょっとあやしい方法での間を開けることもできるようにしました。「読上げ時の間の設定」ページの一番上の「読み上げの間の仕組み」の部分をタップして「非推奨型」にすると少し良くなる気がしますが、この手法は間を「_。_。_。」といった文字列を読み上げさせることで作っているので、将来のiOSのアップデートでうまく動かなくなる可能性があります。
 ・小説の詳細ページの作者名を押すと、その作者の小説を検索するようになります。
+・URLスキーム novelspeaker://downloadncode/ncode-ncode-ncode... という形式で、ncode を指定して小説をダウンロードさせる事ができるようになります。
 
 Interface change
 - Icon changed.
@@ -129,6 +130,7 @@ Interface change
 - "Max continuation reproduction time" configuration is now on settings page.
 - "Speak wait config" configuration is now on settings page.
 - Can search same writer novel, in novel details page.
+- Custom URL scheme is now available. It can download with NCODE. Use novelspeaker://downloadncode/ncode-ncode-ncode...
 
 # レビュー用メモ
 

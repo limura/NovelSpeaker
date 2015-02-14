@@ -68,5 +68,10 @@
     [[GlobalDataSingleton GetInstance] saveContext];
 }
 
+- (BOOL)application:(UIApplication*)application openURL:(NSURL*)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    return [globalData ProcessURLSceme:url];
+}
 
 @end

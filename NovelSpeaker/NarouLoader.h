@@ -28,6 +28,11 @@
 /// 作者の user_id での検索です
 + (NSArray*)SearchUserID:(NSString*)userID;
 
+/// 小説家になろうで検索を行います
+/// ncode での検索です。
+/// ncode は @"-" で区切ることで複数検索を同時にできます
++ (NSArray*)SearchNcode:(NSString*)ncodeList;
+
 /// 小説家になろうでtextダウンロードを行うためのURLを取得します。
 /// 失敗した場合は nil を返します。
 /// 解説：

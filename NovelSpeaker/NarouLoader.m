@@ -86,6 +86,17 @@
 }
 
 
+/// 小説家になろうで検索を行います
+/// ncode での検索です。
+/// ncode は @"-" で区切ることで複数検索を同時にできます
++ (NSArray*)SearchNcode:(NSString*)ncodeList
+{
+    NSString* escapedString = [ncodeList stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
+    
+    NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500&ncode=%@", escapedString];
+    return [NarouLoader SearchWithURL:queryUrl];
+}
+
 /// 小説家になろうで ncode を指定して最新の NarouContent情報 を取得します。
 + (NarouContentCacheData*)GetCurrentNcodeContentData:(NSString*)ncode
 {

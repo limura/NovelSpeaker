@@ -115,6 +115,10 @@
 /// 追加できなかった場合はエラーメッセージを返します。
 - (NSString*) AddDownloadQueueForNarou:(NarouContentCacheData*) content;
 
+/// Ncode の指定でダウンロードqueueに追加します。
+/// 追加できなかった場合はエラーメッセージを返します。
+- (BOOL) AddDownloadQueueForNarouNcode:(NSString*)ncode;
+
 /// 現在ダウンロード中のコンテンツ情報を取得します。
 - (NarouContentCacheData*)GetCurrentDownloadingInfo;
 
@@ -276,5 +280,8 @@
 
 /// 最初のページを表示した事を設定します。
 - (void)SetFirstPageShowed;
+
+/// URLスキームで呼び出された時の反応をします。
+- (BOOL)ProcessURLSceme:(NSURL*)url;
 
 @end

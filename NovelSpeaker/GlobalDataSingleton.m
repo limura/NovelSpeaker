@@ -345,6 +345,13 @@ static GlobalDataSingleton* _singleton = nil;
     return nil;
 }
 
+/// Ncode の指定でダウンロードqueueに追加します。
+/// 追加できなかった場合はエラーメッセージを返します。
+- (BOOL) AddDownloadQueueForNarouNcode:(NSString*)ncode
+{
+    return [m_DownloadQueue AddDownloadQueueForNcodeList:ncode];
+}
+
 /// download queue の最後に対象の content を追加します。
 - (void)PushContentDownloadQueue:(NarouContentCacheData*)content
 {
@@ -1492,6 +1499,39 @@ static GlobalDataSingleton* _singleton = nil;
 - (void)SetFirstPageShowed
 {
     m_bIsFirstPageShowed = true;
+}
+
+
+/// URLスキームで呼び出された時の downloadncode について対応します。
+/// 受け取る引数は @"ncode-ncode-ncode..." という文字列です
+- (BOOL)ProcessURLScemeDownloadNcode:(NSString*)targetListString
+{
+    if (targetListString == nil) {
+        return false;
+    }
+    return [m_DownloadQueue AddDownloadQueueForNcodeList:targetListString];
+}
+
+/// URLスキームで呼び出された時の反応をします。
+/// 反応する URL は、
+/// novelspeaker://downloadncode/ncode-ncode-ncode...
+/// です。
+- (BOOL)ProcessURLSceme:(NSURL*)url
+{
+    if (url == nil) {
+        return false;
+    }
+    NSString* scheme = [url scheme];
+    if (![scheme isEqualToString:@"novelspeaker"]
+        && ![scheme isEqualToString:@"limuraproducts.novelspeaker"]) {
+        return false;
+    }
+    NSString* controller = [url host];
+    if ([controller isEqualToString:@"downloadncode"]) {
+        NSString* ncodeListString = [url lastPathComponent];
+        return [self ProcessURLScemeDownloadNcode:ncodeListString];
+    }
+    return false;
 }
 
 // log用

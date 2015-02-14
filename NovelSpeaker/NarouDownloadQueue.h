@@ -77,4 +77,7 @@
 /// 何もダウンロードしていなければ nil が帰ります。
 - (NarouContentCacheData*)GetCurrentDownloadingInfo;
 
+/// ncodeのリスト(@"ncode-ncode-ncode..." という形式)の文字列を受け取って、ダウンロードキューに入れます
+- (BOOL)AddDownloadQueueForNcodeList:(NSString*)ncodeList;
+
 @end

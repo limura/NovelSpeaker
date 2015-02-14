@@ -400,4 +400,16 @@ static float SLEEP_TIME_SECOND = 10.5f;
 }
 
 
+/// ncodeのリスト(@"ncode-ncode-ncode..." という形式)の文字列を受け取って、ダウンロードキューに入れます
+- (BOOL)AddDownloadQueueForNcodeList:(NSString*)ncodeList
+{
+    dispatch_async(m_DownloadQueueReadWriteDispatchQueue, ^{
+        NSArray* searchResult = [NarouLoader SearchNcode:ncodeList];
+        for (NarouContentCacheData* content in searchResult) {
+            [self AddDownloadQueue:content];
+        }
+    });
+    return true;
+}
+
 @end

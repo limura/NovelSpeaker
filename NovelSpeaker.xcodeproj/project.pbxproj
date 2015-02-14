@@ -31,8 +31,11 @@
 		212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */; };
 		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
+		212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F359B1A8F8857009D0E60 /* GlobalState.m */; };
+		212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */; };
+		212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */; };
+		212F35A61A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */; };
 		213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */; };
-		213A4DC31A63CF8A00E9EC13 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC21A63CF8A00E9EC13 /* GlobalState.m */; };
 		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
 		213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */; };
@@ -153,11 +156,14 @@
 		212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_3to4.xcmappingmodel; sourceTree = "<group>"; };
 		212852DD19B1D101001A75DC /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		212852E019B1ECAD001A75DC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		212F359A1A8F8857009D0E60 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
+		212F359B1A8F8857009D0E60 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
+		212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_5to7.xcmappingmodel; sourceTree = "<group>"; };
+		212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_6to7.xcmappingmodel; sourceTree = "<group>"; };
+		212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
 		213A4DB01A61749600E9EC13 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
 		213A4DB11A61749B00E9EC13 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MaxSpeechTimeTableViewCell.xib; sourceTree = "<group>"; };
 		213A4DB31A6174AD00E9EC13 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
-		213A4DC11A63CF8A00E9EC13 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
-		213A4DC21A63CF8A00E9EC13 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
 		213A4DC41A63CF8B00E9EC13 /* SpeechWaitConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpeechWaitConfig.h; path = DataModelMapping/SpeechWaitConfig.h; sourceTree = "<group>"; };
 		213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SpeechWaitConfig.m; path = DataModelMapping/SpeechWaitConfig.m; sourceTree = "<group>"; };
 		213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitConfigCacheData.h; sourceTree = "<group>"; };
@@ -341,6 +347,8 @@
 				212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */,
 				212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */,
 				21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */,
+				212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */,
+				212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */,
 			);
 			name = MappingModel;
 			sourceTree = "<group>";
@@ -370,6 +378,7 @@
 		21B53A1819619BE7009658B7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
 				210958ED1A0E1C5500E9171F /* NEW!.png */,
 				210958F01A0E1C5C00E9171F /* NEW!@2x.png */,
 				210958F31A0E1C6100E9171F /* NEW!@3x.png */,
@@ -413,8 +422,8 @@
 			isa = PBXGroup;
 			children = (
 				21724EE119721D3600DF6DC4 /* MappingModel */,
-				213A4DC11A63CF8A00E9EC13 /* GlobalState.h */,
-				213A4DC21A63CF8A00E9EC13 /* GlobalState.m */,
+				212F359A1A8F8857009D0E60 /* GlobalState.h */,
+				212F359B1A8F8857009D0E60 /* GlobalState.m */,
 				2177634F19756781004F22FD /* GlobalStateCacheData.h */,
 				2177635019756781004F22FD /* GlobalStateCacheData.m */,
 				2191639819A38414003FF7FC /* NarouContent.h */,
@@ -675,6 +684,7 @@
 				213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */,
 				21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */,
 				210958C61A0DF55600E9171F /* booksearch@3x.png in Resources */,
+				212F35A61A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */,
 				210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */,
 				210958C81A0DF55600E9171F /* icloud1.png in Resources */,
 				2117251E19B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib in Resources */,
@@ -727,6 +737,7 @@
 				217BD9E419CE72BB008A0D9D /* StringSubstituter.m in Sources */,
 				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
 				210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */,
+				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
 				2191637B199F4514003FF7FC /* SpeechModSettingsTableViewController.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
@@ -747,7 +758,6 @@
 				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
 				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
 				21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */,
-				213A4DC31A63CF8A00E9EC13 /* GlobalState.m in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */,
@@ -757,10 +767,12 @@
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
 				21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */,
 				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
+				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
 				213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */,
 				211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
+				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
 				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,
 				21916368199E5D43003FF7FC /* SettingsTableViewController.m in Sources */,
