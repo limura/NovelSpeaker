@@ -18,6 +18,7 @@
     NSInteger m_SpeechStartPosition;
     UIBarButtonItem* startStopButton;
     UIBarButtonItem* detailButton;
+    UIBarButtonItem* shareButton;
     int m_CurrentChapter;
     StoryCacheData* m_CurrentReadingStory;
     BOOL m_bIsSpeaking;

@@ -7,11 +7,13 @@
 //
 
 #import <CoreData/CoreData.h>
+#import <Social/Social.h>
 #import "SpeechViewController.h"
 #import "Story.h"
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
 #import "NarouSearchResultDetailViewController.h"
+#import "EasyAlert.h"
 
 @interface SpeechViewController ()
 
@@ -34,8 +36,9 @@
         speakText = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");
     }
     startStopButton = [[UIBarButtonItem alloc] initWithTitle:speakText style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
-    detailButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"pseechViewController_Detail", @"詳細") style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:startStopButton, detailButton, nil];
+    detailButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SpeechViewController_Detail", @"詳細") style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
+    shareButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonClicked:)];
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:startStopButton, detailButton, shareButton, nil];
     self.navigationItem.title = self.NarouContentDetail.title;
 
 #if 0 // ボタンで章を移動するようにします。
@@ -328,6 +331,33 @@
 
 - (void)detailButtonClick:(id)sender {    
     [self performSegueWithIdentifier:@"speechToDetailSegue" sender:self];
+}
+
+- (void)shareButtonClicked:(id)sender {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:m_CurrentReadingStory.ncode];
+    if (content == nil) {
+        return;
+    }
+    NSString* message = [NSString stringWithFormat:NSLocalizedString(@"SpeechViewController_TweetMessage", @"%@ %@ #narou #ことせかい %@ %@"), content.title, content.writer, [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/%@/%@/", m_CurrentReadingStory.ncode, m_CurrentReadingStory.chapter_number], @"https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185"];
+    
+    UIActivityViewController *viewController = [[UIActivityViewController alloc] initWithActivityItems:@[message]
+                                                                                 applicationActivities:nil];
+    
+    [viewController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+        if (activityError) {
+            NSLog(@"%@", activityError);
+            return;
+        }
+    }];
+    
+    //viewController.popoverPresentationController.sourceView = self.view;
+    viewController.popoverPresentationController.barButtonItem = shareButton;
+    //viewController.popoverPresentationController.sourceRect = CGRectMake(100.0, 100.0, 20.0, 20.0);;
+    
+    [self presentViewController:viewController
+                       animated:YES
+                     completion:nil];
 }
 
 - (void)startStopButtonClick:(id)sender {

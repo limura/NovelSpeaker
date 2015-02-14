@@ -8,6 +8,8 @@
 
 "OK_button" = "OK";
 "DownloadButton" = "Download";
+"Setings_button" = "設定";
+"Cancel_button" = "キャンセル";
 //"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
 
 "SpeakPitchSettingView_NoTitleStringAlert" = "タイトルにする文字列を入れてください。";
@@ -38,10 +40,13 @@
 "SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" を \"%@\" に";
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";
 "SpeechViewController_Speak" = "Speak";
-"pseechViewController_Detail" = "詳細";
+"SpeechViewController_Detail" = "詳細";
 "SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。「詳細」→「Download」を選択して再ダウンロードすることで解消するかもしれません。";
 "SpeechViewController_Stop" = "Stop";
 "SpeechViewController_SpeechStopedByEnd" = "読み上げが最後に達しました。";
+"SpeechViewController_TweetMessage" = "%@ %@ #narou #ことせかい %@ %@";
+"SpeechViewController_NoTwitterAccount_Title" = "Twitterアカウントが設定されていません";
+"SpeechViewController_NoTwitterAccount_Message" = "Twitterアカウントが設定されていません。設定ページでTwitterアカウントを設定か作成することができます。";
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
 "SpeechWaitConfigTableView_TargetText_EnterEnter" = "<改行><改行>";
