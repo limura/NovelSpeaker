@@ -9,6 +9,7 @@
 #import "SpeechWaitSettingTableViewController.h"
 #import "GlobalDataSingleton.h"
 #import "SpeechWaitSettingViewController.h"
+#import "EasyAlert.h"
 
 static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSettingTableViewCellDefault";
 
@@ -59,9 +60,9 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
     if (speechWaitConfigList == nil) {
-        return 1;
+        return 2;
     }
-    return [speechWaitConfigList count] + 1;
+    return [speechWaitConfigList count] + 2;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -72,6 +73,16 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
     }
     
     if (indexPath.row == 0) {
+        cell.textLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_SpeechWaitSettingType", @"読み上げの間の仕組み");
+        GlobalStateCacheData* globalStateCache = [[GlobalDataSingleton GetInstance] GetGlobalState];
+        if (globalStateCache.speechWaitSettingUseExperimentalWait) {
+            cell.detailTextLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", @"非推奨型");
+        }else{
+            cell.detailTextLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default", @"標準型");
+        }
+        return cell;
+    }
+    if (indexPath.row == 1) {
         cell.textLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_EnterEnter", @"<改行><改行>");
         cell.detailTextLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_Enabled", @"有効");
         return cell;
@@ -126,10 +137,39 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 
 // Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.row == 0) {
+    if (indexPath.row == 0 || indexPath.row == 1) {
         return NO;
     }
     return YES;
+}
+
+// 読み上げの間の設定をどのように実行するかを切り替えます
+- (BOOL)switchSpeechWaitSettingType
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    GlobalStateCacheData* globalState = [globalData GetGlobalState];
+    NSString* newSetting = nil;
+    if ([globalState.speechWaitSettingUseExperimentalWait boolValue]) {
+        globalState.speechWaitSettingUseExperimentalWait = [[NSNumber alloc] initWithBool:false];
+        newSetting = NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default", @"推奨型");
+    }else{
+        globalState.speechWaitSettingUseExperimentalWait = [[NSNumber alloc] initWithBool:true];
+        newSetting = NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", @"非推奨型");
+    }
+    UIAlertController* alert = nil;
+    bool settingResult = [globalData UpdateGlobalState:globalState];
+    if(settingResult != false)
+    {
+        alert = [EasyAlert CreateAlertOneButton:[[NSString alloc] initWithFormat: NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdated", @"読み上げ設定を%@に更新しました。"), newSetting]
+                                        message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
+                                            [self.navigationController popViewControllerAnimated:YES];
+                                        }];
+    }else{
+        alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed", @"読み上げ設定の変更に失敗しました。")
+                                        message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
+    }
+    [self presentViewController:alert animated:true completion:nil];
+    return settingResult;
 }
 
 // セルが選択された時
@@ -137,6 +177,9 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 {
     switch (indexPath.row) {
         case 0:
+            [self switchSpeechWaitSettingType];
+            break;
+        case 1:
             break;
         default:
         {
@@ -156,7 +199,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        NSUInteger i = indexPath.row - 1;
+        NSUInteger i = indexPath.row - 2;
         NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
         if(speechWaitConfigList == nil
            || [speechWaitConfigList count] <= i)

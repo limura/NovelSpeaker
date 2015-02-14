@@ -22,10 +22,7 @@
 @property (nonatomic) NSNumber * defaultRate;
 @property (nonatomic) NSNumber * maxSpeechTimeInSec;
 @property (nonatomic) NSNumber * textSizeValue;
-@property (nonatomic) NSNumber * speechDelayComma;
-@property (nonatomic) NSNumber * speechDelayPeriod;
-@property (nonatomic) NSNumber * speechDelayThreeComma;
-@property (nonatomic) NSNumber * speechDelayParagraph;
+@property (nonatomic) NSNumber * speechWaitSettingUseExperimentalWait;
 @property (nonatomic) StoryCacheData *currentReadingStory;
 
 @end

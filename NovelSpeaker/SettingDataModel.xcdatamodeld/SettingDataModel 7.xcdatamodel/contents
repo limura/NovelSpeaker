@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6254" systemVersion="14B25" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6254" systemVersion="14C109" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="GlobalState" representedClassName="GlobalState" syncable="YES">
         <attribute name="defaultPitch" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
         <attribute name="defaultRate" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
         <attribute name="maxSpeechTimeInSec" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="speechWaitSettingUseExperimentalWait" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="textSizeValue" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
         <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="globalStateCurrentReadingInverse" inverseEntity="Story" syncable="YES"/>
     </entity>
@@ -53,11 +54,11 @@
         <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
     </entity>
     <elements>
-        <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="120"/>
+        <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="135"/>
         <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="343"/>
         <element name="SpeakPitchConfig" positionX="-162" positionY="-279" width="128" height="105"/>
         <element name="SpeechModSetting" positionX="-153" positionY="-270" width="128" height="73"/>
-        <element name="Story" positionX="-81" positionY="-280" width="128" height="150"/>
         <element name="SpeechWaitConfig" positionX="-171" positionY="-288" width="128" height="75"/>
+        <element name="Story" positionX="-81" positionY="-280" width="128" height="150"/>
     </elements>
 </model>

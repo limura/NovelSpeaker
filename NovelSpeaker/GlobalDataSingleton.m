@@ -138,6 +138,7 @@ static GlobalDataSingleton* _singleton = nil;
         state.defaultRate = globalState.defaultRate;
         state.textSizeValue = globalState.textSizeValue;
         state.maxSpeechTimeInSec = globalState.maxSpeechTimeInSec;
+        state.speechWaitSettingUseExperimentalWait = globalState.speechWaitSettingUseExperimentalWait;
         
         if (globalState.currentReadingStory == nil) {
             state.currentReadingStory = nil;
@@ -921,8 +922,7 @@ static GlobalDataSingleton* _singleton = nil;
             for (SpeechWaitConfigCacheData* speechWaitConfigCache in speechWaitConfigList) {
                 float delay = [speechWaitConfigCache.delayTimeInSec floatValue];
                 if (delay > 0.0f && [speechWaitConfigCache.targetText compare:@"\r\n\r\n"] != NSOrderedSame) {
-                    if (true) {
-                        // TODO: こっちのモードは iOS のアップデートで無意味になる可能性があるので実行時に選択できるようにすべき
+                    if (globalState.speechWaitSettingUseExperimentalWait) {
                         [m_NiftySpeaker AddSpeechModText:speechWaitConfigCache.targetText to:@"_。_。_。"];
                     }else{
                         [m_NiftySpeaker AddDelayBlockSeparator:speechWaitConfigCache.targetText delay:delay];

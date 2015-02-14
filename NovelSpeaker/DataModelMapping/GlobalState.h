@@ -2,7 +2,7 @@
 //  GlobalState.h
 //  novelspeaker
 //
-//  Created by 飯村卓司 on 2015/01/12.
+//  Created by 飯村卓司 on 2015/02/14.
 //  Copyright (c) 2015年 IIMURA Takuji. All rights reserved.
 //
 
@@ -17,6 +17,7 @@
 @property (nonatomic, retain) NSNumber * defaultRate;
 @property (nonatomic, retain) NSNumber * maxSpeechTimeInSec;
 @property (nonatomic, retain) NSNumber * textSizeValue;
+@property (nonatomic, retain) NSNumber * speechWaitSettingUseExperimentalWait;
 @property (nonatomic, retain) Story *currentReadingStory;
 
 @end

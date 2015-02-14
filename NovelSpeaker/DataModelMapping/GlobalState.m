@@ -2,7 +2,7 @@
 //  GlobalState.m
 //  novelspeaker
 //
-//  Created by 飯村卓司 on 2015/01/12.
+//  Created by 飯村卓司 on 2015/02/14.
 //  Copyright (c) 2015年 IIMURA Takuji. All rights reserved.
 //
 
@@ -16,6 +16,7 @@
 @dynamic defaultRate;
 @dynamic maxSpeechTimeInSec;
 @dynamic textSizeValue;
+@dynamic speechWaitSettingUseExperimentalWait;
 @dynamic currentReadingStory;
 
 @end

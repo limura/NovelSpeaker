@@ -48,3 +48,9 @@
 "SpeechWaitConfigTableView_DelayTimeInSec_Enabled" = "有効";
 "SpeechWaitConfigTableView_DelayTimeInSec_Disabled" = "無効";
 "SpeechWaitConfigSettingView_PleaseInputText" = "文字列を入力してください。";
+"SpeechWaitConfigTableView_TargetText_SpeechWaitSettingType" = "読み上げの間の仕組み";
+"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental" = "非推奨型";
+"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default" = "標準型";
+"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdated" = "読み上げの間の設定を \"%@\" に更新しました。";
+"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed" = "読み上げの間の設定の変更に失敗しました。";
+

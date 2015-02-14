@@ -21,6 +21,7 @@
     self.maxSpeechTimeInSec = coreDataState.maxSpeechTimeInSec;
     self.textSizeValue = coreDataState.textSizeValue;
     self.currentReadingStory = nil;
+    self.speechWaitSettingUseExperimentalWait = coreDataState.speechWaitSettingUseExperimentalWait;
     if (coreDataState.currentReadingStory != nil) {
         self.currentReadingStory = [[StoryCacheData alloc] initWithCoreData:coreDataState.currentReadingStory];
     }
@@ -38,6 +39,7 @@
     coreDataState.defaultRate = self.defaultRate;
     coreDataState.maxSpeechTimeInSec = self.maxSpeechTimeInSec;
     coreDataState.textSizeValue = self.textSizeValue;
+    coreDataState.speechWaitSettingUseExperimentalWait = self.speechWaitSettingUseExperimentalWait;
 
     if (self.currentReadingStory == nil) {
         coreDataState.currentReadingStory = nil;
