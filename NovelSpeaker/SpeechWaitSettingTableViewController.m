@@ -88,7 +88,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
         return cell;
     }
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-    NSUInteger targetRow = indexPath.row - 1;
+    NSUInteger targetRow = indexPath.row - 2;
     NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
     if ([speechWaitConfigList count] <= targetRow) {
         cell.textLabel.text = @"-";
@@ -183,7 +183,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
             break;
         default:
         {
-            unsigned int i = indexPath.row - 1;
+            unsigned int i = indexPath.row - 2;
             NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
             if (speechWaitConfigList == nil || [speechWaitConfigList count] <= i) {
                 return;

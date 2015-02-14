@@ -58,6 +58,6 @@
 "SpeechWaitConfigTableView_TargetText_SpeechWaitSettingType" = "Speech wait type";
 "SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental" = "experimental";
 "SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default" = "default";
-"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdated" = "Speech wait type update to \"%@\".";
+"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdated" = "Speech wait type changed to \"%@\".";
 "SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed" = "Speech wait type update failed.";
 
