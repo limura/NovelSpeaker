@@ -83,8 +83,11 @@
 
 - (BOOL) StopSpeech
 {
-    //NSLog(@"StopSpeech called.");
-    return [m_Synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
+    BOOL result = true;
+    if ([m_Synthesizer isSpeaking]) {
+        result = [m_Synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
+    }
+    return result;
 }
 
 - (BOOL) PauseSpeech
@@ -94,7 +97,7 @@
 
 - (BOOL) ResumeSpeech
 {
-    return [m_Synthesizer 	continueSpeaking];
+    return [m_Synthesizer continueSpeaking];
 }
 
 - (void)changeStatus:(STSpeakingStatus)status

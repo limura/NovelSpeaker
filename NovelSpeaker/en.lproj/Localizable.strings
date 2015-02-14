@@ -44,8 +44,8 @@
 "SpeechViewController_ContentReadFailed" = "Content read failed. This problem may dissolve by choosing \"Detail\" and \"Download\", and performing a redownload.";
 "SpeechViewController_Stop" = "Stop";
 "SpeechViewController_SpeechStopedByEnd" = "Because it reached at the end of a book, I stopped reading aloud.";
-"SpeechWaitConfigSettingView_AppendSuccess" = "Append success.";
-"SpeechWaitConfigSettingView_AppendFailed" = "Append failed.";
+"SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
+"SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";
 "SpeechWaitConfigTableView_TargetText_EnterEnter" = "<Enter><Enter>";
 "SpeechWaitConfigTableView_DelayTimeInSec_Enabled" = "Enabled";
 "SpeechWaitConfigTableView_DelayTimeInSec_Disabled" = "Disabled";

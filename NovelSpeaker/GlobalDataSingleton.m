@@ -593,7 +593,7 @@ static GlobalDataSingleton* _singleton = nil;
     if (location == [story.content length] && [story.content length] > 0) {
         location = [story.content length] - 1;
     }
-    [self AddLogString:[[NSString alloc] initWithFormat:@"読み上げ位置を保存します。(%@) 章: %d 位置: %ld/%ld", content.title, [story.chapter_number intValue], (long)location, [story.content length]]]; // NSLog
+    [self AddLogString:[[NSString alloc] initWithFormat:@"読み上げ位置を保存します。(%@) 章: %d 位置: %ld/%ld", content.title, [story.chapter_number intValue], (long)location, (unsigned long)[story.content length]]]; // NSLog
 
     __block BOOL result = false;
     dispatch_sync(m_CoreDataAccessQueue, ^{
@@ -778,6 +778,13 @@ static GlobalDataSingleton* _singleton = nil;
                               , @"お兄さま", @"おにいさま"
                               , @"お付き", @"おつき"
                               , @"VRMMORPG", @"VR MMORPG"
+                              , @"薬室", @"やくしつ"
+                              , @"海兵隊", @"かいへいたい"
+                              , @"擲弾", @"てきだん"
+                              , @"弾倉", @"だんそう"
+                              , @"対戦車", @"たいせんしゃ"
+                              , @"ボクっ娘", @"ボクっ子"
+                              , @"ドジっ娘", @"ドジっ娘"
                               
 
                               , @"α", @"アルファ"
@@ -843,8 +850,8 @@ static GlobalDataSingleton* _singleton = nil;
                               , @"カズ彦", @"カズヒコ"
                               , @"大地人", @"だいちじん"
                               , @"地底人", @"ちていじん"
-                              , @"Plant hwyaden", @"プラント・フロウデン"
-                              , @"Ｐｌａｎｔ　ｈｗｙａｄｅｎ", @"プラント・フロウデン"
+                              //, @"Plant hwyaden", @"プラント・フロウデン"
+                              //, @"Ｐｌａｎｔ　ｈｗｙａｄｅｎ", @"プラント・フロウデン"
                               
                               , nil];
         SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
@@ -858,11 +865,29 @@ static GlobalDataSingleton* _singleton = nil;
     }
 }
 
+- (void)InsertDefaultSpeechWaitConfig
+{
+    NSArray* defaultSpeechWaitTargets = [[NSArray alloc] initWithObjects:
+                                         @"……"
+                                         , @"、"
+                                         , @"。"
+                                         , @"・"
+                                         , nil];
+    
+    for (NSString* targetString in defaultSpeechWaitTargets) {
+        SpeechWaitConfigCacheData* waitConfig = [SpeechWaitConfigCacheData new];
+        waitConfig.targetText = targetString;
+        waitConfig.delayTimeInSec = [[NSNumber alloc] initWithFloat:0.0f];
+        [[GlobalDataSingleton GetInstance] AddSpeechWaitSetting:waitConfig];
+    }
+}
+
 /// 何も設定されていなければ標準のデータを追加します。
 - (void)InsertDefaultSetting
 {
     [self InsertDefaultSpeakPitchConfig];
     [self InsertDefaultSpeechModConfig];
+    [self InsertDefaultSpeechWaitConfig];
 }
 
 /// 読み上げ設定を読み直します。
@@ -896,7 +921,12 @@ static GlobalDataSingleton* _singleton = nil;
             for (SpeechWaitConfigCacheData* speechWaitConfigCache in speechWaitConfigList) {
                 float delay = [speechWaitConfigCache.delayTimeInSec floatValue];
                 if (delay > 0.0f && [speechWaitConfigCache.targetText compare:@"\r\n\r\n"] != NSOrderedSame) {
-                    [m_NiftySpeaker AddDelayBlockSeparator:speechWaitConfigCache.targetText delay:delay];
+                    if (true) {
+                        // TODO: こっちのモードは iOS のアップデートで無意味になる可能性があるので実行時に選択できるようにすべき
+                        [m_NiftySpeaker AddSpeechModText:speechWaitConfigCache.targetText to:@"_。_。_。"];
+                    }else{
+                        [m_NiftySpeaker AddDelayBlockSeparator:speechWaitConfigCache.targetText delay:delay];
+                    }
                 }
             }
         }

@@ -42,8 +42,8 @@
 "SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。「詳細」→「Download」を選択して再ダウンロードすることで解消するかもしれません。";
 "SpeechViewController_Stop" = "Stop";
 "SpeechViewController_SpeechStopedByEnd" = "読み上げが最後に達しました。";
-"SpeechWaitConfigSettingView_AppendSuccess" = "読み上げ時の間の設定を追加しました。";
-"SpeechWaitConfigSettingView_AppendFailed" = "読み上げ時の間の設定の追加に失敗しました。";
+"SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
+"SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
 "SpeechWaitConfigTableView_TargetText_EnterEnter" = "<改行><改行>";
 "SpeechWaitConfigTableView_DelayTimeInSec_Enabled" = "有効";
 "SpeechWaitConfigTableView_DelayTimeInSec_Disabled" = "無効";

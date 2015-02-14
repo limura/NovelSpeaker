@@ -75,12 +75,12 @@
     {
         [[GlobalDataSingleton GetInstance] saveContext];
         [self announceSpeechWaitConfig];
-        alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeechWaitConfigSettingView_AppendSuccess", @"読み上げ時の間の設定を追加しました。")
+        alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdated", @"読み上げ時の間の設定を追加しました。")
                                 message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
                                     [self.navigationController popViewControllerAnimated:YES];
                                 }];
     }else{
-        alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeechWaitConfigSettingView_AppendFailed", @"読み上げ時の間の設定の追加に失敗しました。")
+        alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdateFailed", @"読み上げ時の間の設定の追加に失敗しました。")
                                 message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
     }
     [self presentViewController:alert animated:true completion:nil];
