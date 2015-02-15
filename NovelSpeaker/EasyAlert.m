@@ -136,7 +136,7 @@
 {
     UIAlertController* alertController = [EasyAlert CreateAlertNoButton:title message:message];
     if (alertController != nil) {
-        [m_ParentViewController presentViewController:m_ParentViewController animated:false completion:nil];
+        [m_ParentViewController presentViewController:alertController animated:false completion:nil];
         return [[EasyAlertActionHolder alloc] initWithData:nil SecondAction:nil AlertView:nil AlertController:alertController];
     }
     UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:nil otherButtonTitles:nil];
@@ -152,7 +152,7 @@
 {
     UIAlertController* alertController = [EasyAlert CreateAlertOneButton:title message:message okButtonText:okButtonText okActionHandler:okActionHandler];
     if (alertController != nil) {
-        [m_ParentViewController presentViewController:m_ParentViewController animated:false completion:nil];
+        [m_ParentViewController presentViewController:alertController animated:false completion:nil];
         return true;
     }
     UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:nil otherButtonTitles:okButtonText, nil];
@@ -176,7 +176,7 @@
 {
     UIAlertController* alertController = [EasyAlert CreateAlertTwoButton:title message:message firstButtonText:firstButtonText firstActionHandler:firstActionHandler secondButtonText:secondButtonText secondActionHandler:secondActionHandler];
     if (alertController != nil) {
-        [m_ParentViewController presentViewController:m_ParentViewController animated:false completion:nil];
+        [m_ParentViewController presentViewController:alertController animated:false completion:nil];
         return true;
     }
     UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:nil otherButtonTitles:firstButtonText, secondButtonText, nil];
