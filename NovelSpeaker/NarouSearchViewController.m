@@ -58,24 +58,13 @@
 
 // 検索ボタンがクリックされた
 - (IBAction)SearchButtonClicked:(id)sender {
-#if true
     EasyAlertActionHolder* holder = [m_EasyAlert ShowAlert:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching")
                    message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching")];
-#else
-    UIAlertController* alertView = [EasyAlert CreateAlertNoButton:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching") message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching")];
-    // ここで animated を TRUE にしてしまうと、アニメーションしている間に dissmissViewControllerAnimated を発行してしまうと効かないので
-    // 検索がすげー時間かからないと駄目になっちゃうので FALSE にします。
-    [self presentViewController:alertView animated:FALSE completion:nil];
-#endif
     dispatch_async(m_SearchQueue, ^{
         NSArray* searchResult = [NarouLoader Search:self.SearchTextBox.text wname:self.WriterSwitch.on title:self.TitleSwitch.on keyword:self.KeywordSwitch.on ex:self.ExSwitch.on];
         m_SearchResult = searchResult;
         dispatch_async(m_MainQueue, ^{
-#if true
             [holder CloseAlert:false];
-#else
-            [alertView dismissViewControllerAnimated:FALSE completion:nil];
-#endif
             NSLog(@"search end. count: %lu", (unsigned long)[m_SearchResult count]);
             [self performSegueWithIdentifier:@"searchResultPushSegue" sender:self];
         });

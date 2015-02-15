@@ -162,26 +162,11 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
     if(settingResult != false)
     {
         NSString* title = [[NSString alloc] initWithFormat: NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdated", @"読み上げ設定を%@に更新しました。"), newSetting];
-#if true
         [m_EasyAlert ShowAlertOneButton:title message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
             [self.navigationController popViewControllerAnimated:YES];
         }];
-#else
-        UIAlertController* alert = nil;
-        alert = [EasyAlert CreateAlertOneButton:title message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
-                                            [self.navigationController popViewControllerAnimated:YES];
-                                        }];
-        [self presentViewController:alert animated:true completion:nil];
-#endif
     }else{
-#if true
         [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed", @"読み上げ設定の変更に失敗しました。") message:nil];
-#else
-        UIAlertController* alert = nil;
-        alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed", @"読み上げ設定の変更に失敗しました。")
-                                        message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
-        [self presentViewController:alert animated:true completion:nil];
-#endif
     }
     return settingResult;
 }

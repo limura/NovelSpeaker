@@ -43,12 +43,7 @@
 
 - (void)showAlertView:(NSString*)message
 {
-#if true
     [m_EasyAlert ShowAlertOKButton:message message:nil];
-#else
-    UIAlertController* alert = [EasyAlert CreateAlertOneButton:message message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
-    [self presentViewController:alert animated:TRUE completion:nil];
-#endif
 }
 
 - (IBAction)testSpeechButtonClicked:(id)sender {

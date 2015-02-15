@@ -59,12 +59,7 @@
 
 - (IBAction)commitButtonClicked:(id)sender {
     if ([self.inputTextField.text length] <= 0) {
-#if true
         [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SpeechWaitConfigSettingView_PleaseInputText", @"文字列を入力してください。") message:nil];
-#else
-        UIAlertController* errorDialog = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeechWaitConfigSettingView_PleaseInputText", @"文字列を入力してください。") message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
-        [self presentViewController:errorDialog animated:true completion:nil];
-#endif
         return;
     }
     
@@ -79,29 +74,13 @@
     {
         [[GlobalDataSingleton GetInstance] saveContext];
         [self announceSpeechWaitConfig];
-#if true
         [m_EasyAlert ShowAlertOneButton:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdated", @"読み上げ時の間の設定を追加しました。")
                                 message:nil okButtonText:NSLocalizedString(@"OK_button", nil)
                         okActionHandler:^(UIAlertAction* action){
                             [self.navigationController popViewControllerAnimated:YES];
                         }];
-#else
-        UIAlertController* alert = nil;
-        alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdated", @"読み上げ時の間の設定を追加しました。")
-                                message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
-                                    [self.navigationController popViewControllerAnimated:YES];
-                                }];
-        [self presentViewController:alert animated:true completion:nil];
-#endif
     }else{
-#if true
         [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdateFailed", @"読み上げ時の間の設定の追加に失敗しました。") message:nil];
-#else
-        UIAlertController* alert = nil;
-        alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdateFailed", @"読み上げ時の間の設定の追加に失敗しました。")
-                                message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
-        [self presentViewController:alert animated:true completion:nil];
-#endif
     }
 }
 @end
