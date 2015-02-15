@@ -40,7 +40,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VU5-Wx-PIG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-22" y="1618"/>
+            <point key="canvasLocation" x="-514" y="1618"/>
         </scene>
         <!--文字の大きさ-->
         <scene sceneID="KxK-FQ-fPF">
@@ -97,7 +97,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="u55-Il-lHZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="450" y="1618"/>
+            <point key="canvasLocation" x="-22" y="1618"/>
         </scene>
         <!--声質の設定-->
         <scene sceneID="AH2-bb-f0h">
@@ -485,7 +485,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ejC-0w-H3j" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-22" y="925"/>
+            <point key="canvasLocation" x="-514" y="925"/>
         </scene>
         <!--設定-->
         <scene sceneID="JFC-RS-oaw">
@@ -997,7 +997,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1Ae-cX-Tqs" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-514" y="925"/>
+            <point key="canvasLocation" x="-1352" y="925"/>
         </scene>
         <!--なろう検索-->
         <scene sceneID="fIy-nG-msd">
@@ -1098,11 +1098,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <action selector="ChapterSliderChanged:" destination="vXZ-lx-hvc" eventType="valueChanged" id="oWD-X6-6fE"/>
                                 </connections>
                             </slider>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rSc-eb-8Bm">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rSc-eb-8Bm">
                                 <rect key="frame" x="0.0" y="482" width="43" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="43" id="gaw-7O-0xT"/>
                                 </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <state key="normal" title="&lt;">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -1110,11 +1111,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <action selector="PrevChapterButtonClicked:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="W3B-kT-7x1"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fp5-Fr-Wdn">
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fp5-Fr-Wdn">
                                 <rect key="frame" x="277" y="482" width="43" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="43" id="PJH-GY-nL2"/>
                                 </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <state key="normal" title="&gt;">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -1164,7 +1166,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
+        <segue reference="0zP-nv-fmY"/>
         <segue reference="vyW-HX-PLM"/>
-        <segue reference="Sih-ID-qj2"/>
     </inferredMetricsTieBreakers>
 </document>
