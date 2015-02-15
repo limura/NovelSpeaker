@@ -24,6 +24,7 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     }
     return self;
 }
@@ -35,6 +36,7 @@
     m_SearchResult = nil;
     m_MainQueue = dispatch_get_main_queue();
     m_SearchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.search", NULL);
+    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
 
     // ダウンロードボタンを右上に配置します
     UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DownloadButton", @"download") style:UIBarButtonItemStylePlain target:self action:@selector(downloadButtonClicked)];
@@ -140,29 +142,47 @@
     NSString* errString = [[GlobalDataSingleton GetInstance] AddDownloadQueueForNarou:self.NarouContentDetail];
     if (errString != nil) {
         NSString* msg = [[NSString alloc] initWithString:errString];
+#if true
+        [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue", @"ダウンロードキューへの追加に失敗") message:msg];
+#else
         UIAlertController* alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue", @"ダウンロードキューへの追加に失敗") message:msg okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
         [self presentViewController:alert animated:true completion:nil];
+#endif
         return;
     }
     
     NSString* msg = [[NSString alloc] initWithFormat:NSLocalizedString(@"NarouSearchResultDetailViewController_AddSuccess_Title", @"作品名: %@"), self.NarouContentDetail.title];
+#if true
+    [m_EasyAlert ShowAlertOneButton:NSLocalizedString(@"NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue", @"ダウンロードキューに追加されました") message:msg okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
+        [self.navigationController popViewControllerAnimated:YES];
+    }];
+#else
     UIAlertController* alert = [EasyAlert CreateAlertOneButton:NSLocalizedString(@"NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue", @"ダウンロードキューに追加されました")
                                                        message:msg okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
                                                            [self.navigationController popViewControllerAnimated:YES];
                                                        }];
     [self presentViewController:alert animated:true completion:nil];
+#endif
 }
 
 - (IBAction)WriterButtonClicked:(id)sender {
+#if true
+    EasyAlertActionHolder* holder = [m_EasyAlert ShowAlert:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching") message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching")];
+#else
     UIAlertController* alertView = [EasyAlert CreateAlertNoButton:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching") message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching")];
     // ここで animated を TRUE にしてしまうと、アニメーションしている間に dissmissViewControllerAnimated を発行してしまうと効かないので
     // 検索がすげー時間かからないと駄目になっちゃうので FALSE にします。
     [self presentViewController:alertView animated:FALSE completion:nil];
+#endif
     dispatch_async(m_SearchQueue, ^{
         NSArray* searchResult = [NarouLoader SearchUserID: self.NarouContentDetail.userid];
         m_SearchResult = searchResult;
         dispatch_async(m_MainQueue, ^{
+#if true
+            [holder CloseAlert:false];
+#else
             [alertView dismissViewControllerAnimated:FALSE completion:nil];
+#endif
             NSLog(@"search end. count: %lu", (unsigned long)[m_SearchResult count]);
             [self performSegueWithIdentifier:@"searchUserIDResultPushSegue" sender:self];
         });

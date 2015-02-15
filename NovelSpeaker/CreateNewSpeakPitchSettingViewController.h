@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "EasyAlert.h"
 
 @protocol CreateNewSpeakPitchSettingDelegate <NSObject>
 
@@ -17,6 +18,7 @@
 @interface CreateNewSpeakPitchSettingViewController : UIViewController
 {
     BOOL m_isNeedBack;
+    EasyAlert* m_EasyAlert;
 }
 
 @property (weak, nonatomic) IBOutlet UITextField *titleTextField;

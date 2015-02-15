@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "NarouContentCacheData.h"
+#import "EasyAlert.h"
 
 @interface NarouSearchResultDetailViewController : UIViewController
 {
@@ -19,6 +20,8 @@
     
     dispatch_queue_t m_MainQueue;
     dispatch_queue_t m_SearchQueue;
+
+    EasyAlert* m_EasyAlert;
 }
 // 前のページから得られる表示するための情報
 @property NarouContentCacheData* NarouContentDetail;

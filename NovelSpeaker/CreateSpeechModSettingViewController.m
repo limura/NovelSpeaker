@@ -21,6 +21,7 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     }
     return self;
 }
@@ -31,6 +32,7 @@
     // Do any additional setup after loading the view.
     
     m_Speaker = [Speaker new];
+    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
 }
 
 - (void)didReceiveMemoryWarning
@@ -41,8 +43,12 @@
 
 - (void)showAlertView:(NSString*)message
 {
+#if true
+    [m_EasyAlert ShowAlertOKButton:message message:nil];
+#else
     UIAlertController* alert = [EasyAlert CreateAlertOneButton:message message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:nil];
     [self presentViewController:alert animated:TRUE completion:nil];
+#endif
 }
 
 - (IBAction)testSpeechButtonClicked:(id)sender {

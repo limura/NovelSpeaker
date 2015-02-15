@@ -13,7 +13,6 @@
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
 #import "NarouSearchResultDetailViewController.h"
-#import "EasyAlert.h"
 
 @interface SpeechViewController ()
 
@@ -343,17 +342,21 @@
     
     UIActivityViewController *viewController = [[UIActivityViewController alloc] initWithActivityItems:@[message]
                                                                                  applicationActivities:nil];
-    
-    [viewController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
-        if (activityError) {
-            NSLog(@"%@", activityError);
-            return;
-        }
-    }];
-    
-    //viewController.popoverPresentationController.sourceView = self.view;
-    viewController.popoverPresentationController.barButtonItem = shareButton;
-    //viewController.popoverPresentationController.sourceRect = CGRectMake(100.0, 100.0, 20.0, 20.0);;
+
+    // iOS8 からのもの。
+    float iOSVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
+    if (iOSVersion >= 8.0) {
+        [viewController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+            if (activityError) {
+                NSLog(@"%@", activityError);
+                return;
+            }
+        }];
+
+        //viewController.popoverPresentationController.sourceView = self.view;
+        viewController.popoverPresentationController.barButtonItem = shareButton;
+        //viewController.popoverPresentationController.sourceRect = CGRectMake(100.0, 100.0, 20.0, 20.0);;
+    }
     
     [self presentViewController:viewController
                        animated:YES

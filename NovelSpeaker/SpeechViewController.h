@@ -11,7 +11,6 @@
 #import "Speaker.h"
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
-#import "Speaker.h"
 
 @interface SpeechViewController : UIViewController<SpeakRangeDelegate, UITextViewDelegate>
 {

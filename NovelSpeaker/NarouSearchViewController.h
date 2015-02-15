@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "EasyAlert.h"
 
 @interface NarouSearchViewController : UIViewController<UITextFieldDelegate>
 {
@@ -14,6 +15,8 @@
     
     dispatch_queue_t m_MainQueue;
     dispatch_queue_t m_SearchQueue;
+    
+    EasyAlert* m_EasyAlert;
 }
 @property (weak, nonatomic) IBOutlet UITextField *SearchTextBox;
 @property (weak, nonatomic) IBOutlet UISwitch *WriterSwitch;
