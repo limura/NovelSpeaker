@@ -34,6 +34,13 @@ NovelSpeaker: "Let's become a novelist" reading aloud application
 「読みの修正」から「異世界」を「ことせかい」と読み上げさせないための設定ができます。 
 ただ、「読みの修正」に大量に修正項目を設定すると読み上げ開始時に結構かなりいっぱい待たされるようになります。すみません。
 
+高度な使い方：
+* URLスキームによる小説のダウンロード
+URLスキーム novelspeaker://downloadncode/ncode-ncode-ncode... という形式で ncode を指定することで、対象の小説をダウンロードキューに追加する事ができるようになります。ncode とは、小説家になろうでの個々の小説のIDで、小説のページのURL(例えば http://ncode.syosetu.com/n0537ci/)の最後の部分(この例の場合は n0537ci)です。URLスキームでは ncode-ncode-ncode... と、複数の ncode を - (ハイフン) を使って繋げて記述できます。パソコン等で読んでいる小説を ことせかい でも読もうと思った時にこのURLスキームを送信することでダウンロードを楽にできるようになる…… かもしれません。(単に検索してもいいような気がしますが)
+
+* 読み上げ時の間の設定での非推奨型について
+設定ページの「読み上げ時の間の設定」では、読み上げをする時の間の設定を変えることができます。この「間」の取り方には標準の手法と非推奨の手法の二種類が選べます。非推奨型を選んだ場合、標準型よりも短い「間」を実現できますが、Siriさんに「_。_。_。」を読み上げてもらって「間」を実現しているので、将来的にSiriさんの読み上げ方式が変わることで「間」がなくなったり意図しない読み上げになったりする可能性があります。この場合は標準型に戻して使用してください。
+
 * 英語
 NovelSpeaker is application to read the shown novel which is "Let's become a novelist" aloud.
 "listen" hears a novel when I do walking time and housework.

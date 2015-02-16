@@ -10,7 +10,7 @@
 #import "GlobalDataSingleton.h"
 #import "MaxSpeechTimeTableViewCell.h"
 
-#define USE_LOG_VIEW
+#undef USE_LOG_VIEW
 
 static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellDefault";
 
