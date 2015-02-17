@@ -409,9 +409,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oMz-PI-mqu">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                                 <subviews>
-                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zZI-up-85G">
-                                        <rect key="frame" x="263" y="154" width="51" height="31"/>
-                                    </switch>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Mte-mX-gvu">
                                         <rect key="frame" x="8" y="111" width="304" height="30"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -423,14 +420,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="間を入れるかどうか" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QVn-gx-50q">
-                                        <rect key="frame" x="8" y="159" width="247" height="21"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="間の時間" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QVn-gx-50q">
+                                        <rect key="frame" x="8" y="159" width="304" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Jyx-Pf-xD6">
-                                        <rect key="frame" x="98" y="209" width="124" height="30"/>
+                                        <rect key="frame" x="98" y="229" width="124" height="30"/>
                                         <state key="normal" title="設定する">
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
@@ -438,22 +435,33 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                             <action selector="commitButtonClicked:" destination="C7M-ZK-1Ak" eventType="touchUpInside" id="3sP-Zz-ZDP"/>
                                         </connections>
                                     </button>
+                                    <slider opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="3" translatesAutoresizingMaskIntoConstraints="NO" id="sjr-ko-BAa">
+                                        <rect key="frame" x="6" y="188" width="308" height="31"/>
+                                    </slider>
+                                    <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WGV-EQ-lgB">
+                                        <rect key="frame" x="0.0" y="67" width="320" height="2"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    </view>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="zZI-up-85G" firstAttribute="top" secondItem="Mte-mX-gvu" secondAttribute="bottom" constant="13" id="ImB-V8-PO9"/>
-                                    <constraint firstItem="zZI-up-85G" firstAttribute="leading" secondItem="QVn-gx-50q" secondAttribute="trailing" constant="8" id="MyL-Em-fEo"/>
-                                    <constraint firstAttribute="trailing" secondItem="zZI-up-85G" secondAttribute="trailing" constant="8" id="Oh9-4c-plX"/>
-                                    <constraint firstItem="Jyx-Pf-xD6" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="98" id="Par-LN-OqJ"/>
-                                    <constraint firstItem="QVn-gx-50q" firstAttribute="top" secondItem="Mte-mX-gvu" secondAttribute="bottom" constant="18" id="VPB-MA-pZq"/>
-                                    <constraint firstItem="QVn-gx-50q" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="Wwl-ro-pf1"/>
-                                    <constraint firstItem="Mte-mX-gvu" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="f5T-zt-lGe"/>
-                                    <constraint firstAttribute="trailing" secondItem="Mte-mX-gvu" secondAttribute="trailing" constant="8" id="ghn-JY-nBP"/>
-                                    <constraint firstItem="Jyx-Pf-xD6" firstAttribute="top" secondItem="QVn-gx-50q" secondAttribute="bottom" constant="29" id="iEK-GV-f4o"/>
-                                    <constraint firstItem="mEm-Ii-Fpd" firstAttribute="top" secondItem="oMz-PI-mqu" secondAttribute="top" constant="82" id="oGz-uK-hCW"/>
-                                    <constraint firstItem="mEm-Ii-Fpd" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="pg6-Qx-Gpu"/>
-                                    <constraint firstItem="Mte-mX-gvu" firstAttribute="top" secondItem="mEm-Ii-Fpd" secondAttribute="bottom" constant="8" id="rEA-Qr-JRy"/>
-                                    <constraint firstAttribute="trailing" secondItem="mEm-Ii-Fpd" secondAttribute="trailing" constant="8" id="t2y-iv-jHK"/>
-                                    <constraint firstAttribute="trailing" secondItem="Jyx-Pf-xD6" secondAttribute="trailing" constant="98" id="zXu-er-0R9"/>
+                                    <constraint firstItem="QVn-gx-50q" firstAttribute="top" secondItem="Mte-mX-gvu" secondAttribute="bottom" constant="18" id="0uO-gP-SSy"/>
+                                    <constraint firstItem="WGV-EQ-lgB" firstAttribute="top" secondItem="oMz-PI-mqu" secondAttribute="top" constant="67" id="7O5-Pp-1aR"/>
+                                    <constraint firstAttribute="bottom" secondItem="Jyx-Pf-xD6" secondAttribute="bottom" constant="309" id="Bfb-LO-8FR"/>
+                                    <constraint firstAttribute="trailing" secondItem="mEm-Ii-Fpd" secondAttribute="trailing" constant="8" id="G3t-re-xbb"/>
+                                    <constraint firstItem="WGV-EQ-lgB" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" id="JU1-90-VqY"/>
+                                    <constraint firstAttribute="trailing" secondItem="sjr-ko-BAa" secondAttribute="trailing" constant="8" id="M3Y-h1-Tbg"/>
+                                    <constraint firstItem="sjr-ko-BAa" firstAttribute="top" secondItem="QVn-gx-50q" secondAttribute="bottom" constant="8" id="PlW-8X-vdL"/>
+                                    <constraint firstAttribute="trailing" secondItem="Jyx-Pf-xD6" secondAttribute="trailing" constant="98" id="QNj-v4-bZJ"/>
+                                    <constraint firstItem="mEm-Ii-Fpd" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="QSf-fF-aCc"/>
+                                    <constraint firstItem="QVn-gx-50q" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="bVs-hH-tvv"/>
+                                    <constraint firstItem="Mte-mX-gvu" firstAttribute="top" secondItem="mEm-Ii-Fpd" secondAttribute="bottom" constant="8" id="fEI-AQ-P4E"/>
+                                    <constraint firstAttribute="trailing" secondItem="QVn-gx-50q" secondAttribute="trailing" constant="8" id="hw6-x0-iVW"/>
+                                    <constraint firstItem="Mte-mX-gvu" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="nER-0t-pEw"/>
+                                    <constraint firstItem="Jyx-Pf-xD6" firstAttribute="top" secondItem="sjr-ko-BAa" secondAttribute="bottom" constant="11" id="qSE-ON-u8i"/>
+                                    <constraint firstItem="Jyx-Pf-xD6" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="98" id="qvD-J1-ye7"/>
+                                    <constraint firstAttribute="trailing" secondItem="WGV-EQ-lgB" secondAttribute="trailing" id="w7z-d6-9vP"/>
+                                    <constraint firstItem="sjr-ko-BAa" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="wkQ-pq-vP4"/>
+                                    <constraint firstAttribute="trailing" secondItem="Mte-mX-gvu" secondAttribute="trailing" constant="8" id="z30-tM-N1F"/>
                                 </constraints>
                             </scrollView>
                         </subviews>
@@ -463,7 +471,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                     <connections>
                         <outlet property="commitButton" destination="Jyx-Pf-xD6" id="gOB-MS-c9W"/>
                         <outlet property="inputTextField" destination="Mte-mX-gvu" id="nZ2-ap-QMq"/>
-                        <outlet property="onOffSwitch" destination="zZI-up-85G" id="hb7-aW-vgW"/>
+                        <outlet property="waitTimeSlider" destination="sjr-ko-BAa" id="YI2-fc-1I7"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PhH-X1-Ua4" userLabel="First Responder" sceneMemberID="firstResponder"/>

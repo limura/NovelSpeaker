@@ -423,6 +423,7 @@
 		21E294E91970E2D00012A3AA /* DataModel */ = {
 			isa = PBXGroup;
 			children = (
+				21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */,
 				21724EE119721D3600DF6DC4 /* MappingModel */,
 				212F359A1A8F8857009D0E60 /* GlobalState.h */,
 				212F359B1A8F8857009D0E60 /* GlobalState.m */,
@@ -448,7 +449,6 @@
 				213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */,
 				213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */,
 				213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */,
-				21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */,
 			);
 			name = DataModel;
 			sourceTree = "<group>";

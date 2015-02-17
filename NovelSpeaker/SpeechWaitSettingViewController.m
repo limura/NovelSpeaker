@@ -22,12 +22,18 @@
     
     if(self.speechWaitConfigCacheData != nil)
     {
-        self.inputTextField.text = self.speechWaitConfigCacheData.targetText;
-        if (self.speechWaitConfigCacheData.delayTimeInSec != nil
-            && [self.speechWaitConfigCacheData.delayTimeInSec floatValue] > 0.0f) {
-            self.onOffSwitch.on = YES;
+        if ([self.speechWaitConfigCacheData.targetText compare:@"\r\n\r\n"] == NSOrderedSame)
+        {
+            // 改行については表示を変えて編集不可にします
+            self.inputTextField.text = NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_EnterEnter", @"<改行><改行>");;
+            self.inputTextField.enabled = false;
         }else{
-            self.onOffSwitch.on = NO;
+            self.inputTextField.text = self.speechWaitConfigCacheData.targetText;
+        }
+        if (self.speechWaitConfigCacheData.delayTimeInSec != nil) {
+            self.waitTimeSlider.value = [self.speechWaitConfigCacheData.delayTimeInSec floatValue];
+        }else{
+            self.waitTimeSlider.value = 0.0f;
         }
     }
 }
@@ -64,12 +70,13 @@
     }
     
     SpeechWaitConfigCacheData* waitConfig = [SpeechWaitConfigCacheData new];
-    waitConfig.targetText = self.inputTextField.text;
-    if (self.onOffSwitch.on) {
-        waitConfig.delayTimeInSec = [[NSNumber alloc] initWithFloat:0.5f];
+    if ([self.inputTextField.text compare:NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_EnterEnter", @"<改行><改行>")] == NSOrderedSame)
+    {
+        waitConfig.targetText = @"\r\n\r\n";
     }else{
-        waitConfig.delayTimeInSec = [[NSNumber alloc] initWithFloat:0.0f];
+        waitConfig.targetText = self.inputTextField.text;
     }
+    waitConfig.delayTimeInSec = [[NSNumber alloc] initWithFloat:self.waitTimeSlider.value];
     if([[GlobalDataSingleton GetInstance] AddSpeechWaitSetting:waitConfig] != false)
     {
         [[GlobalDataSingleton GetInstance] saveContext];

@@ -875,6 +875,13 @@ static GlobalDataSingleton* _singleton = nil;
 
 - (void)InsertDefaultSpeechWaitConfig
 {
+    {
+        // 改行2つは 0.5秒待たせます
+        SpeechWaitConfigCacheData* waitConfig = [SpeechWaitConfigCacheData new];
+        waitConfig.targetText = @"\r\n\r\n";
+        waitConfig.delayTimeInSec = [[NSNumber alloc] initWithFloat:0.5f];
+        [[GlobalDataSingleton GetInstance] AddSpeechWaitSetting:waitConfig];
+    }
     NSArray* defaultSpeechWaitTargets = [[NSArray alloc] initWithObjects:
                                          @"……"
                                          , @"、"
@@ -922,7 +929,7 @@ static GlobalDataSingleton* _singleton = nil;
     }
 
     // delay については \r\n\r\n 以外を読み込むことにします
-    [m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02];
+    //[m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02];
     {
         NSArray* speechWaitConfigList = [self GetAllSpeechWaitConfig];
         if (speechWaitConfigList != nil) {
@@ -930,7 +937,11 @@ static GlobalDataSingleton* _singleton = nil;
                 float delay = [speechWaitConfigCache.delayTimeInSec floatValue];
                 if (delay > 0.0f && [speechWaitConfigCache.targetText compare:@"\r\n\r\n"] != NSOrderedSame) {
                     if (globalState.speechWaitSettingUseExperimentalWait) {
-                        [m_NiftySpeaker AddSpeechModText:speechWaitConfigCache.targetText to:@"_。_。_。"];
+                        NSMutableString* waitString = [[NSMutableString alloc] initWithString:@"_。"];
+                        for (float x = 0.0f; x < delay; x += 0.1f) {
+                            [waitString appendString:@"_。"];
+                        }
+                        [m_NiftySpeaker AddSpeechModText:speechWaitConfigCache.targetText to:waitString];
                     }else{
                         [m_NiftySpeaker AddDelayBlockSeparator:speechWaitConfigCache.targetText delay:delay];
                     }
