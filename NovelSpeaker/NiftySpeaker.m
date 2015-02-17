@@ -263,8 +263,6 @@ typedef enum {
         }
     }
     
-    NSMutableArray* configStack = [NSMutableArray new];
-    [configStack addObject:m_DefaultSpeechConfig];
     NSArray* locationArray = [speechSettingMap allKeys];
     locationArray = [locationArray sortedArrayUsingComparator:^NSComparisonResult(NSNumber* a, NSNumber* b){
         return [a compare:b];
@@ -286,65 +284,72 @@ typedef enum {
               , str);
     }
 #endif
-    
+
+    NSMutableArray* configStack = [NSMutableArray new];
+    [configStack addObject:m_DefaultSpeechConfig];
+
     unsigned long p = 0;
     NSMutableArray* speechBlockArray = [NSMutableArray new];
+    NSTimeInterval delayTime = 0.0f;
     for (NSNumber* key in locationArray) {
         SpeechSetting* setting = [speechSettingMap objectForKey:key];
         if (setting == nil) {
             continue;
         }
-        if (p >= [key unsignedLongValue]) {
-            continue;
-        }
         //NSLog(@"setting[%lu]: delay: %.2f, pitch: %.2f, rate: %.2f", [key unsignedLongValue], setting.config.beforeDelay, setting.config.pitch, setting.config.rate);
         
         SpeechConfig* currentConfig = [configStack lastObject];
+        currentConfig.beforeDelay = delayTime;
         SpeechConfig* nextConfig = [SpeechConfig new];
         nextConfig.beforeDelay = 0.0f;
         nextConfig.pitch = currentConfig.pitch;
         nextConfig.rate = currentConfig.rate;
-        BOOL bNeedPushNextConfig = false;
+        
+        delayTime = 0.0f;
         if (setting.type & SPEECH_SETTING_TYPE_DELAY) {
-            nextConfig.beforeDelay = setting.config.beforeDelay;
-            bNeedPushNextConfig = true;
+            delayTime = setting.config.beforeDelay;
         }
         if (setting.type & SPEECH_SETTING_TYPE_TONE_CHANGE_IN) {
             nextConfig.pitch = setting.config.pitch;
             nextConfig.rate = setting.config.rate;
-            bNeedPushNextConfig = true;
-        }else if(setting.type & SPEECH_SETTING_TYPE_TONE_CHANGE_OUT){
+            [configStack addObject:nextConfig];
+        }
+        if (setting.type & SPEECH_SETTING_TYPE_TONE_CHANGE_OUT) {
             if ([configStack count] > 1) {
                 [configStack removeLastObject];
             }
-            SpeechConfig* popConfig = [configStack lastObject];
-            // TONE_CHANGE_OUT の時は delay の設定は消します。
-            // TODO: だいたいはこれでOKだと思いますが、多分これよくないパターンがあるはず……
-            popConfig.beforeDelay = 0.0f;
         }
-        if (bNeedPushNextConfig) {
-            [configStack addObject:nextConfig];
+        if (p >= [key unsignedLongValue]) {
+            // 同じ場所に指示があった。(いきなり頭に "「" があったとか
+            // つまり読み上げるべきものは何も無いので SpeechBlock は作らなくて良い
+            continue;
         }
         NSRange textRange = NSMakeRange(p, [key unsignedLongValue] - p);
         NSString* targetString = [text substringWithRange:textRange];
-#if 0
-        SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString speechModDictionary:m_SpeechModDictionary config:currentConfig];
-#else
+        if (currentConfig.beforeDelay > 0.0f) {
+            SpeechConfig* tmpConfig = [SpeechConfig new];
+            tmpConfig.rate = currentConfig.rate;
+            tmpConfig.pitch = currentConfig.pitch;
+            tmpConfig.beforeDelay = currentConfig.beforeDelay;
+            currentConfig = tmpConfig;
+        }
         SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString config:currentConfig];
-#endif
         //NSLog(@"block(%p): delay: %.2f, pitch: %.2f, rate: %.2f %@ → %@", block, block.speechConfig.beforeDelay, block.speechConfig.pitch, block.speechConfig.rate, targetString, [block GetSpeechText]);
         [speechBlockArray addObject:block];
         p = [key unsignedIntegerValue];
     }
     if (p < [text length]) {
         SpeechConfig* config = [configStack lastObject];
+        if (delayTime > 0.0f) {
+            SpeechConfig* tmpConfig = [SpeechConfig new];
+            tmpConfig.rate = config.rate;
+            tmpConfig.pitch = config.pitch;
+            tmpConfig.beforeDelay = delayTime;
+            config = tmpConfig;
+        }
         NSRange textRange = NSMakeRange(p, [text length] - p);
         NSString* targetString = [text substringWithRange:textRange];
-#if 0
-        SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString speechModDictionary:m_SpeechModDictionary config:config];
-#else
         SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString config:config];
-#endif
         //NSLog(@"block(%p): delay: %.2f, pitch: %.2f, rate: %.2f %@ → %@", block, block.speechConfig.beforeDelay, block.speechConfig.pitch, block.speechConfig.rate, targetString, [block GetSpeechText]);
         [speechBlockArray addObject:block];
     }
