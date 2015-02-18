@@ -29,8 +29,9 @@
         if (barButton != nil) {
             activityViewController.popoverPresentationController.barButtonItem = barButton;
         }else{
-            viewController.popoverPresentationController.sourceView = viewController.view;
-            viewController.popoverPresentationController.sourceRect = viewController.view.bounds;
+            CGRect frame = [[UIScreen mainScreen] applicationFrame];
+            activityViewController.popoverPresentationController.sourceView = viewController.view;
+            activityViewController.popoverPresentationController.sourceRect = CGRectMake(CGRectGetMidX(frame)-60,frame.size.height-50, 120,50);;
         }
     }
     
