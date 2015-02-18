@@ -131,7 +131,8 @@ static GlobalDataSingleton* _singleton = nil;
 
         // pitch か rate が変わってたら読み直し指示をします。
         if ([state.defaultPitch compare:globalState.defaultPitch] != NSOrderedSame
-            || [state.defaultRate compare:globalState.defaultRate] != NSOrderedSame) {
+            || [state.defaultRate compare:globalState.defaultRate] != NSOrderedSame
+            || [state.speechWaitSettingUseExperimentalWait boolValue] != [globalState.speechWaitSettingUseExperimentalWait boolValue]){
             m_isNeedReloadSpeakSetting = true;
         }
         state.defaultPitch = globalState.defaultPitch;
@@ -937,8 +938,8 @@ static GlobalDataSingleton* _singleton = nil;
         if (speechWaitConfigList != nil) {
             for (SpeechWaitConfigCacheData* speechWaitConfigCache in speechWaitConfigList) {
                 float delay = [speechWaitConfigCache.delayTimeInSec floatValue];
-                if (delay > 0.0f && [speechWaitConfigCache.targetText compare:@"\r\n\r\n"] != NSOrderedSame) {
-                    if (globalState.speechWaitSettingUseExperimentalWait) {
+                if (delay > 0.0f) {
+                    if ([globalState.speechWaitSettingUseExperimentalWait boolValue]) {
                         NSMutableString* waitString = [[NSMutableString alloc] initWithString:@"_。"];
                         for (float x = 0.0f; x < delay; x += 0.1f) {
                             [waitString appendString:@"_。"];
@@ -951,9 +952,6 @@ static GlobalDataSingleton* _singleton = nil;
             }
         }
     }
-    //[m_NiftySpeaker AddDelayBlockSeparator:@"…" delay:0.0005];
-    //[m_NiftySpeaker AddDelayBlockSeparator:@"、" delay:0.0002];
-    //[m_NiftySpeaker AddDelayBlockSeparator:@"。" delay:0.0005];
     
     NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
     if (speechModConfigArray != nil) {

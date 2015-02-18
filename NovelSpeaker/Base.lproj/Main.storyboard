@@ -406,66 +406,54 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oMz-PI-mqu">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                                <subviews>
-                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Mte-mX-gvu">
-                                        <rect key="frame" x="8" y="111" width="304" height="30"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <textInputTraits key="textInputTraits"/>
-                                    </textField>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="対象文字列" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mEm-Ii-Fpd">
-                                        <rect key="frame" x="8" y="82" width="304" height="21"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="間の時間" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QVn-gx-50q">
-                                        <rect key="frame" x="8" y="159" width="304" height="21"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Jyx-Pf-xD6">
-                                        <rect key="frame" x="98" y="229" width="124" height="30"/>
-                                        <state key="normal" title="設定する">
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                        </state>
-                                        <connections>
-                                            <action selector="commitButtonClicked:" destination="C7M-ZK-1Ak" eventType="touchUpInside" id="3sP-Zz-ZDP"/>
-                                        </connections>
-                                    </button>
-                                    <slider opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="3" translatesAutoresizingMaskIntoConstraints="NO" id="sjr-ko-BAa">
-                                        <rect key="frame" x="6" y="188" width="308" height="31"/>
-                                    </slider>
-                                    <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WGV-EQ-lgB">
-                                        <rect key="frame" x="0.0" y="67" width="320" height="2"/>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    </view>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstItem="QVn-gx-50q" firstAttribute="top" secondItem="Mte-mX-gvu" secondAttribute="bottom" constant="18" id="0uO-gP-SSy"/>
-                                    <constraint firstItem="WGV-EQ-lgB" firstAttribute="top" secondItem="oMz-PI-mqu" secondAttribute="top" constant="67" id="7O5-Pp-1aR"/>
-                                    <constraint firstAttribute="bottom" secondItem="Jyx-Pf-xD6" secondAttribute="bottom" constant="309" id="Bfb-LO-8FR"/>
-                                    <constraint firstAttribute="trailing" secondItem="mEm-Ii-Fpd" secondAttribute="trailing" constant="8" id="G3t-re-xbb"/>
-                                    <constraint firstItem="WGV-EQ-lgB" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" id="JU1-90-VqY"/>
-                                    <constraint firstAttribute="trailing" secondItem="sjr-ko-BAa" secondAttribute="trailing" constant="8" id="M3Y-h1-Tbg"/>
-                                    <constraint firstItem="sjr-ko-BAa" firstAttribute="top" secondItem="QVn-gx-50q" secondAttribute="bottom" constant="8" id="PlW-8X-vdL"/>
-                                    <constraint firstAttribute="trailing" secondItem="Jyx-Pf-xD6" secondAttribute="trailing" constant="98" id="QNj-v4-bZJ"/>
-                                    <constraint firstItem="mEm-Ii-Fpd" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="QSf-fF-aCc"/>
-                                    <constraint firstItem="QVn-gx-50q" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="bVs-hH-tvv"/>
-                                    <constraint firstItem="Mte-mX-gvu" firstAttribute="top" secondItem="mEm-Ii-Fpd" secondAttribute="bottom" constant="8" id="fEI-AQ-P4E"/>
-                                    <constraint firstAttribute="trailing" secondItem="QVn-gx-50q" secondAttribute="trailing" constant="8" id="hw6-x0-iVW"/>
-                                    <constraint firstItem="Mte-mX-gvu" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="nER-0t-pEw"/>
-                                    <constraint firstItem="Jyx-Pf-xD6" firstAttribute="top" secondItem="sjr-ko-BAa" secondAttribute="bottom" constant="11" id="qSE-ON-u8i"/>
-                                    <constraint firstItem="Jyx-Pf-xD6" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="98" id="qvD-J1-ye7"/>
-                                    <constraint firstAttribute="trailing" secondItem="WGV-EQ-lgB" secondAttribute="trailing" id="w7z-d6-9vP"/>
-                                    <constraint firstItem="sjr-ko-BAa" firstAttribute="leading" secondItem="oMz-PI-mqu" secondAttribute="leading" constant="8" id="wkQ-pq-vP4"/>
-                                    <constraint firstAttribute="trailing" secondItem="Mte-mX-gvu" secondAttribute="trailing" constant="8" id="z30-tM-N1F"/>
-                                </constraints>
-                            </scrollView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="対象文字列" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mEm-Ii-Fpd">
+                                <rect key="frame" x="8" y="72" width="304" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="間の時間" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QVn-gx-50q">
+                                <rect key="frame" x="8" y="139" width="304" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Jyx-Pf-xD6">
+                                <rect key="frame" x="98" y="240" width="124" height="30"/>
+                                <state key="normal" title="設定する">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="commitButtonClicked:" destination="C7M-ZK-1Ak" eventType="touchUpInside" id="3sP-Zz-ZDP"/>
+                                </connections>
+                            </button>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="3" translatesAutoresizingMaskIntoConstraints="NO" id="sjr-ko-BAa">
+                                <rect key="frame" x="6" y="168" width="308" height="31"/>
+                            </slider>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Mte-mX-gvu">
+                                <rect key="frame" x="8" y="101" width="304" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="sjr-ko-BAa" firstAttribute="top" secondItem="QVn-gx-50q" secondAttribute="bottom" constant="8" id="GWc-WW-IXT"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="mEm-Ii-Fpd" secondAttribute="trailing" constant="-8" id="HLt-sR-Hkc"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Mte-mX-gvu" secondAttribute="trailing" constant="-8" id="PMy-6e-A4T"/>
+                            <constraint firstItem="mEm-Ii-Fpd" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="RII-m7-cFr"/>
+                            <constraint firstItem="sjr-ko-BAa" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="Rlq-n5-qcn"/>
+                            <constraint firstItem="QVn-gx-50q" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="VE5-Ue-VTo"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="sjr-ko-BAa" secondAttribute="trailing" constant="-8" id="WcE-sV-4x7"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Jyx-Pf-xD6" secondAttribute="trailing" constant="82" id="b2O-ou-Wys"/>
+                            <constraint firstItem="Mte-mX-gvu" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="kGY-9Z-5Ld"/>
+                            <constraint firstItem="mEm-Ii-Fpd" firstAttribute="top" secondItem="4V8-Oh-ljF" secondAttribute="bottom" constant="8" id="kVe-wd-ha0"/>
+                            <constraint firstItem="QVn-gx-50q" firstAttribute="top" secondItem="Mte-mX-gvu" secondAttribute="bottom" constant="8" id="kxV-0Q-ebi"/>
+                            <constraint firstItem="Mte-mX-gvu" firstAttribute="top" secondItem="mEm-Ii-Fpd" secondAttribute="bottom" constant="8" id="lv1-Gd-dd2"/>
+                            <constraint firstItem="Jyx-Pf-xD6" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="82" id="oV5-On-QKb"/>
+                            <constraint firstItem="Jyx-Pf-xD6" firstAttribute="top" secondItem="sjr-ko-BAa" secondAttribute="bottom" constant="42" id="vp5-Ok-Omm"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="QVn-gx-50q" secondAttribute="trailing" constant="-8" id="yON-4e-Siz"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="読み上げ時の間の詳細設定" id="jA6-Pi-jzs"/>
                     <connections>

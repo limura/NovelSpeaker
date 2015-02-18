@@ -62,9 +62,9 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
     if (speechWaitConfigList == nil) {
-        return 0;
+        return 1;
     }
-    return [speechWaitConfigList count];
+    return [speechWaitConfigList count] + 1;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -73,7 +73,6 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:SpeechWaitSettingTableViewDefaultCellID];
     }
-#if 0
     if (indexPath.row == 0) {
         cell.textLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_SpeechWaitSettingType", @"読み上げの間の仕組み");
         GlobalStateCacheData* globalStateCache = [[GlobalDataSingleton GetInstance] GetGlobalState];
@@ -84,6 +83,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
         }
         return cell;
     }
+#if 0
     if (indexPath.row == 1) {
         cell.textLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_EnterEnter", @"<改行><改行>");
         cell.detailTextLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_Enabled", @"有効");
@@ -91,7 +91,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
     }
 #endif
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-    NSUInteger targetRow = indexPath.row - 0;
+    NSUInteger targetRow = indexPath.row - 1;
     NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
     if ([speechWaitConfigList count] <= targetRow) {
         cell.textLabel.text = @"-";
@@ -117,7 +117,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
     // CoreData 側に save されている数と表示されている数が違うと assertion failure で落ちるので封印します。
     NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
     for (NSUInteger i = 0; i < [speechWaitConfigList count]; i++) {
-        NSIndexPath* indexPath = [NSIndexPath indexPathForRow:i+0 inSection:0];
+        NSIndexPath* indexPath = [NSIndexPath indexPathForRow:i+1 inSection:0];
         UITableViewCell* cell = [self.tableView dequeueReusableCellWithIdentifier:SpeechWaitSettingTableViewDefaultCellID forIndexPath:indexPath];
         if (cell == nil) {
             continue;
@@ -140,11 +140,11 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 
 // Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
-    if ([speechWaitConfigList count] < (indexPath.row + 1)) {
+    if (indexPath.row == 0) {
         return NO;
     }
-    SpeechWaitConfigCacheData* speechWaitConfigCache = [speechWaitConfigList objectAtIndex:indexPath.row];
+    NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
+    SpeechWaitConfigCacheData* speechWaitConfigCache = [speechWaitConfigList objectAtIndex:indexPath.row - 1];
     if ([speechWaitConfigCache.targetText compare:@"\r\n\r\n"] == NSOrderedSame) {
         return NO;
     }
@@ -181,16 +181,16 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     switch (indexPath.row) {
-#if 0
         case 0:
             [self switchSpeechWaitSettingType];
             break;
+#if 0
         case 1:
             break;
 #endif
         default:
         {
-            unsigned int i = indexPath.row - 0;
+            unsigned int i = indexPath.row - 1;
             NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
             if (speechWaitConfigList == nil || [speechWaitConfigList count] <= i) {
                 return;
@@ -206,7 +206,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        NSUInteger i = indexPath.row - 0;
+        NSUInteger i = indexPath.row - 1;
         NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
         if(speechWaitConfigList == nil
            || [speechWaitConfigList count] <= i)

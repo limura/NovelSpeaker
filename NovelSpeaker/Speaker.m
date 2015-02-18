@@ -84,10 +84,10 @@
 - (BOOL) StopSpeech
 {
     BOOL result = true;
-    if ([m_Synthesizer isSpeaking]) {
+    //if ([m_Synthesizer isSpeaking]) {
         result = [m_Synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
-    }
-    return result;
+    //}
+    return true;
 }
 
 - (BOOL) PauseSpeech
