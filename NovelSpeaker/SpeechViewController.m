@@ -94,7 +94,7 @@
     [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
     [globalData AddSpeakRangeDelegate:self];
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
-    [self becomeFirstResponder];
+    [self.textView becomeFirstResponder];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
