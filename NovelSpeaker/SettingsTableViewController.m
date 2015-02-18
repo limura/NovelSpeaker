@@ -9,6 +9,7 @@
 #import "SettingsTableViewController.h"
 #import "GlobalDataSingleton.h"
 #import "MaxSpeechTimeTableViewCell.h"
+#import "EasyShare.h"
 
 #undef USE_LOG_VIEW
 
@@ -25,6 +26,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     self = [super initWithStyle:style];
     if (self) {
         // Custom initialization
+        m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     }
     return self;
 }
@@ -41,7 +43,8 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 
     UINib* maxSpeechTimeTableViewCellNib = [UINib nibWithNibName:MaxSpeechTimeTableViewCellID bundle:nil];
     [self.tableView registerNib:maxSpeechTimeTableViewCellNib forCellReuseIdentifier:MaxSpeechTimeTableViewCellID];
-
+    
+    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     
     // 読み上げ設定をloadします。
     [[GlobalDataSingleton GetInstance] ReloadSpeechSetting];
@@ -64,7 +67,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return 5
+    return 7
 #ifdef USE_LOG_VIEW
     + 1
 #endif
@@ -94,8 +97,14 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         case 3:
             cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_SettingOfTheSpeechDelay", @"読み上げ時の間の設定");
             break;
-#ifdef USE_LOG_VIEW
         case 5:
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_AddDefaultCorrectionOfTheReading", @"標準の読みの修正を上書き追加");
+            break;
+        case 6:
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GetNcodeDownloadURLScheme", @"再ダウンロード用URLスキームの取得");
+            break;
+#ifdef USE_LOG_VIEW
+        case 7:
             cell.textLabel.text = @"debug log";
             break;
 #endif
@@ -124,9 +133,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     switch (indexPath.row) {
-        case 0: case 1: case 2: case 3:
+        case 0: case 1: case 2: case 3: case 5: case 6:
 #ifdef USE_LOG_VIEW
-        case 5:
+        case 7:
 #endif
             return [self GetDefaultTableView:tableView cellForRowAtIndexPath:indexPath];
             break;
@@ -137,6 +146,34 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             break;
     }
     return nil;
+}
+
+/// 標準で用意された読み上げ辞書を上書き追加します。
+- (void)AddDefaultSpeechModSetting
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    [globalData InsertDefaultSpeechModConfig];
+    
+    [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary", @"標準の読み替え辞書を上書き追加しました。") message:nil];
+}
+
+/// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
+- (void)ShareNcodeListURLScheme
+{
+    NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
+    if (contentList == nil || [contentList count] <= 0) {
+        [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SettingTableViewController_NoContentHave", @"本棚に本がありません") message:nil];
+        return;
+    }
+    
+    NSMutableString* shareText = [[NSMutableString alloc] initWithString:@"novelspeaker://downloadncode/"];
+    
+    for (NarouContentCacheData* content in contentList) {
+        [shareText appendString:[[NSString alloc] initWithFormat:@"%@-", content.ncode]];
+    }
+    NSString* shareURL = [shareText substringToIndex:[shareText length] - 1];
+    
+    [EasyShare ShareText:shareURL viewController:self barButton:nil];
 }
 
 // セルが選択された時
@@ -155,8 +192,14 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         case 3:
             [self performSegueWithIdentifier:@"textDelaySettingSegue" sender:self];
             break;
-#ifdef USE_LOG_VIEW
         case 5:
+            [self AddDefaultSpeechModSetting];
+            break;
+        case 6:
+            [self ShareNcodeListURLScheme];
+            break;
+#ifdef USE_LOG_VIEW
+        case 7:
             [self performSegueWithIdentifier:@"debugLogViewSegue" sender:self];
             break;
 #endif
@@ -173,9 +216,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     UITableViewCell* cell = nil;
     if (cell == nil) {
         switch (indexPath.row) {
-            case 0: case 1: case 2: case 3:
+            case 0: case 1: case 2: case 3: case 5: case 6:
 #ifdef USE_LOG_VIEW
-            case 5:
+            case 7:
 #endif
                 return 40.0f;
                 break;

@@ -36,6 +36,10 @@
 "SettingTableViewController_CorrectionOfTheReading" = "読みの修正";
 "SettingTableViewController_SettingOfTheTextSize" = "表示文字サイズの設定";
 "SettingTableViewController_SettingOfTheSpeechDelay" = "読み上げ時の間の設定";
+"SettingTableViewController_AddDefaultCorrectionOfTheReading" = "標準の読みの修正を上書き追加";
+"SettingTableViewController_GetNcodeDownloadURLScheme" = "再ダウンロード用URLの取得";
+"SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "標準の読み替え辞書を上書き追加しました。";
+"SettingTableViewController_NoContentHave" = "本棚に本がありません";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "ここに書いた文をテストで読み上げます。";
 "SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" を \"%@\" に";
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";

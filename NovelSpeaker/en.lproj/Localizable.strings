@@ -36,6 +36,10 @@
 "SettingTableViewController_CorrectionOfTheReading" = "Correction of the reading";
 "SettingTableViewController_SettingOfTheTextSize" = "Setting of the text size";
 "SettingTableViewController_SettingOfTheSpeechDelay" = "Setting of the speech delay";
+"SettingTableViewController_AddDefaultCorrectionOfTheReading" = "Add default correction of the reading";
+"SettingTableViewController_GetNcodeDownloadURLScheme" = "Get re-download URL scheme";
+"SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "An address added a standard paraphrasing dictionary.";
+"SettingTableViewController_NoContentHave" = "No book in bookshelf";
 
 // "ここに書いた文をテストで読み上げます。";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "Speak the sentence for test.";

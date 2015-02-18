@@ -13,6 +13,7 @@
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
 #import "NarouSearchResultDetailViewController.h"
+#import "EasyShare.h"
 
 @interface SpeechViewController ()
 
@@ -339,28 +340,7 @@
         return;
     }
     NSString* message = [NSString stringWithFormat:NSLocalizedString(@"SpeechViewController_TweetMessage", @"%@ %@ #narou #ことせかい %@ %@"), content.title, content.writer, [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/%@/%@/", m_CurrentReadingStory.ncode, m_CurrentReadingStory.chapter_number], @"https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185"];
-    
-    UIActivityViewController *viewController = [[UIActivityViewController alloc] initWithActivityItems:@[message]
-                                                                                 applicationActivities:nil];
-
-    // iOS8 からのもの。
-    float iOSVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
-    if (iOSVersion >= 8.0) {
-        [viewController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
-            if (activityError) {
-                NSLog(@"%@", activityError);
-                return;
-            }
-        }];
-
-        //viewController.popoverPresentationController.sourceView = self.view;
-        viewController.popoverPresentationController.barButtonItem = shareButton;
-        //viewController.popoverPresentationController.sourceRect = CGRectMake(100.0, 100.0, 20.0, 20.0);;
-    }
-    
-    [self presentViewController:viewController
-                       animated:YES
-                     completion:nil];
+    [EasyShare ShareText:message viewController:self barButton:shareButton];
 }
 
 - (void)startStopButtonClick:(id)sender {

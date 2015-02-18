@@ -698,6 +698,7 @@ static GlobalDataSingleton* _singleton = nil;
     }
 }
 
+/// 標準の読み替え辞書を上書き追加します。
 - (void)InsertDefaultSpeechModConfig
 {
     NSArray* speechModConfigArray = [self GetAllSpeechModSettings];

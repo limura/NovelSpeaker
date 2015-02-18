@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "EasyAlert.h"
 
 @interface SettingsTableViewController : UITableViewController
-
+{
+    EasyAlert* m_EasyAlert;
+}
 @end

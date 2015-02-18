@@ -284,4 +284,7 @@
 /// URLスキームで呼び出された時の反応をします。
 - (BOOL)ProcessURLSceme:(NSURL*)url;
 
+/// 標準の読み替え辞書を上書き追加します。
+- (void)InsertDefaultSpeechModConfig;
+
 @end
