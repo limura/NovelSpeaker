@@ -40,6 +40,8 @@
 "SettingTableViewController_GetNcodeDownloadURLScheme" = "再ダウンロード用URLの取得";
 "SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "標準の読み替え辞書を上書き追加しました。";
 "SettingTableViewController_NoContentHave" = "本棚に本がありません";
+"SettingTableViewController_ShareNcodeListURLScheme" = "本棚に登録されている小説の再ダウンロードURLスキームを生成します";
+"SettingTableViewController_ShareNcodeListURLSchemeMessage" = "現在 本棚に登録されている全ての小説を再ダウンロードさせるためのURLを生成しました。\r\nことせかい をアンインストールしてしまっても、このURLを開けばもう一度小説をダウンロードさせることができます。バックアップ用途などに使用してください。(自分宛てに mail するなどが良いかもしれません)";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "ここに書いた文をテストで読み上げます。";
 "SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" を \"%@\" に";
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";

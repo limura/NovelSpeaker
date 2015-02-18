@@ -172,8 +172,12 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         [shareText appendString:[[NSString alloc] initWithFormat:@"%@-", content.ncode]];
     }
     NSString* shareURL = [shareText substringToIndex:[shareText length] - 1];
-    
-    [EasyShare ShareText:shareURL viewController:self barButton:nil];
+
+    [m_EasyAlert ShowAlertOneButton:NSLocalizedString(@"SettingTableViewController_ShareNcodeListURLScheme", @"本棚に登録されている小説の再ダウンロードURLスキームを生成します")
+                            message:NSLocalizedString(@"SettingTableViewController_ShareNcodeListURLSchemeMessage", @"現在 本棚に登録されている全ての小説を再ダウンロードさせるためのURLを生成しました。\r\nことせかい をアンインストールしてしまっても、このURLを開けばもう一度小説をダウンロードさせることができます。バックアップ用途などに使用してください。(自分宛てに mail するなどが良いかもしれません)")
+                       okButtonText:NSLocalizedString(@"OK_button", @"OK") okActionHandler:^(UIAlertAction *action){
+                           [EasyShare ShareText:shareURL viewController:self barButton:nil];
+                       }];
 }
 
 // セルが選択された時

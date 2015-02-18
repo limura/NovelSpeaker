@@ -702,9 +702,6 @@ static GlobalDataSingleton* _singleton = nil;
 /// 標準の読み替え辞書を上書き追加します。
 - (void)InsertDefaultSpeechModConfig
 {
-    NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
-    if (speechModConfigArray == nil || [speechModConfigArray count] <= 0) {
-        // これも無いようなので勝手に作ります。
         NSArray* dataArray = [[NSArray alloc] initWithObjects:
                               @"異世界", @"イセカイ"
                               , @"術者", @"ジュツシャ"
@@ -716,7 +713,7 @@ static GlobalDataSingleton* _singleton = nil;
                               , @"照ら", @"てら"
                               , @"身体", @"からだ"
                               , @"真っ暗", @"まっくら"
-                              , @"真っ二つ", @"真っ二つ"
+                              , @"真っ二つ", @"まっぷたつ"
                               , @"小柄", @"こがら"
                               , @"召喚獣", @"ショウカンジュウ"
                               , @"召喚術", @"ショウカンジュツ"
@@ -871,9 +868,6 @@ static GlobalDataSingleton* _singleton = nil;
             speechModSetting.afterString = [dataArray objectAtIndex:i+1];
             [self UpdateSpeechModSetting:speechModSetting];
         }
-        
-        speechModConfigArray = [self GetAllSpeechModSettings];
-    }
 }
 
 - (void)InsertDefaultSpeechWaitConfig
@@ -904,7 +898,11 @@ static GlobalDataSingleton* _singleton = nil;
 - (void)InsertDefaultSetting
 {
     [self InsertDefaultSpeakPitchConfig];
-    [self InsertDefaultSpeechModConfig];
+    NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
+    if (speechModConfigArray == nil || [speechModConfigArray count] <= 0) {
+        // これも無いようなので勝手に作ります。
+        [self InsertDefaultSpeechModConfig];
+    }
     [self InsertDefaultSpeechWaitConfig];
 }
 
