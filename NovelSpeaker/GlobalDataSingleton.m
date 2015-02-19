@@ -872,6 +872,11 @@ static GlobalDataSingleton* _singleton = nil;
 
 - (void)InsertDefaultSpeechWaitConfig
 {
+    NSArray* currentSpeechWaitSettingList = [self GetAllSpeechWaitConfig];
+    if (currentSpeechWaitSettingList != nil && [currentSpeechWaitSettingList count] > 0) {
+        // 何かあるなら追加しません。
+        return;
+    }
     {
         // 改行2つは 0.5秒待たせます
         SpeechWaitConfigCacheData* waitConfig = [SpeechWaitConfigCacheData new];

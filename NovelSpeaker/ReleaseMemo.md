@@ -145,7 +145,7 @@ Interface change
 - Can search same writer novel, in novel details page.
 - Share button added for novel read page.
 - Custom URL scheme is now available. It can download with NCODE. Use novelspeaker://downloadncode/ncode-ncode-ncode...
-
+  "ncode" is "Let's become a novelist"'s novel-code. "ncode" can found "Let's become a novelist" web page ( http://syosetu.com ). example ncode found at last of url  like http://ncode.syosetu.com/n9669bk/ (this example include ncode "n9669bk")
 # レビュー用メモ
 
 修正項目以下の通りです。

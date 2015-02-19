@@ -32,7 +32,9 @@
     dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     
     dispatch_async(queue, ^{
-        [[GlobalDataSingleton GetInstance] doCoreDataMigration];
+        GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+        [globalData doCoreDataMigration];
+        [globalData InsertDefaultSetting];
         dispatch_async(dispatch_get_main_queue(), ^{
             // 通常の main storyboard に移行します。
             UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
