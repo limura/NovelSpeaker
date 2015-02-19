@@ -157,6 +157,14 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary", @"標準の読み替え辞書を上書き追加しました。") message:nil];
 }
 
+/// 標準で用意された読み上げ辞書で上書きして良いか確認した上で、上書き追加します。
+- (void)ConfirmAddDefaultSpeechModSetting
+{
+    [m_EasyAlert ShowAlertTwoButton:NSLocalizedString(@"SettingTableViewController_ConfirmAddDefaultSpeechModSetting", @"確認") message:NSLocalizedString(@"SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage", @"用意された読み替え辞書を追加・上書きします。よろしいですか？") firstButtonText:NSLocalizedString(@"Cancel_button", @"Cancel") firstActionHandler:nil secondButtonText:NSLocalizedString(@"OK_button", @"OK") secondActionHandler:^(UIAlertAction *alert) {
+        [self AddDefaultSpeechModSetting];
+    }];
+}
+
 /// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
 - (void)ShareNcodeListURLScheme
 {
@@ -197,7 +205,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             [self performSegueWithIdentifier:@"textDelaySettingSegue" sender:self];
             break;
         case 5:
-            [self AddDefaultSpeechModSetting];
+            [self ConfirmAddDefaultSpeechModSetting];
             break;
         case 6:
             [self ShareNcodeListURLScheme];

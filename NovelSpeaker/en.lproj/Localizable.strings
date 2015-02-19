@@ -38,10 +38,12 @@
 "SettingTableViewController_SettingOfTheSpeechDelay" = "Setting of the speech delay";
 "SettingTableViewController_AddDefaultCorrectionOfTheReading" = "Add default correction of the reading";
 "SettingTableViewController_GetNcodeDownloadURLScheme" = "Get re-download URL scheme";
-"SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "An address added a standard paraphrasing dictionary.";
+"SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "Added a standard paraphrasing dictionary.";
 "SettingTableViewController_NoContentHave" = "No book in bookshelf";
 "SettingTableViewController_ShareNcodeListURLScheme" = "re-download URL created.";
 "SettingTableViewController_ShareNcodeListURLSchemeMessage" = "Re-Download URL created. You can use this URL for re-download all novels in bookshelf. This is for a backup use. You should e-mail it to oneself.";
+"SettingTableViewController_ConfirmAddDefaultSpeechModSetting" = "Confirm";
+"SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage" = "Add a standard paraphrasing dictionary. Will that be all right?";
 
 // "ここに書いた文をテストで読み上げます。";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "Speak the sentence for test.";
