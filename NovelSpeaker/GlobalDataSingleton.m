@@ -812,7 +812,7 @@ static GlobalDataSingleton* _singleton = nil;
                               , @"下の上", @"ゲのジョウ"
                               , @"下の中", @"ゲのチュウ"
                               , @"下の下", @"ゲのゲ"
-
+                              
                               , @"α", @"アルファ"
                               , @"Α", @"アルファ"
                               , @"β", @"ベータ"
@@ -961,7 +961,7 @@ static GlobalDataSingleton* _singleton = nil;
                 float delay = [speechWaitConfigCache.delayTimeInSec floatValue];
                 if (delay > 0.0f) {
                     if ([globalState.speechWaitSettingUseExperimentalWait boolValue]) {
-                        NSMutableString* waitString = [[NSMutableString alloc] initWithString:@"_。"];
+                        NSMutableString* waitString = [[NSMutableString alloc] initWithString:@"。"];
                         for (float x = 0.0f; x < delay; x += 0.1f) {
                             [waitString appendString:@"_。"];
                         }

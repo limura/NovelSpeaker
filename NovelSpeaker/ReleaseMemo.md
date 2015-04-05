@@ -165,6 +165,16 @@ Interface change
 - Share button added for novel read page.
 - Custom URL scheme is now available. It can download with NCODE. Use novelspeaker://downloadncode/ncode-ncode-ncode...
   "ncode" is "Let's become a novelist"'s novel-code. "ncode" can found "Let's become a novelist" web page ( http://syosetu.com ). example ncode found at last of url  like http://ncode.syosetu.com/n9669bk/ (this example include ncode "n9669bk")
+
+# Version 1.1.1 リリースノート
+問題の修正
+・読み上げの間の設定を「非推奨型」にした場合に文末の単語を2回読み上げる事がある問題を修正
+
+# Version 1.1.1 release note
+
+Bug fix
+- Duplicate word speech about "Experimental" speak setting is fixed.
+
 # レビュー用メモ
 
 修正項目以下の通りです。
