@@ -169,11 +169,13 @@ Interface change
 # Version 1.1.1 リリースノート
 問題の修正
 ・読み上げの間の設定を「非推奨型」にした場合に文末の単語を2回読み上げる事がある問題を修正
+・読み上げ対象の文字列に "@" が含まれている章を選択すると落ちる問題を修正
 
 # Version 1.1.1 release note
 
 Bug fix
 - Duplicate word speech about "Experimental" speak setting is fixed.
+- I revise a problem to come off when I choose the chapter which "@" is included in for character string for the reading aloud.
 
 # レビュー用メモ
 

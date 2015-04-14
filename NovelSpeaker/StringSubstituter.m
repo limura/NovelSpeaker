@@ -56,7 +56,7 @@
     // 1文字目で m_1stKeyMap から設定を読み出します。
     unichar c = [from characterAtIndex:0];
     NSString* key = [NSString stringWithFormat:@"%C", c];
-    NSMutableArray* convArray = [m_1stKeyMap valueForKey:key];
+    NSMutableArray* convArray = [m_1stKeyMap objectForKey:key];
     if (convArray == nil) {
         convArray = [NSMutableArray new];
     }
@@ -109,7 +109,7 @@
     // 1文字目で m_1stKeyMap から設定を読み出します。
     unichar c = [from characterAtIndex:0];
     NSString* key = [NSString stringWithFormat:@"%C", c];
-    NSMutableArray* convArray = [m_1stKeyMap valueForKey:key];
+    NSMutableArray* convArray = [m_1stKeyMap objectForKey:key];
     if (convArray == nil) {
         convArray = [NSMutableArray new];
     }
@@ -153,7 +153,7 @@
     NSUInteger n = 0;
     while (n < textLength) {
         NSString* targetChar = [NSString stringWithFormat:@"%C", [text characterAtIndex:n]];
-        NSMutableArray* convArray = [m_1stKeyMap valueForKey:targetChar];
+        NSMutableArray* convArray = [m_1stKeyMap objectForKey:targetChar];
         if (convArray == nil) {
             // 設定に無い文字なのであればそれを追加して次へ
             [noConvString appendString:targetChar];
