@@ -73,3 +73,15 @@
 "SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdated" = "Speech wait type changed to \"%@\".";
 "SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed" = "Speech wait type update failed.";
 
+"NarouSerchViewController_OrderNew" = "New";
+"NarouSerchViewController_OrderOver-allJudgment" = "Over-all Judgement";
+"NarouSerchViewController_OrderOver-allJudgmentAsc" = "Over-all Judgement Asc";
+"NarouSerchViewController_OrderNumberOfCoverBookmark" = "Number of cover bookmark";
+"NarouSerchViewController_NumberOfReview" = "Number of review";
+"NarouSerchViewController_NumberOfImpression" = "Number of impression";
+"NarouSerchViewController_NumberOfEvaluator" = "Number of evaluator";
+"NarouSerchViewController_NumberOfEvaluatorAsc" = "Number of evaluator asc";
+"NarouSerchViewController_OrderNumberOfWeeklyUniqueUser" = "Weekly unique user";
+"NarouSerchViewController_OrderStoryLength" = "Story length";
+"NarouSerchViewController_OrderStoryLengthAsc" = "Story length asc";
+"NarouSerchViewController_OrderOlder" = "Old";

@@ -71,3 +71,15 @@
 "SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdated" = "読み上げの間の設定を \"%@\" に変更しました。";
 "SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed" = "読み上げの間の設定の変更に失敗しました。";
 
+"NarouSerchViewController_OrderNew" = "新着順";
+"NarouSerchViewController_OrderOver-allJudgment" = "総合評価の高い順";
+"NarouSerchViewController_OrderOver-allJudgmentAsc" = "総合評価の低い順";
+"NarouSerchViewController_OrderNumberOfCoverBookmark" = "ブックマークの多い順";
+"NarouSerchViewController_NumberOfReview" = "レビュー数の多い順";
+"NarouSerchViewController_NumberOfImpression" = "感想の多い順";
+"NarouSerchViewController_NumberOfEvaluator" = "評価者数の多い順";
+"NarouSerchViewController_NumberOfEvaluatorAsc" = "評価者数の少ない順";
+"NarouSerchViewController_OrderNumberOfWeeklyUniqueUser" = "週間ユニークユーザ数順";
+"NarouSerchViewController_OrderStoryLength" = "本文の文字数順";
+"NarouSerchViewController_OrderStoryLengthAsc" = "本文の文字数の少ない順";
+"NarouSerchViewController_OrderOlder" = "古い順";

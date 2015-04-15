@@ -49,7 +49,7 @@
 /// title: タイトルを検索対象に含むか否か
 /// keyword: キーワードを検索対象に含むか否か
 /// ex: あらすじを検索対象に含むか否か
-+ (NSMutableArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex
++ (NSMutableArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex order:(NSString*)order
 {
     // 18禁のに接続したければ、ここの URL を api.syousetu.com/novelapi/... って所を
     // api.syousetu.com/novel18api/ に書き換えればOKらしいよ？ 試してないけど。
@@ -73,6 +73,9 @@
     if (ex)
     {
         queryUrl = [queryUrl stringByAppendingString:@"&ex=1"];
+    }
+    if (order != nil) {
+        queryUrl = [queryUrl stringByAppendingString:[[NSString alloc] initWithFormat:@"&order=%@", order]];
     }
     return [NarouLoader SearchWithURL:queryUrl];
 }

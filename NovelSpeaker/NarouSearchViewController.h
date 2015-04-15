@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "EasyAlert.h"
 
-@interface NarouSearchViewController : UIViewController<UITextFieldDelegate>
+@interface NarouSearchViewController : UIViewController<UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource>
 {
     NSArray* m_SearchResult;
     
@@ -17,11 +17,15 @@
     dispatch_queue_t m_SearchQueue;
     
     EasyAlert* m_EasyAlert;
+    
+    NSArray* m_SearchOrderTargetList;
+    NSDictionary* m_SearchOrderTargetTextMap;
 }
 @property (weak, nonatomic) IBOutlet UITextField *SearchTextBox;
 @property (weak, nonatomic) IBOutlet UISwitch *WriterSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *TitleSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *ExSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *KeywordSwitch;
+@property (weak, nonatomic) IBOutlet UIPickerView *SearchOrderPickerView;
 
 @end
