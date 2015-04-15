@@ -287,4 +287,13 @@
 /// 標準の読み替え辞書を上書き追加します。
 - (void)InsertDefaultSpeechModConfig;
 
+/// NiftySpeaker に現在の標準設定を登録します
+- (void)ApplyDefaultSpeechconfig:(NiftySpeaker*)niftySpeaker;
+/// NiftySpeakerに現在の読み上げの声質の設定を登録します
+- (void)ApplySpeakPitchConfig:(NiftySpeaker*) niftySpeaker;
+/// NiftySpeakerに現在の読みの「間」の設定を登録します
+- (void)ApplySpeechWaitConfig:(NiftySpeaker*) niftySpeaker;
+/// NiftySpeakerに現在の読み替え設定を登録します
+- (void)ApplySpeechModConfig:(NiftySpeaker*)niftySpeaker;
+
 @end

@@ -69,9 +69,14 @@
 /// SpeechBlock で deleay を追加するための分割ルールを設定します。
 /// 注意：この設定では声色を変更することはできません。
 - (BOOL)AddDelayBlockSeparator:(NSString*)string delay:(NSTimeInterval)delay;
+/// SpeechBlock の delay設定を削除します
+- (void)DeleteDelayBlockSeparator:(NSString*)string;
 
 /// 読み上げ時に、Siriさんが読み間違えてしまう文字列を読み間違えないように別の文字列で置き換えるテーブルを追加します。
 - (BOOL)AddSpeechModText:(NSString*)from to:(NSString*)to;
+
+/// 読み上げ時にSiriさんが読み間違えてしまう文字列の読み替え辞書を一つ消します
+- (void)DeleteSpeechModString:(NSString*)string;
 
 /// 読み上げを開始します。
 - (BOOL)StartSpeech;

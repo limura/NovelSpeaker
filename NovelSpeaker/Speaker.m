@@ -15,7 +15,7 @@
 - (id) init {
     self = [super init];
     
-    m_Synthesizer = [[AVSpeechSynthesizer alloc] init];
+    m_Synthesizer = [AVSpeechSynthesizer new];
     m_Voice = [AVSpeechSynthesisVoice voiceWithLanguage:@"ja-JP"];
     m_Rate = 0.7f;
     m_Pitch = 1.0f;
@@ -43,7 +43,7 @@
     utterance.pitchMultiplier = m_Pitch;
     utterance.postUtteranceDelay = m_Interval;
     
-    //NSLog(@"rate: %f, pitch: %f, text: %@", m_Rate, m_Pitch, text);
+    //NSLog(@"rate: %f, pitch: %f, post delay: %f text: %@", m_Rate, m_Pitch, m_Interval, text);
     [m_Synthesizer speakUtterance:utterance];
     
     return TRUE;
@@ -87,6 +87,10 @@
     //if ([m_Synthesizer isSpeaking]) {
         result = [m_Synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
     //}
+    // なにやら読み上げが失敗するようになることがあるようなので、Stopのタイミングで AVSpeechSynthesizer object を作り直すようにします
+    m_Synthesizer = [AVSpeechSynthesizer new];
+    m_Synthesizer.delegate = self;
+    
     return true;
 }
 

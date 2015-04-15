@@ -929,18 +929,22 @@ static GlobalDataSingleton* _singleton = nil;
     [self InsertDefaultSpeechWaitConfig];
 }
 
-/// 読み上げ設定を読み直します。
-- (BOOL)ReloadSpeechSetting
+/// NiftySpeaker に現在の標準設定を登録します
+- (void)ApplyDefaultSpeechconfig:(NiftySpeaker*)niftySpeaker
 {
-    [m_NiftySpeaker ClearSpeakSettings];
-
     GlobalStateCacheData* globalState = [self GetGlobalState];
     SpeechConfig* defaultSetting = [SpeechConfig new];
     defaultSetting.pitch = [globalState.defaultPitch floatValue];
     defaultSetting.rate = [globalState.defaultRate floatValue];
     defaultSetting.beforeDelay = 0.0f;
-    [m_NiftySpeaker SetDefaultSpeechConfig:defaultSetting];
+    [niftySpeaker SetDefaultSpeechConfig:defaultSetting];
+}
 
+/// NiftySpeakerに現在の読み上げの声質の設定を登録します
+- (void)ApplySpeakPitchConfig:(NiftySpeaker*) niftySpeaker
+{
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    
     NSArray* speechConfigArray = [self GetAllSpeakPitchConfig];
     if (speechConfigArray != nil) {
         for (SpeakPitchConfigCacheData* pitchConfig in speechConfigArray) {
@@ -948,39 +952,54 @@ static GlobalDataSingleton* _singleton = nil;
             speechConfig.pitch = [pitchConfig.pitch floatValue];
             speechConfig.rate = [globalState.defaultRate floatValue];
             speechConfig.beforeDelay = 0.0f;
-            [m_NiftySpeaker AddBlockStartSeparator:pitchConfig.startText endString:pitchConfig.endText speechConfig:speechConfig];
+            [niftySpeaker AddBlockStartSeparator:pitchConfig.startText endString:pitchConfig.endText speechConfig:speechConfig];
         }
     }
+}
 
-    // delay については \r\n\r\n 以外を読み込むことにします
-    //[m_NiftySpeaker AddDelayBlockSeparator:@"\r\n\r\n" delay:0.02];
-    {
-        NSArray* speechWaitConfigList = [self GetAllSpeechWaitConfig];
-        if (speechWaitConfigList != nil) {
-            for (SpeechWaitConfigCacheData* speechWaitConfigCache in speechWaitConfigList) {
-                float delay = [speechWaitConfigCache.delayTimeInSec floatValue];
-                if (delay > 0.0f) {
-                    if ([globalState.speechWaitSettingUseExperimentalWait boolValue]) {
-                        NSMutableString* waitString = [[NSMutableString alloc] initWithString:@"。"];
-                        for (float x = 0.0f; x < delay; x += 0.1f) {
-                            [waitString appendString:@"_。"];
-                        }
-                        [m_NiftySpeaker AddSpeechModText:speechWaitConfigCache.targetText to:waitString];
-                    }else{
-                        [m_NiftySpeaker AddDelayBlockSeparator:speechWaitConfigCache.targetText delay:delay];
+/// NiftySpeakerに現在の読みの「間」の設定を登録します
+- (void)ApplySpeechWaitConfig:(NiftySpeaker*) niftySpeaker
+{
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    
+    NSArray* speechWaitConfigList = [self GetAllSpeechWaitConfig];
+    if (speechWaitConfigList != nil) {
+        for (SpeechWaitConfigCacheData* speechWaitConfigCache in speechWaitConfigList) {
+            float delay = [speechWaitConfigCache.delayTimeInSec floatValue];
+            if (delay > 0.0f) {
+                if ([globalState.speechWaitSettingUseExperimentalWait boolValue]) {
+                    NSMutableString* waitString = [[NSMutableString alloc] initWithString:@"。"];
+                    for (float x = 0.0f; x < delay; x += 0.1f) {
+                        [waitString appendString:@"_。"];
                     }
+                    [niftySpeaker AddSpeechModText:speechWaitConfigCache.targetText to:waitString];
+                }else{
+                    [niftySpeaker AddDelayBlockSeparator:speechWaitConfigCache.targetText delay:delay];
                 }
             }
         }
     }
-    
+}
+
+/// NiftySpeakerに現在の読み替え設定を登録します
+- (void)ApplySpeechModConfig:(NiftySpeaker*)niftySpeaker
+{
     NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
     if (speechModConfigArray != nil) {
         for (SpeechModSettingCacheData* speechModSetting in speechModConfigArray) {
-            [m_NiftySpeaker AddSpeechModText:speechModSetting.beforeString to:speechModSetting.afterString];
+            [niftySpeaker AddSpeechModText:speechModSetting.beforeString to:speechModSetting.afterString];
         }
     }
-    
+}
+
+/// 読み上げ設定を読み直します。
+- (BOOL)ReloadSpeechSetting
+{
+    [m_NiftySpeaker ClearSpeakSettings];
+    [self ApplyDefaultSpeechconfig:m_NiftySpeaker];
+    [self ApplySpeakPitchConfig:m_NiftySpeaker];
+    [self ApplySpeechWaitConfig:m_NiftySpeaker];
+    [self ApplySpeechModConfig:m_NiftySpeaker];
     return true;
 }
 

@@ -167,15 +167,22 @@ Interface change
   "ncode" is "Let's become a novelist"'s novel-code. "ncode" can found "Let's become a novelist" web page ( http://syosetu.com ). example ncode found at last of url  like http://ncode.syosetu.com/n9669bk/ (this example include ncode "n9669bk")
 
 # Version 1.1.1 リリースノート
+インタフェースの変更
+・読み上げの間の設定に 0.1刻み で変化させるボタンを追加しました。また、簡単な文を使っての読み上げテストができるようになります。
+
 問題の修正
 ・読み上げの間の設定を「非推奨型」にした場合に文末の単語を2回読み上げる事がある問題を修正
 ・読み上げ対象の文字列に "@" が含まれている章を選択すると落ちる問題を修正
+・読み上げ開始時に読み上げが失敗すると、アプリを落とさないと読み上げができなくなる問題を一部修正(多分全部は直せてないです。すみません)
 
 # Version 1.1.1 release note
+Interface update
+- "Speak wait config" page inploved.
 
 Bug fix
 - Duplicate word speech about "Experimental" speak setting is fixed.
 - I revise a problem to come off when I choose the chapter which "@" is included in for character string for the reading aloud.
+- Speech start fail bug fixed.
 
 # レビュー用メモ
 

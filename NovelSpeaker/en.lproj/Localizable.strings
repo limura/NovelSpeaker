@@ -59,6 +59,10 @@
 "SpeechViewController_NoTwitterAccount_Message" = "There are no Twitter accounts configured. You can add or create a Twitter account in Settings.";
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";
+"SpeechWaitConfigSettingView_PleaseSetSpeechText" = "読み上げテスト用の文字列を設定してください";
+"SpeechWaitConfigSettingView_SpeechTestTextBoxLeftSide" = "ここに書かれた文を";
+"SpeechWaitConfigSettingView_SpeechTestTextBoxRightSide" = "テストで読み上げます";
+"SpeechWaitConfigSettingView_NowTestSpeaking" = "Now test speaking...";
 "SpeechWaitConfigTableView_TargetText_EnterEnter" = "<Enter><Enter>";
 "SpeechWaitConfigTableView_DelayTimeInSec_Enabled" = "Enabled";
 "SpeechWaitConfigTableView_DelayTimeInSec_Disabled" = "Disabled";

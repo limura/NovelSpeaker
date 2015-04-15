@@ -360,6 +360,8 @@ typedef enum {
 /// 読み上げ用の文字列を設定します。同時に SpeechBlock への変換が走ります。
 - (BOOL)SetText:(NSString*)text
 {
+    [self StopSpeech];
+    m_NowQueuedBlockIndex = 0;
     m_SpeechBlockArray = [self ConvertTextToSpeechBlockArray:text];
     return true;
 }
@@ -404,6 +406,26 @@ typedef enum {
     return true;
 }
 
+/// SpeechBlock の delay設定を削除します
+- (void)DeleteDelayBlockSeparator:(NSString*)string
+{
+    NSMutableArray* deleteTargetList = [NSMutableArray new];
+    for (DelaySetting* delaySetting in m_DelaySettingArray) {
+        if ([delaySetting.separator compare:string] == NSOrderedSame) {
+            [deleteTargetList addObject:delaySetting];
+        }
+    }
+    for (DelaySetting* delaySetting in deleteTargetList) {
+        [m_DelaySettingArray removeObject:delaySetting];
+    }
+}
+
+/// 読み上げ時にSiriさんが読み間違えてしまう文字列の読み替え辞書を一つ消します
+- (void)DeleteSpeechModString:(NSString*)string
+{
+    [m_SpeechModDictionary removeObjectForKey:string];
+    [m_StringSubstituter DelSetting:string];
+}
 
 /// 読み上げ時に、Siriさんが読み間違えてしまう文字列を読み間違えないように別の文字列で置き換えるテーブルを追加します。
 - (BOOL)AddSpeechModText:(NSString*)from to:(NSString*)to

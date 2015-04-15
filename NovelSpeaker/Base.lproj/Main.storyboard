@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6254" systemVersion="14C109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7531" systemVersion="14D131" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="Ktg-AW-K7m">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7520"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -418,8 +418,57 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <slider opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1.5" translatesAutoresizingMaskIntoConstraints="NO" id="sjr-ko-BAa">
+                                <rect key="frame" x="53" y="168" width="220" height="31"/>
+                            </slider>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Mte-mX-gvu">
+                                <rect key="frame" x="8" y="101" width="304" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="inputTextFieldChanged:" destination="C7M-ZK-1Ak" eventType="editingChanged" id="vwK-NL-PLK"/>
+                                </connections>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="読み上げテスト用文字列" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Dls-qY-Z7E">
+                                <rect key="frame" x="8" y="206" width="304" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ihK-ij-WNY">
+                                <rect key="frame" x="8" y="235" width="304" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lda-DN-gyF">
+                                <rect key="frame" x="8" y="168" width="39" height="30"/>
+                                <state key="normal" title="&lt;">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="WaitTimeSliderLeftButtonClicked:" destination="C7M-ZK-1Ak" eventType="touchUpInside" id="D9Z-zb-Wp8"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="31l-7s-dpA">
+                                <rect key="frame" x="279" y="168" width="33" height="30"/>
+                                <state key="normal" title="&gt;">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="WaitTimeSliderRightButtonClicked:" destination="C7M-ZK-1Ak" eventType="touchUpInside" id="t6E-lC-Jrg"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OlW-dZ-2G6">
+                                <rect key="frame" x="123" y="273" width="75" height="30"/>
+                                <state key="normal" title="発音テスト">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="SampleSpeechButtonClicked:" destination="C7M-ZK-1Ak" eventType="touchUpInside" id="wbs-Uj-sCT"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Jyx-Pf-xD6">
-                                <rect key="frame" x="98" y="240" width="124" height="30"/>
+                                <rect key="frame" x="98" y="311" width="124" height="30"/>
                                 <state key="normal" title="設定する">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -427,36 +476,42 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                                     <action selector="commitButtonClicked:" destination="C7M-ZK-1Ak" eventType="touchUpInside" id="3sP-Zz-ZDP"/>
                                 </connections>
                             </button>
-                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="3" translatesAutoresizingMaskIntoConstraints="NO" id="sjr-ko-BAa">
-                                <rect key="frame" x="6" y="168" width="308" height="31"/>
-                            </slider>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Mte-mX-gvu">
-                                <rect key="frame" x="8" y="101" width="304" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                            </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="ihK-ij-WNY" firstAttribute="top" secondItem="Dls-qY-Z7E" secondAttribute="bottom" constant="8" id="30o-H1-s9B"/>
+                            <constraint firstItem="ihK-ij-WNY" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="3dJ-Yu-gZ5"/>
+                            <constraint firstItem="OlW-dZ-2G6" firstAttribute="top" secondItem="ihK-ij-WNY" secondAttribute="bottom" constant="8" id="6Wf-gd-8kD"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Jyx-Pf-xD6" secondAttribute="trailing" constant="82" id="GTC-mM-2Pu"/>
                             <constraint firstItem="sjr-ko-BAa" firstAttribute="top" secondItem="QVn-gx-50q" secondAttribute="bottom" constant="8" id="GWc-WW-IXT"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="ihK-ij-WNY" secondAttribute="trailing" constant="-8" id="HDe-Pa-4CY"/>
                             <constraint firstAttribute="trailingMargin" secondItem="mEm-Ii-Fpd" secondAttribute="trailing" constant="-8" id="HLt-sR-Hkc"/>
+                            <constraint firstItem="31l-7s-dpA" firstAttribute="centerY" secondItem="lda-DN-gyF" secondAttribute="centerY" id="J6I-wr-knM"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="OlW-dZ-2G6" secondAttribute="trailing" constant="106" id="K9n-xv-O10"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Dls-qY-Z7E" secondAttribute="trailing" constant="-8" id="KFR-fy-5aU"/>
+                            <constraint firstItem="sjr-ko-BAa" firstAttribute="leading" secondItem="lda-DN-gyF" secondAttribute="trailing" constant="8" id="LOe-tm-lTp"/>
+                            <constraint firstItem="Dls-qY-Z7E" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="OVf-SS-D1J"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Mte-mX-gvu" secondAttribute="trailing" constant="-8" id="PMy-6e-A4T"/>
+                            <constraint firstItem="31l-7s-dpA" firstAttribute="centerY" secondItem="sjr-ko-BAa" secondAttribute="centerY" id="QjP-l1-viE"/>
                             <constraint firstItem="mEm-Ii-Fpd" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="RII-m7-cFr"/>
-                            <constraint firstItem="sjr-ko-BAa" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="Rlq-n5-qcn"/>
+                            <constraint firstItem="Jyx-Pf-xD6" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="82" id="TaP-dj-sTx"/>
                             <constraint firstItem="QVn-gx-50q" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="VE5-Ue-VTo"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="sjr-ko-BAa" secondAttribute="trailing" constant="-8" id="WcE-sV-4x7"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="Jyx-Pf-xD6" secondAttribute="trailing" constant="82" id="b2O-ou-Wys"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="31l-7s-dpA" secondAttribute="trailing" constant="-8" id="g2N-1t-xAT"/>
+                            <constraint firstItem="Dls-qY-Z7E" firstAttribute="top" secondItem="31l-7s-dpA" secondAttribute="bottom" constant="8" id="g9E-H0-H8k"/>
+                            <constraint firstItem="31l-7s-dpA" firstAttribute="leading" secondItem="sjr-ko-BAa" secondAttribute="trailing" constant="8" id="gEL-dN-Q6J"/>
+                            <constraint firstItem="lda-DN-gyF" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="ibP-WY-k3n"/>
                             <constraint firstItem="Mte-mX-gvu" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="-8" id="kGY-9Z-5Ld"/>
                             <constraint firstItem="mEm-Ii-Fpd" firstAttribute="top" secondItem="4V8-Oh-ljF" secondAttribute="bottom" constant="8" id="kVe-wd-ha0"/>
                             <constraint firstItem="QVn-gx-50q" firstAttribute="top" secondItem="Mte-mX-gvu" secondAttribute="bottom" constant="8" id="kxV-0Q-ebi"/>
                             <constraint firstItem="Mte-mX-gvu" firstAttribute="top" secondItem="mEm-Ii-Fpd" secondAttribute="bottom" constant="8" id="lv1-Gd-dd2"/>
-                            <constraint firstItem="Jyx-Pf-xD6" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="82" id="oV5-On-QKb"/>
-                            <constraint firstItem="Jyx-Pf-xD6" firstAttribute="top" secondItem="sjr-ko-BAa" secondAttribute="bottom" constant="42" id="vp5-Ok-Omm"/>
+                            <constraint firstItem="Jyx-Pf-xD6" firstAttribute="top" secondItem="OlW-dZ-2G6" secondAttribute="bottom" constant="8" id="q6j-tv-nHL"/>
+                            <constraint firstItem="OlW-dZ-2G6" firstAttribute="leading" secondItem="meu-KG-fZD" secondAttribute="leadingMargin" constant="107" id="xdB-fL-iFw"/>
                             <constraint firstAttribute="trailingMargin" secondItem="QVn-gx-50q" secondAttribute="trailing" constant="-8" id="yON-4e-Siz"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="読み上げ時の間の詳細設定" id="jA6-Pi-jzs"/>
                     <connections>
+                        <outlet property="SampleSpeechTextField" destination="ihK-ij-WNY" id="Krf-wt-TTq"/>
                         <outlet property="commitButton" destination="Jyx-Pf-xD6" id="gOB-MS-c9W"/>
                         <outlet property="inputTextField" destination="Mte-mX-gvu" id="nZ2-ap-QMq"/>
                         <outlet property="waitTimeSlider" destination="sjr-ko-BAa" id="YI2-fc-1I7"/>
