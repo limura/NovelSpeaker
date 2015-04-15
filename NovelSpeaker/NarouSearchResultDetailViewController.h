@@ -22,6 +22,9 @@
     dispatch_queue_t m_SearchQueue;
 
     EasyAlert* m_EasyAlert;
+
+    UIBarButtonItem* downloadButton;
+    UIBarButtonItem* shareButton;
 }
 // 前のページから得られる表示するための情報
 @property NarouContentCacheData* NarouContentDetail;

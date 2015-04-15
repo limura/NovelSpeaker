@@ -83,3 +83,6 @@
 "NarouSerchViewController_OrderStoryLength" = "本文の文字数順";
 "NarouSerchViewController_OrderStoryLengthAsc" = "本文の文字数の少ない順";
 "NarouSerchViewController_OrderOlder" = "古い順";
+
+"NarouSearchResultDetailViewController_GoToMypage" = "作者のマイページへ移動";
+"NarouSearchResultDetailViewController_GoToMyPageMessage" = "作者のマイページをSafariで表示します。よろしいですか？";

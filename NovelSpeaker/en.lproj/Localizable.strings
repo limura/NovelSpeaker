@@ -85,3 +85,7 @@
 "NarouSerchViewController_OrderStoryLength" = "Story length";
 "NarouSerchViewController_OrderStoryLengthAsc" = "Story length asc";
 "NarouSerchViewController_OrderOlder" = "Old";
+
+"NarouSearchResultDetailViewController_GoToMypage" = "Move to writer page";
+"NarouSearchResultDetailViewController_GoToMyPageMessage" = "Move to writer page. sure?";
+

@@ -39,8 +39,13 @@
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
 
     // ダウンロードボタンを右上に配置します
-    UIBarButtonItem* buttonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"DownloadButton", @"download") style:UIBarButtonItemStylePlain target:self action:@selector(downloadButtonClicked)];
-    self.navigationItem.rightBarButtonItem = buttonItem;
+    downloadButton = [[UIBarButtonItem alloc]
+                      initWithTitle:NSLocalizedString(@"DownloadButton", @"download")
+                      style:UIBarButtonItemStyleBordered
+                      target:self
+                      action:@selector(downloadButtonClicked:)];
+    shareButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonClicked:)];
+    self.navigationItem.rightBarButtonItems = @[downloadButton, shareButton];
     
     // 内容をラベル等に反映します
     if (self.NarouContentDetail == nil) {
@@ -137,7 +142,7 @@
 }
 */
 
-- (void)downloadButtonClicked
+- (void)downloadButtonClicked:(id)sender
 {
     NSString* errString = [[GlobalDataSingleton GetInstance] AddDownloadQueueForNarou:self.NarouContentDetail];
     if (errString != nil) {
@@ -150,6 +155,19 @@
     [m_EasyAlert ShowAlertOneButton:NSLocalizedString(@"NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue", @"ダウンロードキューに追加されました") message:msg okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
         [self.navigationController popViewControllerAnimated:YES];
     }];
+}
+
+- (void)shareButtonClicked:(id)sender {
+    [m_EasyAlert
+     ShowAlertTwoButton:                            NSLocalizedString(@"NarouSearchResultDetailViewController_GoToMypage", @"作者のマイページへ移動")
+     message:NSLocalizedString(@"NarouSearchResultDetailViewController_GoToMyPageMessage", @"作者のマイページへ移動します。よろしいですか？")
+     firstButtonText:NSLocalizedString(@"Cancel_button", @"Cancel")
+     firstActionHandler:nil
+     secondButtonText:NSLocalizedString(@"OK_button", @"OK")
+     secondActionHandler:^(UIAlertAction *alert) {
+         NSURL* url = [NSURL URLWithString:[[NSString alloc] initWithFormat:@"http://mypage.syosetu.com/%@/", self.NarouContentDetail.userid]];
+         [[UIApplication sharedApplication] openURL:url];
+     }];
 }
 
 - (IBAction)WriterButtonClicked:(id)sender {

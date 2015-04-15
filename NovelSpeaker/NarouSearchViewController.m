@@ -26,6 +26,7 @@
         [self SetSearchOrderTargets];
         self.SearchOrderPickerView.delegate = self;
         self.SearchOrderPickerView.dataSource = self;
+        [self.SearchOrderPickerView selectRow:2 inComponent:0 animated:false];
     }
     return self;
 }
@@ -42,12 +43,13 @@
     [self SetSearchOrderTargets];
     self.SearchOrderPickerView.delegate = self;
     self.SearchOrderPickerView.dataSource = self;
+    [self.SearchOrderPickerView selectRow:2 inComponent:0 animated:false];
 }
 
 // 検索オーダーのリストを作ります
 - (void)SetSearchOrderTargets
 {
-    m_SearchOrderTargetList = @[@"none", @"hyoka", @"hyokaasc", @"favnovelcnt", @"reviewcnt", @"impressioncnt", @"hyokacnt", @"hyokacntasc", @"weekly", @"lengthdesc", @"lengthasc", @"old"];
+    m_SearchOrderTargetList = @[@"hyokaasc", @"hyoka", @"none", @"favnovelcnt", @"reviewcnt", @"impressioncnt", @"hyokacnt", @"hyokacntasc", @"weekly", @"lengthdesc", @"lengthasc", @"old"];
     m_SearchOrderTargetTextMap = @{@"none": NSLocalizedString(@"NarouSerchViewController_OrderNew", @"新着順")
                                    , @"hyoka": NSLocalizedString(@"NarouSerchViewController_OrderOver-allJudgment", @"総合評価の高い順")
                                    , @"hyokaasc": NSLocalizedString(@"NarouSerchViewController_OrderOver-allJudgmentAsc", @"総合評価の低い順")
