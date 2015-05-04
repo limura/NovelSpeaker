@@ -20,12 +20,16 @@
     
     NSArray* m_SearchOrderTargetList;
     NSDictionary* m_SearchOrderTargetTextMap;
+    
+    NSString* m_SelectedOrder;
 }
 @property (weak, nonatomic) IBOutlet UITextField *SearchTextBox;
 @property (weak, nonatomic) IBOutlet UISwitch *WriterSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *TitleSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *ExSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *KeywordSwitch;
-@property (weak, nonatomic) IBOutlet UIPickerView *SearchOrderPickerView;
+@property (nonatomic) UIPickerView *SearchOrderPickerView;
+@property (nonatomic) UIToolbar* KeyboardToolbar;
+@property (weak, nonatomic) IBOutlet UITextField *SearchOrderTextBox;
 
 @end

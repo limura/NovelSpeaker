@@ -135,7 +135,6 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSLog(@"indexPath.row %ld", (long)indexPath.row);
     switch (indexPath.row) {
         case 0: case 1: case 2: case 3: case 5: case 6: case 7:
 #ifdef USE_LOG_VIEW

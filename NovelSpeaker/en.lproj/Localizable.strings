@@ -90,3 +90,6 @@
 "NarouSearchResultDetailViewController_GoToMypage" = "Move to writer page";
 "NarouSearchResultDetailViewController_GoToMyPageMessage" = "Move to writer page. sure?";
 
+"NarouSearchViewController_DoneKeyboardBarItem" = "done";
+
+

@@ -88,3 +88,5 @@
 
 "NarouSearchResultDetailViewController_GoToMypage" = "作者のマイページへ移動";
 "NarouSearchResultDetailViewController_GoToMyPageMessage" = "作者のマイページをSafariで表示します。よろしいですか？";
+
+"NarouSearchViewController_DoneKeyboardBarItem" = "決定";
