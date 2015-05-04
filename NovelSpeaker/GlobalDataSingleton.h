@@ -296,4 +296,9 @@
 /// NiftySpeakerに現在の読み替え設定を登録します
 - (void)ApplySpeechModConfig:(NiftySpeaker*)niftySpeaker;
 
+/// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
+- (BOOL)IsVersionUped;
+
+/// 今回起動した時のバージョン番号を保存します。
+- (void)UpdateCurrentVersionSaveData;
 @end

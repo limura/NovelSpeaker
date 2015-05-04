@@ -92,4 +92,64 @@
 
 "NarouSearchViewController_DoneKeyboardBarItem" = "done";
 
+"BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.2
+
+- in Search tab, \"Search order\" is now show after tap.
+
+Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
+
+"UpdateLogViewController_UpdateLog" = "
+# Version 1.1.2 release note
+
+Interface change
+
+- in Search tab, \"Search order\" is now show after tap.
+- Add \"Update log\" in Settings tab.
+- Update Notice dialog added. This is displayed first time only.
+
+# Version 1.1.1 release note
+Interface update
+- \"Speak wait config\" page inploved.
+- \"Go to writer page\" button added at novel detail page.
+
+Bug fix
+- Duplicate word speech about \"Experimental\" speak setting is fixed.
+- I revise a problem to come off when I choose the chapter which \"@\" is included in for character string for the reading aloud.
+- Speech start fail bug fixed.
+
+# Version 1.1 release note
+
+Interface change
+- Icon changed.
+- Text size change configuration is now on settings page.
+- iPad mode. NovelSpeaker is universal application now.
+- If reached at the end of a book then announce messsage: \"Because it reached at the end of a book, I stopped reading aloud.\"
+- First open view is now \"Last read page\".
+- \"Max continuation reproduction time\" configuration is now on settings page.
+- \"Speak wait config\" configuration is now on settings page.
+- Can search same writer novel, in novel details page.
+- Share button added for novel read page.
+- Custom URL scheme is now available. It can download with NCODE. Use novelspeaker://downloadncode/ncode-ncode-ncode...
+\"ncode\" is \"Let's become a novelist\"'s novel-code. \"ncode\" can found \"Let's become a novelist\" web page ( http://syosetu.com ). example ncode found at last of url  like http://ncode.syosetu.com/n9669bk/ (this example include ncode \"n9669bk\")
+
+# Version 1.0.2 release note
+
+Change of the interface
+
+- I attached a button for the front and the movement to a later chapter with the screen which read a novel. By the right and left flick cannot move now.
+
+Correction of the problem
+
+- I revise the problem that the latest thing which I reloaded was not able to download.
+- When I moved a chapter during background reproduction, I revise the problem that reproduction might stop.
+- I revise the problem that the indication of the novel is fogged in a status bar and navigation bar, and it may not seem that it is displayed.
+- I revise a reproduction start and the problem that I am replaced, and nothing sometimes reacts to for a long time of the chapter when I increase the setting of the reading substitute. (if the number increases, it becomes late)
+- Movement revises the problem that became slow if in condition to have downloaded a large quantity of novels.
+
+
+# Version 1.0 release note
+
+First release.
+";
 

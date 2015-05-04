@@ -353,7 +353,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         <!--更新履歴-->
         <scene sceneID="Q7Y-NW-rFh">
             <objects>
-                <viewController id="pS8-hH-Po4" sceneMemberID="viewController">
+                <viewController id="pS8-hH-Po4" customClass="UpdateLogViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="rdp-8T-t7T"/>
                         <viewControllerLayoutGuide type="bottom" id="Gg3-Xv-2Gf"/>
@@ -362,89 +362,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yzx-3k-Oma">
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="update text here" translatesAutoresizingMaskIntoConstraints="NO" id="Yzx-3k-Oma">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <string key="text"># Ver 1.1.2
-
-インタフェースの変更
-
-・なろう検索のタブで、検索時の順位付けの部分を、タップしてから選択するタイプに変更しました。
-・設定タブに更新履歴の情報を追加しました。
-・アプリの更新があった時に、一回だけダイアログを表示するようにしました。
-
-
-# Ver 1.1.1
-
-インタフェースの変更
-
-・読み上げの間の設定に 0.1刻み で変化させるボタンを追加しました。また、簡単な文を使っての読み上げテストができるようになります。
-
-・小説の詳細ページの右上に、作者のマイページをSafariで表示するためのボタンを追加しました。
-
-・なろう検索のタブで、検索時の順位付けを「総合評価の高い順」などから選べるようにしました。ただ、「検索開始」ボタンが画面外に押し出されてちょっと使いづらくなっています。すみません。
-
-問題の修正
-
-・読み上げの間の設定を「非推奨型」にした場合に文末の単語を2回読み上げる事がある問題を修正
-
-・読み上げ対象の文字列に "@" が含まれている章を選択すると落ちる問題を修正
-
-・読み上げ開始時に読み上げが失敗すると、アプリを落とさないと読み上げができなくなる問題を一部修正(再度再生させようとした時に読み上げられない問題を解決しただけで、読み上げが勝手に停止する問題については直せていません。すみません)
-
-
- # Ver 1.1
-
-インタフェースの変更
-
-・本棚、なろう検索、ダウンロード状態 のアイコンを変更しました。
-
-・小説の表示用の文字サイズを変更できるようにしました。「設定」に項目が増えます。
-
-・iPadでも表示できるようにしました(ユニバーサルアプリとなります)。
-
-・読み上げ中に最後の章を読みきった時に、「読み上げが最後に達しました」とアナウンスするようになります。
-
-・起動時に最後に読んでいた小説を表示するようになります。
-
-・最大連続再生時間の指定を設定ページに入れました。標準では23時間55分になっています。再生を開始してから、ここで設定された時間が経つと再生が停止します。
-
-・読み上げ時に「……」や「、」「。」等でも読み上げの間をつけられるような設定項目を設定ページに追加しました。
-
-・小説の詳細ページの作者名を押すと、その作者の小説を検索するようになります。
-
-・小説を読むページにシェアボタンを追加しました。今読んでいるページへのURLやことせかいのアプリへのリンクなどをTwitterやmailでシェアすることができます。
-
-・URLスキーム novelspeaker://downloadncode/ncode-ncode-ncode... という形式で、ncode を指定して小説をダウンロードさせる事ができるようになります。「設定」タブの「再ダウンロード用URLの取得」で本棚に登録されている小説についてのダウンロード用URLを取得できますので、機種変更等の際にご利用ください。
-
-
-
-# Ver 1.0.2
-
-インタフェースの変更
-
-・小説を読んでいる画面で前と後の章への移動用にボタンをつけました。左右フリックでの移動はできなくなります。
-
-
-
-問題の修正
-
-・リロードした最新のものがダウンロードできなかった問題を修正
-
-・バックグラウンド再生中に章を移動した時、再生が停止する可能性があった問題を修正
-
-・小説の表示がステータスバーやナビゲーションバーにかぶって表示されて見えなくなることがある問題を修正
-
-・読み替えの設定を増やすと再生開始や章の切り替わり時に長時間無反応になる問題を"ある程度"修正。(件数が増えれば遅くはなります)
-
-・大量の小説をダウンロードした状態だと動作が遅くなっていた問題を修正</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="Yzx-3k-Oma" secondAttribute="trailing" constant="-16" id="6TX-XD-bUG"/>
+                            <constraint firstItem="Yzx-3k-Oma" firstAttribute="leading" secondItem="FDx-ou-YJa" secondAttribute="leadingMargin" constant="-16" id="6pz-D9-TA2"/>
+                            <constraint firstItem="Yzx-3k-Oma" firstAttribute="top" secondItem="FDx-ou-YJa" secondAttribute="topMargin" id="GIH-nR-a8c"/>
+                            <constraint firstItem="Yzx-3k-Oma" firstAttribute="bottom" secondItem="FDx-ou-YJa" secondAttribute="bottomMargin" id="sKa-Zg-HYB"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="更新履歴" id="ZMF-wZ-Q5b"/>
+                    <connections>
+                        <outlet property="LogTextView" destination="Yzx-3k-Oma" id="f4B-6F-Rq6"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1Hj-SI-klv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

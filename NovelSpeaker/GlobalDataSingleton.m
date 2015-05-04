@@ -1607,4 +1607,43 @@ static GlobalDataSingleton* _singleton = nil;
     }
 }
 
+#define USER_DEFAULTS_PREVIOUS_TIME_VERSION @"PreviousTimeVersion"
+#define USER_DEFAULTS_PREVIOUS_TIME_BUILD   @"PreviousTimeBuild"
+
+/// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
+- (BOOL)IsVersionUped
+{
+    // NSUserDefaults を使います
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString* version = [userDefaults stringForKey:USER_DEFAULTS_PREVIOUS_TIME_VERSION];
+    NSString* build = [userDefaults stringForKey:USER_DEFAULTS_PREVIOUS_TIME_BUILD];
+    NSString* versionBuild = @"unknown";
+    if (version != nil && build != nil) {
+        versionBuild = [[NSString alloc] initWithFormat:@"%@-%@", version, build];
+    }
+    NSDictionary* infoDictionary = [[NSBundle mainBundle] infoDictionary];
+    NSString* currentVersionBuild = [[NSString alloc]
+                                     initWithFormat:@"%@-%@"
+                                     , [infoDictionary objectForKey:@"CFBundleShortVersionString"]
+                                     , [infoDictionary objectForKey:@"CFBundleVersion"]
+                                     ];
+    if ([versionBuild isEqualToString:currentVersionBuild]) {
+        return NO;
+    }
+    return YES;
+}
+
+/// 今回起動した時のバージョン番号を保存します。
+- (void)UpdateCurrentVersionSaveData
+{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary* infoDictionary = [[NSBundle mainBundle] infoDictionary];
+    NSString* version = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
+    NSString* build = [infoDictionary objectForKey:@"CFBundleVersion"];
+    [userDefaults setObject:version forKey:USER_DEFAULTS_PREVIOUS_TIME_VERSION];
+    [userDefaults setObject:build forKey:USER_DEFAULTS_PREVIOUS_TIME_BUILD];
+    [userDefaults synchronize];
+}
+
+
 @end
