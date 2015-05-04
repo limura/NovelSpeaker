@@ -221,11 +221,18 @@ Correction of the problem
 
 インタフェースの変更
 
-・なろう検索のタブで、検索時の順位付けの部分を、タップしてから選択するタイプに変更しました。
+・なろう検索のタブで、検索時の順位付けの部分を、タップしてから選択するタイプに変更しました。(検索開始ボタンがスクロールしないと見えない状態だったのを解消しました)
 ・設定タブに更新履歴の情報を追加しました。
 ・アプリの更新があった時に、一回だけダイアログを表示するようにしました。
 
 
+# Version 1.1.2
+
+Interface change
+
+- in Search tab, "Search order" is now show after tap.
+- Add "Update log" in Settings tab.
+- Update Notice dialog added. This is displayed first time only.
 
 # メモ
 
