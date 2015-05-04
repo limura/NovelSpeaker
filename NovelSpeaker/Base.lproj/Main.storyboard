@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7531" systemVersion="14D131" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7531" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="Ktg-AW-K7m">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7520"/>
@@ -348,6 +348,106 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bLn-TN-oKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="-22" y="2323"/>
+        </scene>
+        <!--更新履歴-->
+        <scene sceneID="Q7Y-NW-rFh">
+            <objects>
+                <viewController id="pS8-hH-Po4" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="rdp-8T-t7T"/>
+                        <viewControllerLayoutGuide type="bottom" id="Gg3-Xv-2Gf"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="FDx-ou-YJa">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yzx-3k-Oma">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <mutableString key="text"># Ver 1.1.2
+
+インタフェースの変更
+
+・なろう検索のタブで、検索時の順位付けの部分を、タップしてから選択するタイプに変更しました。
+・設定タブに更新履歴の情報を追加しました。
+・アプリの更新があった時に、一回だけダイアログを表示するようにしました。
+
+
+# Ver 1.1.1
+
+インタフェースの変更
+
+・読み上げの間の設定に 0.1刻み で変化させるボタンを追加しました。また、簡単な文を使っての読み上げテストができるようになります。
+
+・小説の詳細ページの右上に、作者のマイページをSafariで表示するためのボタンを追加しました。
+
+・なろう検索のタブで、検索時の順位付けを「総合評価の高い順」などから選べるようにしました。ただ、「検索開始」ボタンが画面外に押し出されてちょっと使いづらくなっています。すみません。
+
+問題の修正
+
+・読み上げの間の設定を「非推奨型」にした場合に文末の単語を2回読み上げる事がある問題を修正
+
+・読み上げ対象の文字列に "@" が含まれている章を選択すると落ちる問題を修正
+
+・読み上げ開始時に読み上げが失敗すると、アプリを落とさないと読み上げができなくなる問題を一部修正(再度再生させようとした時に読み上げられない問題を解決しただけで、読み上げが勝手に停止する問題については直せていません。すみません)
+
+
+ # Ver 1.1
+
+インタフェースの変更
+
+・本棚、なろう検索、ダウンロード状態 のアイコンを変更しました。
+
+・小説の表示用の文字サイズを変更できるようにしました。「設定」に項目が増えます。
+
+・iPadでも表示できるようにしました(ユニバーサルアプリとなります)。
+
+・読み上げ中に最後の章を読みきった時に、「読み上げが最後に達しました」とアナウンスするようになります。
+
+・起動時に最後に読んでいた小説を表示するようになります。
+
+・最大連続再生時間の指定を設定ページに入れました。標準では23時間55分になっています。再生を開始してから、ここで設定された時間が経つと再生が停止します。
+
+・読み上げ時に「……」や「、」「。」等でも読み上げの間をつけられるような設定項目を設定ページに追加しました。
+
+・小説の詳細ページの作者名を押すと、その作者の小説を検索するようになります。
+
+・小説を読むページにシェアボタンを追加しました。今読んでいるページへのURLやことせかいのアプリへのリンクなどをTwitterやmailでシェアすることができます。
+
+・URLスキーム novelspeaker://downloadncode/ncode-ncode-ncode... という形式で、ncode を指定して小説をダウンロードさせる事ができるようになります。「設定」タブの「再ダウンロード用URLの取得」で本棚に登録されている小説についてのダウンロード用URLを取得できますので、機種変更等の際にご利用ください。
+
+
+
+# Ver 1.0.2
+
+インタフェースの変更
+
+・小説を読んでいる画面で前と後の章への移動用にボタンをつけました。左右フリックでの移動はできなくなります。
+
+
+
+問題の修正
+
+・リロードした最新のものがダウンロードできなかった問題を修正
+
+・バックグラウンド再生中に章を移動した時、再生が停止する可能性があった問題を修正
+
+・小説の表示がステータスバーやナビゲーションバーにかぶって表示されて見えなくなることがある問題を修正
+
+・読み替えの設定を増やすと再生開始や章の切り替わり時に長時間無反応になる問題を"ある程度"修正。(件数が増えれば遅くはなります)
+
+・大量の小説をダウンロードした状態だと動作が遅くなっていた問題を修正</mutableString>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="更新履歴" id="ZMF-wZ-Q5b"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1Hj-SI-klv" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
             <point key="canvasLocation" x="450" y="2323"/>
         </scene>
         <!--読み上げ時の間の設定-->
@@ -577,6 +677,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         <segue destination="Pb4-1M-Lvn" kind="push" identifier="textSizeSettingSegue" id="TN8-7S-JAt"/>
                         <segue destination="dQB-7t-eBi" kind="push" identifier="textDelaySettingSegue" id="Taz-2K-ASG"/>
                         <segue destination="WI3-lq-RQn" kind="push" identifier="debugLogViewSegue" id="iaU-6Z-vkf"/>
+                        <segue destination="pS8-hH-Po4" kind="push" identifier="updateLogSegue" id="prX-RH-vA8"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="2y7-9M-CWR" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1230,7 +1331,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
+        <segue reference="DuH-s0-ioe"/>
         <segue reference="0zP-nv-fmY"/>
-        <segue reference="vyW-HX-PLM"/>
     </inferredMetricsTieBreakers>
 </document>

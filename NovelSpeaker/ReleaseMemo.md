@@ -184,7 +184,7 @@ Interface change
 ・読み上げ開始時に読み上げが失敗すると、アプリを落とさないと読み上げができなくなる問題を一部修正(再度再生させようとした時に読み上げられない問題を解決しただけで、読み上げが勝手に停止する問題については直せていません。すみません)
 
 追伸：
-レビューありがとうございます。落ちてしまう不都合の報告がありましたので、主に不都合対応のリリースをさせていただきます。
+評価やレビュー、ありがとうございます。回避方法がなく落ちてしまう不都合の報告がありましたので、主に不都合対応のリリースをさせていただきます。
 その他、提案していただいた機能で、簡単に追加できそうなものについては追加してみました。ご確認ください。
 
 本棚周り、コピー＆ペーストでの新規本の登録、他サイトの小説の読み込み等は実装するのに結構時間がかかりますので今回のリリースには含めることができませんでした。すみません。なお、これらの対応については結構かなりいっぱいたくさん時間がかかってしまいそうですので、気長に待っていただければ嬉しいです。
@@ -216,6 +216,14 @@ Correction of the problem
 - I revise the problem that the indication of the novel is fogged in a status bar and navigation bar, and it may not seem that it is displayed.
 - I revise a reproduction start and the problem that I am replaced, and nothing sometimes reacts to for a long time of the chapter when I increase the setting of the reading substitute. (if the number increases, it becomes late)
 
+
+# Ver 1.1.2
+
+インタフェースの変更
+
+・なろう検索のタブで、検索時の順位付けの部分を、タップしてから選択するタイプに変更しました。
+・設定タブに更新履歴の情報を追加しました。
+・アプリの更新があった時に、一回だけダイアログを表示するようにしました。
 
 
 

@@ -67,7 +67,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return 7
+    return 8
 #ifdef USE_LOG_VIEW
     + 1
 #endif
@@ -103,8 +103,11 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         case 6:
             cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GetNcodeDownloadURLScheme", @"再ダウンロード用URLスキームの取得");
             break;
-#ifdef USE_LOG_VIEW
         case 7:
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GoToReleaseLog", @"更新履歴");
+            break;
+#ifdef USE_LOG_VIEW
+        case 8:
             cell.textLabel.text = @"debug log";
             break;
 #endif
@@ -132,10 +135,11 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    NSLog(@"indexPath.row %ld", (long)indexPath.row);
     switch (indexPath.row) {
-        case 0: case 1: case 2: case 3: case 5: case 6:
+        case 0: case 1: case 2: case 3: case 5: case 6: case 7:
 #ifdef USE_LOG_VIEW
-        case 7:
+        case 8:
 #endif
             return [self GetDefaultTableView:tableView cellForRowAtIndexPath:indexPath];
             break;
@@ -210,8 +214,11 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         case 6:
             [self ShareNcodeListURLScheme];
             break;
-#ifdef USE_LOG_VIEW
         case 7:
+            [self performSegueWithIdentifier:@"updateLogSegue" sender:self];
+            break;
+#ifdef USE_LOG_VIEW
+        case 8:
             [self performSegueWithIdentifier:@"debugLogViewSegue" sender:self];
             break;
 #endif
@@ -228,9 +235,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     UITableViewCell* cell = nil;
     if (cell == nil) {
         switch (indexPath.row) {
-            case 0: case 1: case 2: case 3: case 5: case 6:
+            case 0: case 1: case 2: case 3: case 5: case 6: case 7:
 #ifdef USE_LOG_VIEW
-            case 7:
+            case 8:
 #endif
                 return 40.0f;
                 break;

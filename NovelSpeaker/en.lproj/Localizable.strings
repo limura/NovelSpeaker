@@ -44,6 +44,7 @@
 "SettingTableViewController_ShareNcodeListURLSchemeMessage" = "Re-Download URL created. You can use this URL for re-download all novels in bookshelf. This is for a backup use. You should e-mail it to oneself.";
 "SettingTableViewController_ConfirmAddDefaultSpeechModSetting" = "Confirm";
 "SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage" = "Add a standard paraphrasing dictionary. Will that be all right?";
+"SettingTableViewController_GoToReleaseLog" = "Update log";
 
 // "ここに書いた文をテストで読み上げます。";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "Speak the sentence for test.";
