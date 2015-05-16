@@ -225,6 +225,10 @@ Correction of the problem
 ・設定タブに更新履歴の情報を追加しました。
 ・アプリの更新があった時に、一回だけダイアログを表示するようにしました。
 
+追伸：
+評価やレビュー、ありがとうございます。今回はほとんど更新はありません。
+やはり、検索タブの所の PickerView(検索の順位付けのくるくる回るUI)が入ってしまって「検索開始」ボタンが見えなくなってしまっていて、スクロールしないと駄目になっていたのが原因(?)で検索出来ない人がおられるようでしたので、ちょっとUIを変えました。
+あと、ことせかいをアップデートしたのが気づいてもらえないかもしれないなぁ、と思って、バージョン番号が変わった時には一回だけダイアログを出すようにしました。ということで、ちょっとウザくなってしまいます。すみません。
 
 # Version 1.1.2
 
@@ -233,6 +237,50 @@ Interface change
 - in Search tab, "Search order" is now show after tap.
 - Add "Update log" in Settings tab.
 - Update Notice dialog added. This is displayed first time only.
+
+
+# Ver 1.1.3
+
+問題の修正
+
+・なろう検索のタブで、検索用文字列を入力できなくなっていた問題を修正しました。
+
+追伸：
+評価やレビュー、ありがとうございます。今回は検索が無意味になってしまうようなバグを入れたままリリースしてしまって申し訳ありませんでした。
+焦って提出して安心したままじゃ駄目ですね…… 本当にすみませんでした。
+
+# Version 1.1.3
+
+Bug fix
+
+- in Search tab, Search string is now can editable.
+
+expedited app review に出した時の文言
+---begin---
+なろう検索のタブで、検索用文字列を入力できなくなっていた問題を修正しています。
+この部分が入力できないと、検索で好みの小説を探すことができないため、あまり小説が選べないアプリになってしまっています。
+
+問題の再現手順：
+
+1. なろう検索 タブを開く
+2. 一番上の「検索文字列」のテキストボックスを選択
+3. 文字を入力する
+
+3. のステップで、旧バージョンでは文字が入力できませんでした。
+
+In English
+
+In Search tab, Search string is now can editable.
+
+
+The reproduction procedure of the problem:
+
+1. Open the search tab
+2. Choose the text box of a top "search string"
+3. Input a letter
+
+In 3. steppe, It was not able to input a letter in the old version.
+----end----
 
 # メモ
 

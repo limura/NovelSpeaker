@@ -203,7 +203,7 @@
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
 {
     NSUInteger tag = [textField tag];
-    if (tag == SEARCH_TEXT_BOX_TAG || tag == SEARCH_ORDER_TEXT_BOX_TAG) {
+    if (tag == SEARCH_ORDER_TEXT_BOX_TAG) {
         return NO;
     }
     return YES;

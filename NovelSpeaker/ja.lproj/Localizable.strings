@@ -92,13 +92,20 @@
 "NarouSearchViewController_DoneKeyboardBarItem" = "決定";
 
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.3
 
-- なろう検索で「検索開始」ボタンを押しやすくしました
+・なろう検索のタブで、検索用文字列を入力できなくなっていた問題を修正しました
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Ver 1.1.3
+
+問題の修正
+
+・なろう検索のタブで、検索用文字列を入力できなくなっていた問題を修正しました。
+
+
 # Ver 1.1.2
 
 インタフェースの変更

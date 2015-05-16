@@ -93,13 +93,20 @@
 "NarouSearchViewController_DoneKeyboardBarItem" = "done";
 
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.3
 
-- in Search tab, \"Search order\" is now show after tap.
+- in Search tab, Search string is now can editable.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.3
+
+Bug fix
+
+- in Search tab, Search string is now can editable.
+
+
 # Version 1.1.2 release note
 
 Interface change
