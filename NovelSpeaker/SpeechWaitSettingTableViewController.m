@@ -123,7 +123,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
             continue;
         }
         SpeechWaitConfigCacheData* waitConfig = speechWaitConfigList[i];
-        NSLog([[NSString alloc] initWithFormat:@"%ld -> %@ %f", i, waitConfig.targetText, [waitConfig.delayTimeInSec floatValue]]);
+        //NSLog([[NSString alloc] initWithFormat:@"%ld -> %@ %f", (unsigned long)i, waitConfig.targetText, [waitConfig.delayTimeInSec floatValue]]);
         if (waitConfig.targetText == nil) {
             cell.textLabel.text = @"-";
         }else{
@@ -190,7 +190,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 #endif
         default:
         {
-            unsigned int i = indexPath.row - 1;
+            long i = indexPath.row - 1;
             NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
             if (speechWaitConfigList == nil || [speechWaitConfigList count] <= i) {
                 return;
@@ -211,7 +211,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
         if(speechWaitConfigList == nil
            || [speechWaitConfigList count] <= i)
         {
-            NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[speechWaitConfigList count], i);
+            NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[speechWaitConfigList count], (unsigned long)i);
             return;
         }
         SpeechWaitConfigCacheData* waitConfig = speechWaitConfigList[i];

@@ -298,3 +298,5 @@ http://blog.gentlesoft.net/article/56456255.html
 
 
 http://d.hatena.ne.jp/glass-_-onion/20120728/1343471940
+
+284話 たいがとの接触

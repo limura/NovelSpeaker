@@ -116,7 +116,7 @@
         return;
     }
     NSRange range = self.textView.selectedRange;
-    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld", self.NarouContentDetail.title, range.location]]; // NSLog
+    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld", self.NarouContentDetail.title, (unsigned long)range.location]]; // NSLog
     [self SaveCurrentReadingPoint];
 }
 

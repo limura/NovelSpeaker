@@ -85,7 +85,7 @@
         NSUInteger aLength = [a.from length];
         NSUInteger bLength = [b.from length];
         if (aLength == bLength){
-            return [a.from compare:NSOrderedSame];
+            return [a.from compare:b.from];
         }
         if (aLength > bLength) {
             return NSOrderedAscending;
@@ -189,7 +189,6 @@
     }
     if ([noConvString length] > 0) {
         [result AddDisplayText:noConvString speechText:noConvString];
-        noConvString = [NSMutableString new];
     }
     
     return result;

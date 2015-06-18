@@ -165,6 +165,7 @@
             break;
         case CACHE_FOLDER_TYPE:
             directoryURL = [[fileManager URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] lastObject];
+            break;
         default:
             NSLog(@"ERROR: FolderType is unknown.");
             return nil;
