@@ -87,7 +87,9 @@
     //if ([m_Synthesizer isSpeaking]) {
         result = [m_Synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
     //}
+    
     // なにやら読み上げが失敗するようになることがあるようなので、Stopのタイミングで AVSpeechSynthesizer object を作り直すようにします
+    m_Synthesizer.delegate = nil; // 先に delegate は消しておきます
     m_Synthesizer = [AVSpeechSynthesizer new];
     m_Synthesizer.delegate = self;
     
