@@ -14,6 +14,8 @@
 #import "GlobalDataSingleton.h"
 #import "NarouSearchResultDetailViewController.h"
 #import "EasyShare.h"
+#import "EasyAlert.h"
+#import "CreateSpeechModSettingViewController.h"
 
 @interface SpeechViewController ()
 
@@ -67,7 +69,12 @@
     
     // textView で選択範囲が変えられた時のイベントハンドラに自分を登録します
     self.textView.delegate = self;
-        
+
+    // 読み替え辞書への直接登録メニューを追加します
+    UIMenuController* menuController = [UIMenuController sharedMenuController];
+    UIMenuItem* speechModMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"SpeechViewController_AddSpeechModSettings", @"読み替え辞書へ登録") action:@selector(setSpeechModSetting:)];
+    [menuController setMenuItems:@[speechModMenuItem]];
+    
     m_bIsSpeaking = NO;
 }
 
@@ -106,6 +113,21 @@
     
     [super viewWillDisappear:animated];
 }
+
+/// 現在選択されている文字列を取得します
+- (NSString*) GetCurrentSelectedString {
+    UITextRange* range = [self.textView selectedTextRange];
+    if ([range isEmpty]){
+        return nil;
+    }
+    return [self.textView textInRange:range];
+}
+
+/// 読み替え辞書への登録イベントハンドラ
+- (void) setSpeechModSetting:(id)sender {
+    [self performSegueWithIdentifier:@"SpeechViewToSpeechModSetingsSegue" sender:self];
+}
+
 
 /// UITextField でカーソルの位置が変わった時に呼び出されるはずです。
 - (void) textViewDidChangeSelection: (UITextView*) textView
@@ -364,6 +386,12 @@
     if ([[segue identifier] isEqualToString:@"speechToDetailSegue"]) {
         NarouSearchResultDetailViewController* nextViewController = [segue destinationViewController];
         nextViewController.NarouContentDetail = self.NarouContentDetail;
+    }
+    
+    // 読み替え辞書登録時の値を放り込みます
+    if ([[segue identifier] isEqualToString:@"SpeechViewToSpeechModSetingsSegue"]) {
+        CreateSpeechModSettingViewController* nextViewController = [segue destinationViewController];
+        nextViewController.targetBeforeString = [self GetCurrentSelectedString];
     }
 }
 

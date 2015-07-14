@@ -33,6 +33,9 @@
     
     m_Speaker = [Speaker new];
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
+    if (self.targetBeforeString != nil) {
+        self.beforeTextField.text = self.targetBeforeString;
+    }
 }
 
 - (void)didReceiveMemoryWarning

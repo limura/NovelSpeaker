@@ -23,4 +23,5 @@
 @property (weak, nonatomic) IBOutlet UITextField *beforeTextField;
 @property (weak, nonatomic) IBOutlet UITextField *afterTextField;
 @property (nonatomic) id<CreateNewSpeechModSettingDelegate> createNewSpeechModSettingDelegate;
+@property NSString *targetBeforeString;
 @end

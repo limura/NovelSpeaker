@@ -58,6 +58,8 @@
 "SpeechViewController_TweetMessage" = "%@ %@ #narou #NovelSpeaker %@ %@";
 "SpeechViewController_NoTwitterAccount_Title" = "No Twitter Accounts";
 "SpeechViewController_NoTwitterAccount_Message" = "There are no Twitter accounts configured. You can add or create a Twitter account in Settings.";
+"SpeechViewController_AddSpeechModSettings" = "Add to speech mod settings";
+
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";
 "SpeechWaitConfigSettingView_PleaseSetSpeechText" = "読み上げテスト用の文字列を設定してください";
