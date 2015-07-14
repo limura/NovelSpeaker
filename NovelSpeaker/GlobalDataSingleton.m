@@ -1117,7 +1117,12 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げ停止のタイマー呼び出しのイベントハンドラ
 - (void)MaxSpeechTimeInSecEventHandler:(NSTimer*)timer
 {
-    [self StopSpeech];
+    if (m_MaxSpeechTimeInSecTimer != nil) {
+        [[GlobalDataSingleton GetInstance] AddLogString:@"MaxSpeechTimeInSecEventHandler が呼び出されたので読み上げを止めます。"]; // NSLog
+        [self StopSpeech];
+    }else{
+        [[GlobalDataSingleton GetInstance] AddLogString:@"MaxSpeechTimeInSecEventHandler が呼び出されたけれど、m_MaxSpeechTimeInSecTimer が nil でした。"]; // NSLog
+    }
 }
 
 /// 読み上げを開始します。

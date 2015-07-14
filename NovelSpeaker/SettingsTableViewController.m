@@ -11,7 +11,7 @@
 #import "MaxSpeechTimeTableViewCell.h"
 #import "EasyShare.h"
 
-#undef USE_LOG_VIEW
+#define USE_LOG_VIEW
 
 static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellDefault";
 
