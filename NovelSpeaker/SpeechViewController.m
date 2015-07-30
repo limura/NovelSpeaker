@@ -138,7 +138,7 @@
         return;
     }
     NSRange range = self.textView.selectedRange;
-    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld", self.NarouContentDetail.title, (unsigned long)range.location]]; // NSLog
+    //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld", self.NarouContentDetail.title, (unsigned long)range.location]]; // NSLog
     [self SaveCurrentReadingPoint];
 }
 
@@ -161,7 +161,7 @@
     StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
     if (story == nil) {
         // なにやら設定されていないようなので、最初の章を読み込むことにします。
-        [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController なにやら読み上げようの章が設定されていないようなので、最初の章を読み込みます"]]; // NSLog
+        [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込みます"]]; // NSLog
 
         NSLog(@"GetReadingChapter return nil. なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込むことにします。");
         story = [[GlobalDataSingleton GetInstance] SearchStory:content.ncode chapter_no:1];

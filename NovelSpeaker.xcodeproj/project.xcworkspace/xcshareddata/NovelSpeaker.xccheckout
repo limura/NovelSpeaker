@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>02B7897D-9569-4622-8D37-FDCA81B421BB</string>
 	<key>IDESourceControlProjectName</key>
-	<string>novelspeaker</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>ED22387A6190A983C9F166816E79F817447D340F</key>
 		<string>github.com:limura/NovelSpeaker.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>novelspeaker.xcodeproj</string>
+	<string>novelspeaker.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>ED22387A6190A983C9F166816E79F817447D340F</key>

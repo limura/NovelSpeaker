@@ -602,7 +602,7 @@ static GlobalDataSingleton* _singleton = nil;
     if (location == [story.content length] && [story.content length] > 0) {
         location = [story.content length] - 1;
     }
-    [self AddLogString:[[NSString alloc] initWithFormat:@"読み上げ位置を保存します。(%@) 章: %d 位置: %ld/%ld", content.title, [story.chapter_number intValue], (long)location, (unsigned long)[story.content length]]]; // NSLog
+    //[self AddLogString:[[NSString alloc] initWithFormat:@"読み上げ位置を保存します。(%@) 章: %d 位置: %ld/%ld", content.title, [story.chapter_number intValue], (long)location, (unsigned long)[story.content length]]]; // NSLog
 
     __block BOOL result = false;
     dispatch_sync(m_CoreDataAccessQueue, ^{
@@ -1107,7 +1107,6 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げ停止のタイマーを停止します
 - (void)StopMaxSpeechTimeInSecTimer
 {
-    return;
     if (m_MaxSpeechTimeInSecTimer != nil && [m_MaxSpeechTimeInSecTimer isValid]) {
         [m_MaxSpeechTimeInSecTimer invalidate];
     }
@@ -1118,8 +1117,12 @@ static GlobalDataSingleton* _singleton = nil;
 - (void)MaxSpeechTimeInSecEventHandler:(NSTimer*)timer
 {
     if (m_MaxSpeechTimeInSecTimer != nil) {
-        [[GlobalDataSingleton GetInstance] AddLogString:@"MaxSpeechTimeInSecEventHandler が呼び出されたので読み上げを止めます。"]; // NSLog
-        [self StopSpeech];
+        if (m_MaxSpeechTimeInSecTimer != timer) {
+            [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"MaxSpeechTimeInSecEventHandler が呼び出されたけれど、Timer のポインタが違ったので読み上げは停止しません。(timer: %p, m_MaxSpeechTimeInSecTimer: %p", timer, m_MaxSpeechTimeInSecTimer]]; // NSLog
+        }else{
+            [[GlobalDataSingleton GetInstance] AddLogString:@"MaxSpeechTimeInSecEventHandler が呼び出されたので読み上げを止めます。"]; // NSLog
+            [self StopSpeech];
+        }
     }else{
         [[GlobalDataSingleton GetInstance] AddLogString:@"MaxSpeechTimeInSecEventHandler が呼び出されたけれど、m_MaxSpeechTimeInSecTimer が nil でした。"]; // NSLog
     }
