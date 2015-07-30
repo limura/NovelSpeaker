@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "NiftySpeaker.h"
 #import "SpeechBlock.h"
+#import "GlobalDataSingleton.h"
 
 @interface SpeechBlockConverter : NSObject
 
@@ -148,5 +149,38 @@
         XCTAssertEqual(block.speechConfig.beforeDelay, answer.delay, @"block %d", i);
     }
 }
+
+/// 登録されている読み替え辞書のリストを , @"..", @".." の形式で(そのまま source にコピペ出来る感じで)書き出します。
+/// ただ、なにやら変なバグがあるのでそのままコピペすると残念なことになります。
+/// 具体的には "ほ\222げ" みたいなのが出るとか、, @"..", @"..", @".." みたいな行(2つでなく3つある)とかが出て謎です。(´・ω・`)
+- (void) testDumpSpeechModDictionary
+{
+    NSMutableString* strBuf = [NSMutableString new];
+    [strBuf appendFormat:@"\n"];
+    
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NSArray* speechModArray = [globalData GetAllSpeechModSettings];
+    for (SpeechModSettingCacheData* modSetting in speechModArray) {
+        if (modSetting == nil || modSetting.beforeString == nil || modSetting.afterString == nil
+            || [modSetting.beforeString length] <= 0
+            || [modSetting.afterString length] <= 0) {
+            continue;
+        }
+        [strBuf appendFormat:@", @\"%@\", @\"%@\"\n", modSetting.beforeString, modSetting.afterString];
+    }
+    NSLog(@"%@", strBuf);
+}
+
+/*
+ /// 登録されている読み替え辞書を全部消し飛ばします
+- (void) testClearSpeechMod
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NSArray* speechModArray = [globalData GetAllSpeechModSettings];
+    for (SpeechModSettingCacheData* modSetting in speechModArray) {
+        [globalData DeleteSpeechModSetting:modSetting];
+    }
+}
+ */
 
 @end
