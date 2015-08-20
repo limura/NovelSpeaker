@@ -16,6 +16,7 @@
 #import "EasyShare.h"
 #import "EasyAlert.h"
 #import "CreateSpeechModSettingViewController.h"
+#import "EditUserBookViewController.h"
 
 @interface SpeechViewController ()
 
@@ -37,10 +38,23 @@
     if ([[GlobalDataSingleton GetInstance] isSpeaking]) {
         speakText = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");
     }
+    NSMutableArray* buttonItemList = [NSMutableArray new];
     startStopButton = [[UIBarButtonItem alloc] initWithTitle:speakText style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
-    detailButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"SpeechViewController_Detail", @"詳細") style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
-    shareButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonClicked:)];
-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:startStopButton, detailButton, shareButton, nil];
+    [buttonItemList addObject:startStopButton];
+    
+    NSString* detailText;
+    if ([self.NarouContentDetail isUserCreatedContent]) {
+        detailText = NSLocalizedString(@"SpeechViewController_Edit", @"編集");
+    }else{
+        detailText = NSLocalizedString(@"SpeechViewController_Detail", @"詳細");
+    }
+    detailButton = [[UIBarButtonItem alloc] initWithTitle:detailText style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
+    [buttonItemList addObject:detailButton];
+    if ([self.NarouContentDetail isUserCreatedContent] != true) {
+        shareButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonClicked:)];
+        [buttonItemList addObject:shareButton];
+    }
+    self.navigationItem.rightBarButtonItems = buttonItemList;
     self.navigationItem.title = self.NarouContentDetail.title;
 
 #if 0 // ボタンで章を移動するようにします。
@@ -137,7 +151,7 @@
         // 話し中であればこれはバンバン呼び出されるはずだし、勝手に NiftySpeaker側 で読み上げ位置の更新をしているはずなので無視して良いです。
         return;
     }
-    NSRange range = self.textView.selectedRange;
+    //NSRange range = self.textView.selectedRange;
     //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld", self.NarouContentDetail.title, (unsigned long)range.location]]; // NSLog
     [self SaveCurrentReadingPoint];
 }
@@ -331,6 +345,11 @@
     [self SaveCurrentReadingPoint];
 }
 
+- (void)UpdateChapterIndicatorLabel:(int)current max:(int)max
+{
+    self.ChapterIndicatorLabel.text = [[NSString alloc] initWithFormat:@"%d/%d", current, max];
+}
+
 /// 読み上げ用の文字列を設定します。
 /// 読み上げ中の場合は読み上げは停止されます。
 /// 読み上げられるのは text で、range で指定されている点を読み上げ開始点として読み上げを開始します。
@@ -347,11 +366,16 @@
     self.textView.selectedRange = range;
     [self.textView scrollRangeToVisible:range];
     self.ChapterSlider.value = [story.chapter_number floatValue];
+    [self UpdateChapterIndicatorLabel:[story.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];
     m_CurrentReadingStory = story;
     [[GlobalDataSingleton GetInstance] SetSpeechStory:story];
 }
 
-- (void)detailButtonClick:(id)sender {    
+- (void)detailButtonClick:(id)sender {
+    if ([self.NarouContentDetail isUserCreatedContent]) {
+        [self performSegueWithIdentifier:@"EditUserTextSegue" sender:self];
+        return;
+    }
     [self performSegueWithIdentifier:@"speechToDetailSegue" sender:self];
 }
 
@@ -393,12 +417,19 @@
         CreateSpeechModSettingViewController* nextViewController = [segue destinationViewController];
         nextViewController.targetBeforeString = [self GetCurrentSelectedString];
     }
+    
+    // ユーザ作成のコンテンツだった場合
+    if ([[segue identifier] isEqualToString:@"EditUserTextSegue"]) {
+        EditUserBookViewController* nextViewController = [segue destinationViewController];
+        nextViewController.NarouContentDetail = self.NarouContentDetail;
+    }
+
 }
 
 // スライダーが変更されたとき。
 - (IBAction)ChapterSliderChanged:(UISlider *)sender {
     [self stopSpeech];
-    int chapter = self.ChapterSlider.value;
+    int chapter = (self.ChapterSlider.value + 0.5f);
     if([self ChangeChapterWithLastestReadLocation:chapter] != true)
     {
         [self SetReadingPointFailedMessage];

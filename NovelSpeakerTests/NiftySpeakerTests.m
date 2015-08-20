@@ -166,9 +166,11 @@
             || [modSetting.afterString length] <= 0) {
             continue;
         }
-        [strBuf appendFormat:@", @\"%@\", @\"%@\"\n", modSetting.beforeString, modSetting.afterString];
+        [strBuf appendFormat:@", @\"%@\", @\"%@\"\n"
+         , modSetting.beforeString
+         , modSetting.afterString];
     }
-    NSLog(@"%@", strBuf);
+    NSLog(@"%@", [NSString stringWithCString:[strBuf cStringUsingEncoding:NSUTF8StringEncoding] encoding:NSNonLossyASCIIStringEncoding]);
 }
 
 /*

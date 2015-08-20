@@ -26,6 +26,7 @@
 "GlobalDataSingleton_NoPlaing" = "No Playing";
 "GlobalDataSingleton_Conversation1" = "Conversation 1";
 "GlobalDataSingleton_Conversation2" = "Conversation 2";
+"GlobalDataSingleton_NewUserBookTitle" = "New User Book";
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "Title: %@";
 "NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "It was added to download queue.";
@@ -45,6 +46,12 @@
 "SettingTableViewController_ConfirmAddDefaultSpeechModSetting" = "Confirm";
 "SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage" = "Add a standard paraphrasing dictionary. Will that be all right?";
 "SettingTableViewController_GoToReleaseLog" = "Update log";
+"SettingTableViewController_CreateNewUserText" = "Add own created book";
+"SettingTableViewController_RightNotation" = "Right notation";
+
+"EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
+"EditUserBookViewController_NewChapterCreated" = "New chapter added.";
+"EditUserBookViewController_ConfirmDeleteThisChapter" = "Delete this chapter. Will that be all right?";
 
 // "ここに書いた文をテストで読み上げます。";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "Speak the sentence for test.";
@@ -52,6 +59,7 @@
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@ to %@";
 "SpeechViewController_Speak" = "Speak";
 "SpeechViewController_Detail" = "Detail";
+"SpeechViewController_Edit" = "Edit";
 "SpeechViewController_ContentReadFailed" = "Content read failed. This problem may dissolve by choosing \"Detail\" and \"Download\", and performing a redownload.";
 "SpeechViewController_Stop" = "Stop";
 "SpeechViewController_SpeechStopedByEnd" = "Because it reached at the end of a book, I stopped reading aloud.";
@@ -92,12 +100,20 @@
 "NarouSearchResultDetailViewController_GoToMypage" = "Move to writer page";
 "NarouSearchResultDetailViewController_GoToMyPageMessage" = "Move to writer page. sure?";
 
+"EditUserBookViewController_PleaseInputTitle" = "Please Input Title";
+"EditUserBookViewController_PleaseInputBookBody" = "Please Input content text";
+"EditUserBookViewController_CanNotDeleteChapter" = "Chapter delete failed.";
+"EditUserBookViewController_ChapterDeleted" = "Chapter deleted.";
+"EditUserBookViewController_NewChapterCreated" = "New chapter created.";
+"EditUserBookViewContoller_InputTextHeare" = "Input text here";
+"EditUserBookViewController_AddNewStoryFailed" = "Chapter add failed.";
 "NarouSearchViewController_DoneKeyboardBarItem" = "done";
 
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.4
 
 - Add \"Add default correction of the reading\" menu on text long tap menu.
+- Add \"Add own created book\" feature at Settings page.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -107,6 +123,7 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 Interface change
 
 - Add \"Add default correction of the reading\" menu on text long tap menu.
+- Add \"Add own created book\" feature at Settings page. You can write yourself book now!
 
 Bug fix.
 

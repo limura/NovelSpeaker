@@ -126,4 +126,15 @@
     return true;
 }
 
+/// ユーザによる自作コンテンツか否かを取得します
+/// 今の所、単に ncode として保存されている文字列の頭が "_u" になっているか否かを判定しているだけです。
+- (BOOL)isUserCreatedContent
+{
+    if (self.ncode == nil) {
+        return false;
+    }
+    return [self.ncode hasPrefix:@"_u"];
+}
+
+
 @end

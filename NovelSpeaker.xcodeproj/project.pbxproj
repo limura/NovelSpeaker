@@ -89,6 +89,7 @@
 		21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA31967FD390039A706 /* NarouDownloadQueue.m */; };
 		21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD3196831070039A706 /* DownloadStatusViewController.m */; };
 		21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD6196843280039A706 /* BookShelfTableViewController.m */; };
+		21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */; };
 		21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */; };
 		21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */; };
 		21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */; };
@@ -109,6 +110,7 @@
 		21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21F054F41917E0F200CC6BA9 /* InfoPlist.strings */; };
 		21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */; };
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
+		2217FB76B0586FC596BA93BC /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 517C1C276F8A1290A574A923 /* libPods.a */; };
 		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
 		4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */; };
 /* End PBXBuildFile section */
@@ -267,6 +269,8 @@
 		21C74FD3196831070039A706 /* DownloadStatusViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadStatusViewController.m; sourceTree = "<group>"; };
 		21C74FD5196843280039A706 /* BookShelfTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewController.h; sourceTree = "<group>"; };
 		21C74FD6196843280039A706 /* BookShelfTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewController.m; sourceTree = "<group>"; };
+		21D317E51B6BBF3600023B3B /* EditUserBookViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditUserBookViewController.h; sourceTree = "<group>"; };
+		21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditUserBookViewController.m; sourceTree = "<group>"; };
 		21D8FC4D19FC985B00CCF1B6 /* LPPerformanceChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LPPerformanceChecker.h; sourceTree = "<group>"; };
 		21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LPPerformanceChecker.m; sourceTree = "<group>"; };
 		21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModel4to5.xcmappingmodel; sourceTree = "<group>"; };
@@ -299,10 +303,13 @@
 		21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NovelSpeakerTests.m; sourceTree = "<group>"; };
 		21F7DE43197EB33900BD2899 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Story.h; path = DataModelMapping/Story.h; sourceTree = "<group>"; };
 		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
+		3A40BBF8597FA93B09C50AD9 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
 		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
 		4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultTableViewController.h; sourceTree = "<group>"; };
 		4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchResultTableViewController.m; sourceTree = "<group>"; };
+		517C1C276F8A1290A574A923 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B730BF0B8C84D65036267414 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -316,6 +323,7 @@
 				21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */,
 				21F054D11917E0F200CC6BA9 /* UIKit.framework in Frameworks */,
 				21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */,
+				2217FB76B0586FC596BA93BC /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,6 +476,7 @@
 				21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */,
 				21F054CB1917E0F200CC6BA9 /* Frameworks */,
 				21F054CA1917E0F200CC6BA9 /* Products */,
+				F592A12F5DD135799AA9A812 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -492,6 +501,7 @@
 				21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */,
 				21F054D01917E0F200CC6BA9 /* UIKit.framework */,
 				21F054EB1917E0F200CC6BA9 /* XCTest.framework */,
+				517C1C276F8A1290A574A923 /* libPods.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -595,8 +605,19 @@
 				213A4DD41A77D74F00E9EC13 /* DebugLogViewController.m */,
 				21E704CD1AF741350071F31E /* UpdateLogViewController.h */,
 				21E704CE1AF741350071F31E /* UpdateLogViewController.m */,
+				21D317E51B6BBF3600023B3B /* EditUserBookViewController.h */,
+				21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */,
 			);
 			name = ViewControllers;
+			sourceTree = "<group>";
+		};
+		F592A12F5DD135799AA9A812 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				B730BF0B8C84D65036267414 /* Pods.debug.xcconfig */,
+				3A40BBF8597FA93B09C50AD9 /* Pods.release.xcconfig */,
+			);
+			name = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -606,9 +627,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21F054FB1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeaker" */;
 			buildPhases = (
+				DB54A7CBA997776D51A7AC63 /* Check Pods Manifest.lock */,
 				21F054C51917E0F200CC6BA9 /* Sources */,
 				21F054C61917E0F200CC6BA9 /* Frameworks */,
 				21F054C71917E0F200CC6BA9 /* Resources */,
+				9F1D2458E20E3AD67D47BA58 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -732,6 +755,39 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		9F1D2458E20E3AD67D47BA58 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DB54A7CBA997776D51A7AC63 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		21F054C51917E0F200CC6BA9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -765,6 +821,7 @@
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
 				213A4DD51A77D74F00E9EC13 /* DebugLogViewController.m in Sources */,
 				21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */,
+				21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */,
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
@@ -1004,16 +1061,17 @@
 		};
 		21F054FC1917E0F200CC6BA9 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B730BF0B8C84D65036267414 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "e08a8b43-e00c-4bad-a61b-e15ef49794ab";
+				PROVISIONING_PROFILE = "45276cbc-8f9b-4c36-aa68-830e53884058";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1021,16 +1079,17 @@
 		};
 		21F054FD1917E0F200CC6BA9 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3A40BBF8597FA93B09C50AD9 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "e08a8b43-e00c-4bad-a61b-e15ef49794ab";
+				PROVISIONING_PROFILE = "45276cbc-8f9b-4c36-aa68-830e53884058";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};

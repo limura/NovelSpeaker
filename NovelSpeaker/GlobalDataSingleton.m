@@ -470,16 +470,20 @@ static GlobalDataSingleton* _singleton = nil;
     BOOL result = false;
     NarouContent* parentCoreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:parentContent.ncode];
     if (parentCoreDataContent == nil) {
+        //NSLog(@"UpdateStoryThreadUnsafe failed. parenteCoreDataContent is nil");
         result = false;
     }else{
         Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:parentContent.ncode chapter_no:chapter_number];
         if (coreDataStory == nil) {
+            //NSLog(@"UpdateStoryThreadUnsafe: create new story for \"%@\" chapter: %d", parentContent.ncode, chapter_number);
             coreDataStory = [self CreateNewStoryThreadUnsafe:parentCoreDataContent content:content chapter_number: chapter_number];
         }
         coreDataStory.content = content;
         coreDataStory.parentContent = parentCoreDataContent;
         coreDataStory.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
-        [m_CoreDataObjectHolder save];
+        if(![m_CoreDataObjectHolder save]){
+            //NSLog(@"UpdateStoryThreadUnsafe: m_CoreDataObjectHolder save failed.");
+        }
         result = true;
     }
 
@@ -1852,5 +1856,47 @@ static GlobalDataSingleton* _singleton = nil;
     [userDefaults synchronize];
 }
 
+/// 新しくユーザ定義の本を追加します。ncode に "_n" で始まるユーザ定義用の code が使われ、
+/// それ以外の項目は未設定のものが生成されます。
+/// 生成に失敗すると nil を返します。
+/// 生成しただけでまだDBには登録されていないので、内容を更新した上で UpdateNarouContent で登録してください。
+- (NarouContentCacheData*)CreateNewUserBook
+{
+    NSString* tmpNcode = nil;
+    NarouContentCacheData* content = nil;
+    int n = arc4random_uniform(0x7fffffff);
+    for (int i = 0; i < 1000; i++) {
+        tmpNcode = [[NSString alloc] initWithFormat:@"_u%08x", n + i];
+        content = [self SearchNarouContentFromNcode:tmpNcode];
+        if (content == nil) {
+            break;
+        }
+    }
+    if (tmpNcode == nil || content != nil) {
+        return nil;
+    }
+    content = [NarouContentCacheData new];
+    content.title = NSLocalizedString(@"GlobalDataSingleton_NewUserBookTitle", @"新規ユーザ小説");
+    content.ncode = tmpNcode;
+    content.userid = @"";
+    content.writer = @"";
+    content.story = @"";
+    content.genre = [[NSNumber alloc] initWithInt:0];
+    content.keyword = @"";
+    content.general_all_no = [[NSNumber alloc] initWithInt:0];
+    content.end = [[NSNumber alloc] initWithBool:false];
+    content.global_point = [[NSNumber alloc] initWithInt:0];
+    content.fav_novel_cnt = [[NSNumber alloc] initWithInt:0];
+    content.review_cnt = [[NSNumber alloc] initWithInt:0];
+    content.all_point = [[NSNumber alloc] initWithInt:0];
+    content.all_hyoka_cnt = [[NSNumber alloc] initWithInt:0];
+    content.sasie_cnt = [[NSNumber alloc] initWithInt:0];
+    content.novelupdated_at = [NSDate date];
+    content.reading_chapter = [[NSNumber alloc] initWithInt:1];
+    content.is_new_flug = [[NSNumber alloc] initWithBool:false];
+    
+    content.currentReadingStory = nil;
 
+    return content;
+}
 @end

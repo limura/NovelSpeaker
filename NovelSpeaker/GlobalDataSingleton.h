@@ -301,4 +301,7 @@
 
 /// 今回起動した時のバージョン番号を保存します。
 - (void)UpdateCurrentVersionSaveData;
+
+/// 新しくユーザ定義の本を追加します。必須項目以外は未設定のものが生成されます。
+- (NarouContentCacheData*)CreateNewUserBook;
 @end

@@ -10,8 +10,9 @@
 #import "GlobalDataSingleton.h"
 #import "MaxSpeechTimeTableViewCell.h"
 #import "EasyShare.h"
+#import "EditUserBookViewController.h"
 
-#define USE_LOG_VIEW
+#undef USE_LOG_VIEW
 
 static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellDefault";
 
@@ -67,7 +68,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return 8
+    return 10
 #ifdef USE_LOG_VIEW
     + 1
 #endif
@@ -98,16 +99,22 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_SettingOfTheSpeechDelay", @"読み上げ時の間の設定");
             break;
         case 5:
-            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_AddDefaultCorrectionOfTheReading", @"標準の読みの修正を上書き追加");
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_CreateNewUserText", @"新規自作本の追加");
             break;
         case 6:
-            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GetNcodeDownloadURLScheme", @"再ダウンロード用URLスキームの取得");
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_AddDefaultCorrectionOfTheReading", @"標準の読みの修正を上書き追加");
             break;
         case 7:
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GetNcodeDownloadURLScheme", @"再ダウンロード用URLスキームの取得");
+            break;
+        case 8:
             cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GoToReleaseLog", @"更新履歴");
             break;
+        case 9:
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_RightNotation", @"権利表記");
+            break;
 #ifdef USE_LOG_VIEW
-        case 8:
+        case 10:
             cell.textLabel.text = @"debug log";
             break;
 #endif
@@ -136,9 +143,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     switch (indexPath.row) {
-        case 0: case 1: case 2: case 3: case 5: case 6: case 7:
+        case 0: case 1: case 2: case 3: case 5: case 6: case 7: case 8: case 9:
 #ifdef USE_LOG_VIEW
-        case 8:
+        case 10:
 #endif
             return [self GetDefaultTableView:tableView cellForRowAtIndexPath:indexPath];
             break;
@@ -180,15 +187,26 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     NSMutableString* shareText = [[NSMutableString alloc] initWithString:@"novelspeaker://downloadncode/"];
     
     for (NarouContentCacheData* content in contentList) {
+        if ([content isUserCreatedContent]) {
+            continue;
+        }
         [shareText appendString:[[NSString alloc] initWithFormat:@"%@-", content.ncode]];
     }
     NSString* shareURL = [shareText substringToIndex:[shareText length] - 1];
 
     [m_EasyAlert ShowAlertOneButton:NSLocalizedString(@"SettingTableViewController_ShareNcodeListURLScheme", @"本棚に登録されている小説の再ダウンロードURLスキームを生成します")
-                            message:NSLocalizedString(@"SettingTableViewController_ShareNcodeListURLSchemeMessage", @"現在 本棚に登録されている全ての小説を再ダウンロードさせるためのURLを生成しました。\r\nことせかい をアンインストールしてしまっても、このURLを開けばもう一度小説をダウンロードさせることができます。バックアップ用途などに使用してください。(自分宛てに mail するなどが良いかもしれません)")
+                            message:NSLocalizedString(@"SettingTableViewController_ShareNcodeListURLSchemeMessage", @"現在 本棚に登録されている全ての「小説家になろう」の小説を再ダウンロードさせるためのURLを生成しました。\r\nことせかい をアンインストールしてしまっても、このURLを開けばもう一度小説をダウンロードさせることができます。バックアップ用途などに使用してください。(自分宛てに mail するなどが良いかもしれません)")
                        okButtonText:NSLocalizedString(@"OK_button", @"OK") okActionHandler:^(UIAlertAction *action){
                            [EasyShare ShareText:shareURL viewController:self barButton:nil];
                        }];
+}
+
+// 新規のユーザ本を追加して、編集ページに遷移する
+- (void)CreateNewUserText{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    
+    m_EditUserBookViewNarouContent = [globalData CreateNewUserBook];
+    [self performSegueWithIdentifier:@"CreateNewUserTextSegue" sender:self];
 }
 
 // セルが選択された時
@@ -208,16 +226,22 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             [self performSegueWithIdentifier:@"textDelaySettingSegue" sender:self];
             break;
         case 5:
-            [self ConfirmAddDefaultSpeechModSetting];
+            [self CreateNewUserText];
             break;
         case 6:
-            [self ShareNcodeListURLScheme];
+            [self ConfirmAddDefaultSpeechModSetting];
             break;
         case 7:
+            [self ShareNcodeListURLScheme];
+            break;
+        case 8:
             [self performSegueWithIdentifier:@"updateLogSegue" sender:self];
             break;
+        case 9:
+            [self performSegueWithIdentifier:@"CreditPageSegue" sender:self];
+            break;
 #ifdef USE_LOG_VIEW
-        case 8:
+        case 10:
             [self performSegueWithIdentifier:@"debugLogViewSegue" sender:self];
             break;
 #endif
@@ -234,9 +258,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     UITableViewCell* cell = nil;
     if (cell == nil) {
         switch (indexPath.row) {
-            case 0: case 1: case 2: case 3: case 5: case 6: case 7:
+            case 0: case 1: case 2: case 3: case 5: case 6: case 7: case 8: case 9:
 #ifdef USE_LOG_VIEW
-            case 8:
+            case 10:
 #endif
                 return 40.0f;
                 break;
@@ -291,7 +315,6 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 }
 */
 
-/*
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
@@ -299,7 +322,11 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
+    if ([[segue identifier] isEqualToString:@"CreateNewUserTextSegue"]) {
+        EditUserBookViewController* nextViewController = [segue destinationViewController];
+        nextViewController.NarouContentDetail = m_EditUserBookViewNarouContent;
+    }
 }
-*/
+
 
 @end

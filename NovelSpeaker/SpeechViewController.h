@@ -27,6 +27,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *NextChapterButton;
 
 @property (weak, nonatomic) IBOutlet UIButton *PrevChapterButton;
+@property (weak, nonatomic) IBOutlet UILabel *ChapterIndicatorLabel;
 
 // 前のページから得られる表示するための情報
 @property NarouContentCacheData* NarouContentDetail;

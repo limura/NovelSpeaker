@@ -26,6 +26,7 @@
 "GlobalDataSingleton_NoPlaing" = "再生していません";
 "GlobalDataSingleton_Conversation1" = "会話文";
 "GlobalDataSingleton_Conversation2" = "会話文 2";
+"GlobalDataSingleton_NewUserBookTitle" = "新規ユーザ小説";
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "ダウンロードキューへの追加に失敗";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "作品名: %@";
 "NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "ダウンロードキューに追加されました";
@@ -45,12 +46,15 @@
 "SettingTableViewController_ConfirmAddDefaultSpeechModSetting" = "確認";
 "SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage" = "用意された読み替え辞書を追加・上書きします。よろしいですか？";
 "SettingTableViewController_GoToReleaseLog" = "更新履歴";
+"SettingTableViewController_CreateNewUserText" = "新規自作小説の追加";
+"SettingTableViewController_RightNotation" = "権利表記";
 
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "ここに書いた文をテストで読み上げます。";
 "SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" を \"%@\" に";
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";
 "SpeechViewController_Speak" = "Speak";
 "SpeechViewController_Detail" = "詳細";
+"SpeechViewController_Edit" = "編集";
 "SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。「詳細」→「Download」を選択して再ダウンロードすることで解消するかもしれません。";
 "SpeechViewController_Stop" = "Stop";
 "SpeechViewController_SpeechStopedByEnd" = "読み上げが最後に達しました。";
@@ -92,10 +96,20 @@
 
 "NarouSearchViewController_DoneKeyboardBarItem" = "決定";
 
+"EditUserBookViewController_PleaseInputTitle" = "タイトルを入力してください";
+"EditUserBookViewController_PleaseInputBookBody" = "本文を入力してください";
+"EditUserBookViewController_CanNotDeleteChapter" = "章の削除に失敗しました";
+"EditUserBookViewController_ChapterDeleted" = "最後の章を削除しました";
+"EditUserBookViewController_NewChapterCreated" = "章を追加しました";
+"EditUserBookViewContoller_InputTextHeare" = "ここに本文を書き込んでください";
+"EditUserBookViewController_AddNewStoryFailed" = "新しい章の追加に失敗しました";
+"EditUserBookViewController_ConfirmDeleteThisChapter" = "この章を削除します。よろしいですか？";
+
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.4
 
-・テキスト長押しメニューに読み替え辞書への登録を追加しました
+・テキスト長押しメニューに「読み替え辞書への登録」を追加しました
+・「設定」タブに自作小説の追加メニューを追加しました
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
@@ -105,10 +119,13 @@
 インタフェースの変更
 
 ・文章上で長押しした時に出るメニューに、「読み替え辞書へ登録」を追加しました。コピーしてペーストする手間が少しだけ減ります。
+・設定タブの下の方に「新規自作小説の追加」が増えます。自分で書いた文章を読み上げさせる時などにご利用ください。
+作成した自作小説を再度編集したい場合、自作小説を表示している時に編集ボタン(小説家になろうの小説の場合は「詳細」ボタンがあった位置にあります)を押すことで再度編集できます。
+なお、この自作小説の登録機能は、ちょっと汚い形で組み込んでしまったので、今後のアップデートでもう少し違った形での実装に変更するかもしれません。その場合はもしかすると自作小説自体を新形式に移行出来ない可能性があります(できるだけ残そうと努力はするつもりですけれども)。もしそうなってしまった場合はご容赦お願いしつつ、自作小説は別途バックアップを取っておいていただきますようお願い致します。
 
 問題の修正
 
-・読み上げが勝手に停止する問題を修正しました(多分これで根本的な対応になったはずです)
+・読み上げが勝手に停止する問題を修正しました(多分これで根本的な対応になると思います)
 
 
 # Ver 1.1.3

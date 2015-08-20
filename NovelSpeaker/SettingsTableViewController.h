@@ -8,9 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "EasyAlert.h"
+#import "NarouContentCacheData.h"
 
 @interface SettingsTableViewController : UITableViewController
 {
     EasyAlert* m_EasyAlert;
+    
+    NarouContentCacheData* m_EditUserBookViewNarouContent;
 }
 @end
