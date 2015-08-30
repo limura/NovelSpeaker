@@ -55,6 +55,9 @@ typedef enum {
 /// 音声の読み上げ言語を指定します。@"ja-JP", @"en-US" などが使えます
 - (void) SetVoice: (NSString*) language;
 
+/// 音声の読み上げ話者を指定します。@"Alex", AVSpeechSynthesisVoiceIdentifierAlex などが使えます
+- (void) SetVoiceWithVoiceID: (NSString*) voiceID;
+
 /// 音声の読み上げ速度を指定します。1.0f が通常の速度で、2.0f だと二倍速、0.5f だと半分の速度です。
 /// この設定は次回以降の読み上げから有効になります
 /// 最小値は AVSpeechUtteranceMinimumSpeechRate
