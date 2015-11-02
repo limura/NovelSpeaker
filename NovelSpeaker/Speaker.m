@@ -54,9 +54,13 @@
     m_Voice = [AVSpeechSynthesisVoice voiceWithLanguage:language];
 }
 
-- (void)SetVoiceWithIdentifier: (NSString*) voideID
+- (BOOL)SetVoiceWithIdentifier: (NSString*) voiceID
 {
-    m_Voice = [AVSpeechSynthesisVoice voiceWithIdentifier:voideID];
+    m_Voice = [AVSpeechSynthesisVoice voiceWithIdentifier:voiceID];
+    if (m_Voice == nil) {
+        return false;
+    }
+    return true;
 }
 
 - (void) SetRate: (float) rate
