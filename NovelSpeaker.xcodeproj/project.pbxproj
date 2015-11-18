@@ -41,6 +41,7 @@
 		213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */; };
 		213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */; };
 		213A4DD51A77D74F00E9EC13 /* DebugLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DD41A77D74F00E9EC13 /* DebugLogViewController.m */; };
+		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
@@ -64,6 +65,8 @@
 		2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */; };
 		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
 		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
+		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
+		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
 		21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */ = {isa = PBXBuildFile; fileRef = 21AED5D419B335CF00CE846D /* ReleaseMemo.md */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
@@ -180,6 +183,7 @@
 		213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingViewController.m; sourceTree = "<group>"; };
 		213A4DD31A77D74F00E9EC13 /* DebugLogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugLogViewController.h; sourceTree = "<group>"; };
 		213A4DD41A77D74F00E9EC13 /* DebugLogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DebugLogViewController.m; sourceTree = "<group>"; };
+		2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMultithreadTests.m; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
 		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
 		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
@@ -226,6 +230,8 @@
 		2191639919A38414003FF7FC /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
 		2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataObjectHolder.h; sourceTree = "<group>"; };
 		2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataObjectHolder.m; sourceTree = "<group>"; };
+		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
+		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		21A4F6DA19B1B30C007CCD32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F71C19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
 		21A4F71D19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -395,6 +401,7 @@
 			isa = PBXGroup;
 			children = (
 				212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
+				219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */,
 				210958ED1A0E1C5500E9171F /* NEW!.png */,
 				210958F01A0E1C5C00E9171F /* NEW!@2x.png */,
 				210958F31A0E1C6100E9171F /* NEW!@3x.png */,
@@ -516,6 +523,7 @@
 				21F054DC1917E0F200CC6BA9 /* AppDelegate.m */,
 				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
 				21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */,
+				219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */,
 				4E776B17196247BE00C36AD1 /* ViewControllers */,
 				21E294E91970E2D00012A3AA /* DataModel */,
 				21B53A1819619BE7009658B7 /* Resources */,
@@ -552,6 +560,7 @@
 				21F054F21917E0F200CC6BA9 /* Supporting Files */,
 				217E683D199A80A200C656AA /* NiftySpeakerTests.m */,
 				217BD9E519E038BE008A0D9D /* StringSubstituterTests.m */,
+				2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -727,6 +736,7 @@
 				2117251E19B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib in Resources */,
 				21B53A2819619D23009658B7 /* app_globe.png in Resources */,
 				210958C71A0DF55600E9171F /* gear@3x.png in Resources */,
+				219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */,
 				21B53A1C19619C00009658B7 /* sound.png in Resources */,
 				210958CB1A0DF55600E9171F /* soundbook.png in Resources */,
 				210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */,
@@ -740,6 +750,7 @@
 				21B53A1D19619C00009658B7 /* sound@2x.png in Resources */,
 				212852DC19B1D101001A75DC /* Localizable.strings in Resources */,
 				21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */,
+				219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */,
 				21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */,
 				21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */,
 			);
@@ -859,6 +870,7 @@
 			files = (
 				217E683E199A80A200C656AA /* NiftySpeakerTests.m in Sources */,
 				21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */,
+				2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */,
 				217BD9E619E038BE008A0D9D /* StringSubstituterTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1065,13 +1077,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "45276cbc-8f9b-4c36-aa68-830e53884058";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1083,13 +1096,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "45276cbc-8f9b-4c36-aa68-830e53884058";
+				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
