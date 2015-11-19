@@ -302,6 +302,27 @@ Bug fix.
 
 
 
+# Ver 1.1.5
+
+インタフェースの変更
+
+問題の修正
+
+・電話がかかってきた時など、ことせかい 以外のアプリで音が使われる時に再生を停止しなかった問題を修正
+・アプリ名が NovelSpeaker になっていたのを ことせかい になるように修正
+・iPhone 6 Plus 等で上下に黒帯が入る事がある問題を修正
+
+# Version 1.1.5
+
+Interface change
+
+Bug fix
+
+- When it had a telephone, It come to stop reproduction.
+- I revise the problem that a black belt holder may begin up and down in 6 iPhone Plus.
+
+
+
 expedited app review に出した時の文言
 ---begin---
 なろう検索のタブで、検索用文字列を入力できなくなっていた問題を修正しています。

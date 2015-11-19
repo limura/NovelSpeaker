@@ -23,6 +23,9 @@
     m_CurrentStatus = STSpeakingStatusNone;
     
     m_Synthesizer.delegate = self;
+
+    // AVAudioSessionInterruptionNotification のイベントハンドラを登録します
+    [self setAVAudioSessionInterruptionNotificationHandler];
     
     return self;
 }
@@ -124,7 +127,7 @@
             //NSLog(@"speak status -> None");
             break;
         case STSpeakingStatusPause:
-            //NSLog(@"speak status -> Pause");
+            NSLog(@"speak status -> Pause");
             break;
         case STSpeakingStatusSpeak:
             //NSLog(@"speak status -> Speak");
@@ -166,6 +169,32 @@
     }
     [self.speakRangeChangeDelegate willSpeakRange:characterRange speakText:utterance.speechString];
 
+}
+
+- (void)setAVAudioSessionInterruptionNotificationHandler
+{
+    NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+    [center addObserver:self selector:@selector(sessionDidInterrupt:) name:AVAudioSessionInterruptionNotification object:nil];
+}
+
+- (void)sessionDidInterrupt:(NSNotification*)notification
+{
+    if (notification == nil) {
+        return;
+    }
+    
+    switch ([notification.userInfo[AVAudioSessionInterruptionTypeKey] intValue]) {
+        case AVAudioSessionInterruptionTypeBegan:
+            NSLog(@"interruption begin.");
+            [self PauseSpeech];
+            break;
+        case AVAudioSessionInterruptionTypeEnded:
+            NSLog(@"interuption end.");
+            [self ResumeSpeech];
+            break;
+        default:
+            break;
+    }
 }
 
 @end
