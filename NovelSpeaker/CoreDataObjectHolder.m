@@ -130,13 +130,13 @@
         return true;
     }
     __block BOOL result = true;
-    //[context performBlockAndWait:^{
+    [context performBlockAndWait:^{
         NSError* error = nil;
         if (![context save:&error]) {
             NSLog(@"CoreData save error: %@ %@", error, error.userInfo);
             result = false;
         }
-    //}];
+    }];
     return result;
 }
 
@@ -284,25 +284,6 @@
 //------------------------------------------------------------
 //   utility methods.
 //------------------------------------------------------------
-
-/// 現在のthreadのコンテキストで非同期実行します
-- (void)performBlock:(void (^)())block
-{
-    NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
-    [context performBlock:^{
-        block();
-    }];
-}
-
-/// 現在のthreadのコンテキストで同期実行します
-- (void)performBlockAndWait:(void (^)())block
-{
-    NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
-    [context performBlockAndWait:^{
-        block();
-    }];
-}
-
 
 /// 新しい Entity を生成して返します
 - (id)CreateNewEntity:(NSString*)entityName

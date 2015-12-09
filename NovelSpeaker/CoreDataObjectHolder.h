@@ -79,12 +79,6 @@ typedef enum {
 
 // 以下 utility method
 
-// 現在のthreadのコンテキストで非同期で実行します
-- (void)performBlock:(void (^)())block;
-// 現在のthreadのコンテキストで同期実行します
-- (void)performBlockAndWait:(void (^)())block;
-
-
 /// 新しい Entity を生成して返します
 - (id)CreateNewEntity:(NSString*)entityName;
 
