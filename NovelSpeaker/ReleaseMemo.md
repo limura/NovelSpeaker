@@ -306,6 +306,8 @@ Bug fix.
 
 インタフェースの変更
 
+・Voice Over が有効になっている場合、読み上げ開始時に警告を発するようになります。
+
 問題の修正
 
 ・電話がかかってきた時など、ことせかい 以外のアプリで音が使われる時に再生を停止しなかった問題を修正
@@ -315,6 +317,8 @@ Bug fix.
 # Version 1.1.5
 
 Interface change
+
+- If VoiceOver enabled, alert dialog is open when speak start.
 
 Bug fix
 

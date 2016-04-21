@@ -62,6 +62,8 @@
 "SpeechViewController_NoTwitterAccount_Title" = "Twitterアカウントが設定されていません";
 "SpeechViewController_NoTwitterAccount_Message" = "Twitterアカウントが設定されていません。設定ページでTwitterアカウントを設定か作成することができます。";
 "SpeechViewController_AddSpeechModSettings" = "読み替え辞書へ登録";
+"SpeechViewController_SpeakAlertVoiceOver" = "VoiceOverが有効になっています。このまま再生しますか？";
+"SpeechViewController_SpeakAlertVoiceOverMessage" = "そのまま再生すると二重に読み上げが発生してしまいます。";
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
 "SpeechWaitConfigSettingView_PleaseSetSpeechText" = "読み上げテスト用の文字列を設定してください";

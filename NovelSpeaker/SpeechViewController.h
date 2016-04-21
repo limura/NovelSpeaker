@@ -11,6 +11,7 @@
 #import "Speaker.h"
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
+#import "EasyAlert.h"
 
 @interface SpeechViewController : UIViewController<SpeakRangeDelegate, UITextViewDelegate>
 {
@@ -21,6 +22,7 @@
     int m_CurrentChapter;
     StoryCacheData* m_CurrentReadingStory;
     BOOL m_bIsSpeaking;
+    EasyAlert* m_EasyAlert;
 }
 @property (weak, nonatomic) IBOutlet UISlider *ChapterSlider;
 @property (weak, nonatomic) IBOutlet UITextView *textView;

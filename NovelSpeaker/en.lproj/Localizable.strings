@@ -67,6 +67,8 @@
 "SpeechViewController_NoTwitterAccount_Title" = "No Twitter Accounts";
 "SpeechViewController_NoTwitterAccount_Message" = "There are no Twitter accounts configured. You can add or create a Twitter account in Settings.";
 "SpeechViewController_AddSpeechModSettings" = "Add to speech mod settings";
+"SpeechViewController_SpeakAlertVoiceOver" = "VoiceOver becomes effective. Do you reproduce as it is?";
+"SpeechViewController_SpeakAlertVoiceOverMessage" = "Reading aloud occurs double when it just reproduce.";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";

@@ -33,6 +33,8 @@
     
     [[GlobalDataSingleton GetInstance] AddSpeakRangeDelegate:self];
     
+    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
+    
     // NavitationBar にボタンを配置します。
     NSString* speakText = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
     if ([[GlobalDataSingleton GetInstance] isSpeaking]) {
@@ -393,6 +395,20 @@
     if([startStopButton.title compare:NSLocalizedString(@"SpeechViewController_Speak", @"Speak")] == NSOrderedSame)
     {
         // 停止中だったので読み上げを開始します
+        if (UIAccessibilityIsVoiceOverRunning()) {
+            // VoiceOver が Enable であったので、警告を発します
+            [m_EasyAlert ShowAlertTwoButton:NSLocalizedString(@"SpeechViewController_SpeakAlertVoiceOver", @"VoiceOverが有効になっています。このまま再生しますか？")
+                message:NSLocalizedString(@"SpeechViewController_SpeakAlertVoiceOverMessage", @"そのまま再生すると二重に読み上げが発声する事になります。")
+                firstButtonText:NSLocalizedString(@"Cancel_button", @"Cancel")
+                firstActionHandler:nil
+                secondButtonText:NSLocalizedString(@"OK_button", @"OK")
+                secondActionHandler:^(UIAlertAction *action) {
+                    m_bIsSpeaking = YES;
+                    [self startSpeech];
+                }];
+            return;
+        }
+
         m_bIsSpeaking = YES;
         [self startSpeech];
     }
