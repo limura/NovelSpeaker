@@ -27,7 +27,7 @@
     
     m_SearchResult = nil;
     m_MainQueue = dispatch_get_main_queue();
-    m_SearchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.search", NULL);
+    m_SearchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.search", DISPATCH_QUEUE_SERIAL);
     self.SearchTextBox.delegate = self;
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
 

@@ -31,10 +31,10 @@ static float SLEEP_TIME_SECOND = 10.5f;
     m_MainDispatchQueue = dispatch_get_main_queue();
     
     //
-    m_DownloadQueueReadWriteDispatchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.naroudownloadqueue.downloadqueuereadwrite", NULL);
+    m_DownloadQueueReadWriteDispatchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.naroudownloadqueue.downloadqueuereadwrite", DISPATCH_QUEUE_CONCURRENT);
     
     // コンテンツダウンロード用の直列queueを作ります。
-    m_ContentsDownloadDispatchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.naroudownloadqueue.contentsdownload", NULL);
+    m_ContentsDownloadDispatchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.naroudownloadqueue.contentsdownload", DISPATCH_QUEUE_SERIAL);
 
     m_DownloadQueue = [NSMutableArray new];
     m_isNeedQuit = false;

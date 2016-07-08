@@ -25,12 +25,13 @@
     [super tearDown];
 }
 
+/*
 - (void)testCoreDataMultithread {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    dispatch_queue_attr_t mainQueue = dispatch_queue_create("mainThreadQueue", NULL);
-    dispatch_queue_attr_t subQueue = dispatch_queue_create("subThreadQueue", NULL);
-    
-}
+    dispatch_queue_t mainQueue = dispatch_queue_create("mainThreadQueue", NULL);
+    dispatch_queue_t subQueue = dispatch_queue_create("subThreadQueue", DISPATCH_QUEUE_CONCURRENT);
+}
+ */
 
 - (void)testPerformanceExample {
     // This is an example of a performance test case.

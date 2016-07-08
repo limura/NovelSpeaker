@@ -35,7 +35,7 @@
     // Do any additional setup after loading the view.
     m_SearchResult = nil;
     m_MainQueue = dispatch_get_main_queue();
-    m_SearchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.search", NULL);
+    m_SearchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.search", DISPATCH_QUEUE_SERIAL);
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
 
     // ダウンロードボタンを右上に配置します
