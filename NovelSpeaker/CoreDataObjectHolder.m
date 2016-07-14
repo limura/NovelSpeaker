@@ -454,5 +454,13 @@
     return [results count];
 }
 
+/// 現在のthreadでの NSManagedObjectContext で、performBlockAndWait を実行します。
+- (void)performBlockAndWait:(void(^)())block{
+    NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
+    [context performBlockAndWait:^{
+        block();
+    }];
+}
+
 
 @end

@@ -77,6 +77,10 @@ static GlobalDataSingleton* _singleton = nil;
     return _singleton;
 }
 
+- (void)coreDataPerfomBlockAndWait:(void(^)())block {
+    [m_CoreDataObjectHolder performBlockAndWait:block];
+}
+
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
 // 非公開インタフェースになりました。
 - (GlobalState*) GetCoreDataGlobalStateThreadUnsafe
@@ -115,10 +119,12 @@ static GlobalDataSingleton* _singleton = nil;
 - (GlobalStateCacheData*) GetGlobalState
 {
     __block GlobalStateCacheData* stateCache = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         GlobalState* state = [self GetCoreDataGlobalStateThreadUnsafe];
         stateCache = [[GlobalStateCacheData alloc] initWithCoreData:state];
-    });
+    //});
+    }];
     return stateCache;
 }
 
@@ -126,7 +132,8 @@ static GlobalDataSingleton* _singleton = nil;
 - (BOOL)UpdateGlobalState:(GlobalStateCacheData*)globalState
 {
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         GlobalState* state = [self GetCoreDataGlobalStateThreadUnsafe];
 
         // pitch か rate が変わってたら読み直し指示をします。
@@ -164,7 +171,8 @@ static GlobalDataSingleton* _singleton = nil;
             content.currentReadingStory = story;
         }
         result = true;
-    });
+    //});
+    }];
     [m_CoreDataObjectHolder save];
     return result;
 }
@@ -208,12 +216,14 @@ static GlobalDataSingleton* _singleton = nil;
 - (NarouContentCacheData*) SearchNarouContentFromNcode:(NSString*) ncode
 {
     __block NarouContentCacheData* result = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:ncode];
         if (coreDataContent != nil) {
             result = [[NarouContentCacheData alloc] initWithCoreData:coreDataContent];
         }
-    });
+    //});
+    }];
     /// TODO: 何故か nil が帰ってくるときは、duplicate ncode で消されてる可能性があるのでsaveしておきます。
     if (result == nil) {
         [self saveContext];
@@ -232,7 +242,8 @@ static GlobalDataSingleton* _singleton = nil;
     }
     __block BOOL result = false;
     __block BOOL isNeedContentListChangedAnnounce = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
         if (coreDataContent == nil) {
             coreDataContent = [self CreateNewNarouContentThreadUnsafe];
@@ -242,7 +253,8 @@ static GlobalDataSingleton* _singleton = nil;
         }
         result = [content AssignToCoreData:coreDataContent];
         [m_CoreDataObjectHolder save];
-    });
+    //});
+    }];
     if (isNeedContentListChangedAnnounce || true) {
         [self NarouContentListChangedAnnounce];
     }
@@ -261,9 +273,11 @@ static GlobalDataSingleton* _singleton = nil;
 - (NSUInteger) GetNarouContentCount
 {
     __block NSUInteger result = 0;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         result = [m_CoreDataObjectHolder CountEntity:@"NarouContent"];
-    });
+    //});
+    }];
     return result;
 }
 
@@ -273,13 +287,15 @@ static GlobalDataSingleton* _singleton = nil;
 {
     __block NSError* err;
     __block NSMutableArray* fetchResults = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"NarouContent" sortAttributeName:@"novelupdated_at" ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[NarouContentCacheData alloc] initWithCoreData:results[i]];
         }
-    });
+    //});
+    }];
     if(err != nil)
     {
         NSLog(@"fetch failed. %@, %@", err, [err userInfo]);
@@ -302,7 +318,8 @@ static GlobalDataSingleton* _singleton = nil;
     if (targetContentCacheData == nil) {
         // 登録がないようなのでとりあえず NarouContent を登録します。
         __block BOOL isNarouContentCreated = false;
-        dispatch_sync(m_CoreDataAccessQueue, ^{
+        [self coreDataPerfomBlockAndWait:^{
+        //dispatch_sync(m_CoreDataAccessQueue, ^{
             NarouContent* targetContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:targetNcode];
             if (targetContent == nil) {
                 targetContent = [self CreateNewNarouContentThreadUnsafe];
@@ -327,7 +344,8 @@ static GlobalDataSingleton* _singleton = nil;
             targetContentCacheData = [[NarouContentCacheData alloc] initWithCoreData:targetContent];
             // 新しく作ったので save して main thread と sync しておきます。
             [m_CoreDataObjectHolder save];
-        });
+        //});
+        }];
         if (isNarouContentCreated) {
             [self NarouContentListChangedAnnounce];
         }
@@ -433,12 +451,14 @@ static GlobalDataSingleton* _singleton = nil;
 - (StoryCacheData*) SearchStory:(NSString*)ncode chapter_no:(int)chapter_number
 {
     __block StoryCacheData* result = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         Story* story = [self SearchCoreDataStoryThreadUnsafe:ncode chapter_no:chapter_number];
         if (story != nil) {
             result = [[StoryCacheData alloc] initWithCoreData:story];
         }
-    });
+    //});
+    }];
     return result;
 }
 
@@ -500,9 +520,11 @@ static GlobalDataSingleton* _singleton = nil;
     }
     
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         result = [self UpdateStoryThreadUnsafe:content chapter_number:chapter_number parentContent:parentContent];
-    });
+    //});
+    }];
     
     return result;
 }
@@ -522,14 +544,16 @@ static GlobalDataSingleton* _singleton = nil;
         return false;
     }
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
         if (coreDataContent != nil) {
             [m_CoreDataObjectHolder DeleteEntity:coreDataContent];
             [m_CoreDataObjectHolder save];
             result = true;
         }
-    });
+    //});
+    }];
     if (result) {
         [self NarouContentListChangedAnnounce];
     }
@@ -543,7 +567,8 @@ static GlobalDataSingleton* _singleton = nil;
         return false;
     }
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:[story.chapter_number intValue]];
         if (coreDataStory == nil) {
             result = false;
@@ -552,7 +577,8 @@ static GlobalDataSingleton* _singleton = nil;
             [m_CoreDataObjectHolder save];
             result = true;
         }
-    });
+    //});
+    }];
     return result;
 }
 
@@ -564,9 +590,11 @@ static GlobalDataSingleton* _singleton = nil;
     }
     
     __block NSUInteger result = 0;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         result = [m_CoreDataObjectHolder CountEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", content.ncode]];
-    });
+    //});
+    }];
     return result;
 }
 
@@ -609,7 +637,8 @@ static GlobalDataSingleton* _singleton = nil;
     //[self AddLogString:[[NSString alloc] initWithFormat:@"読み上げ位置を保存します。(%@) 章: %d 位置: %ld/%ld", content.title, [story.chapter_number intValue], (long)location, (unsigned long)[story.content length]]]; // NSLog
 
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
         Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:[story.chapter_number intValue]];
         GlobalState* globalState = [self GetCoreDataGlobalStateThreadUnsafe];
@@ -622,7 +651,8 @@ static GlobalDataSingleton* _singleton = nil;
             [m_CoreDataObjectHolder save];
             result = true;
         }
-    });
+    //});
+    }];
     return result;
 }
 
@@ -635,7 +665,8 @@ static GlobalDataSingleton* _singleton = nil;
     }
     int target_chapter_number = [story.chapter_number intValue] + 1;
     __block StoryCacheData* result = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         Story* nextCoreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:target_chapter_number];
         if (nextCoreDataStory != nil) {
             //NSLog(@"chapter: %d is alive", target_chapter_number);
@@ -643,7 +674,8 @@ static GlobalDataSingleton* _singleton = nil;
         }else{
             NSLog(@"chapter: %d is NOT alive", target_chapter_number);
         }
-    });
+    //});
+    }];
     return result;
 }
 
@@ -656,12 +688,14 @@ static GlobalDataSingleton* _singleton = nil;
     }
     int target_chapter_number = [story.chapter_number intValue] - 1;
     __block StoryCacheData* result = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         Story* previousCoreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:target_chapter_number];
         if (previousCoreDataStory != nil) {
             result = [[StoryCacheData alloc] initWithCoreData:previousCoreDataStory];
         }
-    });
+    //});
+    }];
     return result;
 }
 
@@ -1254,7 +1288,8 @@ static GlobalDataSingleton* _singleton = nil;
 /// ncode の new flag を落とします。
 - (void)DropNewFlag:(NSString*)ncode
 {
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* content = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:ncode];
         if ([content.is_new_flug boolValue] == true) {
             NSLog(@"new flag drop: %@", ncode);
@@ -1262,7 +1297,8 @@ static GlobalDataSingleton* _singleton = nil;
             [m_CoreDataObjectHolder save];
         
         }
-    });
+    //});
+    }];
     // drop の Notification を飛ばします
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusDown_%@", ncode];
@@ -1446,9 +1482,11 @@ static GlobalDataSingleton* _singleton = nil;
 
 - (void)saveContext
 {
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         [m_CoreDataObjectHolder save];
-    });
+    //});
+    }];
     //NSLog(@"CoreData saved.");
 }
 
@@ -1457,13 +1495,15 @@ static GlobalDataSingleton* _singleton = nil;
 - (NSArray*)GetAllSpeakPitchConfig
 {
     __block NSMutableArray* fetchResults = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeakPitchConfig" sortAttributeName:@"title" ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[SpeakPitchConfigCacheData alloc] initWithCoreData:results[i]];
         }
-    });
+    //});
+    }];
     return fetchResults;
 }
 
@@ -1494,12 +1534,14 @@ static GlobalDataSingleton* _singleton = nil;
 - (SpeakPitchConfigCacheData*)GetSpeakPitchConfigWithTitle:(NSString*)title
 {
     __block SpeakPitchConfigCacheData* result = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         SpeakPitchConfig* coreDataConfig = [self GetSpeakPitchConfigWithTitleThreadUnsafe:title];
         if (coreDataConfig != nil) {
             result = [[SpeakPitchConfigCacheData alloc] initWithCoreData:coreDataConfig];
         }
-    });
+    //});
+    }];
     return result;
 }
 
@@ -1522,7 +1564,8 @@ static GlobalDataSingleton* _singleton = nil;
         return false;
     }
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         SpeakPitchConfig* coreDataConfig = [self GetSpeakPitchConfigWithTitleThreadUnsafe:config.title];
         if (coreDataConfig == nil) {
             coreDataConfig = [self CreateNewSpeakPitchConfigThreadUnsafe:config];
@@ -1531,7 +1574,8 @@ static GlobalDataSingleton* _singleton = nil;
             result = [config AssignToCoreData:coreDataConfig];
             [m_CoreDataObjectHolder save];
         }
-    });
+    //});
+    }];
     if (result) {
         //NSLog(@"isNeedReloadSpeakSetting = true (pitch)");
         m_isNeedReloadSpeakSetting = true;
@@ -1543,7 +1587,8 @@ static GlobalDataSingleton* _singleton = nil;
 - (BOOL)DeleteSpeakPitchConfig:(SpeakPitchConfigCacheData*)config
 {
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         SpeakPitchConfig* coreDataConfig = [self GetSpeakPitchConfigWithTitleThreadUnsafe:config.title];
         if (coreDataConfig == nil) {
             result = false;
@@ -1552,7 +1597,8 @@ static GlobalDataSingleton* _singleton = nil;
             [m_CoreDataObjectHolder save];
             result = true;
         }
-    });
+    //});
+    }];
     if (result) {
         m_isNeedReloadSpeakSetting = true;
     }
@@ -1565,13 +1611,15 @@ static GlobalDataSingleton* _singleton = nil;
 - (NSArray*)GetAllSpeechModSettings
 {
     __block NSMutableArray* fetchResults = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeechModSetting" sortAttributeName:@"beforeString" ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[SpeechModSettingCacheData alloc] initWithCoreData:results[i]];
         }
-    });
+    //});
+    }];
     return fetchResults;
 }
 
@@ -1601,12 +1649,14 @@ static GlobalDataSingleton* _singleton = nil;
 - (SpeechModSettingCacheData*)GetSpeechModSettingWithBeforeString:(NSString*)beforeString
 {
     __block SpeechModSettingCacheData* result = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         SpeechModSetting* coreDataSetting = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:beforeString];
         if (coreDataSetting != nil) {
             result = [[SpeechModSettingCacheData alloc] initWithCoreData:coreDataSetting];
         }
-    });
+    //});
+    }];
     return result;
 }
 
@@ -1626,7 +1676,8 @@ static GlobalDataSingleton* _singleton = nil;
         return false;
     }
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:modSetting.beforeString];
         if (coreDataConfig == nil) {
             coreDataConfig = [self CreateNewSpeechModSettingThreadUnsafe:modSetting];
@@ -1635,7 +1686,8 @@ static GlobalDataSingleton* _singleton = nil;
             result = [modSetting AssignToCoreData:coreDataConfig];
             [m_CoreDataObjectHolder save];
         }
-    });
+    //});
+    }];
     if (result) {
         //NSLog(@"isNeedReloadSpeakSetting = true (speechMod)");
         m_isNeedReloadSpeakSetting = true;
@@ -1647,7 +1699,8 @@ static GlobalDataSingleton* _singleton = nil;
 - (BOOL)DeleteSpeechModSetting:(SpeechModSettingCacheData*)modSetting
 {
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:modSetting.beforeString];
         if (coreDataConfig == nil) {
             result = false;
@@ -1656,7 +1709,8 @@ static GlobalDataSingleton* _singleton = nil;
             [m_CoreDataObjectHolder save];
             result = true;
         }
-    });
+    //});
+    }];
     if (result) {
         m_isNeedReloadSpeakSetting = true;
     }
@@ -1698,13 +1752,15 @@ static GlobalDataSingleton* _singleton = nil;
 - (NSArray*)GetAllSpeechWaitConfig
 {
     __block NSMutableArray* fetchResults = nil;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeechWaitConfig" sortAttributeName:@"targetText" ascending:YES];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[SpeechWaitConfigCacheData alloc] initWithCoreData:results[i]];
         }
-    });
+    //});
+    }];
     return fetchResults;
 }
 
@@ -1713,7 +1769,8 @@ static GlobalDataSingleton* _singleton = nil;
 - (BOOL)AddSpeechWaitSetting:(SpeechWaitConfigCacheData*)waitConfigCacheData
 {
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         SpeechWaitConfig* coreDataConfig = [self GetSpeechWaitSettingWithTargetTextThreadUnsafe:waitConfigCacheData.targetText];
         if (coreDataConfig == nil) {
             [self CreateNewSpeechWaitConfigThreadUnsafe:waitConfigCacheData];
@@ -1726,7 +1783,8 @@ static GlobalDataSingleton* _singleton = nil;
                 result = true;
             }
         }
-    });
+    //});
+    }];
     if (result) {
         m_isNeedReloadSpeakSetting = true;
     }
@@ -1738,7 +1796,8 @@ static GlobalDataSingleton* _singleton = nil;
 - (BOOL)DeleteSpeechWaitSetting:(NSString*)targetString
 {
     __block BOOL result = false;
-    dispatch_sync(m_CoreDataAccessQueue, ^{
+    [self coreDataPerfomBlockAndWait:^{
+    //dispatch_sync(m_CoreDataAccessQueue, ^{
         SpeechWaitConfig* coreDataConfig = [self GetSpeechWaitSettingWithTargetTextThreadUnsafe:targetString];
         if (coreDataConfig == nil) {
             result = false;
@@ -1747,7 +1806,8 @@ static GlobalDataSingleton* _singleton = nil;
             [m_CoreDataObjectHolder save];
             result = true;
         }
-    });
+    //});
+    }];
     if (result) {
         m_isNeedReloadSpeakSetting = true;
     }

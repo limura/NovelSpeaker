@@ -104,4 +104,7 @@ typedef enum {
 /// 登録されている Entity の個数を取得します(検索用の NSPredicate 指定版)
 - (NSUInteger)CountEntity:(NSString*)entityName predicate:(NSPredicate*)predicate;
 
+/// 現在のthreadでの NSManagedObjectContext で、performBlockAndWait を実行します。
+- (void)performBlockAndWait:(void(^)())block;
+
 @end
