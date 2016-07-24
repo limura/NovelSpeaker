@@ -65,6 +65,9 @@
 		2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */; };
 		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
 		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
+		2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */; };
+		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
+		2195FBC71D2FD22C00ADDCAB /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
@@ -230,6 +233,13 @@
 		2191639919A38414003FF7FC /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
 		2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataObjectHolder.h; sourceTree = "<group>"; };
 		2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataObjectHolder.m; sourceTree = "<group>"; };
+		2195FBBE1D2FBBCF00ADDCAB /* UriLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UriLoader.h; sourceTree = "<group>"; };
+		2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UriLoader.m; sourceTree = "<group>"; };
+		2195FBC11D2FCC6800ADDCAB /* SiteInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SiteInfo.h; sourceTree = "<group>"; };
+		2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SiteInfo.m; sourceTree = "<group>"; };
+		2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.2.tbd; path = usr/lib/libxml2.2.tbd; sourceTree = SDKROOT; };
+		2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
+		2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 8.xcdatamodel"; sourceTree = "<group>"; };
 		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		21A4F6DA19B1B30C007CCD32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -323,6 +333,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2195FBC71D2FD22C00ADDCAB /* libxml2.tbd in Frameworks */,
 				217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */,
 				21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */,
 				21B539F819603737009658B7 /* CoreData.framework in Frameworks */,
@@ -439,6 +450,10 @@
 				21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */,
 				21E46D411A94B7F400CE39B0 /* EasyShare.h */,
 				21E46D421A94B7F400CE39B0 /* EasyShare.m */,
+				2195FBBE1D2FBBCF00ADDCAB /* UriLoader.h */,
+				2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */,
+				2195FBC11D2FCC6800ADDCAB /* SiteInfo.h */,
+				2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -499,6 +514,8 @@
 		21F054CB1917E0F200CC6BA9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */,
+				2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */,
 				21245BDA1A8FBB6800D3B376 /* Social.framework */,
 				21245BD81A8FBA2A00D3B376 /* Twitter.framework */,
 				217E683A1998F6A000C656AA /* MediaPlayer.framework */,
@@ -826,6 +843,7 @@
 				21916364199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m in Sources */,
 				2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */,
 				212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */,
+				2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */,
 				212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
 				213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
@@ -873,6 +891,7 @@
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
+				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
 				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,
 				21916368199E5D43003FF7FC /* SettingsTableViewController.m in Sources */,
@@ -1097,6 +1116,12 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
+					"\"${SDKROOT}/usr/include/libxml2\"",
+				);
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1116,6 +1141,12 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
+					"\"${SDKROOT}/usr/include/libxml2\"",
+				);
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1201,6 +1232,7 @@
 		21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */,
 				21778D701A6168C30042F2F1 /* SettingDataModel 7.xcdatamodel */,
 				210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */,
 				212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */,
