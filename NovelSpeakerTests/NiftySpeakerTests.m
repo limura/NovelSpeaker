@@ -173,6 +173,26 @@
     NSLog(@"%@", [NSString stringWithCString:[strBuf cStringUsingEncoding:NSUTF8StringEncoding] encoding:NSNonLossyASCIIStringEncoding]);
 }
 
+/// 現在登録されている読み替え辞書と、標準の読み替え辞書の差分を表示します
+- (void) testSpeechModSettingDiff
+{
+    NSMutableString* strBuf = [NSMutableString new];
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NSArray* speechModArray = [globalData GetAllSpeechModSettings];
+    NSDictionary* defaultSpeechModDictionary = [globalData GetDefaultSpeechModConfig];
+    for (SpeechModSettingCacheData* modSetting in speechModArray) {
+        if (modSetting == nil || modSetting.beforeString == nil || modSetting.afterString == nil
+            || [modSetting.beforeString length] <= 0
+            || [modSetting.afterString length] <= 0) {
+            continue;
+        }
+        if ([defaultSpeechModDictionary valueForKey:modSetting.beforeString] == nil) {
+            [strBuf appendFormat:@", @\"%@\": @\"%@\"\n", modSetting.beforeString, modSetting.afterString];
+        }
+    }
+    NSLog(@"%@", strBuf);
+}
+
 /*
  /// 登録されている読み替え辞書を全部消し飛ばします
 - (void) testClearSpeechMod

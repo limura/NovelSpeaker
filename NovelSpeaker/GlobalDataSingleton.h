@@ -304,4 +304,7 @@
 
 /// 新しくユーザ定義の本を追加します。必須項目以外は未設定のものが生成されます。
 - (NarouContentCacheData*)CreateNewUserBook;
+
+/// 標準の読み上げ辞書のリストを取得します
+- (NSDictionary*)GetDefaultSpeechModConfig;
 @end
