@@ -34,6 +34,8 @@
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
 		212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */; };
 		212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F01131D8FDEC5009D69E6 /* NiftyUtility.m */; };
+		212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */; };
+		212F011C1D907CF1009D69E6 /* Default568@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F011B1D907CF1009D69E6 /* Default568@2x.png */; };
 		212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F359B1A8F8857009D0E60 /* GlobalState.m */; };
 		212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */; };
 		212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */; };
@@ -178,6 +180,8 @@
 		212F01131D8FDEC5009D69E6 /* NiftyUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftyUtility.m; sourceTree = "<group>"; };
 		212F01161D906F4E009D69E6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/DefaultSpeakSettingEditTableViewCell.strings; sourceTree = "<group>"; };
 		212F01181D906F56009D69E6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/DefaultSpeakSettingEditTableViewCell.strings; sourceTree = "<group>"; };
+		212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-167px.png"; sourceTree = "<group>"; };
+		212F011B1D907CF1009D69E6 /* Default568@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default568@2x.png"; sourceTree = "<group>"; };
 		212F359A1A8F8857009D0E60 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
 		212F359B1A8F8857009D0E60 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
 		212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_5to7.xcmappingmodel; sourceTree = "<group>"; };
@@ -423,8 +427,10 @@
 		21B53A1819619BE7009658B7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */,
 				212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
 				219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */,
+				212F011B1D907CF1009D69E6 /* Default568@2x.png */,
 				210958ED1A0E1C5500E9171F /* NEW!.png */,
 				210958F01A0E1C5C00E9171F /* NEW!@2x.png */,
 				210958F31A0E1C6100E9171F /* NEW!@3x.png */,
@@ -755,10 +761,12 @@
 				210958CA1A0DF55600E9171F /* icloud1@3x.png in Resources */,
 				21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */,
 				21B53A2219619C50009658B7 /* gear.png in Resources */,
+				212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */,
 				210958C41A0DF55600E9171F /* booksearch.png in Resources */,
 				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
 				210958EB1A0E1C5500E9171F /* NEW!.png in Resources */,
 				213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */,
+				212F011C1D907CF1009D69E6 /* Default568@2x.png in Resources */,
 				21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */,
 				210958C61A0DF55600E9171F /* booksearch@3x.png in Resources */,
 				212F35A61A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */,
