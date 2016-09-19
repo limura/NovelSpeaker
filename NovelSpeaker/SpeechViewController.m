@@ -29,7 +29,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidLoad %@", self.NarouContentDetail.title]]; // NSLog
+    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidLoad %@, reading_chapter: %d, currentReadingStory: %p", self.NarouContentDetail.title, [self.NarouContentDetail.reading_chapter intValue], self.NarouContentDetail.currentReadingStory]]; // NSLog
     
     [[GlobalDataSingleton GetInstance] AddSpeakRangeDelegate:self];
     
@@ -174,13 +174,14 @@
         [self SetReadingPointFailedMessage];
         return false;
     }
-    StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
+    StoryCacheData* story = content.currentReadingStory;
+    if (story == nil) {
+        story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
+    }
     if (story == nil) {
         // なにやら設定されていないようなので、最初の章を読み込むことにします。
         // TODO: XXXX: 最新情報に更新した後にここに何故か来る事があるのをなんとかする
         [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込みます"]]; // NSLog
-
-        NSLog(@"GetReadingChapter return nil. なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込むことにします。");
         story = [[GlobalDataSingleton GetInstance] SearchStory:content.ncode chapter_no:1];
         if (story == nil) {
             [self SetReadingPointFailedMessage];

@@ -249,6 +249,9 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
 /// 読み上げ時の読み替え設定を beforeString指定 で読み出します
 - (SpeechModSettingCacheData*)GetSpeechModSettingWithBeforeString:(NSString*)beforeString;
 
+/// 読み上げ時の読み替え設定をリストで受け取り、上書き更新します。
+- (BOOL)UpdateSpeechModSettingMultiple:(NSArray*)modSettingArray;
+
 /// 読み上げ時の読み替え設定を更新します。無ければ新しく登録されます。
 - (BOOL)UpdateSpeechModSetting:(SpeechModSettingCacheData*)modSetting;
 

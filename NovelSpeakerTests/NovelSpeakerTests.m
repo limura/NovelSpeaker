@@ -36,7 +36,42 @@
 {
     // まずはテキトーな小説をダウンロードする
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    [globalData AddDownloadQueueForNarouNcode:@""];
+    // http://ncode.syosetu.com/n5693dn/
+    NSString* targetNcode = @"N5693DN";
+    /*
+    [globalData AddDownloadQueueForNarouNcode:targetNcode];
+    [NSThread sleepForTimeInterval:3.0f];
+    
+    NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:targetNcode];
+    XCTAssertTrue(content != nil, @"content is nil");
+    
+    StoryCacheData* story1 = [globalData SearchStory:targetNcode chapter_no:2];
+    [globalData UpdateReadingPoint:content story:story1];
+
+    NarouContentCacheData* currentReadingContent = [globalData GetCurrentReadingContent];
+    XCTAssertTrue([targetNcode compare:currentReadingContent.ncode] == NSOrderedSame, @"current reading content is not same ncode");
+    XCTAssertTrue(currentReadingContent.currentReadingStory != nil, @"current reading story is nil take 1");
+    XCTAssertTrue([currentReadingContent.currentReadingStory.chapter_number intValue] != 1, @"current reading story chapter number is not 1 take 1");
+     */
+
+    // 最後？の章を消します
+    //StoryCacheData* story2 = [globalData SearchStory:targetNcode chapter_no:3];
+    //[globalData DeleteStory:story2];
+/*
+    currentReadingContent = [globalData GetCurrentReadingContent];
+    XCTAssertTrue([targetNcode compare:currentReadingContent.ncode] == NSOrderedSame, @"current reading content is not same ncode take 2");
+    XCTAssertTrue(currentReadingContent.currentReadingStory != nil, @"current reading story is nil take 2");
+    XCTAssertTrue([currentReadingContent.currentReadingStory.chapter_number intValue] != 1, @"current reading story chapter number is not 1 take 2");
+
+    // 再度ダウンロードします
+    [globalData AddDownloadQueueForNarouNcode:targetNcode];
+    [NSThread sleepForTimeInterval:3.0f];
+
+    currentReadingContent = [globalData GetCurrentReadingContent];
+    XCTAssertTrue([targetNcode compare:currentReadingContent.ncode] == NSOrderedSame, @"current reading content is not same ncode take 3");
+    XCTAssertTrue(currentReadingContent.currentReadingStory != nil, @"current reading story is nil take 3");
+    XCTAssertTrue([currentReadingContent.currentReadingStory.chapter_number intValue] != 1, @"current reading story chapter number is not 1 take 3");
+ */
 }
 
 @end

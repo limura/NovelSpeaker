@@ -119,14 +119,32 @@
 
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.4
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.5
 
-- Add \"Add default correction of the reading\" menu on text long tap menu.
-- Add \"Add own created book\" feature at Settings page.
+- Can select speaker data. You need download sepaker data.
+- If VoiceOver enabled, alert dialog is open when speak start.
+- Bookshelf sort type selector now available.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.5
+
+Interface change
+
+- Can select speaker data. You need download sepaker data from:
+Settings > General > Accessibility > Speech > Voice > Japanese
+- If VoiceOver enabled, alert dialog is open when speak start.
+- Bookshelf sort type selector now available.
+
+Bug fix
+
+- I read it aloud at the time of the re-reading of the novel, and a position revised an initialized problem.
+- When it had a telephone, It come to stop reproduction.
+- I revise the problem that a black belt holder may begin up and down in 6 iPhone Plus.
+- Application revised a bug to be finished at the time of access to internal DB.
+
+
 # Version 1.1.4
 
 Interface change

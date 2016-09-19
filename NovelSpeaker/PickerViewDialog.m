@@ -92,10 +92,6 @@
     // Initialization code
     self.PickerView.dataSource = self;
     self.PickerView.delegate = self;
-    //self.doneButton.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.3];
-    //self.doneButtonBottom.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.3];
-    //self.backgroundColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.3];
-    //self.PickerView.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.9];
 }
 
 - (NSString*)GetRowText:(NSInteger)row {

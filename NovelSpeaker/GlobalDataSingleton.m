@@ -637,8 +637,20 @@ static GlobalDataSingleton* _singleton = nil;
     if (content == nil) {
         return nil;
     }
-    NarouContentCacheData* narouContent = [self SearchNarouContentFromNcode:content.ncode];
-    return narouContent.currentReadingStory;
+    if (content.currentReadingStory != nil) {
+        return content.currentReadingStory;
+    }
+    content = [self SearchNarouContentFromNcode:content.ncode];
+    if (content.currentReadingStory != nil) {
+        return content.currentReadingStory;
+    }
+    StoryCacheData* story = [self SearchStory:content.ncode chapter_no:[content.reading_chapter intValue]];
+    if (story != nil) {
+        //NSLog(@"story get from reading_chapter: %d", [content.reading_chapter intValue]);
+        return story;
+    }
+    
+    return nil;
 }
 
 /// 読み込み中の場所を指定された小説と章で更新します。
@@ -666,6 +678,7 @@ static GlobalDataSingleton* _singleton = nil;
         }else{
             coreDataStory.readLocation = [[NSNumber alloc] initWithUnsignedInteger:location];
             coreDataContent.currentReadingStory = coreDataStory;
+            coreDataContent.reading_chapter = coreDataStory.chapter_number;
             globalState.currentReadingStory = coreDataStory;
             [m_CoreDataObjectHolder save];
             result = true;
@@ -1141,6 +1154,36 @@ static GlobalDataSingleton* _singleton = nil;
         , @"カツ丼": @"カツドン"
         , @"お祖母": @"おばあ"
         
+        // 2016/09/19 added.
+        , @"魔光弾": @"マコーダン"
+        , @"雄たけび": @"おたけび"
+        , @"跳弾": @"チョウダン"
+        , @"貴国": @"キコク"
+        , @"豚の角煮": @"豚のカクニ"
+        , @"血飛沫": @"血シブキ"
+        , @"船速": @"センソク"
+        , @"空対空": @"クウタイクウ"
+        , @"秘密裏": @"秘密リ"
+        , @"砲口": @"ホーコー"
+        , @"異民族": @"イミンゾク"
+        , @"理論上": @"理論ジョー"
+        , @"滑腔砲": @"カッコウホウ"
+        , @"洋ゲー": @"ヨウゲー"
+        , @"武術家": @"ブジュツカ"
+        , @"敵機影": @"敵キエイ"
+        , @"敵機": @"テッキ"
+        , @"拗らせ": @"こじらせ"
+        , @"打撃力": @"ダゲキリョク"
+        , @"心技体": @"シン、ギ、タイ"
+        , @"後退翼": @"コウタイヨク"
+        , @"弾薬": @"ダンヤク"
+        , @"弾帯": @"ダンタイ"
+        , @"小悪党": @"コアクトウ"
+        , @"導力": @"ドウリョク"
+        , @"安月給": @"ヤスゲッキュウ"
+        , @"女王様": @"ジョオウサマ"
+        , @"多脚": @"タキャク"
+        
         , @"〜": @"ー"
         
         , @"α": @"アルファ"
@@ -1214,12 +1257,14 @@ static GlobalDataSingleton* _singleton = nil;
 - (void)InsertDefaultSpeechModConfig
 {
     NSDictionary* dataDictionary = [self GetDefaultSpeechModConfig];
-    SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
+    NSMutableArray* mutableArray = [NSMutableArray new];
     for (NSString* key in [dataDictionary keyEnumerator]) {
+        SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
         speechModSetting.beforeString = key;
         speechModSetting.afterString = [dataDictionary objectForKey:key];
-        [self UpdateSpeechModSetting:speechModSetting];
+        [mutableArray addObject:speechModSetting];
     }
+    [self UpdateSpeechModSettingMultiple:mutableArray];
 }
 
 - (void)InsertDefaultSpeechWaitConfig
@@ -1406,6 +1451,11 @@ static GlobalDataSingleton* _singleton = nil;
     }
     [self UpdatePlayingInfo:story];
     [self DropNewFlag:story.ncode];
+    NarouContentCacheData* content = [self SearchNarouContentFromNcode:story.ncode];
+    if (content != nil) {
+        content.reading_chapter = story.chapter_number;
+        [self UpdateNarouContent:content];
+    }
     NSRange range = NSMakeRange([story.readLocation unsignedLongValue], 0);
     return [m_NiftySpeaker UpdateCurrentReadingPoint:range];
 }
@@ -1721,6 +1771,32 @@ static GlobalDataSingleton* _singleton = nil;
     [data AssignToCoreData:setting];
     [m_CoreDataObjectHolder save];
     return setting;
+}
+
+/// 読み上げ時の読み替え設定をリストで受け取り、上書き更新します。
+- (BOOL)UpdateSpeechModSettingMultiple:(NSArray*)modSettingArray {
+    if (modSettingArray == nil) {
+        return false;
+    }
+    __block BOOL result = true;
+    [self coreDataPerfomBlockAndWait:^{
+        for (SpeechModSettingCacheData* modSetting in modSettingArray) {
+            SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:modSetting.beforeString];
+            if (coreDataConfig == nil) {
+                coreDataConfig = [self CreateNewSpeechModSettingThreadUnsafe:modSetting];
+            }
+            if (coreDataConfig != nil) {
+                if (![modSetting AssignToCoreData:coreDataConfig]) {
+                    result = false;
+                }
+            }
+        }
+        [m_CoreDataObjectHolder save];
+    }];
+    if (result) {
+        m_isNeedReloadSpeakSetting = true;
+    }
+    return result;
 }
 
 /// 読み上げ時の読み替え設定を更新します。無ければ新しく登録されます。
