@@ -14,6 +14,7 @@
 
 - (void)awakeFromNib
 {
+    [super awakeFromNib];
     // Initialization code
     self.pitchSlider.minimumValue = 0.5f;
     self.pitchSlider.maximumValue = 2.0f;

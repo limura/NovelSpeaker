@@ -57,8 +57,10 @@
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     //[self.navigationController setNavigationBarHidden:FALSE animated:TRUE];
 
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    
     // TODO: 保存された値を読みだすようにする
-    m_SortType = NarouContentSortType_NovelUpdatedAt;
+    m_SortType = [globalData GetBookSelfSortType];
     
     // 編集ボタンをつけます。
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
@@ -77,13 +79,13 @@
     [self setNotificationReciver];
     //[[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
     
-    if ([[GlobalDataSingleton GetInstance] IsVersionUped]) {
+    if ([globalData IsVersionUped]) {
         [self ShowVersionUpNotice];
     }
     
-    if(![[GlobalDataSingleton GetInstance] IsFirstPageShowed])
+    if(![globalData IsFirstPageShowed])
     {
-        NarouContentCacheData* currentContent = [[GlobalDataSingleton GetInstance] GetCurrentReadingContent];
+        NarouContentCacheData* currentContent = [globalData GetCurrentReadingContent];
         if (currentContent != nil) {
             [self PushNextView:currentContent];
         }
@@ -124,24 +126,49 @@
     [globalData ReDownladAllContents];
 }
 
+- (NSDictionary*)GetDisplayStringToSortTypeDictionary {
+    return @{
+             @"Ncode順": @(NarouContentSortType_Ncode)
+             , @"作者名順": @(NarouContentSortType_Writer)
+             , @"小説名順": @(NarouContentSortType_Title)
+             , @"更新順": @(NarouContentSortType_NovelUpdatedAt)
+             };
+}
+
+- (NSString*)GetCurrentSortTypeDisplayString {
+    NSDictionary* dic = [self GetDisplayStringToSortTypeDictionary];
+    NarouContentSortType sortType = [[GlobalDataSingleton GetInstance] GetBookSelfSortType];
+    for (NSString* key in [dic keyEnumerator]) {
+        NSNumber* number = [dic valueForKey:key];
+        if ([number intValue] == sortType) {
+            return key;
+        }
+    }
+    return nil;
+}
+
+- (NarouContentSortType)ConvertDisplayStringToSortType:(NSString*)key {
+    if (key == nil) {
+        return NarouContentSortType_NovelUpdatedAt;
+    }
+    NSDictionary* dic = [self GetDisplayStringToSortTypeDictionary];
+    NSNumber* number = [dic objectForKey:key];
+    if (number == nil) {
+        return NarouContentSortType_NovelUpdatedAt;
+    }
+    return (NarouContentSortType)[number intValue];
+}
+
 - (void)sortTypeSelectButtonClick:(id)sender
 {
     UIView* targetView = self.parentViewController.parentViewController.view;
-    PickerViewDialog* dialog = [PickerViewDialog createNewDialog:@[@"Ncode順", @"作者名順", @"名前順", @"更新順"] firstSelectedString:@"名前順" parentView:targetView resultReceiver:^(NSString* selectedText){
-        NarouContentSortType sortType = NarouContentSortType_NovelUpdatedAt;
-        if ([selectedText compare:@"更新順"] == NSOrderedSame) {
-            sortType = NarouContentSortType_NovelUpdatedAt;
-        }else if([selectedText compare:@"名前順"] == NSOrderedSame) {
-            sortType = NarouContentSortType_Title;
-        }else if([selectedText compare:@"作者名順"] == NSOrderedSame) {
-            sortType = NarouContentSortType_Writer;
-        }else if([selectedText compare:@"Ncode順"] == NSOrderedSame) {
-            sortType = NarouContentSortType_Ncode;
-        }else{
-            sortType = NarouContentSortType_NovelUpdatedAt;
-        }
-        m_SortType = sortType;
-        [self ReloadAllTableViewData];
+    PickerViewDialog* dialog = [PickerViewDialog
+        createNewDialog:@[@"Ncode順", @"作者名順", @"小説名順", @"更新順"]
+        firstSelectedString:[self GetCurrentSortTypeDisplayString]
+        parentView:targetView resultReceiver:^(NSString* selectedText){
+            m_SortType = [self ConvertDisplayStringToSortType:selectedText];
+            [[GlobalDataSingleton GetInstance] SetBookSelfSortType:m_SortType];
+            [self ReloadAllTableViewData];
     }];
     [dialog popup:nil];
 }

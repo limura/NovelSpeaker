@@ -7,6 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "GlobalDataSingleton.h"
 
 @interface NovelSpeakerTests : XCTestCase
 
@@ -29,6 +30,13 @@
 - (void)testExample
 {
     //XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
+}
+
+- (void)testCurrentReadingStoryClearBug_Issue22
+{
+    // まずはテキトーな小説をダウンロードする
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    [globalData AddDownloadQueueForNarouNcode:@""];
 }
 
 @end

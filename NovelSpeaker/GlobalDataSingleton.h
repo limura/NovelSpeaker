@@ -341,4 +341,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 - (void)DeleteVoiceIdentifier;
 
+/// 本棚のソートタイプを取得します
+- (NarouContentSortType)GetBookSelfSortType;
+/// 本棚のソートタイプを保存します
+- (void)SetBookSelfSortType:(NarouContentSortType)sortType;
+
 @end

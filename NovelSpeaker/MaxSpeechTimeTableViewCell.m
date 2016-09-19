@@ -12,6 +12,7 @@
 @implementation MaxSpeechTimeTableViewCell
 
 - (void)awakeFromNib {
+    [super awakeFromNib];
     // Initialization code
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     [self.CountDownTimer setCountDownDuration:[[globalData GetGlobalState].maxSpeechTimeInSec intValue]];

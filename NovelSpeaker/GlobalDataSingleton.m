@@ -1980,6 +1980,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_PREVIOUS_TIME_VERSION @"PreviousTimeVersion"
 #define USER_DEFAULTS_PREVIOUS_TIME_BUILD   @"PreviousTimeBuild"
 #define USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER @"DefaultVoiceIdentifier"
+#define USER_DEFAULTS_BOOKSELF_SORT_TYPE @"BookSelfSortType"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -2189,5 +2190,22 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults removeObjectForKey:USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER];
     [userDefaults synchronize];
 }
+
+/// 本棚のソートタイプを取得します
+- (NarouContentSortType)GetBookSelfSortType {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSInteger sortTypeInteger = [userDefaults integerForKey:USER_DEFAULTS_BOOKSELF_SORT_TYPE];
+    NarouContentSortType sortType = sortTypeInteger;
+    return sortType;
+}
+
+/// 本棚のソートタイプを保存します
+- (void)SetBookSelfSortType:(NarouContentSortType)sortType{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSInteger integer = sortType;
+    [userDefaults setInteger:integer forKey:USER_DEFAULTS_BOOKSELF_SORT_TYPE];
+    [userDefaults synchronize];
+}
+
 
 @end

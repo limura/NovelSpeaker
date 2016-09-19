@@ -14,6 +14,7 @@
 
 - (void)awakeFromNib
 {
+    [super awakeFromNib];
     // Initialization code
     m_Ncode = nil;
 }
