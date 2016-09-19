@@ -59,7 +59,7 @@
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "Can not select speaker data";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "Please change the version of the OS to the latest thing.";
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotSelectSpeaker_title" = "Can not select speaker data";
-"DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeaker_message" = "You need download speaker data at:\nSettings > General > Accessibility > Speech > Voice > Japanese";
+"DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeaker_message" = "You need download speaker data at:\nSettings > General > Accessibility > Speech > Voices > Japanese";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "Speak the sentence for test.";
 "SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" to \"%@\"";
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@ to %@";
@@ -117,6 +117,10 @@
 "EditUserBookViewController_AddNewStoryFailed" = "Chapter add failed.";
 "NarouSearchViewController_DoneKeyboardBarItem" = "done";
 
+"BookShelfTableViewController_SortTypeNcode" = "Ncode";
+"BookShelfTableViewController_SortTypeWriter" = "Writer name";
+"BookShelfTableViewController_SortTypeNovelName" = "Novel name";
+"BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.5
@@ -133,7 +137,7 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 Interface change
 
 - Can select speaker data. You need download sepaker data from:
-Settings > General > Accessibility > Speech > Voice > Japanese
+Settings > General > Accessibility > Speech > Voices > Japanese
 - If VoiceOver enabled, alert dialog is open when speak start.
 - Bookshelf sort type selector now available.
 

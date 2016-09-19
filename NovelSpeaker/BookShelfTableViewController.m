@@ -128,10 +128,10 @@
 
 - (NSDictionary*)GetDisplayStringToSortTypeDictionary {
     return @{
-             @"Ncode順": @(NarouContentSortType_Ncode)
-             , @"作者名順": @(NarouContentSortType_Writer)
-             , @"小説名順": @(NarouContentSortType_Title)
-             , @"更新順": @(NarouContentSortType_NovelUpdatedAt)
+             NSLocalizedString(@"BookShelfTableViewController_SortTypeNcode", @"Ncode順"): @(NarouContentSortType_Ncode)
+             , NSLocalizedString(@"BookShelfTableViewController_SortTypeWriter", @"作者名順"): @(NarouContentSortType_Writer)
+             , NSLocalizedString(@"BookShelfTableViewController_SortTypeNovelName", @"小説名順"): @(NarouContentSortType_Title)
+             , NSLocalizedString(@"BookShelfTableViewController_SortTypeUpdateDate", @"更新順"): @(NarouContentSortType_NovelUpdatedAt)
              };
 }
 
@@ -163,7 +163,12 @@
 {
     UIView* targetView = self.parentViewController.parentViewController.view;
     PickerViewDialog* dialog = [PickerViewDialog
-        createNewDialog:@[@"Ncode順", @"作者名順", @"小説名順", @"更新順"]
+        createNewDialog:@[
+            NSLocalizedString(@"BookShelfTableViewController_SortTypeNcode", @"Ncode順")
+            , NSLocalizedString(@"BookShelfTableViewController_SortTypeWriter", @"作者名順")
+            , NSLocalizedString(@"BookShelfTableViewController_SortTypeNovelName", @"小説名順")
+            , NSLocalizedString(@"BookShelfTableViewController_SortTypeUpdateDate", @"更新順")
+        ]
         firstSelectedString:[self GetCurrentSortTypeDisplayString]
         parentView:targetView resultReceiver:^(NSString* selectedText){
             m_SortType = [self ConvertDisplayStringToSortType:selectedText];

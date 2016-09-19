@@ -2,14 +2,14 @@
 /* Class = "UILabel"; text = "速度"; ObjectID = "DrX-Cm-JJl"; */
 "DrX-Cm-JJl.text" = "速度";
 
-/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "GT1-rG-UmS"; */
-"GT1-rG-UmS.normalTitle" = "OS標準の話者";
+/* Class = "UIButton"; normalTitle = "Default"; ObjectID = "GT1-rG-UmS"; */
+"GT1-rG-UmS.normalTitle" = "Default";
 
 /* Class = "UILabel"; text = "話者"; ObjectID = "YLT-VV-V1D"; */
 "YLT-VV-V1D.text" = "話者";
 
-/* Class = "UILabel"; text = "通常時"; ObjectID = "jaV-Mw-rgG"; */
-"jaV-Mw-rgG.text" = "通常時";
+/* Class = "UILabel"; text = "標準"; ObjectID = "jaV-Mw-rgG"; */
+"jaV-Mw-rgG.text" = "標準";
 
 /* Class = "UIButton"; normalTitle = "発音テスト"; ObjectID = "tQC-At-ng1"; */
 "tQC-At-ng1.normalTitle" = "発音テスト";
