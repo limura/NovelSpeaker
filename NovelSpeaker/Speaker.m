@@ -41,6 +41,9 @@
     }
 
     AVSpeechUtterance *utterance = [AVSpeechUtterance speechUtteranceWithString:text];
+    if (m_Voice == nil) {
+        m_Voice = [AVSpeechSynthesisVoice voiceWithLanguage:@"ja-JP"];
+    }
     utterance.voice = m_Voice;
     utterance.rate = m_Rate;
     utterance.pitchMultiplier = m_Pitch;
@@ -59,10 +62,18 @@
 
 - (BOOL)SetVoiceWithIdentifier: (NSString*) voiceID
 {
-    m_Voice = [AVSpeechSynthesisVoice voiceWithIdentifier:voiceID];
-    if (m_Voice == nil) {
+    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_9_0) {
         return false;
     }
+    if (voiceID == nil) {
+        return false;
+    }
+    AVSpeechSynthesisVoice* voice = [AVSpeechSynthesisVoice voiceWithIdentifier:voiceID];
+    if (voice == nil) {
+        NSLog(@"can not set voiceIdentifier: %@", voiceID);
+        return false;
+    }
+    m_Voice = voice;
     return true;
 }
 

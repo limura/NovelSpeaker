@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="11232" systemVersion="15G1004" minimumToolsVersion="Xcode 4.3" sourceLanguage="Objective-C" userDefinedModelVersionIdentifier="">
+    <entity name="GlobalState" representedClassName="GlobalState" syncable="YES">
+        <attribute name="defaultPitch" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="defaultRate" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="defaultSpeaker" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="maxSpeechTimeInSec" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="speechWaitSettingUseExperimentalWait" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="stopIfAudioSessionRouteChanged" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="textSizeValue" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="globalStateCurrentReadingInverse" inverseEntity="Story" syncable="YES"/>
+    </entity>
+    <entity name="NarouContent" representedClassName="NarouContent" syncable="YES">
+        <attribute name="all_hyoka_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="all_point" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="end" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="fav_novel_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="general_all_no" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="genre" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="global_point" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="is_new_flug" optional="YES" attributeType="Boolean" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="keyword" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="ncode" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="novelupdated_at" optional="YES" attributeType="Date" usesScalarValueType="NO" indexed="YES" syncable="YES"/>
+        <attribute name="reading_chapter" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="review_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="sasie_cnt" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="story" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="url" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="userid" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="writer" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <relationship name="childStory" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Story" inverseName="parentContent" inverseEntity="Story" syncable="YES"/>
+        <relationship name="currentReadingStory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Story" inverseName="contentCurrentReadingInverse" inverseEntity="Story" syncable="YES"/>
+    </entity>
+    <entity name="SpeakPitchConfig" representedClassName="SpeakPitchConfig" syncable="YES">
+        <attribute name="endText" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="pitch" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="startText" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="SpeechModSetting" representedClassName="SpeechModSetting" syncable="YES">
+        <attribute name="afterString" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="beforeString" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="SpeechWaitConfig" representedClassName="SpeechWaitConfig" syncable="YES">
+        <attribute name="delayTimeInSec" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="targetText" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+    </entity>
+    <entity name="Story" representedClassName="Story" syncable="YES">
+        <attribute name="chapter_number" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" indexed="YES" syncable="YES"/>
+        <attribute name="content" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="contentZiped" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="ncode" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="readLocation" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <relationship name="contentCurrentReadingInverse" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="currentReadingStory" inverseEntity="NarouContent" syncable="YES"/>
+        <relationship name="globalStateCurrentReadingInverse" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="GlobalState" inverseName="currentReadingStory" inverseEntity="GlobalState" syncable="YES"/>
+        <relationship name="parentContent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NarouContent" inverseName="childStory" inverseEntity="NarouContent" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="GlobalState" positionX="-261" positionY="-441" width="128" height="165"/>
+        <element name="NarouContent" positionX="-245" positionY="-109" width="128" height="360"/>
+        <element name="SpeakPitchConfig" positionX="-162" positionY="-279" width="128" height="105"/>
+        <element name="SpeechModSetting" positionX="-153" positionY="-270" width="128" height="73"/>
+        <element name="SpeechWaitConfig" positionX="-171" positionY="-288" width="128" height="75"/>
+        <element name="Story" positionX="-81" positionY="-280" width="128" height="165"/>
+    </elements>
+</model>

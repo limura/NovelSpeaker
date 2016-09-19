@@ -151,8 +151,8 @@
     [m_NiftySpeaker ClearSpeakSettings];
     [globalData ApplyDefaultSpeechconfig:m_NiftySpeaker];
     [globalData ApplySpeakPitchConfig:m_NiftySpeaker];
-    [globalData ApplySpeechModConfig:m_NiftySpeaker];
     [globalData ApplySpeechWaitConfig:m_NiftySpeaker];
+    [globalData ApplySpeechModConfig:m_NiftySpeaker];
 
     // 読み上げの間の設定を上書きします
     GlobalStateCacheData* globalState = [globalData GetGlobalState];

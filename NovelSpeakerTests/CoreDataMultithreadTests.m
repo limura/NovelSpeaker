@@ -71,7 +71,7 @@
 
     while(dispatch_semaphore_wait(semaphore, DISPATCH_TIME_NOW)){
         // http://stackoverflow.com/questions/13620128/block-main-thread-dispatch-get-main-queue-and-or-not-run-currentrunloop
-        // で知ったのだけれど、これを呼んであげないと block してしまう……(´・ω・`)
+        // で知ったのだけれど、これを呼んであげないと block してしまう……[NSThread sleep] みたいなので行けるのかと思ったら違った。(´・ω・`)
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
     }
     //[NSThread sleepForTimeInterval:5];

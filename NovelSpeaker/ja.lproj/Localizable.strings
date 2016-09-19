@@ -33,6 +33,9 @@
 "NarouSearchResultTableViewController_SearchResult" = "検索結果";
 "NarouSearchViewController_SearchTitle_Searching" = "Searching";
 "NarouSearchViewController_SearchMessage_NowSearching" = "Now searching";
+
+"PickerViewDialog_DoneKeyboardBarItem" = "決定";
+
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "声質の設定";
 "SettingTableViewController_CorrectionOfTheReading" = "読みの修正";
 "SettingTableViewController_SettingOfTheTextSize" = "表示文字サイズの設定";
@@ -49,6 +52,10 @@
 "SettingTableViewController_CreateNewUserText" = "新規自作小説の追加";
 "SettingTableViewController_RightNotation" = "権利表記";
 
+"DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
+"DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
+"DefaultSpeakSettingEditTableViewCell_AlertCanNotSelectSpeaker_title" = "話者を選択できません";
+"DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeaker_message" = "選択できる話者データが一つ以下です。\n設定アプリ→一般→アクセシビリティ→スピーチ→声→日本語\nと手繰っていった所で音声データをダウンロードしてから、もう一度お試しください。";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "ここに書いた文をテストで読み上げます。";
 "SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" を \"%@\" に";
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";
@@ -107,6 +114,7 @@
 "EditUserBookViewController_AddNewStoryFailed" = "新しい章の追加に失敗しました";
 "EditUserBookViewController_ConfirmDeleteThisChapter" = "この章を削除します。よろしいですか？";
 
+"BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.4
 

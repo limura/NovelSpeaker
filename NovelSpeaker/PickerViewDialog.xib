@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11201" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="PickerViewDialog">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="389"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="W94-s4-ntb">
+                    <color key="backgroundColor" white="1" alpha="0.90267619680851063" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="216" id="DFS-0d-Ix3"/>
+                    </constraints>
+                </pickerView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mly-Kl-0i7">
+                    <color key="backgroundColor" white="0.33333333333333331" alpha="0.30083665780141844" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <action selector="doneButtonClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="Ue1-H8-G0O"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Iou-Hj-Zb7">
+                    <color key="backgroundColor" white="0.33333333333333331" alpha="0.2981493794326241" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <action selector="doneButtonBottomClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="iwh-jj-Yba"/>
+                    </connections>
+                </button>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="mly-Kl-0i7" secondAttribute="trailing" id="88u-Ld-rRS"/>
+                <constraint firstItem="W94-s4-ntb" firstAttribute="top" secondItem="mly-Kl-0i7" secondAttribute="bottom" id="BaO-d8-ooq"/>
+                <constraint firstAttribute="trailing" secondItem="Iou-Hj-Zb7" secondAttribute="trailing" id="CY7-BE-Pdn"/>
+                <constraint firstAttribute="trailing" secondItem="W94-s4-ntb" secondAttribute="trailing" id="X2O-yE-5x9"/>
+                <constraint firstItem="mly-Kl-0i7" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="X6q-55-7c7"/>
+                <constraint firstAttribute="bottom" secondItem="Iou-Hj-Zb7" secondAttribute="bottom" id="YDt-VA-sYx"/>
+                <constraint firstItem="Iou-Hj-Zb7" firstAttribute="height" secondItem="mly-Kl-0i7" secondAttribute="height" id="aUC-yw-fDg"/>
+                <constraint firstItem="Iou-Hj-Zb7" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="cp4-DR-0jO"/>
+                <constraint firstItem="mly-Kl-0i7" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="khM-UP-0HD"/>
+                <constraint firstItem="W94-s4-ntb" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="qce-SZ-OIW"/>
+                <constraint firstItem="Iou-Hj-Zb7" firstAttribute="top" secondItem="W94-s4-ntb" secondAttribute="bottom" id="yKq-9g-Fcu"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="PickerView" destination="W94-s4-ntb" id="CD5-Xp-DBo"/>
+                <outlet property="doneButton" destination="mly-Kl-0i7" id="VVt-Rp-SlE"/>
+                <outlet property="doneButtonBottom" destination="Iou-Hj-Zb7" id="eXM-W6-TPw"/>
+            </connections>
+            <point key="canvasLocation" x="26.5" y="-215.5"/>
+        </view>
+    </objects>
+</document>

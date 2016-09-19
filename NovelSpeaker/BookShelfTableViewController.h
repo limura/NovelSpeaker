@@ -13,5 +13,6 @@
 @interface BookShelfTableViewController : UITableViewController<NarouDownloadQueueDelegate, UINavigationControllerDelegate>
 {
     NarouContentCacheData* m_NextViewDetail;
+    NarouContentSortType m_SortType;
 }
 @end

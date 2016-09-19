@@ -58,9 +58,11 @@ typedef enum {
     m_StringSubstituter = [StringSubstituter new];
 
     m_DefaultSpeechConfig = [SpeechConfig new];
-    GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    GlobalStateCacheData* globalState = [globalData GetGlobalState];
     m_DefaultSpeechConfig.pitch = [globalState.defaultPitch floatValue];
     m_DefaultSpeechConfig.rate = [globalState.defaultRate floatValue];
+    m_DefaultSpeechConfig.voiceIdentifier = [globalData GetVoiceIdentifier];
     m_DefaultSpeechConfig.beforeDelay = 0.0f;
     
     m_bIsSpeaking = false;
@@ -95,6 +97,7 @@ typedef enum {
     m_DefaultSpeechConfig.pitch = speechConfig.pitch;
     m_DefaultSpeechConfig.rate = speechConfig.rate;
     m_DefaultSpeechConfig.beforeDelay = speechConfig.beforeDelay;
+    m_DefaultSpeechConfig.voiceIdentifier = speechConfig.voiceIdentifier;
     
     m_bIsSpeaking = false;
     m_NowSpeechBlockIndex = 0;
@@ -133,6 +136,7 @@ typedef enum {
     result.speechConfig.beforeDelay = config.beforeDelay;
     result.speechConfig.pitch = config.pitch;
     result.speechConfig.rate = config.rate;
+    result.speechConfig.voiceIdentifier = config.voiceIdentifier;
     unsigned long p = 0;
     unsigned long displayTextLength = [displayText length];
     while (p < displayTextLength) {
@@ -205,6 +209,7 @@ typedef enum {
                 currentSetting.config.pitch = m_DefaultSpeechConfig.pitch;
                 currentSetting.config.rate = m_DefaultSpeechConfig.pitch;
                 currentSetting.config.beforeDelay = m_DefaultSpeechConfig.beforeDelay;
+                currentSetting.config.voiceIdentifier = m_DefaultSpeechConfig.voiceIdentifier;
                 currentSetting.type = 0;
             }
             currentSetting.type |= SPEECH_SETTING_TYPE_DELAY;
@@ -235,6 +240,7 @@ typedef enum {
                 startSetting = [SpeechSetting new];
                 startSetting.config = [SpeechConfig new];
                 startSetting.config.beforeDelay = 0.0f;
+                startSetting.config.voiceIdentifier = [[GlobalDataSingleton GetInstance] GetVoiceIdentifier];
                 startSetting.type = 0;
             }
             startSetting.type |= SPEECH_SETTING_TYPE_TONE_CHANGE_IN;
@@ -250,6 +256,7 @@ typedef enum {
                 endSetting = [SpeechSetting new];
                 endSetting.config = [SpeechConfig new];
                 endSetting.config.beforeDelay = 0.0f;
+                endSetting.config.voiceIdentifier = [[GlobalDataSingleton GetInstance] GetVoiceIdentifier];
                 endSetting.type = 0;
             }
             endSetting.type |= SPEECH_SETTING_TYPE_TONE_CHANGE_OUT;
@@ -304,6 +311,7 @@ typedef enum {
         nextConfig.beforeDelay = 0.0f;
         nextConfig.pitch = currentConfig.pitch;
         nextConfig.rate = currentConfig.rate;
+        nextConfig.voiceIdentifier = currentConfig.voiceIdentifier;
         
         delayTime = 0.0f;
         if (setting.type & SPEECH_SETTING_TYPE_DELAY) {
@@ -331,6 +339,7 @@ typedef enum {
             tmpConfig.rate = currentConfig.rate;
             tmpConfig.pitch = currentConfig.pitch;
             tmpConfig.beforeDelay = currentConfig.beforeDelay;
+            tmpConfig.voiceIdentifier = currentConfig.voiceIdentifier;
             currentConfig = tmpConfig;
         }
         SpeechBlock* block = [self CreateSpeechBlockFromDisplayText:targetString config:currentConfig];
@@ -345,6 +354,7 @@ typedef enum {
             tmpConfig.rate = config.rate;
             tmpConfig.pitch = config.pitch;
             tmpConfig.beforeDelay = delayTime;
+            tmpConfig.voiceIdentifier = config.voiceIdentifier;
             config = tmpConfig;
         }
         NSRange textRange = NSMakeRange(p, [text length] - p);
@@ -370,11 +380,13 @@ typedef enum {
 - (BOOL)SetDefaultSpeechConfig:(SpeechConfig*)speechConfig
 {
     if (speechConfig == nil) {
-        GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
+        GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+        GlobalStateCacheData* globalState = [globalData GetGlobalState];
         m_DefaultSpeechConfig = [SpeechConfig new];
         m_DefaultSpeechConfig.pitch = [globalState.defaultPitch floatValue];
         m_DefaultSpeechConfig.rate = [globalState.defaultRate floatValue];
         m_DefaultSpeechConfig.beforeDelay = 0.0f;
+        m_DefaultSpeechConfig.voiceIdentifier = [globalData GetVoiceIdentifier];
         return true;
     }
     m_DefaultSpeechConfig = speechConfig;
@@ -481,6 +493,9 @@ typedef enum {
     }
     NSRange targetRange = NSMakeRange(location, [speakText length] - location);
     speakText = [speakText substringWithRange:targetRange];
+    if (currentBlock.speechConfig.voiceIdentifier != nil) {
+        [m_Speaker SetVoiceWithIdentifier:currentBlock.speechConfig.voiceIdentifier];
+    }
     [m_Speaker SetRate:currentBlock.speechConfig.rate];
     [m_Speaker SetPitch:currentBlock.speechConfig.pitch];
     [m_Speaker SetDelay:currentBlock.speechConfig.beforeDelay];
@@ -681,6 +696,38 @@ typedef enum {
     }
     return [m_Speaker Speech:speechString];
 }
+
+
+/// countryCode の発音をサポートしている音声の AVSpeechSynthesisVoice のリストを取得します。
++ (NSArray*)getSupportedSpeaker:(NSString*)countryCode{
+    NSArray* voiceList = [AVSpeechSynthesisVoice speechVoices];
+    NSMutableArray* countryVoiceList = [NSMutableArray new];
+    for (AVSpeechSynthesisVoice* voice in voiceList) {
+        if ([voice.language compare:countryCode] == NSOrderedSame) {
+            [countryVoiceList addObject:voice];
+        }
+    }
+    return countryVoiceList;
+}
+
+
+/// AVSpeechSynthesisVoice.identifier から .name を取得します。該当がなければ nil を返します。
++ (NSString*)getDisplayStringForVoiceIdentifier:(NSString*)identifier {
+    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_9_0) {
+        return nil;
+    }
+    if (identifier == nil) {
+        return nil;
+    }
+    NSArray* voiceList = [AVSpeechSynthesisVoice speechVoices];
+    for (AVSpeechSynthesisVoice* voice in voiceList) {
+        if ([voice.identifier compare:identifier] == NSOrderedSame) {
+            return voice.name;
+        }
+    }
+    return nil;
+}
+
 
 #if 0
 // AVAudioSessionDelegate で受け取れる音声停止のイベント？

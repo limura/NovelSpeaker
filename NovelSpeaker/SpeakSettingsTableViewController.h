@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "Speaker.h"
 #import "CreateNewSpeakPitchSettingViewController.h"
+#import "EasyAlert.h"
 
 @protocol SettingTableViewDelegate <NSObject>
 
@@ -18,6 +19,8 @@
 /// テスト読み上げ用の文字列が書き換えられた時のイベントハンドラ
 - (void) testSpeakSampleTextUpdate:(NSString*)text;
 
+/// TableViewCell から alert を表示したいとのお願いのイベントハンドラ
+- (void) showAlert:(NSString*)title message:(NSString*)message;
 
 @end
 
@@ -25,6 +28,7 @@
 {
     NSString* testSpeechSampleText;
     Speaker* m_Speaker;
+    EasyAlert* m_EasyAlert;
 }
 
 @end

@@ -11,6 +11,7 @@
 /// 読み上げの時の設定
 @interface SpeechConfig : NSObject
 
+@property (nonatomic) NSString* voiceIdentifier;
 @property (nonatomic) float pitch;
 @property (nonatomic) float rate;
 @property (nonatomic) NSTimeInterval beforeDelay;

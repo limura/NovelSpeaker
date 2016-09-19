@@ -142,6 +142,7 @@
 {
     SpeechBlock* result = [SpeechBlock new];
     result.speechConfig = [SpeechConfig new];
+    result.speechConfig.voiceIdentifier = config.voiceIdentifier;
     result.speechConfig.beforeDelay = config.beforeDelay;
     result.speechConfig.pitch = config.pitch;
     result.speechConfig.rate = config.rate;

@@ -178,7 +178,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 /// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
 - (void)ShareNcodeListURLScheme
 {
-    NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
+    NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:NarouContentSortType_Ncode];
     if (contentList == nil || [contentList count] <= 0) {
         [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SettingTableViewController_NoContentHave", @"本棚に本がありません") message:nil];
         return;

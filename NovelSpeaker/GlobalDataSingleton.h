@@ -20,6 +20,13 @@
 #import "CoreDataObjectHolder.h"
 #import "SpeechWaitConfigCacheData.h"
 
+typedef NS_ENUM(NSUInteger,NarouContentSortType) {
+    NarouContentSortType_NovelUpdatedAt = 0,
+    NarouContentSortType_Title,
+    NarouContentSortType_Writer,
+    NarouContentSortType_Ncode,
+};
+
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
 {
@@ -108,7 +115,7 @@
 
 /// NarouContent の全てを NSArray で取得します
 /// novelupdated_at で sort されて返されます。
-- (NSMutableArray*) GetAllNarouContent;
+- (NSMutableArray*) GetAllNarouContent:(NarouContentSortType)sortType;
 
 /// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
@@ -307,4 +314,31 @@
 
 /// 標準の読み上げ辞書のリストを取得します
 - (NSDictionary*)GetDefaultSpeechModConfig;
+
+/// 全てのコンテンツを再度ダウンロードしようとします。
+- (void)ReDownladAllContents;
+
+/// 現在の Download queue を全て削除します
+- (void)ClearDownloadQueue;
+
+/// 現在の新規ダウンロード数をクリアします
+- (void)ClearNewDownloadCount;
+
+/// 現在の新規ダウンロード数を取得します
+- (int)GetNewDownloadCount;
+
+// Background fetch イベントを処理します
+- (void)HandleBackgroundFetch:(UIApplication *)application
+performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
+
+// 設定されている読み上げに使う音声の identifier を取得します
+// XXX TODO: 本来なら core data 側でなんとかすべきです
+- (NSString*)GetVoiceIdentifier;
+
+// 読み上げに使う音声の identifier を保存します。
+// XXX TODO: 本来なら core data 側でなんとかすべきです
+- (void)SetVoiceIdentifier:(NSString*)identifier;
+
+- (void)DeleteVoiceIdentifier;
+
 @end

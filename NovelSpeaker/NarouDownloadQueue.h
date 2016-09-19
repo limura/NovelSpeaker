@@ -44,8 +44,11 @@
     /// 現在ダウンロード中のものの情報
     NarouContentCacheData* m_CurrentDownloadContentAllData;
     
-    /// 小説家になろうからダウンロードした回数
+    /// 小説家になろうからダウンロードした回数(連続ダウンロード抑止用)
     int m_DownloadCount;
+    
+    /// 小説家になろうから新たにダウンロードした小説の数(バッヂ用)
+    int m_NewDownloadCount;
 }
 
 /// ダウンロード周りのイベントハンドラ用のdelegateに追加します。
@@ -79,5 +82,11 @@
 
 /// ncodeのリスト(@"ncode-ncode-ncode..." という形式)の文字列を受け取って、ダウンロードキューに入れます
 - (BOOL)AddDownloadQueueForNcodeList:(NSString*)ncodeList;
+
+/// 現在の新規ダウンロード数カウントをクリアします
+- (void)ClearNewDownloadCount;
+
+/// 現在の新規ダウンロード数カウントを取得します
+- (int)GetNewDownloadCount;
 
 @end

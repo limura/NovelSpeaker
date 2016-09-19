@@ -177,6 +177,7 @@
     StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
     if (story == nil) {
         // なにやら設定されていないようなので、最初の章を読み込むことにします。
+        // TODO: XXXX: 最新情報に更新した後にここに何故か来る事があるのをなんとかする
         [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込みます"]]; // NSLog
 
         NSLog(@"GetReadingChapter return nil. なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込むことにします。");

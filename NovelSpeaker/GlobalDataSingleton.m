@@ -48,6 +48,7 @@ static GlobalDataSingleton* _singleton = nil;
     speechConfig.pitch = 1.0f;
     speechConfig.rate = 1.0f;
     speechConfig.beforeDelay = 0.0f;
+    speechConfig.voiceIdentifier = [self GetVoiceIdentifier]; // これは現状では UserDefaults です。
     m_NiftySpeaker = [[NiftySpeaker alloc] initWithSpeechConfig:speechConfig];
 
     AVAudioSession* session = [AVAudioSession sharedInstance];
@@ -283,13 +284,31 @@ static GlobalDataSingleton* _singleton = nil;
 
 /// NarouContent の全てを NarouContentCacheData の NSArray で取得します
 /// novelupdated_at で sort されて返されます。
-- (NSMutableArray*) GetAllNarouContent
+- (NSMutableArray*) GetAllNarouContent:(NarouContentSortType)sortType;
 {
     __block NSError* err;
     __block NSMutableArray* fetchResults = nil;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"NarouContent" sortAttributeName:@"novelupdated_at" ascending:NO];
+        NSString* sortAttributeName = @"novelupdated_at";
+        switch (sortType) {
+            case NarouContentSortType_NovelUpdatedAt:
+                sortAttributeName = @"novelupdated_at";
+                break;
+            case NarouContentSortType_Title:
+                sortAttributeName = @"title";
+                break;
+            case NarouContentSortType_Writer:
+                sortAttributeName = @"writer";
+                break;
+            case NarouContentSortType_Ncode:
+                sortAttributeName = @"ncode";
+                break;
+            default:
+                sortAttributeName = @"novelupdated_at";
+                break;
+        }
+        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"NarouContent" sortAttributeName:sortAttributeName ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[NarouContentCacheData alloc] initWithCoreData:results[i]];
@@ -1252,6 +1271,7 @@ static GlobalDataSingleton* _singleton = nil;
     defaultSetting.pitch = [globalState.defaultPitch floatValue];
     defaultSetting.rate = [globalState.defaultRate floatValue];
     defaultSetting.beforeDelay = 0.0f;
+    defaultSetting.voiceIdentifier = [self GetVoiceIdentifier];
     [niftySpeaker SetDefaultSpeechConfig:defaultSetting];
 }
 
@@ -1267,6 +1287,7 @@ static GlobalDataSingleton* _singleton = nil;
             speechConfig.pitch = [pitchConfig.pitch floatValue];
             speechConfig.rate = [globalState.defaultRate floatValue];
             speechConfig.beforeDelay = 0.0f;
+            speechConfig.voiceIdentifier = [self GetVoiceIdentifier];
             [niftySpeaker AddBlockStartSeparator:pitchConfig.startText endString:pitchConfig.endText speechConfig:speechConfig];
         }
     }
@@ -1958,6 +1979,7 @@ static GlobalDataSingleton* _singleton = nil;
 
 #define USER_DEFAULTS_PREVIOUS_TIME_VERSION @"PreviousTimeVersion"
 #define USER_DEFAULTS_PREVIOUS_TIME_BUILD   @"PreviousTimeBuild"
+#define USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER @"DefaultVoiceIdentifier"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -2037,4 +2059,135 @@ static GlobalDataSingleton* _singleton = nil;
 
     return content;
 }
+
+/// 全てのコンテンツを再度ダウンロードしようとします。
+- (void)ReDownladAllContents{
+    NSMutableArray* contentList = [self GetAllNarouContent:NarouContentSortType_NovelUpdatedAt];
+    if (contentList == nil) {
+        return;
+    }
+    for (NarouContentCacheData* content in contentList) {
+        [self AddDownloadQueueForNarou:content];
+    }
+}
+
+/// 現在の Download queue を全て削除します
+- (void)ClearDownloadQueue{
+    NSMutableArray* contentList = [self GetAllNarouContent:NarouContentSortType_NovelUpdatedAt];
+    if (contentList == nil) {
+        return;
+    }
+    for (NarouContentCacheData* content in contentList) {
+        if (content != nil && content.ncode != nil && [content.ncode length] > 0) {
+            [self DeleteDownloadQueue:content.ncode];
+        }
+    }
+}
+
+
+/// 現在の新規ダウンロード数をクリアします
+- (void)ClearNewDownloadCount{
+    [m_DownloadQueue ClearNewDownloadCount];
+}
+
+/// 現在の新規ダウンロード数を取得します
+- (int)GetNewDownloadCount{
+    return [m_DownloadQueue GetNewDownloadCount];
+}
+
+// Background fetch イベントを処理します
+- (void)HandleBackgroundFetch:(UIApplication *)application
+performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler{
+    // 既に download queue が走っていれば何もしません
+    NSArray* downloadInfo = [self GetCurrentDownloadWaitingInfo];
+    NarouContentCacheData* nowDownloadContent = [self GetCurrentDownloadingInfo];
+    if ([downloadInfo count] > 0 || nowDownloadContent != nil) {
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
+    }
+
+    // UI起動中であれば特に何もしません
+    UIApplicationState applicationState =  [application applicationState];
+    NSLog(@"START: applicationState: %@", applicationState == UIApplicationStateInactive ? @"Inactive"
+          : applicationState == UIApplicationStateBackground ? @"Background"
+          : applicationState == UIApplicationStateActive ? @"Active"
+          : @"Unknown");
+    if (applicationState == UIApplicationStateActive) {
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
+    }
+    // background で再生中であっても何もしません
+    if (applicationState == UIApplicationStateBackground && [self isSpeaking]) {
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
+    }
+    
+    NSDate* startTime = [NSDate date];
+    [self ClearNewDownloadCount];
+    [self ReDownladAllContents];
+    [NSThread sleepForTimeInterval:2.0];
+    while (TRUE) {
+        NSArray* downloadInfo = [self GetCurrentDownloadWaitingInfo];
+        if ([downloadInfo count] <= 0) {
+            break;
+        }
+        [NSThread sleepForTimeInterval:0.1];
+        NSTimeInterval interval = [startTime timeIntervalSinceNow];
+        NSLog(@"interval: %f", interval);
+        if (interval < -29.0) {
+            // 30秒以上かかりそうならやめます
+            break;
+        }
+        if ([self isSpeaking]) {
+            break;
+        }
+    }
+    applicationState =  [application applicationState];
+    NSLog(@"END applicationState: %@", applicationState == UIApplicationStateInactive ? @"Inactive"
+          : applicationState == UIApplicationStateBackground ? @"Background"
+          : applicationState == UIApplicationStateActive ? @"Active"
+          : @"Unknown");
+    if (applicationState == UIApplicationStateInactive){
+        //[self ClearDownloadQueue];
+    }
+
+    int downloadCount = [self GetNewDownloadCount];
+    if (downloadCount > 0) {
+        application.applicationIconBadgeNumber = downloadCount;
+        
+        UILocalNotification* notification = [UILocalNotification new];
+        notification.fireDate = [NSDate date];
+        notification.alertBody = @"new content alive.";
+        notification.applicationIconBadgeNumber = downloadCount;
+        [application scheduleLocalNotification:notification];
+        
+        completionHandler(UIBackgroundFetchResultNewData);
+    }else{
+        application.applicationIconBadgeNumber = 100;
+        completionHandler(UIBackgroundFetchResultNoData);
+    }
+}
+
+// 設定されている読み上げに使う音声の identifier を取得します
+// XXX TODO: 本来なら core data 側でなんとかすべきです
+- (NSString*)GetVoiceIdentifier {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString* voiceIdentifier = [userDefaults stringForKey:USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER];
+    return voiceIdentifier;
+}
+
+// 読み上げに使う音声の identifier を保存します。
+// XXX TODO: 本来なら core data 側でなんとかすべきです
+- (void)SetVoiceIdentifier:(NSString*)identifier {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:identifier forKey:USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER];
+    [userDefaults synchronize];
+}
+
+- (void)DeleteVoiceIdentifier{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults removeObjectForKey:USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER];
+    [userDefaults synchronize];
+}
+
 @end

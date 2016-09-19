@@ -13,6 +13,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import "BookShelfTableViewCell.h"
 #import "EasyAlert.h"
+#import "PickerViewDialog.h"
 
 @interface BookShelfTableViewController ()
 
@@ -40,7 +41,7 @@
 {
     self = [super initWithStyle:style];
     if (self) {
-        // Custom initialization
+        // custom init
     }
     return self;
 }
@@ -55,13 +56,18 @@
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     //[self.navigationController setNavigationBarHidden:FALSE animated:TRUE];
+
+    // TODO: 保存された値を読みだすようにする
+    m_SortType = NarouContentSortType_NovelUpdatedAt;
     
     // 編集ボタンをつけます。
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
     
     UIBarButtonItem* refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshButtonClick:)];
+    
+    UIBarButtonItem* sortTypeSelectButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BookShelfTableViewController_SortTypeSelectButton", @"sort") style:UIBarButtonItemStyleDone target:self action:@selector(sortTypeSelectButtonClick:)];
 
-    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:self.editButtonItem, refreshButton, nil];
+    self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:self.editButtonItem, refreshButton, sortTypeSelectButton, nil];
 
     // カスタマイズしたセルをテーブルビューにセット
     UINib *nib = [UINib nibWithNibName:BookShelfTableViewCellID bundle:nil];
@@ -115,14 +121,29 @@
 - (void)refreshButtonClick:(id)sender
 {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    NSMutableArray* contentList = [globalData GetAllNarouContent];
-    if (contentList == nil) {
-        return;
-    }
-    for (NarouContent* content in contentList) {
-        NarouContentCacheData* contentAllData = [[NarouContentCacheData alloc] initWithCoreData:content];
-        [globalData AddDownloadQueueForNarou:contentAllData];
-    }
+    [globalData ReDownladAllContents];
+}
+
+- (void)sortTypeSelectButtonClick:(id)sender
+{
+    UIView* targetView = self.parentViewController.parentViewController.view;
+    PickerViewDialog* dialog = [PickerViewDialog createNewDialog:@[@"Ncode順", @"作者名順", @"名前順", @"更新順"] firstSelectedString:@"名前順" parentView:targetView resultReceiver:^(NSString* selectedText){
+        NarouContentSortType sortType = NarouContentSortType_NovelUpdatedAt;
+        if ([selectedText compare:@"更新順"] == NSOrderedSame) {
+            sortType = NarouContentSortType_NovelUpdatedAt;
+        }else if([selectedText compare:@"名前順"] == NSOrderedSame) {
+            sortType = NarouContentSortType_Title;
+        }else if([selectedText compare:@"作者名順"] == NSOrderedSame) {
+            sortType = NarouContentSortType_Writer;
+        }else if([selectedText compare:@"Ncode順"] == NSOrderedSame) {
+            sortType = NarouContentSortType_Ncode;
+        }else{
+            sortType = NarouContentSortType_NovelUpdatedAt;
+        }
+        m_SortType = sortType;
+        [self ReloadAllTableViewData];
+    }];
+    [dialog popup:nil];
 }
 
 #pragma mark - Table view data source
@@ -136,7 +157,7 @@
 // セクション内部のセルの数
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
+    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
     if (contentList == nil) {
         return 0;
     }
@@ -155,7 +176,7 @@
         cell = [[BookShelfTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:BookShelfTableViewCellID];
     }
     
-    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
+    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
     if(contentList == nil
        || [contentList count] <= indexPath.row)
     {
@@ -176,7 +197,7 @@
     return;
     
     // CoreData 側に save されている数と表示されている数が違うと assertion failure で落ちるので封印します。
-    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
+    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
     for (NSUInteger i = 0; i < [contentList count]; i++) {
         NSIndexPath* indexPath = [NSIndexPath indexPathForRow:i inSection:0];
         BookShelfTableViewCell* cell = [self.tableView dequeueReusableCellWithIdentifier:BookShelfTableViewCellID forIndexPath:indexPath];
@@ -204,7 +225,7 @@
 /// セルが選択された時
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
+    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
     if(contentList == nil
        || [contentList count] < indexPath.row)
     {
@@ -227,7 +248,7 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent];
+        NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
         if(contentList == nil
            || [contentList count] <= indexPath.row)
         {

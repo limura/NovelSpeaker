@@ -32,6 +32,7 @@ static NSString* const speechModSettingsTableViewDefaultCellID = @"speechModSett
     [super viewDidLoad];
     
     m_Speaker = [Speaker new];
+    [m_Speaker SetVoiceWithIdentifier:[[GlobalDataSingleton GetInstance] GetVoiceIdentifier]];
     
     // 追加ボタンとEditボタンをつけます。
     UIBarButtonItem* addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonClicked)];

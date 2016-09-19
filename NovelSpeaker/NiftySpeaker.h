@@ -110,4 +110,10 @@
 /// 読み上げを行った場合には true を返します。
 - (BOOL)AnnounceBySpeech:(NSString*)speechString;
 
+/// countryCode の発音をサポートしている音声の AVSpeechSynthesisVoice のリストを取得します。
++ (NSArray*)getSupportedSpeaker:(NSString*)countryCode;
+
+/// AVSpeechSynthesisVoice.identifier から .name を取得します。該当がなければ nil を返します。
++ (NSString*)getDisplayStringForVoiceIdentifier:(NSString*)identifier;
+
 @end

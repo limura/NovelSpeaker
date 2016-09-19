@@ -1,0 +1,18 @@
+
+/* Class = "UILabel"; text = "速度"; ObjectID = "DrX-Cm-JJl"; */
+"DrX-Cm-JJl.text" = "Rate";
+
+/* Class = "UIButton"; normalTitle = "Default"; ObjectID = "GT1-rG-UmS"; */
+"GT1-rG-UmS.normalTitle" = "Default speaker";
+
+/* Class = "UILabel"; text = "話者"; ObjectID = "YLT-VV-V1D"; */
+"YLT-VV-V1D.text" = "Speaker";
+
+/* Class = "UILabel"; text = "標準"; ObjectID = "jaV-Mw-rgG"; */
+"jaV-Mw-rgG.text" = "Default setting";
+
+/* Class = "UIButton"; normalTitle = "発音テスト"; ObjectID = "tQC-At-ng1"; */
+"tQC-At-ng1.normalTitle" = "Speak test";
+
+/* Class = "UILabel"; text = "高さ"; ObjectID = "wbT-Jc-cUT"; */
+"wbT-Jc-cUT.text" = "Pitch";

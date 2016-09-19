@@ -20,6 +20,10 @@
         [globalData InsertDefaultSetting];
     }
     
+    // background fetch activate
+    // background fetch はとりあえず封印します
+    //[application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+    
     UIViewController* toplevelViewController = nil;
     if ([globalData isRequiredCoreDataMigration]) {
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"coreDataMigration" bundle:nil];
@@ -53,6 +57,8 @@
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
     NSLog(@"application will enter foreground.");
+    // badge clear.
+    application.applicationIconBadgeNumber = 0;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -72,6 +78,13 @@
 {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     return [globalData ProcessURLSceme:url];
+}
+
+// for background fetch
+- (void)application:(UIApplication *)application
+performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    [globalData HandleBackgroundFetch:application performFetchWithCompletionHandler:completionHandler];
 }
 
 @end

@@ -280,6 +280,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     });
 
     int max_content_count = [localContent.general_all_no intValue];
+    Boolean isDownloaded = FALSE;
         
     //NSLog(@"download queue for %@ started max: %d", localContent.title, max_content_count);
     for (int n = 1; n <= max_content_count; n++) {
@@ -344,6 +345,8 @@ static float SLEEP_TIME_SECOND = 10.5f;
             m_CurrentDownloadContentAllData.current_download_complete_count = n;
         });
         [self announceDownloadStatus:localContent n:n maxPos:max_content_count];
+        
+        isDownloaded = TRUE;
     }
    // すべてのダウンロードが完了したら、nil で状態を更新します。
     dispatch_async(m_MainDispatchQueue, ^{
@@ -356,6 +359,10 @@ static float SLEEP_TIME_SECOND = 10.5f;
     id<NarouDownloadQueueDelegate> ncodeHandler = [m_DownloadEventHandlerDictionary objectForKey:localContent.ncode];
     if (ncodeHandler != nil) {
         [ncodeHandler DownloadEnd];
+    }
+    
+    if (isDownloaded) {
+        m_NewDownloadCount++;
     }
     
     return true;
@@ -411,5 +418,16 @@ static float SLEEP_TIME_SECOND = 10.5f;
     });
     return true;
 }
+
+/// 現在の新規ダウンロード数をクリアします
+- (void)ClearNewDownloadCount{
+    m_NewDownloadCount = 0;
+}
+
+/// 現在の新規ダウンロード数を取得します
+- (int)GetNewDownloadCount {
+    return m_NewDownloadCount;
+}
+
 
 @end

@@ -37,6 +37,8 @@
 
     testSpeechSampleText = NSLocalizedString(@"SpeakSettingsTableViewController_ReadTheSentenceForTest", @"ここに書いた文をテストで読み上げます。");
     m_Speaker = [Speaker new];
+    [m_Speaker SetVoiceWithIdentifier:[[GlobalDataSingleton GetInstance] GetVoiceIdentifier]];
+    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     
     UINib* defaultSpeakSettingTableViewCellNib = [UINib nibWithNibName:DefaultSpeakSettingEditTableViewCellID bundle:nil];
     [self.tableView registerNib:defaultSpeakSettingTableViewCellNib forCellReuseIdentifier:DefaultSpeakSettingEditTableViewCellID];
@@ -168,7 +170,7 @@
             case 0:
                 return 31.0f;
             case 1:
-                return 125.0f;
+                return 146.0f;
                 break;
             default:
                 break;
@@ -208,6 +210,7 @@
     [m_Speaker StopSpeech];
     [m_Speaker SetPitch:pitch];
     [m_Speaker SetRate:rate];
+    [m_Speaker SetVoiceWithIdentifier:[[GlobalDataSingleton GetInstance] GetVoiceIdentifier]];
     [m_Speaker Speech:testSpeechSampleText];
 }
 
@@ -215,6 +218,11 @@
 - (void) testSpeakSampleTextUpdate:(NSString*)text
 {
     testSpeechSampleText = text;
+}
+
+/// TableViewCell から alert を表示したいとのお願いのイベントハンドラ
+- (void) showAlert:(NSString*)title message:(NSString*)message {
+    [m_EasyAlert ShowAlertOKButton:title message:message];
 }
 
 

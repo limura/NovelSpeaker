@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11201" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="146" id="KGk-i7-Jjw" customClass="DefaultSpeakSettingEditTableViewCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="146"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <frame key="frameInset" width="320" height="145"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="標準" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jaV-Mw-rgG">
+                        <frame key="frameInset" minX="18" minY="12" width="187" height="21"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tQC-At-ng1">
+                        <constraints>
+                            <constraint firstAttribute="width" constant="100" id="Wfq-p8-tMv"/>
+                        </constraints>
+                        <state key="normal" title="発音テスト">
+                            <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        </state>
+                        <connections>
+                            <action selector="speakTestButtonClicked:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="pTS-32-8qv"/>
+                        </connections>
+                    </button>
+                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="cWU-jw-SYq">
+                        <connections>
+                            <action selector="pitchValueChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="avv-7P-7s6"/>
+                        </connections>
+                    </slider>
+                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="nLn-wQ-uW8">
+                        <connections>
+                            <action selector="rateValueChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="24S-sy-t1t"/>
+                        </connections>
+                    </slider>
+                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="高さ" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wbT-Jc-cUT">
+                        <constraints>
+                            <constraint firstAttribute="width" constant="68" id="GXt-Xn-7Jr"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="速度" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DrX-Cm-JJl">
+                        <constraints>
+                            <constraint firstAttribute="width" constant="68" id="KKT-p3-e0I"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="話者" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YLT-VV-V1D">
+                        <constraints>
+                            <constraint firstAttribute="width" constant="68" id="IZ5-Xf-jw1"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GT1-rG-UmS">
+                        <constraints>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="209" id="4B6-Nd-5wb"/>
+                        </constraints>
+                        <state key="normal" title="Default"/>
+                        <connections>
+                            <action selector="speakerSelectButtonClicked:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="63d-ot-Syp"/>
+                        </connections>
+                    </button>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="GT1-rG-UmS" firstAttribute="centerY" secondItem="YLT-VV-V1D" secondAttribute="centerY" id="19G-ml-w8w"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="GT1-rG-UmS" secondAttribute="trailing" constant="9" id="AwX-uv-l4E"/>
+                    <constraint firstItem="GT1-rG-UmS" firstAttribute="leading" secondItem="YLT-VV-V1D" secondAttribute="trailing" constant="8" id="Dpg-FH-0vS"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="nLn-wQ-uW8" secondAttribute="trailing" constant="9" id="FEs-cO-AQd"/>
+                    <constraint firstItem="wbT-Jc-cUT" firstAttribute="top" secondItem="jaV-Mw-rgG" secondAttribute="bottom" constant="13" id="IRX-pH-VTq"/>
+                    <constraint firstItem="DrX-Cm-JJl" firstAttribute="top" secondItem="wbT-Jc-cUT" secondAttribute="bottom" constant="13" id="Ime-83-4Sd"/>
+                    <constraint firstItem="cWU-jw-SYq" firstAttribute="top" secondItem="tQC-At-ng1" secondAttribute="bottom" constant="4" id="L65-We-aTJ"/>
+                    <constraint firstItem="nLn-wQ-uW8" firstAttribute="top" secondItem="cWU-jw-SYq" secondAttribute="bottom" constant="3" id="LJa-Lb-uu4"/>
+                    <constraint firstItem="wbT-Jc-cUT" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" constant="10" id="MxU-GE-Juq"/>
+                    <constraint firstItem="YLT-VV-V1D" firstAttribute="top" secondItem="DrX-Cm-JJl" secondAttribute="bottom" constant="13" id="Qnf-IC-tKa"/>
+                    <constraint firstItem="nLn-wQ-uW8" firstAttribute="leading" secondItem="DrX-Cm-JJl" secondAttribute="trailing" constant="8" id="Sta-If-Kv8"/>
+                    <constraint firstItem="YLT-VV-V1D" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" constant="10" id="U1r-Mb-Hw2"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="YLT-VV-V1D" secondAttribute="bottom" constant="4" id="Zko-dN-cz2"/>
+                    <constraint firstItem="jaV-Mw-rgG" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" constant="4" id="aaY-NL-ahP"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="cWU-jw-SYq" secondAttribute="trailing" constant="9" id="fj8-QI-zJv"/>
+                    <constraint firstItem="cWU-jw-SYq" firstAttribute="leading" secondItem="wbT-Jc-cUT" secondAttribute="trailing" constant="8" id="g1I-gc-hkq"/>
+                    <constraint firstItem="jaV-Mw-rgG" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" constant="10" id="i2j-CE-mb1"/>
+                    <constraint firstItem="DrX-Cm-JJl" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" constant="10" id="ir2-gn-nJ3"/>
+                    <constraint firstItem="tQC-At-ng1" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" id="pxh-l2-D6g"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="tQC-At-ng1" secondAttribute="trailing" constant="9" id="uu4-5I-ErW"/>
+                    <constraint firstItem="GT1-rG-UmS" firstAttribute="bottom" secondItem="H2p-sc-9uM" secondAttribute="bottomMargin" id="vV1-5G-jlG"/>
+                    <constraint firstItem="tQC-At-ng1" firstAttribute="centerY" secondItem="jaV-Mw-rgG" secondAttribute="centerY" id="zdC-jW-KDK"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="pitchSlider" destination="cWU-jw-SYq" id="2WO-rG-XEf"/>
+                <outlet property="rateSlider" destination="nLn-wQ-uW8" id="bb1-Ew-5ML"/>
+                <outlet property="speakerNameButton" destination="GT1-rG-UmS" id="loS-ec-OVq"/>
+            </connections>
+            <point key="canvasLocation" x="24" y="60"/>
+        </tableViewCell>
+    </objects>
+    <simulatedMetricsContainer key="defaultSimulatedMetrics">
+        <simulatedStatusBarMetrics key="statusBar"/>
+        <simulatedOrientationMetrics key="orientation"/>
+        <simulatedScreenMetrics key="destination" type="retina4_7.fullscreen"/>
+    </simulatedMetricsContainer>
+</document>
