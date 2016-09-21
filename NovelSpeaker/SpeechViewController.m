@@ -115,7 +115,7 @@
     // なにやら登録が外れる事があるようなので、AddSpeakRangeDelegate をこのタイミングでも呼んでおきます。
     // AddSpeakRangeDelegate は複数回呼んでも大丈夫なように作ってあるはずです
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+    //[self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
     [globalData AddSpeakRangeDelegate:self];
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     [self.textView becomeFirstResponder];
@@ -153,8 +153,13 @@
         // 話し中であればこれはバンバン呼び出されるはずだし、勝手に NiftySpeaker側 で読み上げ位置の更新をしているはずなので無視して良いです。
         return;
     }
-    //NSRange range = self.textView.selectedRange;
-    //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld", self.NarouContentDetail.title, (unsigned long)range.location]]; // NSLog
+    NSRange range = self.textView.selectedRange;
+    // 何故か起動時に表示範囲外の textViewDidChangeSelection が飛んでくるのでそれは無視するようにします。
+    if (range.location >= [textView.text length]) {
+        return;
+    }
+    //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld %ld", self.NarouContentDetail.title, (unsigned long)range.location(unsigned long), [textView.text length]]]; // NSLog
+    m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:range.location];
     [self SaveCurrentReadingPoint];
 }
 
@@ -174,10 +179,8 @@
         [self SetReadingPointFailedMessage];
         return false;
     }
-    StoryCacheData* story = content.currentReadingStory;
-    if (story == nil) {
-        story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
-    }
+    // 自分の content.currentReadingStory は昔のcacheなので現在の値を読み直します
+    StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
     if (story == nil) {
         // なにやら設定されていないようなので、最初の章を読み込むことにします。
         // TODO: XXXX: 最新情報に更新した後にここに何故か来る事があるのをなんとかする
@@ -201,12 +204,12 @@
     }
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     NSUInteger location = self.textView.selectedRange.location;
+    //NSLog(@"self.textView.selectedRange.location: %lu", (unsigned long)location);
     if (location <= 0) {
         NSRange readingRange = [globalData GetCurrentReadingPoint];
         location = readingRange.location;
     }
     m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:location];
-    //NSLog(@"update read location %lu (%@)", [m_CurrentReadingStory.readLocation unsignedLongValue], m_CurrentReadingStory.ncode);
     [globalData UpdateReadingPoint:self.NarouContentDetail story:m_CurrentReadingStory];
     [globalData saveContext];
 }
@@ -475,6 +478,7 @@
 /// 読み上げ位置が更新されたとき
 - (void) willSpeakRange:(NSRange)range speakText:(NSString*)text
 {
+    m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:range.location];
     self.textView.selectedRange = range;
     [self.textView scrollRangeToVisible:range];
 }

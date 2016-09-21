@@ -68,7 +68,7 @@
 - (void)StopDownloadThread;
 
 /// ncode のコンテンツをダウンロードをqueueに入れます。
-- (BOOL)AddDownloadQueue:(NarouContentCacheData*)ncode;
+- (BOOL)AddDownloadQueue:(NarouContentCacheData*)content;
 
 /// 現在ダウンロード待ち中の NarouContentCacheData* のリストを返します。
 - (NSArray*)GetCurrentWaitingList;

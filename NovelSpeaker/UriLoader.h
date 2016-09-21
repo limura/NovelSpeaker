@@ -16,6 +16,8 @@
     float m_SleepTime;
     NSMutableArray* m_SiteInfoArray;
 }
+/// SiteInfo のJSONを内部データベースに追加します。
+- (BOOL)AddSiteInfoFromData:(NSData*)siteInfo;
 
 /// SiteInfo のJSON文字列を内部データベースに追加します。
 - (BOOL)AddSiteInfoFromString:(NSString*)siteInfo;

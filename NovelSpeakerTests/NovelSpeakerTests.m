@@ -74,4 +74,9 @@
  */
 }
 
+- (void)testURLDownload {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NSString* result = [globalData AddDownloadQueueForURL:[[NSURL alloc] initWithString:@"https://kakuyomu.jp/works/1177354054880210298/episodes/1177354054880210374"]];
+}
+
 @end

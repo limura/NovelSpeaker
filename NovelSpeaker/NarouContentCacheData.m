@@ -136,5 +136,16 @@
     return [self.ncode hasPrefix:@"_u"];
 }
 
+/// URLで指定されるコンテンツか否かを取得します
+- (BOOL)isURLContent {
+    if (self.ncode == nil) {
+        return false;
+    }
+    if([self.ncode hasPrefix:@"http://"] || [self.ncode hasPrefix:@"https://"]){
+        return true;
+    }
+    return false;
+}
+
 
 @end

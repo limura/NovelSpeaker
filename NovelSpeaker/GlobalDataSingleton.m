@@ -11,6 +11,7 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import "NarouLoader.h"
 #import "NarouDownloadQueue.h"
+#import "NSDataZlibExtension.h"
 
 @implementation GlobalDataSingleton
 
@@ -378,7 +379,7 @@ static GlobalDataSingleton* _singleton = nil;
     
     // download queue に追加します。
     NSLog(@"add download queue.");
-    [[GlobalDataSingleton GetInstance] PushContentDownloadQueue:content];
+    [self PushContentDownloadQueue:content];
     
     return nil;
 }
@@ -2059,6 +2060,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_BOOKSELF_SORT_TYPE @"BookSelfSortType"
 #define USER_DEFAULTS_BACKGROUND_FETCHED_NOVEL_ID_LIST @"BackgroundFetchedNovelIDList"
 #define USER_DEFAULTS_BACKGROUND_NOVEL_FETCH_MODE @"BackgroundNovelFetchMode"
+#define USER_DEFAULTS_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE @"AutoPagerizeSiteInfoCacheSavedDate"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -2382,5 +2384,132 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// AutoPagerize の SiteInfo を保存した日付を取得します
+- (NSDate*)GetAutoPagerizeCacheSavedDate {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    return [userDefaults objectForKey:USER_DEFAULTS_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE];
+}
+
+/// AutoPagerize の SiteInfo を保存した日付を保存します
+- (void)UpdateAutoPagerizeCacheSavedDate:(NSDate*)date {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:date forKey:USER_DEFAULTS_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE];
+    [userDefaults synchronize];
+}
+
+#define CACHE_FILE_NAME_AUTOPAGERLIZE_SITEINFO @"AutoPagerizeSiteInfo.deflate"
+#define AUTOPAGERIZE_SITEINFO_URL @"http://wedata.net/databases/AutoPagerize/items.json"
+
+/// AutoPagerize の SiteInfo を保存するファイルへのパスを取得します
+- (NSString*)GetAutoPagerizeSiteInfoCacheFilePath {
+    NSArray* pathArray = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString* cachesPath = [pathArray objectAtIndex:0];
+    if (cachesPath == nil) {
+        return nil;
+    }
+    NSString* filePath = [[NSString alloc] initWithFormat:@"%@/%@", cachesPath, CACHE_FILE_NAME_AUTOPAGERLIZE_SITEINFO];
+    return filePath;
+}
+
+/// AutoPagerize の SiteInfo を内部に保存します
+- (void)SaveAutoPagerizeSiteInfoData:(NSData*)data {
+    NSString* filePath = [self GetAutoPagerizeSiteInfoCacheFilePath];
+    [data writeToFile:filePath atomically:true];
+}
+
+/// 内部に保存してある AutoPagerize の SiteInfo を最新版に更新します
+/// これはネットワークアクセスを行う動作になります
+- (BOOL)UpdateCachedAutoPagerizeSiteInfoData {
+    NSURL* url = [[NSURL alloc] initWithString:AUTOPAGERIZE_SITEINFO_URL];
+    NSURLRequest* request = [NSURLRequest requestWithURL:url];
+    NSError* error;
+    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error];
+    if (error != nil) {
+        return false;
+    }
+    NSData* zipedData = [data deflate:9];
+    [self SaveAutoPagerizeSiteInfoData:zipedData];
+    return true;
+}
+
+/// 内部に保存してある AutoPagerize の SiteInfo を取り出します
+- (NSData*)GetCachedAutoPagerizeSiteInfoData {
+    NSDate* lastUpdateDate = [self GetAutoPagerizeCacheSavedDate];
+    if ([lastUpdateDate timeIntervalSinceNow] < -24*60*60) { // 24時間以上経っていたらキャッシュを更新する
+        [self GetCachedAutoPagerizeSiteInfoData];
+    }
+    
+    NSString* filePath = [self GetAutoPagerizeSiteInfoCacheFilePath];
+    NSLog(@"autopagerize site info path:\n%@", filePath);
+    NSData* siteInfoDeflate = [NSData dataWithContentsOfFile:filePath];
+    if (siteInfoDeflate == nil) {
+        // 読み出しに失敗したらネットワーク経由で取得しようとします。
+        if ([self UpdateCachedAutoPagerizeSiteInfoData]) {
+            return [self GetCachedAutoPagerizeSiteInfoData];
+        };
+        return nil;
+    }
+    return [siteInfoDeflate inflate];
+}
+
+/// ダウンロードqueueに追加しようとします
+/// 追加した場合は nil を返します。
+/// 追加できなかった場合はエラーメッセージを返します。
+- (NSString*) AddDownloadQueueForURL:(NSURL*)url
+{
+    if(url == nil)
+    {
+        return NSLocalizedString(@"GlobalDataSingleton_CanNotGetValidNCODE", @"有効な URL を取得できませんでした。");
+    }
+    NSString* urlString = [url absoluteString];
+    
+    __block NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:urlString];
+    if (targetContentCacheData == nil) {
+        // 登録がないようなのでとりあえず NarouContent を登録します。
+        __block BOOL isNarouContentCreated = false;
+        [self coreDataPerfomBlockAndWait:^{
+            NarouContent* targetContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:urlString];
+            if (targetContent == nil) {
+                targetContent = [self CreateNewNarouContentThreadUnsafe];
+                isNarouContentCreated = true;
+            }
+            targetContent.title = urlString;
+            targetContent.ncode = urlString;
+            targetContent.userid = @"-";
+            targetContent.writer = @"-";
+            targetContent.story = @"-";
+            targetContent.genre = [[NSNumber alloc] initWithInt:0];
+            targetContent.keyword = @"-";
+            targetContent.general_all_no = [[NSNumber alloc] initWithInt:0];
+            targetContent.end = [[NSNumber alloc] initWithBool:false];
+            targetContent.global_point = [[NSNumber alloc] initWithInt:0];
+            targetContent.fav_novel_cnt = [[NSNumber alloc] initWithInt:0];
+            targetContent.review_cnt = [[NSNumber alloc] initWithInt:0];
+            targetContent.all_point = [[NSNumber alloc] initWithInt:0];
+            targetContent.all_hyoka_cnt = [[NSNumber alloc] initWithInt:0];
+            targetContent.sasie_cnt = [[NSNumber alloc] initWithInt:0];
+            targetContent.novelupdated_at = [NSDate date];
+            targetContentCacheData = [[NarouContentCacheData alloc] initWithCoreData:targetContent];
+            // 新しく作ったので save して main thread と sync しておきます。
+            [m_CoreDataObjectHolder save];
+            //});
+        }];
+        if (isNarouContentCreated) {
+            [self NarouContentListChangedAnnounce];
+        }
+    }
+    
+    /*
+     if (targetContentCacheData != nil && ([targetContentCacheData.general_all_no intValue] <= [self CountContentChapter:targetContentCacheData]) ) {
+     return NSLocalizedString(@"GlobalDataSingleton_AlreadyDownloaded", @"既にダウンロード済です。");
+     }
+     */
+    
+    // download queue に追加します。
+    NSLog(@"add download queue.");
+    [self PushContentDownloadQueue:targetContentCacheData];
+    
+    return nil;
+}
 
 @end

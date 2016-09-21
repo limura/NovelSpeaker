@@ -12,6 +12,7 @@
 #import "NarouContent.h"
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
+#import "UriLoader.h"
 
 @implementation NarouDownloadQueue
 
@@ -252,12 +253,48 @@ static float SLEEP_TIME_SECOND = 10.5f;
     [notificationCenter postNotification:notification];
 }
 
+/// URL のコンテンツをダウンロードします。
+- (BOOL)URLDownload:(NarouContentCacheData*)localContent {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    UriLoader* loader = [UriLoader new];
+    
+    NSData* siteInfoData = [globalData GetCachedAutoPagerizeSiteInfoData];
+    if(![loader AddSiteInfoFromData:siteInfoData]){
+        return false;
+    }
+    NSURL* targetURL = [[NSURL alloc] initWithString:localContent.ncode];
+    
+    __block BOOL result = false;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    [loader LoadURL:targetURL successAction:^(NSArray* fetchedArray){
+        for (int i = 0; i < [fetchedArray count]; i++) {
+            [globalData UpdateStory:fetchedArray[i] chapter_number:i+1 parentContent:localContent];
+        }
+        localContent.general_all_no = [[NSNumber alloc] initWithInt:(int)[fetchedArray count]];
+        result = true;
+        dispatch_semaphore_signal(semaphore);
+    } failedAction:^(NSURL* url){
+        dispatch_semaphore_signal(semaphore);
+    }];
+    while(dispatch_semaphore_wait(semaphore, DISPATCH_TIME_NOW)){
+        // http://stackoverflow.com/questions/13620128/block-main-thread-dispatch-get-main-queue-and-or-not-run-currentrunloop
+        // で知ったのだけれど、これを呼んであげないと block してしまう……[NSThread sleep] みたいなので行けるのかと思ったら違った。(´・ω・`)
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+    }
+
+    return result;
+}
+
 /// ncode のコンテンツのダウンロードを開始します。
 - (BOOL)ChapterDownload:(NarouContentCacheData*)localContent
 {
     if (localContent == nil || localContent.ncode == nil) {
         return false;
     }
+    if ([localContent isURLContent]) {
+        return [self URLDownload:localContent];
+    }
+    
     // 与えられた content の ncode を使って最新情報を読み込んでCoreData側の情報を上書きします。
     NarouContentCacheData* currentContent = [NarouLoader GetCurrentNcodeContentData:localContent.ncode];
     if (currentContent == nil) {

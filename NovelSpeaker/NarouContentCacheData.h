@@ -45,4 +45,7 @@
 /// ユーザによる自作コンテンツか否かを取得します
 - (BOOL)isUserCreatedContent;
 
+/// URLで指定されるコンテンツか否かを取得します
+- (BOOL)isURLContent;
+
 @end

@@ -204,6 +204,8 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 /// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
 - (void)ShareNcodeListURLScheme
 {
+    //GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    //[globalData AddDownloadQueueForURL:[[NSURL alloc] initWithString:@"https://kakuyomu.jp/works/1177354054880928816/episodes/1177354054880929986"]];
     NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:NarouContentSortType_Ncode];
     if (contentList == nil || [contentList count] <= 0) {
         [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SettingTableViewController_NoContentHave", @"本棚に本がありません") message:nil];

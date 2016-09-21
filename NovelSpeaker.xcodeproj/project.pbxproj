@@ -55,6 +55,8 @@
 		217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 217E683A1998F6A000C656AA /* MediaPlayer.framework */; };
 		217E683E199A80A200C656AA /* NiftySpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 217E683D199A80A200C656AA /* NiftySpeakerTests.m */; };
 		217F6E1C1942F14B008E432E /* Speaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 217F6E1B1942F14B008E432E /* Speaker.m */; };
+		21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
+		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
 		21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */; };
 		2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191635A199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m */; };
 		21916360199E01A7003FF7FC /* SpeakSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */; };
@@ -215,6 +217,9 @@
 		217E683D199A80A200C656AA /* NiftySpeakerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftySpeakerTests.m; sourceTree = "<group>"; };
 		217F6E1A1942F14B008E432E /* Speaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Speaker.h; sourceTree = "<group>"; };
 		217F6E1B1942F14B008E432E /* Speaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Speaker.m; sourceTree = "<group>"; };
+		21890CF11D92F38800869046 /* NSDataZlibExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataZlibExtension.h; sourceTree = "<group>"; };
+		21890CF21D92F38800869046 /* NSDataZlibExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataZlibExtension.m; sourceTree = "<group>"; };
+		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		21916354199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DefaultSpeakSettingEditTableViewCell.h; sourceTree = "<group>"; };
 		21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DefaultSpeakSettingEditTableViewCell.m; sourceTree = "<group>"; };
 		21916359199DFECA003FF7FC /* SpeakSettingEditTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakSettingEditTableViewCell.h; sourceTree = "<group>"; };
@@ -346,6 +351,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				21890CF51D9309F000869046 /* libz.tbd in Frameworks */,
 				2195FBC71D2FD22C00ADDCAB /* libxml2.tbd in Frameworks */,
 				217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */,
 				21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */,
@@ -474,6 +480,8 @@
 				2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */,
 				212F01121D8FDEC5009D69E6 /* NiftyUtility.h */,
 				212F01131D8FDEC5009D69E6 /* NiftyUtility.m */,
+				21890CF11D92F38800869046 /* NSDataZlibExtension.h */,
+				21890CF21D92F38800869046 /* NSDataZlibExtension.m */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -534,6 +542,7 @@
 		21F054CB1917E0F200CC6BA9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				21890CF41D9309F000869046 /* libz.tbd */,
 				2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */,
 				2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */,
 				21245BDA1A8FBB6800D3B376 /* Social.framework */,
@@ -889,6 +898,7 @@
 				21E704CF1AF741350071F31E /* UpdateLogViewController.m in Sources */,
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
 				213A4DD51A77D74F00E9EC13 /* DebugLogViewController.m in Sources */,
+				21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */,
 				21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */,
 				21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */,
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,

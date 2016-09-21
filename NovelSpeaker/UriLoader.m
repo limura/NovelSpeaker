@@ -55,16 +55,20 @@
     return true;
 }
 
-/// SiteInfo のJSON文字列を内部データベースに追加します。
-- (BOOL)AddSiteInfoFromString:(NSString*)siteInfo{
+/// SiteInfo のJSONを内部データベースに追加します。
+- (BOOL)AddSiteInfoFromData:(NSData*)siteInfo{
     NSError* error = nil;
-    NSArray* jsonArray = [NSJSONSerialization JSONObjectWithData:[siteInfo dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:&error];
+    NSArray* jsonArray = [NSJSONSerialization JSONObjectWithData:siteInfo options:NSJSONReadingAllowFragments error:&error];
     if (jsonArray == nil || error != nil) {
         return false;
     }
     return [self AddSiteInfoFromJsonArray:jsonArray];
 }
 
+/// SiteInfo のJSON文字列を内部データベースに追加します。
+- (BOOL)AddSiteInfoFromString:(NSString*)siteInfo{
+    return [self AddSiteInfoFromData:[siteInfo dataUsingEncoding:NSUTF8StringEncoding]];
+}
 
 /// SiteInfo をURLから内部データベースに追加します。
 - (void)AddSiteInfoFromURL:(NSURL*)url successAction:(void(^)())successAction failedAction:(void(^)(NSURL* url))failedAction{
@@ -78,8 +82,7 @@
                 return;
             }
         }
-        NSArray* jsonArray = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&error];
-        if (![self AddSiteInfoFromJsonArray:jsonArray]) {
+        if (![self AddSiteInfoFromData:data]) {
             if (failedAction != nil) {
                 failedAction(url);
                 return;

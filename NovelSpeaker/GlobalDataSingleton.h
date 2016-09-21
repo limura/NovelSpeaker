@@ -355,5 +355,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 新規小説の自動ダウンロード機能のON/OFFを切り替えます
 - (void)UpdateBackgroundNovelFetchMode:(BOOL)isEnabled;
 
+/// 内部に保存してある AutoPagerize の SiteInfo を取り出します
+- (NSData*)GetCachedAutoPagerizeSiteInfoData;
+/// AutoPagerize の SiteInfo を内部に保存します
+- (void)SaveAutoPagerizeSiteInfoData:(NSData*)data;
+
+/// URLをダウンロードqueueに追加しようとします
+/// 追加した場合は nil を返します。
+/// 追加できなかった場合はエラーメッセージを返します。
+- (NSString*) AddDownloadQueueForURL:(NSURL*)url;
 
 @end
