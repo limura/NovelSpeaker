@@ -55,6 +55,8 @@
 "SettingTableViewController_RightNotation" = "Right notation";
 "SettingTableViewController_BackgroundFetch_Enabled" = "Auto download for updated novel: Enabled";
 "SettingTableViewController_BackgroundFetch_Disabled" = "Auto download for updated novel: Disabled";
+"SettingTableViewController_ConfirmEnableBackgroundFetch_title" = "Conifirm";
+"SettingtableViewController_ConfirmEnableBackgroundFetch" = "Network communication comes to occur to come to confirm the update of the novel when I validate this setting when I do not use NovelSpeaker. Will that be all right?";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";

@@ -2230,9 +2230,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     
     // BackgroundFetchで既にトライしたダウンロード先を排除したダウンロードリストを作ります。
     NSArray* alreadyFetchedNovelIDArray = [self GetAlreadyFetchedNovelIDList];
-    NSLog(@"alreadyFetchedNovelIDArray count: %lul", (unsigned long)[alreadyFetchedNovelIDArray count]);
     NSArray* contentArray = [self GetAllNarouContent:NarouContentSortType_Ncode];
-    NSLog(@"contentArray.count: %lul", (unsigned long)[contentArray count]);
     NSMutableArray* downloadTargetNovelIDArray = [NSMutableArray new];
     for (NarouContentCacheData* content in contentArray) {
         if ([content isUserCreatedContent]) {
@@ -2263,7 +2261,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
     // ダウンロードqueueに追加します。
     for (NSString* novelID in downloadTargetNovelIDArray) {
-        NSLog(@"AddDownloadQueueForNarouNcode: %@", novelID);
         [self AddDownloadQueueForNarouNcode:novelID];
     }
 
@@ -2273,21 +2270,15 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         NSArray* downloadInfo = [self GetCurrentDownloadWaitingInfo];
         NarouContentCacheData* content = [self GetCurrentDownloadingInfo];
         if ([downloadInfo count] <= 0 && content == nil) {
-            NSLog(@"downloadInfo count <= 0 && content == nil");
             break;
-        }else{
-            NSLog(@"downloadInfo.count: %lul, content: %p", [downloadInfo count], content);
         }
         [NSThread sleepForTimeInterval:0.1];
         NSTimeInterval interval = [startTime timeIntervalSinceNow];
-        NSLog(@"interval: %f", interval);
         if (interval < -28.0) {
             // 30秒以上かかりそうならやめます
-            NSLog(@"interlval < -28.0");
             break;
         }
         if ([self isSpeaking]) {
-            NSLog(@"isSpeaking");
             break;
         }
     }
@@ -2314,7 +2305,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
                 }
             }
             if (!hit) {
-                NSLog(@"AddAlreadyFetchdNovelID: %@", novelID);
                 [self AddAlreadyFetchedNovelID:novelID];
             }
             [self DeleteDownloadQueue:novelID];

@@ -55,6 +55,8 @@
 "SettingTableViewController_RightNotation" = "権利表記";
 "SettingTableViewController_BackgroundFetch_Enabled" = "更新された小説の自動ダウンロード: 有効";
 "SettingTableViewController_BackgroundFetch_Disabled" = "更新された小説の自動ダウンロード: 無効";
+"SettingTableViewController_ConfirmEnableBackgroundFetch_title" = "確認";
+"SettingtableViewController_ConfirmEnableBackgroundFetch" = "この設定を有効にすると、ことせかい を使用していない時等に小説の更新を確認するようになるため、ネットワーク通信が発生するようになります。よろしいですか？";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";

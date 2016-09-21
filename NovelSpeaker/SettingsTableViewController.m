@@ -192,8 +192,11 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         
         [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalNever];
     }else{
-        [globalData UpdateBackgroundNovelFetchMode:true];
-        [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+        [m_EasyAlert ShowAlertTwoButton:NSLocalizedString(@"SettingTableViewController_ConfirmEnableBackgroundFetch_title", @"確認") message:NSLocalizedString(@"SettingtableViewController_ConfirmEnableBackgroundFetch", @"この設定を有効にすると、ことせかい を使用していない時等に小説の更新を確認するようになるため、ネットワーク通信が発生するようになります。よろしいですか？") firstButtonText:NSLocalizedString(@"Cancel_button", @"Cancel") firstActionHandler:nil secondButtonText:NSLocalizedString(@"OK_button", @"OK") secondActionHandler:^(UIAlertAction *alert) {
+            [globalData UpdateBackgroundNovelFetchMode:true];
+            [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+            [self.settingsTableView reloadData];
+        }];
     }
     [self.settingsTableView reloadData];
 }
