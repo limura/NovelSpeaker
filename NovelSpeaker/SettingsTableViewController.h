@@ -16,4 +16,5 @@
     
     NarouContentCacheData* m_EditUserBookViewNarouContent;
 }
+@property (strong, nonatomic) IBOutlet UITableView *settingsTableView;
 @end

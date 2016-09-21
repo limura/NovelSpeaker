@@ -20,9 +20,22 @@
         [globalData InsertDefaultSetting];
     }
     
+    // local notification acrtivate
+    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_0) {
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(
+            UIRemoteNotificationTypeBadge
+            | UIRemoteNotificationTypeAlert)];
+    }else{
+        UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:
+            (UIUserNotificationTypeAlert | UIUserNotificationTypeBadge)
+            categories:nil];
+        [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
+    }
+    
     // background fetch activate
-    // background fetch はとりあえず封印します
-    //[application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+    if ([globalData GetBackgroundNovelFetchEnabled]) {
+        [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+    }
     
     UIViewController* toplevelViewController = nil;
     if ([globalData isRequiredCoreDataMigration]) {
@@ -58,7 +71,7 @@
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
     NSLog(@"application will enter foreground.");
     // badge clear.
-    application.applicationIconBadgeNumber = 0;
+    application.applicationIconBadgeNumber = -1;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application

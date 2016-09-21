@@ -349,4 +349,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 本棚のソートタイプを保存します
 - (void)SetBookSelfSortType:(NarouContentSortType)sortType;
 
+/// 新規小説の自動ダウンロード機能のON/OFF状態を取得します
+- (BOOL)GetBackgroundNovelFetchEnabled;
+
+/// 新規小説の自動ダウンロード機能のON/OFFを切り替えます
+- (void)UpdateBackgroundNovelFetchMode:(BOOL)isEnabled;
+
+
 @end

@@ -2057,6 +2057,8 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_PREVIOUS_TIME_BUILD   @"PreviousTimeBuild"
 #define USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER @"DefaultVoiceIdentifier"
 #define USER_DEFAULTS_BOOKSELF_SORT_TYPE @"BookSelfSortType"
+#define USER_DEFAULTS_BACKGROUND_FETCHED_NOVEL_ID_LIST @"BackgroundFetchedNovelIDList"
+#define USER_DEFAULTS_BACKGROUND_NOVEL_FETCH_MODE @"BackgroundNovelFetchMode"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -2172,9 +2174,36 @@ static GlobalDataSingleton* _singleton = nil;
     return [m_DownloadQueue GetNewDownloadCount];
 }
 
+/// BackgroundFetch でダウンロードを行った(過去形)ncode(やURL)のリストを取得します
+- (NSArray*) GetAlreadyFetchedNovelIDList{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSArray* backgroundFetchedNovelIDList = [userDefaults arrayForKey:USER_DEFAULTS_BACKGROUND_FETCHED_NOVEL_ID_LIST];
+    return backgroundFetchedNovelIDList;
+}
+
+/// BackgroundFetch でダウンロードを行った(過去形)ncode(やURL)のリストに新しいIDを追加します
+- (void)AddAlreadyFetchedNovelID:(NSString*)novelID {
+    NSArray* backgroundFetchedNovelIDList = [self GetAlreadyFetchedNovelIDList];
+    NSMutableArray* newArray = [[NSMutableArray alloc] initWithArray:backgroundFetchedNovelIDList];
+    [newArray addObject:novelID];
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:newArray forKey:USER_DEFAULTS_BACKGROUND_FETCHED_NOVEL_ID_LIST];
+    [userDefaults synchronize];
+}
+
+/// BackgroundFetch でダウンロードを行ったNovelIDのリストを消します
+- (void)ClearAlreadyFetchedNovelIDList{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults removeObjectForKey:USER_DEFAULTS_BACKGROUND_FETCHED_NOVEL_ID_LIST];
+    [userDefaults synchronize];
+}
+
 // Background fetch イベントを処理します
 - (void)HandleBackgroundFetch:(UIApplication *)application
 performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler{
+    // 30秒以内に終了しないと怒られるので時間を測ります
+    NSDate* startTime = [NSDate date];
+
     // 既に download queue が走っていれば何もしません
     NSArray* downloadInfo = [self GetCurrentDownloadWaitingInfo];
     NarouContentCacheData* nowDownloadContent = [self GetCurrentDownloadingInfo];
@@ -2199,48 +2228,115 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         return;
     }
     
-    NSDate* startTime = [NSDate date];
+    // BackgroundFetchで既にトライしたダウンロード先を排除したダウンロードリストを作ります。
+    NSArray* alreadyFetchedNovelIDArray = [self GetAlreadyFetchedNovelIDList];
+    NSLog(@"alreadyFetchedNovelIDArray count: %lul", (unsigned long)[alreadyFetchedNovelIDArray count]);
+    NSArray* contentArray = [self GetAllNarouContent:NarouContentSortType_Ncode];
+    NSLog(@"contentArray.count: %lul", (unsigned long)[contentArray count]);
+    NSMutableArray* downloadTargetNovelIDArray = [NSMutableArray new];
+    for (NarouContentCacheData* content in contentArray) {
+        if ([content isUserCreatedContent]) {
+            continue;
+        }
+        BOOL hit = false;
+        for (NSString* novelID in alreadyFetchedNovelIDArray) {
+            // TODO: 外部URLであったら ncode と比べても意味が無い
+            if ([content.ncode compare:novelID] == NSOrderedSame) {
+                hit = true;
+                break;
+            }
+        }
+        if (!hit) {
+            // TODO: 外部URLであったら ncode を追加しても意味がない
+            [downloadTargetNovelIDArray addObject:content.ncode];
+        }
+    }
+    // ダウンロード先が無い場合はダウンロード済みリストをクリアして、何もなかったと報告して終わります。
+    if ([downloadTargetNovelIDArray count] <= 0) {
+        [self ClearAlreadyFetchedNovelIDList];
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
+    }
+    
+    // ダウンロードが行われた数をクリアしておきます
     [self ClearNewDownloadCount];
-    [self ReDownladAllContents];
+
+    // ダウンロードqueueに追加します。
+    for (NSString* novelID in downloadTargetNovelIDArray) {
+        NSLog(@"AddDownloadQueueForNarouNcode: %@", novelID);
+        [self AddDownloadQueueForNarouNcode:novelID];
+    }
+
+    // 30秒以内に終わるようにダウンロードの終了を待ちます
     [NSThread sleepForTimeInterval:2.0];
     while (TRUE) {
         NSArray* downloadInfo = [self GetCurrentDownloadWaitingInfo];
-        if ([downloadInfo count] <= 0) {
+        NarouContentCacheData* content = [self GetCurrentDownloadingInfo];
+        if ([downloadInfo count] <= 0 && content == nil) {
+            NSLog(@"downloadInfo count <= 0 && content == nil");
             break;
+        }else{
+            NSLog(@"downloadInfo.count: %lul, content: %p", [downloadInfo count], content);
         }
         [NSThread sleepForTimeInterval:0.1];
         NSTimeInterval interval = [startTime timeIntervalSinceNow];
         NSLog(@"interval: %f", interval);
-        if (interval < -29.0) {
+        if (interval < -28.0) {
             // 30秒以上かかりそうならやめます
+            NSLog(@"interlval < -28.0");
             break;
         }
         if ([self isSpeaking]) {
+            NSLog(@"isSpeaking");
             break;
         }
     }
-    applicationState =  [application applicationState];
-    NSLog(@"END applicationState: %@", applicationState == UIApplicationStateInactive ? @"Inactive"
-          : applicationState == UIApplicationStateBackground ? @"Background"
-          : applicationState == UIApplicationStateActive ? @"Active"
-          : @"Unknown");
-    if (applicationState == UIApplicationStateInactive){
-        //[self ClearDownloadQueue];
+    
+    // 残っているダウンロードqueueを削除します
+    {
+        NSArray* downloadQueueArray = [self GetCurrentDownloadWaitingInfo];
+        NarouContentCacheData* downloadingContent = [self GetCurrentDownloadingInfo];
+        
+        NSMutableArray* notDownloadNovelIDArray = [NSMutableArray new];
+        if (downloadingContent != nil && downloadingContent.ncode != nil) {
+            [notDownloadNovelIDArray addObject:downloadingContent.ncode];
+        }
+        for (NarouContentCacheData* content in downloadQueueArray) {
+            if (content != nil && content.ncode != nil) {
+                [notDownloadNovelIDArray addObject:content.ncode];
+            }
+        }
+        for (NSString* novelID in downloadTargetNovelIDArray) {
+            BOOL hit = false;
+            for (NSString* notDownloadNovelID in notDownloadNovelIDArray) {
+                if ([novelID compare:notDownloadNovelID] == NSOrderedSame) {
+                    hit = true;
+                }
+            }
+            if (!hit) {
+                NSLog(@"AddAlreadyFetchdNovelID: %@", novelID);
+                [self AddAlreadyFetchedNovelID:novelID];
+            }
+            [self DeleteDownloadQueue:novelID];
+        }
     }
 
     int downloadCount = [self GetNewDownloadCount];
     if (downloadCount > 0) {
-        application.applicationIconBadgeNumber = downloadCount;
-        
+        NSInteger appendCount = 0;
+        if (application.applicationIconBadgeNumber > 0) {
+            appendCount = application.applicationIconBadgeNumber;
+        }
+        application.applicationIconBadgeNumber = downloadCount + appendCount;
         UILocalNotification* notification = [UILocalNotification new];
         notification.fireDate = [NSDate date];
-        notification.alertBody = @"new content alive.";
+        notification.alertBody = [[NSString alloc] initWithFormat:NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertBody", @"%d個の更新があります"), downloadCount];
+        notification.alertAction = NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertAction", @"アプリを開く");
         notification.applicationIconBadgeNumber = downloadCount;
         [application scheduleLocalNotification:notification];
         
         completionHandler(UIBackgroundFetchResultNewData);
     }else{
-        application.applicationIconBadgeNumber = 100;
         completionHandler(UIBackgroundFetchResultNoData);
     }
 }
@@ -2280,6 +2376,19 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     NSInteger integer = sortType;
     [userDefaults setInteger:integer forKey:USER_DEFAULTS_BOOKSELF_SORT_TYPE];
+    [userDefaults synchronize];
+}
+
+/// 新規小説の自動ダウンロード機能のON/OFF状態を取得します
+- (BOOL)GetBackgroundNovelFetchEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    return [userDefaults boolForKey:USER_DEFAULTS_BACKGROUND_NOVEL_FETCH_MODE];
+}
+
+/// 新規小説の自動ダウンロード機能のON/OFFを切り替えます
+- (void)UpdateBackgroundNovelFetchMode:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_BACKGROUND_NOVEL_FETCH_MODE];
     [userDefaults synchronize];
 }
 

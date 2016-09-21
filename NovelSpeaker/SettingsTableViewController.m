@@ -68,7 +68,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return 10
+    return 11
 #ifdef USE_LOG_VIEW
     + 1
 #endif
@@ -102,15 +102,21 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_CreateNewUserText", @"新規自作本の追加");
             break;
         case 6:
-            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_AddDefaultCorrectionOfTheReading", @"標準の読みの修正を上書き追加");
+            cell.textLabel.text = [[GlobalDataSingleton GetInstance] GetBackgroundNovelFetchEnabled] ?
+                NSLocalizedString(@"SettingTableViewController_BackgroundFetch_Enabled", @"新規小説の自動ダウンロード: 有効")
+                : NSLocalizedString(@"SettingTableViewController_BackgroundFetch_Disabled", @"新規小説のダウンロード: 無効");
+            ;
             break;
         case 7:
-            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GetNcodeDownloadURLScheme", @"再ダウンロード用URLスキームの取得");
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_AddDefaultCorrectionOfTheReading", @"標準の読みの修正を上書き追加");
             break;
         case 8:
-            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GoToReleaseLog", @"更新履歴");
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GetNcodeDownloadURLScheme", @"再ダウンロード用URLスキームの取得");
             break;
         case 9:
+            cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_GoToReleaseLog", @"更新履歴");
+            break;
+        case 10:
             cell.textLabel.text = NSLocalizedString(@"SettingTableViewController_RightNotation", @"権利表記");
             break;
 #ifdef USE_LOG_VIEW
@@ -143,9 +149,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     switch (indexPath.row) {
-        case 0: case 1: case 2: case 3: case 5: case 6: case 7: case 8: case 9:
+        case 0: case 1: case 2: case 3: case 5: case 6: case 7: case 8: case 9: case 10:
 #ifdef USE_LOG_VIEW
-        case 10:
+        case 11:
 #endif
             return [self GetDefaultTableView:tableView cellForRowAtIndexPath:indexPath];
             break;
@@ -173,6 +179,23 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     [m_EasyAlert ShowAlertTwoButton:NSLocalizedString(@"SettingTableViewController_ConfirmAddDefaultSpeechModSetting", @"確認") message:NSLocalizedString(@"SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage", @"用意された読み替え辞書を追加・上書きします。よろしいですか？") firstButtonText:NSLocalizedString(@"Cancel_button", @"Cancel") firstActionHandler:nil secondButtonText:NSLocalizedString(@"OK_button", @"OK") secondActionHandler:^(UIAlertAction *alert) {
         [self AddDefaultSpeechModSetting];
     }];
+}
+
+/// BackgroundFetch で小説の更新分を取得するか否かの設定をトグルします。
+- (void)BackgroundNovelFetchSettingToggle
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    BOOL isEnabled = [globalData GetBackgroundNovelFetchEnabled];
+    UIApplication* application = [UIApplication sharedApplication];
+    if (isEnabled) {
+        [globalData UpdateBackgroundNovelFetchMode:false];
+        
+        [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalNever];
+    }else{
+        [globalData UpdateBackgroundNovelFetchMode:true];
+        [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+    }
+    [self.settingsTableView reloadData];
 }
 
 /// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
@@ -229,15 +252,18 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             [self CreateNewUserText];
             break;
         case 6:
-            [self ConfirmAddDefaultSpeechModSetting];
+            [self BackgroundNovelFetchSettingToggle];
             break;
         case 7:
-            [self ShareNcodeListURLScheme];
+            [self ConfirmAddDefaultSpeechModSetting];
             break;
         case 8:
-            [self performSegueWithIdentifier:@"updateLogSegue" sender:self];
+            [self ShareNcodeListURLScheme];
             break;
         case 9:
+            [self performSegueWithIdentifier:@"updateLogSegue" sender:self];
+            break;
+        case 10:
             [self performSegueWithIdentifier:@"CreditPageSegue" sender:self];
             break;
 #ifdef USE_LOG_VIEW
@@ -258,9 +284,9 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     UITableViewCell* cell = nil;
     if (cell == nil) {
         switch (indexPath.row) {
-            case 0: case 1: case 2: case 3: case 5: case 6: case 7: case 8: case 9:
+            case 0: case 1: case 2: case 3: case 5: case 6: case 7: case 8: case 9: case 10:
 #ifdef USE_LOG_VIEW
-            case 10:
+            case 11:
 #endif
                 return 40.0f;
                 break;

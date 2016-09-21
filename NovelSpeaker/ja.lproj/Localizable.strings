@@ -27,6 +27,8 @@
 "GlobalDataSingleton_Conversation1" = "会話文";
 "GlobalDataSingleton_Conversation2" = "会話文 2";
 "GlobalDataSingleton_NewUserBookTitle" = "新規ユーザ小説";
+"GlobalDataSingleton_NovelUpdateAlertBody" = "%d個の小説が更新されました";
+"GlobalDataSingleton_NovelUpdateAlertAction" = "アプリを開く";
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "ダウンロードキューへの追加に失敗";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "作品名: %@";
 "NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "ダウンロードキューに追加されました";
@@ -51,6 +53,8 @@
 "SettingTableViewController_GoToReleaseLog" = "更新履歴";
 "SettingTableViewController_CreateNewUserText" = "新規自作小説の追加";
 "SettingTableViewController_RightNotation" = "権利表記";
+"SettingTableViewController_BackgroundFetch_Enabled" = "更新された小説の自動ダウンロード: 有効";
+"SettingTableViewController_BackgroundFetch_Disabled" = "更新された小説の自動ダウンロード: 無効";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
@@ -125,6 +129,7 @@
 ・発音される音声データを選択できるようになりました。(iOS9以上)
 ・Voice Over が有効になっている場合、読み上げ開始時に警告を発するようになりました。
 ・本棚の並び順を変更できるようになりました。
+・更新された小説を自動で読み込むことができるようになります。
 ・その他バグの修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
@@ -136,11 +141,12 @@
 
 ・iOS 9 以上で、発音される音声データを選択できるようになります。設定タブの声質の設定に項目が増えます。
 利用可能な音声データは初期状態では一つだけですので、音声データを増やしたい場合は
-設定アプリ → 一般 → アクセシビリティ → スピーチ → 声 → 日本語
+設定アプリ > 一般 > アクセシビリティ > スピーチ > 声 > 日本語
 と手繰っていった所で音声データをダウンロードしてください。
 (なお、Siriさんの音声データは O-ren(拡張) という名前になっているもののようです）
 ・Voice Over が有効になっている場合、読み上げ開始時に警告を発するようになります。
 ・本棚の並び順を変更できるようになります。本棚タブの右上にボタンが増えます。
+・小説の更新分を自動で取得させることができるようになります。設定タブに設定項目が増えます。
 
 問題の修正
 

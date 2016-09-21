@@ -121,6 +121,12 @@
             continue;
         }
         if ([ncode compare:content.ncode] == NSOrderedSame) {
+            NarouContentCacheData* previousContent = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:ncode];
+            if (previousContent != nil) {
+                content.reading_chapter = previousContent.reading_chapter;
+                content.currentReadingStory = previousContent.currentReadingStory;
+                content.is_new_flug  = previousContent.is_new_flug;
+            }
             return content;
         }
     }

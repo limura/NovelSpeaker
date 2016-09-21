@@ -258,17 +258,12 @@ static float SLEEP_TIME_SECOND = 10.5f;
     if (localContent == nil || localContent.ncode == nil) {
         return false;
     }
-    // GetCurrentNcodeContentData を実行すると、currentReadingStory と reading_chapter が破壊されるので保存しておきます。
-    StoryCacheData* currentReadingStory = localContent.currentReadingStory;
-    NSNumber* reading_chapter = localContent.reading_chapter;
     // 与えられた content の ncode を使って最新情報を読み込んでCoreData側の情報を上書きします。
     NarouContentCacheData* currentContent = [NarouLoader GetCurrentNcodeContentData:localContent.ncode];
     if (currentContent == nil) {
         NSLog(@"ncode: %@ の最新情報の読み込みに失敗しました。", localContent.ncode);
         return false;
     }
-    currentContent.currentReadingStory = currentReadingStory;
-    currentContent.reading_chapter = reading_chapter;
     [[GlobalDataSingleton GetInstance] UpdateNarouContent:currentContent];
     localContent = currentContent;
     

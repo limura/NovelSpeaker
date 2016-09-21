@@ -27,6 +27,8 @@
 "GlobalDataSingleton_Conversation1" = "Conversation 1";
 "GlobalDataSingleton_Conversation2" = "Conversation 2";
 "GlobalDataSingleton_NewUserBookTitle" = "New User Book";
+"GlobalDataSingleton_NovelUpdateAlertBody" = "%d novels updated.";
+"GlobalDataSingleton_NovelUpdateAlertAction" = "open app";
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "Title: %@";
 "NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "It was added to download queue.";
@@ -51,6 +53,8 @@
 "SettingTableViewController_GoToReleaseLog" = "Update log";
 "SettingTableViewController_CreateNewUserText" = "Add own created book";
 "SettingTableViewController_RightNotation" = "Right notation";
+"SettingTableViewController_BackgroundFetch_Enabled" = "Auto download for updated novel: Enabled";
+"SettingTableViewController_BackgroundFetch_Disabled" = "Auto download for updated novel: Disabled";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -128,6 +132,7 @@
 - Can select speaker data. You need download sepaker data.
 - If VoiceOver enabled, alert dialog is open when speak start.
 - Bookshelf sort type selector now available.
+- Auto download for updated nove mode added.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -140,6 +145,7 @@ Interface change
 Settings > General > Accessibility > Speech > Voices > Japanese
 - If VoiceOver enabled, alert dialog is open when speak start.
 - Bookshelf sort type selector now available.
+- Auto download for updated novel mode added. Add enable/disable this mode settings at Settings page.
 
 Bug fix
 

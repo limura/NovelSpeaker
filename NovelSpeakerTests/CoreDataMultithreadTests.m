@@ -58,7 +58,7 @@
             dataArray = result;
             done = true;
             dispatch_semaphore_signal(semaphore);
-        }failedAction:^(NSURL* url){
+        } failedAction:^(NSURL* url){
             NSLog(@"LoadURL failed: %@", [url absoluteString]);
             done = true;
             dispatch_semaphore_signal(semaphore);
