@@ -34,7 +34,11 @@
     
     // background fetch activate
     if ([globalData GetBackgroundNovelFetchEnabled]) {
-        [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+        NSTimeInterval hour = 60*60;
+        if (hour < UIApplicationBackgroundFetchIntervalMinimum) {
+            hour = UIApplicationBackgroundFetchIntervalMinimum;
+        }
+        [application setMinimumBackgroundFetchInterval:hour];
     }
     
     UIViewController* toplevelViewController = nil;
@@ -99,5 +103,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     [globalData HandleBackgroundFetch:application performFetchWithCompletionHandler:completionHandler];
 }
+
 
 @end

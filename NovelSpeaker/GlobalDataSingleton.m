@@ -2020,14 +2020,15 @@ static GlobalDataSingleton* _singleton = nil;
         return false;
     }
     NSString* scheme = [url scheme];
-    if (![scheme isEqualToString:@"novelspeaker"]
-        && ![scheme isEqualToString:@"limuraproducts.novelspeaker"]) {
-        return false;
-    }
     NSString* controller = [url host];
-    if ([controller isEqualToString:@"downloadncode"]) {
-        NSString* ncodeListString = [url lastPathComponent];
-        return [self ProcessURLScemeDownloadNcode:ncodeListString];
+    if ([scheme isEqualToString:@"novelspeaker"]
+        || [scheme isEqualToString:@"limuraproducts.novelspeaker"]) {
+        if ([controller isEqualToString:@"downloadncode"]) {
+            NSString* ncodeListString = [url lastPathComponent];
+            return [self ProcessURLScemeDownloadNcode:ncodeListString];
+        }
+    }else if ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
+        return [self AddDownloadQueueForURL:url] == nil;
     }
     return false;
 }
@@ -2347,12 +2348,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:identifier forKey:USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER];
     [userDefaults synchronize];
+    m_isNeedReloadSpeakSetting = true;
 }
 
 - (void)DeleteVoiceIdentifier{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults removeObjectForKey:USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER];
     [userDefaults synchronize];
+    m_isNeedReloadSpeakSetting = true;
 }
 
 /// 本棚のソートタイプを取得します

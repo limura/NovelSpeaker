@@ -133,7 +133,7 @@
     if (self.ncode == nil) {
         return false;
     }
-    return [self.ncode hasPrefix:@"_u"];
+    return [self.ncode hasPrefix:@"_u"] || [self isURLContent];
 }
 
 /// URLで指定されるコンテンツか否かを取得します
