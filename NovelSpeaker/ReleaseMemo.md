@@ -346,6 +346,31 @@ Bug fix
 - I revise the problem that a black belt holder may begin up and down in 6 iPhone Plus.
 - Application revised a bug to be finished at the time of access to internal DB.
 
+metadata rejected に返信した奴
+"AAA"という単語はサイト名です。"AAA"は http://syosetu.com/ というWebサイトの名前です。
+
+本アプリは”AAA"にある小説を読み上げるためのものです。従って、ユーザは”AAA"という単語で検索をすることが有り得ます。そのため、我々はメタデータには”AAA"が含まれるべきだと考えています。
+
+メタデータ”AAA"はこのまま残しておいて良いでしょうか？
+
+アプリ名については日本語の言い回し上紛らわしい事を確認致しましたので”BBB"と修正致します。
+
+The word "小説家になろう" is the site name. "小説家になろう" is the name of the Web site called http://syosetu.com/.
+
+This application is intended to read a novel in "小説家になろう" aloud. Therefore, the user may have that I search it by a word "小説家になろう". Therefore we think that "小説家になろう" should be included in meta data.
+
+May meta data "小説家になろう" leave it as it is?
+
+Because I confirmed a confusing thing in a Japanese expression about the application name, I make modifications with "ことせかい".
+
+# Ver 1.1.6
+
+インタフェースの変更
+
+# Version 1.1.6
+
+Interface change
+
 
 expedited app review に出した時の文言
 ---begin---

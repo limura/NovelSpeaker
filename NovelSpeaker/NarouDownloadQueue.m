@@ -445,6 +445,19 @@ static float SLEEP_TIME_SECOND = 10.5f;
 /// ncodeのリスト(@"ncode-ncode-ncode..." という形式)の文字列を受け取って、ダウンロードキューに入れます
 - (BOOL)AddDownloadQueueForNcodeList:(NSString*)ncodeList
 {
+    // 一応入力文字列をvalidateします
+    // 先頭は 'n' か 'N' である必要があります
+    if (!([ncodeList hasPrefix:@"n"] || [ncodeList hasPrefix:@"N"])) {
+        return false;
+    }
+    // 文字列は [A-Za-z0-9-] だけである必要があります
+    {
+        NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:@"[A-Za-z0-9-]" options:NSRegularExpressionIgnoreMetacharacters error:nil];
+        NSTextCheckingResult* matchResult = [regexp firstMatchInString:ncodeList options:0 range:NSMakeRange(0, ncodeList.length)];
+        if (matchResult.numberOfRanges > 0) {
+            return false;
+        }
+    }
     dispatch_async(m_DownloadQueueReadWriteDispatchQueue, ^{
         NSArray* searchResult = [NarouLoader SearchNcode:ncodeList];
         for (NarouContentCacheData* content in searchResult) {

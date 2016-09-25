@@ -2026,6 +2026,9 @@ static GlobalDataSingleton* _singleton = nil;
         if ([controller isEqualToString:@"downloadncode"]) {
             NSString* ncodeListString = [url lastPathComponent];
             return [self ProcessURLScemeDownloadNcode:ncodeListString];
+        }else if ([controller isEqualToString:@"downloadurl"]) {
+            NSString* urlString = [url lastPathComponent];
+            return [self AddDownloadQueueForURL:[NSURL URLWithString:urlString]] == nil;
         }
     }else if ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
         return [self AddDownloadQueueForURL:url] == nil;
