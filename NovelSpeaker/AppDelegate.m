@@ -20,18 +20,6 @@
         [globalData InsertDefaultSetting];
     }
     
-    // local notification acrtivate
-    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_0) {
-        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(
-            UIRemoteNotificationTypeBadge
-            | UIRemoteNotificationTypeAlert)];
-    }else{
-        UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:
-            (UIUserNotificationTypeAlert | UIUserNotificationTypeBadge)
-            categories:nil];
-        [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
-    }
-    
     // background fetch activate
     if ([globalData GetBackgroundNovelFetchEnabled]) {
         NSTimeInterval hour = 60*60;

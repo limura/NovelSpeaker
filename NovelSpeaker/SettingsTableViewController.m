@@ -194,6 +194,19 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     }else{
         [m_EasyAlert ShowAlertTwoButton:NSLocalizedString(@"SettingTableViewController_ConfirmEnableBackgroundFetch_title", @"確認") message:NSLocalizedString(@"SettingtableViewController_ConfirmEnableBackgroundFetch", @"この設定を有効にすると、ことせかい を使用していない時等に小説の更新を確認するようになるため、ネットワーク通信が発生するようになります。よろしいですか？") firstButtonText:NSLocalizedString(@"Cancel_button", @"Cancel") firstActionHandler:nil secondButtonText:NSLocalizedString(@"OK_button", @"OK") secondActionHandler:^(UIAlertAction *alert) {
             [globalData UpdateBackgroundNovelFetchMode:true];
+
+            // この時点で Notification を有効化します。
+            if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_0) {
+                [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(
+                                                                                       UIRemoteNotificationTypeBadge
+                                                                                       | UIRemoteNotificationTypeAlert)];
+            }else{
+                UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:
+                                                                    (UIUserNotificationTypeAlert | UIUserNotificationTypeBadge)
+                                                                                                     categories:nil];
+                [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
+            }
+            
             [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
             [self.settingsTableView reloadData];
         }];
