@@ -2027,11 +2027,17 @@ static GlobalDataSingleton* _singleton = nil;
             NSString* ncodeListString = [url lastPathComponent];
             return [self ProcessURLScemeDownloadNcode:ncodeListString];
         }else if ([controller isEqualToString:@"downloadurl"]) {
-            NSString* urlString = [url lastPathComponent];
-            return [self AddDownloadQueueForURL:[NSURL URLWithString:urlString]] == nil;
+            NSString* path = [url path];
+            if (path == nil || [path length] <= 1) {
+                return false;
+            }
+            NSString* urlString = [path substringFromIndex:1];
+            NSURL* targetURL = [NSURL URLWithString:urlString];
+            NSString* scheme = [targetURL scheme];
+            if ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
+                return [self AddDownloadQueueForURL:targetURL] == nil;
+            }
         }
-    }else if ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
-        return [self AddDownloadQueueForURL:url] == nil;
     }
     return false;
 }
@@ -2469,47 +2475,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     NSString* urlString = [url absoluteString];
     
-    __block NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:urlString];
-    if (targetContentCacheData == nil) {
-        // 登録がないようなのでとりあえず NarouContent を登録します。
-        __block BOOL isNarouContentCreated = false;
-        [self coreDataPerfomBlockAndWait:^{
-            NarouContent* targetContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:urlString];
-            if (targetContent == nil) {
-                targetContent = [self CreateNewNarouContentThreadUnsafe];
-                isNarouContentCreated = true;
-            }
-            targetContent.title = urlString;
-            targetContent.ncode = urlString;
-            targetContent.userid = @"-";
-            targetContent.writer = @"-";
-            targetContent.story = @"-";
-            targetContent.genre = [[NSNumber alloc] initWithInt:0];
-            targetContent.keyword = @"-";
-            targetContent.general_all_no = [[NSNumber alloc] initWithInt:0];
-            targetContent.end = [[NSNumber alloc] initWithBool:false];
-            targetContent.global_point = [[NSNumber alloc] initWithInt:0];
-            targetContent.fav_novel_cnt = [[NSNumber alloc] initWithInt:0];
-            targetContent.review_cnt = [[NSNumber alloc] initWithInt:0];
-            targetContent.all_point = [[NSNumber alloc] initWithInt:0];
-            targetContent.all_hyoka_cnt = [[NSNumber alloc] initWithInt:0];
-            targetContent.sasie_cnt = [[NSNumber alloc] initWithInt:0];
-            targetContent.novelupdated_at = [NSDate date];
-            targetContentCacheData = [[NarouContentCacheData alloc] initWithCoreData:targetContent];
-            // 新しく作ったので save して main thread と sync しておきます。
-            [m_CoreDataObjectHolder save];
-            //});
-        }];
-        if (isNarouContentCreated) {
-            [self NarouContentListChangedAnnounce];
-        }
-    }
-    
-    /*
-     if (targetContentCacheData != nil && ([targetContentCacheData.general_all_no intValue] <= [self CountContentChapter:targetContentCacheData]) ) {
-     return NSLocalizedString(@"GlobalDataSingleton_AlreadyDownloaded", @"既にダウンロード済です。");
-     }
-     */
+    NarouContentCacheData* targetContentCacheData = [self CreateNewUserBook];
+    targetContentCacheData.title = urlString;
+    targetContentCacheData.ncode = urlString;
+    [self UpdateNarouContent:targetContentCacheData];
     
     // download queue に追加します。
     NSLog(@"add download queue.");
