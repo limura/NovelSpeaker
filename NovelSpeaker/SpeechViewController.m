@@ -68,7 +68,7 @@
     leftSwipe.direction = UISwipeGestureRecognizerDirectionLeft;
     [self.view addGestureRecognizer:leftSwipe];
 #endif
-    
+
     self.ChapterSlider.minimumValue = 1;
     self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
     
@@ -79,7 +79,8 @@
     [self setNotificationReciver];
 
     // 読み上げ設定をloadします。
-    [[GlobalDataSingleton GetInstance] ReloadSpeechSetting];
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    [globalData ReloadSpeechSetting];
     // 読み上げる文章を設定します。
     [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
     
@@ -363,6 +364,9 @@
 - (void)setSpeechStory:(StoryCacheData*)story {
     //[self stopSpeech];
     NSString* displayText = [[GlobalDataSingleton GetInstance] ConvertStoryContentToDisplayText:story];
+    if (displayText == nil || [displayText length] <= 0) {
+        displayText = NSLocalizedString(@"SpeechViewController_ContentReadFailed", @"文書の読み込みに失敗しました。「詳細」→「Download」を選択して再ダウンロードすることで解消するかもしれません。");
+    }
     [self.textView setText:displayText];
     NSUInteger location = [story.readLocation unsignedLongValue];
     NSUInteger length = 1;

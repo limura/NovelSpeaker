@@ -262,18 +262,47 @@ static float SLEEP_TIME_SECOND = 10.5f;
     if(![loader AddSiteInfoFromData:siteInfoData]){
         return false;
     }
-    NSURL* targetURL = [[NSURL alloc] initWithString:localContent.ncode];
+    NSData* customSiteInfoData = [globalData GetCachedCustomAutoPagerizeSiteInfoData];
+    [loader AddCustomSiteInfoFromData:customSiteInfoData];
     
+    NSString* urlString = localContent.ncode;
+    // XXXXX TODO: .userid が最後に読み込んだ URL になってるのをなんとかしたい……(´・ω・`)
+    int startCount = 1;
+    BOOL isReload = false; // 更新チェックの場合か否か
+    if (localContent.userid != nil && [localContent.userid length] > 0) {
+        urlString = localContent.userid;
+        startCount = [localContent.general_all_no intValue];
+        isReload = true;
+    }
+    NSURL* targetURL = [[NSURL alloc] initWithString:urlString];
+
+    NSArray* cookieArray = [localContent.keyword componentsSeparatedByString:@";NSC;"];
+
     __block BOOL result = false;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    [loader LoadURL:targetURL successAction:^(NSArray* fetchedArray){
-        for (int i = 0; i < [fetchedArray count]; i++) {
-            [globalData UpdateStory:fetchedArray[i] chapter_number:i+1 parentContent:localContent];
+    [loader LoadURL:targetURL cookieArray:cookieArray startCount:startCount successAction:^(HtmlStory* story, NSURL* currentURL){
+        if (story == nil) {
+            return;
         }
-        localContent.general_all_no = [[NSNumber alloc] initWithInt:(int)[fetchedArray count]];
+        if (story.count == 1 && story.title != nil && [story.title length] > 0 && !isReload) {
+            localContent.title = story.title;
+        }
+        if ([localContent.general_all_no intValue] < story.count) {
+            localContent.general_all_no = [[NSNumber alloc] initWithInt:story.count];
+        }
+        // XXXXX TODO: .userid が最後に読み込んだ URL になってるのをなんとかしたい……(´・ω・`)
+        localContent.userid = [currentURL absoluteString];
+        // 更新チェックの場合、最初の一発目(既に読み込んであるもののうちの最後のもの)は保存しない(ユーザが書き換えてるかもしれないので)
+        if (!(isReload && story.count == startCount)) {
+            NSLog(@"story update: %@", story.content);
+            [globalData UpdateStory:story.content chapter_number:story.count parentContent:localContent];
+            localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
+        }
+        [globalData UpdateNarouContent:localContent];
         result = true;
-        dispatch_semaphore_signal(semaphore);
     } failedAction:^(NSURL* url){
+        dispatch_semaphore_signal(semaphore);
+    } finishAction:^(NSURL* url){
         dispatch_semaphore_signal(semaphore);
     }];
     while(dispatch_semaphore_wait(semaphore, DISPATCH_TIME_NOW)){
@@ -293,6 +322,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
     }
     if ([localContent isURLContent]) {
         return [self URLDownload:localContent];
+    }
+    if ([localContent isUserCreatedContent]) {
+        return false;
     }
     
     // 与えられた content の ncode を使って最新情報を読み込んでCoreData側の情報を上書きします。

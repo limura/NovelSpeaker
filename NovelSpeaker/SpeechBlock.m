@@ -48,6 +48,9 @@
 {
     NSMutableString* str = [NSMutableString new];
     for (FakeSpeechText* fakeText in m_FakeSpeechTextArray) {
+        if (fakeText == nil || fakeText.speechText == nil) {
+            continue;
+        }
         [str appendString:fakeText.speechText];
     }
     return str;
@@ -58,6 +61,9 @@
 {
     NSMutableString* str = [NSMutableString new];
     for (FakeSpeechText* fakeText in m_FakeSpeechTextArray) {
+        if (fakeText == nil || fakeText.displayText == nil) {
+            continue;
+        }
         [str appendString:fakeText.displayText];
     }
     return str;

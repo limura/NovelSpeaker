@@ -29,9 +29,15 @@
 		211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FA19973CFB00560842 /* SpeechConfig.m */; };
 		211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FD199742CF00560842 /* NiftySpeaker.m */; };
 		2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */; };
+		2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */; };
+		2126A2611D9A1B90008E534A /* Action.js in Resources */ = {isa = PBXBuildFile; fileRef = 2126A2601D9A1B90008E534A /* Action.js */; };
+		2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2126A26D1D9D1B92008E534A /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
+		2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */ = {isa = PBXBuildFile; fileRef = 2127EACA1DB75989005B1636 /* HtmlStory.m */; };
 		212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */; };
 		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
+		212972171DA66FDB001ED63D /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 212972141DA66F2C001ED63D /* Info.plist */; };
 		212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */; };
 		212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F01131D8FDEC5009D69E6 /* NiftyUtility.m */; };
 		212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */; };
@@ -40,6 +46,28 @@
 		212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */; };
 		212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */; };
 		212F35A61A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */; };
+		2133F21C1E7D5674001A0BC5 /* CustomAutopagerizeItems.json in Resources */ = {isa = PBXBuildFile; fileRef = 2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */; };
+		2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2211E7FFF0B001A0BC5 /* Localizable.strings */; };
+		2133F2261E800F4A001A0BC5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F054E41917E0F200CC6BA9 /* Images.xcassets */; };
+		2133F2281E801156001A0BC5 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2271E801156001A0BC5 /* MainInterface.storyboard */; };
+		2133F2A21E80E175001A0BC5 /* Icon-60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2901E80E175001A0BC5 /* Icon-60@2x.png */; };
+		2133F2A31E80E175001A0BC5 /* Icon-60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2911E80E175001A0BC5 /* Icon-60@3x.png */; };
+		2133F2A41E80E175001A0BC5 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2921E80E175001A0BC5 /* Icon-72.png */; };
+		2133F2A51E80E175001A0BC5 /* Icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2931E80E175001A0BC5 /* Icon-72@2x.png */; };
+		2133F2A61E80E175001A0BC5 /* Icon-76.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2941E80E175001A0BC5 /* Icon-76.png */; };
+		2133F2A71E80E175001A0BC5 /* Icon-76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2951E80E175001A0BC5 /* Icon-76@2x.png */; };
+		2133F2A81E80E175001A0BC5 /* Icon-83.5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2961E80E175001A0BC5 /* Icon-83.5@2x.png */; };
+		2133F2A91E80E175001A0BC5 /* Icon-Small-40.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2971E80E175001A0BC5 /* Icon-Small-40.png */; };
+		2133F2AA1E80E175001A0BC5 /* Icon-Small-40@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2981E80E175001A0BC5 /* Icon-Small-40@2x.png */; };
+		2133F2AB1E80E175001A0BC5 /* Icon-Small-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2991E80E175001A0BC5 /* Icon-Small-50.png */; };
+		2133F2AC1E80E175001A0BC5 /* Icon-Small-50@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29A1E80E175001A0BC5 /* Icon-Small-50@2x.png */; };
+		2133F2AD1E80E175001A0BC5 /* Icon-Small.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29B1E80E175001A0BC5 /* Icon-Small.png */; };
+		2133F2AE1E80E175001A0BC5 /* Icon-Small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29C1E80E175001A0BC5 /* Icon-Small@2x.png */; };
+		2133F2AF1E80E175001A0BC5 /* Icon-Small@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29D1E80E175001A0BC5 /* Icon-Small@3x.png */; };
+		2133F2B01E80E175001A0BC5 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29E1E80E175001A0BC5 /* Icon.png */; };
+		2133F2B11E80E175001A0BC5 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29F1E80E175001A0BC5 /* Icon@2x.png */; };
+		2133F2B21E80E175001A0BC5 /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A01E80E175001A0BC5 /* iTunesArtwork */; };
+		2133F2B31E80E175001A0BC5 /* iTunesArtwork@2x in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */; };
 		213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */; };
 		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
@@ -74,7 +102,6 @@
 		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
 		2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */; };
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
-		2195FBC71D2FD22C00ADDCAB /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
@@ -129,6 +156,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		2126A2631D9A1B90008E534A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2126A25A1D9A1B90008E534A;
+			remoteInfo = NovelSpeakerURLDownloadExtension;
+		};
 		21F054EF1917E0F200CC6BA9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
@@ -137,6 +171,20 @@
 			remoteInfo = NovelSpeaker;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2126A2691D9A1B90008E534A /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		210958B81A0DF55600E9171F /* arrow_down@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@3x.png"; sourceTree = "<group>"; };
@@ -173,10 +221,19 @@
 		2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PickerViewDialog.m; sourceTree = "<group>"; };
 		21245BD81A8FBA2A00D3B376 /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		21245BDA1A8FBB6800D3B376 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
+		2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NovelSpeakerURLDownloadExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2126A25D1D9A1B90008E534A /* ActionRequestHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActionRequestHandler.h; sourceTree = "<group>"; };
+		2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ActionRequestHandler.m; sourceTree = "<group>"; };
+		2126A2601D9A1B90008E534A /* Action.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Action.js; sourceTree = "<group>"; };
+		2127EAC91DB75989005B1636 /* HtmlStory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HtmlStory.h; sourceTree = "<group>"; };
+		2127EACA1DB75989005B1636 /* HtmlStory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HtmlStory.m; sourceTree = "<group>"; };
 		212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_2to3.xcmappingmodel; sourceTree = "<group>"; };
 		212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_3to4.xcmappingmodel; sourceTree = "<group>"; };
 		212852DD19B1D101001A75DC /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		212852E019B1ECAD001A75DC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		212972131DA66F2C001ED63D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = ja; path = ja.lproj/Info.plist; sourceTree = "<group>"; };
+		212972151DA66F2E001ED63D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = en; path = en.lproj/Info.plist; sourceTree = "<group>"; };
+		212972161DA66F97001ED63D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Base; path = Base.lproj/Info.plist; sourceTree = "<group>"; };
 		212F00D31D8DD700009D69E6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/DefaultSpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		212F01121D8FDEC5009D69E6 /* NiftyUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftyUtility.h; sourceTree = "<group>"; };
 		212F01131D8FDEC5009D69E6 /* NiftyUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftyUtility.m; sourceTree = "<group>"; };
@@ -189,6 +246,28 @@
 		212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_5to7.xcmappingmodel; sourceTree = "<group>"; };
 		212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_6to7.xcmappingmodel; sourceTree = "<group>"; };
 		212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
+		2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = CustomAutopagerizeItems.json; sourceTree = "<group>"; };
+		2133F2201E7FFF0B001A0BC5 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		2133F2221E7FFF0D001A0BC5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		2133F2271E801156001A0BC5 /* MainInterface.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainInterface.storyboard; sourceTree = "<group>"; };
+		2133F2901E80E175001A0BC5 /* Icon-60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-60@2x.png"; sourceTree = "<group>"; };
+		2133F2911E80E175001A0BC5 /* Icon-60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-60@3x.png"; sourceTree = "<group>"; };
+		2133F2921E80E175001A0BC5 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-72.png"; sourceTree = "<group>"; };
+		2133F2931E80E175001A0BC5 /* Icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-72@2x.png"; sourceTree = "<group>"; };
+		2133F2941E80E175001A0BC5 /* Icon-76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-76.png"; sourceTree = "<group>"; };
+		2133F2951E80E175001A0BC5 /* Icon-76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-76@2x.png"; sourceTree = "<group>"; };
+		2133F2961E80E175001A0BC5 /* Icon-83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-83.5@2x.png"; sourceTree = "<group>"; };
+		2133F2971E80E175001A0BC5 /* Icon-Small-40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small-40.png"; sourceTree = "<group>"; };
+		2133F2981E80E175001A0BC5 /* Icon-Small-40@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small-40@2x.png"; sourceTree = "<group>"; };
+		2133F2991E80E175001A0BC5 /* Icon-Small-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small-50.png"; sourceTree = "<group>"; };
+		2133F29A1E80E175001A0BC5 /* Icon-Small-50@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small-50@2x.png"; sourceTree = "<group>"; };
+		2133F29B1E80E175001A0BC5 /* Icon-Small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small.png"; sourceTree = "<group>"; };
+		2133F29C1E80E175001A0BC5 /* Icon-Small@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small@2x.png"; sourceTree = "<group>"; };
+		2133F29D1E80E175001A0BC5 /* Icon-Small@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small@3x.png"; sourceTree = "<group>"; };
+		2133F29E1E80E175001A0BC5 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		2133F29F1E80E175001A0BC5 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
+		2133F2A01E80E175001A0BC5 /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; path = iTunesArtwork; sourceTree = "<group>"; };
+		2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */ = {isa = PBXFileReference; lastKnownFileType = file; path = "iTunesArtwork@2x"; sourceTree = "<group>"; };
 		213A4DB01A61749600E9EC13 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
 		213A4DB11A61749B00E9EC13 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MaxSpeechTimeTableViewCell.xib; sourceTree = "<group>"; };
 		213A4DB31A6174AD00E9EC13 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
@@ -347,12 +426,19 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2126A2581D9A1B90008E534A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		21F054C61917E0F200CC6BA9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2126A26D1D9D1B92008E534A /* libxml2.2.tbd in Frameworks */,
 				21890CF51D9309F000869046 /* libz.tbd in Frameworks */,
-				2195FBC71D2FD22C00ADDCAB /* libxml2.tbd in Frameworks */,
 				217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */,
 				21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */,
 				21B539F819603737009658B7 /* CoreData.framework in Frameworks */,
@@ -391,6 +477,44 @@
 				217BD9E319CE72BB008A0D9D /* StringSubstituter.m */,
 			);
 			name = TextSpeech;
+			sourceTree = "<group>";
+		};
+		2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */ = {
+			isa = PBXGroup;
+			children = (
+				2126A25D1D9A1B90008E534A /* ActionRequestHandler.h */,
+				2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */,
+				2126A2601D9A1B90008E534A /* Action.js */,
+				2133F2271E801156001A0BC5 /* MainInterface.storyboard */,
+				212972141DA66F2C001ED63D /* Info.plist */,
+				2133F2211E7FFF0B001A0BC5 /* Localizable.strings */,
+			);
+			path = NovelSpeakerURLDownloadExtension;
+			sourceTree = "<group>";
+		};
+		2133F28F1E80E175001A0BC5 /* AppIcon-monochrome-reverse */ = {
+			isa = PBXGroup;
+			children = (
+				2133F2901E80E175001A0BC5 /* Icon-60@2x.png */,
+				2133F2911E80E175001A0BC5 /* Icon-60@3x.png */,
+				2133F2921E80E175001A0BC5 /* Icon-72.png */,
+				2133F2931E80E175001A0BC5 /* Icon-72@2x.png */,
+				2133F2941E80E175001A0BC5 /* Icon-76.png */,
+				2133F2951E80E175001A0BC5 /* Icon-76@2x.png */,
+				2133F2961E80E175001A0BC5 /* Icon-83.5@2x.png */,
+				2133F2971E80E175001A0BC5 /* Icon-Small-40.png */,
+				2133F2981E80E175001A0BC5 /* Icon-Small-40@2x.png */,
+				2133F2991E80E175001A0BC5 /* Icon-Small-50.png */,
+				2133F29A1E80E175001A0BC5 /* Icon-Small-50@2x.png */,
+				2133F29B1E80E175001A0BC5 /* Icon-Small.png */,
+				2133F29C1E80E175001A0BC5 /* Icon-Small@2x.png */,
+				2133F29D1E80E175001A0BC5 /* Icon-Small@3x.png */,
+				2133F29E1E80E175001A0BC5 /* Icon.png */,
+				2133F29F1E80E175001A0BC5 /* Icon@2x.png */,
+				2133F2A01E80E175001A0BC5 /* iTunesArtwork */,
+				2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */,
+			);
+			path = "AppIcon-monochrome-reverse";
 			sourceTree = "<group>";
 		};
 		21724EE119721D3600DF6DC4 /* MappingModel */ = {
@@ -433,6 +557,7 @@
 		21B53A1819619BE7009658B7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				2133F28F1E80E175001A0BC5 /* AppIcon-monochrome-reverse */,
 				212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */,
 				212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
 				219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */,
@@ -459,6 +584,7 @@
 				210958C21A0DF55600E9171F /* soundbook@3x.png */,
 				21B53A1919619C00009658B7 /* sound.png */,
 				21B53A1A19619C00009658B7 /* sound@2x.png */,
+				2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -482,6 +608,8 @@
 				212F01131D8FDEC5009D69E6 /* NiftyUtility.m */,
 				21890CF11D92F38800869046 /* NSDataZlibExtension.h */,
 				21890CF21D92F38800869046 /* NSDataZlibExtension.m */,
+				2127EAC91DB75989005B1636 /* HtmlStory.h */,
+				2127EACA1DB75989005B1636 /* HtmlStory.m */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -524,6 +652,7 @@
 			children = (
 				21F054D21917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */,
+				2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
 				21F054CB1917E0F200CC6BA9 /* Frameworks */,
 				21F054CA1917E0F200CC6BA9 /* Products */,
 				F592A12F5DD135799AA9A812 /* Pods */,
@@ -535,6 +664,7 @@
 			children = (
 				21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */,
 				21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */,
+				2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -563,25 +693,25 @@
 			isa = PBXGroup;
 			children = (
 				21AED5D419B335CF00CE846D /* ReleaseMemo.md */,
-				211BA5F219973AAD00560842 /* TextSpeech */,
-				21D8FC4C19FC97DB00CCF1B6 /* Tools */,
-				21F054DB1917E0F200CC6BA9 /* AppDelegate.h */,
-				21F054DC1917E0F200CC6BA9 /* AppDelegate.m */,
-				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
-				21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */,
-				219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */,
-				4E776B17196247BE00C36AD1 /* ViewControllers */,
-				21E294E91970E2D00012A3AA /* DataModel */,
-				21B53A1819619BE7009658B7 /* Resources */,
 				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
 				21C74FA21967FD390039A706 /* NarouDownloadQueue.h */,
 				21C74FA31967FD390039A706 /* NarouDownloadQueue.m */,
 				4E776B18196247FB00C36AD1 /* NarouLoader.h */,
 				4E776B19196247FB00C36AD1 /* NarouLoader.m */,
-				21F054E41917E0F200CC6BA9 /* Images.xcassets */,
 				21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */,
 				21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */,
+				21F054DB1917E0F200CC6BA9 /* AppDelegate.h */,
+				21F054DC1917E0F200CC6BA9 /* AppDelegate.m */,
+				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
+				21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */,
+				219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */,
+				211BA5F219973AAD00560842 /* TextSpeech */,
+				21D8FC4C19FC97DB00CCF1B6 /* Tools */,
+				4E776B17196247BE00C36AD1 /* ViewControllers */,
+				21E294E91970E2D00012A3AA /* DataModel */,
+				21B53A1819619BE7009658B7 /* Resources */,
+				21F054E41917E0F200CC6BA9 /* Images.xcassets */,
 				21F054D31917E0F200CC6BA9 /* Supporting Files */,
 			);
 			path = NovelSpeaker;
@@ -678,6 +808,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2126A2681D9A1B90008E534A /* Build configuration list for PBXNativeTarget "NovelSpeakerURLDownloadExtension" */;
+			buildPhases = (
+				2126A2571D9A1B90008E534A /* Sources */,
+				2126A2581D9A1B90008E534A /* Frameworks */,
+				2126A2591D9A1B90008E534A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NovelSpeakerURLDownloadExtension;
+			productName = NovelSpeakerURLDownloadExtension;
+			productReference = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		21F054C81917E0F200CC6BA9 /* NovelSpeaker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21F054FB1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeaker" */;
@@ -688,10 +835,12 @@
 				21F054C71917E0F200CC6BA9 /* Resources */,
 				9F1D2458E20E3AD67D47BA58 /* Copy Pods Resources */,
 				E89A666218022A76197B566D /* Embed Pods Frameworks */,
+				2126A2691D9A1B90008E534A /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				2126A2641D9A1B90008E534A /* PBXTargetDependency */,
 			);
 			name = NovelSpeaker;
 			productName = NovelSpeaker;
@@ -725,6 +874,11 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "IIMURA Takuji";
 				TargetAttributes = {
+					2126A25A1D9A1B90008E534A = {
+						CreatedOnToolsVersion = 8.0;
+						DevelopmentTeam = 4KZE8276ZF;
+						ProvisioningStyle = Automatic;
+					};
 					21F054C81917E0F200CC6BA9 = {
 						DevelopmentTeam = 4KZE8276ZF;
 						SystemCapabilities = {
@@ -754,30 +908,55 @@
 			targets = (
 				21F054C81917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054E91917E0F200CC6BA9 /* NovelSpeakerTests */,
+				2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		2126A2591D9A1B90008E534A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2133F2261E800F4A001A0BC5 /* Images.xcassets in Resources */,
+				2133F2281E801156001A0BC5 /* MainInterface.storyboard in Resources */,
+				2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */,
+				2126A2611D9A1B90008E534A /* Action.js in Resources */,
+				212972171DA66FDB001ED63D /* Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		21F054C71917E0F200CC6BA9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2133F2A31E80E175001A0BC5 /* Icon-60@3x.png in Resources */,
 				21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */,
+				2133F2AC1E80E175001A0BC5 /* Icon-Small-50@2x.png in Resources */,
 				210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */,
+				2133F2A71E80E175001A0BC5 /* Icon-76@2x.png in Resources */,
 				210958C31A0DF55600E9171F /* arrow_down@3x.png in Resources */,
+				2133F2A91E80E175001A0BC5 /* Icon-Small-40.png in Resources */,
 				210958CC1A0DF55600E9171F /* soundbook@2x.png in Resources */,
 				210958CA1A0DF55600E9171F /* icloud1@3x.png in Resources */,
 				21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */,
 				21B53A2219619C50009658B7 /* gear.png in Resources */,
+				2133F2A81E80E175001A0BC5 /* Icon-83.5@2x.png in Resources */,
 				212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */,
+				2133F2A21E80E175001A0BC5 /* Icon-60@2x.png in Resources */,
 				210958C41A0DF55600E9171F /* booksearch.png in Resources */,
+				2133F2B11E80E175001A0BC5 /* Icon@2x.png in Resources */,
 				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
 				210958EB1A0E1C5500E9171F /* NEW!.png in Resources */,
+				2133F2AF1E80E175001A0BC5 /* Icon-Small@3x.png in Resources */,
+				2133F2B01E80E175001A0BC5 /* Icon.png in Resources */,
+				2133F2AE1E80E175001A0BC5 /* Icon-Small@2x.png in Resources */,
 				213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */,
 				212F011C1D907CF1009D69E6 /* Default568@2x.png in Resources */,
+				2133F2A41E80E175001A0BC5 /* Icon-72.png in Resources */,
 				21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */,
 				210958C61A0DF55600E9171F /* booksearch@3x.png in Resources */,
+				2133F2B31E80E175001A0BC5 /* iTunesArtwork@2x in Resources */,
 				212F35A61A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */,
 				210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */,
 				210958C81A0DF55600E9171F /* icloud1.png in Resources */,
@@ -785,23 +964,30 @@
 				21B53A2819619D23009658B7 /* app_globe.png in Resources */,
 				210958C71A0DF55600E9171F /* gear@3x.png in Resources */,
 				219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */,
+				2133F2A61E80E175001A0BC5 /* Icon-76.png in Resources */,
 				21B53A1C19619C00009658B7 /* sound.png in Resources */,
 				210958CB1A0DF55600E9171F /* soundbook.png in Resources */,
 				210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */,
 				21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */,
 				210958C91A0DF55600E9171F /* icloud1@2x.png in Resources */,
+				2133F2AB1E80E175001A0BC5 /* Icon-Small-50.png in Resources */,
 				21F054D71917E0F200CC6BA9 /* InfoPlist.strings in Resources */,
 				21F054E01917E0F200CC6BA9 /* Main.storyboard in Resources */,
 				212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */,
 				2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */,
 				21C74F961964502A0039A706 /* arrow_down.png in Resources */,
+				2133F21C1E7D5674001A0BC5 /* CustomAutopagerizeItems.json in Resources */,
+				2133F2AA1E80E175001A0BC5 /* Icon-Small-40@2x.png in Resources */,
 				2117251019B2064400FB97D2 /* BookShelfTableViewCell.xib in Resources */,
 				210958CD1A0DF55600E9171F /* soundbook@3x.png in Resources */,
 				21B53A1D19619C00009658B7 /* sound@2x.png in Resources */,
+				2133F2B21E80E175001A0BC5 /* iTunesArtwork in Resources */,
+				2133F2A51E80E175001A0BC5 /* Icon-72@2x.png in Resources */,
 				212852DC19B1D101001A75DC /* Localizable.strings in Resources */,
 				21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */,
 				219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */,
 				21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */,
+				2133F2AD1E80E175001A0BC5 /* Icon-Small.png in Resources */,
 				21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -865,6 +1051,14 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2126A2571D9A1B90008E534A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		21F054C51917E0F200CC6BA9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -912,6 +1106,7 @@
 				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
 				21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
+				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
@@ -948,6 +1143,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		2126A2641D9A1B90008E534A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */;
+			targetProxy = 2126A2631D9A1B90008E534A /* PBXContainerItemProxy */;
+		};
 		21F054F01917E0F200CC6BA9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 21F054C81917E0F200CC6BA9 /* NovelSpeaker */;
@@ -1001,6 +1201,16 @@
 			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
+		212972141DA66F2C001ED63D /* Info.plist */ = {
+			isa = PBXVariantGroup;
+			children = (
+				212972131DA66F2C001ED63D /* ja */,
+				212972151DA66F2E001ED63D /* en */,
+				212972161DA66F97001ED63D /* Base */,
+			);
+			name = Info.plist;
+			sourceTree = "<group>";
+		};
 		212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1009,6 +1219,15 @@
 				212F01181D906F56009D69E6 /* ja */,
 			);
 			name = DefaultSpeakSettingEditTableViewCell.xib;
+			sourceTree = "<group>";
+		};
+		2133F2211E7FFF0B001A0BC5 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2133F2201E7FFF0B001A0BC5 /* ja */,
+				2133F2221E7FFF0D001A0BC5 /* en */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 		213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */ = {
@@ -1072,6 +1291,60 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		2126A2661D9A1B90008E534A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Monocrome";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2126A2671D9A1B90008E534A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Monocrome";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		21F054F91917E0F200CC6BA9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1237,6 +1510,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		2126A2681D9A1B90008E534A /* Build configuration list for PBXNativeTarget "NovelSpeakerURLDownloadExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2126A2661D9A1B90008E534A /* Debug */,
+				2126A2671D9A1B90008E534A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -59,6 +59,9 @@ static GlobalDataSingleton* _singleton = nil;
         NSLog(@"AVAudioSessionCategoryPlayback set failed. %@ %@", err, err.userInfo);
     }
     [session setActive:NO error:nil];
+    
+    // オーディオのルートが変わったよイベントを受け取るようにする
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeAudioSessionRoute:) name:AVAudioSessionRouteChangeNotification object:nil];
 
     return self;
 }
@@ -1186,7 +1189,7 @@ static GlobalDataSingleton* _singleton = nil;
         , @"多脚": @"タキャク"
         
         // 2015/09/27 added.
-        , @"あ、": @"あぁ、"
+        //, @"あ、": @"あぁ、"
         
         , @"〜": @"ー"
         
@@ -1551,11 +1554,66 @@ static GlobalDataSingleton* _singleton = nil;
     return true;
 }
 
+/// 現在の読み上げ位置で GlobalState を更新して保存します
+- (BOOL)SaveCurrentReadingPoint
+{
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    if (globalState == nil || globalState.currentReadingStory == nil) {
+        return false;
+    }
+    NarouContentCacheData* content = [self SearchNarouContentFromNcode:globalState.currentReadingStory.ncode];
+    if (content == nil) {
+        return false;
+    }
+    NSRange currentReadingPoint = [m_NiftySpeaker GetCurrentReadingPoint];
+    NSUInteger storyLength = [globalState.currentReadingStory.content length];
+    NSUInteger readingPointLocation = currentReadingPoint.location;
+    if(storyLength <= readingPointLocation) {
+        return false;
+    }
+    globalState.currentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:readingPointLocation];
+    NSLog(@"save readLocation: %lu", (unsigned long)readingPointLocation);
+    return [self UpdateReadingPoint:content story:globalState.currentReadingStory];
+}
+
+/// 現在の読み上げ位置をイイカンジに少し戻します
+/// count で指定された文字数だけ戻した後、改行か「。」「、」等が出て来る所まで戻します
+- (void)RewindCurrentReadingPoint:(NSUInteger)count
+{
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    if (globalState == nil || globalState.currentReadingStory == nil || globalState.currentReadingStory.content == nil) {
+        return;
+    }
+
+    NSRange currentReadingPoint = [m_NiftySpeaker GetCurrentReadingPoint];
+    NSString* content = globalState.currentReadingStory.content;
+    
+    long pos = currentReadingPoint.location;
+    pos -= count;
+    if(pos < 0) {
+        pos = 0;
+    }else{
+        NSRange searchRange = NSMakeRange(0, pos);
+        NSArray* searchTargetArray = @[@"。", @"、", @"\n"];
+        for (NSString* searchTarget in searchTargetArray) {
+            NSRange range = [content rangeOfString:searchTarget options:NSBackwardsSearch range:searchRange];
+            if (range.location != NSNotFound && pos > range.location) {
+                pos = range.location;
+            }
+        }
+    }
+    NSLog(@"update currentReadingPoint: %lu -> %ld", (unsigned long)currentReadingPoint.location, pos);
+    currentReadingPoint.location = pos;
+    [m_NiftySpeaker UpdateCurrentReadingPoint:currentReadingPoint];
+}
+
 /// 読み上げを停止します。
 - (BOOL)StopSpeech
 {
     AVAudioSession* session = [AVAudioSession sharedInstance];
     bool result = [self StopSpeechWithoutDiactivate];
+    //[self RewindCurrentReadingPoint:5];
+    [self SaveCurrentReadingPoint];
     //NSLog(@"setActive NO.");
     [session setActive:NO error:nil];
     return result;
@@ -2038,7 +2096,7 @@ static GlobalDataSingleton* _singleton = nil;
             NSURL* targetURL = [NSURL URLWithString:urlString];
             NSString* scheme = [targetURL scheme];
             if ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
-                return [self AddDownloadQueueForURL:targetURL] == nil;
+                return [self AddDownloadQueueForURL:[urlString stringByRemovingPercentEncoding] cookieParameter:[url parameterString]] == nil;
             }
         }
     }
@@ -2074,6 +2132,8 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_BACKGROUND_FETCHED_NOVEL_ID_LIST @"BackgroundFetchedNovelIDList"
 #define USER_DEFAULTS_BACKGROUND_NOVEL_FETCH_MODE @"BackgroundNovelFetchMode"
 #define USER_DEFAULTS_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE @"AutoPagerizeSiteInfoCacheSavedDate"
+#define USER_DEFAULTS_CUSTOM_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE @"CustomAutoPagerizeSiteInfoCacheSavedDate"
+#define USER_DEFAULTES_MENU_ITEM_IS_ADD_SPEECH_MOD_SETTINGS_ONLY @"MenuItemIsAddSpeechModSettingOnly"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -2161,7 +2221,7 @@ static GlobalDataSingleton* _singleton = nil;
         return;
     }
     for (NarouContentCacheData* content in contentList) {
-        [self AddDownloadQueueForNarou:content];
+        [self PushContentDownloadQueue:content];
     }
 }
 
@@ -2248,7 +2308,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSArray* contentArray = [self GetAllNarouContent:NarouContentSortType_Ncode];
     NSMutableArray* downloadTargetNovelIDArray = [NSMutableArray new];
     for (NarouContentCacheData* content in contentArray) {
-        if ([content isUserCreatedContent]) {
+        if ([content isUserCreatedContent] && (![content isURLContent])) {
             continue;
         }
         BOOL hit = false;
@@ -2276,7 +2336,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
     // ダウンロードqueueに追加します。
     for (NSString* novelID in downloadTargetNovelIDArray) {
-        [self AddDownloadQueueForNarouNcode:novelID];
+        // ncode 以外のものでも novelID でqueueに入れます
+        NarouContentCacheData* content = [self SearchNarouContentFromNcode:novelID];
+        [self PushContentDownloadQueue:content];
+        NSLog(@"add download queue: %@", content.ncode);
     }
 
     // 30秒以内に終わるようにダウンロードの終了を待ちます
@@ -2412,24 +2475,70 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// カスタムAutoPagerize の SiteInfo を保存した日付を取得します
+- (NSDate*)GetCustomAutoPagerizeCacheSavedDate {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    return [userDefaults objectForKey:USER_DEFAULTS_CUSTOM_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE];
+}
+
+/// カスタムAutoPagerize の SiteInfo を保存した日付を保存します
+- (void)UpdateCustomAutoPagerizeCacheSavedDate:(NSDate*)date {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:date forKey:USER_DEFAULTS_CUSTOM_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE];
+    [userDefaults synchronize];
+}
+
 #define CACHE_FILE_NAME_AUTOPAGERLIZE_SITEINFO @"AutoPagerizeSiteInfo.deflate"
 #define AUTOPAGERIZE_SITEINFO_URL @"http://wedata.net/databases/AutoPagerize/items.json"
+#define CACHE_FILE_NAME_CUSTOM_AUTOPAGERLIZE_SITEINFO @"CustomAutoPagerizeSiteInfo.deflate"
+#define CUSTOM_AUTOPAGERIZE_SITEINFO_URL @"https://raw.githubusercontent.com/limura/NovelSpeaker/master/NovelSpeaker/CustomAutopagerizeItems.json"
 
-/// AutoPagerize の SiteInfo を保存するファイルへのパスを取得します
-- (NSString*)GetAutoPagerizeSiteInfoCacheFilePath {
+/// 内部キャッシュフォルダへのパスを取得します
+- (NSString*)GetCacheFilePath:(NSString*)fileName {
     NSArray* pathArray = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     NSString* cachesPath = [pathArray objectAtIndex:0];
     if (cachesPath == nil) {
         return nil;
     }
-    NSString* filePath = [[NSString alloc] initWithFormat:@"%@/%@", cachesPath, CACHE_FILE_NAME_AUTOPAGERLIZE_SITEINFO];
+    NSString* filePath = [[NSString alloc] initWithFormat:@"%@/%@", cachesPath, fileName];
     return filePath;
+}
+
+/// NSData を内部キャッシュフォルダの指定されたファイル名に上書き保存します
+- (void)SaveDataToCacheFile:(NSData*)data fileName:(NSString*)fileName {
+    NSString* filePath = [self GetCacheFilePath:fileName];
+    [data writeToFile:filePath atomically:true];
+}
+
+/// URLからダウンロードしたデータを deflate で圧縮して指定されたファイル名でキャッシュフォルダに上書き保存します
+/// これはブロッキングします
+- (BOOL)UpdateCachedAndZipedFileFromURL:(NSURL*)url fileName:(NSString*)fileName {
+    NSURLRequest* request = [NSURLRequest requestWithURL:url];
+    NSError* error;
+    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error];
+    if (error != nil) {
+        return false;
+    }
+    NSData* zipedData = [data deflate:9];
+    [self SaveDataToCacheFile:zipedData fileName:fileName];
+    return true;
+}
+
+/// キャッシュフォルダに保存してある deflate で圧縮されたファイルの中身を解凍し、NSData とてして取り出します。
+- (NSData*)GetCachedAndZipedFileData:(NSString*)fileName {
+    NSString* filePath = [self GetCacheFilePath:fileName];
+    NSData* dataDeflate = [NSData dataWithContentsOfFile:filePath];
+    return [dataDeflate inflate];
+}
+
+/// AutoPagerize の SiteInfo を保存するファイルへのパスを取得します
+- (NSString*)GetAutoPagerizeSiteInfoCacheFilePath {
+    return [self GetCacheFilePath:CACHE_FILE_NAME_AUTOPAGERLIZE_SITEINFO];
 }
 
 /// AutoPagerize の SiteInfo を内部に保存します
 - (void)SaveAutoPagerizeSiteInfoData:(NSData*)data {
-    NSString* filePath = [self GetAutoPagerizeSiteInfoCacheFilePath];
-    [data writeToFile:filePath atomically:true];
+    [self SaveDataToCacheFile:data fileName:CACHE_FILE_NAME_AUTOPAGERLIZE_SITEINFO];
 }
 
 /// 内部に保存してある AutoPagerize の SiteInfo を最新版に更新します
@@ -2447,11 +2556,26 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return true;
 }
 
+/// 内部に保存してある AutoPagerize の カスタムSiteInfo を最新版に更新します
+/// これはネットワークアクセスを行う動作になります
+- (BOOL)UpdateCachedCustomAutoPagerizeSiteInfoData {
+    NSURL* url = [[NSURL alloc] initWithString:CUSTOM_AUTOPAGERIZE_SITEINFO_URL];
+    NSURLRequest* request = [NSURLRequest requestWithURL:url];
+    NSError* error;
+    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error];
+    if (error != nil) {
+        return false;
+    }
+    NSData* zipedData = [data deflate:9];
+    [self SaveDataToCacheFile:zipedData fileName:CACHE_FILE_NAME_CUSTOM_AUTOPAGERLIZE_SITEINFO];
+    return true;
+}
+
 /// 内部に保存してある AutoPagerize の SiteInfo を取り出します
 - (NSData*)GetCachedAutoPagerizeSiteInfoData {
     NSDate* lastUpdateDate = [self GetAutoPagerizeCacheSavedDate];
     if ([lastUpdateDate timeIntervalSinceNow] < -24*60*60) { // 24時間以上経っていたらキャッシュを更新する
-        [self GetCachedAutoPagerizeSiteInfoData];
+        [self UpdateCachedAutoPagerizeSiteInfoData];
     }
     
     NSString* filePath = [self GetAutoPagerizeSiteInfoCacheFilePath];
@@ -2467,27 +2591,90 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return [siteInfoDeflate inflate];
 }
 
+/// 内部に保存してある AutoPagerize の カスタムSiteInfo を取り出します
+- (NSData*)GetCachedCustomAutoPagerizeSiteInfoData {
+    NSDate* lastUpdateDate = [self GetCustomAutoPagerizeCacheSavedDate];
+    if ([lastUpdateDate timeIntervalSinceNow] < -24*60*60) { // 24時間以上経っていたらキャッシュを更新する
+        [self UpdateCachedCustomAutoPagerizeSiteInfoData];
+    }
+    
+    NSData* siteInfo = [self GetCachedAndZipedFileData:CACHE_FILE_NAME_CUSTOM_AUTOPAGERLIZE_SITEINFO];
+    if (siteInfo == nil) {
+        // 読み出しに失敗したらネットワーク経由で取得しようとします。
+        if ([self UpdateCachedCustomAutoPagerizeSiteInfoData]) {
+            return [self GetCachedCustomAutoPagerizeSiteInfoData];
+        };
+        return nil;
+    }
+    return siteInfo;
+}
+
 /// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
-- (NSString*) AddDownloadQueueForURL:(NSURL*)url
+- (NSString*) AddDownloadQueueForURL:(NSString*)urlString cookieParameter:(NSString*)cookieParameter
 {
-    if(url == nil)
+    if(urlString == nil)
     {
         return NSLocalizedString(@"GlobalDataSingleton_CanNotGetValidNCODE", @"有効な URL を取得できませんでした。");
     }
-    NSString* urlString = [url absoluteString];
     
     NarouContentCacheData* targetContentCacheData = [self CreateNewUserBook];
+    // XXXXX TODO: 怪しく ncode には URLを、keyword には cookieパラメタ を入れているのをなんとかしないと……(´・ω・`)
     targetContentCacheData.title = urlString;
     targetContentCacheData.ncode = urlString;
+    targetContentCacheData.keyword = cookieParameter;
     [self UpdateNarouContent:targetContentCacheData];
     
     // download queue に追加します。
-    NSLog(@"add download queue.");
+    NSLog(@"add download queue: %@", urlString);
     [self PushContentDownloadQueue:targetContentCacheData];
     
     return nil;
+}
+
+/// オーディオのルートが変わったよイベントのイベントハンドラ
+/// from: http://qiita.com/naonya3/items/433b3daaad75accf156b
+- (void)didChangeAudioSessionRoute:(NSNotification *)notification
+{
+    // ヘッドホンorイヤホンが刺さっていたか取得
+    BOOL (^isJointHeadphone)(NSArray *) = ^(NSArray *outputs){
+        for (AVAudioSessionPortDescription *desc in outputs) {
+            if ([desc.portType isEqual:AVAudioSessionPortHeadphones]) {
+                return YES;
+            }
+        }
+        return NO;
+    };
+    
+    // 直前の状態を取得
+    AVAudioSessionRouteDescription *prevDesc = notification.userInfo[AVAudioSessionRouteChangePreviousRouteKey];
+    
+    if (isJointHeadphone([[[AVAudioSession sharedInstance] currentRoute] outputs])) {
+        if (!isJointHeadphone(prevDesc.outputs)) {
+            //NSLog(@"ヘッドフォンが刺さった");
+        }
+    } else {
+        if(isJointHeadphone(prevDesc.outputs)) {
+            //NSLog(@"ヘッドフォンが抜かれた");
+            [self StopSpeech];
+        }
+    }
+}
+
+
+/// 小説内部での範囲選択時に出てくるメニューを「読み替え辞書に登録」だけにする(YES)か否(NO)かの設定値を取り出します
+- (BOOL)GetMenuItemIsAddSpeechModSettingOnly {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    return [userDefaults boolForKey:USER_DEFAULTES_MENU_ITEM_IS_ADD_SPEECH_MOD_SETTINGS_ONLY];
+}
+
+/// 小説内部での範囲選択時に出てくるメニューを「読み替え辞書に登録」だけにする(YES)か否(NO)かの設定値を保存します
+- (void)SetMenuItemIsAddSpeechModSettingOnly:(BOOL)yesNo {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:yesNo forKey:USER_DEFAULTES_MENU_ITEM_IS_ADD_SPEECH_MOD_SETTINGS_ONLY];
+    [userDefaults synchronize];
+
 }
 
 @end

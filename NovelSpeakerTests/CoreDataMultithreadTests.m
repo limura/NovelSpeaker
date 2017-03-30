@@ -45,7 +45,7 @@
 - (void)testXPath {
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     __block BOOL done = false;
-    __block NSArray* dataArray = nil;
+    __block NSMutableArray* dataArray = [NSMutableArray new];
     
     UriLoader* uriLoader = [UriLoader new];
     [uriLoader SetMaxDepth:3];
@@ -53,13 +53,15 @@
     [uriLoader AddSiteInfoFromURL:siteInfoUrl successAction:^(){
         NSLog(@"add siteinfo success.");
         NSURL* targetURL = [[NSURL alloc] initWithString:@"https://kakuyomu.jp/works/1177354054880210298/episodes/1177354054880210374"];
-        [uriLoader LoadURL:targetURL successAction:^(NSArray* result){
+        [uriLoader LoadURL:targetURL cookieArray:@[] startCount:0
+        successAction:^(HtmlStory* story, NSURL* url){
             NSLog(@"LoadURL success:");
-            dataArray = result;
-            done = true;
-            dispatch_semaphore_signal(semaphore);
+            [dataArray addObject:story];
         } failedAction:^(NSURL* url){
             NSLog(@"LoadURL failed: %@", [url absoluteString]);
+            done = true;
+            dispatch_semaphore_signal(semaphore);
+        } finishAction:^(NSURL* url){
             done = true;
             dispatch_semaphore_signal(semaphore);
         }];
@@ -75,8 +77,8 @@
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
     }
     //[NSThread sleepForTimeInterval:5];
-    for (NSString* content in dataArray) {
-        NSLog(@"%@", content);
+    for (HtmlStory* story in dataArray) {
+        NSLog(@"%@", story.content);
     }
 }
 

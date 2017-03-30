@@ -19,6 +19,11 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>NovelSpeakerLoadURL.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Release NovelSpeaker.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -26,12 +31,19 @@
 		</dict>
 		<key>URLDownloadExtension.xcscheme</key>
 		<dict>
+			<key>isShown</key>
+			<false/>
 			<key>orderHint</key>
 			<integer>3</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>2126A25A1D9A1B90008E534A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>21F054C81917E0F200CC6BA9</key>
 		<dict>
 			<key>primary</key>

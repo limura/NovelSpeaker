@@ -360,9 +360,18 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// AutoPagerize の SiteInfo を内部に保存します
 - (void)SaveAutoPagerizeSiteInfoData:(NSData*)data;
 
-/// URLをダウンロードqueueに追加しようとします
+/// 内部に保存してある AutoPagerize の カスタムSiteInfo を取り出します
+- (NSData*)GetCachedCustomAutoPagerizeSiteInfoData;
+
+/// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
-- (NSString*) AddDownloadQueueForURL:(NSURL*)url;
+- (NSString*) AddDownloadQueueForURL:(NSString*)urlString cookieParameter:(NSString*)cookieParameter;
+
+/// 小説内部での範囲選択時に出てくるメニューを「読み替え辞書に登録」だけにする(YES)か否(NO)かの設定値を取り出します
+- (BOOL)GetMenuItemIsAddSpeechModSettingOnly;
+
+/// 小説内部での範囲選択時に出てくるメニューを「読み替え辞書に登録」だけにする(YES)か否(NO)かの設定値を保存します
+- (void)SetMenuItemIsAddSpeechModSettingOnly:(BOOL)yesNo;
 
 @end

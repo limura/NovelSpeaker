@@ -38,7 +38,7 @@
 }
 
 /// NextLink に当たるものを取り出します
-- (NSURL*)GetNextURL:(xmlDocPtr)document context:(xmlXPathContextPtr)context currentURL:(NSURL*)currentURL {
+- (NSURL*)GetNextURL:(xmlDocPtr)document context:(xmlXPathContextPtr)context currentURL:(NSURL*)currentURL documentEncoding:(unsigned long)documentEncoding {
     xmlChar* xpath = (xmlChar*)[m_NextLink cStringUsingEncoding:NSUTF8StringEncoding];
     xmlXPathObjectPtr result = xmlXPathEvalExpression(xpath, context);
     if (result == NULL || result->nodesetval == NULL) {
@@ -54,7 +54,7 @@
         if (href == NULL) {
             continue;
         }
-        NSString* hrefString = [[NSString alloc] initWithUTF8String:(const char*)href];
+        NSString* hrefString = [NSString stringWithCString:(const char*)href encoding:documentEncoding];
         xmlFree(href);
         return [NSURL URLWithString:hrefString relativeToURL:currentURL];
     }
@@ -65,7 +65,7 @@
 /// 実際の所は NSAttributedString にそういうことをしてくれるイニシャライザがあるのでそれを使います。
 /// ただ、それは main thread からしか呼び出せないイニシャライザなので、main thread 側に処理を投げる処理が入ります。
 /// そのため、この関数を呼ぶ奴は dispatch_sync(dispatch_get_main_queue(), ... をしているとブロックするかもしれないです。(´・ω・`)
-- (NSAttributedString*)HtmlStringToAttributedString:(NSString*)htmlString {
++ (NSAttributedString* _Nonnull)HtmlStringToAttributedString:(NSString*)htmlString {
     // NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType を使う場合は main thread でないと駄目だそうな。
     __block NSAttributedString* attributedString = nil;
     if ([NSThread isMainThread]) {
@@ -79,12 +79,16 @@
         });
         //dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     }
+    
+    if (attributedString == nil) {
+        attributedString = [NSAttributedString new];
+    }
 
     return attributedString;
 }
 
 /// HTMLの <ruby> 関係のタグを排除します
-- (NSString*)RemoveRubyTag:(NSString*)html {
++ (NSString*)RemoveRubyTag:(NSString*)html {
     NSString* result = html;
     //<ruby><rb>黒河</rb><rp>（</rp><rt>くろかわ</rt><rp>）</rp></ruby>
     NSArray* targetArray = @[@"<ruby>", @"</ruby>", @"<rb>", @"</rb>", @"<rp>", @"</rp>", @"<rt>", @"</rt>"];
@@ -94,13 +98,34 @@
     return result;
 }
 
+/// HTMLタグを全部消します
++ (NSString*)RemoveHtmlTag:(NSString*)html {
+    NSString* htmlTags = @"<[^>]*>";
+    NSRange range;
+    while ((range = [html rangeOfString:htmlTags options:NSRegularExpressionSearch]).location != NSNotFound) {
+        html = [html stringByReplacingCharactersInRange:range withString:@""];
+    }
+    return html;
+}
+
+/// XHTML の <br /> のようなタグ(単品で終わるタグ) を <br> のようなタグに変更します
++ (NSString*)ReplaceXhtmlLonlyTag:(NSString*)html {
+    NSString* lonlyTag = @"/>";
+    NSRange range;
+    while ((range = [html rangeOfString:lonlyTag options:NSRegularExpressionSearch]).location != NSNotFound) {
+        html = [html stringByReplacingCharactersInRange:range withString:@">"];
+    }
+    return html;
+}
+
 /// PageElementに当たるもののリストを取り出します。
-- (NSString*)GetPageElement:(xmlDocPtr)document context:(xmlXPathContextPtr)context {
+- (NSString*)GetPageElement:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding {
     xmlChar* xpath = (xmlChar*)[m_PageElement cStringUsingEncoding:NSUTF8StringEncoding];
     xmlXPathObjectPtr result = xmlXPathEvalExpression(xpath, context);
     if (result == NULL || result->nodesetval == NULL) {
         return nil;
     }
+    NSLog(@"xmlXPathEvalExpression: result: %p->nodesetval(%p)->nodeNr(%d)", result, result->nodesetval, result->nodesetval->nodeNr);
     xmlNodeSetPtr nodeSet = result->nodesetval;
     NSMutableString* htmlString = [NSMutableString new];
     for (int i = 0; i < nodeSet->nodeNr; i++) {
@@ -110,22 +135,30 @@
         }
         xmlBufferPtr buffer = xmlBufferCreate();
         int result = xmlNodeDump(buffer, node->doc, node, 0, 1);
+        NSLog(@"  node[%d] xmlNodeDump: %d", i, result);
         if (result > 0) {
             const xmlChar* bufCharArray = xmlBufferContent(buffer);
             if (bufCharArray != NULL) {
-                NSString* docString = [[NSString alloc] initWithUTF8String:(char*)bufCharArray];
+                //NSString* docString = [NSString stringWithCString:(const char*)bufCharArray encoding:documentEncoding];
+                NSString* docString = [[NSString alloc] initWithData:[[NSData alloc] initWithBytes:(char*)bufCharArray length:buffer->use] encoding:documentEncoding];
+                NSLog(@"docString: %p(%lu) length: %u", docString, documentEncoding, buffer->use);
+                if (docString == nil) {
+                    continue;
+                }
                 [htmlString appendString:docString];
                 [htmlString appendString:@"<br><br>"];
             }
         }
         xmlBufferFree(buffer);
     }
-    // このタイミングで <ruby> 周りを削除しています。
-    NSString* removeRubyTagString = [self RemoveRubyTag:htmlString];
-    NSAttributedString* attributedString = [self HtmlStringToAttributedString:removeRubyTagString];
-    return attributedString.string;
+    xmlXPathFreeObject(result);
+    return htmlString;
 }
 
+/// 概要を文字列で返します
+- (NSString*)GetDescription {
+    return [[NSString alloc] initWithFormat:@"nextLink: %@, pageElement: %@", m_NextLink, m_PageElement];
+}
 
 
 

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HtmlStory.h"
 
 /// URI からコンテンツ文字列を抽出します。
 @interface UriLoader : NSObject
@@ -15,6 +16,7 @@
     int m_MaxDepth;
     float m_SleepTime;
     NSMutableArray* m_SiteInfoArray;
+    NSMutableArray* m_CustomSiteInfoArray;
 }
 /// SiteInfo のJSONを内部データベースに追加します。
 - (BOOL)AddSiteInfoFromData:(NSData*)siteInfo;
@@ -25,10 +27,13 @@
 /// SiteInfo をURLから内部データベースに追加します。
 - (void)AddSiteInfoFromURL:(NSURL*)url successAction:(void(^)())successAction failedAction:(void(^)(NSURL* url))failedAction;
 
+/// ことせかい用にカスタムされた SiteInfo (Autopagerize由来ではないSiteInfo) のJSONを内部データベースに追加します。
+- (BOOL)AddCustomSiteInfoFromData:(NSData*)siteInfo;
+
 /// URLを読み込んで、SiteInfo の情報から得た PageElement の情報を NSString に変換して取り出しつつ、
 /// MaxDepth まで nextLink を辿ったものを、PageElement毎の配列として取り出します。
 /// 該当する siteinfo が無い場合、a rel="next" であったり class="autopagerize_page_element" であるものを取り出そうとします。
-- (void)LoadURL:(NSURL*)url successAction:(void(^)(NSArray* result))successAction failedAction:(void(^)(NSURL* url))failedAction;
+- (void)LoadURL:(NSURL*)url cookieArray:(NSArray*)cookieArray startCount:(int)startCount successAction:(void(^)(HtmlStory* story, NSURL* currentURL))successAction failedAction:(void(^)(NSURL* url))failedAction finishAction:(void(^)(NSURL* url))finishAction;
 
 /// 最大何ページまで読み進むかを指定します
 - (void)SetMaxDepth:(int)maxDepth;

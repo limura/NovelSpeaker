@@ -1,0 +1,9 @@
+/* 
+  Localizable.strings
+  novelspeaker
+
+  Created by 飯村卓司 on 2017/03/20.
+  Copyright © 2017年 IIMURA Takuji. All rights reserved.
+*/
+
+"ActionRequestHandler_CanNotUseThisInformation" = "ことせかい で利用可能な情報ではありませんでした。";
