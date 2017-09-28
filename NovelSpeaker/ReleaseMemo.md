@@ -404,6 +404,21 @@ Bug fix
 - Fixed a problem that automatic stop at continuous playback time does not work if page switching occurs before the specified time in continuous playback time.
 
 
+レビュワー向け
+
+Interface change
+
+- When an headphone is pulled up when an headphone sticks in headphone Jack, speech comes to stop.
+- Add "download with NovelSpeaker" Action Extension for Safari. It's use http://* connection.
+
+Bug fix
+
+- Fixed problem that download from Let's becom novelist site failed.
+- Fixed a problem in which the reading start position shifted to the reading position stopped earlier when reading of a book was stopped and when opening another book and starting reading aloud.
+- Fixed a problem that automatic stop at continuous playback time does not work if page switching occurs before the specified time in continuous playback time.
+
+
+
 expedited app review に出した時の文言
 ---begin---
 なろう検索のタブで、検索用文字列を入力できなくなっていた問題を修正しています。
