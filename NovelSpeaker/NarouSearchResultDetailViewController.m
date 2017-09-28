@@ -41,7 +41,7 @@
     // ダウンロードボタンを右上に配置します
     downloadButton = [[UIBarButtonItem alloc]
                       initWithTitle:NSLocalizedString(@"DownloadButton", @"download")
-                      style:UIBarButtonItemStyleBordered
+                      style:UIBarButtonItemStylePlain
                       target:self
                       action:@selector(downloadButtonClicked:)];
     shareButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonClicked:)];
@@ -165,7 +165,7 @@
      firstActionHandler:nil
      secondButtonText:NSLocalizedString(@"OK_button", @"OK")
      secondActionHandler:^(UIAlertAction *alert) {
-         NSURL* url = [NSURL URLWithString:[[NSString alloc] initWithFormat:@"http://mypage.syosetu.com/%@/", self.NarouContentDetail.userid]];
+         NSURL* url = [NSURL URLWithString:[[NSString alloc] initWithFormat:@"https://mypage.syosetu.com/%@/", self.NarouContentDetail.userid]];
          [[UIApplication sharedApplication] openURL:url];
      }];
 }

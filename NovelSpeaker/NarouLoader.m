@@ -53,7 +53,7 @@
 {
     // 18禁のに接続したければ、ここの URL を api.syousetu.com/novelapi/... って所を
     // api.syousetu.com/novel18api/ に書き換えればOKらしいよ？ 試してないけど。
-    NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500", nil];
+    NSString* queryUrl = [[NSString alloc] initWithFormat:@"https://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500", nil];
     
     if (searchString != nil) {
         queryUrl = [queryUrl stringByAppendingFormat:@"&word=%@", [self URIEncode:searchString]];
@@ -84,7 +84,7 @@
 /// 作者の user_id での検索です
 + (NSArray*)SearchUserID:(NSString*)userID
 {
-    NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500&userid=%@", userID];
+    NSString* queryUrl = [[NSString alloc] initWithFormat:@"https://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500&userid=%@", userID];
     return [NarouLoader SearchWithURL:queryUrl];
 }
 
@@ -96,14 +96,14 @@
 {
     NSString* escapedString = [ncodeList stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
     
-    NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500&ncode=%@", escapedString];
+    NSString* queryUrl = [[NSString alloc] initWithFormat:@"https://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500&ncode=%@", escapedString];
     return [NarouLoader SearchWithURL:queryUrl];
 }
 
 /// 小説家になろうで ncode を指定して最新の NarouContent情報 を取得します。
 + (NarouContentCacheData*)GetCurrentNcodeContentData:(NSString*)ncode
 {
-    NSString* queryUrl = [[NSString alloc] initWithFormat:@"http://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500&ncode=%@", ncode];
+    NSString* queryUrl = [[NSString alloc] initWithFormat:@"https://api.syosetu.com/novelapi/api/?out=json&of=t-n-u-w-s-k-e-ga-gp-f-r-a-ah-sa-nu&lim=500&ncode=%@", ncode];
 
     NSData* jsonData = [self HttpGetBinary:queryUrl];
     if (jsonData == nil) {
@@ -157,7 +157,7 @@
 + (NSString*)GetTextDownloadURL:(NSString*)ncode
 {
     // まずは通常のHTMLを取得します。
-    NSString* htmlURL = [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/%@/", ncode];
+    NSString* htmlURL = [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/", ncode];
     NSString* html = [self HttpGet:htmlURL];
     if (html == nil) {
         return nil;
@@ -179,7 +179,7 @@
         return nil;
     }
     NSString* result = [html substringWithRange:[checkResult rangeAtIndex:1]];
-    return [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/txtdownload/dlstart/ncode/%@/", result];
+    return [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/txtdownload/dlstart/ncode/%@/", result];
 }
 
 /// 小説家になろうでTextダウンロードを行います。
