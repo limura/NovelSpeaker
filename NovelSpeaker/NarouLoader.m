@@ -165,7 +165,7 @@
     // この html から、正規表現を使って
     // onclick="javascript:window.open('http://ncode.syosetu.com/txtdownload/top/ncode/562600/'
     // といった文字列の、562600 の部分を取得します。
-    NSString* matchPattern = @"onclick=\"javascript:window.open\\('http://ncode.syosetu.com/txtdownload/top/ncode/([^/]*)/'";
+    NSString* matchPattern = @"onclick=\"javascript:window.open\\('https?://ncode.syosetu.com/txtdownload/top/ncode/([^/]*)/'";
     NSError* err = nil;
     NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:matchPattern options:NSRegularExpressionCaseInsensitive error:&err];
     if (err != nil) {
