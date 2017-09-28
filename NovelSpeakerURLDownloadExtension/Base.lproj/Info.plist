@@ -43,9 +43,9 @@
 			<string>Action</string>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
-		<string>com.apple.ui-services</string>
-		<key>NSExtensionMainStoryboard</key>
-		<string>MainInterface</string>
+		<string>com.apple.services</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>ActionRequestHandler</string>
 	</dict>
 </dict>
 </plist>

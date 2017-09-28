@@ -22,6 +22,6 @@
 }
 
 @property (weak, nonatomic) IBOutlet UITextField *titleTextField;
-@property (nonatomic) id<CreateNewSpeakPitchSettingDelegate> createNewSpeakPitchSettingDelegate;
+@property (nonatomic, weak) id<CreateNewSpeakPitchSettingDelegate> createNewSpeakPitchSettingDelegate;
 
 @end

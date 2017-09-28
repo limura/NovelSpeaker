@@ -44,8 +44,8 @@
     unsigned int m_NowSpeechBlockIndex;
     /// 読み上げqueueに入れた m_SpeechBlockArray のインデックス
     unsigned int m_NowQueuedBlockIndex;
-    /// 読み上げqueueに入れられる文字の最大数
-    unsigned int m_MaxQueueCharacterLength;
+    /// 読み上げqueueに入れられるblockの最大数
+    unsigned int m_MaxQueueBlockLength;
     
     /// 現在読み上げている m_SpeechBlockArray における、speakText での読み上げ位置
     NSRange m_NowSpeechBlockSpeachRange;

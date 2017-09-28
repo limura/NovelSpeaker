@@ -49,7 +49,6 @@
 		2133F21C1E7D5674001A0BC5 /* CustomAutopagerizeItems.json in Resources */ = {isa = PBXBuildFile; fileRef = 2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */; };
 		2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2211E7FFF0B001A0BC5 /* Localizable.strings */; };
 		2133F2261E800F4A001A0BC5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F054E41917E0F200CC6BA9 /* Images.xcassets */; };
-		2133F2281E801156001A0BC5 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2271E801156001A0BC5 /* MainInterface.storyboard */; };
 		2133F2A21E80E175001A0BC5 /* Icon-60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2901E80E175001A0BC5 /* Icon-60@2x.png */; };
 		2133F2A31E80E175001A0BC5 /* Icon-60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2911E80E175001A0BC5 /* Icon-60@3x.png */; };
 		2133F2A41E80E175001A0BC5 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2921E80E175001A0BC5 /* Icon-72.png */; };
@@ -83,6 +82,8 @@
 		217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 217E683A1998F6A000C656AA /* MediaPlayer.framework */; };
 		217E683E199A80A200C656AA /* NiftySpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 217E683D199A80A200C656AA /* NiftySpeakerTests.m */; };
 		217F6E1C1942F14B008E432E /* Speaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 217F6E1B1942F14B008E432E /* Speaker.m */; };
+		21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21814C5B1E8D68A90096CB42 /* NSStringExtension.m */; };
+		21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */; };
 		21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
 		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
 		21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */; };
@@ -149,10 +150,13 @@
 		21F054EE1917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
 		21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21F054F41917E0F200CC6BA9 /* InfoPlist.strings */; };
 		21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */; };
+		21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */; };
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
-		2217FB76B0586FC596BA93BC /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 517C1C276F8A1290A574A923 /* libPods.a */; };
+		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
 		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
 		4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */; };
+		9051B983E846E56867906F94 /* Pods_NovelSpeakerURLDownloadExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */; };
+		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -187,6 +191,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; sourceTree = "<group>"; };
 		210958B81A0DF55600E9171F /* arrow_down@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@3x.png"; sourceTree = "<group>"; };
 		210958B91A0DF55600E9171F /* booksearch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = booksearch.png; sourceTree = "<group>"; };
 		210958BA1A0DF55600E9171F /* booksearch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "booksearch@2x.png"; sourceTree = "<group>"; };
@@ -246,10 +251,10 @@
 		212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_5to7.xcmappingmodel; sourceTree = "<group>"; };
 		212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_6to7.xcmappingmodel; sourceTree = "<group>"; };
 		212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
+		212F951D1EB0EB8B005EF253 /* NovelSpeakerURLDownloadExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerURLDownloadExtension-Bridging-Header.h"; sourceTree = "<group>"; };
 		2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = CustomAutopagerizeItems.json; sourceTree = "<group>"; };
 		2133F2201E7FFF0B001A0BC5 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		2133F2221E7FFF0D001A0BC5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		2133F2271E801156001A0BC5 /* MainInterface.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainInterface.storyboard; sourceTree = "<group>"; };
 		2133F2901E80E175001A0BC5 /* Icon-60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-60@2x.png"; sourceTree = "<group>"; };
 		2133F2911E80E175001A0BC5 /* Icon-60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-60@3x.png"; sourceTree = "<group>"; };
 		2133F2921E80E175001A0BC5 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-72.png"; sourceTree = "<group>"; };
@@ -296,6 +301,11 @@
 		217E683D199A80A200C656AA /* NiftySpeakerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftySpeakerTests.m; sourceTree = "<group>"; };
 		217F6E1A1942F14B008E432E /* Speaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Speaker.h; sourceTree = "<group>"; };
 		217F6E1B1942F14B008E432E /* Speaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Speaker.m; sourceTree = "<group>"; };
+		21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeaker.entitlements; sourceTree = "<group>"; };
+		21814C591E8CE8A00096CB42 /* NovelSpeakerURLDownloadExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerURLDownloadExtension.entitlements; sourceTree = "<group>"; };
+		21814C5A1E8D68A90096CB42 /* NSStringExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringExtension.h; sourceTree = "<group>"; };
+		21814C5B1E8D68A90096CB42 /* NSStringExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStringExtension.m; sourceTree = "<group>"; };
+		21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-small-40@3x.png"; sourceTree = "<group>"; };
 		21890CF11D92F38800869046 /* NSDataZlibExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataZlibExtension.h; sourceTree = "<group>"; };
 		21890CF21D92F38800869046 /* NSDataZlibExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataZlibExtension.m; sourceTree = "<group>"; };
 		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -414,15 +424,25 @@
 		21F054F31917E0F200CC6BA9 /* NovelSpeakerTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NovelSpeakerTests-Info.plist"; sourceTree = "<group>"; };
 		21F054F51917E0F200CC6BA9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NovelSpeakerTests.m; sourceTree = "<group>"; };
+		21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeaker-Bridging-Header.h"; sourceTree = "<group>"; };
+		21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomUITextView.swift; sourceTree = "<group>"; };
+		21F4D8CA1F6A969E004F6976 /* ActionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionViewController.swift; sourceTree = "<group>"; };
+		21F4D8CD1F6A969E004F6976 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		21F4D8CF1F6A969E004F6976 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		21F7DE43197EB33900BD2899 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Story.h; path = DataModelMapping/Story.h; sourceTree = "<group>"; };
 		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
-		3A40BBF8597FA93B09C50AD9 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
 		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
 		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
 		4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultTableViewController.h; sourceTree = "<group>"; };
 		4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchResultTableViewController.m; sourceTree = "<group>"; };
-		517C1C276F8A1290A574A923 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B730BF0B8C84D65036267414 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerURLDownloadExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.release.xcconfig"; sourceTree = "<group>"; };
+		D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -430,6 +450,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9051B983E846E56867906F94 /* Pods_NovelSpeakerURLDownloadExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -445,7 +466,7 @@
 				21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */,
 				21F054D11917E0F200CC6BA9 /* UIKit.framework in Frameworks */,
 				21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */,
-				2217FB76B0586FC596BA93BC /* libPods.a in Frameworks */,
+				A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -456,6 +477,7 @@
 				21F054EC1917E0F200CC6BA9 /* XCTest.framework in Frameworks */,
 				21F054EE1917E0F200CC6BA9 /* UIKit.framework in Frameworks */,
 				21F054ED1917E0F200CC6BA9 /* Foundation.framework in Frameworks */,
+				2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,12 +504,13 @@
 		2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */ = {
 			isa = PBXGroup;
 			children = (
+				2126A2601D9A1B90008E534A /* Action.js */,
+				21814C591E8CE8A00096CB42 /* NovelSpeakerURLDownloadExtension.entitlements */,
 				2126A25D1D9A1B90008E534A /* ActionRequestHandler.h */,
 				2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */,
-				2126A2601D9A1B90008E534A /* Action.js */,
-				2133F2271E801156001A0BC5 /* MainInterface.storyboard */,
 				212972141DA66F2C001ED63D /* Info.plist */,
 				2133F2211E7FFF0B001A0BC5 /* Localizable.strings */,
+				212F951D1EB0EB8B005EF253 /* NovelSpeakerURLDownloadExtension-Bridging-Header.h */,
 			);
 			path = NovelSpeakerURLDownloadExtension;
 			sourceTree = "<group>";
@@ -504,6 +527,7 @@
 				2133F2961E80E175001A0BC5 /* Icon-83.5@2x.png */,
 				2133F2971E80E175001A0BC5 /* Icon-Small-40.png */,
 				2133F2981E80E175001A0BC5 /* Icon-Small-40@2x.png */,
+				21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */,
 				2133F2991E80E175001A0BC5 /* Icon-Small-50.png */,
 				2133F29A1E80E175001A0BC5 /* Icon-Small-50@2x.png */,
 				2133F29B1E80E175001A0BC5 /* Icon-Small.png */,
@@ -610,6 +634,10 @@
 				21890CF21D92F38800869046 /* NSDataZlibExtension.m */,
 				2127EAC91DB75989005B1636 /* HtmlStory.h */,
 				2127EACA1DB75989005B1636 /* HtmlStory.m */,
+				21814C5A1E8D68A90096CB42 /* NSStringExtension.h */,
+				21814C5B1E8D68A90096CB42 /* NSStringExtension.m */,
+				21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */,
+				21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -653,9 +681,10 @@
 				21F054D21917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */,
 				2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
+				21F4D8C91F6A969E004F6976 /* URLDownloadExtension */,
 				21F054CB1917E0F200CC6BA9 /* Frameworks */,
 				21F054CA1917E0F200CC6BA9 /* Products */,
-				F592A12F5DD135799AA9A812 /* Pods */,
+				A889DD6179ED1DDD1D382860 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -684,7 +713,9 @@
 				21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */,
 				21F054D01917E0F200CC6BA9 /* UIKit.framework */,
 				21F054EB1917E0F200CC6BA9 /* XCTest.framework */,
-				517C1C276F8A1290A574A923 /* libPods.a */,
+				A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */,
+				AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */,
+				7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -692,6 +723,7 @@
 		21F054D21917E0F200CC6BA9 /* NovelSpeaker */ = {
 			isa = PBXGroup;
 			children = (
+				21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */,
 				21AED5D419B335CF00CE846D /* ReleaseMemo.md */,
 				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
@@ -750,6 +782,16 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		21F4D8C91F6A969E004F6976 /* URLDownloadExtension */ = {
+			isa = PBXGroup;
+			children = (
+				21F4D8CA1F6A969E004F6976 /* ActionViewController.swift */,
+				21F4D8CC1F6A969E004F6976 /* MainInterface.storyboard */,
+				21F4D8CF1F6A969E004F6976 /* Info.plist */,
+			);
+			path = URLDownloadExtension;
+			sourceTree = "<group>";
+		};
 		4E776B17196247BE00C36AD1 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -796,11 +838,15 @@
 			name = ViewControllers;
 			sourceTree = "<group>";
 		};
-		F592A12F5DD135799AA9A812 /* Pods */ = {
+		A889DD6179ED1DDD1D382860 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				B730BF0B8C84D65036267414 /* Pods.debug.xcconfig */,
-				3A40BBF8597FA93B09C50AD9 /* Pods.release.xcconfig */,
+				D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */,
+				355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */,
+				5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */,
+				BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */,
+				BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */,
+				0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -812,9 +858,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2126A2681D9A1B90008E534A /* Build configuration list for PBXNativeTarget "NovelSpeakerURLDownloadExtension" */;
 			buildPhases = (
+				83E287011980B0B51F2387CD /* [CP] Check Pods Manifest.lock */,
 				2126A2571D9A1B90008E534A /* Sources */,
 				2126A2581D9A1B90008E534A /* Frameworks */,
 				2126A2591D9A1B90008E534A /* Resources */,
+				D2AFECA5F47A43B473AFA4D2 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -829,13 +877,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21F054FB1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeaker" */;
 			buildPhases = (
-				DB54A7CBA997776D51A7AC63 /* Check Pods Manifest.lock */,
+				E09854C708603E180E1222AF /* [CP] Check Pods Manifest.lock */,
 				21F054C51917E0F200CC6BA9 /* Sources */,
 				21F054C61917E0F200CC6BA9 /* Frameworks */,
 				21F054C71917E0F200CC6BA9 /* Resources */,
-				9F1D2458E20E3AD67D47BA58 /* Copy Pods Resources */,
-				E89A666218022A76197B566D /* Embed Pods Frameworks */,
 				2126A2691D9A1B90008E534A /* Embed App Extensions */,
+				455CC71F8AB9A5A5AC429D00 /* [CP] Embed Pods Frameworks */,
+				7A6E4BCA21DBB736AB31C9A8 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -851,9 +899,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21F054FE1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeakerTests" */;
 			buildPhases = (
+				79969131A327B7D119614886 /* [CP] Check Pods Manifest.lock */,
 				21F054E61917E0F200CC6BA9 /* Sources */,
 				21F054E71917E0F200CC6BA9 /* Frameworks */,
 				21F054E81917E0F200CC6BA9 /* Resources */,
+				E32C75D328D5D377B032C1DA /* [CP] Embed Pods Frameworks */,
+				81310842B94D21913F2304A1 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -871,17 +922,28 @@
 		21F054C11917E0F100CC6BA9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastSwiftUpdateCheck = 0830;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = "IIMURA Takuji";
 				TargetAttributes = {
 					2126A25A1D9A1B90008E534A = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = 4KZE8276ZF;
+						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 0;
+							};
+						};
 					};
 					21F054C81917E0F200CC6BA9 = {
 						DevelopmentTeam = 4KZE8276ZF;
+						LastSwiftMigration = 0900;
 						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 0;
+							};
 							com.apple.BackgroundModes = {
 								enabled = 1;
 							};
@@ -919,7 +981,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2133F2261E800F4A001A0BC5 /* Images.xcassets in Resources */,
-				2133F2281E801156001A0BC5 /* MainInterface.storyboard in Resources */,
 				2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */,
 				2126A2611D9A1B90008E534A /* Action.js in Resources */,
 				212972171DA66FDB001ED63D /* Info.plist in Resources */,
@@ -964,6 +1025,7 @@
 				21B53A2819619D23009658B7 /* app_globe.png in Resources */,
 				210958C71A0DF55600E9171F /* gear@3x.png in Resources */,
 				219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */,
+				21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */,
 				2133F2A61E80E175001A0BC5 /* Icon-76.png in Resources */,
 				21B53A1C19619C00009658B7 /* sound.png in Resources */,
 				210958CB1A0DF55600E9171F /* soundbook.png in Resources */,
@@ -1003,49 +1065,124 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		9F1D2458E20E3AD67D47BA58 /* Copy Pods Resources */ = {
+		455CC71F8AB9A5A5AC429D00 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy Pods Resources";
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		DB54A7CBA997776D51A7AC63 /* Check Pods Manifest.lock */ = {
+		79969131A327B7D119614886 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Check Pods Manifest.lock";
+			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		E89A666218022A76197B566D /* Embed Pods Frameworks */ = {
+		7A6E4BCA21DBB736AB31C9A8 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Embed Pods Frameworks";
+			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		81310842B94D21913F2304A1 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		83E287011980B0B51F2387CD /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		D2AFECA5F47A43B473AFA4D2 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E09854C708603E180E1222AF /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		E32C75D328D5D377B032C1DA /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1066,6 +1203,7 @@
 				21916360199E01A7003FF7FC /* SpeakSettingsTableViewController.m in Sources */,
 				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
 				21916372199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m in Sources */,
+				21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */,
 				212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */,
 				21916364199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m in Sources */,
 				2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */,
@@ -1121,6 +1259,7 @@
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
+				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
 				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
 				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,
@@ -1288,14 +1427,24 @@
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
+		21F4D8CC1F6A969E004F6976 /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21F4D8CD1F6A969E004F6976 /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		2126A2661D9A1B90008E534A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Monocrome";
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
@@ -1314,15 +1463,21 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerURLDownloadExtension/NovelSpeakerURLDownloadExtension-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
 		2126A2671D9A1B90008E534A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Monocrome";
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
@@ -1341,6 +1496,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerURLDownloadExtension/NovelSpeakerURLDownloadExtension-Bridging-Header.h";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -1349,22 +1507,35 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -1377,7 +1548,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -1387,40 +1558,54 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
 		21F054FC1917E0F200CC6BA9 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B730BF0B8C84D65036267414 /* Pods.debug.xcconfig */;
+			baseConfigurationReference = D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
@@ -1433,9 +1618,15 @@
 					"\"${SDKROOT}/usr/include/libxml2\"",
 				);
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeaker/NovelSpeaker-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1443,10 +1634,11 @@
 		};
 		21F054FD1917E0F200CC6BA9 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3A40BBF8597FA93B09C50AD9 /* Pods.release.xcconfig */;
+			baseConfigurationReference = 355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
@@ -1459,9 +1651,14 @@
 					"\"${SDKROOT}/usr/include/libxml2\"",
 				);
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeaker/NovelSpeaker-Bridging-Header.h";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1469,8 +1666,10 @@
 		};
 		21F054FF1917E0F200CC6BA9 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/NovelSpeaker.app/NovelSpeaker";
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -1483,16 +1682,20 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "NovelSpeakerTests/NovelSpeakerTests-Info.plist";
+				OTHER_LDFLAGS = "-v";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.limurasoftware.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NovelSpeaker.app/NovelSpeaker";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
 		};
 		21F055001917E0F200CC6BA9 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/NovelSpeaker.app/NovelSpeaker";
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -1501,8 +1704,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeakerTests/NovelSpeakerTests-Info.plist";
+				OTHER_LDFLAGS = "-v";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.limurasoftware.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUNDLE_LOADER)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NovelSpeaker.app/NovelSpeaker";
 				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;

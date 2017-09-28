@@ -57,9 +57,11 @@
 
 /// SiteInfo のJSONを内部データベースに追加します。
 - (BOOL)AddSiteInfoFromData:(NSData*)siteInfo{
+    NSLog(@"siteInfo: %p", siteInfo);
     NSError* error = nil;
     NSArray* jsonArray = [NSJSONSerialization JSONObjectWithData:siteInfo options:NSJSONReadingAllowFragments error:&error];
     if (jsonArray == nil || error != nil) {
+        NSLog(@"jsonArray: %p, error: %p(%@)", jsonArray, error, error);
         return false;
     }
     return [self AddSiteInfoFromJsonArray:jsonArray targetSiteInfoArray:m_SiteInfoArray];
@@ -71,7 +73,7 @@
 }
 
 /// SiteInfo をURLから内部データベースに追加します。
-- (void)AddSiteInfoFromURL:(NSURL*)url successAction:(void(^)())successAction failedAction:(void(^)(NSURL* url))failedAction{
+- (void)AddSiteInfoFromURL:(NSURL*)url successAction:(void(^)(void))successAction failedAction:(void(^)(NSURL* url))failedAction{
     dispatch_async(m_WebAccessQueue, ^(){
         NSURLRequest* request = [NSURLRequest requestWithURL:url];
         NSError* error;
@@ -318,6 +320,7 @@
         BOOL success = false;
 
         NSHTTPCookieStorage* cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+        NSLog(@"LoadURL: cookieArray: %@", cookieArray);
         if (cookieArray != nil && [cookieArray count] > 0) {
             for (NSString* keyValue in cookieArray) {
                 NSArray* keyValueArray = [[keyValue stringByRemovingPercentEncoding] componentsSeparatedByString:@"="];
@@ -328,6 +331,7 @@
                     if (key == nil || value == nil || host == nil) {
                         continue;
                     }
+                    NSLog(@"#### add cookie: %@=%@ ####", key, value);
                     NSDictionary* cookieDictionary = @{NSHTTPCookieName   : key,
                                                        NSHTTPCookieValue  : value,
                                                        NSHTTPCookiePath   : @"/",

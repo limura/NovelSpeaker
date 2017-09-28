@@ -15,6 +15,6 @@ static NSString* const SpeakSettingSampleTextTableViewCellID = @"SpeakSettingSam
 
 @property (weak, nonatomic) IBOutlet UITextField *sampleTextTextField;
 
-@property (nonatomic, assign) id<SettingTableViewDelegate> testSpeakDelegate;
+@property (nonatomic, weak) id<SettingTableViewDelegate> testSpeakDelegate;
 
 @end

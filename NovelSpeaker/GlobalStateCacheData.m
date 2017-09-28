@@ -15,6 +15,9 @@
 - (id)initWithCoreData: (GlobalState*)coreDataState
 {
     self = [super init];
+    if (self == nil) {
+        return nil;
+    }
     
     self.defaultPitch = coreDataState.defaultPitch;
     self.defaultRate = coreDataState.defaultRate;

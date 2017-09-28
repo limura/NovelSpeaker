@@ -105,6 +105,6 @@ typedef enum {
 - (NSUInteger)CountEntity:(NSString*)entityName predicate:(NSPredicate*)predicate;
 
 /// 現在のthreadでの NSManagedObjectContext で、performBlockAndWait を実行します。
-- (void)performBlockAndWait:(void(^)())block;
+- (void)performBlockAndWait:(void(^)(void))block;
 
 @end

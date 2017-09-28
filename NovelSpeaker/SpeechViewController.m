@@ -41,7 +41,7 @@
         speakText = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");
     }
     NSMutableArray* buttonItemList = [NSMutableArray new];
-    startStopButton = [[UIBarButtonItem alloc] initWithTitle:speakText style:UIBarButtonItemStyleBordered target:self action:@selector(startStopButtonClick:)];
+    startStopButton = [[UIBarButtonItem alloc] initWithTitle:speakText style:UIBarButtonItemStylePlain target:self action:@selector(startStopButtonClick:)];
     [buttonItemList addObject:startStopButton];
     
     NSString* detailText;
@@ -50,7 +50,7 @@
     }else{
         detailText = NSLocalizedString(@"SpeechViewController_Detail", @"詳細");
     }
-    detailButton = [[UIBarButtonItem alloc] initWithTitle:detailText style:UIBarButtonItemStyleBordered target:self action:@selector(detailButtonClick:)];
+    detailButton = [[UIBarButtonItem alloc] initWithTitle:detailText style:UIBarButtonItemStylePlain target:self action:@selector(detailButtonClick:)];
     [buttonItemList addObject:detailButton];
     if ([self.NarouContentDetail isUserCreatedContent] != true) {
         shareButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonClicked:)];
@@ -120,6 +120,9 @@
     [globalData AddSpeakRangeDelegate:self];
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     [self.textView becomeFirstResponder];
+    
+    // 読み上げる文章を改めて設定します。
+    [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -194,6 +197,7 @@
     }
     //NSLog(@"set currentreading story: %@ (content: %@ %@) location: %lu", story.ncode, content.ncode, content.title, [story.readLocation unsignedLongValue]);
     [self setSpeechStory:story];
+    
     return true;
 }
 
@@ -380,6 +384,17 @@
     [self UpdateChapterIndicatorLabel:[story.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];
     m_CurrentReadingStory = story;
     [[GlobalDataSingleton GetInstance] SetSpeechStory:story];
+    
+    // TextView は使いまわされた時、selectedRange が前の値のままのようなので、このタイミングでTextView上の読み上げ位置を上書きします
+    int readLocation = [story.readLocation intValue];
+    if ([self.textView.text length] <= location) {
+        readLocation = (int)[self.textView.text length] - 1;
+        if (readLocation < 0) {
+            readLocation = 0;
+        }
+    }
+    self.textView.selectedRange = NSMakeRange(readLocation, 1);
+
 }
 
 - (void)detailButtonClick:(id)sender {

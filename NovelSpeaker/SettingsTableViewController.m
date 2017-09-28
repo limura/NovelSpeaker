@@ -196,18 +196,10 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
             [globalData UpdateBackgroundNovelFetchMode:true];
 
             // この時点で Notification を有効化します。
-            if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_0) {
-                [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(
-                                                                                       UIRemoteNotificationTypeBadge
-                                                                                       | UIRemoteNotificationTypeAlert)];
-            }else{
-                UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:
-                                                                    (UIUserNotificationTypeAlert | UIUserNotificationTypeBadge)
-                                                                                                     categories:nil];
-                [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
-            }
-            
-            [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+            [globalData RegisterUserNotification];
+            // BackgroundFetch も有効化します
+            [globalData StartBackgroundFetch];
+
             [self.settingsTableView reloadData];
         }];
     }

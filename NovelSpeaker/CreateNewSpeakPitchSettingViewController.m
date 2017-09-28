@@ -19,6 +19,9 @@
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self == nil) {
+        return nil;
+    }
     if (self) {
         // Custom initialization
         m_isNeedBack = false;

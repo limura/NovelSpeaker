@@ -68,7 +68,7 @@ typedef enum {
     m_bIsSpeaking = false;
     m_NowSpeechBlockIndex = 0;
     m_NowQueuedBlockIndex = 0;
-    m_MaxQueueCharacterLength = 8192;
+    m_MaxQueueBlockLength = 1;
     m_NowSpeechBlockSpeachRange.location = 0;
     m_NowSpeechBlockSpeachRange.length = 0;
     
@@ -102,7 +102,7 @@ typedef enum {
     m_bIsSpeaking = false;
     m_NowSpeechBlockIndex = 0;
     m_NowQueuedBlockIndex = 0;
-    m_MaxQueueCharacterLength = 8192;
+    m_MaxQueueBlockLength = 1;
     m_NowSpeechBlockSpeachRange.location = 0;
     m_NowSpeechBlockSpeachRange.length = 0;
     
@@ -453,26 +453,16 @@ typedef enum {
     return [self EnqueueSpeechTextBlock];
 }
 
-/// 読み上げ文の複数ブロックを m_MaxQueueCharacterLength があふれるまで 読み上げqueue に突っ込みます。
+/// 読み上げ文の複数ブロックを m_MaxQueueBlockLength があふれるまで 読み上げqueue に突っ込みます。
 - (BOOL)EnqueueSpeechTextBlock
 {
-    unsigned int queuedCharacterLength = 0;
-    for (unsigned int i = m_NowSpeechBlockIndex; i < m_NowQueuedBlockIndex && i < [m_SpeechBlockArray count]; i++) {
-        SpeechBlock* block = [m_SpeechBlockArray objectAtIndex:i];
-        queuedCharacterLength += [[block GetSpeechText] length];
-    }
-    if(queuedCharacterLength > m_MaxQueueCharacterLength)
-    {
-        return false;
-    }
-    while (queuedCharacterLength < m_MaxQueueCharacterLength && m_NowQueuedBlockIndex < [m_SpeechBlockArray count]) {
+    NSUInteger maxBlockCount = [m_SpeechBlockArray count];
+    while (m_NowQueuedBlockIndex - m_NowSpeechBlockIndex < m_MaxQueueBlockLength &&
+           m_NowQueuedBlockIndex < maxBlockCount) {
         if([self EnqueueOneSpeechTextBlock] == false)
         {
             break;
         }
-        SpeechBlock* currentBlock = [m_SpeechBlockArray objectAtIndex:m_NowQueuedBlockIndex];
-        queuedCharacterLength += [[currentBlock GetSpeechText] length];
-
         m_NowQueuedBlockIndex++;
     }
     return true;

@@ -33,6 +33,9 @@
 - (id)initWithJsonData: (NSDictionary*)jsonContent
 {
     self = [super init];
+    if (self == nil) {
+        return nil;
+    }
 
     self.title = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"title"]];
     self.ncode = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"ncode"]];
@@ -64,7 +67,10 @@
 - (id)initWithCoreData: (NarouContent*)coreDatacontent
 {
     self = [super init];
-    
+    if (self == nil) {
+        return nil;
+    }
+   
     self.title = coreDatacontent.title;
     self.ncode = coreDatacontent.ncode;
     self.userid = coreDatacontent.userid;

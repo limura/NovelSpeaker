@@ -334,7 +334,7 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
 - (void)HandleBackgroundFetch:(UIApplication *)application
 performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
 
-// 設定されている読み上げに使う音声の identifier を取得します
+// 設定されていpod 'SZTextView'る読み上げに使う音声の identifier を取得します
 // XXX TODO: 本来なら core data 側でなんとかすべきです
 - (NSString*)GetVoiceIdentifier;
 
@@ -373,5 +373,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 /// 小説内部での範囲選択時に出てくるメニューを「読み替え辞書に登録」だけにする(YES)か否(NO)かの設定値を保存します
 - (void)SetMenuItemIsAddSpeechModSettingOnly:(BOOL)yesNo;
+
+/// AppGroup で指示されたqueueを処理します
+- (void)HandleAppGroupQueue;
+
+/// 通知をONにしようとします
+- (void)RegisterUserNotification;
+
+/// BackgroundFetch を有効化します
+- (void)StartBackgroundFetch;
 
 @end

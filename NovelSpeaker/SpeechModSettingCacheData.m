@@ -14,7 +14,10 @@
 - (id)initWithCoreData: (SpeechModSetting*)coreDatacontent
 {
     self = [super init];
-    
+    if (self == nil) {
+        return nil;
+    }
+   
     self.beforeString = coreDatacontent.beforeString;
     self.afterString = coreDatacontent.afterString;
     
@@ -33,6 +36,9 @@
 - (id)initWithBeforeString:(NSString*)beforeString afterString:(NSString*)afterString
 {
     self = [super init];
+    if (self == nil) {
+        return nil;
+    }
     self.beforeString = beforeString;
     self.afterString = afterString;
     return self;

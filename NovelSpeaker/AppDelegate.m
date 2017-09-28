@@ -11,9 +11,19 @@
 #import <AVFoundation/AVFoundation.h>
 
 @implementation AppDelegate
+    
+// EXC_BAD_ACCESS とかでスタックトレースが観たい
+// http://qiita.com/exilias/items/485fda81e3d237cb03c2
+void uncaughtExceptionHandler(NSException *exception)
+{
+    NSLog(@"CRASH: %@", exception);
+    NSLog(@"Stack Trace: %@", [exception callStackSymbols]);
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    NSSetUncaughtExceptionHandler(&uncaughtExceptionHandler);
+    
     // Override point for customization after application launch.
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     if ([globalData isAliveCoreDataSaveFile] == false) {
@@ -70,6 +80,12 @@
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     //NSLog(@"application did become active.");
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    [globalData HandleAppGroupQueue];
+    // BackgroundFetchが有効な設定であれば起動時に有効化します。
+    if ([globalData GetBackgroundNovelFetchEnabled] == true) {
+        [globalData StartBackgroundFetch];
+    }
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
@@ -92,5 +108,5 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [globalData HandleBackgroundFetch:application performFetchWithCompletionHandler:completionHandler];
 }
 
-
+    
 @end

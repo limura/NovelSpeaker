@@ -25,7 +25,7 @@
 - (BOOL)AddSiteInfoFromString:(NSString*)siteInfo;
 
 /// SiteInfo をURLから内部データベースに追加します。
-- (void)AddSiteInfoFromURL:(NSURL*)url successAction:(void(^)())successAction failedAction:(void(^)(NSURL* url))failedAction;
+- (void)AddSiteInfoFromURL:(NSURL*)url successAction:(void(^)(void))successAction failedAction:(void(^)(NSURL* url))failedAction;
 
 /// ことせかい用にカスタムされた SiteInfo (Autopagerize由来ではないSiteInfo) のJSONを内部データベースに追加します。
 - (BOOL)AddCustomSiteInfoFromData:(NSData*)siteInfo;

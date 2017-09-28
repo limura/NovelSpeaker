@@ -13,7 +13,9 @@
 /// block の実行時間を測定します。logTimeInterval 以上の時間が経っていたら、comment つきの時間 Log を NSLog() で吐きます。
 + (NSTimeInterval)CheckTimeInterval:(NSString*)comment logTimeInterval:(NSTimeInterval)logTimeInterval block:(void(^)(void))block{
     NSDate* startDate = [NSDate date];
-    block();
+    if (block != nil) {
+        block();
+    }
     return [LPPerformanceChecker CheckTimeInterval:comment startDate:startDate logTimeInterval:logTimeInterval];
 }
 

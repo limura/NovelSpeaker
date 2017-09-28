@@ -22,9 +22,9 @@
 + (instancetype)createNewDialog:(NSArray*)displayTextArray firstSelectedString:(NSString*)firstSelectedString parentView:(UIView*)parentView resultReceiver:(void (^)(NSString*))resultReceiver;
 
 /// 下からにゅるっと表示させます
-- (void)popup:(void(^)())completeTime;
+- (void)popup:(void(^)(void))completeTime;
 /// 表示しているなら、画面外に消えます
-- (void)popdown:(void(^)())completeTime;
+- (void)popdown:(void(^)(void))completeTime;
 
 
 @end

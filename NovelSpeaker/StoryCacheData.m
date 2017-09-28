@@ -14,7 +14,10 @@
 - (id)initWithCoreData: (Story*)coreDataStory
 {
     self = [super init];
-    
+    if (self == nil) {
+        return nil;
+    }
+   
     self.chapter_number = coreDataStory.chapter_number;
     self.content = coreDataStory.content;
     self.ncode = coreDataStory.ncode;

@@ -259,6 +259,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     UriLoader* loader = [UriLoader new];
     
     NSData* siteInfoData = [globalData GetCachedAutoPagerizeSiteInfoData];
+    NSLog(@"siteInfoData: %p", siteInfoData);
     if(![loader AddSiteInfoFromData:siteInfoData]){
         return false;
     }
@@ -276,7 +277,8 @@ static float SLEEP_TIME_SECOND = 10.5f;
     }
     NSURL* targetURL = [[NSURL alloc] initWithString:urlString];
 
-    NSArray* cookieArray = [localContent.keyword componentsSeparatedByString:@";NSC;"];
+    NSLog(@"URLDownload: keyword(cookie): %@", localContent.keyword);
+    NSArray* cookieArray = [localContent.keyword componentsSeparatedByString:@";"];
 
     __block BOOL result = false;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);

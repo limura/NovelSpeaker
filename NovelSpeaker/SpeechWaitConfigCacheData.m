@@ -14,6 +14,9 @@
 - (id)initWithCoreData: (SpeechWaitConfig*)coreDataWaitConfig
 {
     self = [super init];
+    if (self == nil) {
+        return nil;
+    }
     
     self.targetText = coreDataWaitConfig.targetText;
     self.delayTimeInSec = coreDataWaitConfig.delayTimeInSec;

@@ -17,6 +17,38 @@
 
 @implementation ActionRequestHandler
 
+#define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
+#define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
+#define APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE @"AddTextQueue"
+
+- (NSUserDefaults*)getNovelSpeakerAppGroupUserDefaults
+{
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:APP_GROUP_USER_DEFAULTS_SUITE_NAME];
+    return defaults;
+}
+
+- (void)addStringQueueToNovelSpeakerAppGroupUserDefaults:(NSString*)key text:(NSString*)text {
+    NSUserDefaults* userDefaults = [self getNovelSpeakerAppGroupUserDefaults];
+    NSArray* currentArray = [userDefaults stringArrayForKey:key];
+    NSMutableArray* newArray = nil;
+    if (currentArray == nil) {
+        newArray = [NSMutableArray new];
+    }else{
+        newArray = [[NSMutableArray alloc] initWithArray:currentArray];
+    }
+    [newArray addObject:text];
+    [userDefaults setObject:newArray forKey:key];
+    [userDefaults synchronize];
+}
+
+- (void)addURLDownloadQueue:(NSURL*)url {
+    [self addStringQueueToNovelSpeakerAppGroupUserDefaults:APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE text:[url absoluteString]];
+}
+
+- (void)addTextQueue:(NSString*)text {
+    [self addStringQueueToNovelSpeakerAppGroupUserDefaults:APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE text:text];
+}
+
 - (BOOL)checkAndRunItemProvider_for_PropertyListType:(NSItemProvider *)itemProvider context:(NSExtensionContext*)context{
     if (! [itemProvider hasItemConformingToTypeIdentifier:(NSString *)kUTTypePropertyList]) {
         return NO;
@@ -43,6 +75,7 @@
     [itemProvider loadItemForTypeIdentifier:(NSString *)kUTTypePlainText options:nil completionHandler:^(NSString *item, NSError *error) {
         NSLog(@"isPlainText: %@", item);
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            //[self addTextQueue:item];
             NSDictionary *resultsDictionary = @{ NSExtensionJavaScriptFinalizeArgumentKey: @{ @"type" : @"PlainText", @"data": item } };
             NSItemProvider *resultsProvider = [[NSItemProvider alloc] initWithItem:resultsDictionary typeIdentifier:(NSString *)kUTTypePropertyList];
             
@@ -61,11 +94,8 @@
     }
     [itemProvider loadItemForTypeIdentifier:(NSString *)kUTTypeURL options:nil completionHandler:^(NSURL *url, NSError *error) {
         NSLog(@"isURL: %@", [url absoluteString]);
-        NSError* err = [NSError errorWithDomain:NSPOSIXErrorDomain code:EINVAL userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"ActionRequestHandler_CanNotUseThisInformation", @"ことせかい で利用可能な情報ではありませんでした。")}];
-        [context cancelRequestWithError:err];
-        return;
-        [context openURL:[[NSURL alloc] initWithString:[[NSString alloc] initWithFormat:@"novelspeaker://downloadurl/%@", [url absoluteString]]] completionHandler:nil];
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            //[self addURLDownloadQueue:url];
             NSDictionary *resultsDictionary = @{ NSExtensionJavaScriptFinalizeArgumentKey: @{ @"type" : @"URL", @"data": [url absoluteString] } };
             NSItemProvider *resultsProvider = [[NSItemProvider alloc] initWithItem:resultsDictionary typeIdentifier:(NSString *)kUTTypePropertyList];
             

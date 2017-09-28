@@ -14,6 +14,9 @@
 - (id)initWithCoreData: (SpeakPitchConfig*)coreDatacontent
 {
     self = [super init];
+    if (self == nil) {
+        return nil;
+    }
     
     self.pitch = coreDatacontent.pitch;
     self.title = coreDatacontent.title;

@@ -12,6 +12,11 @@
 #import "NarouLoader.h"
 #import "NarouDownloadQueue.h"
 #import "NSDataZlibExtension.h"
+#import "NSStringExtension.h"
+
+#define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
+#define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
+#define APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE @"AddTextQueue"
 
 @implementation GlobalDataSingleton
 
@@ -25,6 +30,9 @@ static GlobalDataSingleton* _singleton = nil;
 - (id)init
 {
     self = [super init];
+    if (self == nil) {
+        return nil;
+    }
     
     m_LogStringArray = [NSMutableArray new];
 
@@ -65,6 +73,12 @@ static GlobalDataSingleton* _singleton = nil;
 
     return self;
 }
+    
+- (void)dealloc
+{
+    NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+    [center removeObserver:self];
+}
 
 /// singleton が確保された時に一発だけ走る method
 /// CoreData の初期化とかいろいろやります。
@@ -82,7 +96,7 @@ static GlobalDataSingleton* _singleton = nil;
     return _singleton;
 }
 
-- (void)coreDataPerfomBlockAndWait:(void(^)())block {
+- (void)coreDataPerfomBlockAndWait:(void(^)(void))block {
     [m_CoreDataObjectHolder performBlockAndWait:block];
 }
 
@@ -751,6 +765,9 @@ static GlobalDataSingleton* _singleton = nil;
     NSMutableDictionary* songInfo = [NSMutableDictionary new];
     [songInfo setObject:titleName forKey:MPMediaItemPropertyTitle];
     [songInfo setObject:artist forKey:MPMediaItemPropertyArtist];
+    UIImage* artworkImage = [UIImage imageNamed:@"NovelSpeakerIcon-167px.png"];
+    MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc] initWithImage:artworkImage];
+    [songInfo setObject:artwork forKey:MPMediaItemPropertyArtwork];
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:songInfo];
 }
 
@@ -1546,7 +1563,9 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げを「バックグラウンド再生としては止めずに」読み上げ部分だけ停止します
 - (BOOL)StopSpeechWithoutDiactivate
 {
-    [self StopMaxSpeechTimeInSecTimer];
+    // ここで読み上げ停止タイマーを停止しちゃうと次のページに移った時とかに呼ばれた読み上げ停止に引っかかってしまうので、読み上げ停止タイマーはここでは触りません
+    // 読み上げ停止タイマーは、「連続読み上げ時間」のタイマーなので、読み上げ開始時にタイマーをリセットするだけでいいはずです
+    //[self StopMaxSpeechTimeInSecTimer];
     if([m_NiftySpeaker StopSpeech] == false)
     {
         return false;
@@ -2074,6 +2093,8 @@ static GlobalDataSingleton* _singleton = nil;
 /// URLスキームで呼び出された時の反応をします。
 /// 反応する URL は、
 /// novelspeaker://downloadncode/ncode-ncode-ncode...
+/// と
+/// novelspeaker://downloadurl/https?://...
 /// です。
 - (BOOL)ProcessURLSceme:(NSURL*)url
 {
@@ -2092,11 +2113,25 @@ static GlobalDataSingleton* _singleton = nil;
             if (path == nil || [path length] <= 1) {
                 return false;
             }
-            NSString* urlString = [path substringFromIndex:1];
-            NSURL* targetURL = [NSURL URLWithString:urlString];
+            // "novelspeaker://downloadurl/" までを読み飛ばしたものがURL
+            NSUInteger prefixLength = [@"novelspeaker://downloadurl/" length];
+            NSString* allUrlString = [url absoluteString];
+            if ([allUrlString length] <= prefixLength) {
+                NSLog(@"prefix too short: %@", allUrlString);
+                return false;
+            }
+            NSString* urlString = [allUrlString substringFromIndex:prefixLength];
+            NSURL* targetURL = nil;
+            NSRange range = [urlString rangeOfString:@"#"];
+            if (range.location != NSNotFound) {
+                NSString* tmpURLString = [urlString substringToIndex:range.location];
+                targetURL = [NSURL URLWithString:[tmpURLString stringByRemovingPercentEncoding]];
+            }else{
+                targetURL = [NSURL URLWithString:[urlString stringByRemovingPercentEncoding]];
+            }
             NSString* scheme = [targetURL scheme];
             if ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
-                return [self AddDownloadQueueForURL:[urlString stringByRemovingPercentEncoding] cookieParameter:[url parameterString]] == nil;
+                return [self AddDownloadQueueForURLString:urlString] == nil;
             }
         }
     }
@@ -2283,7 +2318,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSArray* downloadInfo = [self GetCurrentDownloadWaitingInfo];
     NarouContentCacheData* nowDownloadContent = [self GetCurrentDownloadingInfo];
     if ([downloadInfo count] > 0 || nowDownloadContent != nil) {
-        completionHandler(UIBackgroundFetchResultNoData);
+        if (completionHandler != nil) {
+            completionHandler(UIBackgroundFetchResultNoData);
+        }
         return;
     }
 
@@ -2294,12 +2331,16 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
           : applicationState == UIApplicationStateActive ? @"Active"
           : @"Unknown");
     if (applicationState == UIApplicationStateActive) {
-        completionHandler(UIBackgroundFetchResultNoData);
+        if (completionHandler != nil) {
+            completionHandler(UIBackgroundFetchResultNoData);
+        }
         return;
     }
     // background で再生中であっても何もしません
     if (applicationState == UIApplicationStateBackground && [self isSpeaking]) {
-        completionHandler(UIBackgroundFetchResultNoData);
+        if (completionHandler != nil) {
+            completionHandler(UIBackgroundFetchResultNoData);
+        }
         return;
     }
     
@@ -2489,7 +2530,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 #define CACHE_FILE_NAME_AUTOPAGERLIZE_SITEINFO @"AutoPagerizeSiteInfo.deflate"
-#define AUTOPAGERIZE_SITEINFO_URL @"http://wedata.net/databases/AutoPagerize/items.json"
+#define AUTOPAGERIZE_SITEINFO_URL @"http://wedata.net/databases/AutoPagerize/items_all.json"
 #define CACHE_FILE_NAME_CUSTOM_AUTOPAGERLIZE_SITEINFO @"CustomAutoPagerizeSiteInfo.deflate"
 #define CUSTOM_AUTOPAGERIZE_SITEINFO_URL @"https://raw.githubusercontent.com/limura/NovelSpeaker/master/NovelSpeaker/CustomAutopagerizeItems.json"
 
@@ -2500,7 +2541,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     if (cachesPath == nil) {
         return nil;
     }
-    NSString* filePath = [[NSString alloc] initWithFormat:@"%@/%@", cachesPath, fileName];
+    NSString* filePath = [cachesPath stringByAppendingPathComponent:fileName];
+    //[[NSString alloc] initWithFormat:@"%@/%@", cachesPath, fileName];
     return filePath;
 }
 
@@ -2552,6 +2594,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         return false;
     }
     NSData* zipedData = [data deflate:9];
+    NSLog(@"data: %p(%lu[bytes]), zipedData: %p(%lu[bytes])", data, (unsigned long)[data length], zipedData, (unsigned long)[zipedData length]);
     [self SaveAutoPagerizeSiteInfoData:zipedData];
     return true;
 }
@@ -2574,21 +2617,29 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 内部に保存してある AutoPagerize の SiteInfo を取り出します
 - (NSData*)GetCachedAutoPagerizeSiteInfoData {
     NSDate* lastUpdateDate = [self GetAutoPagerizeCacheSavedDate];
-    if ([lastUpdateDate timeIntervalSinceNow] < -24*60*60) { // 24時間以上経っていたらキャッシュを更新する
+    if ([lastUpdateDate timeIntervalSinceNow] < -24*60*60 || true) { // 24時間以上経っていたらキャッシュを更新する
         [self UpdateCachedAutoPagerizeSiteInfoData];
     }
     
     NSString* filePath = [self GetAutoPagerizeSiteInfoCacheFilePath];
     NSLog(@"autopagerize site info path:\n%@", filePath);
     NSData* siteInfoDeflate = [NSData dataWithContentsOfFile:filePath];
-    if (siteInfoDeflate == nil) {
+    NSLog(@"siteInfoDeflate: %p", siteInfoDeflate);
+    NSData* infratedSiteInfo = nil;
+    if(siteInfoDeflate != nil) {
+        infratedSiteInfo = [siteInfoDeflate inflate];
+    }
+    NSLog(@"infratedSiteInfo: %p", infratedSiteInfo);
+    NSLog(@"siteInfoDefrate: %p(%lu[bytes]), inflatedSiteInfo: %p(%lu[bytes])", siteInfoDeflate, (unsigned long)[siteInfoDeflate length], infratedSiteInfo, (unsigned long)[infratedSiteInfo length]);
+    if (siteInfoDeflate == nil || infratedSiteInfo == nil) {
         // 読み出しに失敗したらネットワーク経由で取得しようとします。
+        [NSThread sleepForTimeInterval:1.0];
         if ([self UpdateCachedAutoPagerizeSiteInfoData]) {
             return [self GetCachedAutoPagerizeSiteInfoData];
         };
         return nil;
     }
-    return [siteInfoDeflate inflate];
+    return infratedSiteInfo;
 }
 
 /// 内部に保存してある AutoPagerize の カスタムSiteInfo を取り出します
@@ -2607,6 +2658,20 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         return nil;
     }
     return siteInfo;
+}
+
+/// http://...#cookie の形式の文字列を受け取り、ダウンロードqueueに追加します。
+- (NSString*)AddDownloadQueueForURLString:(NSString*)urlWithCookieString{
+    NSRange range = [urlWithCookieString rangeOfString:@"#"];
+    NSString* urlString = urlWithCookieString;
+    NSString* cookieString = nil;
+    if (range.location != NSNotFound) {
+        urlString = [urlWithCookieString substringToIndex:range.location];
+        if ((range.location + 1) < [urlWithCookieString length]) {
+            cookieString = [urlWithCookieString substringFromIndex:(range.location+1)];
+        }
+    }
+    return [self AddDownloadQueueForURL:[urlString stringByRemovingPercentEncoding] cookieParameter:[cookieString stringByRemovingPercentEncoding]];
 }
 
 /// ダウンロードqueueに追加しようとします
@@ -2675,6 +2740,145 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setBool:yesNo forKey:USER_DEFAULTES_MENU_ITEM_IS_ADD_SPEECH_MOD_SETTINGS_ONLY];
     [userDefaults synchronize];
 
+}
+
+
+/// ことせかい 関連の AppGroup に属する UserDefaults を取得します。
+- (NSUserDefaults*)getNovelSpeakerAppGroupUserDefaults
+{
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:APP_GROUP_USER_DEFAULTS_SUITE_NAME];
+    return defaults;
+}
+
+/// ことせかい 関連の AppGroup に属する UserDefaults から文字列を格納した NSArray* を取り出します。
+- (NSArray*)getAppGroup_UserDefaults_StringArrayDataForKey:(NSString*)key {
+    NSUserDefaults* userDefaults = [self getNovelSpeakerAppGroupUserDefaults];
+    NSArray* currentArray = [userDefaults stringArrayForKey:key];
+    return currentArray;
+}
+
+/// ことせかい 関連の AppGroup に属する UserDefaults に格納されている文字列を格納した NSArray から、指定された文字列を含むものを排除します
+- (BOOL)deleteTextFromAppGroup_UserDefaults_StringArrayDataForKey:(NSString*)key text:(NSString*)text {
+    NSArray* currentArray = [self getAppGroup_UserDefaults_StringArrayDataForKey:key];
+    if (currentArray == nil) {
+        return true;
+    }
+    NSMutableArray* newArray = [NSMutableArray new];
+    for (NSString* obj in currentArray) {
+        if (obj == nil || [obj isEqualToString:text] == NSOrderedSame) {
+            continue;
+        }
+        [newArray addObject:obj];
+    }
+    if ([newArray count] <= 0) {
+        newArray = nil;
+    }
+    NSUserDefaults* userDefaults = [self getNovelSpeakerAppGroupUserDefaults];
+    if (userDefaults == nil) {
+        return false;
+    }
+    [userDefaults setObject:newArray forKey:key];
+    [userDefaults synchronize];
+    return true;
+}
+
+/// AppGroupで外部プロセスから指示されたURLのダウンロードを指示したqueueを取り出します。
+- (NSArray*)getAppGroupURLDownloadQueue{
+    return [self getAppGroup_UserDefaults_StringArrayDataForKey:APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE];
+}
+
+/// AppGroup で指示されているURLダウンロードのリストから指定されたURLのものを取り除きます。
+- (BOOL)deleteAppGroupQueueForURLDownload:(NSString*)urlString {
+    return [self deleteTextFromAppGroup_UserDefaults_StringArrayDataForKey:APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE text:urlString];
+}
+
+/// textの追加を指示したqueueを取り出します。
+- (NSArray*)getAppGroupAddTextQueue{
+    return [self getAppGroup_UserDefaults_StringArrayDataForKey:APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE];
+}
+
+/// AppGroup で指示されているtext追加のリストから指定されたtextのものを取り除きます。
+- (BOOL)deleteAppGroupQueueForText:(NSString*)text {
+    return [self deleteTextFromAppGroup_UserDefaults_StringArrayDataForKey:APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE text:text];
+}
+
+
+/// ことせかい 関連の AppGroup に属する UserDefaults の key に対して、文字列を格納した NSArray のつもりで text を追加します
+- (void)addStringQueueToNovelSpeakerAppGroupUserDefaults:(NSString*)key text:(NSString*)text {
+    NSUserDefaults* userDefaults = [self getNovelSpeakerAppGroupUserDefaults];
+    NSArray* currentArray = [userDefaults stringArrayForKey:key];
+    NSMutableArray* newArray = nil;
+    if (currentArray == nil) {
+        newArray = [NSMutableArray new];
+    }else{
+        newArray = [[NSMutableArray alloc] initWithArray:currentArray];
+    }
+    [newArray addObject:text];
+    [userDefaults setObject:newArray forKey:key];
+    [userDefaults synchronize];
+}
+
+/// URLのダウンロードを指示するqueueにurlを追加します
+- (void)addURLDownloadQueueToAppGroupUserDefaults:(NSURL*)url {
+    [self addStringQueueToNovelSpeakerAppGroupUserDefaults:APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE text:[url absoluteString]];
+}
+
+/// text を新規ユーザ小説として追加します
+- (void)AddNewContentForText:(NSString*)text
+{
+    NarouContentCacheData* content = [self CreateNewUserBook];
+    NSString* firstLine = [text getFirstContentLine];
+    if (firstLine != nil) {
+        content.title = firstLine;
+    }
+    content.general_all_no = [[NSNumber alloc] initWithInt:1];
+    [self UpdateNarouContent:content];
+    NSLog(@"addContent: %@\n-> %@", content.title, text);
+    [self UpdateStory:text chapter_number:1 parentContent:content];
+    [self saveContext];
+}
+
+/// AppGroup で指示されたqueueを処理します
+- (void)HandleAppGroupQueue{
+    return;
+    NSArray* UrlDownloadQueueArray = [self getAppGroupURLDownloadQueue];
+    if (UrlDownloadQueueArray != nil) {
+        for (NSString* urlString in UrlDownloadQueueArray) {
+            [self AddDownloadQueueForURLString:urlString];
+            [self deleteAppGroupQueueForURLDownload:urlString];
+        }
+    }
+    NSArray* AddTextQueueArray = [self getAppGroupAddTextQueue];
+    if (AddTextQueueArray != nil) {
+        for (NSString* text in AddTextQueueArray) {
+            [self AddNewContentForText:text];
+            [self deleteAppGroupQueueForText:text];
+        }
+    }
+}
+
+/// 通知をONにしようとします
+- (void)RegisterUserNotification {
+    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_0) {
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(
+                                                                               UIRemoteNotificationTypeBadge
+                                                                               | UIRemoteNotificationTypeAlert)];
+    }else{
+        UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:
+                                                            (UIUserNotificationTypeAlert | UIUserNotificationTypeBadge)
+                                                                                             categories:nil];
+        [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
+    }
+}
+
+/// BackgroundFetch を有効化します
+- (void)StartBackgroundFetch{
+    NSTimeInterval hour = 60*60;
+    if (hour < UIApplicationBackgroundFetchIntervalMinimum) {
+        hour = UIApplicationBackgroundFetchIntervalMinimum;
+    }
+    UIApplication* application = [UIApplication sharedApplication];
+    [application setMinimumBackgroundFetchInterval:hour];
 }
 
 @end

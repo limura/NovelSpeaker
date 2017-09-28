@@ -17,6 +17,6 @@ static NSString* const DefaultSpeakSettingEditTableViewCellID = @"DefaultSpeakSe
 @property (weak, nonatomic) IBOutlet UISlider *rateSlider;
 @property (weak, nonatomic) IBOutlet UIButton *speakerNameButton;
 
-@property (nonatomic, assign) id<SettingTableViewDelegate> testSpeakDelegate;
+@property (nonatomic, weak) id<SettingTableViewDelegate> testSpeakDelegate;
 
 @end

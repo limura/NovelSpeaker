@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "GlobalDataSingleton.h"
+#import "NiftySpeaker.h"
 
 @interface NovelSpeakerTests : XCTestCase
 
@@ -76,7 +77,34 @@
 
 - (void)testURLDownload {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    NSString* result = [globalData AddDownloadQueueForURL:[[NSURL alloc] initWithString:@"https://kakuyomu.jp/works/1177354054880210298/episodes/1177354054880210374"]];
+    //NSString* result = [globalData AddDownloadQueueForURL:[[NSURL alloc] initWithString:@"https://kakuyomu.jp/works/1177354054880210298/episodes/1177354054880210374"]];
 }
 
+- (void)testSpeach {
+    NSString* firstString = @"3/14　誤字・空白・描写等修正\r\n\r\n********************************************\r\n\r\n。_。_。_。_。_。\r\n\r\n\r\n";
+    NSString* secondString = @"「ん。_。う。_。";
+    Speaker* speaker = [Speaker new];
+    [speaker Speech:firstString];
+    while (true) {
+        [NSThread sleepForTimeInterval:0.3f];
+        STSpeakingStatus status = [speaker GetStatus];
+        if (status == STSpeakingStatusNone || status == STSpeakingStatusStop) {
+            break;
+        }
+    }
+    [speaker SetRate:0.590558];
+    [speaker SetPitch:1.270424];
+    [speaker Speech:secondString];
+    [NSThread sleepForTimeInterval:1.0f];
+    [speaker StopSpeech];
+    [NSThread sleepForTimeInterval:1.0f];
+    [speaker SetPitch:1.0];
+    [speaker Speech:firstString];
+    [speaker SetPitch:1.270424];
+    [speaker Speech:secondString];
+    [NSThread sleepForTimeInterval:3.0f];
+    
+}
+
+    
 @end

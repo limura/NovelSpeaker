@@ -126,17 +126,29 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.5
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.6
 
-・発音される音声データを選択できるようになりました。(iOS9以上)
-・Voice Over が有効になっている場合、読み上げ開始時に警告を発するようになりました。
-・本棚の並び順を変更できるようになりました。
-・更新された小説を自動で読み込むことができるようになります。
-・その他バグの修正
+・「なろう検索」からのダウンロードが失敗する問題を修正
+・再生中にイヤホンジャックからイヤホンが引き抜かれた場合、再生が停止
+・読み上げ開始位置がズレてしまう問題を修正
+・連続再生時間指定での自動停止が効かなくなる問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Ver 1.1.6
+
+インタフェースの変更
+
+・再生中にイヤホンジャックからイヤホンが引き抜かれた場合、再生が停止するようになります
+・実験的機能の追加(詳しくはAppStoreの Version 1.1.6 のアップデートノートを参照してください)
+
+問題の修正
+
+・「なろう検索」からのダウンロードが失敗する問題を修正
+・ある本の読み上げを停止した後、別の本を開いて読み上げを開始しようとした時に、読み上げ開始位置が先程停止した読み上げ位置にズレてしまう問題を修正
+・連続再生時間で指定した時間が経つ前にページ切り替えが起こると連続再生時間での自動停止が効かなくなる問題を修正
+
 # Ver 1.1.5
 
 インタフェースの変更

@@ -63,7 +63,7 @@
     m_ResultReceiver = resultReceiver;
 }
 
-- (void)popup:(void(^)())completeTime{
+- (void)popup:(void(^)(void))completeTime{
     CGSize screenSize = [UIScreen mainScreen].bounds.size;
     [UIView animateWithDuration:0.2f delay:0.0f options:UIViewAnimationOptionCurveEaseInOut animations:^{
         self.bounds = CGRectMake(0, 0, screenSize.width, screenSize.height);
@@ -75,7 +75,7 @@
     }];
 }
 
-- (void)popdown:(void(^)())completeTime {
+- (void)popdown:(void(^)(void))completeTime {
     CGSize screenSize = [UIScreen mainScreen].bounds.size;
     [UIView animateWithDuration:0.2f delay:0.0f options:UIViewAnimationOptionCurveEaseInOut animations:^{
         self.bounds = CGRectMake(0, 0, screenSize.width, screenSize.height);

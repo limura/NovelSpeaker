@@ -32,6 +32,9 @@
         zStream.next_out = buffer;
         zStream.avail_out = sizeof(buffer);
         retval = deflate(&zStream, Z_FINISH);
+        //if (retval != Z_OK) {
+        //    break;
+        //}
         size_t length = sizeof(buffer) - zStream.avail_out;
         if (length > 0)
             [ret appendBytes:buffer length:length];
@@ -52,6 +55,9 @@
         zStream.next_out = buffer;
         zStream.avail_out = sizeof(buffer);
         retval = inflate(&zStream, Z_FINISH);
+        //if (retval != Z_OK) {
+        //    return nil;
+        //}
         size_t length = sizeof(buffer) - zStream.avail_out;
         if (length > 0)
             [ret appendBytes:buffer length:length];

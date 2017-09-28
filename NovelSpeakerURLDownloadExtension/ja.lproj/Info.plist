@@ -46,8 +46,6 @@
 		<string>com.apple.services</string>
 		<key>NSExtensionPrincipalClass</key>
 		<string>ActionRequestHandler</string>
-		<key>NSExtensionMainStoryboard</key>
-		<string>MainInterface</string>
 	</dict>
 </dict>
 </plist>
