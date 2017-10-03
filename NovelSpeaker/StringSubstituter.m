@@ -196,4 +196,93 @@
 }
 
 
+/// 与えられた文章の文字列から、小説家になろうにおけるルビ表記を発見して、自身の読み替え辞書に登録するための辞書を取り出します
+/// 例として、『|北の鬼(ノースオーガ)』という文字列を発見した場合には
+/// key → value
+/// "|北の鬼(ノースオーガ)" → "ノースオーガ"
+/// "北の鬼" → "ノースオーガ"
+/// の二種類を出力します。
++ (NSDictionary*)FindNarouRubyNotation:(NSString*)text {
+    // 小説家になろうでのルビの扱い https://syosetu.com/man/ruby/
+    // 平仮名 \p{Hiragana}
+    // カタカナ \p{Katakana}
+    // 漢字 \p{Han}
+    // 数字 \p{}
+    NSArray* patternArray = @[
+      @"\\|([^|]+)《(.+?)》", // | のある場合
+      @"([\\p{Han}]+)《(.+?)》", // 《 》 の前が漢字
+      @"([\\p{Han}]+)[(（]([\\p{Hiragana}\\p{Katakana}]+)[)）]", // () の前が漢字かつ、() の中がカタカナまたは平仮名
+    ];
+
+    NSLog(@"phase 1.");
+    NSMutableArray* regexpArray = [NSMutableArray new];
+    for (int i = 0; i < patternArray.count; i++) {
+        NSString* pattern = patternArray[i];
+        NSError *err = nil;
+        NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&err];
+        if (err != nil) {
+            continue;
+        }
+        [regexpArray addObject:regexp];
+    }
+    
+    NSLog(@"phase 2.");
+    // 先にマッチしたものの範囲のリスト
+    NSMutableArray* hitRanges = [NSMutableArray new];
+    // 抽出された読み替え辞書のストア
+    NSMutableDictionary* result = [NSMutableDictionary new];
+    for (NSRegularExpression* regexp in regexpArray) {
+        NSArray* hitArray = [regexp matchesInString:text options:0 range:NSMakeRange(0, text.length)];
+        NSLog(@"phase 2.1. count: %lu", (unsigned long)[hitArray count]);
+        for (NSTextCheckingResult* match in hitArray) {
+            NSLog(@"phase 2.1.1. match: %p", match);
+            if ([match numberOfRanges] != 3) {
+                continue;
+            }
+            
+            NSRange thisRange = [match rangeAtIndex:0];
+            if (thisRange.length == 0) {
+                continue;
+            }
+            NSUInteger thisStart = thisRange.location;
+            NSUInteger thisEnd = thisRange.location + thisRange.length;
+            BOOL alreadyHit = false;
+            for (NSValue* rangeValue in hitRanges) {
+                NSLog(@"phase 2.1.1.1. rangeValue: %p", rangeValue);
+                NSLog(@"   rangeValue: [%lu, %lu]", rangeValue.rangeValue.location, rangeValue.rangeValue.length);
+                NSRange prevRange = rangeValue.rangeValue;
+                NSUInteger prevStart = prevRange.location;
+                NSUInteger prevEnd = prevRange.location + prevRange.length;
+                if (prevStart <= thisStart && prevEnd >= thisStart) {
+                    alreadyHit = true;
+                    break;
+                }
+                if (prevStart <= thisEnd && prevEnd >= thisEnd) {
+                    alreadyHit = true;
+                    break;
+                }
+            }
+            NSLog(@"phase 2.1.2. alreadyHit?: %@", alreadyHit ? @"true" : @"false");
+            if (alreadyHit) {
+                continue;
+            }
+            [hitRanges addObject:[NSValue valueWithRange:thisRange]];
+
+            NSRange fromStringRange = [match rangeAtIndex:1];
+            NSRange toStringRange = [match rangeAtIndex:2];
+            NSString* fromString = [text substringWithRange:fromStringRange];
+            NSString* toString = [text substringWithRange:toStringRange];
+            [result setObject:toString forKey:fromString];
+            NSString* allString = [text substringWithRange:thisRange];
+            NSLog(@"phase 2.1.3: from/to: %@/%@", fromString, toString);
+            [result setObject:toString forKey:allString];
+            NSLog(@"phase 2.1.4: from/to: %@/%@", allString, toString);
+        }
+    }
+    NSLog(@"phase 3: done.");
+
+    return result;
+}
+
+
 @end

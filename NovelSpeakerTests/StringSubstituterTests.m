@@ -81,4 +81,36 @@
     XCTAssertEqual([answer compare:conved], NSOrderedSame, @"conv failed:\n  from:\"%@\"\nanswer:\"%@\"\n    to:\"%@\"", from, answer, conved);
 }
 
+- (void)testNarouRuby
+{
+    NSString* text = @"012aiuあいう漢字(かんじ)ルビをふる、"
+        @"分断（ブンダン）、|変速ルビ《へんそくルビ》、|強調している《・・・・・・》、"
+        @"漢字(簡易表記のルビ部分に漢字を入れると)認識されないはず"
+        @"end"
+    ;
+    NSDictionary* matchPatterns = @{
+        @"漢字": @"かんじ", @"漢字(かんじ)": @"かんじ",
+        @"分断": @"ブンダン", @"分断（ブンダン）": @"ブンダン",
+        @"変速ルビ": @"へんそくルビ", @"|変速ルビ《へんそくルビ》": @"へんそくルビ",
+        @"強調している": @"・・・・・・", @"|強調している《・・・・・・》": @"・・・・・・",
+    };
+    NSDictionary* resultDictionary = [StringSubstituter FindNarouRubyNotation:text];
+    
+    for (NSString* fromAnswer in [matchPatterns keyEnumerator]) {
+        NSString* toAnswer = matchPatterns[fromAnswer];
+        NSString* to = [resultDictionary objectForKey:fromAnswer];
+        NSString* errString = [NSString stringWithFormat:@"key \"%@\" not found", fromAnswer];
+        if (to == nil) {
+            NSLog(@"%@", errString);
+        }
+        XCTAssertNotNil(to);
+
+        errString = [NSString stringWithFormat:@"to \"%@\" is not same \"%@\"", to, toAnswer];
+        if ([to compare:toAnswer] != NSOrderedSame) {
+            NSLog(@"%@", errString);
+        }
+        XCTAssertTrue([to compare:toAnswer] == NSOrderedSame);
+    }
+}
+
 @end

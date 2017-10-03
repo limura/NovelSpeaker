@@ -28,5 +28,14 @@
 
 /// 変換を行います。
 - (SpeechBlock*) Convert:(NSString*)text speechConfig:(SpeechConfig*)speechConfig;
+
+/// 与えられた文章の文字列から、小説家になろうにおけるルビ表記を発見して、自身の読み替え辞書に登録するための辞書を取り出します
+/// 例として、『|北の鬼(ノースオーガ)』という文字列を発見した場合には
+/// key → value
+/// "|北の鬼(ノースオーガ)" → "ノースオーガ"
+/// "北の鬼" → "ノースオーガ"
+/// の二種類を出力します。
++ (NSDictionary*)FindNarouRubyNotation:(NSString*)text;
+
 @end
 
