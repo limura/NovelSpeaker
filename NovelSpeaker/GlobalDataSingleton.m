@@ -1386,6 +1386,18 @@ static GlobalDataSingleton* _singleton = nil;
     }
 }
 
+/// NiftySpeaker に保存されている文字列から、ルビが振られているものを取り出して読み替え辞書に登録します。
+- (void)ApplyRubyModConfig:(NiftySpeaker*)niftySpeaker
+{
+    NSDictionary* rubyDictionary = [StringSubstituter FindNarouRubyNotation:[m_NiftySpeaker GetText]];
+    for (NSString* from in [rubyDictionary keyEnumerator]) {
+        NSString* to = [rubyDictionary valueForKey:from];
+        if (to != nil) {
+            [m_NiftySpeaker AddSpeechModText:from to:to];
+        }
+    }
+}
+
 /// NiftySpeakerに現在の読み替え設定を登録します
 - (void)ApplySpeechModConfig:(NiftySpeaker*)niftySpeaker
 {
@@ -1404,6 +1416,9 @@ static GlobalDataSingleton* _singleton = nil;
     [self ApplyDefaultSpeechconfig:m_NiftySpeaker];
     [self ApplySpeakPitchConfig:m_NiftySpeaker];
     [self ApplySpeechWaitConfig:m_NiftySpeaker];
+    if ([self GetOverrideRubyIsEnabled]) {
+        [self ApplyRubyModConfig:m_NiftySpeaker];
+    }
     [self ApplySpeechModConfig:m_NiftySpeaker];
     return true;
 }
@@ -1472,6 +1487,9 @@ static GlobalDataSingleton* _singleton = nil;
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
         return false;
+    }
+    if ([self GetOverrideRubyIsEnabled]) {
+        [self ApplyRubyModConfig:m_NiftySpeaker];
     }
     [self UpdatePlayingInfo:story];
     [self DropNewFlag:story.ncode];
@@ -2169,6 +2187,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE @"AutoPagerizeSiteInfoCacheSavedDate"
 #define USER_DEFAULTS_CUSTOM_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE @"CustomAutoPagerizeSiteInfoCacheSavedDate"
 #define USER_DEFAULTES_MENU_ITEM_IS_ADD_SPEECH_MOD_SETTINGS_ONLY @"MenuItemIsAddSpeechModSettingOnly"
+#define USER_DEFAULTS_OVERRIDE_RUBY_IS_ENABLED @"OverrideRubyIsEnabled"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -2739,7 +2758,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setBool:yesNo forKey:USER_DEFAULTES_MENU_ITEM_IS_ADD_SPEECH_MOD_SETTINGS_ONLY];
     [userDefaults synchronize];
-
 }
 
 
@@ -2880,5 +2898,19 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     UIApplication* application = [UIApplication sharedApplication];
     [application setMinimumBackgroundFetchInterval:hour];
 }
+
+/// ルビがふられた物について、ルビの部分だけを読むか否かの設定を取得します
+- (BOOL)GetOverrideRubyIsEnabled {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    return [userDefaults boolForKey:USER_DEFAULTS_OVERRIDE_RUBY_IS_ENABLED];
+}
+
+/// ルビがふられた物について、ルビの部分だけを読むか否かの設定を保存します
+- (void)SetOverrideRubyIsEnabled:(BOOL)yesNo {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:yesNo forKey:USER_DEFAULTS_OVERRIDE_RUBY_IS_ENABLED];
+    [userDefaults synchronize];
+}
+
 
 @end

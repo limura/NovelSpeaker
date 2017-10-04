@@ -376,6 +376,17 @@ typedef enum {
     return true;
 }
 
+/// 読み上げ用に設定されている文字列を取得します。SpeechBlockからの変換になるのでちょっと非効率的です
+- (NSString*)GetText
+{
+    NSMutableString* result = [NSMutableString new];
+    for (SpeechBlock* block in m_SpeechBlockArray) {
+        [result appendString:[block GetDisplayText]];
+    }
+    return result;
+}
+
+
 /// 無指定の時の声色を指定します。
 - (BOOL)SetDefaultSpeechConfig:(SpeechConfig*)speechConfig
 {

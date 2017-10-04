@@ -31,12 +31,8 @@ void uncaughtExceptionHandler(NSException *exception)
     }
     
     // background fetch activate
-    if ([globalData GetBackgroundNovelFetchEnabled]) {
-        NSTimeInterval hour = 60*60;
-        if (hour < UIApplicationBackgroundFetchIntervalMinimum) {
-            hour = UIApplicationBackgroundFetchIntervalMinimum;
-        }
-        [application setMinimumBackgroundFetchInterval:hour];
+    if ([globalData GetBackgroundNovelFetchEnabled] == true) {
+        [globalData StartBackgroundFetch];
     }
     
     UIViewController* toplevelViewController = nil;

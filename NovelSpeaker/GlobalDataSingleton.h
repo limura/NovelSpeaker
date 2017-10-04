@@ -383,4 +383,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// BackgroundFetch を有効化します
 - (void)StartBackgroundFetch;
 
+/// ルビがふられた物について、ルビの部分だけを読むか否かの設定を取得します
+- (BOOL)GetOverrideRubyIsEnabled;
+/// ルビがふられた物について、ルビの部分だけを読むか否かの設定を保存します
+- (void)SetOverrideRubyIsEnabled:(BOOL)yesNo;
+
 @end

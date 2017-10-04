@@ -60,6 +60,9 @@
 /// 読み上げ用の文字列を設定します。同時に SpeechBlock への変換が走ります。
 - (BOOL)SetText:(NSString*)text;
 
+/// 読み上げ用に設定されている文字列を取得します。SpeechBlockからの変換になるのでちょっと非効率的です
+- (NSString*)GetText;
+
 /// 無指定の時の声色を指定します。
 - (BOOL)SetDefaultSpeechConfig:(SpeechConfig*)speechConfig;
 
