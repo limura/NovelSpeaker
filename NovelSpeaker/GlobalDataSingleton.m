@@ -66,6 +66,10 @@ static GlobalDataSingleton* _singleton = nil;
     if (err) {
         NSLog(@"AVAudioSessionCategoryPlayback set failed. %@ %@", err, err.userInfo);
     }
+    [session setMode:AVAudioSessionModeDefault error:&err];
+    if (err) {
+        NSLog(@"AVAudioSessionModeDefault set failed. %@ %@", err, err.userInfo);
+    }
     [session setActive:NO error:nil];
     
     // オーディオのルートが変わったよイベントを受け取るようにする
@@ -654,9 +658,6 @@ static GlobalDataSingleton* _singleton = nil;
 {
     if (content == nil) {
         return nil;
-    }
-    if (content.currentReadingStory != nil) {
-        return content.currentReadingStory;
     }
     content = [self SearchNarouContentFromNcode:content.ncode];
     if (content.currentReadingStory != nil) {
@@ -1568,7 +1569,7 @@ static GlobalDataSingleton* _singleton = nil;
     }
 
     AVAudioSession* session = [AVAudioSession sharedInstance];
-    NSError* err;
+    NSError* err = nil;
     //NSLog(@"setActive YES.");
     [session setActive:YES error:&err];
     if (err != nil) {
@@ -1690,7 +1691,7 @@ static GlobalDataSingleton* _singleton = nil;
         [m_CoreDataObjectHolder save];
     //});
     }];
-    //NSLog(@"CoreData saved.");
+    NSLog(@"CoreData saved.");
 }
 
 /// 読み上げの会話文の音程設定を全て読み出します。
@@ -2155,6 +2156,29 @@ static GlobalDataSingleton* _singleton = nil;
     }
     return false;
 }
+
+/// カスタムUTI(ファイル拡張子？)で呼び出された時の反応をします。
+/// 反応する拡張子は
+/// novelspeaker-backup.json
+/// です。が、何も考えずに JSONファイル として読み込もうとします。
+- (BOOL)ProcessCustomFileUTI:(NSURL*)url{
+    NSData* data = [NSData dataWithContentsOfURL:url];
+    if (data == nil){
+        return false;
+    }
+    NSError* err = nil;
+    id jsonObj = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&err];
+    if (err != nil || jsonObj == nil) {
+        return false;
+    }
+    if (![jsonObj isMemberOfClass:[NSDictionary class]]) {
+        return false;
+    }
+    NSDictionary* jsonDictionary = (NSDictionary*)jsonObj;
+    
+    return false;
+}
+
 
 // log用
 - (NSString*)GetLogString

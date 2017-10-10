@@ -294,6 +294,9 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
 /// URLスキームで呼び出された時の反応をします。
 - (BOOL)ProcessURLSceme:(NSURL*)url;
 
+/// カスタムUTI(ファイル拡張子？)で呼び出された時の反応をします。
+- (BOOL)ProcessCustomFileUTI:(NSURL*)url;
+
 /// 標準の読み替え辞書を上書き追加します。
 - (void)InsertDefaultSpeechModConfig;
 
