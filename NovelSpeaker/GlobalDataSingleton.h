@@ -294,6 +294,9 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
 /// 最初のページを表示した事を設定します。
 - (void)SetFirstPageShowed;
 
+/// URLで呼び出された時の反応をします。
+- (BOOL)ProcessURL:(NSURL*)url;
+
 /// URLスキームで呼び出された時の反応をします。
 - (BOOL)ProcessURLSceme:(NSURL*)url;
 

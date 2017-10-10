@@ -2126,6 +2126,15 @@ static GlobalDataSingleton* _singleton = nil;
     return [m_DownloadQueue AddDownloadQueueForNcodeList:targetListString];
 }
 
+/// URLで呼び出された時の反応をします。
+- (BOOL)ProcessURL:(NSURL*)url{
+    NSString* scheme = [url scheme];
+    if ([scheme isEqualToString:@"novelspeaker"]){
+        return [self ProcessURLSceme:url];
+    }
+    return [self ProcessCustomFileUTI:url];
+}
+
 /// URLスキームで呼び出された時の反応をします。
 /// 反応する URL は、
 /// novelspeaker://downloadncode/ncode-ncode-ncode...
@@ -3113,7 +3122,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// novelspeaker-backup-json
 /// です。が、何も考えずに JSONファイル として読み込もうとします。
 - (BOOL)ProcessCustomFileUTI:(NSURL*)url{
-    NSLog(@"ProcessCustomFileUTI in.");
+    NSLog(@"ProcessCustomFileUTI in. %@", url);
     NSData* data = [NSData dataWithContentsOfURL:url];
     if (data == nil){
         return false;

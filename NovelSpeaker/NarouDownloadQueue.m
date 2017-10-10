@@ -296,7 +296,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         localContent.userid = [currentURL absoluteString];
         // 更新チェックの場合、最初の一発目(既に読み込んであるもののうちの最後のもの)は保存しない(ユーザが書き換えてるかもしれないので)
         if (!(isReload && story.count == startCount)) {
-            NSLog(@"story update: %@", story.content);
+            //NSLog(@"story update: %@", story.content);
             [globalData UpdateStory:story.content chapter_number:story.count parentContent:localContent];
             localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
         }
