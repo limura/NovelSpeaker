@@ -59,6 +59,8 @@
 "SettingtableViewController_ConfirmEnableBackgroundFetch" = "この設定を有効にすると、ことせかい を使用していない時等に小説の更新を確認するようになるため、ネットワーク通信が発生するようになります。よろしいですか？";
 "SettingTableViewController_OverrideRubyIsEnabled" = "ルビをルビだけよむようにする: 有効";
 "SettingTableViewController_OverrideRubyIsDisabled" = "ルビをルビだけよむようにする: 無効";
+"SettingTableView_SendEmailForBackupTitle" = "ことせかい バックアップ";
+"SettingTableView_SendEmailForBackupBody" = "添付されたファイルを ことせかい で読み込む事で、小説のリストや読み替え辞書が再生成されます。";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";

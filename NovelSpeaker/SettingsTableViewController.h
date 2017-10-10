@@ -9,8 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "EasyAlert.h"
 #import "NarouContentCacheData.h"
+#import <MessageUI/MessageUI.h>
 
-@interface SettingsTableViewController : UITableViewController
+@interface SettingsTableViewController : UITableViewController<MFMailComposeViewControllerDelegate>
 {
     EasyAlert* m_EasyAlert;
     

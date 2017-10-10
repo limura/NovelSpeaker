@@ -117,6 +117,9 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
 /// novelupdated_at で sort されて返されます。
 - (NSMutableArray*) GetAllNarouContent:(NarouContentSortType)sortType;
 
+/// 指定された ncode に登録されている全ての Story の内容(文章)を配列にして取得します
+- (NSArray*)GetAllStoryTextForNcode:(NSString*)ncode;
+
 /// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
@@ -390,5 +393,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (BOOL)GetOverrideRubyIsEnabled;
 /// ルビがふられた物について、ルビの部分だけを読むか否かの設定を保存します
 - (void)SetOverrideRubyIsEnabled:(BOOL)yesNo;
+
+// バックアップ用のデータを JSON に encode したものを生成して取得します
+- (NSData*)CreateBackupJSONData;
 
 @end

@@ -13,10 +13,12 @@
 #import "NarouDownloadQueue.h"
 #import "NSDataZlibExtension.h"
 #import "NSStringExtension.h"
+#import "NiftyUtility.h"
 
 #define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
 #define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
 #define APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE @"AddTextQueue"
+#define COOKIE_ENCRYPT_SECRET_KEY @"謎のエラーです。これを確認できた人はご一報ください"
 
 @implementation GlobalDataSingleton
 
@@ -343,6 +345,21 @@ static GlobalDataSingleton* _singleton = nil;
         return nil;
     }
     return fetchResults;
+}
+
+/// 指定された ncode に登録されている全ての Story の内容(文章)を配列にして取得します
+- (NSArray*)GetAllStoryTextForNcode:(NSString*)ncode{
+    __block NSMutableArray* resultArray = nil;
+    [self coreDataPerfomBlockAndWait:^{
+        NSArray* fetchResults = [m_CoreDataObjectHolder SearchEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode]];
+        for (Story* story in fetchResults) {
+            if (resultArray == nil) {
+                resultArray = [NSMutableArray new];
+            }
+            [resultArray addObject:story.content];
+        }
+    }];
+    return resultArray;
 }
 
 /// ダウンロードqueueに追加しようとします
@@ -2157,29 +2174,6 @@ static GlobalDataSingleton* _singleton = nil;
     return false;
 }
 
-/// カスタムUTI(ファイル拡張子？)で呼び出された時の反応をします。
-/// 反応する拡張子は
-/// novelspeaker-backup.json
-/// です。が、何も考えずに JSONファイル として読み込もうとします。
-- (BOOL)ProcessCustomFileUTI:(NSURL*)url{
-    NSData* data = [NSData dataWithContentsOfURL:url];
-    if (data == nil){
-        return false;
-    }
-    NSError* err = nil;
-    id jsonObj = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&err];
-    if (err != nil || jsonObj == nil) {
-        return false;
-    }
-    if (![jsonObj isMemberOfClass:[NSDictionary class]]) {
-        return false;
-    }
-    NSDictionary* jsonDictionary = (NSDictionary*)jsonObj;
-    
-    return false;
-}
-
-
 // log用
 - (NSString*)GetLogString
 {
@@ -2726,7 +2720,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     {
         return NSLocalizedString(@"GlobalDataSingleton_CanNotGetValidNCODE", @"有効な URL を取得できませんでした。");
     }
-    
+
     NarouContentCacheData* targetContentCacheData = [self CreateNewUserBook];
     // XXXXX TODO: 怪しく ncode には URLを、keyword には cookieパラメタ を入れているのをなんとかしないと……(´・ω・`)
     targetContentCacheData.title = urlString;
@@ -2936,5 +2930,195 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+// 本棚に入っている物をバックアップするためのJSONに変換する(ためのNSArray*にする)
+- (NSArray*)CreateBookselfBackupForJSONArray{
+    NSArray* contentArray = [self GetAllNarouContent:NarouContentSortType_Ncode];
+    NSMutableArray* resultArray = [NSMutableArray new];
+    for (NarouContentCacheData* content in contentArray) {
+        // ncode に入ってる文字列で三種類に分かれている(2017/10/10現在)
+        // nXXXXX: 小説家になろうの ncode
+        // _XXXXX: 自作小説
+        // https?XXX: URL
+        // URLであった場合、keyword に secret が入っている。
+        // ncode や URL は再度ダウンロードすると良さそうだが、自作小説の場合はタイトルと本文を保存しておかないと復活できない。
+        NSMutableDictionary* obj = [NSMutableDictionary new];
+        if ([content isURLContent]) {
+            [obj setObject:@"url" forKey:@"type"];
+            [obj setObject:content.ncode forKey:@"url"];
+            if (content.keyword != nil && [content.keyword length] > 0) {
+                [obj setObject: [NiftyUtility stringEncrypt:content.keyword key:content.ncode] forKey:@"secret"];
+            }
+        }else if ([content isUserCreatedContent]) {
+            [obj setObject:@"user" forKey:@"type"];
+            [obj setObject:content.title forKey:@"title"];
+            [obj setObject:content.ncode forKey:@"id"];
+            NSArray* storyTextArray = [self GetAllStoryTextForNcode:content.ncode];
+            if (storyTextArray == nil) {
+                NSLog(@"storyTextArray is nil.");
+                continue;
+            }
+            [obj setObject:storyTextArray forKey:@"storys"];
+        }else{
+            [obj setObject:@"ncode" forKey:@"type"];
+            [obj setObject:content.ncode forKey:@"ncode"];
+        }
+        [resultArray addObject:obj];
+    }
+    return resultArray;
+}
 
+// 読み替え辞書をバックアップ用途用のJSON(用のNSDictionary*)に変換して取得します
+- (NSDictionary*)CreateSpeechModifierSettingDictionaryForJSON{
+    NSArray* array = [self GetAllSpeechModSettings];
+    NSMutableDictionary* resultDictionary = [NSMutableDictionary new];
+    for (SpeechModSettingCacheData* speechMod in array) {
+        [resultDictionary setObject:speechMod.afterString forKey:speechMod.beforeString];
+    }
+    return resultDictionary;
+}
+
+// バックアップ用のデータを JSON に encode したものを生成して取得します
+- (NSData*)CreateBackupJSONData{
+    NSArray* bookselfArray = [self CreateBookselfBackupForJSONArray];
+    NSDictionary* speechModDictionary = [self CreateSpeechModifierSettingDictionaryForJSON];
+    NSDictionary* backupData = @{
+         @"data_version": @"1.0.0",
+         @"bookshelf": bookselfArray,
+         @"word_replacement_dictionary": speechModDictionary
+         };
+    NSError* err = nil;
+    NSData* resultData = [NSJSONSerialization dataWithJSONObject:backupData options:NSJSONWritingPrettyPrinted error:&err];
+    if (err != nil) {
+        NSLog(@"CreateBackupJSONData failed. %@", err);
+        return nil;
+    }
+    return resultData;
+}
+
+- (void)RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray{
+    for (id obj in bookshelfDataArray) {
+        if (![obj isKindOfClass:[NSDictionary class]]) {
+            continue;
+        }
+        NSDictionary* bookshelfDictionary = obj;
+        NSString* type = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"type"];
+        NSLog(@"type: %@", type);
+        if ([type compare:@"ncode"] == NSOrderedSame) {
+            NSString* ncode = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"ncode"];
+            NSLog(@"ncode: %@", ncode);
+            if ([ncode length] <= 0) {
+                continue;
+            }
+            [self AddDownloadQueueForNarouNcode:ncode];
+        }else if([type compare:@"url"] == NSOrderedSame) {
+            NSString* url = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"url"];
+            NSString* secret = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"secret"];
+            NSLog(@"url: %@", url);
+            NSLog(@"secret: %@", secret);
+            if (url == nil) {
+                continue;
+            }
+            NSURL* urlObj = [NSURL URLWithString:url];
+            if (urlObj == nil) {
+                continue;
+            }
+            NSString* cookie = [NiftyUtility stringDecrypt:secret key:url];
+            [self AddDownloadQueueForURL:url cookieParameter:cookie];
+        }else if([type compare:@"user"] == NSOrderedSame) {
+            NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
+            NSString* ncode = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"id"];
+            NSArray* storyArray = [NiftyUtility validateNSDictionaryForArray:bookshelfDictionary key:@"storys"];
+            NSLog(@"title: %@", title);
+            NSLog(@"ncode: %@", ncode);
+            if (title == nil) {
+                title = NSLocalizedString(@"GlobalDataSingleton_NewUserBookTitle", @"新規ユーザ小説");
+            }
+            if (ncode == nil || [ncode length] != 10) {
+                NSLog(@"ユーザ小説で、不正な ncode　が指定されているため無視します。");
+                continue;
+            }
+            if (storyArray == nil || [storyArray count] <= 0) {
+                continue;
+            }
+            NarouContentCacheData* content = [self CreateNewUserBook]; // で作った奴の ncode を上書きすれば良い
+            content.ncode = ncode;
+            content.title = title;
+            [self UpdateNarouContent:content];
+            int chapterNumber = 1;
+            for (id storyObj in storyArray) {
+                if (![storyObj isMemberOfClass:[NSString class]]) {
+                    continue;
+                }
+                NSString* story = storyObj;
+                [self UpdateStory:story chapter_number:chapterNumber parentContent:content];
+                chapterNumber += 1;
+            }
+        }
+    }
+}
+
+- (void)RestoreBackupFromSpeechModDictionary_V1_0_0:speechModDictionary{
+    NSMutableArray* mutableArray = [NSMutableArray new];
+    for (id keyObj in [speechModDictionary keyEnumerator]) {
+        if (![keyObj isKindOfClass:[NSString class]]) {
+            continue;
+        }
+        NSString* key = keyObj;
+        NSString* value = [NiftyUtility validateNSDictionaryForString:speechModDictionary key:keyObj];
+        if (value == nil) {
+            continue;
+        }
+        SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
+        speechModSetting.beforeString = key;
+        speechModSetting.afterString = value;
+        [mutableArray addObject:speechModSetting];
+    }
+    [self UpdateSpeechModSettingMultiple:mutableArray];
+}
+
+/// JSONData に入っているバックアップを書き戻します。
+- (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData {
+    NSError* err = nil;
+    id jsonObj = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&err];
+    if (err != nil || jsonObj == nil) {
+        NSLog(@"RestoreBackupFromJSONData: JSONObjectWithData failed. %@", err);
+        return false;
+    }
+    if (![jsonObj isKindOfClass:[NSDictionary class]]) {
+        NSLog(@"RestoreBackupFromJSONData: toplevel isMemberObClass NSDictionary fail.");
+        return false;
+    }
+    NSDictionary* toplevelDictionary = (NSDictionary*)jsonObj;
+    NSString* dataVersion = [NiftyUtility validateNSDictionaryForString:toplevelDictionary key:@"data_version"];
+    if (dataVersion == nil) {
+        return false;
+    }
+    
+    if ([dataVersion compare:@"1.0.0"] == NSOrderedSame) {
+        NSArray* bookshelfDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"bookshelf"];
+        NSDictionary* speechModDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"word_replacement_dictionary"];
+        if (bookshelfDataArray != nil) {
+            [self RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray];
+        }
+        if (speechModDictionary != nil) {
+            [self RestoreBackupFromSpeechModDictionary_V1_0_0:speechModDictionary];
+        }
+    }
+
+    return true;
+}
+
+/// カスタムUTI(ファイル拡張子？)で呼び出された時の反応をします。
+/// 反応する拡張子は
+/// novelspeaker-backup-json
+/// です。が、何も考えずに JSONファイル として読み込もうとします。
+- (BOOL)ProcessCustomFileUTI:(NSURL*)url{
+    NSLog(@"ProcessCustomFileUTI in.");
+    NSData* data = [NSData dataWithContentsOfURL:url];
+    if (data == nil){
+        return false;
+    }
+
+    return [self RestoreBackupFromJSONData:data];
+}
 @end

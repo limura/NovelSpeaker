@@ -223,9 +223,39 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
     [self.settingsTableView reloadData];
 }
 
+// MFMailComposeViewController でmailアプリ終了時に呼び出されるのでこのタイミングで viewController を取り戻します
+- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (BOOL)sendMailWithBinary:(NSData*)data fileName:(NSString*)fileName mimeType:(NSString*)mimeType{
+    if (![MFMailComposeViewController canSendMail]) {
+        return false;
+    }
+    MFMailComposeViewController *picker = [MFMailComposeViewController new];
+    picker.mailComposeDelegate = self;
+    
+    [picker setSubject:NSLocalizedString(@"SettingTableView_SendEmailForBackupTitle", @"ことせかい バックアップ")];
+    [picker setMessageBody:NSLocalizedString(@"SettingTableView_SendEmailForBackupBody", @"添付されたファイルを ことせかい で読み込む事で、小説のリストが再生成されます。") isHTML:NO];
+    
+    [picker addAttachmentData:data mimeType:mimeType fileName:fileName];
+    
+    [self presentViewController:picker animated:YES completion:nil];
+
+    return true;
+}
+
 /// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
 - (void)ShareNcodeListURLScheme
 {
+    NSData* backupData = [[GlobalDataSingleton GetInstance] CreateBackupJSONData];
+    NSDateFormatter* dateFormatter = [NSDateFormatter new];
+    dateFormatter.dateFormat = @"yyyyMMddHHmm";
+    NSString* dateString = [dateFormatter stringFromDate:[NSDate new]];
+    NSString* fileName = [[NSString alloc] initWithFormat:@"%@.novelspeaker-backup-json", dateString];
+    [self sendMailWithBinary:backupData fileName:fileName mimeType:@"application/octet-stream"];
+    return;
+
     //GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     //[globalData AddDownloadQueueForURL:[[NSURL alloc] initWithString:@"https://kakuyomu.jp/works/1177354054880928816/episodes/1177354054880929986"]];
     NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:NarouContentSortType_Ncode];
@@ -233,7 +263,7 @@ static NSString* const SettingsTableViewDefaultCellID = @"SettingsTableViewCellD
         [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SettingTableViewController_NoContentHave", @"本棚に本がありません") message:nil];
         return;
     }
-    
+
     NSMutableString* shareText = [[NSMutableString alloc] initWithString:@"novelspeaker://downloadncode/"];
     
     for (NarouContentCacheData* content in contentList) {

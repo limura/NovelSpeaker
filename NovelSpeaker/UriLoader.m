@@ -33,11 +33,11 @@
     }
     
     for (NSDictionary* firstObject in siteInfoJsonArray) {
-        if (![firstObject isMemberOfClass:[NSDictionary class]]) {
-            //continue;
+        if (![firstObject isKindOfClass:[NSDictionary class]]) {
+            continue;
         }
         NSDictionary* secondObject = [firstObject objectForKey:@"data"];
-        if (secondObject == nil /*|| ![secondObject isMemberOfClass:[NSDictionary class]]*/) {
+        if (secondObject == nil || ![secondObject isKindOfClass:[NSDictionary class]]) {
             continue;
         }
         NSString* urlPattern = [secondObject objectForKey:@"url"];

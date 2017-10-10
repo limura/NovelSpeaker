@@ -59,6 +59,8 @@
 "SettingtableViewController_ConfirmEnableBackgroundFetch" = "Network communication comes to occur to come to confirm the update of the novel when I validate this setting when I do not use NovelSpeaker. Will that be all right?";
 "SettingTableViewController_OverrideRubyIsEnabled" = "Speech ruby only: Enabled";
 "SettingTableViewController_OverrideRubyIsDisabled" = "Speech ruby only: Disabled";
+"SettingTableView_SendEmailForBackupTitle" = "NovelSpeaker Backup file";
+"SettingTableView_SendEmailForBackupBody" = "By loading the attached file with NovelSpeaker, the list of novels and the replacement dictionary are regenerated.";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";

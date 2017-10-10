@@ -91,6 +91,13 @@ void uncaughtExceptionHandler(NSException *exception)
     [[GlobalDataSingleton GetInstance] saveContext];
 }
 
+- (BOOL)application:(UIApplication *)app
+    openURL:(NSURL *)url
+    options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    return [globalData ProcessCustomFileUTI:url];
+}
+
 - (BOOL)application:(UIApplication*)application openURL:(NSURL*)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation
 {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
@@ -104,5 +111,5 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [globalData HandleBackgroundFetch:application performFetchWithCompletionHandler:completionHandler];
 }
 
-    
+
 @end
