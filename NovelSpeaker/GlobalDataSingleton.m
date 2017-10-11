@@ -3052,10 +3052,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             NarouContentCacheData* content = [self CreateNewUserBook]; // で作った奴の ncode を上書きすれば良い
             content.ncode = ncode;
             content.title = title;
+            content.general_all_no = [[NSNumber alloc] initWithUnsignedInteger:[storyArray count]];
             [self UpdateNarouContent:content];
             int chapterNumber = 1;
             for (id storyObj in storyArray) {
-                if (![storyObj isMemberOfClass:[NSString class]]) {
+                if (![storyObj isKindOfClass:[NSString class]]) {
                     continue;
                 }
                 NSString* story = storyObj;
