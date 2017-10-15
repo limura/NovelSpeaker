@@ -2295,15 +2295,45 @@ static GlobalDataSingleton* _singleton = nil;
     return content;
 }
 
+/// NarouContentCacheData の中から、ncode(小説家になろうのncode)のものだけを取り出して、その ncode を ncode-ncode-ncode... の形式の文字列にして返します。
+- (NSString*)createNcodeListString:(NSArray*)contentArray {
+    NSMutableString* result = [NSMutableString new];
+    for (NarouContentCacheData* content in contentArray) {
+        if ([content isURLContent] || [content isUserCreatedContent]) {
+            continue;
+        }
+        if ([result length] > 0) {
+            [result appendString:@"-"];
+        }
+        [result appendString:content.ncode];
+    }
+    return result;
+}
+
 /// 全てのコンテンツを再度ダウンロードしようとします。
 - (void)ReDownladAllContents{
-    NSMutableArray* contentList = [self GetAllNarouContent:NarouContentSortType_NovelUpdatedAt];
+    NSArray* contentList = [self GetAllNarouContent:NarouContentSortType_NovelUpdatedAt];
     if (contentList == nil) {
         return;
     }
-    for (NarouContentCacheData* content in contentList) {
-        [self PushContentDownloadQueue:content];
-    }
+    NSString* ncodeListString = [self createNcodeListString:contentList];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSArray* searchResult = [NarouLoader SearchNcode:ncodeListString];
+        for (NarouContentCacheData* content in contentList) {
+            BOOL needSkip = false;
+            for (NarouContentCacheData* searchContent in searchResult) {
+                if ([searchContent.ncode compare:content.ncode] == NSOrderedSame
+                    && [searchContent.general_all_no isEqualToNumber:content.general_all_no]) {
+                    needSkip = true;
+                    break;
+                }
+            }
+            if (needSkip) {
+                continue;
+            }
+            [self PushContentDownloadQueue:content];
+        }
+    });
 }
 
 /// 現在の Download queue を全て削除します
