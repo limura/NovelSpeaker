@@ -43,7 +43,7 @@
 "SettingTableViewController_SettingOfTheTextSize" = "Setting of the text size";
 "SettingTableViewController_SettingOfTheSpeechDelay" = "Setting of the speech delay";
 "SettingTableViewController_AddDefaultCorrectionOfTheReading" = "Add default correction of the reading";
-"SettingTableViewController_GetNcodeDownloadURLScheme" = "Get re-download URL scheme";
+"SettingTableViewController_GetNcodeDownloadURLScheme" = "Create backup data";
 "SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "Added a standard paraphrasing dictionary.";
 "SettingTableViewController_NoContentHave" = "No book in bookshelf";
 "SettingTableViewController_ShareNcodeListURLScheme" = "re-download URL created.";
@@ -126,6 +126,10 @@
 "EditUserBookViewContoller_InputTextHeare" = "Input text here";
 "EditUserBookViewController_AddNewStoryFailed" = "Chapter add failed.";
 "NarouSearchViewController_DoneKeyboardBarItem" = "done";
+
+"NarouDownloadQueue_URLDownloadTitleFixed" = "downloading \"%@\" ";
+"NarouDownloadQueue_URLDownloadTitleNotFound" = "Could not get the title of the downloaded thing, will leave it as URL.\n%@";
+"NarouDownloadQueue_URLDownloadFailedWithException" = "Failed to download URL \"%@\".";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

@@ -13,6 +13,8 @@
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
 #import "UriLoader.h"
+#import "EasyAlert.h"
+#import "UIViewControllerExtension.h"
 
 @implementation NarouDownloadQueue
 
@@ -286,8 +288,21 @@ static float SLEEP_TIME_SECOND = 10.5f;
         if (story == nil) {
             return;
         }
-        if (story.count == 1 && story.title != nil && [story.title length] > 0 && !isReload) {
-            localContent.title = story.title;
+        if (story.count == 1 && !isReload) {
+            NSString* message = nil;
+            if (story.title != nil && [story.title length] > 0) {
+                localContent.title = story.title;
+                message = [[NSString alloc] initWithFormat:NSLocalizedString(@"NarouDownloadQueue_URLDownloadTitleFixed", @"「%@」の名前で本棚に登録します。"), story.title];
+            }else{
+                message = [[NSString alloc] initWithFormat:NSLocalizedString(@"NarouDownloadQueue_URLDownloadTitleNotFound", @"ダウンロードしたもののタイトルを取得できなかったので、以下のURLのまま本棚に登録します。\n%@"), localContent.title];
+            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIViewController* rootViewController = [UIViewController toplevelViewController];
+                EasyAlert* easyAlert = [[EasyAlert alloc] initWithViewController:rootViewController];
+                [easyAlert ShowAlertOneButton:message
+                                        message:nil okButtonText:NSLocalizedString(@"OK_button", nil)
+                              okActionHandler:nil];
+            });
         }
         if ([localContent.general_all_no intValue] < story.count) {
             localContent.general_all_no = [[NSNumber alloc] initWithInt:story.count];
@@ -303,6 +318,14 @@ static float SLEEP_TIME_SECOND = 10.5f;
         [globalData UpdateNarouContent:localContent];
         result = true;
     } failedAction:^(NSURL* url){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString* message = [[NSString alloc] initWithFormat:NSLocalizedString(@"NarouDownloadQueue_URLDownloadFailedWithException", @"URLの取得に失敗しました。\n%@"), [url absoluteString]];
+            UIViewController* rootViewController = [UIViewController toplevelViewController];
+            EasyAlert* easyAlert = [[EasyAlert alloc] initWithViewController:rootViewController];
+            [easyAlert ShowAlertOneButton:message
+                                  message:nil okButtonText:NSLocalizedString(@"OK_button", nil)
+                          okActionHandler:nil];
+        });
         dispatch_semaphore_signal(semaphore);
     } finishAction:^(NSURL* url){
         dispatch_semaphore_signal(semaphore);

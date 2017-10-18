@@ -43,7 +43,7 @@
 "SettingTableViewController_SettingOfTheTextSize" = "表示文字サイズの設定";
 "SettingTableViewController_SettingOfTheSpeechDelay" = "読み上げ時の間の設定";
 "SettingTableViewController_AddDefaultCorrectionOfTheReading" = "標準の読みの修正を上書き追加";
-"SettingTableViewController_GetNcodeDownloadURLScheme" = "再ダウンロード用URLの取得";
+"SettingTableViewController_GetNcodeDownloadURLScheme" = "再ダウンロード用データの生成";
 "SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "標準の読み替え辞書を上書き追加しました。";
 "SettingTableViewController_NoContentHave" = "本棚に本がありません";
 "SettingTableViewController_ShareNcodeListURLScheme" = "本棚に登録されている小説の再ダウンロードURLスキームを生成します";
@@ -123,6 +123,10 @@
 "EditUserBookViewContoller_InputTextHeare" = "ここに本文を書き込んでください";
 "EditUserBookViewController_AddNewStoryFailed" = "新しい章の追加に失敗しました";
 "EditUserBookViewController_ConfirmDeleteThisChapter" = "この章を削除します。よろしいですか？";
+
+"NarouDownloadQueue_URLDownloadTitleFixed" = "ダウンロードしたものを「%@」の名前で本棚に登録します";
+"NarouDownloadQueue_URLDownloadTitleNotFound" = "ダウンロードしたもののタイトルを取得できなかったので、以下のURLのまま本棚に登録します。\n%@";
+"NarouDownloadQueue_URLDownloadFailedWithException" = "URLの取得に失敗しました。\n%@";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

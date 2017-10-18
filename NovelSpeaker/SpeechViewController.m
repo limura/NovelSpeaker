@@ -123,6 +123,13 @@
     
     // 読み上げる文章を改めて設定します。
     [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+    
+    // 読み上げ中かどうかが画面が表示されていない時に更新される場合があるので、表示を更新しておきます。
+    if ([globalData isSpeaking]) {
+        startStopButton.title = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");
+    }else{
+        startStopButton.title = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -183,21 +190,23 @@
         [self SetReadingPointFailedMessage];
         return false;
     }
-    // 自分の content.currentReadingStory は昔のcacheなので現在の値を読み直します
-    StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
-    if (story == nil) {
-        // なにやら設定されていないようなので、最初の章を読み込むことにします。
-        // TODO: XXXX: 最新情報に更新した後にここに何故か来る事があるのをなんとかする
-        [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込みます"]]; // NSLog
-        story = [[GlobalDataSingleton GetInstance] SearchStory:content.ncode chapter_no:1];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+        // 自分の content.currentReadingStory は昔のcacheなので現在の値を読み直します
+        StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
         if (story == nil) {
-            [self SetReadingPointFailedMessage];
-            return false;
+            // なにやら設定されていないようなので、最初の章を読み込むことにします。
+            // TODO: XXXX: 最新情報に更新した後にここに何故か来る事があるのをなんとかする
+            [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込みます"]]; // NSLog
+            story = [[GlobalDataSingleton GetInstance] SearchStory:content.ncode chapter_no:1];
+            if (story == nil) {
+                [self SetReadingPointFailedMessage];
+                return;
+            }
         }
-    }
-    //NSLog(@"set currentreading story: %@ (content: %@ %@) location: %lu", story.chapter_number, content.ncode, content.title, [story.readLocation unsignedLongValue]);
-    [self setSpeechStory:story];
-    
+        //NSLog(@"set currentreading story: %@ (content: %@ %@) location: %lu", story.chapter_number, content.ncode, content.title, [story.readLocation unsignedLongValue]);
+        [self setSpeechStory:story];
+    });
+   
     return true;
 }
 
@@ -395,7 +404,6 @@
         }
     }
     self.textView.selectedRange = NSMakeRange(readLocation, 1);
-
 }
 
 - (void)detailButtonClick:(id)sender {

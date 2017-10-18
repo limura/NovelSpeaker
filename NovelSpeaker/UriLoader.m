@@ -27,7 +27,7 @@
 
 /// SiteInfo のJSONを解析した後の NSArray を元に内部データベースに追加します
 - (BOOL)AddSiteInfoFromJsonArray:(NSArray *)siteInfoJsonArray targetSiteInfoArray:(NSMutableArray*)targetSiteInfoArray {
-    if (siteInfoJsonArray == nil /*|| ![siteInfoJsonArray isMemberOfClass:[NSArray class]]*/) {
+    if (siteInfoJsonArray == nil || ![siteInfoJsonArray isKindOfClass:[NSArray class]]) {
         NSLog(@"siteInfoJsonArray invalid: %@", siteInfoJsonArray);
         return false;
     }
