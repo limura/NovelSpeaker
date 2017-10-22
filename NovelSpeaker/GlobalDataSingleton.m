@@ -19,6 +19,7 @@
 #define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
 #define APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE @"AddTextQueue"
 #define COOKIE_ENCRYPT_SECRET_KEY @"謎のエラーです。これを確認できた人はご一報ください"
+#define USER_DEFAULTS_BACKGROUND_FETCH_FETCHED_NOVEL_COUNT @"BackgroundFetchFetchedNovelCount"
 
 @implementation GlobalDataSingleton
 
@@ -2508,10 +2509,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
     int downloadCount = [self GetNewDownloadCount];
     if (downloadCount > 0) {
-        NSInteger appendCount = 0;
-        if (application.applicationIconBadgeNumber > 0) {
-            appendCount = application.applicationIconBadgeNumber;
-        }
+        NSInteger appendCount = [self GetBackgroundFetchedNovelCount];
         application.applicationIconBadgeNumber = downloadCount + appendCount;
         UILocalNotification* notification = [UILocalNotification new];
         notification.fireDate = [NSDate date];
@@ -2876,6 +2874,20 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (BOOL)deleteAppGroupQueueForText:(NSString*)text {
     return [self deleteTextFromAppGroup_UserDefaults_StringArrayDataForKey:APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE text:text];
 }
+
+/// 起動されるまでの間に新規にダウンロードされた小説の数を取得します
+- (NSInteger)GetBackgroundFetchedNovelCount {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    return [userDefaults integerForKey:USER_DEFAULTS_BACKGROUND_FETCH_FETCHED_NOVEL_COUNT];
+}
+
+/// 起動されるまでの間に新規にダウンロードされた小説の数を更新します
+- (void)UpdateBackgroundFetchedNovelCount:(NSInteger)count {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setInteger:count forKey:USER_DEFAULTS_BACKGROUND_FETCH_FETCHED_NOVEL_COUNT];
+    [userDefaults synchronize];
+}
+
 
 
 /// ことせかい 関連の AppGroup に属する UserDefaults の key に対して、文字列を格納した NSArray のつもりで text を追加します

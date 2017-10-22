@@ -70,6 +70,7 @@ void uncaughtExceptionHandler(NSException *exception)
     NSLog(@"application will enter foreground.");
     // badge clear.
     application.applicationIconBadgeNumber = -1;
+    [[GlobalDataSingleton GetInstance] UpdateBackgroundFetchedNovelCount:0];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application

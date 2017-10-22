@@ -442,6 +442,7 @@ If there is still a problem, I am glad that you can specifically tell me what is
 問題の修正
 
 ・全ての小説を再ダウンロードする時に、更新が無いものについてはダウンロードキューに追加しないようになります
+・更新された小説の自動ダウンロードでアプリアイコンに表示されるバッヂの数字が加算されるようになります
 
 追伸
 
