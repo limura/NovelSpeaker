@@ -299,9 +299,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
             dispatch_async(dispatch_get_main_queue(), ^{
                 UIViewController* rootViewController = [UIViewController toplevelViewController];
                 EasyAlert* easyAlert = [[EasyAlert alloc] initWithViewController:rootViewController];
-                [easyAlert ShowAlertOneButton:message
-                                        message:nil okButtonText:NSLocalizedString(@"OK_button", nil)
-                              okActionHandler:nil];
+                [easyAlert ShowAlertOneButton:nil
+                                    message:message okButtonText:NSLocalizedString(@"OK_button", nil)
+                          okActionHandler:nil];
             });
         }
         if ([localContent.general_all_no intValue] < story.count) {

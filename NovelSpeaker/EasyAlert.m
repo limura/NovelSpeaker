@@ -147,6 +147,19 @@
     return nil;
 }
 
+/// 何も押せないメッセージを表示して、このメッセージは指定された時間後に勝手に消えます
+- (BOOL)ShowAlertAutoFade:(NSString*)title message:(NSString*)message delayInSeconds:(double)delayInSeconds
+{
+    EasyAlertActionHolder* holder = [self ShowAlert:title message:message];
+    if (holder == nil) {
+        return false;
+    }
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [holder CloseAlert:false];
+    });
+    return true;
+}
+
 /// 一つの選択肢を出す alert を表示します。ハンドラを一つ受け取ります
 - (BOOL)ShowAlertOneButton:(NSString*)title message:(NSString*)message okButtonText:(NSString*)okButtonText okActionHandler:(void(^)(UIAlertAction*))okActionHandler
 {

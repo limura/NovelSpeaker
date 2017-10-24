@@ -48,6 +48,9 @@
 /// 返り値として返す EasyAlertActionHolder の CloseAlert method で閉じてください。
 - (EasyAlertActionHolder*)ShowAlert:(NSString*)title message:(NSString*)message;
 
+/// 何も押せないメッセージを表示して、このメッセージは指定された時間後に勝手に消えます
+- (BOOL)ShowAlertAutoFade:(NSString*)title message:(NSString*)message delayInSeconds:(double)delayInSeconds;
+
 /// 一つの選択肢を出す alert を表示します。ハンドラを一つ受け取ります
 - (BOOL)ShowAlertOneButton:(NSString*)title message:(NSString*)message okButtonText:(NSString*)okButtonText okActionHandler:(void(^)(UIAlertAction*))okActionHandler;
 
