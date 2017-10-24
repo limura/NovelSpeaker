@@ -121,8 +121,20 @@
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     [self.textView becomeFirstResponder];
     
-    // 読み上げる文章を改めて設定します。
-    [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+    // 読み上げる文章を改めて設定したいです
+    // が、読み上げ中である場合には現在保存されている情報は古いため、
+    // 読み上げを停止→現在の読み上げ位置を保存→読み上げ文章を改めてロード
+    // という手順を踏む必要があります。
+    if ([globalData isSpeaking]) {
+        // [self stopSpeech] を呼んでしまうと、現在表示されているもので読み上げ位置を更新してしまうため、
+        // globalData 側の StopSpeech を呼び出します。この時、globalData側 で読み上げ位置を保存していますので改めて保存の必要はありません。
+        [globalData StopSpeech];
+    }
+    // 読み上げ位置の更新がDB本体に保存されるまで待って、読み上げ位置を改めて設定します
+    // (間髪入れずに読み出そうとすると保存されていない古い情報を読む可能性が少しだけあるはずです)
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+        [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+    });
     
     // 読み上げ中かどうかが画面が表示されていない時に更新される場合があるので、表示を更新しておきます。
     if ([globalData isSpeaking]) {
@@ -515,7 +527,8 @@
 - (void) finishSpeak
 {
     [self stopSpeechWithoutDiactivate];
-    [NSThread sleepForTimeInterval:1.0f];
+    // 次のページに移行する時に、このsleepから先に進んでいかないような挙動？を？示している？ようなので？試しにコメントアウトしてみます
+    //[NSThread sleepForTimeInterval:1.0f];
     if ([self SetNextChapter]) {
         [self startSpeech];
     }else{
