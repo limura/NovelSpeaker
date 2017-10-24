@@ -202,12 +202,13 @@
 /// "|北の鬼(ノースオーガ)" → "ノースオーガ"
 /// "北の鬼" → "ノースオーガ"
 /// の二種類を出力します。
+/// の、つもりだったのですが、「"北の鬼" → "ノースオーガ"」の方はとりあえず出さない事にします。
 + (NSDictionary*)FindNarouRubyNotation:(NSString*)text {
     // 小説家になろうでのルビの扱い https://syosetu.com/man/ruby/
+    // 正規表現における文字集合の書き方
     // 平仮名 \p{Hiragana}
     // カタカナ \p{Katakana}
     // 漢字 \p{Han}
-    // 数字 \p{}
     NSArray* patternArray = @[
       @"\\|([^|]+)《(.+?)》", // | のある場合
       @"([\\p{Han}]+)《(.+?)》", // 《 》 の前が漢字
@@ -268,13 +269,14 @@
             }
             [hitRanges addObject:[NSValue valueWithRange:thisRange]];
 
-            NSRange fromStringRange = [match rangeAtIndex:1];
             NSRange toStringRange = [match rangeAtIndex:2];
-            NSString* fromString = [text substringWithRange:fromStringRange];
             NSString* toString = [text substringWithRange:toStringRange];
-            [result setObject:toString forKey:fromString];
+            // XXXX: 「"北の鬼" → "ノースオーガ"」の方はとりあえず出さない事にします。
+            //NSRange fromStringRange = [match rangeAtIndex:1];
+            //NSString* fromString = [text substringWithRange:fromStringRange];
+            //[result setObject:toString forKey:fromString];
+            //NSLog(@"phase 2.1.3: from/to: %@/%@", fromString, toString);
             NSString* allString = [text substringWithRange:thisRange];
-            NSLog(@"phase 2.1.3: from/to: %@/%@", fromString, toString);
             [result setObject:toString forKey:allString];
             NSLog(@"phase 2.1.4: from/to: %@/%@", allString, toString);
         }
