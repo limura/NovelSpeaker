@@ -429,30 +429,6 @@ I did not know whether the color of the application icon is a problem or whether
 In the Xcode project, the icon of the part of the image to be attached will be blank, so it will correspond to newly setting 1024px.
 If there is still a problem, I am glad that you can specifically tell me what is the problem.
 
-
-
-# Ver 1.1.7
-
-インタフェースの変更
-
-・設定タブに、「ルビをルビだけ読むようにする」のON/OFF設定を追加
-・「設定」→「再ダウンロード用URLの取得」、を「再ダウンロード用データの生成」に変更します。小説家になろうのものだけでなく、自作小説、Safariから ことせかい に読み込ませたもの、読みの修正用辞書のバックアップが可能となります
-・「ことせかい に取り込む」機能を使って読み込ませた時、タイトルが確定した時点でタイトルをダイアログで表示するようになります
-
-問題の修正
-
-・全ての小説を再ダウンロードする時に、更新が無いものについてはダウンロードキューに追加しないようになります
-・更新された小説の自動ダウンロードでアプリアイコンに表示されるバッヂの数字が加算されるようになります
-
-追伸
-
-評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
-
-今回の修正は細かい改良やバグ修正が主となります。
-今回は再ダウンロード用のURLの取得機能を変更して、自作小説のバックアップや読みの修正用辞書のバックアップもできるようにしてみました。ファイルの拡張子を .novelspeaker-backup-json にしていだだいて、正しいJSON形式で記述していただければ、外部から読み替え辞書の登録もできるようになります。これらのデータは上書き保存されます。古いもので上書きされなかったものは削除されませんのでご注意ください。なお、JSONの形式は一度「再ダウンロード用データの生成」でバックアップ用データを生成して頂いて、その中身を真似る形で理解して頂ければと思います。
-
-# Ver 1.1.7
-
 ----
 In japanese.
 Metadataがおかしいという事で、App Archiveを更新しました。
@@ -464,6 +440,95 @@ Metadataがおかしいという事で、App Archiveを更新しました。
 Xcode projectでは、添付致します画像の部分のアイコンが空白でしたので、新たに1024pxのものを設定した、という対応になります。
 まだ問題があるのであれば、具体的に、何が問題なのかを指示していただけると嬉しいです。
 
+
+# Ver 1.1.7
+
+インタフェースの変更
+
+・設定タブに、「ルビをルビだけ読むようにする」のON/OFF設定を追加
+・「設定」->「再ダウンロード用URLの取得」、を「再ダウンロード用データの生成」に変更します。小説家になろうのものだけでなく、自作小説、Safariから ことせかい に読み込ませたもの、読みの修正用辞書のバックアップが可能となります
+・Safari から「ことせかい に読み込む」機能を使って読み込ませた時、タイトルが確定した時点でタイトルをダイアログで表示するようになります
+
+問題の修正
+
+・小説を読み上げ中に設定タブなどへ移動して戻ってくると、読み上げ位置が過去のものに戻されてしまう問題を修正
+・全ての小説を再ダウンロードする時に、更新が無いものについてはダウンロードキューに追加しないようになります
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は細かい改良やバグ修正が主となります。
+小説の読み上げ中にタブを移動すると読み上げ位置が巻き戻る問題はご迷惑をおかけしました。申し訳ありません。
+今回は再ダウンロード用のURLの取得機能を変更して、自作小説のバックアップや読みの修正用辞書のバックアップもできるようにしてみました。ファイルの拡張子を .novelspeaker-backup-json にしていだだいて、正しいJSON形式で記述していただければ、外部から読み替え辞書の登録もできるようになります(読み替え辞書のみの記載だけでも問題ありませんので、読み替え辞書を登録するために利用していただいても構いません)。これらのデータは上書き保存されます。古いもので上書きされなかったものは削除されませんのでご注意ください。なお、JSONの形式は一度「再ダウンロード用データの生成」でバックアップ用データを生成して頂いて、その中身を真似る形で理解して頂ければと思います。
+
+それでは、今後とも ことせかい を宜しくお願い致します。
+
+# Ver 1.1.7
+
+Interface change
+
+- Add "Speech ruby only" setting feature on Settings page.
+- Change "Create re-download URL" feature to "Create NovelSpeaker Backup file" on Settings page.
+- When loading with Safari using the "download with NovelSpeaker" extension, title will be displayed in the dialog when the title is confirmed.
+
+Bug fix
+
+- Fixed a problem that when you move to the setting tab etc. while reading a novel and return it, the reading-out position is returned to the past one.
+- When all the novels are re-downloaded, those that do not update will not be added to the download queue.
+
+
+Appleのレビュアー向けの補足情報
+
+
+In this update, files with the file extension .novelspeaker-backup-json are associated with the application.
+This function is intended for backup purposes of downloaded novels etc.
+This file is generated using "Create re-download URL" in SettingsPage of the application.
+The user can download the generated novelspeaker-backup-json file into the application, and you can re-download the backed up novel again.
+
+.novelspeaker-backup-json The contents of the file are in JSON format and are roughly as follows.
+
+{
+  "data_version" : "1.0.0",
+  "word_replacement_dictionary": {
+    "from word": "to word", ...
+  },
+  "bookshelf": [
+  {
+    "type": "url" or "ncode" or "user",
+    "ncode": ..., "title": ..., "id": ..., ...
+  }, ...
+  ]
+}
+
+In the above. Novelskeaker-backup-json, a place to save data using encryption has been added.
+For that reason, we decided to use the encryption function "Yes" when submitting the review of the application.
+This encryption function uses sha 256 (CC_SHA 256 () function) prepared by OS side.
+----
+in Japanese.
+
+今回のアップデートでは、ファイル拡張子が .novelspeaker-backup-json となっているファイルについて、アプリとの関連付けを行いました。
+この機能はダウンロードされた小説等のバックアップ用途が目的です。
+このファイルはアプリのSettingsPageにおいて"Create re-download URL"を用いて生成されます。
+ユーザは生成された .novelspeaker-backup-json ファイルをアプリに読み込ませる事で、バックアップされた小説をもう一度ダウンロードし直す事ができるようになります。
+
+.novelspeaker-backup-json ファイルの中身は JSON 形式となっており、おおよそ以下のような形式です。
+
+{
+"data_version" : "1.0.0",
+"word_replacement_dictionary": {
+"from word": "to word", ...
+},
+"bookshelf": [
+{
+"type": "url" or "ncode" or "user",
+"ncode": ..., "title": ..., "id": ..., ...
+]
+}
+
+上記の .novelskeaker-backup-json の中で、暗号化を使用してデータを保存する箇所が追加されました。
+そのため、アプリのレビュー提出の際に暗号化機能の利用を「はい」にしました。
+この暗号化機能はOS側で用意しているsha256(CC_SHA256()関数)を利用しています。
 
 expedited app review に出した時の文言
 ---begin---

@@ -1,2 +1,11 @@
 *.xcuserstate
 *.xccheckout
+.DS_Store
+build
+certificate
+docs
+infer-out
+xcschemes
+Podfile.lock
+Podfile.tmp
+runinfer.sh

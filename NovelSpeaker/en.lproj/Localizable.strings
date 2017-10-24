@@ -137,28 +137,28 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.6
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.7
 
-- When an headphone is pulled up when an headphone sticks in headphone Jack, speech comes to stop.
-- Fixed problem that download from Let's becom novelist site failed.
-- Fixed a problem in which the reading start position shifted to the reading position stopped earlier when reading of a book was stopped and when opening another book and starting reading aloud.
-- Fixed a problem that automatic stop at continuous playback time does not work if page switching occurs before the specified time in continuous playback time.
+- Add \"Speech ruby only\" setting feature on Settings page.
+- New feature \"Create NovelSpeaker Backup file\" on Settings page.
+- When all the novels are re-downloaded, those that do not update will not be added to the download queue.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
-# Ver 1.1.6
+# Ver 1.1.7
 
-インタフェースの変更
+Interface change
 
-・再生中にイヤホンジャックからイヤホンが引き抜かれた場合、再生が停止するようになります
-・実験的機能の追加(詳しくはAppStoreの Version 1.1.6 のアップデートノートを参照してください)
+- Add \"Speech ruby only\" setting feature on Settings page.
+- Change \"Create re-download URL\" feature to \"Create NovelSpeaker Backup file\" on Settings page.
+- When loading with Safari using the \"download with NovelSpeaker\" extension, title will be displayed in the dialog when the title is confirmed.
 
-問題の修正
+Bug fix
 
-・「なろう検索」からのダウンロードが失敗する問題を修正
-・ある本の読み上げを停止した後、別の本を開いて読み上げを開始しようとした時に、読み上げ開始位置が先程停止した読み上げ位置にズレてしまう問題を修正
-・連続再生時間で指定した時間が経つ前にページ切り替えが起こると連続再生時間での自動停止が効かなくなる問題を修正
+- Fixed a problem that when you move to the setting tab etc. while reading a novel and return it, the reading-out position is returned to the past one.
+- When all the novels are re-downloaded, those that do not update will not be added to the download queue.
+
 
 # Version 1.1.6
 
