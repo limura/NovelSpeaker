@@ -61,6 +61,10 @@
 "SettingTableViewController_OverrideRubyIsDisabled" = "Speech ruby only: Disabled";
 "SettingTableView_SendEmailForBackupTitle" = "NovelSpeaker Backup file";
 "SettingTableView_SendEmailForBackupBody" = "By loading the attached file with NovelSpeaker, the list of novels and the replacement dictionary are regenerated.";
+"SettingTableViewController_EditNotRubyStringTitle" = "String with judge that it is not ruby.";
+"SettingTableViewController_EditNotRubyStringHint" = "If it is ruby of only letters written here, it is judged to be just emphasis, and the original letter will be read aloud instead of ruby";
+"SettingTableViewController_EditNotRubyStringPlaceHolder" = "・";
+
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";

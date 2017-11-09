@@ -86,16 +86,23 @@
     NSString* text = @"012aiuあいう漢字(かんじ)ルビをふる、"
         @"分断（ブンダン）、|変速ルビ《へんそくルビ》、|強調している《・・・・・・》、"
         @"漢字(簡易表記のルビ部分に漢字を入れると)認識されないはず"
+        @"複数（ふくすう）連続（れんぞく)目標(もくひょう)問題（もんだい）発見（はっけん）"
         @"end"
     ;
     NSDictionary* matchPatterns = @{
-        @"漢字": @"かんじ", @"漢字(かんじ)": @"かんじ",
-        @"分断": @"ブンダン", @"分断（ブンダン）": @"ブンダン",
-        @"変速ルビ": @"へんそくルビ", @"|変速ルビ《へんそくルビ》": @"へんそくルビ",
-        @"強調している": @"・・・・・・", @"|強調している《・・・・・・》": @"・・・・・・",
+        @"漢字(かんじ)": @"かんじ",
+        @"分断（ブンダン）": @"ブンダン",
+        @"|変速ルビ《へんそくルビ》": @"へんそくルビ",
+        @"複数（ふくすう）": @"ふくすう",
+        @"連続（れんぞく)": @"れんぞく",
+        //@"目標(もくひょう)": @"もくひょう",
+        @"問題（もんだい）": @"もんだい",
+        @"発見（はっけん）": @"はっけん",
+        // @"|強調している《・・・・・・》": @"・・・・・・",
     };
-    NSDictionary* resultDictionary = [StringSubstituter FindNarouRubyNotation:text];
+    NSDictionary* resultDictionary = [StringSubstituter FindNarouRubyNotation:text notRubyString:@"・！＠もくひょう"];
     
+    NSLog(@"%@", resultDictionary);
     for (NSString* fromAnswer in [matchPatterns keyEnumerator]) {
         NSString* toAnswer = matchPatterns[fromAnswer];
         NSString* to = [resultDictionary objectForKey:fromAnswer];

@@ -4,3 +4,5 @@
 
 #import <UIKit/UIKit.h>
 #import "GlobalDataSingleton.h"
+#import "EditUserBookViewController.h"
+#import "MaxSpeechTimeTableViewCell.h"

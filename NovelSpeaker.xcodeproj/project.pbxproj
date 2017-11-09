@@ -106,6 +106,7 @@
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
+		219FFC841FB46F4800633184 /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219FFC831FB46F4800633184 /* SettingsTableViewController.swift */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
 		21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */ = {isa = PBXBuildFile; fileRef = 21AED5D419B335CF00CE846D /* ReleaseMemo.md */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
@@ -137,6 +138,7 @@
 		21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */; };
 		21E46D431A94B7F400CE39B0 /* EasyShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E46D421A94B7F400CE39B0 /* EasyShare.m */; };
 		21E704CF1AF741350071F31E /* UpdateLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E704CE1AF741350071F31E /* UpdateLogViewController.m */; };
+		21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BF81FB487B1003C659F /* EasyDialogs.swift */; };
 		21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
 		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
@@ -353,6 +355,7 @@
 		2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 8.xcdatamodel"; sourceTree = "<group>"; };
 		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		219FFC831FB46F4800633184 /* SettingsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
 		21A4F6DA19B1B30C007CCD32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F71C19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
 		21A4F71D19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -408,6 +411,7 @@
 		21E46D421A94B7F400CE39B0 /* EasyShare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EasyShare.m; sourceTree = "<group>"; };
 		21E704CD1AF741350071F31E /* UpdateLogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateLogViewController.h; sourceTree = "<group>"; };
 		21E704CE1AF741350071F31E /* UpdateLogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateLogViewController.m; sourceTree = "<group>"; };
+		21E76BF81FB487B1003C659F /* EasyDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EasyDialogs.swift; sourceTree = "<group>"; };
 		21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
 		21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIViewControllerExtension.m; sourceTree = "<group>"; };
 		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -624,6 +628,7 @@
 			children = (
 				21BDC2DD1A2B70A5002804DD /* EasyAlert.h */,
 				21BDC2DE1A2B70A5002804DD /* EasyAlert.m */,
+				21E76BF81FB487B1003C659F /* EasyDialogs.swift */,
 				2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */,
 				2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */,
 				21D8FC4D19FC985B00CCF1B6 /* LPPerformanceChecker.h */,
@@ -823,6 +828,7 @@
 				2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */,
 				21916366199E5D43003FF7FC /* SettingsTableViewController.h */,
 				21916367199E5D43003FF7FC /* SettingsTableViewController.m */,
+				219FFC831FB46F4800633184 /* SettingsTableViewController.swift */,
 				210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */,
 				210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */,
 				21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */,
@@ -1246,6 +1252,8 @@
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
+				219FFC841FB46F4800633184 /* SettingsTableViewController.swift in Sources */,
+				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
 				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
 				2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,

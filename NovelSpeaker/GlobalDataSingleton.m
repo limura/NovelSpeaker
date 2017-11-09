@@ -1408,7 +1408,7 @@ static GlobalDataSingleton* _singleton = nil;
 /// NiftySpeaker に保存されている文字列から、ルビが振られているものを取り出して読み替え辞書に登録します。
 - (void)ApplyRubyModConfig:(NiftySpeaker*)niftySpeaker
 {
-    NSDictionary* rubyDictionary = [StringSubstituter FindNarouRubyNotation:[m_NiftySpeaker GetText]];
+    NSDictionary* rubyDictionary = [StringSubstituter FindNarouRubyNotation:[m_NiftySpeaker GetText] notRubyString:[self GetNotRubyCharactorStringArray]];
     for (NSString* from in [rubyDictionary keyEnumerator]) {
         NSString* to = [rubyDictionary valueForKey:from];
         if (to != nil) {
@@ -2216,6 +2216,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_CUSTOM_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE @"CustomAutoPagerizeSiteInfoCacheSavedDate"
 #define USER_DEFAULTES_MENU_ITEM_IS_ADD_SPEECH_MOD_SETTINGS_ONLY @"MenuItemIsAddSpeechModSettingOnly"
 #define USER_DEFAULTS_OVERRIDE_RUBY_IS_ENABLED @"OverrideRubyIsEnabled"
+#define USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY @"NotRubyCharactorStringArray"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -2980,6 +2981,28 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setBool:yesNo forKey:USER_DEFAULTS_OVERRIDE_RUBY_IS_ENABLED];
     [userDefaults synchronize];
 }
+
+/// 読み上げられないため、ルビとしては認識しない文字集合を取得します
+- (NSString*)GetNotRubyCharactorStringArray{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString* result = [userDefaults stringForKey:USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY];
+    if (result == nil) {
+        // なんと、ここで default値 を返している！！！！('A`)
+        return @"・";
+    }
+    return result;
+}
+
+/// 読み上げられないため、ルビとしては認識しない文字集合を設定します
+- (void)SetNotRubyCharactorStringArray:(NSString*)data{
+    if (data == nil) {
+        return;
+    }
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:data forKey:USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY];
+    [userDefaults synchronize];
+}
+
 
 // 本棚に入っている物をバックアップするためのJSONに変換する(ためのNSArray*にする)
 - (NSArray*)CreateBookselfBackupForJSONArray{

@@ -35,7 +35,7 @@
 /// "|北の鬼(ノースオーガ)" → "ノースオーガ"
 /// "北の鬼" → "ノースオーガ"
 /// の二種類を出力します。
-+ (NSDictionary*)FindNarouRubyNotation:(NSString*)text;
++ (NSDictionary*)FindNarouRubyNotation:(NSString*)text notRubyString:(NSString*)notRubyString;
 
 @end
 

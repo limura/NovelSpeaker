@@ -195,7 +195,6 @@
     return result;
 }
 
-
 /// 与えられた文章の文字列から、小説家になろうにおけるルビ表記を発見して、自身の読み替え辞書に登録するための辞書を取り出します
 /// 例として、『|北の鬼(ノースオーガ)』という文字列を発見した場合には
 /// key → value
@@ -203,7 +202,8 @@
 /// "北の鬼" → "ノースオーガ"
 /// の二種類を出力します。
 /// の、つもりだったのですが、「"北の鬼" → "ノースオーガ"」の方はとりあえず出さない事にします。
-+ (NSDictionary*)FindNarouRubyNotation:(NSString*)text {
+/// 2017/11/10 ルビではないと判断する文字集合のみの場合、無視するようにします。
++ (NSDictionary*)FindNarouRubyNotation:(NSString*)text notRubyString:(NSString*)notRubyString {
     // 小説家になろうでのルビの扱い https://syosetu.com/man/ruby/
     // 正規表現における文字集合の書き方
     // 平仮名 \p{Hiragana}
@@ -226,6 +226,12 @@
         }
         [regexpArray addObject:regexp];
     }
+    NSRegularExpression* notRubyRegexp = nil;
+    {
+        NSString* pattern = [[NSString alloc] initWithFormat:@"^[%@]+$", notRubyString];
+        NSError *err = nil;
+        notRubyRegexp = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&err];
+    }
     
     NSLog(@"phase 2.");
     // 先にマッチしたものの範囲のリスト
@@ -247,30 +253,16 @@
             }
             NSUInteger thisStart = thisRange.location;
             NSUInteger thisEnd = thisRange.location + thisRange.length;
-            BOOL alreadyHit = false;
-            for (NSValue* rangeValue in hitRanges) {
-                NSLog(@"phase 2.1.1.1. rangeValue: %p", rangeValue);
-                NSLog(@"   rangeValue: [%lu, %lu]", rangeValue.rangeValue.location, rangeValue.rangeValue.length);
-                NSRange prevRange = rangeValue.rangeValue;
-                NSUInteger prevStart = prevRange.location;
-                NSUInteger prevEnd = prevRange.location + prevRange.length;
-                if (prevStart <= thisStart && prevEnd >= thisStart) {
-                    alreadyHit = true;
-                    break;
-                }
-                if (prevStart <= thisEnd && prevEnd >= thisEnd) {
-                    alreadyHit = true;
-                    break;
-                }
-            }
-            NSLog(@"phase 2.1.2. alreadyHit?: %@", alreadyHit ? @"true" : @"false");
-            if (alreadyHit) {
-                continue;
-            }
             [hitRanges addObject:[NSValue valueWithRange:thisRange]];
 
             NSRange toStringRange = [match rangeAtIndex:2];
             NSString* toString = [text substringWithRange:toStringRange];
+            // ルビ部分がルビと認めない文字列のみであった場合は無視するようにします。
+            NSArray* notRubyCheckResultArray = [notRubyRegexp matchesInString:toString options:0 range:NSMakeRange(0, toString.length)];
+            if (notRubyCheckResultArray != nil && [notRubyCheckResultArray count] > 0) {
+                NSLog(@"notRubyCheckHit: %@", notRubyString);
+                continue;
+            }
             // XXXX: 「"北の鬼" → "ノースオーガ"」の方はとりあえず出さない事にします。
             //NSRange fromStringRange = [match rangeAtIndex:1];
             //NSString* fromString = [text substringWithRange:fromStringRange];

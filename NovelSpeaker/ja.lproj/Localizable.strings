@@ -61,6 +61,10 @@
 "SettingTableViewController_OverrideRubyIsDisabled" = "ルビをルビだけよむようにする: 無効";
 "SettingTableView_SendEmailForBackupTitle" = "ことせかい バックアップ";
 "SettingTableView_SendEmailForBackupBody" = "添付されたファイルを ことせかい で読み込む事で、小説のリストや読み替え辞書が再生成されます。";
+"SettingTableViewController_EditNotRubyStringTitle" = "ルビではないと判断する文字";
+"SettingTableViewController_EditNotRubyStringHint" = "ここに書かれた文字のみのルビであればただの強調であると判断され、ルビではなく元の文字が読み上げられる事になります";
+"SettingTableViewController_EditNotRubyStringPlaceHolder" = "・";
+
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
