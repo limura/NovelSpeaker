@@ -189,7 +189,7 @@
         <!--読みの修正-->
         <scene sceneID="FXd-0y-Yzq">
             <objects>
-                <tableViewController id="DcS-zk-4zM" customClass="SpeechModSettingsTableViewController" sceneMemberID="viewController">
+                <tableViewController id="DcS-zk-4zM" customClass="SpeechModSettingsTableViewControllerSwift" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="IYP-gH-U8o">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1462,6 +1462,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.   --------
         <segue reference="OsV-z0-vd7"/>
         <segue reference="0zP-nv-fmY"/>
         <segue reference="DuH-s0-ioe"/>
-        <segue reference="9gN-oA-LUb"/>
+        <segue reference="aiZ-8Y-r0V"/>
     </inferredMetricsTieBreakers>
 </document>

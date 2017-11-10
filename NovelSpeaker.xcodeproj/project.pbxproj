@@ -91,13 +91,11 @@
 		2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191635A199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m */; };
 		21916360199E01A7003FF7FC /* SpeakSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */; };
 		21916364199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916362199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m */; };
-		21916368199E5D43003FF7FC /* SettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916367199E5D43003FF7FC /* SettingsTableViewController.m */; };
 		2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */; };
 		2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */; };
 		21916372199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */; };
 		21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916374199F143E003FF7FC /* SpeechModSetting.m */; };
 		21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
-		2191637B199F4514003FF7FC /* SpeechModSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191637A199F4514003FF7FC /* SpeechModSettingsTableViewController.m */; };
 		2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */; };
 		2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */; };
 		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
@@ -139,6 +137,7 @@
 		21E46D431A94B7F400CE39B0 /* EasyShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E46D421A94B7F400CE39B0 /* EasyShare.m */; };
 		21E704CF1AF741350071F31E /* UpdateLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E704CE1AF741350071F31E /* UpdateLogViewController.m */; };
 		21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BF81FB487B1003C659F /* EasyDialogs.swift */; };
+		21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */; };
 		21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
 		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
@@ -322,8 +321,6 @@
 		2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakSettingsTableViewController.m; sourceTree = "<group>"; };
 		21916361199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakSettingSampleTextTableViewCell.h; sourceTree = "<group>"; };
 		21916362199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakSettingSampleTextTableViewCell.m; sourceTree = "<group>"; };
-		21916366199E5D43003FF7FC /* SettingsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsTableViewController.h; sourceTree = "<group>"; };
-		21916367199E5D43003FF7FC /* SettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsTableViewController.m; sourceTree = "<group>"; };
 		21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 3.xcdatamodel"; sourceTree = "<group>"; };
 		2191636A199E65B9003FF7FC /* SpeakPitchConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakPitchConfig.h; sourceTree = "<group>"; };
 		2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakPitchConfig.m; sourceTree = "<group>"; };
@@ -335,8 +332,6 @@
 		21916374199F143E003FF7FC /* SpeechModSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSetting.m; sourceTree = "<group>"; };
 		21916376199F1463003FF7FC /* SpeechModSettingCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechModSettingCacheData.h; sourceTree = "<group>"; };
 		21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSettingCacheData.m; sourceTree = "<group>"; };
-		21916379199F4514003FF7FC /* SpeechModSettingsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechModSettingsTableViewController.h; sourceTree = "<group>"; };
-		2191637A199F4514003FF7FC /* SpeechModSettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSettingsTableViewController.m; sourceTree = "<group>"; };
 		2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateSpeechModSettingViewController.h; sourceTree = "<group>"; };
 		2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateSpeechModSettingViewController.m; sourceTree = "<group>"; };
 		2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataMigrationViewController.h; sourceTree = "<group>"; };
@@ -412,6 +407,7 @@
 		21E704CD1AF741350071F31E /* UpdateLogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateLogViewController.h; sourceTree = "<group>"; };
 		21E704CE1AF741350071F31E /* UpdateLogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateLogViewController.m; sourceTree = "<group>"; };
 		21E76BF81FB487B1003C659F /* EasyDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EasyDialogs.swift; sourceTree = "<group>"; };
+		21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModSettingsTableViewControllerSwift.swift; sourceTree = "<group>"; };
 		21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
 		21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIViewControllerExtension.m; sourceTree = "<group>"; };
 		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -826,15 +822,12 @@
 				21C74FD3196831070039A706 /* DownloadStatusViewController.m */,
 				2191635E199E01A6003FF7FC /* SpeakSettingsTableViewController.h */,
 				2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */,
-				21916366199E5D43003FF7FC /* SettingsTableViewController.h */,
-				21916367199E5D43003FF7FC /* SettingsTableViewController.m */,
 				219FFC831FB46F4800633184 /* SettingsTableViewController.swift */,
 				210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */,
 				210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */,
 				21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */,
 				21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */,
-				21916379199F4514003FF7FC /* SpeechModSettingsTableViewController.h */,
-				2191637A199F4514003FF7FC /* SpeechModSettingsTableViewController.m */,
+				21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */,
 				2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */,
 				2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */,
 				2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */,
@@ -1235,7 +1228,6 @@
 				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
 				210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */,
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
-				2191637B199F4514003FF7FC /* SpeechModSettingsTableViewController.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
@@ -1276,13 +1268,13 @@
 				213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */,
 				211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
+				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
 				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
 				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
 				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,
-				21916368199E5D43003FF7FC /* SettingsTableViewController.m in Sources */,
 				217F6E1C1942F14B008E432E /* Speaker.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

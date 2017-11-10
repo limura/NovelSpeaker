@@ -77,6 +77,8 @@
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "Speak the sentence for test.";
 "SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" to \"%@\"";
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@ to %@";
+"SpeechModSettingsTableView_SearchTitle" = "Search";
+"SpeechModSettingsTableView_SearchPlaceholder" = "Enter the character string to be searched";
 "SpeechViewController_Speak" = "Speak";
 "SpeechViewController_Detail" = "Detail";
 "SpeechViewController_Edit" = "Edit";

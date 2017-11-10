@@ -190,10 +190,7 @@ class SettingsTableViewControllerSwift: UITableViewController, MFMailComposeView
         EasyDialog.Builder(self)
             .title(title: NSLocalizedString("SettingTableViewController_EditNotRubyStringTitle", comment: "ルビでないと判断する文字集合"))
             .label(text: NSLocalizedString("SettingTableViewController_EditNotRubyStringHint", comment: "ここに書かれた文字のみのルビであればただの強調であると判断され、ルビではなく元の文字が読み上げられる事になります"))
-            .textField(tag: 100, placeholder: NSLocalizedString("SettingTableViewController_EditNotRubyStringPlaceHolder", comment: "・"), content: currentSettingString ?? "・", keyboardType: UIKeyboardType.default, secure: false)
-            .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { dialog in
-                dialog.dismiss(animated: true)
-            })
+            .textField(tag: 100, placeholder: NSLocalizedString("SettingTableViewController_EditNotRubyStringPlaceHolder", comment: "・"), content: currentSettingString ?? "・", keyboardType: UIKeyboardType.default, secure: false, focusKeyboard: true)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { dialog in
                 let newEntryTextField = dialog.view.viewWithTag(100) as! UITextField
                 let newData = newEntryTextField.text ?? ""
@@ -271,7 +268,8 @@ class SettingsTableViewControllerSwift: UITableViewController, MFMailComposeView
         // どうやら勝手に NSData から Data へ変換してくれているっぽい？
         //let backupData = Data.init(referencing: backupNSData)
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "yyyyMMddHHmm", options: 0, locale: Locale.current)
+        dateFormatter.locale = Locale.current
+        dateFormatter.dateFormat = "yyyyMMddHHmm"
         let dateString = dateFormatter.string(from: Date())
         let fileName = String.init(format: "%@.novelspeaker-backup-json", dateString)
         sendMailWithBinary(data: backupData!, fileName: fileName, mimeType: "application/octet-stream")

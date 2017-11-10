@@ -504,6 +504,21 @@ The user can download the generated novelspeaker-backup-json file into the appli
 In the above. Novelskeaker-backup-json, a place to save data using encryption has been added.
 For that reason, we decided to use the encryption function "Yes" when submitting the review of the application.
 This encryption function uses sha 256 (CC_SHA 256 () function) prepared by OS side.
+
+
+
+# Ver 1.1.8
+
+インタフェースの変更
+
+・設定タブの「ルビをルビだけ読むようにする」をONにした時に、ルビとして認識しない文字を指定できるように
+・設定タブの読みの修正内にて、修正項目の検索ができるように
+
+# Ver 1.1.8
+
+Interface change
+
+
 ----
 in Japanese.
 

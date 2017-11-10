@@ -26,6 +26,10 @@
 import Foundation
 import UIKit
 
+public class CustomUITextField: UITextField {
+    public var focusKeyboard: Bool = false
+}
+
 fileprivate func colorFromDecimalRGB(_ red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat = 1.0) -> UIColor {
     return UIColor(
         red: red / 255.0,
@@ -237,12 +241,13 @@ public class EasyDialog: UIViewController {
             return self
         }
         
-        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false) -> Self {
-            let textField = UITextField()
+        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false) -> Self {
+            let textField = CustomUITextField()
             textField.placeholder = placeholder
             textField.text = content
             textField.keyboardType = keyboardType
             textField.isSecureTextEntry = secure
+            textField.focusKeyboard = focusKeyboard
             if let tag = tag {
                 textField.tag = tag
             }
@@ -250,6 +255,15 @@ public class EasyDialog: UIViewController {
 
             views.append(textField)
             return self
+        }
+        public func focusKeyboard(){
+            for view in views {
+                if let customUITextField = view as? CustomUITextField {
+                    if customUITextField.focusKeyboard {
+                        customUITextField.becomeFirstResponder()
+                    }
+                }
+            }
         }
         
         public func addButton(tag: Int? = nil, title: String, type: ButtonType = .regular, callback: ((EasyDialog) -> ())?) -> Self {
@@ -325,6 +339,8 @@ public class EasyDialog: UIViewController {
             
             let baseView = UIView()
             dialog.view.addSubview(baseView)
+            dialog.baseView = baseView
+            dialog.forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: 0)
             
             baseView.backgroundColor = theme.alertBackgroudColor
             baseView.translatesAutoresizingMaskIntoConstraints = false
@@ -337,7 +353,9 @@ public class EasyDialog: UIViewController {
                     baseView.trailingAnchor.constraint(equalTo: dialog.view.trailingAnchor, constant: -24),
                     baseView.heightAnchor.constraint(greaterThanOrEqualToConstant: 1),
                     baseView.centerXAnchor.constraint(equalTo: dialog.view.centerXAnchor),
-                    baseView.centerYAnchor.constraint(equalTo: dialog.view.centerYAnchor)])
+                    // baseView.centerYAnchor.constraint(equalTo: dialog.view.centerYAnchor)
+                    dialog.forKeyboardConstraint
+                    ])
             } else {
                 // Fallback on earlier versions
                 NSLayoutConstraint.activate([
@@ -345,7 +363,8 @@ public class EasyDialog: UIViewController {
                     NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.trailing, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.trailing, multiplier: 1.0, constant: -24),
                     NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.greaterThanOrEqual, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1.0, constant: 1),
                     NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.centerX, multiplier: 1.0, constant: 0),
-                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: 0)
+                    //NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: 0)
+                    dialog.forKeyboardConstraint
                     ])
             }
             
@@ -497,11 +516,58 @@ public class EasyDialog: UIViewController {
     
     /// reference to the builder
     private var builder: Builder!
+    private var baseView: UIView!
+    private var forKeyboardConstraint: NSLayoutConstraint!
     
     public func show() {
-        builder.targetViewController?.present(self, animated: true)
+        builder.targetViewController?.present(self, animated: true, completion: {
+            self.builder.focusKeyboard()
+        })
     }
     
+    func keyboardWillShow(notification:Notification){
+        if let dic = notification.userInfo {
+            if let value = dic[UIKeyboardFrameEndUserInfoKey] as? NSValue {
+                let height = UIScreen.main.bounds.height - value.cgRectValue.minY
+                NSLayoutConstraint.deactivate([forKeyboardConstraint])
+                forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: -height / 2)
+                NSLayoutConstraint.activate([forKeyboardConstraint])
+                if let dulation = dic[UIKeyboardAnimationDurationUserInfoKey] as? TimeInterval {
+                    UIView.animate(withDuration: dulation, animations: {
+                        self.view.layoutIfNeeded()
+                    })
+                }
+            }
+        }
+    }
+    func keyboardWillHide(notification:Notification){
+        if let dic = notification.userInfo {
+            NSLayoutConstraint.deactivate([forKeyboardConstraint])
+            forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: 0)
+            NSLayoutConstraint.activate([forKeyboardConstraint])
+            if let dulation = dic[UIKeyboardAnimationDurationUserInfoKey] as? TimeInterval {
+                UIView.animate(withDuration: dulation, animations: {
+                    self.view.layoutIfNeeded()
+                })
+            }
+        }
+    }
+
+    override public func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(forName: NSNotification.Name.UIKeyboardWillShow, object: nil, queue: OperationQueue.main) { notification in
+            self.keyboardWillShow(notification: notification)
+        }
+        notificationCenter.addObserver(forName: NSNotification.Name.UIKeyboardWillHide, object: nil, queue: OperationQueue.main) { notification in
+            self.keyboardWillHide(notification: notification)
+        }
+    }
+    
+    override public func viewWillDisappear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        NotificationCenter.default.removeObserver(self)
+    }
 }
 
 extension UIImage {

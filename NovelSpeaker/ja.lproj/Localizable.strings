@@ -73,6 +73,8 @@
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "ここに書いた文をテストで読み上げます。";
 "SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" を \"%@\" に";
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";
+"SpeechModSettingsTableView_SearchTitle" = "検索";
+"SpeechModSettingsTableView_SearchPlaceholder" = "検索対象の文字列を入力します";
 "SpeechViewController_Speak" = "Speak";
 "SpeechViewController_Detail" = "詳細";
 "SpeechViewController_Edit" = "編集";
