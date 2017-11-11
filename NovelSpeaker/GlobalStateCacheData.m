@@ -28,9 +28,9 @@
     if (coreDataState.currentReadingStory != nil) {
         self.currentReadingStory = [[StoryCacheData alloc] initWithCoreData:coreDataState.currentReadingStory];
     }
-    // 5分未満(多分初期値)であれば23時間55分にします。
-    if (self.maxSpeechTimeInSec == nil || [self.maxSpeechTimeInSec intValue] < 5 * 60) {
-        self.maxSpeechTimeInSec = [[NSNumber alloc] initWithInt:((23*60)+55)*60];
+    // 1分未満(多分初期値)であれば23時間59分にします。
+    if (self.maxSpeechTimeInSec == nil || [self.maxSpeechTimeInSec intValue] < 1 * 60) {
+        self.maxSpeechTimeInSec = [[NSNumber alloc] initWithInt:((23*60)+59)*60];
     }
     return self;
 }

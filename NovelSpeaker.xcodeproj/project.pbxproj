@@ -74,6 +74,8 @@
 		213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */; };
 		213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */; };
 		213A4DD51A77D74F00E9EC13 /* DebugLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DD41A77D74F00E9EC13 /* DebugLogViewController.m */; };
+		213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */; };
+		213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */; };
 		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
@@ -104,7 +106,6 @@
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
-		219FFC841FB46F4800633184 /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219FFC831FB46F4800633184 /* SettingsTableViewController.swift */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
 		21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */ = {isa = PBXBuildFile; fileRef = 21AED5D419B335CF00CE846D /* ReleaseMemo.md */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
@@ -290,6 +291,8 @@
 		213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingViewController.m; sourceTree = "<group>"; };
 		213A4DD31A77D74F00E9EC13 /* DebugLogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugLogViewController.h; sourceTree = "<group>"; };
 		213A4DD41A77D74F00E9EC13 /* DebugLogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DebugLogViewController.m; sourceTree = "<group>"; };
+		213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeIntervalCountDownRow.swift; sourceTree = "<group>"; };
 		2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMultithreadTests.m; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
 		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
@@ -350,7 +353,6 @@
 		2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 8.xcdatamodel"; sourceTree = "<group>"; };
 		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
-		219FFC831FB46F4800633184 /* SettingsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
 		21A4F6DA19B1B30C007CCD32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F71C19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
 		21A4F71D19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -580,6 +582,7 @@
 				2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */,
 				2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */,
 				2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */,
+				213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */,
 			);
 			name = CustomViews;
 			sourceTree = "<group>";
@@ -822,7 +825,7 @@
 				21C74FD3196831070039A706 /* DownloadStatusViewController.m */,
 				2191635E199E01A6003FF7FC /* SpeakSettingsTableViewController.h */,
 				2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */,
-				219FFC831FB46F4800633184 /* SettingsTableViewController.swift */,
+				213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */,
 				210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */,
 				210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */,
 				21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */,
@@ -1211,6 +1214,7 @@
 			files = (
 				21916360199E01A7003FF7FC /* SpeakSettingsTableViewController.m in Sources */,
 				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
+				213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */,
 				21916372199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m in Sources */,
 				21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */,
 				212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */,
@@ -1244,7 +1248,6 @@
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
-				219FFC841FB46F4800633184 /* SettingsTableViewController.swift in Sources */,
 				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
 				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
 				2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */,
@@ -1272,6 +1275,7 @@
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
 				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
+				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
 				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
 				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,

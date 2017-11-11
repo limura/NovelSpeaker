@@ -1543,6 +1543,7 @@ static GlobalDataSingleton* _singleton = nil;
     }
     [self StopMaxSpeechTimeInSecTimer];
 
+    NSLog(@"StartMaxSpeechTimeInSecTimer: %@", maxSpeechTimeInSec);
     m_MaxSpeechTimeInSecTimer = [NSTimer scheduledTimerWithTimeInterval:[maxSpeechTimeInSec intValue] target:self selector:@selector(MaxSpeechTimeInSecEventHandler:) userInfo:nil repeats:NO];
     //[m_MaxSpeechTimeInSecTimer fire]; // fire すると時間経過に関係なくすぐにイベントが発生するっぽいです。単にタイマーを作った時点でもう時間計測は開始している模様
 }

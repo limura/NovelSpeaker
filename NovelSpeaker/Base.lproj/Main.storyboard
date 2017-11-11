@@ -297,6 +297,35 @@
             </objects>
             <point key="canvasLocation" x="1421" y="1618"/>
         </scene>
+        <!--設定-->
+        <scene sceneID="cAk-Lp-8bt">
+            <objects>
+                <viewController title="設定" id="ycr-eS-jqH" customClass="SettingsViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="kDy-0n-CxR"/>
+                        <viewControllerLayoutGuide type="bottom" id="3Nb-Ft-Ecx"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="f1k-ts-e6k">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="設定" id="IR0-u3-ueb"/>
+                    <connections>
+                        <segue destination="0kw-MK-hET" kind="push" identifier="speakSettingsSegue" id="Bx1-dR-JvG"/>
+                        <segue destination="DcS-zk-4zM" kind="push" identifier="speechModSettingSegue" id="whQ-HQ-5wp"/>
+                        <segue destination="Pb4-1M-Lvn" kind="push" identifier="textSizeSettingSegue" id="VCs-2X-42w"/>
+                        <segue destination="dQB-7t-eBi" kind="push" identifier="textDelaySettingSegue" id="6PR-ie-LLy"/>
+                        <segue destination="WI3-lq-RQn" kind="push" identifier="debugLogViewSegue" id="9Ud-mr-cit"/>
+                        <segue destination="pS8-hH-Po4" kind="push" identifier="updateLogSegue" id="Cej-5a-43x"/>
+                        <segue destination="dCR-kh-Ivz" kind="push" identifier="CreateNewUserTextSegue" id="uw4-9z-dhB"/>
+                        <segue destination="NmR-c8-ccH" kind="push" identifier="CreditPageSegue" id="AaG-TX-X4l"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="brw-Rq-p2L" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="450" y="925"/>
+        </scene>
         <!--クレジット-->
         <scene sceneID="g6V-SU-Uql">
             <objects>
@@ -312,7 +341,7 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="685"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <mutableString key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
+                                <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
 MIT License
 
@@ -354,8 +383,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.   --------
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
-</mutableString>
+//  THE SOFTWARE.    -------- eureka --------  The MIT License (MIT)
+
+Copyright (c) 2015 XMARTLABS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+</string>
                                 <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
@@ -595,61 +644,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.   --------
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
-                        <segue destination="Wp3-U6-Sdl" kind="relationship" relationship="rootViewController" id="wQg-65-Tx1"/>
+                        <segue destination="ycr-eS-jqH" kind="relationship" relationship="rootViewController" id="irm-Vy-DOo"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ejC-0w-H3j" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-514" y="925"/>
-        </scene>
-        <!--設定-->
-        <scene sceneID="JFC-RS-oaw">
-            <objects>
-                <tableViewController id="Wp3-U6-Sdl" customClass="SettingsTableViewControllerSwift" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="sIf-ZE-KgZ">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="SettingsTableViewCellDefault" textLabel="Vj8-Pr-577" style="IBUITableViewCellStyleDefault" id="Ewg-TK-xYi">
-                                <rect key="frame" x="0.0" y="22" width="375" height="44"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Ewg-TK-xYi" id="sIM-np-pjP">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Vj8-Pr-577">
-                                            <rect key="frame" x="16" y="0.0" width="343" height="43.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="18"/>
-                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="Wp3-U6-Sdl" id="DJi-8S-rX7"/>
-                            <outlet property="delegate" destination="Wp3-U6-Sdl" id="SuZ-qa-FiS"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="設定" id="Nbg-ez-a84"/>
-                    <connections>
-                        <outlet property="settingsTableView" destination="sIf-ZE-KgZ" id="bnh-FH-oyu"/>
-                        <segue destination="0kw-MK-hET" kind="push" identifier="speakSettingsSegue" id="B7T-Wg-yhB"/>
-                        <segue destination="DcS-zk-4zM" kind="push" identifier="speechModSettingSegue" id="NN9-Wl-Axe"/>
-                        <segue destination="Pb4-1M-Lvn" kind="push" identifier="textSizeSettingSegue" id="TN8-7S-JAt"/>
-                        <segue destination="dQB-7t-eBi" kind="push" identifier="textDelaySettingSegue" id="Taz-2K-ASG"/>
-                        <segue destination="WI3-lq-RQn" kind="push" identifier="debugLogViewSegue" id="iaU-6Z-vkf"/>
-                        <segue destination="pS8-hH-Po4" kind="push" identifier="updateLogSegue" id="prX-RH-vA8"/>
-                        <segue destination="dCR-kh-Ivz" kind="push" identifier="CreateNewUserTextSegue" id="OsV-z0-vd7"/>
-                        <segue destination="NmR-c8-ccH" kind="push" identifier="CreditPageSegue" id="uXs-o8-Ltb"/>
-                    </connections>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="2y7-9M-CWR" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="450" y="925"/>
         </scene>
         <!--小説家になろうで検索-->
         <scene sceneID="UWl-PZ-0Xb">
@@ -1459,7 +1459,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.   --------
         <image name="soundbook.png" width="24" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="OsV-z0-vd7"/>
+        <segue reference="uw4-9z-dhB"/>
         <segue reference="0zP-nv-fmY"/>
         <segue reference="DuH-s0-ioe"/>
         <segue reference="aiZ-8Y-r0V"/>

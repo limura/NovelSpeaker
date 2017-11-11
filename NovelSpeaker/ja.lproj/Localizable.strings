@@ -42,6 +42,7 @@
 "SettingTableViewController_CorrectionOfTheReading" = "読みの修正";
 "SettingTableViewController_SettingOfTheTextSize" = "表示文字サイズの設定";
 "SettingTableViewController_SettingOfTheSpeechDelay" = "読み上げ時の間の設定";
+"SettingTableViewController_MaxSpeechTime" = "最大連続再生時間";
 "SettingTableViewController_AddDefaultCorrectionOfTheReading" = "標準の読みの修正を上書き追加";
 "SettingTableViewController_GetNcodeDownloadURLScheme" = "再ダウンロード用データの生成";
 "SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "標準の読み替え辞書を上書き追加しました。";
@@ -53,12 +54,14 @@
 "SettingTableViewController_GoToReleaseLog" = "更新履歴";
 "SettingTableViewController_CreateNewUserText" = "新規自作小説の追加";
 "SettingTableViewController_RightNotation" = "権利表記";
-"SettingTableViewController_BackgroundFetch_Enabled" = "更新された小説の自動ダウンロード: 有効";
-"SettingTableViewController_BackgroundFetch_Disabled" = "更新された小説の自動ダウンロード: 無効";
+"SettingTableViewController_BackgroundFetch_Enabled" = "小説の自動更新: 有効";
+"SettingTableViewController_BackgroundFetch_Disabled" = "小説の自動更新: 無効";
+"SettingTableViewController_BackgroundFetch" = "小説の自動更新";
 "SettingTableViewController_ConfirmEnableBackgroundFetch_title" = "確認";
 "SettingtableViewController_ConfirmEnableBackgroundFetch" = "この設定を有効にすると、ことせかい を使用していない時等に小説の更新を確認するようになるため、ネットワーク通信が発生するようになります。よろしいですか？";
-"SettingTableViewController_OverrideRubyIsEnabled" = "ルビをルビだけよむようにする: 有効";
-"SettingTableViewController_OverrideRubyIsDisabled" = "ルビをルビだけよむようにする: 無効";
+"SettingTableViewController_OverrideRubyIsEnabled" = "ルビはルビだけ読む: 有効";
+"SettingTableViewController_OverrideRubyIsDisabled" = "ルビはルビだけ読む: 無効";
+"SettingTableViewController_OverrideRuby" = "ルビはルビだけ読む";
 "SettingTableView_SendEmailForBackupTitle" = "ことせかい バックアップ";
 "SettingTableView_SendEmailForBackupBody" = "添付されたファイルを ことせかい で読み込む事で、小説のリストや読み替え辞書が再生成されます。";
 "SettingTableViewController_EditNotRubyStringTitle" = "ルビではないと判断する文字";
