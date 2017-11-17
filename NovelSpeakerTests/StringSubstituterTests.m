@@ -120,4 +120,32 @@
     }
 }
 
+- (void)testNarouRubyBug
+{
+    NSString* text = @"に|勤《いそ》しんだ。\r\n《セリフ〜》\r\n";
+    
+    NSDictionary* matchPatterns = @{
+                                    @"|勤《いそ》": @"いそ",
+                                    @"勤《いそ》": @"いそ",
+                                    };
+    NSDictionary* resultDictionary = [StringSubstituter FindNarouRubyNotation:text notRubyString:@"・"];
+    
+    NSLog(@"%@", resultDictionary);
+    for (NSString* fromAnswer in [matchPatterns keyEnumerator]) {
+        NSString* toAnswer = matchPatterns[fromAnswer];
+        NSString* to = [resultDictionary objectForKey:fromAnswer];
+        NSString* errString = [NSString stringWithFormat:@"key \"%@\" not found", fromAnswer];
+        if (to == nil) {
+            NSLog(@"%@", errString);
+        }
+        XCTAssertNotNil(to);
+        
+        errString = [NSString stringWithFormat:@"to \"%@\" is not same \"%@\"", to, toAnswer];
+        if ([to compare:toAnswer] != NSOrderedSame) {
+            NSLog(@"%@", errString);
+        }
+        XCTAssertTrue([to compare:toAnswer] == NSOrderedSame);
+    }
+}
+
 @end
