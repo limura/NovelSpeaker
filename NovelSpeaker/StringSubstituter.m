@@ -240,9 +240,9 @@
     NSMutableDictionary* result = [NSMutableDictionary new];
     for (NSRegularExpression* regexp in regexpArray) {
         NSArray* hitArray = [regexp matchesInString:text options:0 range:NSMakeRange(0, text.length)];
-        NSLog(@"phase 2.1. count: %lu", (unsigned long)[hitArray count]);
+        //NSLog(@"phase 2.1. count: %lu", (unsigned long)[hitArray count]);
         for (NSTextCheckingResult* match in hitArray) {
-            NSLog(@"phase 2.1.1. match: %p", match);
+            //NSLog(@"phase 2.1.1. match: %p", match);
             if ([match numberOfRanges] != 3) {
                 continue;
             }
@@ -270,7 +270,7 @@
             //NSLog(@"phase 2.1.3: from/to: %@/%@", fromString, toString);
             NSString* allString = [text substringWithRange:thisRange];
             [result setObject:toString forKey:allString];
-            NSLog(@"phase 2.1.4: from/to: %@/%@", allString, toString);
+            //NSLog(@"phase 2.1.4: from/to: %@/%@", allString, toString);
         }
     }
     //NSLog(@"phase 3: done.");

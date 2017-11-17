@@ -146,15 +146,30 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.7
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Ver 1.1.8
 
-- Add \"Speech ruby only\" setting feature on Settings page.
-- New feature \"Create NovelSpeaker Backup file\" on Settings page.
-- When all the novels are re-downloaded, those that do not update will not be added to the download queue.
+- To be able to specify characters not recognized as ruby
+- In order to search for correction items within correction of reading on setting tab
+- Fixed a problem that characters were out of place on terminals with small screen
+- Fixed a problem that skipped parts other than ruby
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Ver 1.1.8
+
+Interface change
+
+- Redo some UI of setting tab (function does not change)
+- To enable you to designate characters that you do not recognize as ruby when turning on \"Speech ruby only\" on setting tab
+- In order to search for correction items within correction of reading on setting tab
+
+- bug fix
+
+- Fixed a part of the problem that letters were not seen on small terminal of screen of iPhone SE etc
+- Fixed a problem that \"Speech ruby only\" skipping skipping parts other than ruby
+
+
 # Ver 1.1.7
 
 Interface change

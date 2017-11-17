@@ -143,17 +143,30 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.7
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Ver 1.1.8
 
-・読み上げ中に別タブに移動して戻った場合に読み上げ位置が巻き戻る問題を修正
-・「ルビをルビだけ読むようにする」設定を追加
-・バックアップ用URLの生成をバックアップデータの生成に変更して読み替え辞書等もバックアップ可能に
-・全ての小説の再ダウンロード時に、更新が無いとわかっているものについてはダウンロードキューに追加しないように
+・ルビとして認識しない文字を指定できるように
+・設定タブの読みの修正内にて、修正項目の検索ができるように
+・画面の小さい端末で、文字が見切れていた問題を一部修正
+・ルビ以外の部分を読み飛ばしてしまう問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
-Ver 1.1.7
+# Ver 1.1.8
+
+インタフェースの変更
+
+・設定タブのUIを少し作り直し(機能は変わりません)
+・設定タブの「ルビをルビだけ読むようにする」をONにした時に、ルビとして認識しない文字を指定できるように
+・設定タブの読みの修正内にて、修正項目の検索ができるように
+
+問題の修正
+
+・iPhone SE等の画面の小さい端末で、文字が見切れていた問題を一部修正
+・「ルビをルビだけ読むようにする」機能で、ルビ以外の部分を読み飛ばしてしまう問題を修正
+
+# Ver 1.1.7
 
 インタフェースの変更
 

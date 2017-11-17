@@ -518,10 +518,31 @@ This encryption function uses sha 256 (CC_SHA 256 () function) prepared by OS si
 問題の修正
 
 ・iPhone SE等の画面の小さい端末で、文字が見切れていた問題を一部修正
+・「ルビをルビだけ読むようにする」機能で、ルビ以外の部分を読み飛ばしてしまう問題を修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正も細かい改良やバグ修正が主となります。
+設定タブで文字が見切れていた問題やルビをルビだけ読むようにする機能の不都合は気づいておりませんでした。皆様からの不都合報告には重ねてお礼申し上げます。
+今回のバージョンから、UI周りを外部のライブラリに変更して作り直していっています。以前と動作が少し異なる所も出てきてしまうと思いますが、機能的には同じものを提供できるようにしているつもりです。何か問題などありましたらお気軽にご意見ご要望フォーム等から指摘して頂けると嬉しいです。
+
+それでは、今後とも ことせかい をよろしくお願いいたします。
+
 
 # Ver 1.1.8
 
 Interface change
+
+- Redo some UI of setting tab (function does not change)
+- To enable you to designate characters that you do not recognize as ruby when turning on "Speech ruby only" on setting tab
+- In order to search for correction items within correction of reading on setting tab
+
+- bug fix
+
+- Fixed a part of the problem that letters were not seen on small terminal of screen of iPhone SE etc
+- Fixed a problem that "Speech ruby only" skipping skipping parts other than ruby
 
 
 ----
