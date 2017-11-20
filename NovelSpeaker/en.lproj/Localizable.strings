@@ -146,16 +146,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Ver 1.1.8
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Ver 1.1.9
 
-- To be able to specify characters not recognized as ruby
-- In order to search for correction items within correction of reading on setting tab
-- Fixed a problem that characters were out of place on terminals with small screen
-- Fixed a problem that skipped parts other than ruby
+- Fixed an issue where registration of new user novels always failed.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Ver 1.1.9
+
+bug fix
+
+- Fixed an issue where registration of new user novels always failed.
+
+
 # Ver 1.1.8
 
 Interface change

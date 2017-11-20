@@ -143,16 +143,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Ver 1.1.8
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Ver 1.1.9
 
-・ルビとして認識しない文字を指定できるように
-・設定タブの読みの修正内にて、修正項目の検索ができるように
-・画面の小さい端末で、文字が見切れていた問題を一部修正
-・ルビ以外の部分を読み飛ばしてしまう問題を修正
+・新規ユーザー小説の登録が必ず失敗するようになっていた問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Ver 1.1.9
+
+問題の修正
+
+・新規ユーザー小説の登録が必ず失敗するようになっていた問題を修正
+
+
 # Ver 1.1.8
 
 インタフェースの変更

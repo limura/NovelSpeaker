@@ -545,6 +545,26 @@ Interface change
 - Fixed a problem that "Speech ruby only" skipping skipping parts other than ruby
 
 
+# Ver 1.1.9
+
+問題の修正
+
+・新規ユーザー小説の登録が必ず失敗するようになっていた問題を修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回はバグ修正のみの更新になります。
+新規UIに変更したあたりでバグを作り込んでいました。申し訳ありません。
+
+今後とも ことせかい をよろしくお願いいたします。
+
+# Ver 1.1.9
+
+bug fix
+
+- Fixed an issue where registration of new user novels always failed.
 ----
 in Japanese.
 
