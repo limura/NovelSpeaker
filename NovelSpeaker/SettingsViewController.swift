@@ -202,4 +202,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
         dismiss(animated: true, completion: nil)
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let identifier = segue.identifier {
+            switch identifier {
+            case "CreateNewUserTextSegue":
+                if let userBookViewController:EditUserBookViewController = segue.destination as? EditUserBookViewController {
+                    userBookViewController.narouContentDetail = self.m_NarouContentCacheData
+                }
+                break
+            default:
+                break
+            }
+        }
+    }
 }
