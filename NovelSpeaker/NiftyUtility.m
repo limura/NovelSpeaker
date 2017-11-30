@@ -97,5 +97,20 @@
     return nil;
 }
 
+/// HTML のエスケープ文字を元に戻します。(TODO: &#... 形式に対応する必要があります)
++ (NSString*)decodeHtmlEscape:(NSString*)htmlString {
+    if (htmlString == nil) {
+        return nil;
+    }
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&apos;" withString:@"'"];
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"];
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"];
+    
+    // これは最後にやらないと駄目
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
+    
+    return htmlString;
+}
 
 @end

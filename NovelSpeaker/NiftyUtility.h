@@ -26,4 +26,7 @@
 /// dictionary の key に入っているデータが正しく NSDictionary であることを確認した上で取り出します
 + (NSDictionary*)validateNSDictionaryForDictionary:(NSDictionary*)dictionary key:(id)key;
 
+/// HTML のエスケープ文字を元に戻します。
++ (NSString*)decodeHtmlEscape:(NSString*)htmlString;
+
 @end
