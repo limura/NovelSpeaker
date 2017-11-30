@@ -565,6 +565,27 @@ Interface change
 bug fix
 
 - Fixed an issue where registration of new user novels always failed.
+
+# Ver 1.1.10
+
+問題の修正
+
+・小説のタイトルやあらすじに&quot;等があった時にそのまま表示されてしまっていた問題を修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+
+今後とも ことせかい をよろしくお願いいたします。
+
+
+# Ver 1.1.10
+
+bug fix
+
+- Fixed problem which was displayed as it was when &quot; etc was in the title and the outline of the novel
+
 ----
 in Japanese.
 
