@@ -12,8 +12,9 @@
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
 #import "EasyAlert.h"
+#import "NarouDownloadQueue.h"
 
-@interface SpeechViewController : UIViewController<SpeakRangeDelegate, UITextViewDelegate>
+@interface SpeechViewController : UIViewController<SpeakRangeDelegate, UITextViewDelegate, NarouDownloadQueueDelegate>
 {
     NSInteger m_SpeechStartPosition;
     UIBarButtonItem* startStopButton;

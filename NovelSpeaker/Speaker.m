@@ -109,7 +109,7 @@
 - (BOOL) StopSpeech
 {
     //if ([m_Synthesizer isSpeaking]) {
-    NSLog(@"#### AVSpeech Stop Immediate####");
+    //NSLog(@"#### AVSpeech Stop Immediate####");
         [m_Synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
     //}
     

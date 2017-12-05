@@ -14,6 +14,8 @@
 #import "NSDataZlibExtension.h"
 #import "NSStringExtension.h"
 #import "NiftyUtility.h"
+#import "NovelSpeaker-Swift.h"
+#import "UIViewControllerExtension.h"
 
 #define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
 #define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
@@ -776,7 +778,9 @@ static GlobalDataSingleton* _singleton = nil;
     if (story != nil) {
         NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:story.ncode];
         if (content != nil) {
-            artist = content.writer;
+            if (content.writer != nil) {
+                artist = content.writer;
+            }
             titleName = [[NSString alloc] initWithFormat:@"%@ (%d/%d)", content.title, [story.chapter_number intValue], [content.general_all_no intValue]];
         }
     }
@@ -2206,6 +2210,12 @@ static GlobalDataSingleton* _singleton = nil;
         [m_LogStringArray removeObjectAtIndex:0];
     }
 }
+- (void)ClearLogString{
+    m_LogStringArray = [NSMutableArray new];
+}
+- (NSArray*)GetLogStringArray{
+    return m_LogStringArray;
+}
 
 #define USER_DEFAULTS_PREVIOUS_TIME_VERSION @"PreviousTimeVersion"
 #define USER_DEFAULTS_PREVIOUS_TIME_BUILD   @"PreviousTimeBuild"
@@ -2218,6 +2228,8 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTES_MENU_ITEM_IS_ADD_SPEECH_MOD_SETTINGS_ONLY @"MenuItemIsAddSpeechModSettingOnly"
 #define USER_DEFAULTS_OVERRIDE_RUBY_IS_ENABLED @"OverrideRubyIsEnabled"
 #define USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY @"NotRubyCharactorStringArray"
+#define USER_DEFAULTS_FORCE_SITEINFO_RELOAD_IS_ENABLED @"ForceSiteInfoReloadIsEnabled"
+#define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -2553,6 +2565,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 本棚のソートタイプを取得します
 - (NarouContentSortType)GetBookSelfSortType {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_BOOKSELF_SORT_TYPE: [[NSNumber alloc] initWithInteger: NarouContentSortType_Title]}];
     NSInteger sortTypeInteger = [userDefaults integerForKey:USER_DEFAULTS_BOOKSELF_SORT_TYPE];
     NarouContentSortType sortType = sortTypeInteger;
     return sortType;
@@ -2569,6 +2582,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 新規小説の自動ダウンロード機能のON/OFF状態を取得します
 - (BOOL)GetBackgroundNovelFetchEnabled{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_BACKGROUND_NOVEL_FETCH_MODE: @false}];
     return [userDefaults boolForKey:USER_DEFAULTS_BACKGROUND_NOVEL_FETCH_MODE];
 }
 
@@ -2582,6 +2596,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// AutoPagerize の SiteInfo を保存した日付を取得します
 - (NSDate*)GetAutoPagerizeCacheSavedDate {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE: [[NSDate alloc] initWithTimeIntervalSince1970:0]}];
     return [userDefaults objectForKey:USER_DEFAULTS_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE];
 }
 
@@ -2595,6 +2610,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// カスタムAutoPagerize の SiteInfo を保存した日付を取得します
 - (NSDate*)GetCustomAutoPagerizeCacheSavedDate {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_CUSTOM_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE: [[NSDate alloc] initWithTimeIntervalSince1970:0]}];
     return [userDefaults objectForKey:USER_DEFAULTS_CUSTOM_AUTOPAGERIZE_SITEINFO_CACHE_SAVED_DATE];
 }
 
@@ -2606,9 +2622,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 #define CACHE_FILE_NAME_AUTOPAGERLIZE_SITEINFO @"AutoPagerizeSiteInfo.deflate"
-#define AUTOPAGERIZE_SITEINFO_URL @"http://wedata.net/databases/AutoPagerize/items_all.json"
+#define AUTOPAGERIZE_SITEINFO_URL @"http://wedata.net/databases/AutoPagerize/items.json"
 #define CACHE_FILE_NAME_CUSTOM_AUTOPAGERLIZE_SITEINFO @"CustomAutoPagerizeSiteInfo.deflate"
-#define CUSTOM_AUTOPAGERIZE_SITEINFO_URL @"https://raw.githubusercontent.com/limura/NovelSpeaker/master/NovelSpeaker/CustomAutopagerizeItems.json"
+#define CUSTOM_AUTOPAGERIZE_SITEINFO_URL @"http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
 
 /// 内部キャッシュフォルダへのパスを取得します
 - (NSString*)GetCacheFilePath:(NSString*)fileName {
@@ -2670,7 +2686,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         return false;
     }
     NSData* zipedData = [data deflate:9];
-    NSLog(@"data: %p(%lu[bytes]), zipedData: %p(%lu[bytes])", data, (unsigned long)[data length], zipedData, (unsigned long)[zipedData length]);
+    //NSLog(@"data: %p(%lu[bytes]), zipedData: %p(%lu[bytes])", data, (unsigned long)[data length], zipedData, (unsigned long)[zipedData length]);
     [self SaveAutoPagerizeSiteInfoData:zipedData];
     return true;
 }
@@ -2693,20 +2709,17 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 内部に保存してある AutoPagerize の SiteInfo を取り出します
 - (NSData*)GetCachedAutoPagerizeSiteInfoData {
     NSDate* lastUpdateDate = [self GetAutoPagerizeCacheSavedDate];
-    if ([lastUpdateDate timeIntervalSinceNow] < -24*60*60 || true) { // 24時間以上経っていたらキャッシュを更新する
+    if ([lastUpdateDate timeIntervalSinceNow] < -24*60*60 // 24時間以上経っているか、
+        || [self GetForceSiteInfoReloadIsEnabled]) { // 強制的にreloadするべきとされていたらキャッシュを更新する
         [self UpdateCachedAutoPagerizeSiteInfoData];
     }
     
     NSString* filePath = [self GetAutoPagerizeSiteInfoCacheFilePath];
-    NSLog(@"autopagerize site info path:\n%@", filePath);
     NSData* siteInfoDeflate = [NSData dataWithContentsOfFile:filePath];
-    NSLog(@"siteInfoDeflate: %p", siteInfoDeflate);
     NSData* infratedSiteInfo = nil;
     if(siteInfoDeflate != nil) {
         infratedSiteInfo = [siteInfoDeflate inflate];
     }
-    NSLog(@"infratedSiteInfo: %p", infratedSiteInfo);
-    NSLog(@"siteInfoDefrate: %p(%lu[bytes]), inflatedSiteInfo: %p(%lu[bytes])", siteInfoDeflate, (unsigned long)[siteInfoDeflate length], infratedSiteInfo, (unsigned long)[infratedSiteInfo length]);
     if (siteInfoDeflate == nil || infratedSiteInfo == nil) {
         // 読み出しに失敗したらネットワーク経由で取得しようとします。
         [NSThread sleepForTimeInterval:1.0];
@@ -2721,10 +2734,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 内部に保存してある AutoPagerize の カスタムSiteInfo を取り出します
 - (NSData*)GetCachedCustomAutoPagerizeSiteInfoData {
     NSDate* lastUpdateDate = [self GetCustomAutoPagerizeCacheSavedDate];
-    if ([lastUpdateDate timeIntervalSinceNow] < -24*60*60) { // 24時間以上経っていたらキャッシュを更新する
+    if ([lastUpdateDate timeIntervalSinceNow] < -24*60*60 // 24時間以上経っているか、
+        || [self GetForceSiteInfoReloadIsEnabled]) { // 強制的にreloadするべきとされていたらキャッシュを更新する
         [self UpdateCachedCustomAutoPagerizeSiteInfoData];
     }
-    
+
     NSData* siteInfo = [self GetCachedAndZipedFileData:CACHE_FILE_NAME_CUSTOM_AUTOPAGERLIZE_SITEINFO];
     if (siteInfo == nil) {
         // 読み出しに失敗したらネットワーク経由で取得しようとします。
@@ -2747,6 +2761,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             cookieString = [urlWithCookieString substringFromIndex:(range.location+1)];
         }
     }
+    
     return [self AddDownloadQueueForURL:[urlString stringByRemovingPercentEncoding] cookieParameter:[cookieString stringByRemovingPercentEncoding]];
 }
 
@@ -2759,19 +2774,76 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     {
         return NSLocalizedString(@"GlobalDataSingleton_CanNotGetValidNCODE", @"有効な URL を取得できませんでした。");
     }
+    NSURL* url = [[NSURL alloc] initWithString:urlString];
+    NSArray<NSString*>* cookieArray = @[];
+    if (cookieParameter != nil && [cookieParameter length] > 0) {
+        cookieArray = [cookieParameter componentsSeparatedByString:@";"];
+    }
+    UIViewController* rootViewController = [UIViewController toplevelViewController];
+    [NiftyUtilitySwift checkUrlAndConifirmToUserWithViewController:rootViewController url:url cookieArray:cookieArray depth:0];
+    return nil;
+}
 
-    NarouContentCacheData* targetContentCacheData = [self CreateNewUserBook];
-    // XXXXX TODO: 怪しく ncode には URLを、keyword には cookieパラメタ を入れているのをなんとかしないと……(´・ω・`)
-    targetContentCacheData.title = urlString;
-    targetContentCacheData.ncode = urlString;
+- (void)AddDirectoryDownloadQueueForURL:(NSString *)urlString cookieParameter:(NSString *)cookieParameter author:(NSString*)author title:(NSString*)title {
+    NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:urlString];
+    if (targetContentCacheData != nil) {
+        // 既に本棚には登録されているのでタイトル名等だけ上書きして終わりにします。
+        if (author != nil) {
+            targetContentCacheData.writer = author;
+        }
+        if (title != nil) {
+            targetContentCacheData.title = title;
+        }
+        [self UpdateNarouContent:targetContentCacheData];
+        return;
+    }
+    
+    UriLoader* uriLoader = [UriLoader new];
+    [uriLoader AddCustomSiteInfoFromData:[self GetCachedCustomAutoPagerizeSiteInfoData]];
+    [uriLoader AddSiteInfoFromData:[self GetCachedAutoPagerizeSiteInfoData]];
+    NSURL* url = [[NSURL alloc] initWithString:urlString];
+    [uriLoader FetchOneUrl:url cookieArray:[cookieParameter componentsSeparatedByString:@";"] successAction:^(HtmlStory *story) {
+        NSString* setTitle = title;
+        if (title == nil || [title length] <= 0) {
+            setTitle = story.title;
+        }
+        NSString* setAuthor = author;
+        if (author == nil || [author length] <= 0) {
+            setAuthor = story.author;
+        }
+        [self AddNewContentForURL:url nextUrl:story.nextUrl cookieParameter:cookieParameter title:setTitle author:setAuthor firstContent:story.content viewController:nil];
+    } failedAction:^(NSURL *url, NSString *errorString) {
+        NSLog(@"FetchOneUrl failed: %@ %@", [url absoluteString], errorString);
+    }];
+}
+
+/// 始めの章の内容やタイトルが確定しているURLについて、新規登録をしてダウンロードqueueに追加しようとします
+- (void)AddNewContentForURL:(NSURL*)url nextUrl:(NSURL*)nextUrl cookieParameter:(NSString*)cookieParameter title:(NSString*)title author:(NSString*)author firstContent:(NSString*)firstContent viewController:(UIViewController*)viewController {
+    NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:[url absoluteString]];
+    if (targetContentCacheData != nil) {
+        NSLog(@"url: %@ is already downloaded. skip.", [url absoluteString]);
+        if (viewController != nil) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                EasyAlert* alert = [[EasyAlert alloc] initWithViewController:viewController];
+                [alert ShowAlertOKButton:nil message:NSLocalizedString(@"GlobalDataSingleton_URLisAlreadyDownload", @"既に本棚に登録されているURLでした。")];
+            });
+        }
+        return;
+    }
+    targetContentCacheData = [self CreateNewUserBook];
+    // XXXXX TODO: 怪しく ncode には URLを、keyword には cookieパラメタ を、userid には最後にダウンロードしたURLを入れているのをなんとかしないと……(´・ω・`)
+    targetContentCacheData.title = title;
+    targetContentCacheData.writer = author;
+    targetContentCacheData.ncode = [url absoluteString];
+    targetContentCacheData.userid = [url absoluteString];
     targetContentCacheData.keyword = cookieParameter;
+    targetContentCacheData.general_all_no = [[NSNumber alloc] initWithInt:1];
     [self UpdateNarouContent:targetContentCacheData];
+    [self UpdateStory:firstContent chapter_number:1 parentContent:targetContentCacheData];
     
     // download queue に追加します。
-    NSLog(@"add download queue: %@", urlString);
+    NSLog(@"add download queue: %@", [url absoluteString]);
     [self PushContentDownloadQueue:targetContentCacheData];
-    
-    return nil;
 }
 
 /// オーディオのルートが変わったよイベントのイベントハンドラ
@@ -2988,7 +3060,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     NSString* result = [userDefaults stringForKey:USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY];
     if (result == nil) {
-        // なんと、ここで default値 を返している！！！！('A`)
+        // TODO: なんと、ここで default値 を返している！！！！('A`)
         return @"・";
     }
     return result;
@@ -3001,6 +3073,95 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:data forKey:USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY];
+    [userDefaults synchronize];
+}
+
+/// SiteInfo デバッグ用に、毎回 SiteInfo の読み直しを行うか否かの設定を取得します
+- (BOOL)GetForceSiteInfoReloadIsEnabled {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_FORCE_SITEINFO_RELOAD_IS_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_FORCE_SITEINFO_RELOAD_IS_ENABLED];
+}
+
+/// SiteInfo デバッグ用に、毎回 SiteInfo の読み直しを行うか否かの設定を保存します
+- (void)SetForceSiteInfoReloadIsEnabled:(BOOL)yesNo {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:yesNo forKey:USER_DEFAULTS_FORCE_SITEINFO_RELOAD_IS_ENABLED];
+    [userDefaults synchronize];
+}
+
+/// Web取り込み用のBookmarkを取得します
+- (NSArray*)GetWebImportBookmarks{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    // 怪しく「名前」と「URL」を"\n"で区切って保存します。(´・ω・`)
+    [userDefaults registerDefaults:@{USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY: @[
+        @"Google\nhttps://www.google.co.jp",
+        @"小説家になろう\nhttps://syosetu.com/",
+        @"青空文庫\nhttp://www.aozora.gr.jp/",
+        //@"コンプリート・シャーロック・ホームズ\nhttp://www.221b.jp/", // 1秒おきに見に行かせると 403 になるっぽい？
+        @"ハーメルン\nhttps://syosetu.org/",
+        @"暁\nhttps://www.akatsuki-novels.com/",
+        @"カクヨム\nhttps://kakuyomu.jp/",
+        @"アルファポリス\nhttps://www.alphapolis.co.jp/novel/",
+        //@"pixiv/ノベル\nhttps://www.pixiv.net/novel/",
+        @"星空文庫\nhttps://slib.net/",
+        //@"FC2小説\nhttps://novel.fc2.com/",
+        //@"novelist.jp\nhttp://novelist.jp/",
+        //@"eエブリスタ\nhttps://estar.jp/",
+        //@"魔法のiランドノベル\nhttps://novel.maho.jp/",
+        //@"ベリーズ・カフェ\nhttps://www.berrys-cafe.jp/",
+        //@"星の砂\nhttp://hoshi-suna.jp/",
+        //@"小説カキコ\nhttp://www.kakiko.cc/",
+        //@"のべぷろ\nhttp://www.novepro.jp/",
+        //@"野いちご\nhttps://www.no-ichigo.jp/",
+        //@"小説&まんが投稿屋\nhttp://works.bookstudio.com/",
+        //@"シルフェニア\nhttp://www.silufenia.com/main.php",
+        //@"ぱろしょ\nhttp://paro.guttari.info/",
+        //@"おりおん\nhttp://de-view.net/",
+        //@"ドリームライブ\nhttp://www.dreamtribe.jp/",
+        //@"短編\nhttp://tanpen.jp/",
+        //@"ライトノベル作法研究所\nhttp://www.raitonoveru.jp/",
+        ]}];
+    return [userDefaults arrayForKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
+}
+
+/// Web取り込み用のBookmarkに追加します。
+- (void)AddWebImportBookmarkForName:(NSString*)name url:(NSURL*)url {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSArray* bookmarks = [userDefaults arrayForKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
+    NSMutableArray* newArray = [NSMutableArray new];
+    for (NSString* data in bookmarks) {
+        [newArray addObject:data];
+    }
+    [newArray addObject:[[NSString alloc] initWithFormat:@"%@\n%@", name, [url absoluteString]]];
+    [userDefaults setObject:newArray forKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
+    [userDefaults synchronize];
+}
+
+/// Web取り込み用のBookmarkから削除します
+- (void)DelURLFromWebImportBookmark:(NSURL*)url {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    NSArray* bookmarks = [userDefaults arrayForKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
+    NSMutableArray* newArray = [NSMutableArray new];
+    for (NSString* nameAndURL in bookmarks) {
+        NSArray* nameURLArray = [nameAndURL componentsSeparatedByString:@"\n"];
+        if ([nameURLArray count] != 2) {
+            continue;
+        }
+        NSString* URLString = nameURLArray[1];
+        if ([URLString compare:[url absoluteString]] == NSOrderedSame) {
+            continue;
+        }
+        [newArray addObject:nameAndURL];
+    }
+    [userDefaults setObject:newArray forKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
+    [userDefaults synchronize];
+}
+
+/// Web取り込み用のBookmarkを全て消し去ります
+- (void)ClearWebImportBookmarks{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:@[]forKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
     [userDefaults synchronize];
 }
 
@@ -3020,6 +3181,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         if ([content isURLContent]) {
             [obj setObject:@"url" forKey:@"type"];
             [obj setObject:content.ncode forKey:@"url"];
+            [obj setObject:content.writer forKey:@"author"];
+            [obj setObject:content.title forKey:@"title"];
             if (content.keyword != nil && [content.keyword length] > 0) {
                 [obj setObject: [NiftyUtility stringEncrypt:content.keyword key:content.ncode] forKey:@"secret"];
             }
@@ -3052,14 +3215,32 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return resultDictionary;
 }
 
+// Web読み込み用のブックマークをバックアップ用途用のJSON(用のNSArray*)に変換して取得します
+- (NSArray*)CreateWebImportBookmarkSettingArrayForJSON{
+    NSArray* bookmarks = [self GetWebImportBookmarks];
+    NSMutableArray* resultArray = [NSMutableArray new];
+    for (NSString* nameAndURL in bookmarks) {
+        NSArray* nameURLArray = [nameAndURL componentsSeparatedByString:@"\n"];
+        if ([nameURLArray count] != 2) {
+            continue;
+        }
+        NSString* nameString = nameURLArray[0];
+        NSString* URLString = nameURLArray[1];
+        [resultArray addObject:@{nameString: URLString}];
+    }
+    return resultArray;
+}
+
 // バックアップ用のデータを JSON に encode したものを生成して取得します
 - (NSData*)CreateBackupJSONData{
     NSArray* bookselfArray = [self CreateBookselfBackupForJSONArray];
     NSDictionary* speechModDictionary = [self CreateSpeechModifierSettingDictionaryForJSON];
+    NSArray* webImportBookmarkArray = [self CreateWebImportBookmarkSettingArrayForJSON];
     NSDictionary* backupData = @{
          @"data_version": @"1.0.0",
          @"bookshelf": bookselfArray,
-         @"word_replacement_dictionary": speechModDictionary
+         @"word_replacement_dictionary": speechModDictionary,
+         @"web_import_bookmarks": webImportBookmarkArray,
          };
     NSError* err = nil;
     NSData* resultData = [NSJSONSerialization dataWithJSONObject:backupData options:NSJSONWritingPrettyPrinted error:&err];
@@ -3098,7 +3279,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
                 continue;
             }
             NSString* cookie = [NiftyUtility stringDecrypt:secret key:url];
-            [self AddDownloadQueueForURL:url cookieParameter:cookie];
+            NSString* author = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"author"];
+            NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self AddDirectoryDownloadQueueForURL:url cookieParameter:cookie author:author title:title];
+            });
         }else if([type compare:@"user"] == NSOrderedSame) {
             NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
             NSString* ncode = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"id"];
@@ -3152,6 +3337,31 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [self UpdateSpeechModSettingMultiple:mutableArray];
 }
 
+- (void)RestoreBackupFromWebImportBookmarkArray_V1_0_0:(NSArray*)bookmarks{
+    [self ClearWebImportBookmarks];
+    for (id obj in bookmarks) {
+        if (![obj isKindOfClass:[NSDictionary class]]) {
+            continue;
+        }
+        NSDictionary* nameURLDictionary = obj;
+        for (NSString* nameString in [nameURLDictionary keyEnumerator]) {
+            if (nameString == nil || [nameString length] <= 0) {
+                continue;
+            }
+            id urlId = [nameURLDictionary objectForKey:nameString];
+            if (![urlId isKindOfClass:[NSString class]]) {
+                continue;
+            }
+            NSString* urlString = urlId;
+            NSURL* url = [[NSURL alloc] initWithString:urlString];
+            if (url == nil) {
+                continue;
+            }
+            [self AddWebImportBookmarkForName:nameString url:url];
+        }
+    }
+}
+
 /// JSONData に入っているバックアップを書き戻します。
 - (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData {
     NSError* err = nil;
@@ -3172,12 +3382,16 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     
     if ([dataVersion compare:@"1.0.0"] == NSOrderedSame) {
         NSArray* bookshelfDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"bookshelf"];
-        NSDictionary* speechModDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"word_replacement_dictionary"];
         if (bookshelfDataArray != nil) {
             [self RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray];
         }
+        NSDictionary* speechModDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"word_replacement_dictionary"];
         if (speechModDictionary != nil) {
             [self RestoreBackupFromSpeechModDictionary_V1_0_0:speechModDictionary];
+        }
+        NSArray* webImportBookmarkDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"web_import_bookmarks"];
+        if (webImportBookmarkDataArray != nil) {
+            [self RestoreBackupFromWebImportBookmarkArray_V1_0_0:webImportBookmarkDataArray];
         }
     }
 

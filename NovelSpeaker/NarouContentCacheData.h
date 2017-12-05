@@ -26,7 +26,7 @@
 @property (nonatomic) NSString* story;
 @property (nonatomic) NSNumber* genre;
 @property (nonatomic) NSString* keyword;
-@property (nonatomic) NSNumber* general_all_no;
+@property (nonatomic) NSNumber* general_all_no; // 全掲載部分数です。短編の場合は1です。
 @property (nonatomic) NSNumber* end;
 @property (nonatomic) NSNumber* global_point;
 @property (nonatomic) NSNumber* fav_novel_cnt;

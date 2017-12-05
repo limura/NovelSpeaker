@@ -176,9 +176,10 @@
         NSArray* searchResult = [NarouLoader SearchUserID: self.NarouContentDetail.userid];
         m_SearchResult = searchResult;
         dispatch_async(m_MainQueue, ^{
-            [holder CloseAlert:false];
-            NSLog(@"search end. count: %lu", (unsigned long)[m_SearchResult count]);
-            [self performSegueWithIdentifier:@"searchUserIDResultPushSegue" sender:self];
+            [holder CloseAlert:false completion:^{
+                NSLog(@"search end. count: %lu", (unsigned long)[m_SearchResult count]);
+                [self performSegueWithIdentifier:@"searchUserIDResultPushSegue" sender:self];
+            }];
         });
     });
 }

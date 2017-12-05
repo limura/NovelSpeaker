@@ -22,7 +22,8 @@
 - (BOOL)isEqualAlertController:(UIAlertController*)AlertController;
 - (void)runFirstAction:(UIAlertAction*)action;
 - (void)runSecondAction:(UIAlertAction*)action;
-- (void)CloseAlert:(bool)animate;
+- (void)CloseAlert:(bool)animate completion:(void (^ __nullable)(void))completion;
+
 @end
 
 @interface EasyAlert : NSObject<UIAlertViewDelegate>

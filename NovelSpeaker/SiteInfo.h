@@ -16,15 +16,25 @@
     NSRegularExpression* m_UrlPattern;
     NSString* m_NextLink;
     NSString* m_PageElement;
+    NSString* m_Title;
+    NSString* m_Author;
+    NSString* m_FirstPageLink;
 }
 
-- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement;
+- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString*)author firstPageLink:(NSString*)firstPageLink;
 
 /// 指定された url がこの SiteInfo の示すURLであるか否かを判定します
 - (BOOL)isTargetUrl:(NSURL*)url;
 
 /// NextLink に当たるものを取り出します
 - (NSURL*)GetNextURL:(xmlDocPtr)document context:(xmlXPathContextPtr)context currentURL:(NSURL*)currentURL documentEncoding:(unsigned long)documentEncoding;
+/// firstPageLink に当たるものを取り出します
+- (NSURL*)GetFirstPageURL:(xmlDocPtr)document context:(xmlXPathContextPtr)context currentURL:(NSURL*)currentURL documentEncoding:(unsigned long)documentEncoding;
+
+/// タイトルを抽出します
+- (NSString*)GetTitle:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding;
+/// 著者を抽出します
+- (NSString*)GetAuthor:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding;
 
 /// PageElementに当たる HTML を、NSString の形式で取り出します。
 /// HTML から単純な String にするには、HtmlStringToAttributedString 等のユーティリティを用いてください。

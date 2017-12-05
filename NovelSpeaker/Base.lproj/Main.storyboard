@@ -7,6 +7,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <customFonts key="customFonts">
@@ -16,10 +17,10 @@
         </array>
     </customFonts>
     <scenes>
-        <!--Debug Log View Controller-->
+        <!--Debug Log View Controller Swift-->
         <scene sceneID="1sr-gi-zeQ">
             <objects>
-                <viewController id="WI3-lq-RQn" customClass="DebugLogViewController" sceneMemberID="viewController">
+                <viewController id="WI3-lq-RQn" customClass="DebugLogViewControllerSwift" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="kiS-5S-SFr"/>
                         <viewControllerLayoutGuide type="bottom" id="sws-rR-hBh"/>
@@ -43,9 +44,22 @@
                             <constraint firstItem="gQM-YC-Qn8" firstAttribute="top" secondItem="l03-Ng-qdH" secondAttribute="topMargin" id="fMZ-Kk-X6C"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="FcK-cJ-voF"/>
+                    <navigationItem key="navigationItem" id="FcK-cJ-voF">
+                        <rightBarButtonItems>
+                            <barButtonItem title="Clear" id="Lc6-vn-0oR">
+                                <connections>
+                                    <action selector="clearButtonClicked:" destination="WI3-lq-RQn" id="2bD-3o-ZES"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Filter" id="tWi-pl-CUi">
+                                <connections>
+                                    <action selector="searchButtonClicked:" destination="WI3-lq-RQn" id="jEc-In-QrM"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
+                    </navigationItem>
                     <connections>
-                        <outlet property="logTextView" destination="gQM-YC-Qn8" id="IfM-fh-LLF"/>
+                        <outlet property="logTextView" destination="gQM-YC-Qn8" id="j9N-jG-RWp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VU5-Wx-PIG" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -325,6 +339,110 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="brw-Rq-p2L" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="450" y="925"/>
+        </scene>
+        <!--Web取込-->
+        <scene sceneID="rme-vM-df2">
+            <objects>
+                <viewController storyboardIdentifier="WebImportViewController" id="Ntb-XE-J32" customClass="ImportFromWebPageViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Teh-Kw-A3V"/>
+                        <viewControllerLayoutGuide type="bottom" id="LBU-sz-boV"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" restorationIdentifier="WebImportView" id="HZc-ku-Gaa">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YKK-cB-MCo">
+                                <rect key="frame" x="0.0" y="574" width="375" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="zYe-yy-RAc"/>
+                                </constraints>
+                                <items>
+                                    <barButtonItem width="10" style="plain" systemItem="fixedSpace" id="13D-GX-FYK"/>
+                                    <barButtonItem enabled="NO" title="&lt;" id="dK5-Iz-MxA">
+                                        <connections>
+                                            <action selector="backButtonClicked:" destination="Ntb-XE-J32" id="oUC-Px-ypx"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="8" style="plain" systemItem="fixedSpace" id="kB8-zc-FrR"/>
+                                    <barButtonItem enabled="NO" title="&gt;" id="kq8-ha-234">
+                                        <connections>
+                                            <action selector="forwardButtonClicked:" destination="Ntb-XE-J32" id="oKR-fQ-3I8"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="SEf-um-YIB"/>
+                                    <barButtonItem title="home" image="home.png" id="Lac-mr-xje">
+                                        <connections>
+                                            <action selector="homeButtonClicked:" destination="Ntb-XE-J32" id="6B8-Ep-My7"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="8" style="plain" systemItem="fixedSpace" id="Ie5-G7-cPU"/>
+                                    <barButtonItem title="bookmark" image="bookmark-false.png" id="oQ1-yS-NlX">
+                                        <connections>
+                                            <action selector="bookmarkButtonClicked:" destination="Ntb-XE-J32" id="7zO-rP-lxC"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="8" style="plain" systemItem="fixedSpace" id="vul-kC-TXn"/>
+                                    <barButtonItem systemItem="refresh" id="q8x-rc-zlI">
+                                        <connections>
+                                            <action selector="reloadButtonClicked:" destination="Ntb-XE-J32" id="are-Tb-m2n"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="8" style="plain" systemItem="fixedSpace" id="qkr-cR-jZl"/>
+                                    <barButtonItem title="取り込む" id="d9A-sU-gA4">
+                                        <connections>
+                                            <action selector="importButonClicked:" destination="Ntb-XE-J32" id="ivp-PA-dfc"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="b2P-LC-lhM">
+                                <rect key="frame" x="0.0" y="572" width="375" height="2"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="2" id="UeJ-p7-GT3"/>
+                                </constraints>
+                            </progressView>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="LSE-Fd-akM">
+                                <rect key="frame" x="10" y="20" width="355" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="nNY-OD-eoC"/>
+                                </constraints>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="addressBarUITextViewEditingDidBeginEvent:" destination="Ntb-XE-J32" eventType="editingDidBegin" id="Zds-kh-dzT"/>
+                                    <action selector="addressBarUITextViewEditingDidEndOnExitEvent:" destination="Ntb-XE-J32" eventType="editingDidEndOnExit" id="3hH-FW-phB"/>
+                                </connections>
+                            </textField>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="LSE-Fd-akM" firstAttribute="leading" secondItem="HZc-ku-Gaa" secondAttribute="leading" constant="10" id="53A-al-MMq"/>
+                            <constraint firstItem="b2P-LC-lhM" firstAttribute="leading" secondItem="HZc-ku-Gaa" secondAttribute="leading" id="6aK-cA-78r"/>
+                            <constraint firstItem="LBU-sz-boV" firstAttribute="top" secondItem="YKK-cB-MCo" secondAttribute="bottom" id="AvF-GK-976"/>
+                            <constraint firstItem="YKK-cB-MCo" firstAttribute="top" secondItem="b2P-LC-lhM" secondAttribute="bottom" id="BK9-gV-JWF"/>
+                            <constraint firstAttribute="trailing" secondItem="LSE-Fd-akM" secondAttribute="trailing" constant="10" id="Fnf-CU-MLP"/>
+                            <constraint firstItem="LSE-Fd-akM" firstAttribute="top" secondItem="Teh-Kw-A3V" secondAttribute="bottom" id="LPa-aY-WMT"/>
+                            <constraint firstItem="YKK-cB-MCo" firstAttribute="leading" secondItem="HZc-ku-Gaa" secondAttribute="leading" id="RvV-G1-TDh"/>
+                            <constraint firstAttribute="trailing" secondItem="YKK-cB-MCo" secondAttribute="trailing" id="iA9-7N-LmO"/>
+                            <constraint firstAttribute="trailing" secondItem="b2P-LC-lhM" secondAttribute="trailing" id="wQK-bS-Qsi"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Web取込" image="earth.png" id="DHc-nq-yTa"/>
+                    <connections>
+                        <outlet property="addressBarUITextField" destination="LSE-Fd-akM" id="n5w-lt-aJL"/>
+                        <outlet property="backButton" destination="dK5-Iz-MxA" id="V0h-di-n4j"/>
+                        <outlet property="bookmarkUIBarButtonItem" destination="oQ1-yS-NlX" id="2W4-pf-LLi"/>
+                        <outlet property="forwardButton" destination="kq8-ha-234" id="Vy6-FL-ZL5"/>
+                        <outlet property="progressView" destination="b2P-LC-lhM" id="mjw-Tw-BOx"/>
+                        <outlet property="refreshButton" destination="q8x-rc-zlI" id="mCc-l7-Avz"/>
+                        <outlet property="toolBar" destination="YKK-cB-MCo" id="8BE-rk-5we"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="zER-k9-zQN" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-935.5" y="924.5"/>
         </scene>
         <!--クレジット-->
         <scene sceneID="g6V-SU-Uql">
@@ -1101,7 +1219,7 @@ SOFTWARE.
                                 <nil key="highlightedColor"/>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="Hmy-c2-vHv">
-                                <rect key="frame" x="9" y="188.5" width="359" height="418.5"/>
+                                <rect key="frame" x="9" y="188.5" width="359" height="467.5"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </tableView>
                         </subviews>
@@ -1169,7 +1287,7 @@ SOFTWARE.
                     <connections>
                         <segue destination="v42-xJ-9mb" kind="relationship" relationship="viewControllers" id="ktK-js-zfL"/>
                         <segue destination="LfY-GE-Mgm" kind="relationship" relationship="viewControllers" id="BMz-0y-0Ux"/>
-                        <segue destination="QQl-Cw-XTx" kind="relationship" relationship="viewControllers" id="0rH-Qu-il9"/>
+                        <segue destination="Ntb-XE-J32" kind="relationship" relationship="viewControllers" id="L91-U5-uSV"/>
                         <segue destination="SVO-uL-7kp" kind="relationship" relationship="viewControllers" id="4ul-nd-jaO"/>
                     </connections>
                 </tabBarController>
@@ -1453,8 +1571,11 @@ SOFTWARE.
         </scene>
     </scenes>
     <resources>
+        <image name="bookmark-false.png" width="24" height="24"/>
         <image name="booksearch.png" width="24" height="24"/>
+        <image name="earth.png" width="24" height="24"/>
         <image name="gear.png" width="24" height="24"/>
+        <image name="home.png" width="24" height="24"/>
         <image name="icloud1.png" width="24" height="24"/>
         <image name="soundbook.png" width="24" height="24"/>
     </resources>

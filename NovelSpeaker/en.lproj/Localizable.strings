@@ -29,6 +29,7 @@
 "GlobalDataSingleton_NewUserBookTitle" = "New User Book";
 "GlobalDataSingleton_NovelUpdateAlertBody" = "%d novels updated.";
 "GlobalDataSingleton_NovelUpdateAlertAction" = "open app";
+"GlobalDataSingleton_URLisAlreadyDownload" = "This URL is already downloaded.";
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "Title: %@";
 "NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "It was added to download queue.";
@@ -67,6 +68,9 @@
 "SettingTableViewController_EditNotRubyStringTitle" = "String with judge that it is not ruby.";
 "SettingTableViewController_EditNotRubyStringHint" = "If it is ruby of only letters written here, it is judged to be just emphasis, and the original letter will be read aloud instead of ruby";
 "SettingTableViewController_EditNotRubyStringPlaceHolder" = "・";
+"SettingTableViewController_ForceSiteInfoReload" = "Force reload SiteInfo";
+"SettingTableViewController_ShowDebugLog" = "Show debug log";
+"SettingTableViewController_GoToSupportSite" = "Open NovelSpeaker support site";
 
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
@@ -94,6 +98,7 @@
 "SpeechViewController_AddSpeechModSettings" = "Add to speech mod settings";
 "SpeechViewController_SpeakAlertVoiceOver" = "VoiceOver becomes effective. Do you reproduce as it is?";
 "SpeechViewController_SpeakAlertVoiceOverMessage" = "Reading aloud occurs double when it just reproduce.";
+"SpeechViewController_loading" = "loading...";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";
@@ -139,6 +144,32 @@
 "NarouDownloadQueue_URLDownloadTitleFixed" = "downloading \"%@\" ";
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "Could not get the title of the downloaded thing, will leave it as URL.\n%@";
 "NarouDownloadQueue_URLDownloadFailedWithException" = "Failed to download URL \"%@\".";
+
+"ImportFromWebPageViewController_loading" = "loading...";
+"ImportFromWebPageViewController_CreateBookmark" = "Input bookmark name";
+"ImportFromWebPageViewController_InvalidServerCertificate_CanContinue" = "Invalid server certificate. continue?";
+"ImportFromWebPageViewController_InvalidServerCertificate" = "Invalid server certificate.";
+"ImportFromWebPageViewController_NoMoreDisplay" = "Do not display again";
+"ImportFromWebPageViewController_AuthenticationRequired" = "Authentication required";
+"ImportFromWebPageViewController_UnknownHost" = "Unknown host";
+"ImportFromWebPageViewController_MessageFrom..." = "Message from %@";
+"ImportFromWebPageViewController_ImputRequiredFrom..." = "Imput required from %@";
+
+"UriLoader_NSURLConnectionRequestFailed" = "Acquisition from the web server failed. (Perhaps the connection has failed, please check the network status)";
+"UriLoader_HTTPResponseIsInvalid" = "The server has not returned a normal response. (Server returned status code are: \"%ld\") If this error is issued in the site etc. where login is required, it seems to be difficult to deal with, although it may be a problem that can be handled, so NovelSpeaker From the opinion request form on the side of the support site, you should report with the URL where this error occurred and the procedure until the error occurs";
+"UriLoader_HTMLParseFailed_Parse" = "Failed to parse HTML. (It seems that it is not a valid HTML or XHTML document.) Currently, NovelSpeaker can not read PDF and other documents)";
+"UriLoader_HTMLParseFailed_Xpath" = "Failed to parse HTML. (Illegal xpath was specified, probably the \"information registered in wedata\" for use in the analysis of this site is out of date or wrong.) Opinions on the support site side of NovelSpeaker Request form etc. Please report it with the URL where this error occurred or solve it by editing wedata yourself using OpenID)";
+"UriLoader_HTMLParseFailed_ContentIsNil" = "Failed to parse HTML. (I could not get the contents of the document, it may be solved by reporting from the opinion request form etc. on the support site side of NovelSpeaker together with the URL where this error occurred and the procedure until the error occurred. not)";
+
+"NiftyUtilitySwift_FollowingPageAreNotAvailable" = "Following page is not available";
+"NiftyUtilitySwift_FollowingPageAreAvailable" = "Following page are available";
+"NiftyUtilitySwift_TitleUnknown" = "Title unknown";
+"NiftyUtilitySwift_CancelImport" = "Cancel";
+"NiftyUtilitySwift_Import" = "Import";
+"NiftyUtilitySwift_CanNotAddToBookshelfTitle" = "Unknown ERROR";
+"NiftyUtilitySwift_CanNotAddToBookshelfBody" = "Add to bookshelf failed.";
+"NiftyUtilitySwift_ImportError" = "Import error";
+"NiftyUtilitySwift_ImportedButNoTextFound" = "The import of the document was completed, but the content was empty. It may happen, for example, in the case of an HTML document in which all contents are generated in JavaScript. Although NovelSpeaker developers may not be able to do, from the opinion request form etc. of NovelSpeaker's support site side, please report with the URL where this error occurred along with the procedure until an error occurs You may be able to solve it.";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

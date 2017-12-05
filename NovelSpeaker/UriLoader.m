@@ -8,6 +8,8 @@
 
 #import "UriLoader.h"
 #import "SiteInfo.h"
+#import "NiftyUtility.h"
+#import "GlobalDataSingleton.h"
 
 @implementation UriLoader
 
@@ -17,9 +19,10 @@
         return self;
     }
     
-    m_SleepTime = 1.0f;
+    m_SleepTime = 1.6f;
     m_MaxDepth = 100;
     m_SiteInfoArray = [NSMutableArray new];
+    m_CustomSiteInfoArray = [NSMutableArray new];
     m_WebAccessQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.uriloader.webaccessqueue", DISPATCH_QUEUE_CONCURRENT);
     
     return self;
@@ -28,28 +31,48 @@
 /// SiteInfo のJSONを解析した後の NSArray を元に内部データベースに追加します
 - (BOOL)AddSiteInfoFromJsonArray:(NSArray *)siteInfoJsonArray targetSiteInfoArray:(NSMutableArray*)targetSiteInfoArray {
     if (siteInfoJsonArray == nil || ![siteInfoJsonArray isKindOfClass:[NSArray class]]) {
-        NSLog(@"siteInfoJsonArray invalid: %@", siteInfoJsonArray);
+        NSLog(@"AddSiteInfoFromJsonArray: siteInfoJsonArray invalid: %@", siteInfoJsonArray);
         return false;
     }
     
     for (NSDictionary* firstObject in siteInfoJsonArray) {
         if (![firstObject isKindOfClass:[NSDictionary class]]) {
+            NSLog(@"AddSiteInfoFromJsonArray: isKindOfClass failed.");
             continue;
         }
-        NSDictionary* secondObject = [firstObject objectForKey:@"data"];
-        if (secondObject == nil || ![secondObject isKindOfClass:[NSDictionary class]]) {
+        NSDictionary* secondObject = [NiftyUtility validateNSDictionaryForDictionary:firstObject key:@"data"];
+        if (secondObject == nil) {
+            NSLog(@"AddSiteInfoFromJsonArray: data not found.");
             continue;
         }
-        NSString* urlPattern = [secondObject objectForKey:@"url"];
-        NSString* nextLink = [secondObject objectForKey:@"nextLink"];
-        NSString* pageElement = [secondObject objectForKey:@"pageElement"];
-        if (urlPattern == nil || nextLink == nil || pageElement == nil) {
+        NSString* urlPattern = [NiftyUtility validateNSDictionaryForString:secondObject key:@"url"];
+        NSString* pageElement = [NiftyUtility validateNSDictionaryForString:secondObject key:@"pageElement"];
+        if (urlPattern == nil || pageElement == nil) {
+            NSLog(@"AddSiteInfoFromJsonArray: urlPattern or pageElement is not found.");
             continue;
         }
-        SiteInfo* siteInfo = [[SiteInfo alloc] initWithParams:urlPattern nextLink:nextLink pageElement:pageElement];
+        NSString* nextLink = [NiftyUtility validateNSDictionaryForString:secondObject key:@"nextLink"];
+        if (nextLink == nil) {
+            nextLink = @"";
+        }
+        NSString* title = [NiftyUtility validateNSDictionaryForString:secondObject key:@"title"];
+        if (title == nil) {
+            title = @"//title";
+        }
+        NSString* author = [NiftyUtility validateNSDictionaryForString:secondObject key:@"author"];
+        if (author == nil) {
+            author = @"";
+        }
+        NSString* firstPageLink = [NiftyUtility validateNSDictionaryForString:secondObject key:@"firstPageLink"];
+        if (firstPageLink == nil) {
+            firstPageLink = @"";
+        }
+        SiteInfo* siteInfo = [[SiteInfo alloc] initWithParams:urlPattern nextLink:nextLink pageElement:pageElement title:title author:author firstPageLink:firstPageLink];
         if (siteInfo == nil) {
+            NSLog(@"AddSiteInfoFromJsonArray: siteInfo == nil");
             continue;
         }
+        //NSLog(@"AddSiteInfoFromJsonArray: addObject: %@", [siteInfo GetDescription]);
         [targetSiteInfoArray addObject:siteInfo];
     }
     return true;
@@ -57,11 +80,10 @@
 
 /// SiteInfo のJSONを内部データベースに追加します。
 - (BOOL)AddSiteInfoFromData:(NSData*)siteInfo{
-    NSLog(@"siteInfo: %p", siteInfo);
     NSError* error = nil;
     NSArray* jsonArray = [NSJSONSerialization JSONObjectWithData:siteInfo options:NSJSONReadingAllowFragments error:&error];
     if (jsonArray == nil || error != nil) {
-        NSLog(@"jsonArray: %p, error: %p(%@)", jsonArray, error, error);
+        NSLog(@"AddSiteInfoFromData jsonArray == nil or error != nil. jsonArray: %p, error: %p(%@)", jsonArray, error, error);
         return false;
     }
     return [self AddSiteInfoFromJsonArray:jsonArray targetSiteInfoArray:m_SiteInfoArray];
@@ -117,28 +139,43 @@
 
     /// XXXX ことせかい でのカスタムSiteInfoをとりあえずここに書きます。
     /// TODO: 将来的には外部からの読み込みをできるようにしておいたほうが良いです。
+    /*
     NSArray* novelSpeakerCustomSiteInfoArray = @[
         // Arcadia
-        //[[SiteInfo alloc] initWithParams:@"^http://(www\\.)?mai-net\\.(net|ath\\.cx)/bbs/sst/sst.php" nextLink:@"//table//td[@align=\"right\"]/a" pageElement:@"//blockquote/div"]
-                                                 ];
+         [[SiteInfo alloc] initWithParams:@"^https?://(www\\.)?mai-net\\.(net|ath\\.cx)/bbs/sst/sst.php" nextLink:@"//table[@class='brdr']//a[contains(., '次を表示する')]" pageElement:@"//blockquote/div" title:@"//title" author:@""],
+     ];
 
-    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"//a[@rel=\"next\"]" pageElement:@"//*[@class=\"autopagerize_page_element\"]"];
-    SiteInfo* fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//body"];
-    
-    for (SiteInfo* siteInfo in m_SiteInfoArray) {
-        if ([siteInfo isTargetUrl:url]) {
-            [resultArray addObject:siteInfo];
-        }
-    }
     for (SiteInfo* siteInfo in novelSpeakerCustomSiteInfoArray) {
         if ([siteInfo isTargetUrl:url]) {
             [resultArray addObject:siteInfo];
         }
     }
-    
+     */
+
+    for (SiteInfo* siteInfo in m_CustomSiteInfoArray) {
+        //NSLog(@"check: %@", [siteInfo GetDescription]);
+        if ([siteInfo isTargetUrl:url]) {
+            [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"ことせかい用SiteInfoの一つを採用します: %@", [siteInfo GetDescription]]];
+            [resultArray addObject:siteInfo];
+        }
+    }
+
+    for (SiteInfo* siteInfo in m_SiteInfoArray) {
+        if ([siteInfo isTargetUrl:url]) {
+            [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"Autopagerize用SiteInfoの一つを採用します: %@", [siteInfo GetDescription]]];
+            [resultArray addObject:siteInfo];
+        }
+    }
+
+    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"//a[@rel=\"next\"]" pageElement:@"//*[@class=\"autopagerize_page_element\"]" title:@"//title" author:@"" firstPageLink:@""];
     [resultArray addObject:defaultSiteInfo];
+    SiteInfo* fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//body" title:@"//title" author:@"" firstPageLink:@""];
     [resultArray addObject:fallbackSiteInfo];
-    
+    /*
+    fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//\*" title:@"//title" author:@""];
+    [resultArray addObject:fallbackSiteInfo];
+    */
+
     return resultArray;
 }
 
@@ -190,15 +227,22 @@
     if (tmpString == nil) {
         return @"utf-8";
     }
-    NSLog(@"tmpString: %p, %lu, %@", tmpString, (unsigned long)tmpString.length, guessEncoding);
-    NSError* err = nil;
-    NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:@"content=[\"'].*?; *charset=(.*?)[\"']" options:NSRegularExpressionCaseInsensitive error:&err];
-    NSTextCheckingResult* match = [regexp firstMatchInString:tmpString options:0 range:NSMakeRange(0, tmpString.length)];
-    if (match.numberOfRanges >= 2) {
-        NSString* charset = [tmpString substringWithRange:[match rangeAtIndex:1]];
-        if (charset != nil && charset.length > 0) {
-            NSLog(@"charset found: %@", charset);
-            return charset;
+    //NSLog(@"tmpString: %p, %lu, %@", tmpString, (unsigned long)tmpString.length, guessEncoding);
+    
+    NSArray* charsetTagRegexpArray = @[
+       @"content=[\"'].*?; *charset=(.*?)[\"']",
+       @"meta +charset=[\"'](.*?)[\"']",
+    ];
+    for (NSString* pattern in charsetTagRegexpArray) {
+        NSError* err = nil;
+        NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&err];
+        NSTextCheckingResult* match = [regexp firstMatchInString:tmpString options:0 range:NSMakeRange(0, tmpString.length)];
+        if (match.numberOfRanges >= 2) {
+            NSString* charset = [tmpString substringWithRange:[match rangeAtIndex:1]];
+            if (charset != nil && charset.length > 0) {
+                NSLog(@"charset found: %@", charset);
+                return charset;
+            }
         }
     }
     if (guessEncoding != nil) {
@@ -219,7 +263,7 @@
         return NSUTF8StringEncoding;
     }
     for (NSString* key in targetEncodings) {
-        if ([charsetString compare:key] == NSOrderedSame) {
+        if ([charsetString caseInsensitiveCompare:key] == NSOrderedSame) {
             NSNumber* encoding = [targetEncodings valueForKey:key];
             return [encoding unsignedLongValue];
         }
@@ -247,21 +291,10 @@
     }];
 }
 
-// HTML から、<title>...</title> の ... の部分を取り出します。
-+ (NSString*)GetHtmlTitle:(xmlDocPtr)document context:(xmlXPathContextPtr)context  documentEncoding:(unsigned long)documentEncoding {
-    if (document == NULL || context == NULL) {
-        return nil;
-    }
-    
-    SiteInfo* titleSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//title"];
-    NSString* pageString = [titleSiteInfo GetPageElement:document context:context documentEncoding:documentEncoding];
-    return [[NSString alloc] initWithFormat:@"%@", [SiteInfo RemoveHtmlTag:pageString]];
-}
-
 /// 指定されたURLからGETで取得したデータをUTF-8に変換してNSDataとして返します。
 /// これはブロッキングします。リクエストに失敗した時など明確にエラーした場合は nil を返します。
 /// ただ、encodingがわからなかった場合は何も変換せず返すので注意してください。
-+ (NSData*)GetHtmlDataAboutUTF8Encorded:(NSURL*)targetUrl cookieStorage:(NSHTTPCookieStorage*)cookieStorage out_charSetString:(NSMutableString**)out_charsetString out_charsetValue:(unsigned long*)out_charsetValue
++ (NSData*)GetHtmlDataAboutUTF8Encorded:(NSURL*)targetUrl cookieStorage:(NSHTTPCookieStorage*)cookieStorage out_charSetString:(NSMutableString**)out_charsetString out_charsetValue:(unsigned long*)out_charsetValue out_error:(NSMutableString*)out_errorString
 {
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:targetUrl];
     
@@ -272,17 +305,24 @@
     NSError* error;
     NSURLResponse* response;
     NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    NSLog(@"NSURLConnection return: data(%lu bytes), error: %@", (unsigned long)[data length], [error localizedDescription]);
     if (data == nil) {
+        if (out_errorString != nil) {
+            [out_errorString setString:NSLocalizedString(@"UriLoader_NSURLConnectionRequestFailed", @"Webサーバからの取得に失敗しました。(接続失敗？)")];
+        }
         return nil;
     }
     NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
     if ((int)(httpResponse.statusCode / 100) != 2) {
         NSLog(@"HTTP status code is not 2?? (%ld) url: %@", (long)httpResponse.statusCode, [targetUrl absoluteString]);
+        if (out_errorString != nil) {
+            [out_errorString setString:[[NSString alloc] initWithFormat:NSLocalizedString(@"UriLoader_HTTPResponseIsInvalid", @"サーバから返されたステータスコードが正常値(200 OK等)ではなく、%ld を返されました。ログインが必要なサイトである場合などに発生する場合があります。ことせかい アプリ側でできることはあまり無いかもしれませんが、ことせかい のサポートサイトに設置してあります、ご意見ご要望フォームにこの問題の起こったURLとこの症状が起こった前にやったことを添えて報告して頂けると、あるいはなんとかできるかもしれません。"), httpResponse.statusCode]];
+        }
         return nil;
     }
     
     NSString* encoding = [self GetContentCharSet:httpResponse data:data faileoverCharset:@"UTF-8"];
-    NSLog(@"final encoding: %@", encoding);
+    //NSLog(@"final encoding: %@", encoding);
     unsigned long charsetValue = [UriLoader charsetToNSStringEncodingValue:encoding];
     
     // charset が UTF-8 でなければ強引に UTF-8 にしたものを生成してそれを使います
@@ -308,6 +348,131 @@
     return data;
 }
 
+- (NSHTTPCookieStorage*)createCookieStorage:(NSArray*)cookieArray url:(NSURL*)url{
+    NSHTTPCookieStorage* cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    //NSLog(@"LoadURL: cookieArray: %@", cookieArray);
+    if (cookieArray != nil && [cookieArray count] > 0) {
+        for (NSString* keyValue in cookieArray) {
+            NSArray* keyValueArray = [[keyValue stringByRemovingPercentEncoding] componentsSeparatedByString:@"="];
+            if (keyValueArray != nil && [keyValueArray count] == 2) {
+                NSString* key = keyValueArray[0];
+                NSString* value = keyValueArray[1];
+                NSString* host = [url host];
+                if (key == nil || value == nil || host == nil) {
+                    continue;
+                }
+                //NSLog(@"#### add cookie: %@=%@ ####", key, value);
+                NSDictionary* cookieDictionary = @{NSHTTPCookieName   : key,
+                                                   NSHTTPCookieValue  : value,
+                                                   NSHTTPCookiePath   : @"/",
+                                                   NSHTTPCookieDomain : host,
+                                                   NSHTTPCookieExpires: [[NSDate date] dateByAddingTimeInterval:3600]};
+                NSHTTPCookie* cookie = [NSHTTPCookie cookieWithProperties:cookieDictionary];
+                [cookieStorage setCookie:cookie];
+            }
+        }
+    }
+    return cookieStorage;
+}
+
+- (HtmlStory*)FetchStoryForURL:(NSURL*)targetUrl cookieStorage:(NSHTTPCookieStorage*)cookieStorage out_error:(NSMutableString*)out_errorString {
+    NSMutableString* charSetString = [NSMutableString new];
+    unsigned long charsetValue = 0;
+    NSData* data = [UriLoader GetHtmlDataAboutUTF8Encorded:targetUrl cookieStorage:cookieStorage out_charSetString:&charSetString out_charsetValue:&charsetValue out_error:out_errorString];
+    if (data == nil) {
+        NSLog(@"fetchURL failed: data == nil");
+        return nil;
+    }
+    
+    xmlDocPtr document = htmlReadMemory([data bytes], (int)[data length], [[targetUrl absoluteString] cStringUsingEncoding:NSUTF8StringEncoding], [[charSetString lowercaseString] cStringUsingEncoding:NSUTF8StringEncoding], HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR);
+    if (document == NULL) {
+        NSLog(@"xmlParseMemory() failed: %@\n%@", [targetUrl absoluteString], [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+        if (out_errorString != nil) {
+            [out_errorString setString:NSLocalizedString(@"UriLoader_HTMLParseFailed_Parse", @"HTMLの解析に失敗しました。(parse)")];
+        }
+        return nil;
+    }
+    xmlXPathContextPtr context;
+    context = xmlXPathNewContext(document);
+    if (context == NULL) {
+        xmlFreeDoc(document);
+        NSLog(@"xmlXPathNewContext() failed: %@", [targetUrl absoluteString]);
+        if (out_errorString != nil) {
+            [out_errorString setString:NSLocalizedString(@"UriLoader_HTMLParseFailed_Xpath", @"HTMLの解析に失敗しました。(xpath)")];
+        }
+        return nil;
+    }
+    
+    HtmlStory* story = [HtmlStory new];
+    NSArray* siteInfoArray = [self searchSiteInfoForURL:targetUrl];
+    NSURL* firstPageLink = nil;
+    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"URL %@ に対して SiteInfo のマッチングを開始します。", [targetUrl absoluteString]]];
+    for (SiteInfo* siteInfo in siteInfoArray) {
+        // firstPageLink の中身がなければ検索しておきます。
+        if (firstPageLink == nil) {
+            firstPageLink = [siteInfo GetFirstPageURL:document context:context currentURL:targetUrl documentEncoding:charsetValue];
+            if (firstPageLink != nil) {
+                [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"firstPageLink に hit しました。firstPageURL: %@, siteInfo: %@", [firstPageLink absoluteString], [siteInfo GetDescription]]];
+            }
+        }
+        NSString* pageHtml = [siteInfo GetPageElement:document context:context documentEncoding:charsetValue];
+        // pageHtml がみつからないで、かつ、firstPageLink がみつかっていない場合は次の siteInfo を検索します
+        if ((pageHtml == nil || [pageHtml length] <= 0) && firstPageLink == nil) {
+            [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"pageElement と firstPageLink のどちらもヒットしませんでした。siteInfo: %@", [siteInfo GetDescription]]];
+            continue;
+        }
+        if (pageHtml == nil) {
+            pageHtml = @"";
+        }
+        NSString* removeRubyString = [SiteInfo RemoveRubyTag:pageHtml];
+        NSString* replaceLonlyTagString = [SiteInfo ReplaceXhtmlLonlyTag:removeRubyString];
+        NSString* tmpString = [replaceLonlyTagString stringByReplacingOccurrencesOfString:@"&#13;" withString:@""];
+        if (tmpString == nil || [tmpString length] <= 0) {
+            NSLog(@"tmpString == nil || tmpString.length <= 0");
+            continue;
+        }
+        NSAttributedString* textAttributedString = [SiteInfo HtmlStringToAttributedString:tmpString];
+        story.content = textAttributedString.string;
+        story.title = [siteInfo GetTitle:document context:context documentEncoding:charsetValue];
+        story.author = [siteInfo GetAuthor:document context:context documentEncoding:charsetValue];
+        story.nextUrl = [siteInfo GetNextURL:document context:context currentURL:targetUrl documentEncoding:charsetValue];
+        story.firstPageLink = firstPageLink;
+        [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SiteInfo hit: %@ on %@", [siteInfo GetDescription], [targetUrl absoluteString]]];
+        break;
+    }
+    xmlXPathFreeContext(context);
+    xmlFreeDoc(document);
+    
+    if (story.content == nil || [story.content length] <= 0) {
+        NSLog(@"fetchURL failed: story.content == nil or length <= 0");
+        if (out_errorString != nil) {
+            [out_errorString setString:NSLocalizedString(@"UriLoader_HTMLParseFailed_ContentIsNil", @"HTMLの解析に失敗しました。(content is nil)")];
+        }
+        return nil;
+    }
+    
+    story.url = [targetUrl absoluteString];
+    return story;
+}
+
+/// テスト用に一つのURLを取得します。
+- (void)FetchOneUrl:(NSURL*)url cookieArray:(NSArray*)cookieArray successAction:(void(^)(HtmlStory* story))successAction failedAction:(void(^)(NSURL* url, NSString* errorString))failedAction {
+    dispatch_async(m_WebAccessQueue, ^{
+        NSHTTPCookieStorage* cookieStorage = [self createCookieStorage:cookieArray url:url];
+        NSMutableString* errorMutableString = [NSMutableString new];
+        HtmlStory* story = [self FetchStoryForURL:url cookieStorage:cookieStorage out_error:errorMutableString];
+        if (story == nil) {
+            if (failedAction) {
+                failedAction(url, errorMutableString);
+            }
+            return;
+        }
+        if (successAction) {
+            successAction(story);
+        }
+    });
+}
+
 /// URLを読み込んで、SiteInfo の情報から得た PageElement の情報を NSString に変換して取り出しつつ、
 /// MaxDepth まで nextLink を辿ったものを、PageElement毎の配列として取り出します。
 /// 該当する siteinfo が無い場合、a rel="next" であったり class="autopagerize_page_element" であるものを取り出そうとします。
@@ -319,101 +484,37 @@
         int count = startCount;
         BOOL success = false;
 
-        NSHTTPCookieStorage* cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-        NSLog(@"LoadURL: cookieArray: %@", cookieArray);
-        if (cookieArray != nil && [cookieArray count] > 0) {
-            for (NSString* keyValue in cookieArray) {
-                NSArray* keyValueArray = [[keyValue stringByRemovingPercentEncoding] componentsSeparatedByString:@"="];
-                if (keyValueArray != nil && [keyValueArray count] == 2) {
-                    NSString* key = keyValueArray[0];
-                    NSString* value = keyValueArray[1];
-                    NSString* host = [url host];
-                    if (key == nil || value == nil || host == nil) {
-                        continue;
-                    }
-                    NSLog(@"#### add cookie: %@=%@ ####", key, value);
-                    NSDictionary* cookieDictionary = @{NSHTTPCookieName   : key,
-                                                       NSHTTPCookieValue  : value,
-                                                       NSHTTPCookiePath   : @"/",
-                                                       NSHTTPCookieDomain : host,
-                                                       NSHTTPCookieExpires: [[NSDate date] dateByAddingTimeInterval:3600]};
-                    NSHTTPCookie* cookie = [NSHTTPCookie cookieWithProperties:cookieDictionary];
-                    [cookieStorage setCookie:cookie];
-                }
-            }
-        }
+        NSHTTPCookieStorage* cookieStorage = [self createCookieStorage:cookieArray url:url];
 
         for (int i = 0; i < m_MaxDepth && targetUrl != nil; i++) {
-            NSMutableString* charSetString = [NSMutableString new];
-            unsigned long charsetValue = 0;
-            NSData* data = [UriLoader GetHtmlDataAboutUTF8Encorded:targetUrl cookieStorage:cookieStorage out_charSetString:&charSetString out_charsetValue:&charsetValue];
-            if (data == nil) {
+            NSMutableString* errorMutableString = [NSMutableString new];
+            HtmlStory* story = [self FetchStoryForURL:targetUrl cookieStorage:cookieStorage out_error:errorMutableString];
+            if (story == nil) {
+                NSLog(@"FetchURL failed. %@", errorMutableString);
                 break;
             }
-            
-            xmlDocPtr document = htmlReadMemory([data bytes], (int)[data length], [[targetUrl absoluteString] cStringUsingEncoding:NSUTF8StringEncoding], [[charSetString lowercaseString] cStringUsingEncoding:NSUTF8StringEncoding], HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR);
-            if (document == NULL) {
-                NSLog(@"xmlParseMemory() failed: %@\n%@", [targetUrl absoluteString], [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
-                break;
-            }
-            xmlXPathContextPtr context;
-            context = xmlXPathNewContext(document);
-            if (context == NULL) {
-                xmlFreeDoc(document);
-                NSLog(@"xmlXPathNewContext() failed: %@", [targetUrl absoluteString]);
-                break;
-            }
-
-            NSURL* nextUrl = nil;
-            HtmlStory* story = [HtmlStory new];
-            NSArray* siteInfoArray = [self searchSiteInfoForURL:targetUrl];
-            for (SiteInfo* siteInfo in siteInfoArray) {
-                NSString* pageHtml = [siteInfo GetPageElement:document context:context documentEncoding:charsetValue];
-                if (pageHtml == nil || [pageHtml length] <= 0) {
-                    continue;
-                }
-                NSString* removeRubyString = [SiteInfo RemoveRubyTag:pageHtml];
-                NSString* replaceLonlyTagString = [SiteInfo ReplaceXhtmlLonlyTag:removeRubyString];
-                NSString* tmpString = [replaceLonlyTagString stringByReplacingOccurrencesOfString:@"&#13;" withString:@""];
-                if (tmpString == nil || [tmpString length] <= 0) {
-                    continue;
-                }
-                NSAttributedString* textAttributedString = [SiteInfo HtmlStringToAttributedString:tmpString];
-                story.content = textAttributedString.string;
-                nextUrl = [siteInfo GetNextURL:document context:context currentURL:targetUrl documentEncoding:charsetValue];
-                
-                NSLog(@"decode success: next: %@, siteInfo: %@", [nextUrl absoluteString], [siteInfo GetDescription]);
-                break;
-            }
-            story.title = [UriLoader GetHtmlTitle:document context:context documentEncoding:charsetValue];
-            xmlXPathFreeContext(context);
-            xmlFreeDoc(document);
-
             if (story.content == nil || [story.content length] <= 0) {
                 continue;
             }
 
             story.count = count++;
-            story.url = [targetUrl absoluteString];
             success = true;
             if (successAction != nil) {
                 successAction(story, targetUrl);
             }
             
-            if (nextUrl == nil) {
+            if (story.nextUrl == nil) {
                 break;
             }
-            NSLog(@"next url: %@", [nextUrl absoluteString]);
-            targetUrl = nextUrl;
+            targetUrl = story.nextUrl;
             [NSThread sleepForTimeInterval:m_SleepTime];
         }
         
         if (!success && failedAction != nil) {
             failedAction(url);
-        }else{
-            if (finishAction != nil) {
-                finishAction(url);
-            }
+        }
+        if (finishAction != nil) {
+            finishAction(url);
         }
     });
 }

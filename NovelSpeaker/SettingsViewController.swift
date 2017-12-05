@@ -12,6 +12,7 @@ import Eureka
 
 class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate {
     var m_NarouContentCacheData:NarouContentCacheData? = nil
+    var m_RubySwitchToggleHitCount = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,7 +77,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             .label(text: NSLocalizedString("SettingtableViewController_ConfirmEnableBackgroundFetch", comment:"この設定を有効にすると、ことせかい を使用していない時等に小説の更新を確認するようになるため、ネットワーク通信が発生するようになります。よろしいですか？"))
                             .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
                                 row.value = false
-                                dialog.dismiss(animated: true, completion: nil)
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: true, completion: nil)
+                                }
                             })
                             .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
                                 // TODO: ロジックが入ってる
@@ -84,7 +87,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 globalData?.updateBackgroundNovelFetchMode(true)
                                 globalData?.registerUserNotification()
                                 globalData?.startBackgroundFetch()
-                                dialog.dismiss(animated: true)
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: true)
+                                }
                             })
                             .build().show()
                     }else{
@@ -96,6 +101,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
                 $0.value = GlobalDataSingleton.getInstance().getOverrideRubyIsEnabled()
                 }.onChange({ row in
+                    self.m_RubySwitchToggleHitCount += 1
                     GlobalDataSingleton.getInstance().setOverrideRubyIsEnabled(row.value!)
                 })
             <<< TextRow("OverrideRubyTextRow") {
@@ -122,6 +128,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 })
             
             <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_GoToSupportSite", comment: "サポートサイトを開く")
+                }.onCellSelection({ (buttonCellof, buttonRow) in
+                    if let url = URL(string: "https://limura.github.io/NovelSpeaker/") {
+                        UIApplication.shared.openURL(url)
+                    }
+                })
+            
+            <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GoToReleaseLog", comment:"更新履歴")
                 $0.presentationMode = .segueName(segueName: "updateLogSegue", onDismiss: nil)
             }
@@ -129,14 +143,32 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_RightNotation", comment:"権利表記")
                 $0.presentationMode = .segueName(segueName: "CreditPageSegue", onDismiss: nil)
-        }
+            }
         
-        /*
-         <<< ButtonRow() {
-         $0.title = "debug log"
-         $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
-         }
-         */
+            // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、
+            // それらはこの下に記述されます
+            +++ Section("Debug") {
+                $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
+                    return self.m_RubySwitchToggleHitCount < 10
+                })
+            }
+            
+            <<< SwitchRow("OverrideForceSiteInfoReload") {
+                $0.title = NSLocalizedString("SettingTableViewController_ForceSiteInfoReload", comment:"SiteInfoを毎回読み直す")
+                $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
+                    return self.m_RubySwitchToggleHitCount < 10
+                })
+                $0.value = GlobalDataSingleton.getInstance().getForceSiteInfoReloadIsEnabled()
+                }.onChange({ row in
+                    GlobalDataSingleton.getInstance().setForceSiteInfoReloadIsEnabled(row.value!)
+                })
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
+                $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
+                    return self.m_RubySwitchToggleHitCount < 10
+                })
+                $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
+            }
     }
     
     // 新規のユーザ本を追加して、編集ページに遷移する
@@ -151,7 +183,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         EasyDialog.Builder(self)
             .label(text: NSLocalizedString("SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary", comment: "標準の読み替え辞書を上書き追加しました。"))
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: {dialog in
-                dialog.dismiss(animated: true)
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: true)
+                }
             })
             .build().show()
     }
@@ -161,10 +195,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             .title(title: NSLocalizedString("SettingTableViewController_ConfirmAddDefaultSpeechModSetting", comment:"確認"))
             .label(text: NSLocalizedString("SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage", comment:"用意された読み替え辞書を追加・上書きします。よろしいですか？"))
             .addButton(title: NSLocalizedString("Cancel_button", comment:"Cancel"), callback: { dialog in
-                dialog.dismiss(animated: true)
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: true)
+                }
             })
             .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
-                dialog.dismiss(animated: true, completion: nil)
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: true, completion: nil)
+                }
                 self.AddDefaultSpeechModSetting()
             })
             .build().show()

@@ -128,5 +128,9 @@
 			</dict>
 		</dict>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>カメラへのアクセス許可が必要です</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>メディアライブラリへのアクセス許可が必要です</string>
 </dict>
 </plist>

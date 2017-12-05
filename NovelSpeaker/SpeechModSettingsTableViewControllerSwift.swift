@@ -147,7 +147,9 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
                 let newFilterString = filterTextField.text ?? ""
                 self.m_FilterString = newFilterString
                 self.tableView.reloadData()
-                dialog.dismiss(animated: true, completion: nil)
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: true, completion: nil)
+                }
                 })
             .build().show()
     }

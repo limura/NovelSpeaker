@@ -70,6 +70,8 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
 // 実機log用
 - (NSString*)GetLogString;
 - (void)AddLogString:(NSString*)string;
+- (void)ClearLogString;
+- (NSArray*)GetLogStringArray;
 
 /// シングルトンを取得します。
 + (GlobalDataSingleton*)GetInstance;
@@ -377,6 +379,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 追加できなかった場合はエラーメッセージを返します。
 - (NSString*) AddDownloadQueueForURL:(NSString*)urlString cookieParameter:(NSString*)cookieParameter;
 
+/// 始めの章の内容やタイトルが確定しているURLについて、新規登録をしてダウンロードqueueに追加しようとします
+- (void)AddNewContentForURL:(NSURL*)url nextUrl:(NSURL*)nextUrl cookieParameter:(NSString*)cookieParameter title:(NSString*)title author:(NSString*)author firstContent:(NSString*)firstContent viewController:(UIViewController*)viewController;
+
 /// 小説内部での範囲選択時に出てくるメニューを「読み替え辞書に登録」だけにする(YES)か否(NO)かの設定値を取り出します
 - (BOOL)GetMenuItemIsAddSpeechModSettingOnly;
 
@@ -401,6 +406,20 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (NSString*)GetNotRubyCharactorStringArray;
 /// 読み上げられないため、ルビとしては認識しない文字集合を設定します
 - (void)SetNotRubyCharactorStringArray:(NSString*)data;
+
+/// SiteInfo デバッグ用に、毎回 SiteInfo の読み直しを行うか否かの設定を取得します
+- (BOOL)GetForceSiteInfoReloadIsEnabled;
+/// SiteInfo デバッグ用に、毎回 SiteInfo の読み直しを行うか否かの設定を保存します
+- (void)SetForceSiteInfoReloadIsEnabled:(BOOL)yesNo;
+
+/// Web取り込み用のBookmarkを取得します
+- (NSArray*)GetWebImportBookmarks;
+/// Web取り込み用のBookmarkに追加します。
+- (void)AddWebImportBookmarkForName:(NSString*)name url:(NSURL*)url;
+/// Web取り込み用のBookmarkから削除します
+- (void)DelURLFromWebImportBookmark:(NSURL*)url;
+/// Web取り込み用のBookmarkを全て消し去ります
+- (void)ClearWebImportBookmarks;
 
 // バックアップ用のデータを JSON に encode したものを生成して取得します
 - (NSData*)CreateBackupJSONData;

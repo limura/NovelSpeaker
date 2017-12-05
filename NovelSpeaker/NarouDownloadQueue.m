@@ -14,7 +14,6 @@
 #import "StoryCacheData.h"
 #import "UriLoader.h"
 #import "EasyAlert.h"
-#import "UIViewControllerExtension.h"
 
 @implementation NarouDownloadQueue
 
@@ -259,27 +258,31 @@ static float SLEEP_TIME_SECOND = 10.5f;
 - (BOOL)URLDownload:(NarouContentCacheData*)localContent {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     UriLoader* loader = [UriLoader new];
+    NSLog(@"URLDownload: %@ %@", localContent.title, localContent.ncode);
     
+    // ことせかい用のカスタムSiteInfoデータを優先度的に上にするために先に読み込ませます
+    NSData* customSiteInfoData = [globalData GetCachedCustomAutoPagerizeSiteInfoData];
+    if(![loader AddCustomSiteInfoFromData:customSiteInfoData]){
+        NSLog(@"AddCustomSiteInfoFromData failed: %@", [[NSString alloc] initWithData:customSiteInfoData encoding:NSUTF8StringEncoding]);
+    }
+    
+    // AutoPagerizeの情報はその後です
     NSData* siteInfoData = [globalData GetCachedAutoPagerizeSiteInfoData];
-    NSLog(@"siteInfoData: %p", siteInfoData);
     if(![loader AddSiteInfoFromData:siteInfoData]){
         return false;
     }
-    NSData* customSiteInfoData = [globalData GetCachedCustomAutoPagerizeSiteInfoData];
-    [loader AddCustomSiteInfoFromData:customSiteInfoData];
     
     NSString* urlString = localContent.ncode;
-    // XXXXX TODO: .userid が最後に読み込んだ URL になってるのをなんとかしたい……(´・ω・`)
     int startCount = 1;
-    BOOL isReload = false; // 更新チェックの場合か否か
+    // 最終ダウンロードURLがあるならターゲットをそれに更新する。
+    // XXXXX TODO: .userid が最後に読み込んだ URL になってるのをなんとかしたい……(´・ω・`)
     if (localContent.userid != nil && [localContent.userid length] > 0) {
         urlString = localContent.userid;
         startCount = [localContent.general_all_no intValue];
-        isReload = true;
     }
     NSURL* targetURL = [[NSURL alloc] initWithString:urlString];
 
-    NSLog(@"URLDownload: keyword(cookie): %@", localContent.keyword);
+    //NSLog(@"URLDownload: keyword(cookie): %@", localContent.keyword);
     NSArray* cookieArray = [localContent.keyword componentsSeparatedByString:@";"];
 
     __block BOOL result = false;
@@ -288,46 +291,33 @@ static float SLEEP_TIME_SECOND = 10.5f;
         if (story == nil) {
             return;
         }
-        if (story.count == 1 && !isReload) {
-            NSString* message = nil;
-            if (story.title != nil && [story.title length] > 0) {
-                localContent.title = story.title;
-                message = [[NSString alloc] initWithFormat:NSLocalizedString(@"NarouDownloadQueue_URLDownloadTitleFixed", @"「%@」の名前で本棚に登録します。"), story.title];
-            }else{
-                message = [[NSString alloc] initWithFormat:NSLocalizedString(@"NarouDownloadQueue_URLDownloadTitleNotFound", @"ダウンロードしたもののタイトルを取得できなかったので、以下のURLのまま本棚に登録します。\n%@"), localContent.title];
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                UIViewController* rootViewController = [UIViewController toplevelViewController];
-                EasyAlert* easyAlert = [[EasyAlert alloc] initWithViewController:rootViewController];
-                [easyAlert ShowAlertOneButton:nil
-                                    message:message okButtonText:NSLocalizedString(@"OK_button", nil)
-                          okActionHandler:nil];
-            });
-        }
         if ([localContent.general_all_no intValue] < story.count) {
             localContent.general_all_no = [[NSNumber alloc] initWithInt:story.count];
         }
         // XXXXX TODO: .userid が最後に読み込んだ URL になってるのをなんとかしたい……(´・ω・`)
         localContent.userid = [currentURL absoluteString];
-        // 更新チェックの場合、最初の一発目(既に読み込んであるもののうちの最後のもの)は保存しない(ユーザが書き換えてるかもしれないので)
-        if (!(isReload && story.count == startCount)) {
-            //NSLog(@"story update: %@", story.content);
+        if (story.count != startCount) {
+            // 最初に読んだもの以外は内容を更新する。(最初に読むのは前回最後に読んだものなので、ユーザが内容を更新している可能性があるため更新しない)
             [globalData UpdateStory:story.content chapter_number:story.count parentContent:localContent];
             localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
         }
         [globalData UpdateNarouContent:localContent];
         result = true;
-    } failedAction:^(NSURL* url){
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString* message = [[NSString alloc] initWithFormat:NSLocalizedString(@"NarouDownloadQueue_URLDownloadFailedWithException", @"URLの取得に失敗しました。\n%@"), [url absoluteString]];
-            UIViewController* rootViewController = [UIViewController toplevelViewController];
-            EasyAlert* easyAlert = [[EasyAlert alloc] initWithViewController:rootViewController];
-            [easyAlert ShowAlertOneButton:message
-                                  message:nil okButtonText:NSLocalizedString(@"OK_button", nil)
-                          okActionHandler:nil];
+        // ダウンロードされたので、ダウンロード状態を更新します。
+        dispatch_async(m_MainDispatchQueue, ^{
+            [self KickDownloadStatusUpdate:localContent n:story.count maxpos:story.count];
+            m_CurrentDownloadContentAllData.current_download_complete_count = story.count;
         });
-        dispatch_semaphore_signal(semaphore);
+
+    } failedAction:^(NSURL* url){
+        NSLog(@"LoadURL failed. %@", [url absoluteString]);
     } finishAction:^(NSURL* url){
+        //NSLog(@"LoadURL finish. %@", [url absoluteString]);
+        // すべてのダウンロードが完了したら、nil で状態を更新します。
+        dispatch_async(m_MainDispatchQueue, ^{
+            [self KickDownloadStatusUpdate:nil n:0 maxpos:0];
+            m_CurrentDownloadContentAllData = nil;
+        });
         dispatch_semaphore_signal(semaphore);
     }];
     while(dispatch_semaphore_wait(semaphore, DISPATCH_TIME_NOW)){
@@ -335,6 +325,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         // で知ったのだけれど、これを呼んであげないと block してしまう……[NSThread sleep] みたいなので行けるのかと思ったら違った。(´・ω・`)
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
     }
+    [self announceDownloadStatusEnd:localContent];
 
     return result;
 }
@@ -427,9 +418,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
         // new flag を立てます
         localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
         [[GlobalDataSingleton GetInstance] UpdateNarouContent:localContent];
-        [self announceNarouContentNewStatusUp:localContent];
         // 保存を走らせます。(でないと main thread側 の core data に反映されません……(´・ω・`)
         [[GlobalDataSingleton GetInstance] saveContext];
+        [self announceNarouContentNewStatusUp:localContent];
 
         // ダウンロードされたので、ダウンロード状態を更新します。
         dispatch_async(m_MainDispatchQueue, ^{

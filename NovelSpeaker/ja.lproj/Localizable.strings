@@ -29,6 +29,7 @@
 "GlobalDataSingleton_NewUserBookTitle" = "新規ユーザ小説";
 "GlobalDataSingleton_NovelUpdateAlertBody" = "%d個の小説が更新されました";
 "GlobalDataSingleton_NovelUpdateAlertAction" = "アプリを開く";
+"GlobalDataSingleton_URLisAlreadyDownload" = "既に本棚に登録されているURLでした";
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "ダウンロードキューへの追加に失敗";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "作品名: %@";
 "NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "ダウンロードキューに追加されました";
@@ -67,7 +68,9 @@
 "SettingTableViewController_EditNotRubyStringTitle" = "ルビではないと判断する文字";
 "SettingTableViewController_EditNotRubyStringHint" = "ここに書かれた文字のみのルビであればただの強調であると判断され、ルビではなく元の文字が読み上げられる事になります";
 "SettingTableViewController_EditNotRubyStringPlaceHolder" = "・";
-
+"SettingTableViewController_ForceSiteInfoReload" = "SiteInfoを毎回読み直す";
+"SettingTableViewController_ShowDebugLog" = "デバッグログの表示";
+"SettingTableViewController_GoToSupportSite" = "ことせかい のサポートサイトを開く";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
@@ -90,6 +93,7 @@
 "SpeechViewController_AddSpeechModSettings" = "読み替え辞書へ登録";
 "SpeechViewController_SpeakAlertVoiceOver" = "VoiceOverが有効になっています。このまま再生しますか？";
 "SpeechViewController_SpeakAlertVoiceOverMessage" = "そのまま再生すると二重に読み上げが発生してしまいます。";
+"SpeechViewController_loading" = "loading...";
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
 "SpeechWaitConfigSettingView_PleaseSetSpeechText" = "読み上げテスト用の文字列を設定してください";
@@ -136,6 +140,32 @@
 "NarouDownloadQueue_URLDownloadTitleFixed" = "ダウンロードしたものを「%@」の名前で本棚に登録します";
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "ダウンロードしたもののタイトルを取得できなかったので、以下のURLのまま本棚に登録します。\n%@";
 "NarouDownloadQueue_URLDownloadFailedWithException" = "URLの取得に失敗しました。\n%@";
+
+"ImportFromWebPageViewController_loading" = "読み込み中……";
+"ImportFromWebPageViewController_CreateBookmark" = "ブックマーク名を入力";
+"ImportFromWebPageViewController_InvalidServerCertificate_CanContinue" = "このページのサーバ証明書に何らかの問題を確認しました。閲覧・利用は推奨できませんが、一応表示をしますか？(どうしても必要だというので無いのであれば、戻って別のページを閲覧することをおすすめします)";
+"ImportFromWebPageViewController_InvalidServerCertificate" = "このページのサーバ証明書には問題があります。閲覧を停止します。";
+"ImportFromWebPageViewController_NoMoreDisplay" = "もう表示しない";
+"ImportFromWebPageViewController_AuthenticationRequired" = "認証が必要です";
+"ImportFromWebPageViewController_UnknownHost" = "不明なホスト";
+"ImportFromWebPageViewController_MessageFrom..." = "%@からのメッセージ";
+"ImportFromWebPageViewController_ImputRequiredFrom..." = "%@が入力を求めています";
+
+"UriLoader_NSURLConnectionRequestFailed" = "Webサーバからの取得に失敗しました。(恐らくは接続に失敗しています。ネットワーク状況を確認してください)";
+"UriLoader_HTTPResponseIsInvalid" = "サーバから返されたステータスコードが正常値(200 OK等)ではなく、\"%ld\" を返されました。ログインが必要なサイトなどでこのエラーが出ている場合は対応は難しいと思われます。といっても、対応できる問題かもわかりませんので、ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂ければと思います";
+"UriLoader_HTMLParseFailed_Parse" = "HTMLの解析に失敗しました。(有効なHTMLまたはXHTML文書ではないようです。いまのところ、ことせかい はPDF等のHTMLやXHTMLではない文書は読み込む事ができません)";
+"UriLoader_HTMLParseFailed_Xpath" = "HTMLの解析に失敗しました。(不正なxpathが指定されました。恐らくはこのサイトの解析に用いるための「wedataに登録されている情報」が古くなっているか書き間違えています。ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLを添えて報告して頂くか、OpenIDを使って自身でwedataを編集することで解決するかもしれません)";
+"UriLoader_HTMLParseFailed_ContentIsNil" = "HTMLの解析に失敗しました。(文書の中身を取り出せませんでした。ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません)";
+
+"NiftyUtilitySwift_FollowingPageAreNotAvailable" = "続ページ：無し";
+"NiftyUtilitySwift_FollowingPageAreAvailable" = "続ページ：有り";
+"NiftyUtilitySwift_TitleUnknown" = "不明なタイトル";
+"NiftyUtilitySwift_CancelImport" = "取り込まない";
+"NiftyUtilitySwift_Import" = "このまま取り込む";
+"NiftyUtilitySwift_CanNotAddToBookshelfTitle" = "不明なエラー";
+"NiftyUtilitySwift_CanNotAddToBookshelfBody" = "本棚への追加に失敗しました。";
+"NiftyUtilitySwift_ImportError" = "取り込み失敗";
+"NiftyUtilitySwift_ImportedButNoTextFound" = "取り込みは完了しましたが、内容が空でした。全ての内容がJavaScriptで生成されるHTML文書の場合などに起こることがあるかもしれません。ことせかい の開発側でできることはあまりないかもしれませんが、一応、ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

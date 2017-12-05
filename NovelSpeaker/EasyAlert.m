@@ -46,13 +46,15 @@
     secondAction(action);
 }
 
-- (void)CloseAlert:(bool)animate
+- (void)CloseAlert:(bool)animate completion:(void (^ __nullable)(void))completion
 {
     if (alertView != nil) {
         [alertView dismissWithClickedButtonIndex:0 animated:animate];
+        completion();
+        return;
     }
     if (alertController != nil) {
-        [alertController dismissViewControllerAnimated:animate completion:nil];
+        [alertController dismissViewControllerAnimated:animate completion:completion];
     }
 }
 
@@ -155,7 +157,7 @@
         return false;
     }
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [holder CloseAlert:false];
+        [holder CloseAlert:false completion:nil];
     });
     return true;
 }

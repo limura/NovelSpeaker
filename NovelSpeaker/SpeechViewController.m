@@ -29,7 +29,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     
-    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidLoad %@, reading_chapter: %d, currentReadingStory: %p", self.NarouContentDetail.title, [self.NarouContentDetail.reading_chapter intValue], self.NarouContentDetail.currentReadingStory]]; // NSLog
+    //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidLoad %@, reading_chapter: %d, currentReadingStory: %p", self.NarouContentDetail.title, [self.NarouContentDetail.reading_chapter intValue], self.NarouContentDetail.currentReadingStory]]; // NSLog
     
     [[GlobalDataSingleton GetInstance] AddSpeakRangeDelegate:self];
     
@@ -69,9 +69,8 @@
     [self.view addGestureRecognizer:leftSwipe];
 #endif
 
-    self.ChapterSlider.minimumValue = 1;
-    self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
-    
+    [self updateChapterSlider];
+
     // フォントサイズを設定された値に変更します。
     [self loadAndSetFontSize];
     
@@ -111,7 +110,7 @@
 {
     [super viewDidAppear:animated];
 
-    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidAppear %@", self.NarouContentDetail.title]]; // NSLog
+    //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidAppear %@", self.NarouContentDetail.title]]; // NSLog
 
     // なにやら登録が外れる事があるようなので、AddSpeakRangeDelegate をこのタイミングでも呼んでおきます。
     // AddSpeakRangeDelegate は複数回呼んでも大丈夫なように作ってあるはずです
@@ -216,7 +215,9 @@
             }
         }
         //NSLog(@"set currentreading story: %@ (content: %@ %@) location: %lu", story.chapter_number, content.ncode, content.title, [story.readLocation unsignedLongValue]);
+        //EasyAlertActionHolder* holder = [m_EasyAlert ShowAlert:nil message:NSLocalizedString(@"SpeechViewController_loading", @"loading...")];
         [self setSpeechStory:story];
+        //[holder CloseAlert:false];
     });
    
     return true;
@@ -605,14 +606,30 @@
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     
     [notificationCenter addObserver:self selector:@selector(FontSizeChanged:) name:@"StoryDisplayFontSizeChanged" object:nil];
+    
+    NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentDownloadStatusChanged_%@", self.NarouContentDetail.ncode];
+    [notificationCenter addObserver:self selector:@selector(NarouContentUpdated:) name:notificationName object:nil];
+    
+    notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusUp_%@", self.NarouContentDetail.ncode];
+    [notificationCenter addObserver:self selector:@selector(NarouContentUpdated:) name:notificationName object:nil];
+    
+    [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
 }
 
 /// NotificationCenter の受信者の設定を解除します。
 - (void)removeNotificationReciver
 {
+    [[GlobalDataSingleton GetInstance] DeleteDownloadEventHandler:self];
+    
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     
     [notificationCenter removeObserver:self name:@"StoryDisplayFontSizeChanged" object:nil];
+    
+    NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentDownloadStatusChanged_%@", self.NarouContentDetail.ncode];
+    [notificationCenter removeObserver:self name:notificationName object:nil];
+
+    notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusUp_%@", self.NarouContentDetail.ncode];
+    [notificationCenter removeObserver:self name:notificationName object:nil];
 }
 
 /// フォントサイズ変更イベントの受信
@@ -629,6 +646,39 @@
     }
     float floatFontSizeValue = [fontSizeValue floatValue];
     [self ChangeFontSize:[GlobalDataSingleton ConvertFontSizeValueToFontSize:floatFontSizeValue]];
+}
+
+/// ダウンロード状態更新イベントの受信
+- (void)NarouContentUpdated:(NSNotification*)notification
+{
+    self.NarouContentDetail = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:self.NarouContentDetail.ncode];
+    [self updateChapterSlider];
+}
+
+/// 章のスライダを更新します
+- (void)updateChapterSlider{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.ChapterSlider.minimumValue = 1;
+        self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
+        [self UpdateChapterIndicatorLabel:[m_CurrentReadingStory.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];
+    });
+}
+
+// NarouDownloadQueueDelegate ハンドラ：個々の章のダウンロードが行われようとする度に呼び出されます。
+- (void)DownloadStatusUpdate:(NarouContentCacheData*)content currentPosition:(int)currentPosition maxPosition:(int)maxPosition {
+    if ([self.NarouContentDetail.ncode compare:content.ncode] != NSOrderedSame) {
+        return;
+    }
+    if (maxPosition > 0) {
+        self.NarouContentDetail.general_all_no = [[NSNumber alloc] initWithInt:maxPosition];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+            [self updateChapterSlider];
+        });
+    }
+}
+// NarouDownloadQueueDelegate ハンドラ：全ての download queue がなくなった時に呼び出されます。
+- (void)DownloadEnd {
+    // この時点で情報を更新しても古い情報が手に入るっぽい(更新してない？)ので特に何もしません。
 }
 
 @end

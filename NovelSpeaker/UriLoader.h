@@ -30,6 +30,9 @@
 /// ことせかい用にカスタムされた SiteInfo (Autopagerize由来ではないSiteInfo) のJSONを内部データベースに追加します。
 - (BOOL)AddCustomSiteInfoFromData:(NSData*)siteInfo;
 
+/// テスト用に一つのURLを取得します。
+- (void)FetchOneUrl:(NSURL*)url cookieArray:(NSArray*)cookieArray successAction:(void(^)(HtmlStory* story))successAction failedAction:(void(^)(NSURL* url, NSString* errorString))failedAction;
+
 /// URLを読み込んで、SiteInfo の情報から得た PageElement の情報を NSString に変換して取り出しつつ、
 /// MaxDepth まで nextLink を辿ったものを、PageElement毎の配列として取り出します。
 /// 該当する siteinfo が無い場合、a rel="next" であったり class="autopagerize_page_element" であるものを取り出そうとします。
