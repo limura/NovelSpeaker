@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -359,13 +359,13 @@
                                 </constraints>
                                 <items>
                                     <barButtonItem width="10" style="plain" systemItem="fixedSpace" id="13D-GX-FYK"/>
-                                    <barButtonItem enabled="NO" title="&lt;" id="dK5-Iz-MxA">
+                                    <barButtonItem enabled="NO" title="&lt;" image="&lt;.png" id="dK5-Iz-MxA">
                                         <connections>
                                             <action selector="backButtonClicked:" destination="Ntb-XE-J32" id="oUC-Px-ypx"/>
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem width="8" style="plain" systemItem="fixedSpace" id="kB8-zc-FrR"/>
-                                    <barButtonItem enabled="NO" title="&gt;" id="kq8-ha-234">
+                                    <barButtonItem enabled="NO" title="&gt;" image="&gt;.png" id="kq8-ha-234">
                                         <connections>
                                             <action selector="forwardButtonClicked:" destination="Ntb-XE-J32" id="oKR-fQ-3I8"/>
                                         </connections>
@@ -1571,6 +1571,8 @@ SOFTWARE.
         </scene>
     </scenes>
     <resources>
+        <image name="&lt;.png" width="24" height="24"/>
+        <image name="&gt;.png" width="24" height="24"/>
         <image name="bookmark-false.png" width="24" height="24"/>
         <image name="booksearch.png" width="24" height="24"/>
         <image name="earth.png" width="24" height="24"/>
@@ -1580,9 +1582,9 @@ SOFTWARE.
         <image name="soundbook.png" width="24" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="uw4-9z-dhB"/>
+        <segue reference="RgY-Zn-l61"/>
         <segue reference="0zP-nv-fmY"/>
         <segue reference="DuH-s0-ioe"/>
-        <segue reference="aiZ-8Y-r0V"/>
+        <segue reference="9gN-oA-LUb"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -426,7 +426,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 /// 起動されるまでの間に新規にダウンロードされた小説の数を取得します
 - (NSInteger)GetBackgroundFetchedNovelCount;
-
 /// 起動されるまでの間に新規にダウンロードされた小説の数を更新します
 - (void)UpdateBackgroundFetchedNovelCount:(NSInteger)count;
 

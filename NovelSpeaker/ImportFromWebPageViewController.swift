@@ -259,7 +259,6 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         homePageHtmlString += "<ul>"
         //homePageHtmlString += "<li><a href=\"\"></a></li>"
         homePageHtmlString += "<li><a href=\"https://limura.github.io/NovelSpeaker/\">ことせかい サポートサイト</a></li>"
-        homePageHtmlString += "<li><a href=\"http://www.aozora.gr.jp/cards/000151/card43717.html\">青空文庫(HTML)</a></li>"
         let bookmarks = getBookmark()
         for bookmark in bookmarks {
             for (name, url) in bookmark {
