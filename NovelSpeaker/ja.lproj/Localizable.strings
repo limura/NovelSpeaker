@@ -173,13 +173,29 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Ver 1.1.9
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Ver 1.1.10
 
-・新規ユーザー小説の登録が必ず失敗するようになっていた問題を修正
+・「ダウンロード状態」タブを潰して「Web取込」タブを新設
+・Safariから取り込む 機能でも、タイトルや内容を確認してから取り込む事ができるように
+・小説を読んでいる画面にて、左右へのスワイプで章の切り替えができるように
+・小説のタイトルやあらすじに&quot;等があった時にそのまま表示されてしまっていた問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Ver 1.1.10
+
+インタフェースの変更
+
+・「ダウンロード状態」タブを潰して「Web取込」タブを新設。Web取込では表示されているWebPageの文字を取り込む事ができるようになるはずです。使い方の詳しい説明はサポートサイトを参照してください
+・Safariから取り込む 機能でも、タイトルや内容を確認してから取り込む事ができるように
+・小説を読んでいる画面にて、左右へのスワイプで章の切り替えができるように
+
+問題の修正
+
+・小説のタイトルやあらすじに&quot;等があった時にそのまま表示されてしまっていた問題を修正
+
+
 # Ver 1.1.9
 
 問題の修正

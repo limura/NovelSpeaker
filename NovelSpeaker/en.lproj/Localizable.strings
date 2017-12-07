@@ -179,11 +179,27 @@
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Ver 1.1.9
 
-- Fixed an issue where registration of new user novels always failed.
+- New Web Import tab added.
+- Even for functions to be imported from Safari, you can check the title and contents and then import it.
+- On the screen reading the novel, let's switch chapters with swipe left and right.
+- Fixed problem which was displayed as it was when &quot; etc was in the title and the outline of the novel.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Ver 1.1.10
+
+Interface change
+
+- New Web Import tab added.
+- Even for functions to be imported from Safari, you can check the title and contents and then import it.
+- On the screen reading the novel, let's switch chapters with swipe left and right.
+
+bug fix
+
+- Fixed problem which was displayed as it was when &quot; etc was in the title and the outline of the novel.
+
+
 # Ver 1.1.9
 
 bug fix
