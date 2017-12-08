@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Web取込機能について</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <section id="main_content">
+<h3>Web取込機能について</h3>
+<p>
+Web取込機能は、Webページに表示されている文字列を ことせかい に取り込む機能です。
+全てのWebページを取り込めるわけではありませんが、いくつかの対応サイト等では既存の なろう検索 で取得した小説と遜色のない形で文書を取り込むことができるはずです。
+</p>
+<p>
+Web取込機能について、簡単な使い方と、うまく動かない場合の例を動画にしてみました。ざっくりと使い方を知るためには動画を観るのもいいかもしれません。
+</p>
+<p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/hGg2fz4jGe4?rel=0" frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen></iframe>
+</p>
+<p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/wW-FCNM52DA?rel=0" frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen></iframe>
+</p>
+</section>
+<section>
+<h3>Web取込機能の使い方</h3>
+<p>
+動画のものと重複するところもありますが、Web取込機能の使い方について書き下しておきます。
+</p>
+<p>
+Web取込機能を使うには、ことせかい の「Web取込」タブを利用します。
+Web取込タブにて、取り込みたい内容を表示した状態で、右下にあります「取り込む」ボタンを押すことでそこに表示されている文字列を借り読み込みで取り込みを開始します。
+<div class="centerImage"><img width="30%" src="images/IMG_6913.png" alt="「取り込む」ボタン"></div>
+</p>
+<p>
+借り読み込みが完了すると、読み込まれた文字列やタイトル等の情報がダイアログて表示されます。
+<div class="centerImage"><img width="30%" src="images/IMG_6914.png" alt="借り読み込み結果のダイアログ例"></div>
+この画面に表示されている情報で問題がなければ「このまま取り込む」ボタンを押すことで、指定されたタイトルで本棚に登録されます。
+</p>
+<p>
+本棚に登録された文書は、自作小説とほぼ同じ扱いとなりますので、タイトルや本文の修正が可能です。
+また、借り読み込み結果のダイアログで「続ページ：有り」と表示されたものについては、表示されている物以降に続く文書を別の章として順次読み込んでいきます。
+この続ページについては、設定タブの「小説の自動更新」がONになっている時には定期的に続ページが更新されているかどうかを確認して、更新があった場合には新しい章として追加します。
+</p>
+</section>
+<section>
+<h3>Safari からの取込</h3>
+<p>
+このWeb取込機能は、Safariからも利用することが可能です。
+Safariから利用する機能は、Safari のシェアボタンを利用します。(それ以外のアプリからのシェアボタンでは恐らくは正常に機能しません)ですので、まずは Safari を起動してください。
+Safari にはシェアボタン(四角い箱から上向きの矢印が出ているボタン)があります。表示されていない場合はページを一番上までスクロールさせてみると出てくると思います。
+<div class="centerImage"><img width="30%" src="images/IMG_8521_mark.png" alt="Safari のシェアボタン"></div>
+シェアボタンを押すと、カラーのアイコンの行と白黒のアイコンの行が出て来ると思います。「ことせかい へ読み込む」機能は白黒のアイコンの行に属しています。もし、「ことせかい へ読み込む」のボタンが無い場合は、白黒のアイコンの行を横にスクロールしていって「その他」を選んだ先に出てくる「ことせかい へ読み込む」機能をONにしてください(ついでに「ことせかい へ読み込む」の位置を上にズラしておくと少し便利になるかもしれません)。「ことせかい へ読み込む」ボタンが表示されるとこのようになります。
+<div class="centerImage"><img width="30%" src="images/IMG_8525_mark.png" alt="ことせかい へ読み込むボタン"></div>
+このボタンを押すと、「このページを"ことせかい"で開きますか？」といったダイアログが出ます。
+このダイアログで「開く」を選択すると、ことせかい アプリへと移動します。
+ことせかい アプリに移動した後は、借り読み込み結果のダイアログが出ます。この後の操作についてはWeb取込機能と同じです。
+</p>
+</section>
+<section>
+<h3>Web取込機能の仕組み</h3>
+<p>
+Web取込機能はWeb上で発表される小説を読み込むために、以下のような仕組みを導入しています。
+<ol>
+<li>表示されている文字のうち、内容の部分だけを抜き出す</li>
+<li>複数ページにわたる小説の場合、続くページを取得する</li>
+<li>小説のタイトルを抜き出す</li>
+<li>小説の作者名を抜き出す</li>
+</ol>
+これらは全てxpathを用いてHTML内の要素を抽出しています。
+このxpathの情報は <a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a> と、<a href="http://wedata.net/databases/AutoPagerize/items">AutoPagerize</a> の二種類のデータベースを利用しています。
+前者の「ことせかいWebページ読み込み用情報」では4つ全ての情報を、後者の「AutoPagerize」では前半2つの情報が記述されています。なお、AutoPagerize のデータベースは ことせかい とは関係のない目的のデータベースで、ことせかい はその情報を使わせて頂いている側となります(wedataに登録されたデータはパブリック・ドメインとなるらしいので、有難く使わせて頂いています)。
+</p>
+</section>
+<section>
+<h3>うまくいかないサイトについて</h3>
+<p>
+ところで、上記の2つのデータベースに登録されていないWebページについては先程の4つの仕組みがうまく機能しません。
+うまく機能しなかった場合は最初に挙げました動画の二つ目(うまくいかない場合)のように、表示されている全ての文字を取り込まれます。
+これをなんとかするには、
+<ul>
+<li>そのまま取り込んだ後に編集を行うことで回避する</li>
+<li><a href="https://docs.google.com/forms/d/e/1FAIpQLScxJMRQihUhOzpMtTVkbxA7J_wvoW8a1t8QOpT1FJM8GUcKvg/viewform">ご意見ご要望フォーム</a> に、問題となったURL等の情報を添えて、「対応できたら嬉しいです」と投書する</li>
+<li>自分でxpathをデータベース(<a href="http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items">ことせかいWebページ読み込み用情報</a>)に登録する</li>
+</ul>
+という方法が考えられます(もっと素晴らしい方法があれば教えてください)。
+一つ目の方法は毎回の作業になりますのでちょっと手間がかかると思いますが、自分だけの範囲で完結しますので一人で済ませたい人にはいいかもしれません。
+二つ目の方法は今後同じWebサイトを何度も使う場合には良いと考えられますし、他のユーザが同じWebサイトを取り込もうとした時にも効果が出ます。が、この方法を大量の人から受けると ことせかい の開発者が大変になります(ことせかい の開発者は一人なので限界がありますことをご了承ください)。
+三つ目の方法はxpathを書く技術とOpenIDが必要となりますが、どなたでも参加でき、今後同じWebサイトを取り込もうとする人にも効果のある良い方法です。編集作業自体に報酬は何も出ませんが、できましたらば、この手法で貢献して頂けると ことせかい の開発者としては嬉しいです。
+</p>
+</section>
+        <footer>
+          ことせかい is maintained by <a href="https://github.com/limura">limura</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>
