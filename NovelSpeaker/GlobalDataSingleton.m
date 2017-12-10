@@ -3095,7 +3095,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     // 怪しく「名前」と「URL」を"\n"で区切って保存します。(´・ω・`)
     [userDefaults registerDefaults:@{USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY: @[
-        @"Google\nhttps://www.google.co.jp",
+        //@"Google\nhttps://www.google.co.jp",
         @"小説家になろう\nhttps://syosetu.com/",
         @"青空文庫\nhttp://www.aozora.gr.jp/",
         //@"コンプリート・シャーロック・ホームズ\nhttp://www.221b.jp/", // 1秒おきに見に行かせると 403 になるっぽい？
@@ -3129,11 +3129,16 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (void)AddWebImportBookmarkForName:(NSString*)name url:(NSURL*)url {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     NSArray* bookmarks = [userDefaults arrayForKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
+    NSString* newBookmarkString = [[NSString alloc] initWithFormat:@"%@\n%@", name, [url absoluteString]];
     NSMutableArray* newArray = [NSMutableArray new];
     for (NSString* data in bookmarks) {
+        if ([data compare:newBookmarkString] == NSOrderedSame) {
+            // 既にBookmarkに存在していたので無視します
+            return;
+        }
         [newArray addObject:data];
     }
-    [newArray addObject:[[NSString alloc] initWithFormat:@"%@\n%@", name, [url absoluteString]]];
+    [newArray addObject:newBookmarkString];
     [userDefaults setObject:newArray forKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
     [userDefaults synchronize];
 }
@@ -3179,14 +3184,26 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         // ncode や URL は再度ダウンロードすると良さそうだが、自作小説の場合はタイトルと本文を保存しておかないと復活できない。
         NSMutableDictionary* obj = [NSMutableDictionary new];
         if ([content isURLContent]) {
+            if (content.ncode == nil) {
+                continue;
+            }
             [obj setObject:@"url" forKey:@"type"];
             [obj setObject:content.ncode forKey:@"url"];
-            [obj setObject:content.writer forKey:@"author"];
-            [obj setObject:content.title forKey:@"title"];
+            if (content.writer != nil && [content.writer length] > 0) {
+                [obj setObject:content.writer forKey:@"author"];
+            }
+            if (content.title != nil && [content.title length] > 0) {
+                [obj setObject:content.title forKey:@"title"];
+            }else{
+                [obj setObject:@"(不明なタイトル)" forKey:@"title"];
+            }
             if (content.keyword != nil && [content.keyword length] > 0) {
                 [obj setObject: [NiftyUtility stringEncrypt:content.keyword key:content.ncode] forKey:@"secret"];
             }
         }else if ([content isUserCreatedContent]) {
+            if (content.title == nil || content.ncode == nil) {
+                continue;
+            }
             [obj setObject:@"user" forKey:@"type"];
             [obj setObject:content.title forKey:@"title"];
             [obj setObject:content.ncode forKey:@"id"];
@@ -3197,6 +3214,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             }
             [obj setObject:storyTextArray forKey:@"storys"];
         }else{
+            if (content.ncode == nil) {
+                continue;
+            }
             [obj setObject:@"ncode" forKey:@"type"];
             [obj setObject:content.ncode forKey:@"ncode"];
         }
@@ -3338,7 +3358,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 - (void)RestoreBackupFromWebImportBookmarkArray_V1_0_0:(NSArray*)bookmarks{
-    [self ClearWebImportBookmarks];
+    //[self ClearWebImportBookmarks];
     for (id obj in bookmarks) {
         if (![obj isKindOfClass:[NSDictionary class]]) {
             continue;

@@ -177,16 +177,22 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Ver 1.1.9
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.11
 
-- New Web Import tab added.
-- Even for functions to be imported from Safari, you can check the title and contents and then import it.
-- On the screen reading the novel, let's switch chapters with swipe left and right.
-- Fixed problem which was displayed as it was when &quot; etc was in the title and the outline of the novel.
+Interface change
+
+- We closed access to the search site like Google on the Web import tab (a way to avoid Rating 17+ by 'Unlimited Web Access')
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.11
+
+Interface change
+
+- We closed access to the search site like Google on the Web import tab (a way to avoid Rating 17+ by 'Unlimited Web Access')
+
+
 # Ver 1.1.10
 
 Interface change
