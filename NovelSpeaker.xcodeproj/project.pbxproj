@@ -38,9 +38,6 @@
 		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
 		212972171DA66FDB001ED63D /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 212972141DA66F2C001ED63D /* Info.plist */; };
-		212E6C891FC9993000D60A08 /* bookmark-false@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 212E6C861FC9992F00D60A08 /* bookmark-false@2x.png */; };
-		212E6C8A1FC9993000D60A08 /* bookmark-false@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 212E6C871FC9993000D60A08 /* bookmark-false@3x.png */; };
-		212E6C8B1FC9993000D60A08 /* bookmark-false.png in Resources */ = {isa = PBXBuildFile; fileRef = 212E6C881FC9993000D60A08 /* bookmark-false.png */; };
 		212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */; };
 		212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F01131D8FDEC5009D69E6 /* NiftyUtility.m */; };
 		212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */; };
@@ -49,6 +46,9 @@
 		212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */; };
 		212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */; };
 		212F35A61A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */; };
+		2133743F2013816D0043D995 /* bookmark-false@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743C2013816C0043D995 /* bookmark-false@2x.png */; };
+		213374402013816D0043D995 /* bookmark-false@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743D2013816C0043D995 /* bookmark-false@3x.png */; };
+		213374412013816D0043D995 /* bookmark-false.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743E2013816C0043D995 /* bookmark-false.png */; };
 		2133F21C1E7D5674001A0BC5 /* CustomAutopagerizeItems.json in Resources */ = {isa = PBXBuildFile; fileRef = 2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */; };
 		2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2211E7FFF0B001A0BC5 /* Localizable.strings */; };
 		2133F2261E800F4A001A0BC5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F054E41917E0F200CC6BA9 /* Images.xcassets */; };
@@ -264,9 +264,6 @@
 		212972131DA66F2C001ED63D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = ja; path = ja.lproj/Info.plist; sourceTree = "<group>"; };
 		212972151DA66F2E001ED63D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = en; path = en.lproj/Info.plist; sourceTree = "<group>"; };
 		212972161DA66F97001ED63D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Base; path = Base.lproj/Info.plist; sourceTree = "<group>"; };
-		212E6C861FC9992F00D60A08 /* bookmark-false@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "bookmark-false@2x.png"; path = "../../../../Dropbox/俺様メモ/NovelSpeakerIcon/InnerIcons/bookmark-false@2x.png"; sourceTree = "<group>"; };
-		212E6C871FC9993000D60A08 /* bookmark-false@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "bookmark-false@3x.png"; path = "../../../../Dropbox/俺様メモ/NovelSpeakerIcon/InnerIcons/bookmark-false@3x.png"; sourceTree = "<group>"; };
-		212E6C881FC9993000D60A08 /* bookmark-false.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "bookmark-false.png"; path = "../../../../Dropbox/俺様メモ/NovelSpeakerIcon/InnerIcons/bookmark-false.png"; sourceTree = "<group>"; };
 		212F00D31D8DD700009D69E6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/DefaultSpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		212F01121D8FDEC5009D69E6 /* NiftyUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftyUtility.h; sourceTree = "<group>"; };
 		212F01131D8FDEC5009D69E6 /* NiftyUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftyUtility.m; sourceTree = "<group>"; };
@@ -280,6 +277,9 @@
 		212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_6to7.xcmappingmodel; sourceTree = "<group>"; };
 		212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
 		212F951D1EB0EB8B005EF253 /* NovelSpeakerURLDownloadExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerURLDownloadExtension-Bridging-Header.h"; sourceTree = "<group>"; };
+		2133743C2013816C0043D995 /* bookmark-false@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@2x.png"; sourceTree = "<group>"; };
+		2133743D2013816C0043D995 /* bookmark-false@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@3x.png"; sourceTree = "<group>"; };
+		2133743E2013816C0043D995 /* bookmark-false.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false.png"; sourceTree = "<group>"; };
 		2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = CustomAutopagerizeItems.json; sourceTree = "<group>"; };
 		2133F2201E7FFF0B001A0BC5 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		2133F2221E7FFF0D001A0BC5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -657,9 +657,9 @@
 				21D3979D1FC95CBA0018F883 /* earth.png */,
 				21D3979B1FC95CB90018F883 /* earth@2x.png */,
 				21D3979C1FC95CBA0018F883 /* earth@3x.png */,
-				212E6C881FC9993000D60A08 /* bookmark-false.png */,
-				212E6C861FC9992F00D60A08 /* bookmark-false@2x.png */,
-				212E6C871FC9993000D60A08 /* bookmark-false@3x.png */,
+				2133743E2013816C0043D995 /* bookmark-false.png */,
+				2133743C2013816C0043D995 /* bookmark-false@2x.png */,
+				2133743D2013816C0043D995 /* bookmark-false@3x.png */,
 				21D397A61FC960E10018F883 /* bookmark-true.png */,
 				21D397A21FC960DE0018F883 /* bookmark-true@2x.png */,
 				21D397A11FC960DD0018F883 /* bookmark-true@3x.png */,
@@ -1069,6 +1069,7 @@
 				21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */,
 				21D3979F1FC95CBB0018F883 /* earth@3x.png in Resources */,
 				2133F2AC1E80E175001A0BC5 /* Icon-Small-50@2x.png in Resources */,
+				2133743F2013816D0043D995 /* bookmark-false@2x.png in Resources */,
 				210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */,
 				21D397B01FC97A380018F883 /* home@2x.png in Resources */,
 				21F563D11FD802400037F5D7 /* <@3x.png in Resources */,
@@ -1103,13 +1104,13 @@
 				2133F2B31E80E175001A0BC5 /* iTunesArtwork@2x in Resources */,
 				212F35A61A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */,
 				210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */,
+				213374412013816D0043D995 /* bookmark-false.png in Resources */,
 				210958C81A0DF55600E9171F /* icloud1.png in Resources */,
 				2117251E19B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib in Resources */,
 				21B53A2819619D23009658B7 /* app_globe.png in Resources */,
 				210958C71A0DF55600E9171F /* gear@3x.png in Resources */,
 				219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */,
 				21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */,
-				212E6C8A1FC9993000D60A08 /* bookmark-false@3x.png in Resources */,
 				21F563CA1FD801970037F5D7 /* >@3x.png in Resources */,
 				2133F2A61E80E175001A0BC5 /* Icon-76.png in Resources */,
 				21B53A1C19619C00009658B7 /* sound.png in Resources */,
@@ -1118,13 +1119,11 @@
 				210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */,
 				21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */,
 				21D3979E1FC95CBB0018F883 /* earth@2x.png in Resources */,
-				212E6C8B1FC9993000D60A08 /* bookmark-false.png in Resources */,
 				210958C91A0DF55600E9171F /* icloud1@2x.png in Resources */,
 				2133F2AB1E80E175001A0BC5 /* Icon-Small-50.png in Resources */,
 				21F054D71917E0F200CC6BA9 /* InfoPlist.strings in Resources */,
 				21F054E01917E0F200CC6BA9 /* Main.storyboard in Resources */,
 				212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */,
-				212E6C891FC9993000D60A08 /* bookmark-false@2x.png in Resources */,
 				2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */,
 				21D397B11FC97A380018F883 /* home@3x.png in Resources */,
 				21C74F961964502A0039A706 /* arrow_down.png in Resources */,
@@ -1139,6 +1138,7 @@
 				212852DC19B1D101001A75DC /* Localizable.strings in Resources */,
 				21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */,
 				219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */,
+				213374402013816D0043D995 /* bookmark-false@3x.png in Resources */,
 				21D397A01FC95CBB0018F883 /* earth.png in Resources */,
 				21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */,
 				2133F2AD1E80E175001A0BC5 /* Icon-Small.png in Resources */,
