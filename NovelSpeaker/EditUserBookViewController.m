@@ -47,6 +47,9 @@
     [self.view addGestureRecognizer:self.singleTap];
 
     self.BookBodyTextBox.placeholder = NSLocalizedString(@"EditUserBookViewContoller_InputTextHeare", @"ここに本文を書き込んでください。");
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self scrollCurrentPositionInTextField];
+    });
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -61,6 +64,34 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+/// 現在の読み込み位置までスクロールします
+/// TODO: 現在表示されているものが読み上げ中のものであると仮定しているため、viewDidLoadの時にしか使えません
+- (void)scrollCurrentPositionInTextField {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    
+    NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:self.NarouContentDetail.ncode];
+    if (content == nil || content.story == nil) {
+        return;
+    }
+    StoryCacheData* story = content.currentReadingStory;
+    NSNumber* readLocation = story.readLocation;
+    NSString* displayText = self.BookBodyTextBox.text;
+    if (readLocation == nil || displayText == nil) {
+        return;
+    }
+    NSUInteger location = [readLocation unsignedLongValue];
+    NSUInteger length = 1;
+    if ((location + length) > [displayText length]) {
+        location -= 1;
+    }
+    NSRange range = NSMakeRange(location, length);
+    NSLog(@"range: %lu, displayText.length: %lu", (unsigned long)location, (unsigned long)[displayText length]);
+    self.BookBodyTextBox.scrollEnabled = NO;
+    self.BookBodyTextBox.scrollEnabled = YES;
+    self.BookBodyTextBox.selectedRange = range;
+    [self.BookBodyTextBox scrollRangeToVisible:range];
 }
 
 /// 表示する章を設定します。
@@ -79,6 +110,10 @@
 
     float max = [content.general_all_no floatValue];
     float current = [chapter.chapter_number floatValue];
+    //NSLog(@"SetChapter: current/max: %f/%f", current, max);
+    if (max < current) {
+        max = current;
+    }
     
     self.ChapterIndicatorLabel.text = [[NSString alloc] initWithFormat:@"%d/%d", (int)current, (int)max];
     
@@ -152,7 +187,6 @@
 }
 
 /// 小説を読み込みます。読み込みに失敗したら false を返します。
-/// 小説が未定義の場合(self.NarouContentDetail が nilの場合)は、章を初期値で生成します。
 - (BOOL)LoadContent {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     // 一時的に全てを default値 にしておきます
@@ -164,11 +198,19 @@
     m_CurrentChapterNumber = 1;
     
     NarouContentCacheData* content = self.NarouContentDetail;
-    if (content == nil || content.title == nil) {
+    if (content == nil || content.ncode == nil) {
+        NSLog(@"LoadContent content==nil or content.ncode==nil");
         return false;
     }
-    self.TitleTextBox.text = content.title;
+    // 内容が変わっている可能性があるので ncode を元に読み直します。
+    content = [globalData SearchNarouContentFromNcode:content.ncode];
+    if (content == nil || content.title == nil) {
+        NSLog(@"LoadContent content==nil or content.title==nil");
+        return false;
+    }
+    self.NarouContentDetail = content;
 
+    self.TitleTextBox.text = content.title;
     StoryCacheData* story = content.currentReadingStory;
     // どうやら content.currentReadingStory のものは古いデータを参照することがあるようなので、loadし直します。
     int targetChapter = 1;
@@ -255,7 +297,7 @@
 {
     StoryCacheData* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:num];
     if (story == nil) {
-        NSLog(@"FATAL. Storyが読み込めませんでした。");
+        NSLog(@"FATAL. Storyが読み込めませんでした。(ncode: %@, chapter_no: %d)", self.NarouContentDetail.ncode, num);
         return false;
     }
     self.ChapterSlidebar.value = num;

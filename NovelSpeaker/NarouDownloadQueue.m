@@ -325,6 +325,11 @@ static float SLEEP_TIME_SECOND = 10.5f;
         // で知ったのだけれど、これを呼んであげないと block してしまう……[NSThread sleep] みたいなので行けるのかと思ったら違った。(´・ω・`)
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
     }
+    // 更新された内容をアナウンスする必要があります
+    NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:localContent.ncode];
+    if (content != nil) {
+        localContent = content;
+    }
     [self announceDownloadStatusEnd:localContent];
 
     return result;

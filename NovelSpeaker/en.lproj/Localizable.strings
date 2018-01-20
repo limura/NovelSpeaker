@@ -177,15 +177,25 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.11
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.12
 
-Interface change
-
-- We closed access to the search site like Google on the Web import tab (a way to avoid Rating 17+ by 'Unlimited Web Access')
+- When editing a user's own novel etc, change so that editing starts from the reading-out position.
+- Fixed problem that iPhone X hides the first and second lines of the contents of the book.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.12
+
+Interface change
+
+- When editing a user's own novel etc, change so that editing starts from the reading-out position.
+
+bug fix
+
+- Fixed problem that iPhone X hides the first and second lines of the contents of the book.
+
+
 # Version 1.1.11
 
 Interface change

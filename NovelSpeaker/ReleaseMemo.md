@@ -669,6 +669,37 @@ With the above fixes, you can not enter URL, Google search, etc from "Web import
 We believe that this means that it can not be said as "unlimited Web access".
 I made the above fix, but please let me know what is the problem if I can not remove "unrestricted web access" with this.
 
+
+# Version 1.1.12
+
+インタフェースの変更
+
+- ユーザ自作小説等を編集しようとした時に、読み上げ位置から編集が開始されるように変更
+
+問題の修正
+
+- iPhone X で本の内容の表示の最初の1,2行が隠れてしまう問題を修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回は細かい修正のみのリリースとなります。iPhone X は当方は所持しておりませんでしたので、ユーザ様からのバグ報告がなければ対応しないといけないと気づけもしませんでしたので、とても助かります。その他にも「これは全然直らないんだけどどうなんだろう……」といった何かは単に気づいていないだけの可能性もありますので、気になる点はお手数ですがサポートサイト側に用意してあります、ご意見ご要望フォームから投稿して頂けるとありがたいです(気づいてはいるけれど実装がまだという物もありますので、github側のissueに同様の項目が無いかどうかを確認してから投稿して頂けますと、とてもありがたいです)。
+
+また、再度のご連絡になりますが、次回以降のアップデート時に、対応の iOS バージョンを 9 以上にしたいと考えています。iOS のバージョンが古いもので動かしているなどで、対応バージョンの上昇が困るという方がおられましたら、サポートサイト側のご意見ご要望フォーム等からお知らせして頂ければ、対応バージョンを上げないような努力をしてみようと考えます。逆に言うと、お知らせ頂けなければ気兼ねなく対応の iOS バージョンを上げてしまうと思われますので、重ねて申し上げますが、上げてほしくない方がおられましたらお知らせください。
+
+それでは、今後とも ことせかい をよろしくお願いいたします。
+
+
+# Version 1.1.12
+
+Interface change
+
+- When editing a user's own novel etc, change so that editing starts from the reading-out position.
+
+bug fix
+
+- Fixed problem that iPhone X hides the first and second lines of the contents of the book.
 ----
 in Japaneze.
 

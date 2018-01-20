@@ -173,15 +173,25 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.11
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.12
 
-インタフェースの変更
-
-・Web取込タブにて、Googleのような検索サイトへのアクセスを閉じました(「無制限のWebアクセス」によるレーティング17+を回避する方策です)
+- ユーザ自作小説等を編集しようとした時に、読み上げ位置から編集が開始されるように変更
+- iPhone X で本の内容の表示の最初の1,2行が隠れてしまう問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+#Version 1.1.12
+
+インタフェースの変更
+
+- ユーザ自作小説等を編集しようとした時に、読み上げ位置から編集が開始されるように変更
+
+問題の修正
+
+- iPhone X で本の内容の表示の最初の1,2行が隠れてしまう問題を修正
+
+
 # Version 1.1.11
 
 インタフェースの変更
