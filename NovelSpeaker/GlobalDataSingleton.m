@@ -16,6 +16,7 @@
 #import "NiftyUtility.h"
 #import "NovelSpeaker-Swift.h"
 #import "UIViewControllerExtension.h"
+#import "NSDataDetectEncodingExtension.h"
 
 #define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
 #define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
@@ -3418,17 +3419,49 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return true;
 }
 
+/// 指定されたファイルを自作小説として読み込む
+/// とりあえずはベタな plain text ファイルを一つの章として取り込みます
+- (BOOL)ImportNovelFromFile:(NSURL*)url{
+    NSData* data = [NSData dataWithContentsOfURL:url];
+    NSString* text = [[NSString alloc] initWithData:data encoding:[data detectEncoding]];
+    if (text == nil) {
+        return false;
+    }
+    NSString* fileName = [url lastPathComponent];
+    if (fileName == nil) {
+        fileName = @"unknown.txt";
+    }
+    NSString* title = [fileName stringByDeletingPathExtension];
+    if (title == nil) {
+        title = @"unknown title";
+    }
+    NarouContentCacheData* content = [self CreateNewUserBook];
+    if (content == nil) {
+        return false;
+    }
+    content.title = title;
+    content.general_all_no = [[NSNumber alloc] initWithUnsignedInteger:1];
+    [self UpdateNarouContent:content];
+    [self UpdateStory:text chapter_number:1 parentContent:content];
+    return true;
+}
+
 /// カスタムUTI(ファイル拡張子？)で呼び出された時の反応をします。
 /// 反応する拡張子は
-/// novelspeaker-backup-json
+/// .novelspeaker-backup-json
+/// .txt
 /// です。が、何も考えずに JSONファイル として読み込もうとします。
 - (BOOL)ProcessCustomFileUTI:(NSURL*)url{
     NSLog(@"ProcessCustomFileUTI in. %@", url);
-    NSData* data = [NSData dataWithContentsOfURL:url];
-    if (data == nil){
-        return false;
+    if ([[url pathExtension] isEqualToString:@"novelspeaker-backup-json"]) {
+        NSData* data = [NSData dataWithContentsOfURL:url];
+        if (data == nil){
+            return false;
+        }
+        
+        return [self RestoreBackupFromJSONData:data];
     }
-
-    return [self RestoreBackupFromJSONData:data];
+    // .novelspeaker-backup-json 以外であれば plain-text として読み込む
+    return [self ImportNovelFromFile:url];
 }
 @end

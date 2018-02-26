@@ -177,6 +177,8 @@
 		21F563D01FD802400037F5D7 /* <@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CD1FD8023F0037F5D7 /* <@2x.png */; };
 		21F563D11FD802400037F5D7 /* <@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CE1FD8023F0037F5D7 /* <@3x.png */; };
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
+		21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */; };
+		21FDF5642043CDB200DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */; };
 		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
 		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
 		4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */; };
@@ -479,6 +481,9 @@
 		21F563CE1FD8023F0037F5D7 /* <@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "<@3x.png"; sourceTree = "<group>"; };
 		21F7DE43197EB33900BD2899 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Story.h; path = DataModelMapping/Story.h; sourceTree = "<group>"; };
 		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
+		21FDF56020392E1E00DE1692 /* NSDataDetectEncodingExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSDataDetectEncodingExtension.h; sourceTree = "<group>"; };
+		21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSDataDetectEncodingExtension.m; sourceTree = "<group>"; };
+		21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; path = "NovelSpeaker/NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
 		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
 		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
 		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
@@ -703,6 +708,8 @@
 				214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */,
 				21890CF11D92F38800869046 /* NSDataZlibExtension.h */,
 				21890CF21D92F38800869046 /* NSDataZlibExtension.m */,
+				21FDF56020392E1E00DE1692 /* NSDataDetectEncodingExtension.h */,
+				21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */,
 				2127EAC91DB75989005B1636 /* HtmlStory.h */,
 				2127EACA1DB75989005B1636 /* HtmlStory.m */,
 				21814C5A1E8D68A90096CB42 /* NSStringExtension.h */,
@@ -751,6 +758,7 @@
 		21F054C01917E0F100CC6BA9 = {
 			isa = PBXGroup;
 			children = (
+				21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
 				21F054D21917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */,
 				2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
@@ -1068,6 +1076,7 @@
 				2133F2A31E80E175001A0BC5 /* Icon-60@3x.png in Resources */,
 				21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */,
 				21D3979F1FC95CBB0018F883 /* earth@3x.png in Resources */,
+				21FDF5642043CDB200DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */,
 				2133F2AC1E80E175001A0BC5 /* Icon-Small-50@2x.png in Resources */,
 				2133743F2013816D0043D995 /* bookmark-false@2x.png in Resources */,
 				210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */,
@@ -1343,6 +1352,7 @@
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
 				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
 				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
+				21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */,
 				21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
 				21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */,

@@ -24,6 +24,23 @@
 				<string>com.limuraproducts.novelspeaker.backupdatauti</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>/Users/limura/Desktop/sources/NovelSpeaker/NovelSpeaker/NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png</string>
+				<string>NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Text File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>

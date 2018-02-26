@@ -130,7 +130,7 @@
     if (!found) {
         for (NSExtensionItem *item in context.inputItems) {
             for (NSItemProvider *itemProvider in item.attachments) {
-                if ([self checkAndRunItemProvider_for_URLType:itemProvider context:context] == YES) {
+                if ([self checkAndRunItemProvider_for_PlainTextType:itemProvider context:context] == YES) {
                     found = YES;
                     break;
                 }
@@ -143,7 +143,7 @@
     if (!found) {
         for (NSExtensionItem *item in context.inputItems) {
             for (NSItemProvider *itemProvider in item.attachments) {
-                if ([self checkAndRunItemProvider_for_PlainTextType:itemProvider context:context] == YES) {
+                if ([self checkAndRunItemProvider_for_URLType:itemProvider context:context] == YES) {
                     found = YES;
                     break;
                 }
