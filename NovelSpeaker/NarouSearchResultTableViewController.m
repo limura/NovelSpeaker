@@ -18,7 +18,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [BehaviorLoagger AddLogWithDescription:@"NarouSearchResultTableViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"NarouSearchResultTableViewController viewDidLoad" data:@{}];
     // 編集ボタンを追加する場合
     //self.navigationItem.rightBarButtonItem = self.editButtonItem;
     //NSLog(@"NarouSearchResultTableViewController: %p", self);

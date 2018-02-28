@@ -22,7 +22,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [BehaviorLoagger AddLogWithDescription:@"SpeechWaitSettingTableViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"SpeechWaitSettingTableViewController viewDidLoad" data:@{}];
     
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;

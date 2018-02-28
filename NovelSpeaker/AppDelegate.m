@@ -19,7 +19,7 @@ void uncaughtExceptionHandler(NSException *exception)
 {
     NSLog(@"CRASH: %@", exception);
     NSLog(@"Stack Trace: %@", [exception callStackSymbols]);
-    [BehaviorLoagger AddLogWithDescription:@"UncaughtException" data:@{
+    [BehaviorLogger AddLogWithDescription:@"UncaughtException" data:@{
        @"description": [exception description],
        @"stack trace": [[exception callStackSymbols] componentsJoinedByString:@"\n"]
        }];

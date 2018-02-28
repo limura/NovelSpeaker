@@ -23,7 +23,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [BehaviorLoagger AddLogWithDescription:@"UpdateLogViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"UpdateLogViewController viewDidLoad" data:@{}];
     [self AssignUpdateLog];
 }
 

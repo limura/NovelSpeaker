@@ -29,7 +29,7 @@
 {
     [super viewDidLoad];
     
-    [BehaviorLoagger AddLogWithDescription:@"SpeechViewController viewDidLoad" data:@{@"ncode": self.NarouContentDetail.ncode}];
+    [BehaviorLogger AddLogWithDescription:@"SpeechViewController viewDidLoad" data:@{@"ncode": self.NarouContentDetail.ncode}];
     
 	// Do any additional setup after loading the view, typically from a nib.
     

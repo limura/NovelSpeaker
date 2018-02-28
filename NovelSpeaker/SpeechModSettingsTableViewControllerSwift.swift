@@ -15,7 +15,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        BehaviorLoagger.AddLog(description: "SpeechModSettingsTableViewControllerSwift viewDidLoad", data: [:])
+        BehaviorLogger.AddLog(description: "SpeechModSettingsTableViewControllerSwift viewDidLoad", data: [:])
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false

@@ -45,7 +45,6 @@
 		212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F359B1A8F8857009D0E60 /* GlobalState.m */; };
 		212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */; };
 		212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */; };
-		212F35A61A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */; };
 		2133743F2013816D0043D995 /* bookmark-false@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743C2013816C0043D995 /* bookmark-false@2x.png */; };
 		213374402013816D0043D995 /* bookmark-false@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743D2013816C0043D995 /* bookmark-false@3x.png */; };
 		213374412013816D0043D995 /* bookmark-false.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743E2013816C0043D995 /* bookmark-false.png */; };
@@ -82,7 +81,7 @@
 		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
-		216741A02043D592008A578D /* BehaviorLoagger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLoagger.swift */; };
+		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
@@ -279,7 +278,6 @@
 		212F359B1A8F8857009D0E60 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
 		212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_5to7.xcmappingmodel; sourceTree = "<group>"; };
 		212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_6to7.xcmappingmodel; sourceTree = "<group>"; };
-		212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
 		212F951D1EB0EB8B005EF253 /* NovelSpeakerURLDownloadExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerURLDownloadExtension-Bridging-Header.h"; sourceTree = "<group>"; };
 		2133743C2013816C0043D995 /* bookmark-false@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@2x.png"; sourceTree = "<group>"; };
 		2133743D2013816C0043D995 /* bookmark-false@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@3x.png"; sourceTree = "<group>"; };
@@ -323,7 +321,7 @@
 		2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMultithreadTests.m; sourceTree = "<group>"; };
 		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		2167419F2043D592008A578D /* BehaviorLoagger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLoagger.swift; sourceTree = "<group>"; };
+		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
@@ -486,7 +484,7 @@
 		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
 		21FDF56020392E1E00DE1692 /* NSDataDetectEncodingExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSDataDetectEncodingExtension.h; sourceTree = "<group>"; };
 		21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSDataDetectEncodingExtension.m; sourceTree = "<group>"; };
-		21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; path = "NovelSpeaker/NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
+		21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
 		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
 		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
 		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
@@ -642,7 +640,7 @@
 			children = (
 				2133F28F1E80E175001A0BC5 /* AppIcon-monochrome-reverse */,
 				212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */,
-				212F35A51A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
+				21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
 				219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */,
 				212F011B1D907CF1009D69E6 /* Default568@2x.png */,
 				210958ED1A0E1C5500E9171F /* NEW!.png */,
@@ -721,7 +719,7 @@
 				21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */,
 				21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */,
 				21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */,
-				2167419F2043D592008A578D /* BehaviorLoagger.swift */,
+				2167419F2043D592008A578D /* BehaviorLogger.swift */,
 				216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */,
 			);
 			name = Tools;
@@ -763,7 +761,6 @@
 		21F054C01917E0F100CC6BA9 = {
 			isa = PBXGroup;
 			children = (
-				21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
 				21F054D21917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */,
 				2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
@@ -1115,7 +1112,6 @@
 				21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */,
 				210958C61A0DF55600E9171F /* booksearch@3x.png in Resources */,
 				2133F2B31E80E175001A0BC5 /* iTunesArtwork@2x in Resources */,
-				212F35A61A8F9D46009D0E60 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */,
 				210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */,
 				213374412013816D0043D995 /* bookmark-false.png in Resources */,
 				210958C81A0DF55600E9171F /* icloud1.png in Resources */,
@@ -1332,7 +1328,7 @@
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
 				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
-				216741A02043D592008A578D /* BehaviorLoagger.swift in Sources */,
+				216741A02043D592008A578D /* BehaviorLogger.swift in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
 				21BDC2DF1A2B70A5002804DD /* EasyAlert.m in Sources */,

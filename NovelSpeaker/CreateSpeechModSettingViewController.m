@@ -31,7 +31,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [BehaviorLoagger AddLogWithDescription:@"CreateSpeechModSettingViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"CreateSpeechModSettingViewController viewDidLoad" data:@{}];
     
     m_Speaker = [Speaker new];
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];

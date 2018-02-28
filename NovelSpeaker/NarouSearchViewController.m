@@ -66,7 +66,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [BehaviorLoagger AddLogWithDescription:@"NarouSearchViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"NarouSearchViewController viewDidLoad" data:@{}];
     [self CreateInitializeObjects];
 }
 

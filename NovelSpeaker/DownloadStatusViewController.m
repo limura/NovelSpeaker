@@ -29,7 +29,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [BehaviorLoagger AddLogWithDescription:@"DownloadStatusViewController" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"DownloadStatusViewController" data:@{}];
     self.DownloadWaitingQueueTableView.delegate = self;
     self.DownloadWaitingQueueTableView.dataSource = self;
     

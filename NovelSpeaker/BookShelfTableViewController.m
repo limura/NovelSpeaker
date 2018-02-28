@@ -51,7 +51,7 @@
 {
     [super viewDidLoad];
     
-    [BehaviorLoagger AddLogWithDescription:@"BookShelfTableViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"BookShelfTableViewController viewDidLoad" data:@{}];
     
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;

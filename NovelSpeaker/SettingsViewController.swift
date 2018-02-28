@@ -16,7 +16,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        BehaviorLoagger.AddLog(description: "SettingsViewController viewDidLoad", data: [:])
+        BehaviorLogger.AddLog(description: "SettingsViewController viewDidLoad", data: [:])
         createSettingsTable()
     }
     

@@ -1,5 +1,5 @@
 //
-//  BehaviorLoagger.swift
+//  BehaviorLogger.swift
 //  NovelSpeaker
 //
 //  Created by 飯村卓司 on 2018/02/26.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class BehaviorLoagger: NSObject {
+class BehaviorLogger: NSObject {
     static let USERDEFAULTS_NAME = "BehaviorLoggerUserDefaults";
     static let LOG_KEY = "log";
     static let MAX_LOG_COUNTS = 1000;
@@ -49,7 +49,7 @@ class BehaviorLoagger: NSObject {
     }
     
     static public func AddLogSimple(description: String) -> Void {
-        BehaviorLoagger.AddLog(description: description, data: [:]);
+        BehaviorLogger.AddLog(description: description, data: [:]);
     }
     
     /// 保存されているログを文字列の形式で取り出します。

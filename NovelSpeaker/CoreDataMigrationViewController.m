@@ -49,7 +49,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [BehaviorLoagger AddLogWithDescription:@"CoreDataMigrationViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"CoreDataMigrationViewController viewDidLoad" data:@{}];
     // 戻るボタンを消す
     [self.navigationItem setHidesBackButton:YES];
     

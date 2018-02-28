@@ -25,7 +25,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [BehaviorLoagger AddLogWithDescription:@"EditUserBookViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"EditUserBookViewController viewDidLoad" data:@{}];
     
     m_pEasyAlert = [[EasyAlert alloc] initWithViewController:self];
     m_CurrentChapterNumber = 0;

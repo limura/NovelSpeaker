@@ -462,7 +462,7 @@ typedef enum {
 /// 読み上げを開始します。
 - (BOOL)StartSpeech
 {
-    [BehaviorLoagger AddLogWithDescription:@"NiftySpeaker StartSpeech" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"NiftySpeaker StartSpeech" data:@{}];
     return [self EnqueueSpeechTextBlock];
 }
 

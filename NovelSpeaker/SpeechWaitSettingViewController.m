@@ -19,7 +19,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [BehaviorLoagger AddLogWithDescription:@"SpeechWaitSettingViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"SpeechWaitSettingViewController viewDidLoad" data:@{}];
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     m_NiftySpeaker = [NiftySpeaker new];
     

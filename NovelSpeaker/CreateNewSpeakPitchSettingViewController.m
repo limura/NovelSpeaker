@@ -34,7 +34,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [BehaviorLoagger AddLogWithDescription:@"CreateNewSpeakPitchSettingViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"CreateNewSpeakPitchSettingViewController viewDidLoad" data:@{}];
     // Do any additional setup after loading the view.
     m_isNeedBack = false;
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];

@@ -343,7 +343,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     if (localContent == nil || localContent.ncode == nil) {
         return false;
     }
-    [BehaviorLoagger AddLogWithDescription:@"NarouDownloadQueue ChapterDownload kicked" data:@{
+    [BehaviorLogger AddLogWithDescription:@"NarouDownloadQueue ChapterDownload kicked" data:@{
        @"ncode": localContent.ncode
     }];
     if ([localContent isURLContent]) {

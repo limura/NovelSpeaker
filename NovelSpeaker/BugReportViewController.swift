@@ -22,7 +22,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        BehaviorLoagger.AddLog(description: "BugReportViewController viewDidLoad", data: [:])
+        BehaviorLogger.AddLog(description: "BugReportViewController viewDidLoad", data: [:])
 
         // 日付は ViewDidLoad のたびに上書きで不正な値にしておきます。
         BugReportViewController.value.TimeOfOccurence = Date.init(timeIntervalSinceNow: 60*60*24) // 1日後にしておく(DatePickerで日付を一回戻すだけでいいので)
@@ -108,7 +108,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                         }
                     })
                     .addButton(title: NSLocalizedString("BugReportViewController_YES", comment: "はい"), callback: { (dialog) in
-                        self.sendBugReportMail(log: BehaviorLoagger.LoadLog(), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
+                        self.sendBugReportMail(log: BehaviorLogger.LoadLog(), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
                         DispatchQueue.main.async {
                             dialog.dismiss(animated: false, completion: nil)
                         }

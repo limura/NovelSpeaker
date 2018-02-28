@@ -31,7 +31,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [BehaviorLoagger AddLogWithDescription:@"SpeakSettingsTableViewController viewDidLoad" data:@{}];
+    [BehaviorLogger AddLogWithDescription:@"SpeakSettingsTableViewController viewDidLoad" data:@{}];
 
     // 追加ボタンとEditボタンをつけます。
     UIBarButtonItem* addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonClicked)];
