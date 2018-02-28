@@ -128,7 +128,6 @@
 		21B53A2819619D23009658B7 /* app_globe.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2519619D23009658B7 /* app_globe.png */; };
 		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
-		21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A321961B30F009658B7 /* SettingsViewController.m */; };
 		21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */; };
 		21BDC2DF1A2B70A5002804DD /* EasyAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 21BDC2DE1A2B70A5002804DD /* EasyAlert.m */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
@@ -408,8 +407,6 @@
 		21B53A2619619D23009658B7 /* app_globe@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_globe@2x.png"; sourceTree = "<group>"; };
 		21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalDataSingleton.h; sourceTree = "<group>"; };
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
-		21B53A311961B30F009658B7 /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
-		21B53A321961B30F009658B7 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
 		21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaxSpeechTimeTableViewCell.h; sourceTree = "<group>"; };
 		21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MaxSpeechTimeTableViewCell.m; sourceTree = "<group>"; };
 		21BDC2DD1A2B70A5002804DD /* EasyAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EasyAlert.h; sourceTree = "<group>"; };
@@ -891,8 +888,6 @@
 				21C74FD6196843280039A706 /* BookShelfTableViewController.m */,
 				21F054E11917E0F200CC6BA9 /* SpeechViewController.h */,
 				21F054E21917E0F200CC6BA9 /* SpeechViewController.m */,
-				21B53A311961B30F009658B7 /* SettingsViewController.h */,
-				21B53A321961B30F009658B7 /* SettingsViewController.m */,
 				4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */,
 				4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */,
 				21C74F99196456490039A706 /* NarouSearchViewController.h */,
@@ -1356,7 +1351,6 @@
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
 				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
 				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
-				21B53A331961B30F009658B7 /* SettingsViewController.m in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
