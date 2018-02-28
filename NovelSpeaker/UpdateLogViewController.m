@@ -7,6 +7,7 @@
 //
 
 #import "UpdateLogViewController.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface UpdateLogViewController ()
 
@@ -22,6 +23,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [BehaviorLoagger AddLogWithDescription:@"UpdateLogViewController viewDidLoad" data:@{}];
     [self AssignUpdateLog];
 }
 

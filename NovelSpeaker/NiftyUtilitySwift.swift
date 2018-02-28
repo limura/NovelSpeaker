@@ -10,6 +10,7 @@ import UIKit
 
 class NiftyUtilitySwift: NSObject {
     @objc public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieArray: [String], depth: Int = 0) {
+        BehaviorLoagger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
             let easyAlert = EasyAlert(viewController: viewController)
             let alertActionHolder = easyAlert?.show(NSLocalizedString("ImportFromWebPageViewController_loading", comment: "loading"), message: nil)

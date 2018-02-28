@@ -8,6 +8,7 @@
 
 #import "TextSizeSettingViewController.h"
 #import "GlobalDataSingleton.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface TextSizeSettingViewController ()
 
@@ -17,6 +18,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [BehaviorLoagger AddLogWithDescription:@"TextSizeSettingViewController viewDidLoad" data:@{}];
     // Do any additional setup after loading the view.
     if (font == nil) {
         //font = [UIFont systemFontOfSize:[UIFont systemFontSize]];

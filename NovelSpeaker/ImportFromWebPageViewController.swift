@@ -32,6 +32,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        BehaviorLoagger.AddLog(description: "ImportFromWebPageViewController viewDidLoad", data: [:])
         
         self.addressBarUITextField.backgroundColor = #colorLiteral(red: 0.8865675194, green: 0.8865675194, blue: 0.8865675194, alpha: 1)
 

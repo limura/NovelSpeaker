@@ -15,6 +15,7 @@ class DebugLogViewControllerSwift: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        BehaviorLoagger.AddLog(description: "DebugLogViewControllerSwift viewDidLoad", data: [:])
 
         // Do any additional setup after loading the view.
         updateLogText()

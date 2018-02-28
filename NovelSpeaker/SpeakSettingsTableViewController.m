@@ -11,6 +11,7 @@
 #import "SpeakSettingEditTableViewCell.h"
 #import "SpeakSettingSampleTextTableViewCell.h"
 #import "GlobalDataSingleton.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface SpeakSettingsTableViewController ()
 
@@ -30,6 +31,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [BehaviorLoagger AddLogWithDescription:@"SpeakSettingsTableViewController viewDidLoad" data:@{}];
 
     // 追加ボタンとEditボタンをつけます。
     UIBarButtonItem* addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonClicked)];

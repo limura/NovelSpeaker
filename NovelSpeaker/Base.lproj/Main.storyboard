@@ -200,6 +200,25 @@
             </objects>
             <point key="canvasLocation" x="1421" y="925"/>
         </scene>
+        <!--Bug Report View Controller-->
+        <scene sceneID="r9Q-T3-N95">
+            <objects>
+                <viewController id="AU1-Xg-sfF" customClass="BugReportViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="HTU-nf-cUb"/>
+                        <viewControllerLayoutGuide type="bottom" id="KwL-vM-OQE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="6ia-66-EXl">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="HfT-tu-afw"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="K9T-nr-cHp" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1870" y="925"/>
+        </scene>
         <!--読みの修正-->
         <scene sceneID="FXd-0y-Yzq">
             <objects>
@@ -334,6 +353,7 @@
                         <segue destination="pS8-hH-Po4" kind="push" identifier="updateLogSegue" id="Cej-5a-43x"/>
                         <segue destination="dCR-kh-Ivz" kind="push" identifier="CreateNewUserTextSegue" id="uw4-9z-dhB"/>
                         <segue destination="NmR-c8-ccH" kind="push" identifier="CreditPageSegue" id="AaG-TX-X4l"/>
+                        <segue destination="AU1-Xg-sfF" kind="push" identifier="BugReportViewSegue" id="g4z-6o-Wai"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="brw-Rq-p2L" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1582,7 +1602,7 @@ SOFTWARE.
         <image name="soundbook.png" width="24" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="RgY-Zn-l61"/>
+        <segue reference="uw4-9z-dhB"/>
         <segue reference="0zP-nv-fmY"/>
         <segue reference="DuH-s0-ioe"/>
         <segue reference="9gN-oA-LUb"/>

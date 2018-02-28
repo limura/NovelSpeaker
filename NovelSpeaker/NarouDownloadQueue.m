@@ -14,6 +14,7 @@
 #import "StoryCacheData.h"
 #import "UriLoader.h"
 #import "EasyAlert.h"
+#import "NovelSpeaker-Swift.h"
 
 @implementation NarouDownloadQueue
 
@@ -256,6 +257,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
 
 /// URL のコンテンツをダウンロードします。
 - (BOOL)URLDownload:(NarouContentCacheData*)localContent {
+
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     UriLoader* loader = [UriLoader new];
     NSLog(@"URLDownload: %@ %@", localContent.title, localContent.ncode);
@@ -341,6 +343,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
     if (localContent == nil || localContent.ncode == nil) {
         return false;
     }
+    [BehaviorLoagger AddLogWithDescription:@"NarouDownloadQueue ChapterDownload kicked" data:@{
+       @"ncode": localContent.ncode
+    }];
     if ([localContent isURLContent]) {
         return [self URLDownload:localContent];
     }

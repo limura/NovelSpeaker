@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "GlobalDataSingleton.h"
 #import <AVFoundation/AVFoundation.h>
+#import "NovelSpeaker-Swift.h"
 
 @implementation AppDelegate
     
@@ -18,6 +19,10 @@ void uncaughtExceptionHandler(NSException *exception)
 {
     NSLog(@"CRASH: %@", exception);
     NSLog(@"Stack Trace: %@", [exception callStackSymbols]);
+    [BehaviorLoagger AddLogWithDescription:@"UncaughtException" data:@{
+       @"description": [exception description],
+       @"stack trace": [[exception callStackSymbols] componentsJoinedByString:@"\n"]
+       }];
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -49,7 +54,7 @@ void uncaughtExceptionHandler(NSException *exception)
     
     return YES;
 }
-							
+
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

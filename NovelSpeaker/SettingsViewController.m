@@ -9,7 +9,6 @@
 #import "SettingsViewController.h"
 #import <AVFoundation/AVFoundation.h>
 #import "GlobalDataSingleton.h"
-
 #import "NiftySpeaker.h"
 
 @interface SettingsViewController ()
@@ -31,7 +30,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-
+    
     self.defaultRateSetting.minimumValue = AVSpeechUtteranceMinimumSpeechRate;
     self.defaultRateSetting.maximumValue = AVSpeechUtteranceMaximumSpeechRate;
     self.defaultPitchSetting.minimumValue = 0.5f;

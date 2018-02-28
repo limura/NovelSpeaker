@@ -10,6 +10,7 @@
 #import "GlobalDataSingleton.h"
 #import "SpeechWaitSettingViewController.h"
 #import "EasyAlert.h"
+#import "NovelSpeaker-Swift.h"
 
 static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSettingTableViewCellDefault";
 
@@ -21,6 +22,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [BehaviorLoagger AddLogWithDescription:@"SpeechWaitSettingTableViewController viewDidLoad" data:@{}];
     
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;

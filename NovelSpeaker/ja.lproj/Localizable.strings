@@ -49,7 +49,7 @@
 "SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "標準の読み替え辞書を上書き追加しました。";
 "SettingTableViewController_NoContentHave" = "本棚に本がありません";
 "SettingTableViewController_ShareNcodeListURLScheme" = "本棚に登録されている小説の再ダウンロードURLスキームを生成します";
-"SettingTableViewController_ShareNcodeListURLSchemeMessage" = "現在 本棚に登録されている全ての小説を再ダウンロードさせるためのURLを生成しました。\r\nことせかい をアンインストールしてしまっても、このURLを開けばもう一度小説をダウンロードさせることができます。バックアップ用途などに使用してください。(自分宛てに mail するなどが良いかもしれません)";
+"SettingTableViewController_ShareNcodeListURLSchemeMessage" = "現在 本棚に登録されている全ての小説を再ダウンロードさせるためのURLを生成しました。\r\nことせかい をアンインストールしてしまっても、このURLを開けばもう一度小説をダウンロードさせることができます。バックアップ用途などに使用してください。(自分宛てにメールするなどが良いかもしれません)";
 "SettingTableViewController_ConfirmAddDefaultSpeechModSetting" = "確認";
 "SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage" = "用意された読み替え辞書を追加・上書きします。よろしいですか？";
 "SettingTableViewController_GoToReleaseLog" = "更新履歴";
@@ -71,6 +71,7 @@
 "SettingTableViewController_ForceSiteInfoReload" = "SiteInfoを毎回読み直す";
 "SettingTableViewController_ShowDebugLog" = "デバッグログの表示";
 "SettingTableViewController_GoToSupportSite" = "ことせかい のサポートサイトを開く";
+"SettingTableViewController_SendBugReport" = "不都合報告をメールで開発者に送る";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
@@ -167,20 +168,50 @@
 "NiftyUtilitySwift_ImportError" = "取り込み失敗";
 "NiftyUtilitySwift_ImportedButNoTextFound" = "取り込みは完了しましたが、内容が空でした。全ての内容がJavaScriptで生成されるHTML文書の場合などに起こることがあるかもしれません。ことせかい の開発側でできることはあまりないかもしれませんが、一応、ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません";
 
+"BugReportViewController_SectionHeader" = "不都合の報告";
+"BugReportViewController_BugReportTitle" = "不都合がある場合にはこのフォームで不都合報告ができます。";
+"BugReportViewController_TimeOfOccurrence" = "問題発生日時";
+"BugReportViewController_DescriptionOfTheProblem" = "問題の説明";
+"BugReportViewController_DescriptionOfTheProblemPlaceHolder" = "起こっている問題を説明してください";
+"BugReportViewController_ProblemOccurrenceProcedure" = "問題発生手順";
+"BugReportViewController_ProblemOccurrenceProcedurePlaceHolder" = "問題が発生するまでの操作手順を書いてください";
+"BugReportViewController_IsNeedResponse" = "この報告への返事が欲しい";
+"BugReportViewController_SendBugReportButtonTitle" = "不都合報告メールを作成する";
+"BugReportViewController_InvalidTimeOfOccurence" = "※ 不都合の起こった正確な日時を設定してください。なお、未来の日時は指定できません。";
+"BugReportViewController_NoDescriptonOfTheProblem" = "※ 問題の説明欄が空欄になっています。";
+"BugReportViewController_AddBehaviourLogAnnounce" = "ことせかい 内部に保存されている操作ログを不都合報告メールに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれます。開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合には「いいえ」を選択する必要があります。\nまた、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)";
+"BugReportViewController_NO" = "いいえ";
+"BugReportViewController_YES" = "はい";
+"BugReportViewController_SendBugReportMailSubject" = "ことせかい 不都合報告";
+"BugReportViewController_SendBugReportMailInformation" = "\n\n===============\nここより下の行は編集しないでください。\nなお、問題の発生している場面のスクリーンショットなどを添付して頂けると、より対応しやすくなるかと思われます。";
+"BugReportViewController_SendBugReport_IsNeedResponse" = "返信を希望する";
+"BugReportViewController_SendBugReport_Description" = "不都合の概要";
+"BugReportViewController_SendBugReport_Procedure" = "不都合の再現方法";
+"BugReportViewController_ErrorDialog" = "問題のある入力項目があります";
+"BugReportViewController_InformationForIsNeedResponse" = "返事が欲しいと設定されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる場合があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合もあります。";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
 "BookShelfTableViewController_SortTypeNovelName" = "小説名順";
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.12
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.13
 
-- ユーザ自作小説等を編集しようとした時に、読み上げ位置から編集が開始されるように変更
-- iPhone X で本の内容の表示の最初の1,2行が隠れてしまう問題を修正
+- テキストファイルを自作小説として取り込めるように
+- 設定タブに「不都合報告をメールで開発者に送る」機能を追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.13
+
+インタフェースの変更
+
+- テキストファイルを自作小説として取り込めるように
+- 設定タブに「不都合報告をメールで開発者に送る」機能を追加
+
+
 #Version 1.1.12
 
 インタフェースの変更

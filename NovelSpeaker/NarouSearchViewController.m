@@ -10,6 +10,7 @@
 #import "NarouSearchResultTableViewController.h"
 #import "NarouLoader.h"
 #import "EasyAlert.h"
+#import "NovelSpeaker-Swift.h"
 
 #define SEARCH_TEXT_BOX_TAG       (1)
 #define SEARCH_ORDER_TEXT_BOX_TAG (2)
@@ -65,6 +66,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [BehaviorLoagger AddLogWithDescription:@"NarouSearchViewController viewDidLoad" data:@{}];
     [self CreateInitializeObjects];
 }
 

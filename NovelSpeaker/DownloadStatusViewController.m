@@ -8,6 +8,7 @@
 
 #import "DownloadStatusViewController.h"
 #import "NarouContentCacheData.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface DownloadStatusViewController ()
 
@@ -28,6 +29,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [BehaviorLoagger AddLogWithDescription:@"DownloadStatusViewController" data:@{}];
     self.DownloadWaitingQueueTableView.delegate = self;
     self.DownloadWaitingQueueTableView.dataSource = self;
     

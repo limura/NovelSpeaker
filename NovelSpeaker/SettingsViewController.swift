@@ -16,6 +16,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        BehaviorLoagger.AddLog(description: "SettingsViewController viewDidLoad", data: [:])
         createSettingsTable()
     }
     
@@ -134,6 +135,10 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         UIApplication.shared.openURL(url)
                     }
                 })
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_SendBugReport", comment: "不都合報告をmailで開発者に送る")
+                $0.presentationMode = .segueName(segueName: "BugReportViewSegue", onDismiss: nil)
+            }
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GoToReleaseLog", comment:"更新履歴")

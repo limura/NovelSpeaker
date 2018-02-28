@@ -71,7 +71,7 @@
 "SettingTableViewController_ForceSiteInfoReload" = "Force reload SiteInfo";
 "SettingTableViewController_ShowDebugLog" = "Show debug log";
 "SettingTableViewController_GoToSupportSite" = "Open NovelSpeaker support site";
-
+"SettingTableViewController_SendBugReport" = "Send bug report mail";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -171,20 +171,50 @@
 "NiftyUtilitySwift_ImportError" = "Import error";
 "NiftyUtilitySwift_ImportedButNoTextFound" = "The import of the document was completed, but the content was empty. It may happen, for example, in the case of an HTML document in which all contents are generated in JavaScript. Although NovelSpeaker developers may not be able to do, from the opinion request form etc. of NovelSpeaker's support site side, please report with the URL where this error occurred along with the procedure until an error occurs You may be able to solve it.";
 
+"BugReportViewController_SectionHeader" = "Problem report";
+"BugReportViewController_BugReportTitle" = "In case of inconvenience, you can input from this form and report it.";
+"BugReportViewController_TimeOfOccurrence" = "When problem occurred";
+"BugReportViewController_DescriptionOfTheProblem" = "Description of the problem";
+"BugReportViewController_DescriptionOfTheProblemPlaceHolder" = "Describe the problem that is happening";
+"BugReportViewController_ProblemOccurrenceProcedure" = "Problem occurrence procedure";
+"BugReportViewController_ProblemOccurrenceProcedurePlaceHolder" = "Describe the operation procedure until the problem occurs";
+"BugReportViewController_IsNeedResponse" = "I want an answer to this report";
+"BugReportViewController_SendBugReportButtonTitle" = "Create inconvenience report mail";
+"BugReportViewController_InvalidTimeOfOccurence" = "* Please specify the date and time as accurate as possible. The date and time of the future can not be specified.";
+"BugReportViewController_NoDescriptonOfTheProblem" = "* The explanation column of the problem is blank.";
+"BugReportViewController_AddBehaviourLogAnnounce" = "Do you want to attach operation logs saved in NovelSpeaker to inconvenience report mail?\n\nThe operation log contains the details (URL etc.) of the novel downloaded. Please select \"No\" if you have included troublesome information in NovelSpeaker if it is published to the developer in the operation log.\nAlso, if the operation log is not attached, it is difficult for the developer to reproduce the situation, so it may be difficult to deal with it. (There are also cases where we can not respond even if you attach)";
+"BugReportViewController_NO" = "No";
+"BugReportViewController_YES" = "Yes";
+"BugReportViewController_SendBugReportMailSubject" = "NovelSpeaker problem report";
+"BugReportViewController_SendBugReportMailInformation" = "\n\n===============\nPlease do not edit the line below this.\nIf you attach a screenshot etc. of the scene where the problem occurs, it seems that it will be easier to correspond.";
+"BugReportViewController_SendBugReport_IsNeedResponse" = "Need response";
+"BugReportViewController_SendBugReport_Description" = "Description";
+"BugReportViewController_SendBugReport_Procedure" = "Procedure";
+"BugReportViewController_ErrorDialog" = "Error";
+"BugReportViewController_InformationForIsNeedResponse" = "If it is set that you want a reply, we will reply to the sender's email address. Reply may be delayed. Also, please note that if you do not receive mail from @gmail.com, you will not receive a reply.";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.12
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.13
 
-- When editing a user's own novel etc, change so that editing starts from the reading-out position.
-- Fixed problem that iPhone X hides the first and second lines of the contents of the book.
+- Now can import .txt file.
+- Add Problem report feature in Settings tab.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.13
+
+Interface change
+
+- Now can import .txt file.
+- Add Problem report feature in Settings tab.
+
+
 # Version 1.1.12
 
 Interface change

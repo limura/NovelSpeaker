@@ -10,6 +10,7 @@
 
 #import "CoreDataMigrationViewController.h"
 #import "GlobalDataSingleton.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface CoreDataMigrationViewController ()
 
@@ -48,6 +49,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [BehaviorLoagger AddLogWithDescription:@"CoreDataMigrationViewController viewDidLoad" data:@{}];
     // 戻るボタンを消す
     [self.navigationItem setHidesBackButton:YES];
     

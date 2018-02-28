@@ -9,6 +9,7 @@
 #import "SpeechWaitSettingViewController.h"
 #import "GlobalDataSingleton.h"
 #import "EasyAlert.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface SpeechWaitSettingViewController ()
 
@@ -18,6 +19,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [BehaviorLoagger AddLogWithDescription:@"SpeechWaitSettingViewController viewDidLoad" data:@{}];
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     m_NiftySpeaker = [NiftySpeaker new];
     

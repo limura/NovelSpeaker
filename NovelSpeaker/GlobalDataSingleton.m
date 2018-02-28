@@ -1508,6 +1508,11 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げる文書を設定します。
 - (BOOL)SetSpeechStory:(StoryCacheData *)story
 {
+    [BehaviorLoagger AddLogWithDescription:@"SetSpeechStory" data:@{
+            @"novelID": story.ncode,
+            @"chapterNumber": [story.chapter_number stringValue],
+            @"readLocation": [story.readLocation stringValue]
+            }];
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
         return false;
@@ -1600,6 +1605,7 @@ static GlobalDataSingleton* _singleton = nil;
         NSLog(@"setActive error: %@ %@", err, err.userInfo);
     }
     [self StartMaxSpeechTimeInSecTimer];
+    [BehaviorLoagger AddLogWithDescription:@"StartSpeech" data:@{}];
     return [m_NiftySpeaker StartSpeech];
 }
 
@@ -2820,6 +2826,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 /// 始めの章の内容やタイトルが確定しているURLについて、新規登録をしてダウンロードqueueに追加しようとします
 - (void)AddNewContentForURL:(NSURL*)url nextUrl:(NSURL*)nextUrl cookieParameter:(NSString*)cookieParameter title:(NSString*)title author:(NSString*)author firstContent:(NSString*)firstContent viewController:(UIViewController*)viewController {
+    [BehaviorLoagger AddLogWithDescription:@"GlobalDataSingleton AddNewContentForURL called" data:@{
+        @"url": [url absoluteString],
+        @"nextUrl": [nextUrl absoluteString],
+        @"cookie": cookieParameter,
+        @"title": title,
+        @"author": author,
+        @"firstContent": firstContent
+        }];
     NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:[url absoluteString]];
     if (targetContentCacheData != nil) {
         NSLog(@"url: %@ is already downloaded. skip.", [url absoluteString]);

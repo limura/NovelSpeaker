@@ -17,6 +17,7 @@
 #import "EasyAlert.h"
 #import "CreateSpeechModSettingViewController.h"
 #import "EditUserBookViewController.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface SpeechViewController ()
 
@@ -27,6 +28,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    [BehaviorLoagger AddLogWithDescription:@"SpeechViewController viewDidLoad" data:@{@"ncode": self.NarouContentDetail.ncode}];
+    
 	// Do any additional setup after loading the view, typically from a nib.
     
     //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidLoad %@, reading_chapter: %d, currentReadingStory: %p", self.NarouContentDetail.title, [self.NarouContentDetail.reading_chapter intValue], self.NarouContentDetail.currentReadingStory]]; // NSLog
@@ -79,7 +83,7 @@
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     [globalData ReloadSpeechSetting];
     // 読み上げる文章を設定します。
-    [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+    //[self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
     
     // textView で選択範囲が変えられた時のイベントハンドラに自分を登録します
     self.textView.delegate = self;

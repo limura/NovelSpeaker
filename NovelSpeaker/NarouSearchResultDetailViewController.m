@@ -12,6 +12,7 @@
 #import "EasyAlert.h"
 #import "NarouLoader.h"
 #import "NarouSearchResultTableViewController.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface NarouSearchResultDetailViewController ()
 
@@ -32,6 +33,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [BehaviorLoagger AddLogWithDescription:@"NarouSearchResultDetailViewController viewDidLoad" data:@{}];
     // Do any additional setup after loading the view.
     m_SearchResult = nil;
     m_MainQueue = dispatch_get_main_queue();

@@ -9,6 +9,7 @@
 #import "CreateSpeechModSettingViewController.h"
 #import "GlobalDataSingleton.h"
 #import "EasyAlert.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface CreateSpeechModSettingViewController ()
 
@@ -30,6 +31,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [BehaviorLoagger AddLogWithDescription:@"CreateSpeechModSettingViewController viewDidLoad" data:@{}];
     
     m_Speaker = [Speaker new];
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];

@@ -14,6 +14,7 @@
 #import "BookShelfTableViewCell.h"
 #import "EasyAlert.h"
 #import "PickerViewDialog.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface BookShelfTableViewController ()
 
@@ -49,6 +50,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    [BehaviorLoagger AddLogWithDescription:@"BookShelfTableViewController viewDidLoad" data:@{}];
     
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
