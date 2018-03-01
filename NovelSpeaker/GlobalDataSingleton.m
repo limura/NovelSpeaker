@@ -3449,24 +3449,38 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     if (title == nil) {
         title = @"unknown title";
     }
-    NarouContentCacheData* content = [self CreateNewUserBook];
-    if (content == nil) {
-        return false;
-    }
-    content.title = title;
-    content.general_all_no = [[NSNumber alloc] initWithUnsignedInteger:1];
-    [self UpdateNarouContent:content];
-    [self UpdateStory:text chapter_number:1 parentContent:content];
+    UIViewController* rootViewController = [UIViewController toplevelViewController];
+    [NiftyUtilitySwift checkTextImportConifirmToUserWithViewController:rootViewController title:title content:text hintString:nil];
     return true;
 }
 
-/// カスタムUTI(ファイル拡張子？)で呼び出された時の反応をします。
+- (BOOL)ImportNovelFromPDFFile:(NSURL*)url{
+    NSString* text = [NiftyUtilitySwift PDFToStringWithUrl:url];
+    if (text == nil) {
+        return false;
+    }
+    NSString* fileName = [url lastPathComponent];
+    if (fileName == nil) {
+        fileName = @"unknown.txt";
+    }
+    NSString* title = [fileName stringByDeletingPathExtension];
+    if (title == nil) {
+        title = @"unknown title";
+    }
+    UIViewController* rootViewController = [UIViewController toplevelViewController];
+    [NiftyUtilitySwift checkTextImportConifirmToUserWithViewController:rootViewController title:title content:text hintString:nil];
+    return true;
+}
+
+/// UTI(ファイル拡張子？)で呼び出された時の反応をします。
 /// 反応する拡張子は
 /// .novelspeaker-backup-json
 /// .txt
-/// です。が、何も考えずに JSONファイル として読み込もうとします。
+/// .pdf
+/// です。
 - (BOOL)ProcessCustomFileUTI:(NSURL*)url{
     NSLog(@"ProcessCustomFileUTI in. %@", url);
+    [BehaviorLogger AddLogWithDescription:@"GobalDataSingleton ProcessCustomFileUTI" data:@{@"url": [url absoluteString]}];
     if ([[url pathExtension] isEqualToString:@"novelspeaker-backup-json"]) {
         NSData* data = [NSData dataWithContentsOfURL:url];
         if (data == nil){
@@ -3475,7 +3489,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         
         return [self RestoreBackupFromJSONData:data];
     }
-    // .novelspeaker-backup-json 以外であれば plain-text として読み込む
+    if ([[[url pathExtension] lowercaseString] isEqualToString:@"pdf"]) {
+        return [self ImportNovelFromPDFFile:url];
+    }
+    // .novelspeaker-backup-json, .pdf 以外であれば plain-text として読み込む
     return [self ImportNovelFromFile:url];
 }
 @end

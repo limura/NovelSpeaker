@@ -7,8 +7,60 @@
 //
 
 import UIKit
+import PDFKit
 
 class NiftyUtilitySwift: NSObject {
+    @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
+        DispatchQueue.main.async {
+            var easyDialog = EasyDialog.Builder(viewController)
+                .textField(tag: 100, placeholder: title, content: title, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
+                // TODO: 怪しくheightを画面の縦方向からの比率で指定している。
+                // ここに 1.0 とか書くと他のViewの分の高さが入って全体は画面の縦幅よりも高くなるので全部が表示されない。
+                // つまり、この謎の数字 0.53 というのは、できれば書きたくない値であり、この値でも大きすぎるかもしれず、
+                // 小さすぎるかもしれず、適切な大きさ(baseViewが表示領域の縦幅に入る状態)になるように縮む必要があるのだが、
+                // EasyDialog をそのように修正するのが面倒なのでやっていないという事なのであった。('A`)
+                .textView(content: content, heightMultiplier: 0.53)
+                
+            if let hintString = hintString {
+                easyDialog = easyDialog.label(text: hintString)
+            }
+            easyDialog.addButton(title: NSLocalizedString("NiftyUtilitySwift_CancelImport", comment: "取り込まない"), callback: { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
+                }
+            })
+            .addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
+                let titleTextField = dialog.view.viewWithTag(100) as! UITextField
+                let title = titleTextField.text ?? title
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
+                }
+                if let globalData = GlobalDataSingleton.getInstance() {
+                    if let newUserBook = globalData.createNewUserBook() {
+                        newUserBook.title = title
+                        newUserBook.general_all_no = NSNumber.init(value: 1)
+                        globalData.updateNarouContent(newUserBook)
+                        globalData.updateStory(content, chapter_number: 1, parentContent:   newUserBook)
+                        return
+                    }
+                }
+                DispatchQueue.main.sync {
+                    EasyDialog.Builder(viewController)
+                        .title(title: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー"))
+                        .label(text: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfBody", comment: "本棚への追加に失敗しました。"))
+                        .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: false, completion: nil)
+                            }
+                        })
+                        .build().show()
+                }
+            })
+            .build().show()
+        }
+
+    }
+    
     @objc public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieArray: [String], depth: Int = 0) {
         BehaviorLogger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
@@ -116,5 +168,15 @@ class NiftyUtilitySwift: NSObject {
                 }
             })
         }
+    }
+    
+    @objc public static func PDFToString(url: URL) -> String? {
+        if #available(iOS 11.0, *) {
+            let pdf = PDFDocument(url: url)
+            if let str = pdf?.string {
+                return str
+            }
+        }
+        return nil
     }
 }
