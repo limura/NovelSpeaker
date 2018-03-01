@@ -2536,8 +2536,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         notification.fireDate = [NSDate date];
         notification.alertBody = [[NSString alloc] initWithFormat:NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertBody", @"%d個の更新があります"), downloadCount];
         notification.alertAction = NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertAction", @"アプリを開く");
-        notification.applicationIconBadgeNumber = downloadCount;
+        notification.applicationIconBadgeNumber = downloadCount + appendCount;
         [application scheduleLocalNotification:notification];
+        [self UpdateBackgroundFetchedNovelCount:downloadCount + appendCount];
         
         completionHandler(UIBackgroundFetchResultNewData);
     }else{
@@ -3457,6 +3458,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (BOOL)ImportNovelFromPDFFile:(NSURL*)url{
     NSString* text = [NiftyUtilitySwift PDFToStringWithUrl:url];
     if (text == nil) {
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Title", @"PDFのテキスト読み込みに失敗") message:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Body", @"PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPSF読み込み機能は動作しません。") buttonTitle:nil buttonAction:nil];
         return false;
     }
     NSString* fileName = [url lastPathComponent];

@@ -170,6 +170,16 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
+    @objc public static func BinaryPDFToString(data: Data) -> String? {
+        if #available(iOS 11.0, *) {
+            let pdf = PDFDocument(data: data)
+            if let str = pdf?.string {
+                return str
+            }
+        }
+        return nil
+    }
+    
     @objc public static func PDFToString(url: URL) -> String? {
         if #available(iOS 11.0, *) {
             let pdf = PDFDocument(url: url)
@@ -178,5 +188,22 @@ class NiftyUtilitySwift: NSObject {
             }
         }
         return nil
+    }
+    
+    @objc public static func EasyDialogOneButton(viewController: UIViewController, title: String?, message: String?, buttonTitle: String?, buttonAction:(()->Void)?) {
+        var dialog = EasyDialog.Builder(viewController)
+        if let title = title {
+            dialog = dialog.title(title: title)
+        }
+        if let message = message {
+            dialog = dialog.label(text: message, textAlignment: .left)
+        }
+        dialog = dialog.addButton(title: buttonTitle != nil ? buttonTitle! : NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+            if let buttonAction = buttonAction {
+                buttonAction()
+            }
+            dialog.dismiss(animated: false, completion: nil)
+        })
+        dialog.build().show()
     }
 }

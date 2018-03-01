@@ -21,6 +21,7 @@
 "CreateSpeechModSettingView_SettingFailed" = "Setting failed.";
 "DownloadStatusViewController_ThereIsNoThingDownloading" = "There is nothing downloading.";
 "DownloadStatusViewController_WaitingDownloading" = "Waiting downloading";
+
 "GlobalDataSingleton_CanNotGetValidNCODE" = "Can not get valid NCODE";
 "GlobalDataSingleton_AlreadyDownloaded" = "Already Downloaded";
 "GlobalDataSingleton_NoPlaing" = "No Playing";
@@ -30,6 +31,10 @@
 "GlobalDataSingleton_NovelUpdateAlertBody" = "%d novels updated.";
 "GlobalDataSingleton_NovelUpdateAlertAction" = "open app";
 "GlobalDataSingleton_URLisAlreadyDownload" = "This URL is already downloaded.";
+"GlobalDataSingleton_PDFToStringFailed_Title" = "Failed to read PDF text";
+"GlobalDataSingleton_PDFToStringFailed_Body" = "Failed to read text string from PDF file.\nSome character strings can not be read depending on the PDF file. Also, iOS prior to iOS 11 does not work with PSF reading function.";
+
+
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "Title: %@";
 "NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "It was added to download queue.";

@@ -21,6 +21,7 @@
 "CreateSpeechModSettingView_SettingFailed" = "設定に失敗しました。";
 "DownloadStatusViewController_ThereIsNoThingDownloading" = "ダウンロード中のものはありません";
 "DownloadStatusViewController_WaitingDownloading" = "ダウンロード待ち";
+
 "GlobalDataSingleton_CanNotGetValidNCODE" = "有効な NCODE を取得できませんでした。";
 "GlobalDataSingleton_AlreadyDownloaded" = "既にダウンロード済です。";
 "GlobalDataSingleton_NoPlaing" = "再生していません";
@@ -30,6 +31,9 @@
 "GlobalDataSingleton_NovelUpdateAlertBody" = "%d個の小説が更新されました";
 "GlobalDataSingleton_NovelUpdateAlertAction" = "アプリを開く";
 "GlobalDataSingleton_URLisAlreadyDownload" = "既に本棚に登録されているURLでした";
+"GlobalDataSingleton_PDFToStringFailed_Title" = "PDFのテキスト読み込みに失敗";
+"GlobalDataSingleton_PDFToStringFailed_Body" = "PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPSF読み込み機能は動作しません。";
+
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "ダウンロードキューへの追加に失敗";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "作品名: %@";
 "NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue" = "ダウンロードキューに追加されました";

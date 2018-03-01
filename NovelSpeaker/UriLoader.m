@@ -10,6 +10,7 @@
 #import "SiteInfo.h"
 #import "NiftyUtility.h"
 #import "GlobalDataSingleton.h"
+#import "NovelSpeaker-Swift.h"
 
 @implementation UriLoader
 
@@ -291,6 +292,15 @@
     }];
 }
 
++ (BOOL)CheckContentTypeSame:(NSString*)target httpResponse:(NSHTTPURLResponse*)httpResponse {
+    id contentTypeId = [[httpResponse allHeaderFields] objectForKey:@"Content-Type"];
+    if ([contentTypeId isKindOfClass:[NSString class]]) {
+        NSString* contentType = contentTypeId;
+        return [[target lowercaseString] isEqualToString:[contentType lowercaseString]];
+    }
+    return false;
+}
+
 /// 指定されたURLからGETで取得したデータをUTF-8に変換してNSDataとして返します。
 /// これはブロッキングします。リクエストに失敗した時など明確にエラーした場合は nil を返します。
 /// ただ、encodingがわからなかった場合は何も変換せず返すので注意してください。
@@ -319,6 +329,19 @@
             [out_errorString setString:[[NSString alloc] initWithFormat:NSLocalizedString(@"UriLoader_HTTPResponseIsInvalid", @"サーバから返されたステータスコードが正常値(200 OK等)ではなく、%ld を返されました。ログインが必要なサイトである場合などに発生する場合があります。ことせかい アプリ側でできることはあまり無いかもしれませんが、ことせかい のサポートサイトに設置してあります、ご意見ご要望フォームにこの問題の起こったURLとこの症状が起こった前にやったことを添えて報告して頂けると、あるいはなんとかできるかもしれません。"), httpResponse.statusCode]];
         }
         return nil;
+    }
+    
+    // pdf だったら怪しく文字列化して謎HTMLに変換してその後の処理を行います。
+    if ([UriLoader CheckContentTypeSame:@"application/pdf" httpResponse:httpResponse]) {
+        NSString* text = [NiftyUtilitySwift BinaryPDFToStringWithData:data];
+        if (text != nil) {
+            NSString* fileName = [[targetUrl lastPathComponent] stringByDeletingPathExtension];
+            if (fileName == nil || [fileName length] <= 0) {
+                fileName = @"unknwon document";
+            }
+            NSString* dummyHtml = [[NSString alloc] initWithFormat:@"<html><title>%@</title><meta charset=\"UTF-8\"><body><pre>%@</pre></body></html>", fileName, text];
+            data = [dummyHtml dataUsingEncoding:NSUTF8StringEncoding];
+        }
     }
     
     NSString* encoding = [self GetContentCharSet:httpResponse data:data faileoverCharset:@"UTF-8"];
@@ -381,6 +404,7 @@
     NSData* data = [UriLoader GetHtmlDataAboutUTF8Encorded:targetUrl cookieStorage:cookieStorage out_charSetString:&charSetString out_charsetValue:&charsetValue out_error:out_errorString];
     if (data == nil) {
         NSLog(@"fetchURL failed: data == nil");
+        [BehaviorLogger AddLogWithDescription:@"FetchStoryForURL UriLoader GetHtmlDataAboutUTF8Encorded failed." data:@{@"out_error": out_errorString}];
         return nil;
     }
     
