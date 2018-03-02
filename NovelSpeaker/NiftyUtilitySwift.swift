@@ -180,7 +180,7 @@ class NiftyUtilitySwift: NSObject {
         return nil
     }
     
-    @objc public static func PDFToString(url: URL) -> String? {
+    @objc public static func FilePDFToString(url: URL) -> String? {
         if #available(iOS 11.0, *) {
             let pdf = PDFDocument(url: url)
             if let str = pdf?.string {

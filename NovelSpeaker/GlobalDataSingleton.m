@@ -3456,7 +3456,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 - (BOOL)ImportNovelFromPDFFile:(NSURL*)url{
-    NSString* text = [NiftyUtilitySwift PDFToStringWithUrl:url];
+    NSString* text = [NiftyUtilitySwift FilePDFToStringWithUrl:url];
     if (text == nil) {
         [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Title", @"PDFのテキスト読み込みに失敗") message:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Body", @"PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPSF読み込み機能は動作しません。") buttonTitle:nil buttonAction:nil];
         return false;

@@ -207,6 +207,7 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.13
 
 - Now can import .txt file.
+- Now can import .pdf file(iOS 11 or more).
 - Add Problem report feature in Settings tab.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
@@ -217,6 +218,7 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 Interface change
 
 - Now can import .txt file.
+- Now can import .pdf file(iOS 11 or more).
 - Add Problem report feature in Settings tab.
 
 
