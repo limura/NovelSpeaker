@@ -209,6 +209,7 @@
 - Now can import .txt file.
 - Now can import .pdf file(iOS 11 or more).
 - Add Problem report feature in Settings tab.
+- As for the novel imported by the \"Web import\" function, update the update date and time in the captured time.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -220,6 +221,10 @@ Interface change
 - Now can import .txt file.
 - Now can import .pdf file(iOS 11 or more).
 - Add Problem report feature in Settings tab.
+
+Bug fix
+
+- As for the novel imported by the \"Web import\" function, update the update date and time in the captured time.
 
 
 # Version 1.1.12

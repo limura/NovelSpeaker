@@ -710,6 +710,10 @@ bug fix
 - PDFファイルを自作小説として取り込めるように(iOS 11以上のみ)
 - 設定タブに「不都合報告をメールで開発者に送る」機能を追加
 
+問題の修正
+
+- Web取込で取り込んだ小説について、取り込んだ時間で更新日時を更新するように
+
 追伸
 
 評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
@@ -727,8 +731,12 @@ bug fix
 Interface change
 
 - Now can import .txt file.
+- Now can import .PDF file.
 - Add Problem report feature in Settings tab.
 
+Bug fix
+
+- As for the novel imported by the "Web import" function, update the update date and time in the captured time.
 
 ----
 in Japaneze.

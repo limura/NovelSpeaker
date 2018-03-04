@@ -302,6 +302,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
             // 最初に読んだもの以外は内容を更新する。(最初に読むのは前回最後に読んだものなので、ユーザが内容を更新している可能性があるため更新しない)
             [globalData UpdateStory:story.content chapter_number:story.count parentContent:localContent];
             localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
+            localContent.novelupdated_at = [[NSDate alloc] initWithTimeIntervalSinceNow:0];
         }
         [globalData UpdateNarouContent:localContent];
         result = true;
