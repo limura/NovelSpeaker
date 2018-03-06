@@ -404,7 +404,10 @@
     NSData* data = [UriLoader GetHtmlDataAboutUTF8Encorded:targetUrl cookieStorage:cookieStorage out_charSetString:&charSetString out_charsetValue:&charsetValue out_error:out_errorString];
     if (data == nil) {
         NSLog(@"fetchURL failed: data == nil");
-        [BehaviorLogger AddLogWithDescription:@"FetchStoryForURL UriLoader GetHtmlDataAboutUTF8Encorded failed." data:@{@"out_error": out_errorString}];
+        [BehaviorLogger AddLogWithDescription:@"FetchStoryForURL UriLoader GetHtmlDataAboutUTF8Encorded failed." data:@{
+                @"out_error": out_errorString == nil ? @"nil" : out_errorString,
+                @"url": targetUrl == nil ? @"nil" : [targetUrl absoluteString]
+                }];
         return nil;
     }
     

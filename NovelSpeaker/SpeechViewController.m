@@ -29,7 +29,7 @@
 {
     [super viewDidLoad];
     
-    [BehaviorLogger AddLogWithDescription:@"SpeechViewController viewDidLoad" data:@{@"ncode": self.NarouContentDetail.ncode}];
+    [BehaviorLogger AddLogWithDescription:@"SpeechViewController viewDidLoad" data:@{@"ncode": self.NarouContentDetail.ncode == nil ? @"nil" : self.NarouContentDetail.ncode}];
     
 	// Do any additional setup after loading the view, typically from a nib.
     
@@ -654,12 +654,14 @@
 - (void)NarouContentUpdated:(NSNotification*)notification
 {
     self.NarouContentDetail = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:self.NarouContentDetail.ncode];
+    NSLog(@"NarouContentUpdated: %@ %@", self.NarouContentDetail.ncode, self.NarouContentDetail.general_all_no);
     [self updateChapterSlider];
 }
 
 /// 章のスライダを更新します
 - (void)updateChapterSlider{
     dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"updateChapterSlider: %@ %@", self.NarouContentDetail.ncode, self.NarouContentDetail.general_all_no);
         self.ChapterSlider.minimumValue = 1;
         self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
         [self UpdateChapterIndicatorLabel:[m_CurrentReadingStory.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];

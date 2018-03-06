@@ -1509,9 +1509,9 @@ static GlobalDataSingleton* _singleton = nil;
 - (BOOL)SetSpeechStory:(StoryCacheData *)story
 {
     [BehaviorLogger AddLogWithDescription:@"SetSpeechStory" data:@{
-       @"novelID": story.ncode,
-       @"chapterNumber": [story.chapter_number stringValue],
-       @"readLocation": [story.readLocation stringValue]
+       @"novelID": story.ncode == nil ? @"nil" : story.ncode,
+       @"chapterNumber": story.chapter_number == nil ? @"nil" : [story.chapter_number stringValue],
+       @"readLocation": story.readLocation == nil ? @"nil" : [story.readLocation stringValue]
        }];
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
@@ -2828,12 +2828,12 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 始めの章の内容やタイトルが確定しているURLについて、新規登録をしてダウンロードqueueに追加しようとします
 - (void)AddNewContentForURL:(NSURL*)url nextUrl:(NSURL*)nextUrl cookieParameter:(NSString*)cookieParameter title:(NSString*)title author:(NSString*)author firstContent:(NSString*)firstContent viewController:(UIViewController*)viewController {
     [BehaviorLogger AddLogWithDescription:@"GlobalDataSingleton AddNewContentForURL called" data:@{
-        @"url": [url absoluteString],
-        @"nextUrl": [nextUrl absoluteString],
-        @"cookie": cookieParameter,
-        @"title": title,
-        @"author": author,
-        @"firstContent": firstContent
+        @"url": url == nil ? @"nil" : [url absoluteString],
+        @"nextUrl": nextUrl == nil ? @"nil" : [nextUrl absoluteString],
+        @"cookie": cookieParameter == nil ? @"nil" : cookieParameter,
+        @"title": title == nil ? @"nil" : title,
+        @"author": author == nil ? @"nil" : author,
+        @"firstContent": firstContent == nil ? @"nil" : firstContent
         }];
     NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:[url absoluteString]];
     if (targetContentCacheData != nil) {
@@ -3482,7 +3482,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// です。
 - (BOOL)ProcessCustomFileUTI:(NSURL*)url{
     NSLog(@"ProcessCustomFileUTI in. %@", url);
-    [BehaviorLogger AddLogWithDescription:@"GobalDataSingleton ProcessCustomFileUTI" data:@{@"url": [url absoluteString]}];
+    [BehaviorLogger AddLogWithDescription:@"GobalDataSingleton ProcessCustomFileUTI" data:@{@"url": url == nil ? @"nil": [url absoluteString]}];
     if ([[url pathExtension] isEqualToString:@"novelspeaker-backup-json"]) {
         NSData* data = [NSData dataWithContentsOfURL:url];
         if (data == nil){

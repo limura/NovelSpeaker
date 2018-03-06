@@ -345,7 +345,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         return false;
     }
     [BehaviorLogger AddLogWithDescription:@"NarouDownloadQueue ChapterDownload kicked" data:@{
-       @"ncode": localContent.ncode
+        @"ncode": localContent.ncode == nil ? @"nil" : localContent.ncode
     }];
     if ([localContent isURLContent]) {
         return [self URLDownload:localContent];
