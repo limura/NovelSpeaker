@@ -44,4 +44,9 @@
 /// 1ページ読み込み毎に待つ時間を秒で指定します
 - (void)SetSleepTimeInSecond:(float)sleepTime;
 
+// 指定された NSHTTPCookieStorage に入っている変なkeyになっている cookie項目 を削除します
+// 変なkey: 行頭に空白が入っているもの
+// 補足: この 変なkey があると、同じkeyが延々と追加されていってしまいには cookie header がでかくなりすぎて 400 を返すことになる(と思う)
++ (void)RemoveInvalidKeyDataFromCookieStorage:(NSHTTPCookieStorage*)storage;
+
 @end

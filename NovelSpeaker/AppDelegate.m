@@ -10,6 +10,7 @@
 #import "GlobalDataSingleton.h"
 #import <AVFoundation/AVFoundation.h>
 #import "NovelSpeaker-Swift.h"
+#import "UriLoader.h"
 
 @implementation AppDelegate
     
@@ -51,6 +52,9 @@ void uncaughtExceptionHandler(NSException *exception)
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = toplevelViewController;
     [self.window makeKeyAndVisible];
+    
+    // CookieStorageを健全化しておきます……(´・ω・`)
+    [UriLoader RemoveInvalidKeyDataFromCookieStorage:[NSHTTPCookieStorage sharedHTTPCookieStorage]];
     
     return YES;
 }

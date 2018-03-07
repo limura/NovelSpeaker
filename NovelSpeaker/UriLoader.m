@@ -311,7 +311,7 @@
     NSArray* cookieArray = [cookieStorage cookiesForURL:targetUrl];
     NSDictionary* header = [NSHTTPCookie requestHeaderFieldsWithCookies:cookieArray];
     [request setAllHTTPHeaderFields:header];
-    
+
     NSError* error;
     NSURLResponse* response;
     NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
@@ -327,6 +327,11 @@
         NSLog(@"HTTP status code is not 2?? (%ld) url: %@", (long)httpResponse.statusCode, [targetUrl absoluteString]);
         if (out_errorString != nil) {
             [out_errorString setString:[[NSString alloc] initWithFormat:NSLocalizedString(@"UriLoader_HTTPResponseIsInvalid", @"サーバから返されたステータスコードが正常値(200 OK等)ではなく、%ld を返されました。ログインが必要なサイトである場合などに発生する場合があります。ことせかい アプリ側でできることはあまり無いかもしれませんが、ことせかい のサポートサイトに設置してあります、ご意見ご要望フォームにこの問題の起こったURLとこの症状が起こった前にやったことを添えて報告して頂けると、あるいはなんとかできるかもしれません。"), httpResponse.statusCode]];
+            [BehaviorLogger AddLogWithDescription:@"GetHtmlDataAboutUTF8Encorded HTTP status code fail" data:@{
+                  @"returned HTTP status code": [NSString stringWithFormat:@"%ld", (long)httpResponse.statusCode],
+                  @"url": targetUrl == nil ? @"nil" : [targetUrl absoluteString],
+                  @"request header": request == nil ? @"nil": [request allHTTPHeaderFields]
+            }];
         }
         return nil;
     }
@@ -371,19 +376,44 @@
     return data;
 }
 
+// 指定された NSHTTPCookieStorage に入っている変なkeyになっている cookie項目 を削除します
+// 変なkey: 行頭に空白が入っているもの
+// 補足: この 変なkey があると、同じkeyが延々と追加されていってしまいには cookie header がでかくなりすぎて 400 を返すことになる(と思う)
++ (void)RemoveInvalidKeyDataFromCookieStorage:(NSHTTPCookieStorage*)storage {
+    NSMutableArray<NSHTTPCookie*>* deleteTargets = [NSMutableArray new];
+    for (NSHTTPCookie* cookie in storage.cookies) {
+        NSString* key = cookie.name;
+        NSString* validKey = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        if ([key compare:validKey] == NSOrderedSame) {
+            continue;
+        }
+        [deleteTargets addObject:cookie];
+    }
+    for (NSHTTPCookie* cookie in deleteTargets) {
+        [storage deleteCookie:cookie];
+    }
+}
+
 - (NSHTTPCookieStorage*)createCookieStorage:(NSArray*)cookieArray url:(NSURL*)url{
     NSHTTPCookieStorage* cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    //NSHTTPCookieStorage* cookieStorage = [NSHTTPCookieStorage new];
     //NSLog(@"LoadURL: cookieArray: %@", cookieArray);
+    NSMutableDictionary<NSString*, NSString*>* storedCookieDictionary = [NSMutableDictionary new];
     if (cookieArray != nil && [cookieArray count] > 0) {
         for (NSString* keyValue in cookieArray) {
             NSArray* keyValueArray = [[keyValue stringByRemovingPercentEncoding] componentsSeparatedByString:@"="];
             if (keyValueArray != nil && [keyValueArray count] == 2) {
-                NSString* key = keyValueArray[0];
-                NSString* value = keyValueArray[1];
+                NSString* key = [keyValueArray[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                NSString* value = [keyValueArray[1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                 NSString* host = [url host];
-                if (key == nil || value == nil || host == nil) {
+                if (key == nil || [key length] <= 0 || value == nil || [value length] <= 0 || host == nil) {
                     continue;
                 }
+                NSString* storedValue = [storedCookieDictionary objectForKey:key];
+                if (storedValue != nil && [storedValue compare:value] == NSOrderedSame) {
+                    continue;
+                }
+                
                 //NSLog(@"#### add cookie: %@=%@ ####", key, value);
                 NSDictionary* cookieDictionary = @{NSHTTPCookieName   : key,
                                                    NSHTTPCookieValue  : value,
@@ -392,6 +422,7 @@
                                                    NSHTTPCookieExpires: [[NSDate date] dateByAddingTimeInterval:3600]};
                 NSHTTPCookie* cookie = [NSHTTPCookie cookieWithProperties:cookieDictionary];
                 [cookieStorage setCookie:cookie];
+                [storedCookieDictionary setObject:key forKey:value];
             }
         }
     }
