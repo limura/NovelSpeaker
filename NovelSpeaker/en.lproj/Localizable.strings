@@ -210,6 +210,7 @@
 - Now can import .pdf file(iOS 11 or more).
 - Add Problem report feature in Settings tab.
 - As for the novel imported by the \"Web import\" function, update the update date and time in the captured time.
+- Fixed some of the problems with HTTP 400 BadRequest with \"Web import\" function
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -225,7 +226,7 @@ Interface change
 Bug fix
 
 - As for the novel imported by the \"Web import\" function, update the update date and time in the captured time.
-
+- Fixed some of the problems with HTTP 400 BadRequest with \"Web import\" function
 
 # Version 1.1.12
 
