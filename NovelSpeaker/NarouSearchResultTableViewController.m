@@ -9,7 +9,6 @@
 #import "NarouSearchResultTableViewController.h"
 #import "GlobalDataSingleton.h"
 #import "NarouContentCacheData.h"
-#import "NarouSearchResultDetailViewController.h"
 #import "NovelSpeaker-Swift.h"
 
 @implementation NarouSearchResultTableViewController
@@ -92,7 +91,7 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([[segue identifier] isEqualToString:@"searchResultDetailSegue"]) {
-        NarouSearchResultDetailViewController* nextViewController = [segue destinationViewController];
+        NarouSearchResultDetailViewControllerSwift* nextViewController = [segue destinationViewController];
         nextViewController.NarouContentDetail = m_NextViewDetail;
     }
 }

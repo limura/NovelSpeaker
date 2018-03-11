@@ -134,7 +134,6 @@
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
 		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
 		21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
-		21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */; };
 		21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA31967FD390039A706 /* NarouDownloadQueue.m */; };
 		21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD3196831070039A706 /* DownloadStatusViewController.m */; };
 		21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD6196843280039A706 /* BookShelfTableViewController.m */; };
@@ -156,6 +155,8 @@
 		21E704CF1AF741350071F31E /* UpdateLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E704CE1AF741350071F31E /* UpdateLogViewController.m */; };
 		21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BF81FB487B1003C659F /* EasyDialogs.swift */; };
 		21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */; };
+		21EA62E420554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */; };
+		21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EA62E5205560B80084B366 /* EurekaCustomRows.swift */; };
 		21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
 		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
@@ -417,8 +418,6 @@
 		21C74F9A196456490039A706 /* NarouSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchViewController.m; sourceTree = "<group>"; };
 		21C74F9C1965A5300039A706 /* NarouContentCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContentCacheData.h; sourceTree = "<group>"; };
 		21C74F9D1965A5300039A706 /* NarouContentCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContentCacheData.m; sourceTree = "<group>"; };
-		21C74F9F196707B20039A706 /* NarouSearchResultDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultDetailViewController.h; sourceTree = "<group>"; };
-		21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchResultDetailViewController.m; sourceTree = "<group>"; };
 		21C74FA21967FD390039A706 /* NarouDownloadQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouDownloadQueue.h; sourceTree = "<group>"; };
 		21C74FA31967FD390039A706 /* NarouDownloadQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouDownloadQueue.m; sourceTree = "<group>"; };
 		21C74FD2196831070039A706 /* DownloadStatusViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadStatusViewController.h; sourceTree = "<group>"; };
@@ -450,6 +449,8 @@
 		21E704CE1AF741350071F31E /* UpdateLogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateLogViewController.m; sourceTree = "<group>"; };
 		21E76BF81FB487B1003C659F /* EasyDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EasyDialogs.swift; sourceTree = "<group>"; };
 		21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModSettingsTableViewControllerSwift.swift; sourceTree = "<group>"; };
+		21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarouSearchResultDetailViewControllerSwift.swift; sourceTree = "<group>"; };
+		21EA62E5205560B80084B366 /* EurekaCustomRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EurekaCustomRows.swift; sourceTree = "<group>"; };
 		21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
 		21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIViewControllerExtension.m; sourceTree = "<group>"; };
 		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -634,6 +635,7 @@
 				2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */,
 				2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */,
 				213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */,
+				21EA62E5205560B80084B366 /* EurekaCustomRows.swift */,
 			);
 			name = CustomViews;
 			sourceTree = "<group>";
@@ -893,8 +895,6 @@
 				4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */,
 				21C74F99196456490039A706 /* NarouSearchViewController.h */,
 				21C74F9A196456490039A706 /* NarouSearchViewController.m */,
-				21C74F9F196707B20039A706 /* NarouSearchResultDetailViewController.h */,
-				21C74FA0196707B20039A706 /* NarouSearchResultDetailViewController.m */,
 				21C74FD2196831070039A706 /* DownloadStatusViewController.h */,
 				21C74FD3196831070039A706 /* DownloadStatusViewController.m */,
 				2191635E199E01A6003FF7FC /* SpeakSettingsTableViewController.h */,
@@ -920,6 +920,7 @@
 				21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */,
 				215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */,
 				216741A2204421F1008A578D /* BugReportViewController.swift */,
+				21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1328,6 +1329,7 @@
 				210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */,
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
+				21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
@@ -1361,7 +1363,6 @@
 				21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */,
 				21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
-				21C74FA1196707B20039A706 /* NarouSearchResultDetailViewController.m in Sources */,
 				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
 				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
 				213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */,
@@ -1371,6 +1372,7 @@
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
 				214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
+				21EA62E420554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift in Sources */,
 				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
 				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
 				215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */,

@@ -198,23 +198,40 @@
 "BugReportViewController_ErrorDialog" = "Error";
 "BugReportViewController_InformationForIsNeedResponse" = "If it is set that you want a reply, we will reply to the sender's email address. Reply may be delayed. Also, please note that if you do not receive mail from @gmail.com, you will not receive a reply.";
 
+"NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
+"NarouSearchResultDetailViewControllerSwift_Writer" = "Writer";
+"NarouSearchResultDetailViewControllerSwift_Title" = "Title";
+"NarouSearchResultDetailViewControllerSwift_UpdateDate" = "UpdateDate";
+"NarouSearchResultDetailViewControllerSwift_Point" = "Point";
+"NarouSearchResultDetailViewControllerSwift_Storys" = "Storys";
+"NarouSearchResultDetailViewControllerSwift_Bookmark_num" = "Bookmark num";
+"NarouSearchResultDetailViewControllerSwift_Point_mean" = "Point mean";
+"NarouSearchResultDetailViewControllerSwift_Point_count" = "Point count";
+"NarouSearchResultDetailViewControllerSwift_Keyword" = "Keyword";
+"NarouSearchResultDetailViewControllerSwift_Story" = "Story";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.13
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.14
 
-- Now can import .txt file.
-- Now can import .pdf file(iOS 11 or more).
-- Add Problem report feature in Settings tab.
-- As for the novel imported by the \"Web import\" function, update the update date and time in the captured time.
-- Fixed some of the problems with HTTP 400 BadRequest with \"Web import\" function
+Interface change
+
+- Novel information page layout changed (for small display device).
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.14
+
+Interface change
+
+- Novel information page layout changed (for small display device).
+
+
 # Version 1.1.13
 
 Interface change

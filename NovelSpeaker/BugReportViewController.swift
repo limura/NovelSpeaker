@@ -138,6 +138,11 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         if !MFMailComposeViewController.canSendMail() {
             return false;
         }
+        var appVersionString = "*"
+        if let infoDictionary = Bundle.main.infoDictionary, let bundleVersion = infoDictionary["CFBundleVersion"] as? String, let shortVersion = infoDictionary["CFBundleShortVersionString"] as? String {
+            appVersionString = String.init(format: "%@(%@)", shortVersion, bundleVersion)
+        }
+        
         let picker = MFMailComposeViewController()
         picker.mailComposeDelegate = self;
         picker.setSubject(NSLocalizedString("BugReportViewController_SendBugReportMailSubject", comment:"ことせかい 不都合報告"))
@@ -148,6 +153,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             + "\n" + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信を希望する") + ": " + (needResponse ? NSLocalizedString("BugReportViewController_YES", comment: "はい") : NSLocalizedString("BugReportViewController_NO", comment: "いいえ"))
             + "\niOS version: " + UIDevice.current.systemVersion
             + "\nmodel: " + UIDevice.modelName
+            + "\nApp version:" + appVersionString
             + "\n" + NSLocalizedString("BugReportViewController_TimeOfOccurrence", comment: "問題発生日時") + ": " + date.description(with: Locale.init(identifier: "ja_JP"))
             + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Description", comment: "不都合の概要") + ":\n" + description
             + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Procedure", comment: "不都合の再現方法") + ":\n" + procedure

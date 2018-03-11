@@ -12,7 +12,6 @@
 #import "Story.h"
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
-#import "NarouSearchResultDetailViewController.h"
 #import "EasyShare.h"
 #import "EasyAlert.h"
 #import "CreateSpeechModSettingViewController.h"
@@ -472,7 +471,7 @@
 {
     // 次のビューをloadする前に呼び出してくれるらしいので、そこで検索結果を放り込みます。
     if ([[segue identifier] isEqualToString:@"speechToDetailSegue"]) {
-        NarouSearchResultDetailViewController* nextViewController = [segue destinationViewController];
+        NarouSearchResultDetailViewControllerSwift* nextViewController = [segue destinationViewController];
         nextViewController.NarouContentDetail = self.NarouContentDetail;
     }
     

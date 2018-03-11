@@ -740,6 +740,28 @@ Bug fix
 - As for the novel imported by the "Web import" function, update the update date and time in the captured time.
 - Fixed some of the problems with HTTP 400 BadRequest with "Web import" function
 
+
+# Version 1.1.14
+
+インタフェースの変更
+
+- なろう検索で観られる小説の詳細ページのレイアウトを変更(画面の小さいデバイスで表示が崩れるため)
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回は軽微な修正となります。具体的には iPhone 5s で表示が崩れているという不都合報告を受けたことで発覚した問題への対応となります。つまり、ユーザの皆様からの不都合報告には本当に助かっています。これからもよろしくお願い致します。
+
+それでは、これからも ことせかい をよろしくお願い致します。
+
+# Version 1.1.14
+
+Interface change
+
+- Novel information page layout changed (for small display device).
+
+
 ----
 in Japaneze.
 
