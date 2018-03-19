@@ -3288,6 +3288,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 - (void)RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray{
+    NSMutableDictionary* requestedURLHosts = [NSMutableDictionary new];
     for (id obj in bookshelfDataArray) {
         if (![obj isKindOfClass:[NSDictionary class]]) {
             continue;
@@ -3301,7 +3302,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             if ([ncode length] <= 0) {
                 continue;
             }
-            [self AddDownloadQueueForNarouNcode:ncode];
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                [self AddDownloadQueueForNarouNcode:ncode];
+            });
         }else if([type compare:@"url"] == NSOrderedSame) {
             NSString* url = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"url"];
             NSString* secret = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"secret"];
@@ -3317,7 +3320,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             NSString* cookie = [NiftyUtility stringDecrypt:secret key:url];
             NSString* author = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"author"];
             NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
-            dispatch_async(dispatch_get_main_queue(), ^{
+            // 既に登録されているホストであれば1秒待ってから AddDirectoryDownloadQueueForURL をする。でないと連続でアクセスしまくるすることになってしまう
+            NSString* hostName = [urlObj host];
+            if ([requestedURLHosts objectForKey:hostName] == nil) {
+                [requestedURLHosts setObject:hostName forKey:hostName];
+            }else{
+                [NSThread sleepForTimeInterval:1.1f];
+            }
+            dispatch_sync(dispatch_get_main_queue(), ^{
                 [self AddDirectoryDownloadQueueForURL:url cookieParameter:cookie author:author title:title];
             });
         }else if([type compare:@"user"] == NSOrderedSame) {
@@ -3340,14 +3350,18 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             content.ncode = ncode;
             content.title = title;
             content.general_all_no = [[NSNumber alloc] initWithUnsignedInteger:[storyArray count]];
-            [self UpdateNarouContent:content];
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                [self UpdateNarouContent:content];
+            });
             int chapterNumber = 1;
             for (id storyObj in storyArray) {
                 if (![storyObj isKindOfClass:[NSString class]]) {
                     continue;
                 }
                 NSString* story = storyObj;
-                [self UpdateStory:story chapter_number:chapterNumber parentContent:content];
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    [self UpdateStory:story chapter_number:chapterNumber parentContent:content];
+                });
                 chapterNumber += 1;
             }
         }
@@ -3489,7 +3503,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             return false;
         }
         
-        return [self RestoreBackupFromJSONData:data];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            [self RestoreBackupFromJSONData:data];
+        });
+        return true;
     }
     if ([[[url pathExtension] lowercaseString] isEqualToString:@"pdf"]) {
         return [self ImportNovelFromPDFFile:url];
