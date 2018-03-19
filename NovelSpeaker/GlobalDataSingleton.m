@@ -3320,7 +3320,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             NSString* cookie = [NiftyUtility stringDecrypt:secret key:url];
             NSString* author = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"author"];
             NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
-            // 既に登録されているホストであれば1秒待ってから AddDirectoryDownloadQueueForURL をする。でないと連続でアクセスしまくるすることになってしまう
+            // 既に登録されているホストであれば1秒待ってから AddDirectoryDownloadQueueForURL をする。でないと連続でアクセスしまくることになってしまう
             NSString* hostName = [urlObj host];
             if ([requestedURLHosts objectForKey:hostName] == nil) {
                 [requestedURLHosts setObject:hostName forKey:hostName];

@@ -762,6 +762,34 @@ Interface change
 - Novel information page layout changed (for small display device).
 
 
+# Version 1.1.15
+
+インタフェースの変更
+
+- Web取込機能を使って取り込んだ小説について、個々の章を表示している画面に再ダウンロード用のボタン(回転している矢印)を追加
+
+問題の修正
+
+- バックアップファイルで小説等を読み込み直す時に、画面が凍りついたり ことせかい が落ちやすくなっていた問題を(一部)修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正も細かい改良やバグ修正が主となっております。今回のバグ修正などもユーザ様からのご指摘があって気づいた問題になります。いつもありがとうございます。最近は問題のご指摘だけでなく、かなりしっかりとした状況の再現方法まで伝えて頂けていて、手元での問題の再現が楽になることで問題の修正がやりやすく、とても助かっています。ありがとうございます。
+
+以上手短になりますが、今後共 ことせかい をよろしくお願い致します。
+
+# Version 1.1.15
+
+interface change
+
+- Added a button for re-downloading (rotating arrow) to the screen displaying individual chapters for the novel captured using the "Web import" function.
+
+bug fix
+
+- Corrected (some) the problem that the screen froze or NovelSpeaker fell easily when reloading the novel etc in the backup file.
+
 ----
 in Japaneze.
 

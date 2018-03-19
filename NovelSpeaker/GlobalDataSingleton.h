@@ -429,4 +429,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 起動されるまでの間に新規にダウンロードされた小説の数を更新します
 - (void)UpdateBackgroundFetchedNovelCount:(NSInteger)count;
 
+/// download queue の最後に対象の content を追加します。(与えられるNarouContentは既にCoreDataに登録されている物である必要があります)
+- (void)PushContentDownloadQueue:(NarouContentCacheData*)content;
 @end

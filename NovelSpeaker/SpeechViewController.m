@@ -48,7 +48,9 @@
     [buttonItemList addObject:startStopButton];
     
     NSString* detailText;
-    if ([self.NarouContentDetail isUserCreatedContent]) {
+    if ([self.NarouContentDetail isURLContent]){
+        detailText = NSLocalizedString(@"SpeechViewController_Edit", @"編集");
+    }else if ([self.NarouContentDetail isUserCreatedContent]) {
         detailText = NSLocalizedString(@"SpeechViewController_Edit", @"編集");
     }else{
         detailText = NSLocalizedString(@"SpeechViewController_Detail", @"詳細");
@@ -58,6 +60,10 @@
     if ([self.NarouContentDetail isUserCreatedContent] != true) {
         shareButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareButtonClicked:)];
         [buttonItemList addObject:shareButton];
+    }
+    if ([self.NarouContentDetail isURLContent]) {
+        UIBarButtonItem* refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(urlRefreshButtonClick:)];
+        [buttonItemList addObject:refreshButton];
     }
     self.navigationItem.rightBarButtonItems = buttonItemList;
     self.navigationItem.title = self.NarouContentDetail.title;
@@ -684,4 +690,12 @@
     // この時点で情報を更新しても古い情報が手に入るっぽい(更新してない？)ので特に何もしません。
 }
 
+// URL の時にリフレッシュボタンを押したら再ダウンロードします
+- (void)urlRefreshButtonClick:(id)sender
+{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    [globalData PushContentDownloadQueue:self.NarouContentDetail];
+    // 再ダウンロードを指示したので一旦本棚へ戻します
+    [self.navigationController popViewControllerAnimated:YES];
+}
 @end
