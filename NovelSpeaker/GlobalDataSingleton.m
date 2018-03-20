@@ -1410,16 +1410,21 @@ static GlobalDataSingleton* _singleton = nil;
     }
 }
 
-/// NiftySpeaker に保存されている文字列から、ルビが振られているものを取り出して読み替え辞書に登録します。
-- (void)ApplyRubyModConfig:(NiftySpeaker*)niftySpeaker
-{
-    NSDictionary* rubyDictionary = [StringSubstituter FindNarouRubyNotation:[m_NiftySpeaker GetText] notRubyString:[self GetNotRubyCharactorStringArray]];
+- (void)ApplyRubyModConfigWithText:(NiftySpeaker*)niftySpeaker text:(NSString*)text {
+    NSDictionary* rubyDictionary = [StringSubstituter FindNarouRubyNotation:text notRubyString:[self GetNotRubyCharactorStringArray]];
+    NSLog(@"ApplyRubyModConfig: %lu", (unsigned long)[rubyDictionary count]);
     for (NSString* from in [rubyDictionary keyEnumerator]) {
         NSString* to = [rubyDictionary valueForKey:from];
         if (to != nil) {
             [m_NiftySpeaker AddSpeechModText:from to:to];
         }
     }
+}
+
+/// NiftySpeaker に保存されている文字列から、ルビが振られているものを取り出して読み替え辞書に登録します。
+- (void)ApplyRubyModConfig:(NiftySpeaker*)niftySpeaker
+{
+    [self ApplyRubyModConfigWithText:niftySpeaker text:[m_NiftySpeaker GetText]];
 }
 
 /// NiftySpeakerに現在の読み替え設定を登録します
@@ -1513,12 +1518,12 @@ static GlobalDataSingleton* _singleton = nil;
        @"chapterNumber": story.chapter_number == nil ? @"nil" : [story.chapter_number stringValue],
        @"readLocation": story.readLocation == nil ? @"nil" : [story.readLocation stringValue]
        }];
+    if ([self GetOverrideRubyIsEnabled]) {
+        [self ApplyRubyModConfigWithText:m_NiftySpeaker text:story.content];
+    }
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
         return false;
-    }
-    if ([self GetOverrideRubyIsEnabled]) {
-        [self ApplyRubyModConfig:m_NiftySpeaker];
     }
     [self UpdatePlayingInfo:story];
     [self DropNewFlag:story.ncode];
