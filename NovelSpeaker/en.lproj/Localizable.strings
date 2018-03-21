@@ -216,14 +216,22 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.15
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.16
 
-- Added a button for re-downloading (rotating arrow) to the screen displaying individual chapters for the novel captured using the \"Web import\" function.
-- Corrected (some) the problem that the screen froze or NovelSpeaker fell easily when reloading the novel etc in the backup file.
+bug fix
+
+- fixed: Even if \"Speech ruby only\" is ON, the first chapter was not working
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.16
+
+bug fix
+
+- fixed: Even if \"Speech ruby only\" is ON, the first chapter was not working
+
+
 # Version 1.1.15
 
 interface change

@@ -212,14 +212,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.15
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.16
 
-- Web取込機能を使って取り込んだ小説について、個々の章を表示している画面に再ダウンロード用のボタン(回転している矢印)を追加
-- バックアップファイルで小説等を読み込み直す時に、画面が凍りついたり ことせかい が落ちやすくなっていた問題を(一部)修正
+- 「ルビはルビのまま読む」がONになっていても最初の1章分は効いていなかった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.16
+
+問題の修正
+
+- 「ルビはルビのまま読む」がONになっていても最初の1章分は効いていなかった問題を修正
+
+
 # Version 1.1.15
 
 インタフェースの変更

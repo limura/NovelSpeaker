@@ -1410,9 +1410,9 @@ static GlobalDataSingleton* _singleton = nil;
     }
 }
 
+/// 指定された文字列から、ルビが振られているものを取り出して読み替え辞書に登録します。
 - (void)ApplyRubyModConfigWithText:(NiftySpeaker*)niftySpeaker text:(NSString*)text {
     NSDictionary* rubyDictionary = [StringSubstituter FindNarouRubyNotation:text notRubyString:[self GetNotRubyCharactorStringArray]];
-    NSLog(@"ApplyRubyModConfig: %lu", (unsigned long)[rubyDictionary count]);
     for (NSString* from in [rubyDictionary keyEnumerator]) {
         NSString* to = [rubyDictionary valueForKey:from];
         if (to != nil) {
