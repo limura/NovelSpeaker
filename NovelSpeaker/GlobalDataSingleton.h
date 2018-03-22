@@ -431,4 +431,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 /// download queue の最後に対象の content を追加します。(与えられるNarouContentは既にCoreDataに登録されている物である必要があります)
 - (void)PushContentDownloadQueue:(NarouContentCacheData*)content;
+
+/// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
+- (void)ForceOverrideHungSpeakStringToSpeechModSettings;
 @end

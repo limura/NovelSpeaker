@@ -56,6 +56,9 @@ void uncaughtExceptionHandler(NSException *exception)
     // CookieStorageを健全化しておきます……(´・ω・`)
     [UriLoader RemoveInvalidKeyDataFromCookieStorage:[NSHTTPCookieStorage sharedHTTPCookieStorage]];
     
+    // "************" でハングするようなので強制的に読み替え辞書に登録して安全な文字に読み変えるようにします(´・ω・`)
+    [globalData ForceOverrideHungSpeakStringToSpeechModSettings];
+    
     return YES;
 }
 

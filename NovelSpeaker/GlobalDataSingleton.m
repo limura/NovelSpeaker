@@ -3519,4 +3519,22 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     // .novelspeaker-backup-json, .pdf 以外であれば plain-text として読み込む
     return [self ImportNovelFromFile:url];
 }
+
+/// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
+- (void)ForceOverrideHungSpeakStringToSpeechModSettings{
+    NSArray* targetStrings = @[@"*"];
+    
+    for (NSString* key in targetStrings) {
+        // 既に読み替え辞書に登録されているのなら何もしない
+        SpeechModSettingCacheData* setting = [self GetSpeechModSettingWithBeforeString:key];
+        if (setting != nil) {
+            continue;
+        }
+        SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
+        speechModSetting.beforeString = key;
+        speechModSetting.afterString = @" ";
+        [self UpdateSpeechModSetting:speechModSetting];
+    }
+}
+
 @end

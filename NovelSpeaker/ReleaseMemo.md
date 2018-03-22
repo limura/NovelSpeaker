@@ -796,6 +796,7 @@ bug fix
 問題の修正
 
 - 「ルビはルビのまま読む」がONになっていても最初の1章分は効いていなかった問題を修正
+- "*" が連続している部分を読み上げようとすると落ちるので、無害な文字へと読み替える読み替え辞書として追加するように
 
 追伸
 
@@ -812,7 +813,7 @@ bug fix
 bug fix
 
 - fixed: Even if "Speech ruby only" is ON, the first chapter was not working
-
+- Since it falls when trying to read a part where "*" is consecutive, it is added as a replacement dictionary to read as harmless characters
 
 ----
 in Japaneze.

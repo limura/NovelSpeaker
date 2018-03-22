@@ -221,6 +221,7 @@
 bug fix
 
 - fixed: Even if \"Speech ruby only\" is ON, the first chapter was not working
+- Since it falls when trying to read a part where \"*\" is consecutive, it is added as a replacement dictionary to read as harmless characters
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -230,7 +231,7 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 bug fix
 
 - fixed: Even if \"Speech ruby only\" is ON, the first chapter was not working
-
+- Since it falls when trying to read a part where \"*\" is consecutive, it is added as a replacement dictionary to read as harmless characters
 
 # Version 1.1.15
 
