@@ -12,6 +12,15 @@
 
 @implementation CoreDataObjectHolder
 
++ (NSObject*)GetSyncObject{
+    static NSObject* syncObject = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        syncObject = [NSObject new];
+    });
+    return syncObject;
+}
+
 /// モデル名(XXXX.xcdatamodel の XXXX の部分)、ファイル名、フォルダタイプを指定して初期化します。
 /// 生成されるファイルは "ファイル名.sqlite" という名前になります。
 - (CoreDataObjectHolder*)initWithModelName:(NSString*)modelName fileName:(NSString*)fileName folderType:(CoreDataObjectHolderFolderType)folderType mergePolicy:(id)mergePolicy
@@ -261,8 +270,11 @@
     }
     
     // その thread用 の ManagedObjectContext を生成します。
-    // これは PrivateQueue です。
-    context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    if ([NSThread isMainThread]) {
+        context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+    }else{
+        context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    }
     // 親は Main です。
     //[context setParentContext:m_MainManagedObjectContext];
     [context setPersistentStoreCoordinator:coordinator];
@@ -457,9 +469,11 @@
 /// 現在のthreadでの NSManagedObjectContext で、performBlockAndWait を実行します。
 - (void)performBlockAndWait:(void(^)(void))block{
     NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
-    [context performBlockAndWait:^{
-        block();
-    }];
+    @synchronized([CoreDataObjectHolder GetSyncObject]){
+        [context performBlockAndWait:^{
+            block();
+        }];
+    }
 }
 
 
