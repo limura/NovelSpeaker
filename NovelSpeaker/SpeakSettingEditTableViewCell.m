@@ -69,4 +69,22 @@
     // キーボードを閉じる
     [sender resignFirstResponder];
 }
+- (IBAction)startTextEditingDidEnd:(id)sender {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    SpeakPitchConfigCacheData* pitchConfig = [globalData GetSpeakPitchConfigWithTitle:self.titleLabel.text];
+    if (pitchConfig == nil) {
+        return;
+    }
+    pitchConfig.startText = self.startStringTextField.text;
+    [globalData UpdateSpeakPitchConfig:pitchConfig];
+}
+- (IBAction)endTextEditingDidEnd:(id)sender {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    SpeakPitchConfigCacheData* pitchConfig = [globalData GetSpeakPitchConfigWithTitle:self.titleLabel.text];
+    if (pitchConfig == nil) {
+        return;
+    }
+    pitchConfig.endText = self.endStringTextField.text;
+    [globalData UpdateSpeakPitchConfig:pitchConfig];
+}
 @end
