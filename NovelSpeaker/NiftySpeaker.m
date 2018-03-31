@@ -364,6 +364,19 @@ typedef enum {
         //NSLog(@"block(%p): delay: %.2f, pitch: %.2f, rate: %.2f %@ → %@", block, block.speechConfig.beforeDelay, block.speechConfig.pitch, block.speechConfig.rate, targetString, [block GetSpeechText]);
         [speechBlockArray addObject:block];
     }
+#if 0
+    {
+        NSMutableString* logText = [NSMutableString new];
+        for (SpeechBlock* block in speechBlockArray) {
+            [logText appendFormat:@"pitch: %f, rate: %f, delay: %f: %@\n",
+             block.speechConfig.pitch,
+             block.speechConfig.rate,
+             block.speechConfig.beforeDelay,
+             [block GetDisplayText]];
+        }
+        NSLog(@"%@", logText);
+    }
+#endif
     
     return speechBlockArray;
 }

@@ -51,6 +51,11 @@
     return conv;
 }
 
+- (NSString*)SpeechBlockConverterToString:(SpeechBlockConverter*)converter {
+    return [[NSString alloc] initWithFormat:@"%@, delay: %f, pitch: %f, rate: %f",
+            converter.text, converter.delay, converter.pitch, converter.rate];
+}
+
 /// SpeechBlock への分割を確認する
 - (void)testNiftySpeakerBlockSeparate
 {
@@ -79,7 +84,7 @@
 
     
     [speaker SetText:@""
-#if 0
+#if 1
      @"異世界\r\n"
      @"\r\n"
      @"「行頭から会話文」\r\n"
@@ -101,7 +106,7 @@
     NSArray* blockArray = [speaker GetGeneratedSpeechBlockArray_ForTest];
 
     NSArray* answerArray = @[
-#if 1
+#if 0
                              [self AllocSpeechBlockConverter:@"「あ" delay:0.0f pitch:1.5f rate:0.5f]
                              , [self AllocSpeechBlockConverter:@"」\r\nいうえお" delay:0.0f pitch:1.0f rate:0.5f]
                              , [self AllocSpeechBlockConverter:@"\r\n\r\n異世界" delay:0.5f pitch:1.0f rate:0.5f]
@@ -144,9 +149,9 @@
         SpeechBlockConverter* answer = [answerArray objectAtIndex:i];
         NSString* displayText = [block GetDisplayText];
         XCTAssertTrue([displayText compare:answer.text] == NSOrderedSame, @"block %d not same: %@ <=> %@", i, displayText, answer.text);
-        XCTAssertEqual(block.speechConfig.pitch, answer.pitch, @"block %d", i);
-        XCTAssertEqual(block.speechConfig.rate, answer.rate, @"block %d", i);
-        XCTAssertEqual(block.speechConfig.beforeDelay, answer.delay, @"block %d", i);
+        XCTAssertEqual(block.speechConfig.pitch, answer.pitch, @"block %d, pitch not match: %f <=> %f", i, block.speechConfig.pitch, answer.pitch);
+        XCTAssertEqual(block.speechConfig.rate, answer.rate, @"block %d: rate not match: %f <=> %f", i, block.speechConfig.rate, answer.rate);
+        XCTAssertEqual(block.speechConfig.beforeDelay, answer.delay, @"block %d: delay not match: %f <=> %f", i, block.speechConfig.beforeDelay, answer.delay);
     }
 }
 
