@@ -28,5 +28,8 @@
     
     [self.testSpeakDelegate testSpeakSampleTextUpdate:self.sampleTextTextField.text];
 }
+- (IBAction)sampleTextFieldEditingDidEnd:(id)sender {
+    [self.testSpeakDelegate testSpeakSampleTextUpdate:self.sampleTextTextField.text];
+}
 
 @end
