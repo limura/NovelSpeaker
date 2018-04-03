@@ -176,9 +176,9 @@
 "BugReportViewController_BugReportTitle" = "不都合がある場合にはこのフォームで不都合報告ができます。";
 "BugReportViewController_TimeOfOccurrence" = "問題発生日時";
 "BugReportViewController_DescriptionOfTheProblem" = "問題の説明";
-"BugReportViewController_DescriptionOfTheProblemPlaceHolder" = "起こっている問題を説明してください";
+"BugReportViewController_DescriptionOfTheProblemPlaceHolder" = "起こっている問題を説明してください。\n説明はできるだけ詳しく書いて頂けるとありがたいです。「〜ができません」や「〜すると落ちます」といった簡単な報告のみですと、開発者が状況を把握できず対応できません。";
 "BugReportViewController_ProblemOccurrenceProcedure" = "問題発生手順";
-"BugReportViewController_ProblemOccurrenceProcedurePlaceHolder" = "問題が発生するまでの操作手順を書いてください";
+"BugReportViewController_ProblemOccurrenceProcedurePlaceHolder" = "問題が発生するまでの操作手順を書いてください。\nアプリを触ったことが無い人でも同じ事ができるような操作方法を書くつもりで書いて頂けるといいと思います。";
 "BugReportViewController_IsNeedResponse" = "この報告への返事が欲しい";
 "BugReportViewController_SendBugReportButtonTitle" = "不都合報告メールを作成する";
 "BugReportViewController_InvalidTimeOfOccurence" = "※ 不都合の起こった正確な日時を設定してください。なお、未来の日時は指定できません。";
