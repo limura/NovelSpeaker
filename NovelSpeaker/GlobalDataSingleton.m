@@ -3079,12 +3079,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 読み上げられないため、ルビとしては認識しない文字集合を取得します
 - (NSString*)GetNotRubyCharactorStringArray{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    NSString* result = [userDefaults stringForKey:USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY];
-    if (result == nil) {
-        // TODO: なんと、ここで default値 を返している！！！！('A`)
-        return @"・";
-    }
-    return result;
+    [userDefaults registerDefaults:@{USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY: @"・、"}];
+    return [userDefaults stringForKey:USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY];
 }
 
 /// 読み上げられないため、ルビとしては認識しない文字集合を設定します
