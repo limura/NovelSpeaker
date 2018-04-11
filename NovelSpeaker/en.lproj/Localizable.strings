@@ -216,16 +216,22 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.16
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.17
 
-bug fix
-
-- fixed: Even if \"Speech ruby only\" is ON, the first chapter was not working
-- Since it falls when trying to read a part where \"*\" is consecutive, it is added as a replacement dictionary to read as harmless characters
+- Corrected so that even if you erase the keyboard by tapping off the screen etc., the problem which was not saved unless you press Enter is reflected in the part where character input is necessary
+- Fixed an issue where playback did not stop when Bluetooth device was disconnected
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.17
+
+bug fix
+
+- Corrected so that even if you erase the keyboard by tapping off the screen etc., the problem which was not saved unless you press Enter is reflected in the part where character input is necessary
+- Fixed an issue where playback did not stop when Bluetooth device was disconnected
+
+
 # Version 1.1.16
 
 bug fix
