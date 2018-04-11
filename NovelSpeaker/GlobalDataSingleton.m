@@ -2874,7 +2874,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     // ヘッドホンorイヤホンが刺さっていたか取得
     BOOL (^isJointHeadphone)(NSArray *) = ^(NSArray *outputs){
         for (AVAudioSessionPortDescription *desc in outputs) {
-            if ([desc.portType isEqual:AVAudioSessionPortHeadphones]) {
+            if ([desc.portType isEqual:AVAudioSessionPortHeadphones] ||
+                [desc.portType isEqual:AVAudioSessionPortBluetoothA2DP]) {
                 return YES;
             }
         }
