@@ -169,7 +169,7 @@ static GlobalDataSingleton* _singleton = nil;
         if ([state.defaultPitch compare:globalState.defaultPitch] != NSOrderedSame
             || [state.defaultRate compare:globalState.defaultRate] != NSOrderedSame
             || [state.speechWaitSettingUseExperimentalWait boolValue] != [globalState.speechWaitSettingUseExperimentalWait boolValue]){
-            m_isNeedReloadSpeakSetting = true;
+            self->m_isNeedReloadSpeakSetting = true;
         }
         state.defaultPitch = globalState.defaultPitch;
         state.defaultRate = globalState.defaultRate;
@@ -281,7 +281,7 @@ static GlobalDataSingleton* _singleton = nil;
             isNeedContentListChangedAnnounce = true;
         }
         result = [content AssignToCoreData:coreDataContent];
-        [m_CoreDataObjectHolder save];
+        [self->m_CoreDataObjectHolder save];
     //});
     }];
     if (isNeedContentListChangedAnnounce || true) {
@@ -304,7 +304,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block NSUInteger result = 0;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        result = [m_CoreDataObjectHolder CountEntity:@"NarouContent"];
+        result = [self->m_CoreDataObjectHolder CountEntity:@"NarouContent"];
     //});
     }];
     return result;
@@ -336,7 +336,7 @@ static GlobalDataSingleton* _singleton = nil;
                 sortAttributeName = @"novelupdated_at";
                 break;
         }
-        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"NarouContent" sortAttributeName:sortAttributeName ascending:NO];
+        NSArray* results = [self->m_CoreDataObjectHolder FetchAllEntity:@"NarouContent" sortAttributeName:sortAttributeName ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[NarouContentCacheData alloc] initWithCoreData:results[i]];
@@ -355,7 +355,7 @@ static GlobalDataSingleton* _singleton = nil;
 - (NSArray*)GetAllStoryTextForNcode:(NSString*)ncode{
     __block NSMutableArray* resultArray = nil;
     [self coreDataPerfomBlockAndWait:^{
-        NSArray* fetchResults = [m_CoreDataObjectHolder SearchEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode]];
+        NSArray* fetchResults = [self->m_CoreDataObjectHolder SearchEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode]];
         for (Story* story in fetchResults) {
             if (resultArray == nil) {
                 resultArray = [NSMutableArray new];
@@ -405,7 +405,7 @@ static GlobalDataSingleton* _singleton = nil;
             targetContent.novelupdated_at = content.novelupdated_at;
             targetContentCacheData = [[NarouContentCacheData alloc] initWithCoreData:targetContent];
             // 新しく作ったので save して main thread と sync しておきます。
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder save];
         //});
         }];
         if (isNarouContentCreated) {
@@ -610,8 +610,8 @@ static GlobalDataSingleton* _singleton = nil;
     //dispatch_sync(m_CoreDataAccessQueue, ^{
         NarouContent* coreDataContent = [self SearchCoreDataNarouContentFromNcodeThreadUnsafe:content.ncode];
         if (coreDataContent != nil) {
-            [m_CoreDataObjectHolder DeleteEntity:coreDataContent];
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder DeleteEntity:coreDataContent];
+            [self->m_CoreDataObjectHolder save];
             result = true;
         }
     //});
@@ -635,8 +635,8 @@ static GlobalDataSingleton* _singleton = nil;
         if (coreDataStory == nil) {
             result = false;
         }else{
-            [m_CoreDataObjectHolder DeleteEntity:coreDataStory];
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder DeleteEntity:coreDataStory];
+            [self->m_CoreDataObjectHolder save];
             result = true;
         }
     //});
@@ -654,7 +654,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block NSUInteger result = 0;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        result = [m_CoreDataObjectHolder CountEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", content.ncode]];
+        result = [self->m_CoreDataObjectHolder CountEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", content.ncode]];
     //});
     }];
     return result;
@@ -720,7 +720,7 @@ static GlobalDataSingleton* _singleton = nil;
             coreDataContent.currentReadingStory = coreDataStory;
             coreDataContent.reading_chapter = coreDataStory.chapter_number;
             globalState.currentReadingStory = coreDataStory;
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder save];
             result = true;
         }
     //});
@@ -1461,7 +1461,7 @@ static GlobalDataSingleton* _singleton = nil;
         if ([content.is_new_flug boolValue] == true) {
             NSLog(@"new flag drop: %@", ncode);
             content.is_new_flug = [[NSNumber alloc] initWithBool:false];
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder save];
         
         }
     //});
@@ -1723,7 +1723,7 @@ static GlobalDataSingleton* _singleton = nil;
 {
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        [m_CoreDataObjectHolder save];
+        [self->m_CoreDataObjectHolder save];
     //});
     }];
     NSLog(@"CoreData saved.");
@@ -1736,7 +1736,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block NSMutableArray* fetchResults = nil;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeakPitchConfig" sortAttributeName:@"title" ascending:NO];
+        NSArray* results = [self->m_CoreDataObjectHolder FetchAllEntity:@"SpeakPitchConfig" sortAttributeName:@"title" ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[SpeakPitchConfigCacheData alloc] initWithCoreData:results[i]];
@@ -1811,7 +1811,7 @@ static GlobalDataSingleton* _singleton = nil;
         }
         if (coreDataConfig != nil) {
             result = [config AssignToCoreData:coreDataConfig];
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder save];
         }
     //});
     }];
@@ -1832,8 +1832,8 @@ static GlobalDataSingleton* _singleton = nil;
         if (coreDataConfig == nil) {
             result = false;
         }else{
-            [m_CoreDataObjectHolder DeleteEntity:coreDataConfig];
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder DeleteEntity:coreDataConfig];
+            [self->m_CoreDataObjectHolder save];
             result = true;
         }
     //});
@@ -1852,7 +1852,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block NSMutableArray* fetchResults = nil;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeechModSetting" sortAttributeName:@"beforeString" ascending:NO];
+        NSArray* results = [self->m_CoreDataObjectHolder FetchAllEntity:@"SpeechModSetting" sortAttributeName:@"beforeString" ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[SpeechModSettingCacheData alloc] initWithCoreData:results[i]];
@@ -1926,7 +1926,7 @@ static GlobalDataSingleton* _singleton = nil;
                 }
             }
         }
-        [m_CoreDataObjectHolder save];
+        [self->m_CoreDataObjectHolder save];
     }];
     if (result) {
         m_isNeedReloadSpeakSetting = true;
@@ -1949,7 +1949,7 @@ static GlobalDataSingleton* _singleton = nil;
         }
         if (coreDataConfig != nil) {
             result = [modSetting AssignToCoreData:coreDataConfig];
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder save];
         }
     //});
     }];
@@ -1970,8 +1970,8 @@ static GlobalDataSingleton* _singleton = nil;
         if (coreDataConfig == nil) {
             result = false;
         }else{
-            [m_CoreDataObjectHolder DeleteEntity:coreDataConfig];
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder DeleteEntity:coreDataConfig];
+            [self->m_CoreDataObjectHolder save];
             result = true;
         }
     //});
@@ -2019,7 +2019,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block NSMutableArray* fetchResults = nil;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSArray* results = [m_CoreDataObjectHolder FetchAllEntity:@"SpeechWaitConfig" sortAttributeName:@"targetText" ascending:YES];
+        NSArray* results = [self->m_CoreDataObjectHolder FetchAllEntity:@"SpeechWaitConfig" sortAttributeName:@"targetText" ascending:YES];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[SpeechWaitConfigCacheData alloc] initWithCoreData:results[i]];
@@ -2044,7 +2044,7 @@ static GlobalDataSingleton* _singleton = nil;
             // float で == の比較がどれだけ意味があるのかわからんけれど、多分 0.0f には効くんじゃないかなぁ……
             if (coreDataConfig.delayTimeInSec != waitConfigCacheData.delayTimeInSec) {
                 coreDataConfig.delayTimeInSec = waitConfigCacheData.delayTimeInSec;
-                [m_CoreDataObjectHolder save];
+                [self->m_CoreDataObjectHolder save];
                 result = true;
             }
         }
@@ -2067,8 +2067,8 @@ static GlobalDataSingleton* _singleton = nil;
         if (coreDataConfig == nil) {
             result = false;
         }else{
-            [m_CoreDataObjectHolder DeleteEntity:coreDataConfig];
-            [m_CoreDataObjectHolder save];
+            [self->m_CoreDataObjectHolder DeleteEntity:coreDataConfig];
+            [self->m_CoreDataObjectHolder save];
             result = true;
         }
     //});

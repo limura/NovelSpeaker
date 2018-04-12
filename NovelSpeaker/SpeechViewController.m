@@ -456,7 +456,7 @@
                 firstActionHandler:nil
                 secondButtonText:NSLocalizedString(@"OK_button", @"OK")
                 secondActionHandler:^(UIAlertAction *action) {
-                    m_bIsSpeaking = YES;
+                    self->m_bIsSpeaking = YES;
                     [self startSpeech];
                 }];
             return;
@@ -669,7 +669,7 @@
         NSLog(@"updateChapterSlider: %@ %@", self.NarouContentDetail.ncode, self.NarouContentDetail.general_all_no);
         self.ChapterSlider.minimumValue = 1;
         self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
-        [self UpdateChapterIndicatorLabel:[m_CurrentReadingStory.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];
+        [self UpdateChapterIndicatorLabel:[self->m_CurrentReadingStory.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];
     });
 }
 

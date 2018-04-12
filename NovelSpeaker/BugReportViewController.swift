@@ -134,6 +134,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     }
     */
 
+    @discardableResult
     func sendBugReportMail(log:String?, description:String, procedure:String, date:Date, needResponse:Bool) -> Bool {
         if !MFMailComposeViewController.canSendMail() {
             return false;

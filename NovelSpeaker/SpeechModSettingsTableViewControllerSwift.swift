@@ -46,9 +46,6 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         let speechModSettingArray = GetSpeechModArray()
-        if speechModSettingArray == nil {
-            return 0;
-        }
         return (speechModSettingArray.count);
     }
 

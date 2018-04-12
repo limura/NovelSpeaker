@@ -144,10 +144,10 @@
                                  order:[self GetSearchOrderSystemString:
                                         [self.SearchOrderPickerView selectedRowInComponent:0]]
                                  ];
-        m_SearchResult = searchResult;
-        dispatch_async(m_MainQueue, ^{
+        self->m_SearchResult = searchResult;
+        dispatch_async(self->m_MainQueue, ^{
             [holder CloseAlert:false completion:^{
-                NSLog(@"search end. count: %lu", (unsigned long)[m_SearchResult count]);
+                NSLog(@"search end. count: %lu", (unsigned long)[self->m_SearchResult count]);
                 [self performSegueWithIdentifier:@"searchResultPushSegue" sender:self];
             }];
         });

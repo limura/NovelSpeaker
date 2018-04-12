@@ -185,9 +185,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
         
         __block NarouContentCacheData* targetContent = nil;
         dispatch_sync(m_DownloadQueueReadWriteDispatchQueue, ^{
-            if ([m_DownloadQueue count] > 0) {
-                targetContent = m_DownloadQueue[0];
-                [m_DownloadQueue removeObjectAtIndex:0];
+            if ([self->m_DownloadQueue count] > 0) {
+                targetContent = self->m_DownloadQueue[0];
+                [self->m_DownloadQueue removeObjectAtIndex:0];
             }
         });
         
@@ -211,7 +211,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
 - (BOOL)AddDownloadQueue:(NarouContentCacheData*)content
 {
     dispatch_async(m_DownloadQueueReadWriteDispatchQueue, ^{
-        [m_DownloadQueue addObject:content];
+        [self->m_DownloadQueue addObject:content];
     });
     [self announceDownloadStatus:content n:0 maxPos:[content.general_all_no intValue]];
     return true;
@@ -307,9 +307,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
         [globalData UpdateNarouContent:localContent];
         result = true;
         // ダウンロードされたので、ダウンロード状態を更新します。
-        dispatch_async(m_MainDispatchQueue, ^{
+        dispatch_async(self->m_MainDispatchQueue, ^{
             [self KickDownloadStatusUpdate:localContent n:story.count maxpos:story.count];
-            m_CurrentDownloadContentAllData.current_download_complete_count = story.count;
+            self->m_CurrentDownloadContentAllData.current_download_complete_count = story.count;
         });
 
     } failedAction:^(NSURL* url){
@@ -317,9 +317,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
     } finishAction:^(NSURL* url){
         //NSLog(@"LoadURL finish. %@", [url absoluteString]);
         // すべてのダウンロードが完了したら、nil で状態を更新します。
-        dispatch_async(m_MainDispatchQueue, ^{
+        dispatch_async(self->m_MainDispatchQueue, ^{
             [self KickDownloadStatusUpdate:nil n:0 maxpos:0];
-            m_CurrentDownloadContentAllData = nil;
+            self->m_CurrentDownloadContentAllData = nil;
         });
         dispatch_semaphore_signal(semaphore);
     }];
@@ -371,8 +371,8 @@ static float SLEEP_TIME_SECOND = 10.5f;
 
     // 現在ダウンロード中とするデータを copy で作っておきます。
     dispatch_async(m_MainDispatchQueue, ^{
-        m_CurrentDownloadContentAllData = localContent;
-        m_CurrentDownloadContentAllData.current_download_complete_count = 0;
+        self->m_CurrentDownloadContentAllData = localContent;
+        self->m_CurrentDownloadContentAllData.current_download_complete_count = 0;
     });
 
     int max_content_count = [localContent.general_all_no intValue];
@@ -436,7 +436,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         // ダウンロードされたので、ダウンロード状態を更新します。
         dispatch_async(m_MainDispatchQueue, ^{
             [self KickDownloadStatusUpdate:localContent n:n maxpos:max_content_count];
-            m_CurrentDownloadContentAllData.current_download_complete_count = n;
+            self->m_CurrentDownloadContentAllData.current_download_complete_count = n;
         });
         [self announceDownloadStatus:localContent n:n maxPos:max_content_count];
         
@@ -445,7 +445,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
    // すべてのダウンロードが完了したら、nil で状態を更新します。
     dispatch_async(m_MainDispatchQueue, ^{
         [self KickDownloadStatusUpdate:nil n:0 maxpos:0];
-        m_CurrentDownloadContentAllData = nil;
+        self->m_CurrentDownloadContentAllData = nil;
     });
     [self announceDownloadStatusEnd:localContent];
     
@@ -467,7 +467,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
 {
     __block NSArray* result = nil;
     dispatch_sync(m_DownloadQueueReadWriteDispatchQueue, ^{
-        result = [m_DownloadQueue copy];
+        result = [self->m_DownloadQueue copy];
     });
     return result;
 }
@@ -478,15 +478,15 @@ static float SLEEP_TIME_SECOND = 10.5f;
     __block BOOL bRemoved = false;
     dispatch_sync(m_DownloadQueueReadWriteDispatchQueue, ^{
         int index = -1;
-        for (int i = 0; i < [m_DownloadQueue count]; i++) {
-            NarouContentCacheData* content = m_DownloadQueue[i];
+        for (int i = 0; i < [self->m_DownloadQueue count]; i++) {
+            NarouContentCacheData* content = self->m_DownloadQueue[i];
             if ([content.ncode isEqualToString:ncode]) {
                 index = i;
                 break;
             }
         }
         if (index >= 0) {
-            [m_DownloadQueue removeObjectAtIndex:index];
+            [self->m_DownloadQueue removeObjectAtIndex:index];
             bRemoved = true;
         }
     });

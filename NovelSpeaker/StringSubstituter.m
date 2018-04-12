@@ -251,8 +251,8 @@
             if (thisRange.length == 0) {
                 continue;
             }
-            NSUInteger thisStart = thisRange.location;
-            NSUInteger thisEnd = thisRange.location + thisRange.length;
+            //NSUInteger thisStart = thisRange.location;
+            //NSUInteger thisEnd = thisRange.location + thisRange.length;
             [hitRanges addObject:[NSValue valueWithRange:thisRange]];
 
             NSRange toStringRange = [match rangeAtIndex:2];

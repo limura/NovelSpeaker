@@ -174,8 +174,8 @@
         ]
         firstSelectedString:[self GetCurrentSortTypeDisplayString]
         parentView:targetView resultReceiver:^(NSString* selectedText){
-            m_SortType = [self ConvertDisplayStringToSortType:selectedText];
-            [[GlobalDataSingleton GetInstance] SetBookSelfSortType:m_SortType];
+            self->m_SortType = [self ConvertDisplayStringToSortType:selectedText];
+            [[GlobalDataSingleton GetInstance] SetBookSelfSortType:self->m_SortType];
             [self ReloadAllTableViewData];
     }];
     [dialog popup:nil];
@@ -230,23 +230,6 @@
 {
     [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
     return;
-    
-    // CoreData 側に save されている数と表示されている数が違うと assertion failure で落ちるので封印します。
-    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
-    for (NSUInteger i = 0; i < [contentList count]; i++) {
-        NSIndexPath* indexPath = [NSIndexPath indexPathForRow:i inSection:0];
-        BookShelfTableViewCell* cell = [self.tableView dequeueReusableCellWithIdentifier:BookShelfTableViewCellID forIndexPath:indexPath];
-        if (cell == nil) {
-            // 無ければ表示もされていないはずなので無視します。
-            continue;
-        }
-        NarouContentCacheData* narouContent = contentList[i];
-        if (narouContent == nil) {
-            continue;
-        }
-        [cell setTitleLabel:narouContent.title ncode:narouContent.ncode];
-    }
-    //[self.tableView reloadData];
 }
 
 // 次のビューに飛ばします。

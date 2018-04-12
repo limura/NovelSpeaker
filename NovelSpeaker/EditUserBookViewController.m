@@ -372,7 +372,7 @@
 - (IBAction)DelChapterButtonClicked:(id)sender {
     [m_pEasyAlert ShowAlertTwoButton:NSLocalizedString(@"EditUserBookViewController_ConfirmDeleteThisChapter", @"この章を削除します。よろしいですか？") message:nil firstButtonText:NSLocalizedString(@"Cancel_button", @"Cancel") firstActionHandler:nil secondButtonText:NSLocalizedString(@"OK_button", @"OK") secondActionHandler:^(UIAlertAction *alert) {
             if (![self DelLastStory]) {
-                [m_pEasyAlert ShowAlertOKButton:NSLocalizedString(@"EditUserBookViewController_CanNotDeleteChapter", @"章の削除に失敗しました") message:nil];
+                [self->m_pEasyAlert ShowAlertOKButton:NSLocalizedString(@"EditUserBookViewController_CanNotDeleteChapter", @"章の削除に失敗しました") message:nil];
                 return;
             }
             int last = [self.NarouContentDetail.general_all_no intValue];

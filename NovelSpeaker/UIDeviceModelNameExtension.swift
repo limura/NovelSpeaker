@@ -13,7 +13,7 @@ extension UIDevice {
         var systemInfo = utsname()
         uname(&systemInfo)
         
-        return Mirror(reflecting: systemInfo.machine).children.flatMap { (child) -> String? in
+        return Mirror(reflecting: systemInfo.machine).children.compactMap { (child) -> String? in
             if let value = child.value as? Int8, value != 0 {
                 return String(UnicodeScalar(UInt8(value)))
             } else {

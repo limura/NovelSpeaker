@@ -115,28 +115,6 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 {
     [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
     return;
-    
-    // CoreData 側に save されている数と表示されている数が違うと assertion failure で落ちるので封印します。
-    NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
-    for (NSUInteger i = 0; i < [speechWaitConfigList count]; i++) {
-        NSIndexPath* indexPath = [NSIndexPath indexPathForRow:i+1 inSection:0];
-        UITableViewCell* cell = [self.tableView dequeueReusableCellWithIdentifier:SpeechWaitSettingTableViewDefaultCellID forIndexPath:indexPath];
-        if (cell == nil) {
-            continue;
-        }
-        SpeechWaitConfigCacheData* waitConfig = speechWaitConfigList[i];
-        //NSLog([[NSString alloc] initWithFormat:@"%ld -> %@ %f", (unsigned long)i, waitConfig.targetText, [waitConfig.delayTimeInSec floatValue]]);
-        if (waitConfig.targetText == nil) {
-            cell.textLabel.text = @"-";
-        }else{
-            cell.textLabel.text = waitConfig.targetText;
-        }
-        if (waitConfig.delayTimeInSec == nil || [waitConfig.delayTimeInSec floatValue] <= 0.0f) {
-            cell.detailTextLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_Disabled", @"無効");
-        }else{
-            cell.detailTextLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_Enabled", @"有効");
-        }
-    }
 }
 
 

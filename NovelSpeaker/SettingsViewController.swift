@@ -212,6 +212,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             .build().show()
     }
+
+    @discardableResult
     func sendMailWithBinary(data:Data, fileName:String, mimeType:String) -> Bool {
         if !MFMailComposeViewController.canSendMail() {
             return false;

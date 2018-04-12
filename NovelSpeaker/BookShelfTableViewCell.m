@@ -137,7 +137,7 @@
     dispatch_async(m_MainDispatchQueue, ^{
         [self UpdateActivityIndicator];
         [self UpdateNewLabel];
-        if (content == nil || content.ncode == nil || ![content.ncode isEqualToString:m_Ncode] || maxPosition == 0) {
+        if (content == nil || content.ncode == nil || ![content.ncode isEqualToString:self->m_Ncode] || maxPosition == 0) {
             self.DownloadProgressView.hidden = YES;
             return;
         }

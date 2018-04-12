@@ -544,7 +544,7 @@
 
         NSHTTPCookieStorage* cookieStorage = [self createCookieStorage:cookieArray url:url];
 
-        for (int i = 0; i < m_MaxDepth && targetUrl != nil; i++) {
+        for (int i = 0; i < self->m_MaxDepth && targetUrl != nil; i++) {
             NSMutableString* errorMutableString = [NSMutableString new];
             HtmlStory* story = [self FetchStoryForURL:targetUrl cookieStorage:cookieStorage out_error:errorMutableString];
             if (story == nil) {
@@ -565,7 +565,7 @@
                 break;
             }
             targetUrl = story.nextUrl;
-            [NSThread sleepForTimeInterval:m_SleepTime];
+            [NSThread sleepForTimeInterval:self->m_SleepTime];
         }
         
         if (!success && failedAction != nil) {
