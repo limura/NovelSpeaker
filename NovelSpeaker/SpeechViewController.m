@@ -152,6 +152,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated
 {
+    [self stopSpeech];
     [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
     [self resignFirstResponder];
     [self SaveCurrentReadingPoint];
