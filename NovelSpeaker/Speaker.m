@@ -37,6 +37,9 @@
 {
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
     [center removeObserver:self];
+    if (m_Synthesizer != nil) {
+        m_Synthesizer.delegate = nil;
+    }
 }
 
 - (BOOL) Speech: (NSString*) text
