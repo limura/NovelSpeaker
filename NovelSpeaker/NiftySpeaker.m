@@ -744,6 +744,11 @@ typedef enum {
     return nil;
 }
 
+/// 現在の標準のSpeechConfigを取得します
+- (SpeechConfig*)GetDefaultSpeechConfig {
+    return m_DefaultSpeechConfig;
+}
+
 
 #if 0
 // AVAudioSessionDelegate で受け取れる音声停止のイベント？

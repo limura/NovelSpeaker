@@ -119,4 +119,7 @@
 /// AVSpeechSynthesisVoice.identifier から .name を取得します。該当がなければ nil を返します。
 + (NSString*)getDisplayStringForVoiceIdentifier:(NSString*)identifier;
 
+/// 現在の標準のSpeechConfigを取得します
+- (SpeechConfig*)GetDefaultSpeechConfig;
+
 @end

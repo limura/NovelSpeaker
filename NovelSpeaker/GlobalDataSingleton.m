@@ -2118,7 +2118,16 @@ static GlobalDataSingleton* _singleton = nil;
 /// 読み上げを行った場合には true を返します。
 - (BOOL)AnnounceBySpeech:(NSString*)speechString
 {
-    return [m_NiftySpeaker AnnounceBySpeech:speechString];
+    // m_NiftySpeaker を使ってしまうと読み上げ位置更新イベントが伝達されてしまうため、新たに Speaker Object を生成してそちらで鳴らします。
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        Speaker* speaker = [Speaker new];
+        SpeechConfig* config = [self->m_NiftySpeaker GetDefaultSpeechConfig];
+        [speaker SetPitch:config.pitch];
+        [speaker SetRate:config.rate];
+        [speaker SetVoiceWithIdentifier:config.voiceIdentifier];
+        [speaker Speech:speechString];
+    });
+    return true;
 }
 
 /// 最初のページを表示したかどうかのbool値を取得します。

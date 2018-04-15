@@ -847,6 +847,12 @@ bug fix
 - Fixed an issue where playback did not stop when Bluetooth device was disconnected
 
 
+# Version 1.1.18
+
+問題の修正
+
+- 読み上げ時に別のタブに切り替えたりするなどをすると読み上げ位置がズレたりと色々問題が多かったため、読み上げ中に別タブに移動するなどした場合には読み上げを停止するようにしました
+
 ----
 in Japaneze.
 
