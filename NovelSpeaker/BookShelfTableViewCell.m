@@ -76,7 +76,7 @@
     if (hit == false) {
         NSArray* downloadList = [[GlobalDataSingleton GetInstance] GetCurrentDownloadWaitingInfo];
         for (NarouContentCacheData* content in downloadList) {
-            if ([content.ncode compare:m_Ncode] == NSOrderedSame) {
+            if (content != nil && content.ncode != nil && m_Ncode != nil && [content.ncode compare:m_Ncode] == NSOrderedSame) {
                 hit = true;
                 break;
             }

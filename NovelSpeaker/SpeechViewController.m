@@ -403,28 +403,22 @@
         displayText = NSLocalizedString(@"SpeechViewController_ContentReadFailed", @"文書の読み込みに失敗しました。「詳細」→「Download」を選択して再ダウンロードすることで解消するかもしれません。");
     }
     [self.textView setText:displayText];
-    NSUInteger location = [story.readLocation unsignedLongValue];
-    NSUInteger length = 1;
-    if ((location + length) > [displayText length]) {
-        location -= 1;
-    }
-    NSRange range = NSMakeRange(location, length);
-    self.textView.selectedRange = range;
-    [self.textView scrollRangeToVisible:range];
     self.ChapterSlider.value = [story.chapter_number floatValue];
     [self UpdateChapterIndicatorLabel:[story.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];
     m_CurrentReadingStory = story;
     [[GlobalDataSingleton GetInstance] SetSpeechStory:story];
     
     // TextView は使いまわされた時、selectedRange が前の値のままのようなので、このタイミングでTextView上の読み上げ位置を上書きします
-    int readLocation = [story.readLocation intValue];
-    if ([self.textView.text length] <= location) {
-        readLocation = (int)[self.textView.text length] - 1;
-        if (readLocation < 0) {
-            readLocation = 0;
+    if ([self.textView.text length] > 0) {
+        int readLocation = [story.readLocation intValue];
+        if ([self.textView.text length] <= readLocation) {
+            readLocation = (int)[self.textView.text length] - 1;
+            if (readLocation < 0) {
+                readLocation = 0;
+            }
         }
+        self.textView.selectedRange = NSMakeRange(readLocation, 1);
     }
-    self.textView.selectedRange = NSMakeRange(readLocation, 1);
 }
 
 - (void)detailButtonClick:(id)sender {

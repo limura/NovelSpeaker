@@ -467,7 +467,11 @@ static float SLEEP_TIME_SECOND = 10.5f;
 {
     __block NSArray* result = nil;
     dispatch_sync(m_DownloadQueueReadWriteDispatchQueue, ^{
-        result = [self->m_DownloadQueue copy];
+        if (self != nil && self->m_DownloadQueue != nil) {
+            result = [self->m_DownloadQueue copy];
+        }else{
+            result = @[];
+        }
     });
     return result;
 }
