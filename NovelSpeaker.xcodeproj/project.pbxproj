@@ -474,9 +474,6 @@
 		21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NovelSpeakerTests.m; sourceTree = "<group>"; };
 		21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeaker-Bridging-Header.h"; sourceTree = "<group>"; };
 		21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomUITextView.swift; sourceTree = "<group>"; };
-		21F4D8CA1F6A969E004F6976 /* ActionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionViewController.swift; sourceTree = "<group>"; };
-		21F4D8CD1F6A969E004F6976 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
-		21F4D8CF1F6A969E004F6976 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		21F563C11FD801950037F5D7 /* >.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ">.png"; sourceTree = "<group>"; };
 		21F563C21FD801960037F5D7 /* >@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ">@2x.png"; sourceTree = "<group>"; };
 		21F563C41FD801970037F5D7 /* >@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ">@3x.png"; sourceTree = "<group>"; };
@@ -769,7 +766,6 @@
 				21F054D21917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */,
 				2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
-				21F4D8C91F6A969E004F6976 /* URLDownloadExtension */,
 				21F054CB1917E0F200CC6BA9 /* Frameworks */,
 				21F054CA1917E0F200CC6BA9 /* Products */,
 				A889DD6179ED1DDD1D382860 /* Pods */,
@@ -871,16 +867,6 @@
 				21F054F41917E0F200CC6BA9 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		21F4D8C91F6A969E004F6976 /* URLDownloadExtension */ = {
-			isa = PBXGroup;
-			children = (
-				21F4D8CA1F6A969E004F6976 /* ActionViewController.swift */,
-				21F4D8CC1F6A969E004F6976 /* MainInterface.storyboard */,
-				21F4D8CF1F6A969E004F6976 /* Info.plist */,
-			);
-			path = URLDownloadExtension;
 			sourceTree = "<group>";
 		};
 		4E776B17196247BE00C36AD1 /* ViewControllers */ = {
@@ -1554,14 +1540,6 @@
 				21A4F71E19B1B465007CCD32 /* ja */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		21F4D8CC1F6A969E004F6976 /* MainInterface.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				21F4D8CD1F6A969E004F6976 /* Base */,
-			);
-			name = MainInterface.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
