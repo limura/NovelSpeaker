@@ -535,6 +535,7 @@
     if ([self SetNextChapter]) {
         [self startSpeech];
     }else{
+        [self stopSpeech];
         [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_SpeechStopedByEnd", @"Speak")];
     }
 }

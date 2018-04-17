@@ -852,6 +852,15 @@ bug fix
 問題の修正
 
 - 読み上げ時に別のタブに切り替えたりするなどをすると読み上げ位置がズレたりと色々問題が多かったため、読み上げ中に別タブに移動するなどした場合には読み上げを停止するようにしました
+- 最後まで読み上げた後の終了時のアナウンスが発声されない場合があった問題を修正
+
+
+# Version 1.1.18
+
+bug fix.
+
+- Speech stopped when moving to another tab during speech reading. This was the cause of causing various problems.
+- Fixed an issue where announcement at the end after speaking to the end might not be uttered
 
 ----
 in Japaneze.
