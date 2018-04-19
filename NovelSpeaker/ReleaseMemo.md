@@ -853,7 +853,7 @@ bug fix
 
 - 読み上げ時に別のタブに切り替えたりするなどをすると読み上げ位置がズレたりと色々問題が多かったため、読み上げ中に別タブに移動するなどした場合には読み上げを停止するようにしました
 - 最後まで読み上げた後の終了時のアナウンスが発声されない場合があった問題を修正
-
+- 小説の本文を表示している状態から本棚等に戻った時に、読み上げている小説の情報が壊れる可能性があった問題を修正します
 
 # Version 1.1.18
 
@@ -861,6 +861,7 @@ bug fix.
 
 - Speech stopped when moving to another tab during speech reading. This was the cause of causing various problems.
 - Fixed an issue where announcement at the end after speaking to the end might not be uttered
+- When returning to the bookshelf etc from the state displaying the novel text, we fix the problem that there was a possibility that the information of the novel being read might be broken.
 
 ----
 in Japaneze.

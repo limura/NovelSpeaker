@@ -156,6 +156,7 @@
     [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
     [self resignFirstResponder];
     [self SaveCurrentReadingPoint];
+    [[GlobalDataSingleton GetInstance] DeleteSpeakRangeDelegate:self];
     
     [super viewWillDisappear:animated];
 }
@@ -506,16 +507,6 @@
 - (IBAction)NextChapterButtonClicked:(id)sender {
     [self stopSpeech];
     [self SetNextChapter];
-}
-
-// SpeachTextBox が読み終わった時
-- (void)SpeakTextBoxFinishSpeak
-{
-    [self stopSpeechWithoutDiactivate];
-    if ([self SetNextChapter] != true) {
-        return;
-    }
-    [self startSpeech];
 }
 
 /// 読み上げ位置が更新されたとき
