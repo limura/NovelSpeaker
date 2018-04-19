@@ -212,14 +212,24 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.17
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.18
 
-- 文字入力が必要な部分で、Enterを押さないと保存されなかった問題を画面外タップ等でキーボードを消しても反映されるように修正
-- Bluetooth機器が外れた時に再生が停止しなかった問題を修正
+- 読み上げ時に別のタブに切り替えたりするなどをすると読み上げ位置がズレたりと色々問題が多かったため、読み上げ中に別タブに移動するなどした場合には読み上げを停止するように
+- 最後まで読み上げた後の終了時のアナウンスが発声されない場合があった問題を修正
+- 小説の本文を表示している状態から本棚等に戻った時に、読み上げている小説の情報が壊れる可能性があった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.18
+
+問題の修正
+
+- 読み上げ時に別のタブに切り替えたりするなどをすると読み上げ位置がズレたりと色々問題が多かったため、読み上げ中に別タブに移動するなどした場合には読み上げを停止するように
+- 最後まで読み上げた後の終了時のアナウンスが発声されない場合があった問題を修正
+- 小説の本文を表示している状態から本棚等に戻った時に、読み上げている小説の情報が壊れる可能性があった問題を修正
+
+
 # Version 1.1.17
 
 問題の修正

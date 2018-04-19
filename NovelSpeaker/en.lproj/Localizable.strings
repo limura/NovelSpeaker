@@ -216,14 +216,24 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.17
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.18
 
-- Corrected so that even if you erase the keyboard by tapping off the screen etc., the problem which was not saved unless you press Enter is reflected in the part where character input is necessary
-- Fixed an issue where playback did not stop when Bluetooth device was disconnected
+- Speech stopped when moving to another tab during speech reading. This was the cause of causing various problems.
+- Fixed an issue where announcement at the end after speaking to the end might not be uttered
+- When returning to the bookshelf etc from the state displaying the novel text, we fix the problem that there was a possibility that the information of the novel being read might be broken.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.18
+
+bug fix.
+
+- Speech stopped when moving to another tab during speech reading. This was the cause of causing various problems.
+- Fixed an issue where announcement at the end after speaking to the end might not be uttered
+- When returning to the bookshelf etc from the state displaying the novel text, we fix the problem that there was a possibility that the information of the novel being read might be broken.
+
+
 # Version 1.1.17
 
 bug fix
