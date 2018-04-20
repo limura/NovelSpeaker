@@ -216,15 +216,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.18
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.19
 
-- Speech stopped when moving to another tab during speech reading. This was the cause of causing various problems.
-- Fixed an issue where announcement at the end after speaking to the end might not be uttered
-- When returning to the bookshelf etc from the state displaying the novel text, we fix the problem that there was a possibility that the information of the novel being read might be broken.
+- Fixed an issue where the display position did not change when opening a novel (or moving to another chapter)
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.19
+
+bug fix
+
+- Fixed an issue where the display position did not change when opening a novel (or moving to another chapter)
+
+
 Version 1.1.18
 
 bug fix.
