@@ -419,6 +419,7 @@
             }
         }
         self.textView.selectedRange = NSMakeRange(readLocation, 1);
+        [self.textView scrollRangeToVisible:self.textView.selectedRange];
     }
 }
 

@@ -873,6 +873,19 @@ bug fix.
 - Fixed an issue where announcement at the end after speaking to the end might not be uttered
 - When returning to the bookshelf etc from the state displaying the novel text, we fix the problem that there was a possibility that the information of the novel being read might be broken.
 
+
+# Version 1.1.19
+
+問題の修正
+
+- 小説を開いた時(又は別の章に移動した時)に表示位置が変化しなかった問題を修正
+
+# Version 1.1.19
+
+bug fix
+
+- Fixed an issue where the display position did not change when opening a novel (or moving to another chapter)
+
 ----
 in Japaneze.
 
