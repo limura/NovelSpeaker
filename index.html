@@ -96,16 +96,18 @@
 <script>
 window.onload = function() {
 	let targetElementID = "ImportantInformationText";
-	let targetFile = "ImportantInformatinon.txt";
+	let targetFile = "ImportantInformation.txt";
 	fetch("./" + targetFile).then(response => response.text()).then(text => {
 		var html = "<ul>";
 		let lineArray = text.split(/\r\n|\r|\n/);
-		for(var i = 0; i + 1 < lineArray.length; i = i+2){
-			let dateText = lineArray[i];
-			let descriptionText = lineArray[i+1];
-			if(dateText.indexOf("#") == 0 || descriptionText.indexOf("#") == 0){
+		for(var lineIndex in lineArray){
+			let line = lineArray[lineIndex];
+			if(line.length <= 1 || line.indexOf("#") == 0){
 				continue;
 			}
+			let dataArray = line.split("\t");
+			let dateText = dataArray[0];
+			let descriptionText = dataArray.slice(1).join("\t");
 			html += "<li>" + dateText + "<p>" + descriptionText + "</p></li>";
 		}
 		document.getElementById(targetElementID).innerHTML = html + "</ul>";
