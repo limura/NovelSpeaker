@@ -40,6 +40,7 @@
 <p>Web取込機能を追加した Version 1.1.10 をリリース致しました。使い方にちょっとクセがありますので、<a href="WebImport.html">解説ページ</a>を追加しています。</p>
 </li>
 </ul>
+<div id="ImportantInformationText"></div>
 	</section>
 
         <hr>
@@ -92,4 +93,23 @@
       </div>
     </div>
   </body>
+<script>
+window.onload = function() {
+	let targetElementID = "ImportantInformationText";
+	let targetFile = "ImportantInformatinon.txt";
+	fetch("./" + targetFile).then(text => {
+		var html = "<ul>";
+		let lineArray = text.split(/\r\n|\r|\n/);
+		for(var i = 0; i + 1 < lineArray.length; i = i+2){
+			let dateText = lineArray[i];
+			let descriptionText = lineArray[i+1];
+			if(dateText.indexOf("#") == 0 || descriptionText.indexOf("#") == 0){
+				continue;
+			}
+			html += "<li>" + dateText + "<p>" + descriptionText + "</p></li>";
+		}
+		document.getElementById(targetElementID).innerHTML = html + "</ul>";
+	});
+};
+</script>
 </html>
