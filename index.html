@@ -97,9 +97,9 @@
 window.onload = function() {
 	let targetElementID = "ImportantInformationText";
 	let targetFile = "ImportantInformatinon.txt";
-	fetch("./" + targetFile).then(response => {
+	fetch("./" + targetFile).then(response => response.text()).then(text => {
 		var html = "<ul>";
-		let lineArray = response.text().split(/\r\n|\r|\n/);
+		let lineArray = text.split(/\r\n|\r|\n/);
 		for(var i = 0; i + 1 < lineArray.length; i = i+2){
 			let dateText = lineArray[i];
 			let descriptionText = lineArray[i+1];
