@@ -206,4 +206,64 @@ class NiftyUtilitySwift: NSObject {
         })
         dialog.build().show()
     }
+    
+    @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
+        let session: URLSession = URLSession.shared
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.background).async {
+            session.dataTask(with: url) { data, response, error in
+                if let data = data, let response = response as? HTTPURLResponse {
+                    if Int(response.statusCode / 100) % 10 == 2 {
+                        if let successAction = successAction {
+                            successAction(data)
+                            return
+                        }
+                    }
+                }
+                if let failedAction = failedAction {
+                    failedAction(error)
+                }
+            }.resume()
+        }
+    }
+    
+    // cachedHTTPGet で使われるキャッシュの情報
+    struct dataCache {
+        var data: Data?
+        let cachedDate: Date
+        var error: Error?
+    }
+    // cachedHTTPGet のキャッシュ
+    static var httpCache = Dictionary<URL,dataCache>()
+
+    // 今から指定したTimeInterval時間前より新しいデータをキャッシュしていたなら、特に何にもアクセスせずにそれを返します。
+    // キャッシュはメモリを使うのでちと微妙です。
+    @objc public static func cashedHTTPGet(url: URL, delay: TimeInterval, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
+        if let cache = httpCache[url] {
+            if cache.cachedDate < Date(timeIntervalSinceNow: delay) {
+                if let data = cache.data {
+                    if let successAction = successAction {
+                        successAction(data)
+                    }
+                }else{
+                    if let failedAction = failedAction {
+                        failedAction(cache.error)
+                    }
+                }
+                return
+            }
+        }
+        NiftyUtilitySwift.httpGet(url: url, successAction: { (data) in
+            let cache = dataCache(data: data, cachedDate: Date(timeIntervalSinceNow: 0), error: nil)
+            httpCache[url] = cache
+            if let successAction = successAction {
+                successAction(data)
+            }
+        }, failedAction: { (error) in
+            let cache = dataCache(data: nil, cachedDate: Date(timeIntervalSinceNow: 0), error: error)
+            httpCache[url] = cache
+            if let failedAction = failedAction {
+                failedAction(error)
+            }
+        })
+    }
 }

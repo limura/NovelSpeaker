@@ -19,7 +19,6 @@ struct BugReportViewInputData {
 
 class BugReportViewController: FormViewController, MFMailComposeViewControllerDelegate {
     static var value = BugReportViewInputData();
-    static var importantInformationFromWeb = "";
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,12 +29,12 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
 
         // Do any additional setup after loading the view.
         form +++ Section(NSLocalizedString("BugReportViewController_HiddenImportantInformationSectionHeader", comment: "お知らせ")) {
-                $0.hidden = Condition(booleanLiteral: BugReportViewController.importantInformationFromWeb == "")
+                $0.hidden = true
                 $0.tag = "HiddenImportantInformationSectionHeader"
             }
             <<< LabelRow("HiddenImportantInformationLabelRow") {
-                $0.title = BugReportViewController.importantInformationFromWeb
-                $0.hidden = Condition(booleanLiteral: BugReportViewController.importantInformationFromWeb == "")
+                $0.title = ""
+                $0.hidden = true
                 $0.cell.textLabel?.numberOfLines = 0
             }
             +++ Section(NSLocalizedString("BugReportViewController_SectionHeader", comment: "不都合の報告"))
@@ -127,41 +126,36 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 self.navigationController?.popViewController(animated: true)
             })
         
-        if BugReportViewController.importantInformationFromWeb == "" {
-            DispatchQueue.global(qos: DispatchQoS.QoSClass.background).async {
-                let session: URLSession = URLSession.shared
-                let url = URL(string: "https://limura.github.io/NovelSpeaker/ImportantInformation.txt")
-                if url == nil {
-                    return
-                }
-                session.dataTask(with: url!) { data, response, error in
-                    if let data = data, let response = response as? HTTPURLResponse {
-                        if Int(response.statusCode / 100) % 10 == 2 {
-                            if let str = String(data: data, encoding: .utf8) {
-                                var text = ""
-                                str.enumerateLines(invoking: { (line, inOut) in
-                                    if line.count > 0 && line[line.startIndex] != "#" {
-                                        text += line
-                                    }
-                                })
-                                BugReportViewController.importantInformationFromWeb = text
-                                DispatchQueue.main.async {
-                                    if let labelRow = self.form.rowBy(tag: "HiddenImportantInformationLabelRow") as? LabelRow {
-                                        labelRow.title = text
-                                        labelRow.hidden = false
-                                        labelRow.evaluateHidden()
-                                        if let section = self.form.sectionBy(tag: "HiddenImportantInformationSectionHeader") {
-                                            section.hidden = false
-                                            section.evaluateHidden()
-                                        }
-                                    }
+
+        if let url = URL(string: "https://limura.github.io/NovelSpeaker/ImportantInformation.txt") {
+            NiftyUtilitySwift.cashedHTTPGet(url: url, delay: 60*60,
+                successAction: { (data) in
+                    if let str = String(data: data, encoding: .utf8) {
+                        var text = ""
+                        str.enumerateLines(invoking: { (line, inOut) in
+                            if line.count > 0 && line[line.startIndex] != "#" {
+                                text += line + "\n"
+                            }
+                        })
+                        if text == "" {
+                            return
+                        }
+                        text = String(text.prefix(text.count - 1))
+                        DispatchQueue.main.async {
+                            if let labelRow = self.form.rowBy(tag: "HiddenImportantInformationLabelRow") as? LabelRow {
+                                labelRow.title = text
+                                labelRow.hidden = false
+                                labelRow.evaluateHidden()
+                                if let section = self.form.sectionBy(tag: "HiddenImportantInformationSectionHeader") {
+                                    section.hidden = false
+                                    section.evaluateHidden()
                                 }
                             }
                         }
                     }
-                }.resume()
-            }
+            }, failedAction: nil)
         }
+
     }
 
     override func didReceiveMemoryWarning() {
