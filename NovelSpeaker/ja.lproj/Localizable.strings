@@ -193,6 +193,7 @@
 "BugReportViewController_SendBugReport_Procedure" = "不都合の再現方法";
 "BugReportViewController_ErrorDialog" = "問題のある入力項目があります";
 "BugReportViewController_InformationForIsNeedResponse" = "返事が欲しいと設定されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる場合があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合もあります。";
+"BugReportViewController_HiddenImportantInformationSectionHeader" = "お知らせ";
 
 "NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
 "NarouSearchResultDetailViewControllerSwift_Writer" = "作者";

@@ -197,6 +197,7 @@
 "BugReportViewController_SendBugReport_Procedure" = "Procedure";
 "BugReportViewController_ErrorDialog" = "Error";
 "BugReportViewController_InformationForIsNeedResponse" = "If it is set that you want a reply, we will reply to the sender's email address. Reply may be delayed. Also, please note that if you do not receive mail from @gmail.com, you will not receive a reply.";
+"BugReportViewController_HiddenImportantInformationSectionHeader" = "Information";
 
 "NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
 "NarouSearchResultDetailViewControllerSwift_Writer" = "Writer";
