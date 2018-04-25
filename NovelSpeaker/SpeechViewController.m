@@ -65,6 +65,10 @@
         UIBarButtonItem* refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(urlRefreshButtonClick:)];
         [buttonItemList addObject:refreshButton];
     }
+    if ([self.NarouContentDetail isURLContent] || ![self.NarouContentDetail isUserCreatedContent]) {
+        UIBarButtonItem* safariButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"earth"] style:UIBarButtonItemStylePlain target:self action:@selector(safariButtonClick:)];
+        [buttonItemList addObject:safariButton];
+    }
     self.navigationItem.rightBarButtonItems = buttonItemList;
     self.navigationItem.title = self.NarouContentDetail.title;
 
@@ -685,5 +689,24 @@
     [globalData PushContentDownloadQueue:self.NarouContentDetail];
     // 再ダウンロードを指示したので一旦本棚へ戻します
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+// 地球のアイコンをタップしたらその小説のURLをSafariで開きます
+- (void)safariButtonClick:(id)sender{
+    NSURL* url = nil;
+    if ([self.NarouContentDetail isURLContent]) {
+        NSString* urlString = self.NarouContentDetail.ncode;
+        url = [[NSURL alloc] initWithString:urlString];
+    }else if([self.NarouContentDetail isUserCreatedContent]){
+        return;
+    }else{
+        NSString* urlString = [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/", self.NarouContentDetail.ncode];
+        url = [[NSURL alloc] initWithString:urlString];
+    }
+    if (url != nil) {
+        if ([UIApplication.sharedApplication canOpenURL:url]) {
+            [UIApplication.sharedApplication openURL:url];
+        }
+    }
 }
 @end
