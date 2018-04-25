@@ -75,7 +75,7 @@
 "SettingTableViewController_ForceSiteInfoReload" = "SiteInfoを毎回読み直す";
 "SettingTableViewController_ShowDebugLog" = "デバッグログの表示";
 "SettingTableViewController_GoToSupportSite" = "ことせかい のサポートサイトを開く";
-"SettingTableViewController_SendBugReport" = "不都合報告をメールで開発者に送る";
+"SettingTableViewController_SendBugReport" = "開発者に問い合わせる";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
@@ -194,6 +194,15 @@
 "BugReportViewController_ErrorDialog" = "問題のある入力項目があります";
 "BugReportViewController_InformationForIsNeedResponse" = "返事が欲しいと設定されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる場合があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合もあります。";
 "BugReportViewController_HiddenImportantInformationSectionHeader" = "お知らせ";
+"BugReportViewController_SendNewFeatureMailInformation" = "\n\n===============\nここより下の行は編集しないでください。\n";
+"BugReportViewController_SendNewFeatureMailSubject" = "ことせかい 新機能等の提案";
+"BugReportViewController_NoDescriptionOfTheNewFeature" = "ご提案の内容が空になっています";
+"BugReportViewController_SendNewFeatureButtonTitle" = "ご提案mailを作成する";
+"BugReportViewController_NewFeatureTextArePlaceHolder" = "既存の機能の改善案や新機能のご提案など、不都合以外のお問い合わせを書いてください。";
+"BugReportViewController_NewFeatureSectionHeader" = "新機能等のご提案";
+"BugReportViewController_TypeSelect_NewFeature" = "新機能等のご提案";
+"BugReportViewController_TypeSelect_BugReport" = "不都合報告";
+"BugReportViewController_TypeSelectTitle" = "お問い合わせの種類";
 
 "NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
 "NarouSearchResultDetailViewControllerSwift_Writer" = "作者";

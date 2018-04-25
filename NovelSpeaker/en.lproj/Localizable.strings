@@ -76,7 +76,7 @@
 "SettingTableViewController_ForceSiteInfoReload" = "Force reload SiteInfo";
 "SettingTableViewController_ShowDebugLog" = "Show debug log";
 "SettingTableViewController_GoToSupportSite" = "Open NovelSpeaker support site";
-"SettingTableViewController_SendBugReport" = "Send bug report mail";
+"SettingTableViewController_SendBugReport" = "Send inquiries to developers by e-mail";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -198,6 +198,15 @@
 "BugReportViewController_ErrorDialog" = "Error";
 "BugReportViewController_InformationForIsNeedResponse" = "If it is set that you want a reply, we will reply to the sender's email address. Reply may be delayed. Also, please note that if you do not receive mail from @gmail.com, you will not receive a reply.";
 "BugReportViewController_HiddenImportantInformationSectionHeader" = "Information";
+"BugReportViewController_SendNewFeatureMailInformation" = "\n\n===============\nPlease do not edit the line below this.\n";
+"BugReportViewController_SendNewFeatureMailSubject" = "NovelSpeaker Proposal of new function";
+"BugReportViewController_NoDescriptionOfTheNewFeature" = "The content of your proposal is empty";
+"BugReportViewController_SendNewFeatureButtonTitle" = "Create a proposal mail";
+"BugReportViewController_NewFeatureTextArePlaceHolder" = "Please write inquiries other than inconvenience such as suggestions for improvement of existing functions or suggestions for new functions.";
+"BugReportViewController_NewFeatureSectionHeader" = "Proposal of new function";
+"BugReportViewController_TypeSelect_NewFeature" = "Proposal of new function";
+"BugReportViewController_TypeSelect_BugReport" = "Problem report";
+"BugReportViewController_TypeSelectTitle" = "Type of inquiry";
 
 "NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
 "NarouSearchResultDetailViewControllerSwift_Writer" = "Writer";

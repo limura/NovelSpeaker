@@ -15,6 +15,7 @@ struct BugReportViewInputData {
     var DescriptionOfTheProblem = ""
     var ProblemOccurenceProcedure = ""
     var IsNeedResponse = false
+    var DescriptionOfNewFeature = ""
 }
 
 class BugReportViewController: FormViewController, MFMailComposeViewControllerDelegate {
@@ -37,7 +38,83 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 $0.hidden = true
                 $0.cell.textLabel?.numberOfLines = 0
             }
-            +++ Section(NSLocalizedString("BugReportViewController_SectionHeader", comment: "不都合の報告"))
+            +++ Section()
+            <<< AlertRow<String>() {
+                $0.title = NSLocalizedString("BugReportViewController_TypeSelectTitle", comment: "お問い合わせの種類")
+                $0.selectorTitle = NSLocalizedString("BugReportViewController_TypeSelectTitle", comment: "お問い合わせの種類")
+                $0.options = [
+                    NSLocalizedString("BugReportViewController_TypeSelect_NewFeature", comment: "新機能等のご提案"),
+                    NSLocalizedString("BugReportViewController_TypeSelect_BugReport", comment: "不都合報告")
+                ]
+                $0.value = NSLocalizedString("BugReportViewController_TypeSelect_BugReport", comment: "不都合報告")
+                }.onChange({ (row) in
+                    if let value = row.value {
+                        if value == NSLocalizedString("BugReportViewController_TypeSelect_BugReport", comment: "不都合報告") {
+                            let bugReportSection = self.form.sectionBy(tag: "Section_BugReport")
+                            let newFeatureSection = self.form.sectionBy(tag: "Section_NewFeature")
+                            bugReportSection?.hidden = false
+                            bugReportSection?.evaluateHidden()
+                            newFeatureSection?.hidden = true
+                            newFeatureSection?.evaluateHidden()
+                        }else if value == NSLocalizedString("BugReportViewController_TypeSelect_NewFeature", comment: "新機能等のご提案") {
+                            let bugReportSection = self.form.sectionBy(tag: "Section_BugReport")
+                            let newFeatureSection = self.form.sectionBy(tag: "Section_NewFeature")
+                            bugReportSection?.hidden = true
+                            bugReportSection?.evaluateHidden()
+                            newFeatureSection?.hidden = false
+                            newFeatureSection?.evaluateHidden()
+                        }
+                    }
+                })
+            +++ Section(NSLocalizedString("BugReportViewController_NewFeatureSectionHeader", comment: "新機能等のご提案")) {
+                $0.tag = "Section_NewFeature"
+                $0.hidden = true
+            }
+            <<< TextAreaRow(){
+                $0.add(rule: RuleRequired())
+                $0.placeholder = NSLocalizedString("BugReportViewController_NewFeatureTextArePlaceHolder", comment: "既存の機能の改善案や新機能のご提案など、不都合以外のお問い合わせを書いてください。")
+                $0.value = BugReportViewController.value.DescriptionOfNewFeature
+                $0.textAreaHeight = .dynamic(initialTextViewHeight: 110)
+                }.onChange({ (row) in
+                    if let value = row.value {
+                        BugReportViewController.value.DescriptionOfNewFeature = value
+                    }
+                })
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "この報告への返事が欲しい")
+                $0.value = BugReportViewController.value.IsNeedResponse
+            }.onChange({ (row) in
+                if let value = row.value {
+                    BugReportViewController.value.IsNeedResponse = value
+                }
+            })
+            <<< LabelRow() {
+                $0.title = NSLocalizedString("BugReportViewController_InformationForIsNeedResponse", comment: "返事が欲しいと設定されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる可能性があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合があります。")
+                $0.cell.textLabel?.font = .systemFont(ofSize: 12.0)
+                $0.cell.textLabel?.numberOfLines = 0
+            }
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("BugReportViewController_SendNewFeatureButtonTitle",   comment: "ご提案mailを作成する")
+            }.onCellSelection({ (butonCellof, buttonRow) in
+                let description = BugReportViewController.value.DescriptionOfNewFeature
+                let needResponse = BugReportViewController.value.IsNeedResponse
+                if BugReportViewController.value.DescriptionOfNewFeature == "" {
+                    EasyDialog.Builder(self)
+                        .title(title: NSLocalizedString("BugReportViewController_ErrorDialog", comment: "問題のある入力項目があります"))
+                        .label(text: NSLocalizedString("BugReportViewController_NoDescriptionOfTheNewFeature", comment: "ご提案の内容が空になっています"), textAlignment: .left)
+                        .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: false, completion: nil)
+                            }
+                        })
+                        .build().show()
+                    return;
+                }
+                self.sendNewFeatureMail(description: description, needResponse: needResponse)
+            })
+            +++ Section(NSLocalizedString("BugReportViewController_SectionHeader", comment: "不都合の報告")){
+                $0.tag = "Section_BugReport"
+            }
             <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_BugReportTitle", comment:"不都合がある場合にはこのフォームから入力して報告できます。")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -173,6 +250,33 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         // Pass the selected object to the new view controller.
     }
     */
+    
+    @discardableResult
+    func sendNewFeatureMail(description:String, needResponse:Bool) -> Bool {
+        if !MFMailComposeViewController.canSendMail() {
+            return false;
+        }
+        var appVersionString = "*"
+        if let infoDictionary = Bundle.main.infoDictionary, let bundleVersion = infoDictionary["CFBundleVersion"] as? String, let shortVersion = infoDictionary["CFBundleShortVersionString"] as? String {
+            appVersionString = String.init(format: "%@(%@)", shortVersion, bundleVersion)
+        }
+        
+        let picker = MFMailComposeViewController()
+        picker.mailComposeDelegate = self;
+        picker.setSubject(NSLocalizedString("BugReportViewController_SendNewFeatureMailSubject", comment:"ことせかい 新機能等の提案"))
+        picker.setToRecipients(["limuraproducts@gmail.com"])
+        picker.setMessageBody(
+            description
+            + NSLocalizedString("BugReportViewController_SendNewFeatureMailInformation", comment: "\n\n===============\nここより下の行は編集しないでください。\n\n")
+            + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信を希望する") + ": " + (needResponse ? NSLocalizedString("BugReportViewController_YES", comment: "はい") : NSLocalizedString("BugReportViewController_NO", comment: "いいえ"))
+            + "\niOS version: " + UIDevice.current.systemVersion
+            + "\nmodel: " + UIDevice.modelName
+            + "\nApp version:" + appVersionString
+        , isHTML: false)
+        present(picker, animated: true, completion: nil)
+        return true;
+
+    }
 
     @discardableResult
     func sendBugReportMail(log:String?, description:String, procedure:String, date:Date, needResponse:Bool) -> Bool {
