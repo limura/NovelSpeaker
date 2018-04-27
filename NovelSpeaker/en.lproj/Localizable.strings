@@ -226,13 +226,27 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.19
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.20
 
-- Fixed an issue where the display position did not change when opening a novel (or moving to another chapter)
+- Add a form for suggesting new functions etc. to \"query to developers\" function on setting tab
+- When displaying the text of the novel so that the novel's WebPage can be opened in Safari from the icon of the earth added to the top
+- Even if you go back without pressing registration while editing your own novel, so that the contents are saved
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.20
+
+Interface change
+
+- Add a form for suggesting new functions etc. to \"query to developers\" function on setting tab
+- When displaying the text of the novel so that the novel's WebPage can be opened in Safari from the icon of the earth added to the top
+
+Bug fix
+
+- Even if you go back without pressing registration while editing your own novel, so that the contents are saved
+
+
 Version 1.1.19
 
 bug fix
