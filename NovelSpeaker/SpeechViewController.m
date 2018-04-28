@@ -525,15 +525,17 @@
 /// 読み上げが停止したとき
 - (void) finishSpeak
 {
-    [self stopSpeechWithoutDiactivate];
-    // 次のページに移行する時に、このsleepから先に進んでいかないような挙動？を？示している？ようなので？試しにコメントアウトしてみます
-    //[NSThread sleepForTimeInterval:1.0f];
-    if ([self SetNextChapter]) {
-        [self startSpeech];
-    }else{
-        [self stopSpeech];
-        [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_SpeechStopedByEnd", @"Speak")];
-    }
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [self stopSpeechWithoutDiactivate];
+        // 次のページに移行する時に、このsleepから先に進んでいかないような挙動？を？示している？ようなので？試しにコメントアウトしてみます
+        //[NSThread sleepForTimeInterval:1.0f];
+        if ([self SetNextChapter]) {
+            [self startSpeech];
+        }else{
+            [self stopSpeech];
+            [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_SpeechStopedByEnd", @"Speak")];
+        }
+    });
 }
 
 /// リモートコントロールされたとき

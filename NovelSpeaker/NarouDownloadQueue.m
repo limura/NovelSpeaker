@@ -34,7 +34,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     m_MainDispatchQueue = dispatch_get_main_queue();
     
     //
-    m_DownloadQueueReadWriteDispatchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.naroudownloadqueue.downloadqueuereadwrite", DISPATCH_QUEUE_CONCURRENT);
+    m_DownloadQueueReadWriteDispatchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.naroudownloadqueue.downloadqueuereadwrite", DISPATCH_QUEUE_SERIAL);
     
     // コンテンツダウンロード用の直列queueを作ります。
     m_ContentsDownloadDispatchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.naroudownloadqueue.contentsdownload", DISPATCH_QUEUE_SERIAL);
