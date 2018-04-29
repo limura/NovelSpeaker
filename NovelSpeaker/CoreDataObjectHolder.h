@@ -38,7 +38,6 @@ typedef enum {
     NSPersistentStoreCoordinator* m_PersistentStoreCoordinator;
     NSManagedObjectModel* m_ManagedObjectModel;
     NSMutableDictionary* m_Thread_to_NSManagedObjectContext_Dictionary;
-    NSManagedObjectContext* m_MainThreadManagedObjectContext;
 }
 
 /// モデル名(XXXX.xcdatamodel の XXXX の部分)、ファイル名、フォルダタイプを指定して初期化します。

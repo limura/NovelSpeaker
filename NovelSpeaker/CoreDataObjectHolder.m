@@ -41,7 +41,6 @@
     //m_MergeThreadManagedObjectContext = nil;
     //m_MergeThreadDispatchQueue = dispatch_get_main_queue();
     //m_MergeThreadDispatchQueue = dispatch_queue_create("com.limuraproducts.coredataextension.mergethread", NULL);
-    m_MainThreadManagedObjectContext = nil;
     
     return self;
 }
@@ -241,21 +240,24 @@
     return coordinator;
 }
 
-/// NSManagedObjectContext:save:error が他のthreadで行われた時の Notification のレシーバ(MainThread用)
+/// NSManagedObjectContext:save:error が行われた時の Notification のレシーバ
 - (void)mergeChanges:(NSNotification*)notification
 {
-    if (m_MainThreadManagedObjectContext == nil) {
-        return;
-    }
-    NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
-    if (context == m_MainThreadManagedObjectContext) {
+    // 自分が呼び出し元の時に、自分以外の全ての context の mergeChangesFromContextDidSaveNotification を呼び出す
+    // これでどの thread で save されても merge されるようになる。
+    NSManagedObjectContext* sendorContext = notification.object;
+    NSManagedObjectContext* thisContext = [self GetManagedObjectContextForThisThread];
+    if (sendorContext != thisContext) {
         return;
     }
     
-    if (m_MainThreadManagedObjectContext != nil) {
-        [m_MainThreadManagedObjectContext performBlock:^{
-            [m_MainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
-        }];
+    for (NSString* threadID in [m_Thread_to_NSManagedObjectContext_Dictionary keyEnumerator]) {
+        NSManagedObjectContext* context = m_Thread_to_NSManagedObjectContext_Dictionary[threadID];
+        if (context != nil && context != sendorContext) {
+            [context performBlock:^{
+                [context mergeChangesFromContextDidSaveNotification:notification];
+            }];
+        }
     }
 }
 
@@ -284,7 +286,6 @@
     // その thread用 の ManagedObjectContext を生成します。
     if ([NSThread isMainThread]) {
         context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
-        m_MainThreadManagedObjectContext = context;
     }else{
         context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     }
