@@ -9,7 +9,7 @@
 #import "EasyAlert.h"
 
 @implementation EasyAlertActionHolder
-- (id)initWithData:(void(^)(UIAlertAction*))FirstAction SecondAction:(void(^)(UIAlertAction*))SecondAction AlertView:(UIAlertView*)AlertView AlertController:(UIAlertController*)AlertController
+- (id _Nullable)initWithData:(void(^_Nullable)(UIAlertAction*_Nullable))FirstAction SecondAction:(void(^_Nullable)(UIAlertAction*_Nullable))SecondAction AlertView:(UIAlertView*_Nullable)AlertView AlertController:(UIAlertController*_Nullable)AlertController
 {
     self = [super init];
     if (self == nil) {
@@ -23,22 +23,22 @@
     return self;
 }
 
-- (BOOL)isEqualAlertView:(UIAlertView*)AlertView
+- (BOOL)isEqualAlertView:(UIAlertView*_Nullable)AlertView
 {
     return AlertView == alertView;
 }
-- (BOOL)isEqualAlertController:(UIAlertController *)AlertController
+- (BOOL)isEqualAlertController:(UIAlertController *_Nullable)AlertController
 {
     return AlertController == alertController;
 }
-- (void)runFirstAction:(UIAlertAction*)action
+- (void)runFirstAction:(UIAlertAction*_Nullable)action
 {
     if (firstAction == nil) {
         return;
     }
     firstAction(action);
 }
-- (void)runSecondAction:(UIAlertAction*)action
+- (void)runSecondAction:(UIAlertAction*_Nullable)action
 {
     if (secondAction == nil) {
         return;
@@ -101,14 +101,14 @@
 }
 
 /// 選択肢の無い Alert を作成します。
-+ (UIAlertController*)CreateAlertNoButton:(NSString*)title message:(NSString*)message
++ (UIAlertController*_Nullable)CreateAlertNoButton:(NSString*_Nullable)title message:(NSString*_Nullable)message
 {
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
     return alert;
 }
 
 /// 1つの選択肢を出す Alert を作成します。
-+ (UIAlertController*)CreateAlertOneButton:(NSString*)title message:(NSString*)message okButtonText:(NSString*)okButtonText okActionHandler:(void(^)(UIAlertAction *))okActionHandler
++ (UIAlertController*_Nullable)CreateAlertOneButton:(NSString*_Nullable)title message:(NSString*)message okButtonText:(NSString*_Nullable)okButtonText okActionHandler:(void(^_Nullable)(UIAlertAction*_Nullable))okActionHandler
 {
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:okButtonText style:UIAlertActionStyleDefault handler:okActionHandler]];
@@ -116,9 +116,9 @@
 }
 
 /// 2つの選択肢を出す Alert を作成します。
-+ (UIAlertController*)CreateAlertTwoButton:(NSString*)title message:(NSString*)message
-    firstButtonText:(NSString*)firstButtonText firstActionHandler:(void(^)(UIAlertAction *))firstActionHandler
-    secondButtonText:(NSString*)secondButtonText secondActionHandler:(void(^)(UIAlertAction *))secondActionHandler
++ (UIAlertController*_Nullable)CreateAlertTwoButton:(NSString*_Nullable)title message:(NSString*_Nullable)message
+    firstButtonText:(NSString*_Nullable)firstButtonText firstActionHandler:(void(^_Nullable)(UIAlertAction *_Nullable))firstActionHandler
+    secondButtonText:(NSString*_Nullable)secondButtonText secondActionHandler:(void(^_Nullable)(UIAlertAction *_Nullable))secondActionHandler
 {
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:firstButtonText style:UIAlertActionStyleDefault handler:firstActionHandler]];
@@ -134,7 +134,7 @@
 
 /// 何も押せないメッセージを表示します。ハンドラはありません。
 /// 返り値として返す EasyAlertActionHolder の CloseAlert method で閉じてください。
-- (EasyAlertActionHolder*)ShowAlert:(NSString*)title message:(NSString*)message
+- (EasyAlertActionHolder*_Nullable)ShowAlert:(NSString*_Nullable)title message:(NSString*_Nullable)message
 {
     UIAlertController* alertController = [EasyAlert CreateAlertNoButton:title message:message];
     if (alertController != nil) {
@@ -150,7 +150,7 @@
 }
 
 /// 何も押せないメッセージを表示して、このメッセージは指定された時間後に勝手に消えます
-- (BOOL)ShowAlertAutoFade:(NSString*)title message:(NSString*)message delayInSeconds:(double)delayInSeconds
+- (BOOL)ShowAlertAutoFade:(NSString*_Nullable)title message:(NSString*_Nullable)message delayInSeconds:(double)delayInSeconds
 {
     EasyAlertActionHolder* holder = [self ShowAlert:title message:message];
     if (holder == nil) {
@@ -163,7 +163,7 @@
 }
 
 /// 一つの選択肢を出す alert を表示します。ハンドラを一つ受け取ります
-- (BOOL)ShowAlertOneButton:(NSString*)title message:(NSString*)message okButtonText:(NSString*)okButtonText okActionHandler:(void(^)(UIAlertAction*))okActionHandler
+- (BOOL)ShowAlertOneButton:(NSString*_Nullable)title message:(NSString*_Nullable)message okButtonText:(NSString*_Nullable)okButtonText okActionHandler:(void(^_Nullable)(UIAlertAction*_Nullable))okActionHandler
 {
     UIAlertController* alertController = [EasyAlert CreateAlertOneButton:title message:message okButtonText:okButtonText okActionHandler:okActionHandler];
     if (alertController != nil) {
@@ -181,13 +181,13 @@
 }
 
 /// OK が押せるだけのダイアログを表示します。ハンドラはありません。
-- (BOOL)ShowAlertOKButton:(NSString*)title message:(NSString*)message
+- (BOOL)ShowAlertOKButton:(NSString*_Nullable)title message:(NSString*_Nullable)message
 {
     return [self ShowAlertOneButton:title message:message okButtonText:NSLocalizedString(@"OK_button", @"OK") okActionHandler:nil];
 }
 
 /// 2つの選択肢を出す alert を表示します。ハンドラを2つ受け取ります
-- (BOOL)ShowAlertTwoButton:(NSString*)title message:(NSString*)message firstButtonText:(NSString*)firstButtonText firstActionHandler:(void(^)(UIAlertAction*))firstActionHandler secondButtonText:(NSString*)secondButtonText secondActionHandler:(void(^)(UIAlertAction*))secondActionHandler
+- (BOOL)ShowAlertTwoButton:(NSString*_Nullable)title message:(NSString*_Nullable)message firstButtonText:(NSString*_Nullable)firstButtonText firstActionHandler:(void(^_Nullable)(UIAlertAction*_Nullable))firstActionHandler secondButtonText:(NSString*_Nullable)secondButtonText secondActionHandler:(void(^_Nullable)(UIAlertAction*_Nullable))secondActionHandler
 {
     UIAlertController* alertController = [EasyAlert CreateAlertTwoButton:title message:message firstButtonText:firstButtonText firstActionHandler:firstActionHandler secondButtonText:secondButtonText secondActionHandler:secondActionHandler];
     if (alertController != nil) {
