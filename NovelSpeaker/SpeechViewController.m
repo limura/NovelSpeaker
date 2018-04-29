@@ -92,7 +92,7 @@
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     [globalData ReloadSpeechSetting];
     // 読み上げる文章を設定します。
-    //[self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+    //[self SetCurrentReadingPointFromSavedData:self.NarouContentDetail.ncode];
     
     // textView で選択範囲が変えられた時のイベントハンドラに自分を登録します
     self.textView.delegate = self;
@@ -126,7 +126,7 @@
     // なにやら登録が外れる事があるようなので、AddSpeakRangeDelegate をこのタイミングでも呼んでおきます。
     // AddSpeakRangeDelegate は複数回呼んでも大丈夫なように作ってあるはずです
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    //[self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+    //[self SetCurrentReadingPointFromSavedData:self.NarouContentDetail.ncode];
     [globalData AddSpeakRangeDelegate:self];
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     [self.textView becomeFirstResponder];
@@ -143,7 +143,7 @@
     // 読み上げ位置の更新がDB本体に保存されるまで待って、読み上げ位置を改めて設定します
     // (間髪入れずに読み出そうとすると保存されていない古い情報を読む可能性が少しだけあるはずです)
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-        [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail];
+        [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail.ncode];
     });
     
     // 読み上げ中かどうかが画面が表示されていない時に更新される場合があるので、表示を更新しておきます。
@@ -208,20 +208,24 @@
 }
 
 /// 保存されている読み上げ位置を元に、現在の文書を設定します。
-- (BOOL)SetCurrentReadingPointFromSavedData:(NarouContentCacheData*)content
+- (BOOL)SetCurrentReadingPointFromSavedData:(NSString*)ncode
 {
-    if (content == nil) {
+    if (ncode == nil) {
         [self SetReadingPointFailedMessage];
         return false;
     }
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+        GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+        // このタイミングでNarouContent自体を読み直します
+        [self ReloadNarouContentDetail];
+        NarouContentCacheData* content = self.NarouContentDetail;
         // 自分の content.currentReadingStory は昔のcacheなので現在の値を読み直します
-        StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetReadingChapter:content];
+        StoryCacheData* story = content.currentReadingStory;
         if (story == nil) {
             // なにやら設定されていないようなので、最初の章を読み込むことにします。
             // TODO: XXXX: 最新情報に更新した後にここに何故か来る事があるのをなんとかする
-            [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込みます"]]; // NSLog
-            story = [[GlobalDataSingleton GetInstance] SearchStory:content.ncode chapter_no:1];
+            [globalData AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController なにやら読み上げ用の章が設定されていないようなので、最初の章を読み込みます"]]; // NSLog
+            story = [globalData SearchStory:content.ncode chapter_no:1];
             if (story == nil) {
                 [self SetReadingPointFailedMessage];
                 return;
@@ -412,6 +416,7 @@
     [self UpdateChapterIndicatorLabel:[story.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];
     m_CurrentReadingStory = story;
     [[GlobalDataSingleton GetInstance] SetSpeechStory:story];
+    [self updateChapterSlider];
     
     // TextView は使いまわされた時、selectedRange が前の値のままのようなので、このタイミングでTextView上の読み上げ位置を上書きします
     if ([self.textView.text length] > 0) {
@@ -527,8 +532,6 @@
 {
     dispatch_sync(dispatch_get_main_queue(), ^{
         [self stopSpeechWithoutDiactivate];
-        // 次のページに移行する時に、このsleepから先に進んでいかないような挙動？を？示している？ようなので？試しにコメントアウトしてみます
-        //[NSThread sleepForTimeInterval:1.0f];
         if ([self SetNextChapter]) {
             [self startSpeech];
         }else{
@@ -541,7 +544,7 @@
 /// リモートコントロールされたとき
 - (void) remoteControlReceivedWithEvent: (UIEvent*)receivedEvent
 {
-    NSLog(@"event got.");
+    NSLog(@"remoteControl event got.");
     if (receivedEvent.type != UIEventTypeRemoteControl)
     {
         return;
@@ -649,18 +652,27 @@
     [self ChangeFontSize:[GlobalDataSingleton ConvertFontSizeValueToFontSize:floatFontSizeValue]];
 }
 
+- (void)ReloadNarouContentDetail{
+    NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:self.NarouContentDetail.ncode];
+    if (content == nil) {
+        return;
+    }
+    self.NarouContentDetail = content;
+    [self updateChapterSlider];
+}
+
 /// ダウンロード状態更新イベントの受信
 - (void)NarouContentUpdated:(NSNotification*)notification
 {
-    self.NarouContentDetail = [[GlobalDataSingleton GetInstance] SearchNarouContentFromNcode:self.NarouContentDetail.ncode];
-    NSLog(@"NarouContentUpdated: %@ %@", self.NarouContentDetail.ncode, self.NarouContentDetail.general_all_no);
-    [self updateChapterSlider];
+    [self ReloadNarouContentDetail];
 }
 
 /// 章のスライダを更新します
 - (void)updateChapterSlider{
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSLog(@"updateChapterSlider: %@ %@", self.NarouContentDetail.ncode, self.NarouContentDetail.general_all_no);
+        NSLog(@"updateChapterSlider: %@ → %@/%@", self.NarouContentDetail.ncode,
+              self->m_CurrentReadingStory.chapter_number,
+              self.NarouContentDetail.general_all_no);
         self.ChapterSlider.minimumValue = 1;
         self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
         [self UpdateChapterIndicatorLabel:[self->m_CurrentReadingStory.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];

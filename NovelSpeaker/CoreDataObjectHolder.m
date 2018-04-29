@@ -41,6 +41,7 @@
     //m_MergeThreadManagedObjectContext = nil;
     //m_MergeThreadDispatchQueue = dispatch_get_main_queue();
     //m_MergeThreadDispatchQueue = dispatch_queue_create("com.limuraproducts.coredataextension.mergethread", NULL);
+    m_MainThreadManagedObjectContext = nil;
     
     return self;
 }
@@ -243,10 +244,19 @@
 /// NSManagedObjectContext:save:error が他のthreadで行われた時の Notification のレシーバ(MainThread用)
 - (void)mergeChanges:(NSNotification*)notification
 {
+    if (m_MainThreadManagedObjectContext == nil) {
+        return;
+    }
     NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
-    [context performBlock:^{
-        [context mergeChangesFromContextDidSaveNotification:notification];
-    }];
+    if (context == m_MainThreadManagedObjectContext) {
+        return;
+    }
+    
+    if (m_MainThreadManagedObjectContext != nil) {
+        [m_MainThreadManagedObjectContext performBlock:^{
+            [m_MainThreadManagedObjectContext mergeChangesFromContextDidSaveNotification:notification];
+        }];
+    }
 }
 
 /// NSManagedObjectContext を取得します。
@@ -274,6 +284,7 @@
     // その thread用 の ManagedObjectContext を生成します。
     if ([NSThread isMainThread]) {
         context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+        m_MainThreadManagedObjectContext = context;
     }else{
         context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     }
@@ -287,7 +298,7 @@
     [notify addObserver:self
                selector:@selector(mergeChanges:)
                    name:NSManagedObjectContextDidSaveNotification
-                 object:context];
+                 object:nil];
     // m_Thread_to_NSManagedObjectContext_Dictionary に登録します。
     [m_Thread_to_NSManagedObjectContext_Dictionary setObject:context forKey:threadID];
 
