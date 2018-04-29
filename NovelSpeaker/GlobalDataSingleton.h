@@ -117,7 +117,7 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
 
 /// NarouContent の全てを NSArray で取得します
 /// novelupdated_at で sort されて返されます。
-- (NSMutableArray*) GetAllNarouContent:(NarouContentSortType)sortType;
+- (NSArray*) GetAllNarouContent:(NarouContentSortType)sortType;
 
 /// 指定された ncode に登録されている全ての Story の内容(文章)を配列にして取得します
 - (NSArray*)GetAllStoryTextForNcode:(NSString*)ncode;

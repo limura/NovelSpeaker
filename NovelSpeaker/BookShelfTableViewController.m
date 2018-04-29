@@ -192,7 +192,7 @@
 // セクション内部のセルの数
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+    NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
     if (contentList == nil) {
         return 0;
     }
@@ -211,7 +211,7 @@
         cell = [[BookShelfTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:BookShelfTableViewCellID];
     }
     
-    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+    NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
     if(contentList == nil
        || [contentList count] <= indexPath.row)
     {
@@ -243,7 +243,7 @@
 /// セルが選択された時
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+    NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
     if(contentList == nil
        || [contentList count] < indexPath.row)
     {
@@ -266,7 +266,7 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        NSMutableArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+        NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
         if(contentList == nil
            || [contentList count] <= indexPath.row)
         {

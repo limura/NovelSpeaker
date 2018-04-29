@@ -22,7 +22,7 @@
 /// title: タイトルを検索対象に含むか否か
 /// keyword: キーワードを検索対象に含むか否か
 /// ex: あらすじを検索対象に含むか否か
-+ (NSMutableArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex order:(NSString*)order;
++ (NSArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex order:(NSString*)order;
 
 /// 小説家になろうで検索を行います
 /// 作者の user_id での検索です

@@ -16,7 +16,7 @@
 @implementation NarouLoader
 
 /// なろう検索APIのURLを使って検索結果を取得します。
-+ (NSMutableArray*)SearchWithURL:(NSString*)queryUrl
++ (NSArray*)SearchWithURL:(NSString*)queryUrl
 {
     NSLog(@"search: %@", queryUrl);
     NSData* jsonData = [self HttpGetBinary:queryUrl];
@@ -49,7 +49,7 @@
 /// title: タイトルを検索対象に含むか否か
 /// keyword: キーワードを検索対象に含むか否か
 /// ex: あらすじを検索対象に含むか否か
-+ (NSMutableArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex order:(NSString*)order
++ (NSArray*)Search:(NSString*) searchString wname:(BOOL)wname title:(BOOL)title keyword:(BOOL)keyword ex:(BOOL)ex order:(NSString*)order
 {
     // 18禁のに接続したければ、ここの URL を api.syousetu.com/novelapi/... って所を
     // api.syousetu.com/novel18api/ に書き換えればOKらしいよ？ 試してないけど。

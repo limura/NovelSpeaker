@@ -312,7 +312,7 @@ static GlobalDataSingleton* _singleton = nil;
 
 /// NarouContent の全てを NarouContentCacheData の NSArray で取得します
 /// novelupdated_at で sort されて返されます。
-- (NSMutableArray*) GetAllNarouContent:(NarouContentSortType)sortType;
+- (NSArray*) GetAllNarouContent:(NarouContentSortType)sortType;
 {
     __block NSError* err;
     __block NSMutableArray* fetchResults = nil;
@@ -2374,7 +2374,7 @@ static GlobalDataSingleton* _singleton = nil;
 
 /// 現在の Download queue を全て削除します
 - (void)ClearDownloadQueue{
-    NSMutableArray* contentList = [self GetAllNarouContent:NarouContentSortType_NovelUpdatedAt];
+    NSArray* contentList = [self GetAllNarouContent:NarouContentSortType_NovelUpdatedAt];
     if (contentList == nil) {
         return;
     }
