@@ -1645,7 +1645,7 @@ static GlobalDataSingleton* _singleton = nil;
         return false;
     }
     globalState.currentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:readingPointLocation];
-    NSLog(@"save readLocation: %lu", (unsigned long)readingPointLocation);
+    //NSLog(@"save readLocation: %lu", (unsigned long)readingPointLocation);
     return [self UpdateReadingPoint:content story:globalState.currentReadingStory];
 }
 

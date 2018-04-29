@@ -530,15 +530,19 @@
 /// 読み上げが停止したとき
 - (void) finishSpeak
 {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        [self stopSpeechWithoutDiactivate];
-        if ([self SetNextChapter]) {
-            [self startSpeech];
-        }else{
-            [self stopSpeech];
-            [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_SpeechStopedByEnd", @"Speak")];
-        }
-    });
+    if(![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self finishSpeak];
+        });
+        return;
+    }
+    [self stopSpeechWithoutDiactivate];
+    if ([self SetNextChapter]) {
+        [self startSpeech];
+    }else{
+        [self stopSpeech];
+        [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_SpeechStopedByEnd", @"Speak")];
+    }
 }
 
 /// リモートコントロールされたとき
@@ -670,9 +674,9 @@
 /// 章のスライダを更新します
 - (void)updateChapterSlider{
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSLog(@"updateChapterSlider: %@ → %@/%@", self.NarouContentDetail.ncode,
-              self->m_CurrentReadingStory.chapter_number,
-              self.NarouContentDetail.general_all_no);
+        //NSLog(@"updateChapterSlider: %@ → %@/%@", self.NarouContentDetail.ncode,
+        //      self->m_CurrentReadingStory.chapter_number,
+        //      self.NarouContentDetail.general_all_no);
         self.ChapterSlider.minimumValue = 1;
         self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
         [self UpdateChapterIndicatorLabel:[self->m_CurrentReadingStory.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];

@@ -952,6 +952,24 @@ Bug fix
 
 - Even if you go back without pressing registration while editing your own novel, so that the contents are saved
 
+
+# Version 1.1.21
+
+問題の修正
+
+- Web取込機能にて取込を行った小説を開いた時に、読み込まれた章の数がうまく表示できていなかった問題を修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助かっています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+
+# Version 1.1.21
+
+Bug fix
+
+- Fixed an issue where the number of chapters loaded could not be displayed well when opening a novel that was imported by the web import function
+
 ----
 in Japaneze.
 
