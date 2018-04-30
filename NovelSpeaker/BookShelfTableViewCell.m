@@ -38,6 +38,11 @@
 
     notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusDown_%@", m_Ncode];
     [notificationCenter addObserver:self selector:@selector(NarouContentNewStatusDown:) name:notificationName object:nil];
+    
+    notificationName = [[NSString alloc] initWithFormat:@"NarouContentReadingPointChanged_%@", m_Ncode];
+    [notificationCenter addObserver:self selector:@selector(NarouContentReadingPointUpdated:) name:notificationName object:nil];
+    notificationName = @"NarouContentReadingPointChanged";
+    [notificationCenter addObserver:self selector:@selector(NarouContentReadingPointUpdated:) name:notificationName object:nil];
 }
 
 /// NotificationCenter の受信者の設定を解除します。
@@ -52,6 +57,11 @@
     [notificationCenter removeObserver:self name:notificationName object:nil];
     
     notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusDown_%@", m_Ncode];
+    [notificationCenter removeObserver:self name:notificationName object:nil];
+
+    notificationName = [[NSString alloc] initWithFormat:@"NarouContentReadingPointChanged_%@", m_Ncode];
+    [notificationCenter removeObserver:self name:notificationName object:nil];
+    notificationName = @"NarouContentReadingPointChanged";
     [notificationCenter removeObserver:self name:notificationName object:nil];
 }
 
@@ -119,6 +129,7 @@
     
     [self UpdateActivityIndicator];
     [self UpdateNewLabel];
+    [self UpdateReadingProgressView:m_Ncode];
     
     NarouContentCacheData* content = [[GlobalDataSingleton GetInstance] GetCurrentDownloadingInfo];
     if (content == nil || [content.ncode compare:ncode] != NSOrderedSame) {
@@ -129,6 +140,38 @@
     
     [self setNotificationReciver];
     //[[GlobalDataSingleton GetInstance] AddDownloadEventHandlerWithNcode:ncode handler:self];
+}
+
+// 読んでいるゲージを更新します
+- (void)UpdateReadingProgressView:(NSString*)ncode {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    if (![globalData IsReadingProgressDisplayEnabled]) {
+        self.ReadProgressView.hidden = true;
+        return;
+    }
+    NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:ncode];
+    if (content == nil) {
+        self.ReadProgressView.hidden = true;
+        return;
+    }
+    StoryCacheData* story = content.currentReadingStory;
+    if (story == nil) {
+        self.ReadProgressView.hidden = true;
+        return;
+    }
+    float allNumber = [content.general_all_no floatValue];
+    if (allNumber <= 0.0f) {
+        allNumber = 1.0f;
+    }
+    float chapterNumber = [story.chapter_number floatValue];
+    float pageLength = (float)[story.content length];
+    if (pageLength <= 0.0f) {
+        pageLength = 1.0f;
+    }
+    float readingPoint = [story.readLocation floatValue];
+    float readingProgress = ((chapterNumber - 1.0f) + readingPoint / pageLength) / allNumber;
+    self.ReadProgressView.progress = readingProgress;
+    self.ReadProgressView.hidden = false;
 }
 
 // 個々の章のダウンロードが行われようとする度に呼び出されます。
@@ -165,6 +208,7 @@
         dispatch_async(m_MainDispatchQueue, ^{
             self.DownloadProgressView.hidden = YES;
             self.ActivityIndicator.hidden = YES;
+            [self sendSubviewToBack:self.DownloadProgressView];
         });
     }else{
         NSNumber* currentPosition = [args objectForKey:@"currentPosition"];
@@ -174,6 +218,7 @@
             self.DownloadProgressView.progress = progress;
             self.DownloadProgressView.hidden = NO;
             self.ActivityIndicator.hidden = NO;
+            [self bringSubviewToFront:self.DownloadProgressView];
             if (![self.ActivityIndicator isAnimating]) {
                 [self.ActivityIndicator startAnimating];
             }
@@ -195,6 +240,14 @@
     //NSLog(@"NarouContentNewStatus Down!");
     dispatch_async(m_MainDispatchQueue, ^{
         self.NewImaveView.hidden = YES;
+    });
+}
+
+- (void)NarouContentReadingPointUpdated:(NSNotification*)notification
+{
+    //NSLog(@"NarouContentReadingPointUpdated Up!");
+    dispatch_async(m_MainDispatchQueue, ^{
+        [self UpdateReadingProgressView:m_Ncode];
     });
 }
 

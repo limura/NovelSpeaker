@@ -76,6 +76,7 @@
 "SettingTableViewController_ShowDebugLog" = "デバッグログの表示";
 "SettingTableViewController_GoToSupportSite" = "ことせかい のサポートサイトを開く";
 "SettingTableViewController_SendBugReport" = "開発者に問い合わせる";
+"SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "本棚に栞の位置を表示する";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
@@ -222,15 +223,27 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.20
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.21
 
-- 設定タブにある「開発者へ問い合わせる」機能に新機能等の提案用のフォームを追加
-- 小説の本文を表示している時、上部に追加された地球のアイコンからその小説のWebPageをSafariで開けるように
-- 自作小説の編集中に登録を押さずに戻っても、内容が保存されるように
+- 設定タブに「本棚に栞の位置を表示する」のON/OFFの設定を追加
+- Web取込機能にて取込を行った小説を開いた時に、読み込まれた章の数がうまく表示できていなかった問題を修正
+- ダウンロード中に本棚から小説を削除した時に、ダウンロードが継続することで壊れた小説ができてしまう問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.21
+
+インタフェースの変更
+
+- 設定タブに「本棚に栞の位置を表示する」のON/OFFの設定を追加
+
+問題の修正
+
+- Web取込機能にて取込を行った小説を開いた時に、読み込まれた章の数がうまく表示できていなかった問題を修正
+- ダウンロード中に本棚から小説を削除した時に、ダウンロードが継続することで壊れた小説ができてしまう問題を修正
+
+
 # Version 1.1.20
 
 インタフェースの変更

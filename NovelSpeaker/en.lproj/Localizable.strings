@@ -77,6 +77,7 @@
 "SettingTableViewController_ShowDebugLog" = "Show debug log";
 "SettingTableViewController_GoToSupportSite" = "Open NovelSpeaker support site";
 "SettingTableViewController_SendBugReport" = "Send inquiries to developers by e-mail";
+"SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "Display bookmark position on Bookshelf";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -226,15 +227,27 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.20
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.21
 
-- Add a form for suggesting new functions etc. to \"query to developers\" function on setting tab
-- When displaying the text of the novel so that the novel's WebPage can be opened in Safari from the icon of the earth added to the top
-- Even if you go back without pressing registration while editing your own novel, so that the contents are saved
+- Add \"Display bookmark position on Bookshelf\" toggle switch on Settings tab.
+- Fixed an issue where the number of chapters loaded could not be displayed well when opening a novel that was imported by the web import function
+- Fixed a problem that broken novels will be created when downloading continues when downloading novels from bookshelf during downloading
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.21
+
+Interface change
+
+- Add \"Display bookmark position on Bookshelf\" toggle switch on Settings tab.
+
+Bug fix
+
+- Fixed an issue where the number of chapters loaded could not be displayed well when opening a novel that was imported by the web import function
+- Fixed a problem that broken novels will be created when downloading continues when downloading novels from bookshelf during downloading
+
+
 Version 1.1.20
 
 Interface change

@@ -412,6 +412,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// SiteInfo デバッグ用に、毎回 SiteInfo の読み直しを行うか否かの設定を保存します
 - (void)SetForceSiteInfoReloadIsEnabled:(BOOL)yesNo;
 
+/// 読んでいるゲージを表示するか否かを取得します
+- (BOOL)IsReadingProgressDisplayEnabled;
+/// 読んでいるゲージを表示する(true)か否(false)かを設定します
+- (void)SetReadingProgressDisplayEnabled:(BOOL)isDisplay;
+
 /// Web取り込み用のBookmarkを取得します
 - (NSArray*)GetWebImportBookmarks;
 /// Web取り込み用のBookmarkに追加します。
@@ -434,4 +439,5 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
 - (void)ForceOverrideHungSpeakStringToSpeechModSettings;
+
 @end

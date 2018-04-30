@@ -725,6 +725,12 @@ static GlobalDataSingleton* _singleton = nil;
         }
     //});
     }];
+    // 読み上げ位置が変わった Notification を飛ばします
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentReadingPointChanged_%@", content.ncode];
+    NSNotification* notification = [NSNotification notificationWithName:notificationName object:self];
+    [notificationCenter postNotification:notification];
+
     return result;
 }
 
@@ -2250,6 +2256,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_OVERRIDE_RUBY_IS_ENABLED @"OverrideRubyIsEnabled"
 #define USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY @"NotRubyCharactorStringArray"
 #define USER_DEFAULTS_FORCE_SITEINFO_RELOAD_IS_ENABLED @"ForceSiteInfoReloadIsEnabled"
+#define USER_DEFAULTS_READING_PROGRESS_DISPLAY_IS_ENABLED @"ReadingProgressDisplayIsEnabled"
 #define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
@@ -3114,6 +3121,19 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (void)SetForceSiteInfoReloadIsEnabled:(BOOL)yesNo {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setBool:yesNo forKey:USER_DEFAULTS_FORCE_SITEINFO_RELOAD_IS_ENABLED];
+    [userDefaults synchronize];
+}
+
+/// 読んでいるゲージを表示するか否かを取得します
+- (BOOL)IsReadingProgressDisplayEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_READING_PROGRESS_DISPLAY_IS_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_READING_PROGRESS_DISPLAY_IS_ENABLED];
+}
+/// 読んでいるゲージを表示する(true)か否(false)かを設定します
+- (void)SetReadingProgressDisplayEnabled:(BOOL)yesNo{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:yesNo forKey:USER_DEFAULTS_READING_PROGRESS_DISPLAY_IS_ENABLED];
     [userDefaults synchronize];
 }
 

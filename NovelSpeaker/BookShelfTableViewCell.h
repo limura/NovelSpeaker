@@ -21,6 +21,7 @@ static NSString* const BookShelfTableViewCellID = @"BookShelfTableViewCell";
 @property (weak, nonatomic) IBOutlet UIImageView *NewImaveView;
 @property (weak, nonatomic) IBOutlet UIProgressView *DownloadProgressView;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *ActivityIndicator;
+@property (weak, nonatomic) IBOutlet UIProgressView *ReadProgressView;
 
 - (void)setTitleLabel:(NSString*)titleLabel ncode:(NSString*)ncode;
 
