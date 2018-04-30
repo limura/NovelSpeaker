@@ -289,10 +289,19 @@ static float SLEEP_TIME_SECOND = 10.5f;
 
     __block BOOL result = false;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    [loader LoadURL:targetURL cookieArray:cookieArray startCount:startCount successAction:^(HtmlStory* story, NSURL* currentURL){
+    [loader LoadURL:targetURL cookieArray:cookieArray startCount:startCount successAction:^BOOL(HtmlStory* story, NSURL* currentURL){
         if (story == nil) {
-            return;
+            return false;
         }
+        // ダウンロード中に本棚からNarouContentが消されている場合はダウンロードを打ち切る必要があります。
+        {
+            NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:localContent.ncode];
+            if (content == nil) {
+                NSLog(@"already deleted content!!!!!!!!");
+                return false;
+            }
+        }
+        
         if ([localContent.general_all_no intValue] < story.count) {
             localContent.general_all_no = [[NSNumber alloc] initWithInt:story.count];
         }
@@ -311,7 +320,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
             [self KickDownloadStatusUpdate:localContent n:story.count maxpos:story.count];
             self->m_CurrentDownloadContentAllData.current_download_complete_count = story.count;
         });
-
+        return true;
     } failedAction:^(NSURL* url){
         NSLog(@"LoadURL failed. %@", [url absoluteString]);
     } finishAction:^(NSURL* url){
@@ -353,6 +362,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     if ([localContent isUserCreatedContent]) {
         return false;
     }
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     
     // 与えられた content の ncode を使って最新情報を読み込んでCoreData側の情報を上書きします。
     NarouContentCacheData* currentContent = [NarouLoader GetCurrentNcodeContentData:localContent.ncode];
@@ -360,7 +370,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         NSLog(@"ncode: %@ の最新情報の読み込みに失敗しました。", localContent.ncode);
         return false;
     }
-    [[GlobalDataSingleton GetInstance] UpdateNarouContent:currentContent];
+    [globalData UpdateNarouContent:currentContent];
     localContent = currentContent;
     
     NSString* downloadURL = [NarouLoader GetTextDownloadURL:localContent.ncode];
@@ -383,14 +393,14 @@ static float SLEEP_TIME_SECOND = 10.5f;
 
         //NSLog(@"Story の query をかけます。");
         // 既に読みこんであるか否かを判定します。
-        StoryCacheData* story = [[GlobalDataSingleton GetInstance] SearchStory:localContent.ncode chapter_no:n];
+        StoryCacheData* story = [globalData SearchStory:localContent.ncode chapter_no:n];
         //NSLog(@"Story の query が終わりました。");
         if (story != nil) {
             // 何かデータがありました。
             if ([self isValidStory:story] == false) {
                 // 駄目なデータでした。削除して読み込みを行います。
                 NSLog(@"すでにあるデータは 駄目なデータだったので削除して読み込みを行います。(%d)", n);
-                [[GlobalDataSingleton GetInstance] DeleteStory:story];
+                [globalData DeleteStory:story];
             }else{
                 // 既に読み込んであるようなので読み込まないで良いことにします。
                 //NSLog(@"読み込み済みなのでスキップします。%d/%d %@", n, max_content_count, localContent.title);
@@ -423,14 +433,22 @@ static float SLEEP_TIME_SECOND = 10.5f;
             NSLog(@"text download failed. ncode: %@, download in %d/%d", localContent.ncode, n, max_content_count);
             return false;
         }
+        // ダウンロード中に本棚からNarouContentが消されている場合はダウンロードを打ち切る必要があります。
+        {
+            NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:localContent.ncode];
+            if (content == nil) {
+                NSLog(@"already deleted content!!!!!!!!");
+                return false;
+            }
+        }
         //NSLog(@"create new story: %d, %@", n, localContent.title);
         // コンテンツを生成します。
-        [[GlobalDataSingleton GetInstance] UpdateStory:text chapter_number:n parentContent:localContent];
+        [globalData UpdateStory:text chapter_number:n parentContent:localContent];
         // new flag を立てます
         localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
-        [[GlobalDataSingleton GetInstance] UpdateNarouContent:localContent];
+        [globalData UpdateNarouContent:localContent];
         // 保存を走らせます。(でないと main thread側 の core data に反映されません……(´・ω・`)
-        [[GlobalDataSingleton GetInstance] saveContext];
+        [globalData saveContext];
         [self announceNarouContentNewStatusUp:localContent];
 
         // ダウンロードされたので、ダウンロード状態を更新します。

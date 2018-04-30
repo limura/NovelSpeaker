@@ -958,6 +958,7 @@ Bug fix
 問題の修正
 
 - Web取込機能にて取込を行った小説を開いた時に、読み込まれた章の数がうまく表示できていなかった問題を修正
+- ダウンロード中に本棚から小説を削除した時に、ダウンロードが継続することで壊れた小説ができてしまう問題を修正
 
 追伸
 
@@ -969,6 +970,7 @@ Bug fix
 Bug fix
 
 - Fixed an issue where the number of chapters loaded could not be displayed well when opening a novel that was imported by the web import function
+- Fixed a problem that broken novels will be created when downloading continues when downloading novels from bookshelf during downloading
 
 ----
 in Japaneze.

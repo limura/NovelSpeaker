@@ -534,7 +534,7 @@
 /// URLを読み込んで、SiteInfo の情報から得た PageElement の情報を NSString に変換して取り出しつつ、
 /// MaxDepth まで nextLink を辿ったものを、PageElement毎の配列として取り出します。
 /// 該当する siteinfo が無い場合、a rel="next" であったり class="autopagerize_page_element" であるものを取り出そうとします。
-- (void)LoadURL:(NSURL*)url cookieArray:(NSArray*)cookieArray startCount:(int)startCount successAction:(void(^)(HtmlStory* story, NSURL* currentURL))successAction failedAction:(void(^)(NSURL* url))failedAction finishAction:(void(^)(NSURL* url))finishAction{
+- (void)LoadURL:(NSURL*)url cookieArray:(NSArray*)cookieArray startCount:(int)startCount successAction:(BOOL(^)(HtmlStory* story, NSURL* currentURL))successAction failedAction:(void(^)(NSURL* url))failedAction finishAction:(void(^)(NSURL* url))finishAction{
     NSLog(@"LoadURL: %@", [url absoluteString]);
     
     dispatch_async(m_WebAccessQueue, ^(){
@@ -558,7 +558,9 @@
             story.count = count++;
             success = true;
             if (successAction != nil) {
-                successAction(story, targetUrl);
+                if (!successAction(story, targetUrl)){
+                    break;
+                }
             }
             
             if (story.nextUrl == nil) {
