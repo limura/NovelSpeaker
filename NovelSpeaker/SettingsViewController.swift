@@ -78,6 +78,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             .label(text: NSLocalizedString("SettingtableViewController_ConfirmEnableBackgroundFetch", comment:"この設定を有効にすると、ことせかい を使用していない時等に小説の更新を確認するようになるため、ネットワーク通信が発生するようになります。よろしいですか？"))
                             .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
                                 row.value = false
+                                row.updateCell()
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: true, completion: nil)
                                 }
@@ -115,7 +116,15 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }.onChange({ textRow in
                     GlobalDataSingleton.getInstance().setNotRubyCharactorStringArray(textRow.value)
                 })
-            
+            <<< SwitchRow(){
+                $0.title = NSLocalizedString("SettingTableViewController_DisplayBookmarkPositionOnBookshelf", comment: "本棚に栞の現在位置ゲージを表示する")
+                $0.value = GlobalDataSingleton.getInstance().isReadingProgressDisplayEnabled()
+                }.onChange({ (row) in
+                    GlobalDataSingleton.getInstance().setReadingProgressDisplayEnabled(row.value!)
+                    let notificationCenter = NotificationCenter.default
+                    let notification = Notification(name: Notification.Name("NarouContentReadingPointChanged"))
+                    notificationCenter.post(notification)
+                })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 }.onCellSelection({ (butonCellof, buttonRow) in
