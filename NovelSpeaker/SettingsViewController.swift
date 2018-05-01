@@ -119,11 +119,19 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow(){
                 $0.title = NSLocalizedString("SettingTableViewController_DisplayBookmarkPositionOnBookshelf", comment: "本棚に栞の現在位置ゲージを表示する")
                 $0.value = GlobalDataSingleton.getInstance().isReadingProgressDisplayEnabled()
+                $0.cell.textLabel?.numberOfLines = 0
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance().setReadingProgressDisplayEnabled(row.value!)
                     let notificationCenter = NotificationCenter.default
                     let notification = Notification(name: Notification.Name("NarouContentReadingPointChanged"))
                     notificationCenter.post(notification)
+                })
+            <<< SwitchRow(){
+                $0.title = NSLocalizedString("SettingTableViewController_OnlyDisplayAddSpeechModSettings", comment: "本文中の長押しメニューを読み替え辞書へ登録のみにする")
+                $0.value = GlobalDataSingleton.getInstance().getMenuItemIsAddSpeechModSettingOnly()
+                $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ (row) in
+                    GlobalDataSingleton.getInstance().setMenuItemIsAddSpeechModSettingOnly(row.value!)
                 })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")

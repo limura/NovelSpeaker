@@ -78,6 +78,7 @@
 "SettingTableViewController_GoToSupportSite" = "Open NovelSpeaker support site";
 "SettingTableViewController_SendBugReport" = "Send inquiries to developers by e-mail";
 "SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "Display bookmark position on Bookshelf";
+"SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "Only display add correction of the reading at long press menu";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";

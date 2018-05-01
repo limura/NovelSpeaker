@@ -77,6 +77,7 @@
 "SettingTableViewController_GoToSupportSite" = "ことせかい のサポートサイトを開く";
 "SettingTableViewController_SendBugReport" = "開発者に問い合わせる";
 "SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "本棚に栞の位置を表示する";
+"SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "本文中の長押しメニューを読み替え辞書へ登録のみにする";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";

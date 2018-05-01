@@ -17,15 +17,6 @@ public class CustomUITextView: UITextView {
         if globalData == nil || globalData?.getMenuItemIsAddSpeechModSettingOnly() != true {
             return super.canPerformAction(action, withSender: sender);
         }
-        if action == #selector(copy(_:))
-            || action == #selector(cut(_:))
-            || action == #selector(paste(_:))
-            || action == #selector(select(_:))
-            || action == #selector(selectAll(_:))
-            || action == #selector(copy(_:))
-        {
-            return false;
-        }
-        return super.canPerformAction(action, withSender: sender);
+        return false;
     }
 }
