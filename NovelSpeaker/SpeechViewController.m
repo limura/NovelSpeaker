@@ -593,10 +593,24 @@
 }
 
 /// 表示用のフォントサイズを変更します
-- (void)ChangeFontSize:(float)fontSize
+- (void)ChangeFontOnlySize:(float)fontSize
 {
     UIFont* font = [UIFont systemFontOfSize:140.0];
     self.textView.font = [font fontWithSize:fontSize];
+}
+
+- (void)ChangeFontSize:(float)fontSize
+{
+    [self ChangeFont:[[GlobalDataSingleton GetInstance] GetDisplayFontName] fontSize:fontSize];
+}
+
+- (void)ChangeFont:(NSString*)fontName fontSize:(float)fontSize {
+    if(fontName == nil) {
+        [self ChangeFontOnlySize:fontSize];
+        return;
+    }
+    UIFont* font = [UIFont fontWithName:fontName size:fontSize];
+    self.textView.font = font;
 }
 
 /// フォントサイズを設定されている値にします。
@@ -614,7 +628,9 @@
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     
     [notificationCenter addObserver:self selector:@selector(FontSizeChanged:) name:@"StoryDisplayFontSizeChanged" object:nil];
-    
+
+    [notificationCenter addObserver:self selector:@selector(FontNameChanged:) name:@"FontNameChanged" object:nil];
+
     NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentDownloadStatusChanged_%@", self.NarouContentDetail.ncode];
     [notificationCenter addObserver:self selector:@selector(NarouContentUpdated:) name:notificationName object:nil];
     
@@ -654,6 +670,11 @@
     }
     float floatFontSizeValue = [fontSizeValue floatValue];
     [self ChangeFontSize:[GlobalDataSingleton ConvertFontSizeValueToFontSize:floatFontSizeValue]];
+}
+
+- (void)FontNameChanged:(NSNotification*)notification
+{
+    [self loadAndSetFontSize];
 }
 
 - (void)ReloadNarouContentDetail{

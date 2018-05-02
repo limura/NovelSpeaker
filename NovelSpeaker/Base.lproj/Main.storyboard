@@ -111,6 +111,7 @@
                     <connections>
                         <outlet property="sampleTextTextView" destination="vgK-qt-EeE" id="MNB-oz-ONO"/>
                         <outlet property="textSizeSlider" destination="Fkj-1l-L3c" id="sLT-4G-cJR"/>
+                        <segue destination="tq7-oK-KKM" kind="push" identifier="FontSelectSegue" id="vDk-Ae-lek"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="u55-Il-lHZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -212,6 +213,25 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="K9T-nr-cHp" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1870" y="925"/>
+        </scene>
+        <!--Font select View Controller-->
+        <scene sceneID="HJA-bV-XCn">
+            <objects>
+                <viewController id="tq7-oK-KKM" userLabel="Font select View Controller" customClass="FontSelectViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Ydy-2E-YxO"/>
+                        <viewControllerLayoutGuide type="bottom" id="JGs-s5-doR"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Lte-f3-jqz">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="字体設定" id="9su-Dc-tDK"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Rmb-WZ-IqD" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-515" y="2323"/>
         </scene>
         <!--読みの修正-->
         <scene sceneID="FXd-0y-Yzq">
@@ -1395,7 +1415,7 @@ SOFTWARE.
         <image name="soundbook.png" width="24" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="RgY-Zn-l61"/>
+        <segue reference="uw4-9z-dhB"/>
         <segue reference="0zP-nv-fmY"/>
         <segue reference="vyW-HX-PLM"/>
         <segue reference="9gN-oA-LUb"/>

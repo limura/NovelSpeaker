@@ -33,6 +33,18 @@
     }
     [self SetFontSizeByFontSizeValue:fontSizeValue];
     self.textSizeSlider.value = fontSizeValue;
+
+    NSMutableArray* buttonItemList = [NSMutableArray new];
+    UIBarButtonItem* fontButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"TextSizeSettingViewController_FontSettingTitle", @"字体設定") style:UIBarButtonItemStylePlain target:self action:@selector(fontButtonClick:)];
+    [buttonItemList addObject:fontButton];
+    self.navigationItem.rightBarButtonItems = buttonItemList;
+    
+    [self setNotificationReciver];
+}
+
+- (void)dealloc
+{
+    [self removeNotificationReciver];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -50,12 +62,22 @@
 }
 */
 
+- (void)ReloadFont:(NSString*)fontName fontSize:(CGFloat)fontSize {
+    if (fontName == nil) {
+        font = [UIFont systemFontOfSize:fontSize];
+    }else{
+        font = [UIFont fontWithName:fontName size:fontSize];
+    }
+    if (font != nil) {
+        self.sampleTextTextView.font = font;
+    }
+}
+
 /// 表示しているフォントを指定された値から計算されるフォントサイズに変更します。(value そのものがフォントサイズではない所に注意)
 - (void)SetFontSizeByFontSizeValue:(float)value
 {
     double fontSize = [GlobalDataSingleton ConvertFontSizeValueToFontSize:value];
-    
-    self.sampleTextTextView.font = [font fontWithSize:fontSize];
+    [self ReloadFont:[[GlobalDataSingleton GetInstance] GetDisplayFontName] fontSize:fontSize];
 }
 
 /// 小説の表示用フォントサイズが変わったことをアナウンスします。
@@ -77,4 +99,30 @@
     [globalData UpdateGlobalState:globalState];
     [self StoryDisplayFontSizeChangedAnnounce:currentValue];
 }
+
+- (void)fontButtonClick:(id)sender {
+    [self performSegueWithIdentifier:@"FontSelectSegue" sender:self];
+}
+
+/// NotificationCenter の受信者の設定をします。
+- (void)setNotificationReciver
+{
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    [notificationCenter addObserver:self selector:@selector(FontNameChanged:) name:@"FontNameChanged" object:nil];
+}
+
+/// NotificationCenter の受信者の設定を解除します。
+- (void)removeNotificationReciver
+{
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    [notificationCenter removeObserver:self name:@"FontNameChanged" object:nil];
+}
+
+/// フォント変更イベントの受信
+- (void)FontNameChanged:(NSNotification*)notification
+{
+    float currentValue = self.textSizeSlider.value;
+    [self SetFontSizeByFontSizeValue:currentValue];
+}
+
 @end

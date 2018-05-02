@@ -85,6 +85,7 @@
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
 		216741A92047714D008A578D /* PDFKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 216741A82047714D008A578D /* PDFKit.framework */; };
+		216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
@@ -327,6 +328,7 @@
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
 		216741A82047714D008A578D /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = System/Library/Frameworks/PDFKit.framework; sourceTree = SDKROOT; };
+		216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSelectViewController.swift; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
 		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
 		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
@@ -907,6 +909,7 @@
 				215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */,
 				216741A2204421F1008A578D /* BugReportViewController.swift */,
 				21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */,
+				216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1323,6 +1326,7 @@
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
 				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
 				21E46D431A94B7F400CE39B0 /* EasyShare.m in Sources */,
+				216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */,
 				217BD9E419CE72BB008A0D9D /* StringSubstituter.m in Sources */,
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
 				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,

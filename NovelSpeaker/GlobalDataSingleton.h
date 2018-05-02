@@ -417,6 +417,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 読んでいるゲージを表示する(true)か否(false)かを設定します
 - (void)SetReadingProgressDisplayEnabled:(BOOL)isDisplay;
 
+/// 小説の表示に使用するフォント名を取得します
+- (NSString*)GetDisplayFontName;
+/// 小説の表示に使用するフォント名を設定します
+- (void)SetDisplayFontName:(NSString*)fontName;
+
 /// Web取り込み用のBookmarkを取得します
 - (NSArray*)GetWebImportBookmarks;
 /// Web取り込み用のBookmarkに追加します。

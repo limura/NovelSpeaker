@@ -986,6 +986,34 @@ Bug fix
 - Fixed an issue where the number of chapters loaded could not be displayed well when opening a novel that was imported by the web import function
 - Fixed a problem that broken novels will be created when downloading continues when downloading novels from bookshelf during downloading
 
+# Version 1.1.22
+
+インタフェースの変更
+
+- 小説の本文を長押しした時に出るメニューを「読み替え辞書へ登録」のみにするかどうかの指定を設定タブに追加
+- 小説の本文を表示する字体を選択するボタンを設定タブの「表示文字サイズの設定」上部に追加
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+ゴールデンウィークは何をやろうかなぁと思いながら、結局 ことせかい の改良をしている私です。今回も不採用となりましたお問い合わせについて回答していきます。
+
+ルビを文字の上に表示して欲しいというお問い合わせについて。
+まず、ことせかい は「読み上げ」アプリですので「目で読む」ための機能については真面目にサポートするつもりはありません。
+なのですが、簡単に実現できるのに実装しないのだとすると悪い気もしますので、調査してみました。しかし、残念なことにルビの表示を簡単に実現するのは難しいという結論に達しましたため、この機能については見送りました。
+とはいえ、調査している所で小説の本文を表示している部分の字体を変えるのはそれほど大変でもなさそうでしたので、字体を変える機能を実装しました。選べる字体は多いのに日本語の文字の字体が変わるものは少なそうなのが気になりますが、選択できないよりはいいのかなぁと思っています。
+
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+# Version 1.1.22
+
+Interface change
+
+- Add to the setting tab whether to set only the menu to be displayed when long-pressed the novel's body "Add correction of the reading"
+- Add a button to select the font that displays the novel's body to the upper part of "Setting the display character size" on the setting tab
+
 ----
 in Japaneze.
 

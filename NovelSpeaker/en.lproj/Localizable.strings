@@ -222,21 +222,31 @@
 "NarouSearchResultDetailViewControllerSwift_Keyword" = "Keyword";
 "NarouSearchResultDetailViewControllerSwift_Story" = "Story";
 
+"TextSizeSettingViewController_FontSettingTitle" = "Font";
+
+"FontSelectViewController_DefaultFontTitle" = "DefaultFont";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.21
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.22
 
-- Add \"Display bookmark position on Bookshelf\" toggle switch on Settings tab.
-- Fixed an issue where the number of chapters loaded could not be displayed well when opening a novel that was imported by the web import function
-- Fixed a problem that broken novels will be created when downloading continues when downloading novels from bookshelf during downloading
+- Add to the setting tab whether to set only the menu to be displayed when long-pressed the novel's body \"Add correction of the reading\"
+- Add a button to select the font that displays the novel's body to the upper part of \"Setting the display character size\" on the setting tab
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.22
+
+Interface change
+
+- Add to the setting tab whether to set only the menu to be displayed when long-pressed the novel's body \"Add correction of the reading\"
+- Add a button to select the font that displays the novel's body to the upper part of \"Setting the display character size\" on the setting tab
+
 Version 1.1.21
 
 Interface change

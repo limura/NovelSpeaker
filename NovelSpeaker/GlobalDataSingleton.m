@@ -2257,6 +2257,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY @"NotRubyCharactorStringArray"
 #define USER_DEFAULTS_FORCE_SITEINFO_RELOAD_IS_ENABLED @"ForceSiteInfoReloadIsEnabled"
 #define USER_DEFAULTS_READING_PROGRESS_DISPLAY_IS_ENABLED @"ReadingProgressDisplayIsEnabled"
+#define USER_DEFAULTS_DISPLAY_FONT_NAME @"DisplayFontName"
 #define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
@@ -3137,6 +3138,24 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setBool:yesNo forKey:USER_DEFAULTS_READING_PROGRESS_DISPLAY_IS_ENABLED];
     [userDefaults synchronize];
 }
+
+/// 小説の表示に使用するフォント名を取得します
+- (NSString*)GetDisplayFontName{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_DISPLAY_FONT_NAME: @""}];
+    NSString* fontName = [userDefaults stringForKey:USER_DEFAULTS_DISPLAY_FONT_NAME];
+    if ([fontName compare:@""] == NSOrderedSame) {
+        return nil;
+    }
+    return fontName;
+}
+/// 小説の表示に使用するフォント名を設定します
+- (void)SetDisplayFontName:(NSString*)fontName{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:fontName forKey:USER_DEFAULTS_DISPLAY_FONT_NAME];
+    [userDefaults synchronize];
+}
+
 
 /// Web取り込み用のBookmarkを取得します
 - (NSArray*)GetWebImportBookmarks{
