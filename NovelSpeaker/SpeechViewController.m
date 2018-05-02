@@ -526,10 +526,11 @@
     NSRange range = NSMakeRange(location, 1);
     // 何行か後までの文字数をカウントして、scrollRangeToVisible ではその行が見えるようにスクロールさせる
     const NSUInteger lineCount = 5; // 5行分まで先を表示させる
+    const NSUInteger minAppendLength = 15; // 改行が連続している場合(lineCount分だけ読んでもこの文字数以下である場合)は15文字位先までは先に飛ばして良いとする
     NSString* tmpString = [displayString substringFromIndex:range.location];
     NSArray<NSString*>* lineList = [tmpString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
     NSUInteger appendLength = 0;
-    for (int i = 0; i < lineCount && i < [lineList count]; i++) {
+    for (int i = 0; (i < lineCount || appendLength < minAppendLength) && i < [lineList count]; i++) {
         NSString* lineString = lineList[i];
         appendLength += [lineString length];
     }
