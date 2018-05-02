@@ -1014,6 +1014,18 @@ Interface change
 - Add to the setting tab whether to set only the menu to be displayed when long-pressed the novel's body "Add correction of the reading"
 - Add a button to select the font that displays the novel's body to the upper part of "Setting the display character size" on the setting tab
 
+
+# Version 1.1.23
+
+インタフェースの変更
+
+- 本棚での栞の位置表示ゲージについて、読み終わっている場合はゲージの色を変えた
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側からのご意見ご要望フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+
 ----
 in Japaneze.
 
