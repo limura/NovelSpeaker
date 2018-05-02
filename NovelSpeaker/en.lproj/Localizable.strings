@@ -161,6 +161,7 @@
 "ImportFromWebPageViewController_UnknownHost" = "Unknown host";
 "ImportFromWebPageViewController_MessageFrom..." = "Message from %@";
 "ImportFromWebPageViewController_ImputRequiredFrom..." = "Imput required from %@";
+"ImportFromWebPageViewController_ConifirmDeleteBookmark" = "Delete bookmarks on this page. Is it OK?";
 
 "UriLoader_NSURLConnectionRequestFailed" = "Acquisition from the web server failed. (Perhaps the connection has failed, please check the network status)";
 "UriLoader_HTTPResponseIsInvalid" = "The server has not returned a normal response. (Server returned status code are: \"%ld\") If this error is issued in the site etc. where login is required, it seems to be difficult to deal with, although it may be a problem that can be handled, so NovelSpeaker From the opinion request form on the side of the support site, you should report with the URL where this error occurred and the procedure until the error occurs";

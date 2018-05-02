@@ -157,6 +157,7 @@
 "ImportFromWebPageViewController_UnknownHost" = "不明なホスト";
 "ImportFromWebPageViewController_MessageFrom..." = "%@からのメッセージ";
 "ImportFromWebPageViewController_ImputRequiredFrom..." = "%@が入力を求めています";
+"ImportFromWebPageViewController_ConifirmDeleteBookmark" = "このページのブックマークを削除します。よろしいですか？";
 
 "UriLoader_NSURLConnectionRequestFailed" = "Webサーバからの取得に失敗しました。(恐らくは接続に失敗しています。ネットワーク状況を確認してください)";
 "UriLoader_HTTPResponseIsInvalid" = "サーバから返されたステータスコードが正常値(200 OK等)ではなく、\"%ld\" を返されました。ログインが必要なサイトなどでこのエラーが出ている場合は対応は難しいと思われます。といっても、対応できる問題かもわかりませんので、ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂ければと思います";

@@ -312,8 +312,19 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
             return
         }
         if isBookmarked(targetUrl: url) {
-            GlobalDataSingleton.getInstance().delURL(fromWebImportBookmark: url)
-            updateBookmarkButtonState(url: url)
+            EasyDialog.Builder(self)
+            .label(text: NSLocalizedString("ImportFromWebPageViewController_ConifirmDeleteBookmark", comment: "このページのブックマークを削除します。よろしいですか？"))
+            .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel")) { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
+                }
+            }.addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+                GlobalDataSingleton.getInstance().delURL(fromWebImportBookmark: url)
+                self.updateBookmarkButtonState(url: url)
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
+                }
+            }.build().show()
         }else{
             let titleString = self.wkWebView?.title
             EasyDialog.Builder(self)
