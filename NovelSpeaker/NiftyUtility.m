@@ -26,6 +26,9 @@
 // a を b で xor します。b が a より短い場合はループして適用します
 + (NSData*)xorData:(NSData*)aData b:(NSData*)bData {
     NSMutableData* result = [NSMutableData new];
+    if (aData == nil || bData == nil) {
+        return result;
+    }
     const char* a = [aData bytes];
     const char* b = [bData bytes];
     for (int i = 0; i < aData.length; i++) {

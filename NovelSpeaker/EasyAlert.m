@@ -50,7 +50,9 @@
 {
     if (alertView != nil) {
         [alertView dismissWithClickedButtonIndex:0 animated:animate];
-        completion();
+        if (completion != nil) {
+            completion();
+        }
         return;
     }
     if (alertController != nil) {
