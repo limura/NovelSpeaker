@@ -428,7 +428,7 @@
             }
         }
         self.textView.selectedRange = NSMakeRange(readLocation, 1);
-        [self.textView scrollRangeToVisible:self.textView.selectedRange];
+        [self TextViewScrollTo:readLocation];
     }
 }
 
@@ -519,12 +519,38 @@
     [self SetNextChapter];
 }
 
+/// location の後ろに何行か開けた分が画面内に入るように UITextView:scrollRangeToVisible を呼ぶ
+- (void)TextViewScrollTo:(NSUInteger)location {
+    NSString* displayString = self.textView.text;
+    NSUInteger textLength = [displayString length];
+    NSRange range = NSMakeRange(location, 1);
+    // 何行か後までの文字数をカウントして、scrollRangeToVisible ではその行が見えるようにスクロールさせる
+    const NSUInteger lineCount = 5; // 5行分まで先を表示させる
+    NSString* tmpString = [displayString substringFromIndex:range.location];
+    NSArray<NSString*>* lineList = [tmpString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    NSUInteger appendLength = 0;
+    for (int i = 0; i < lineCount && i < [lineList count]; i++) {
+        NSString* lineString = lineList[i];
+        appendLength += [lineString length];
+    }
+    // ここまでは単に改行を探しているだけなので、改行されずに長い文章が書かれていると、読み上げている部分が飛ばされてしまう可能性がある。なので、上限を入れておく
+    if (appendLength > 120) {
+        appendLength = 120;
+    }
+    
+    if (appendLength + range.location > textLength) {
+        appendLength = textLength - range.location;
+    }
+    range.length = appendLength;
+    [self.textView scrollRangeToVisible:range];
+}
+
 /// 読み上げ位置が更新されたとき
 - (void) willSpeakRange:(NSRange)range speakText:(NSString*)text
 {
     m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:range.location];
     self.textView.selectedRange = range;
-    [self.textView scrollRangeToVisible:range];
+    [self TextViewScrollTo:range.location];
 }
 
 /// 読み上げが停止したとき
