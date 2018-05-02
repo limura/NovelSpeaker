@@ -232,14 +232,22 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.22
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.23
 
-- Add to the setting tab whether to set only the menu to be displayed when long-pressed the novel's body \"Add correction of the reading\"
-- Add a button to select the font that displays the novel's body to the upper part of \"Setting the display character size\" on the setting tab
+- About the position indicator gauge of the bookmarker on the bookshelf so that the color of the gauge changes when reading is finished
+- Change the scroll position being read so that it scrolls slightly beyond the place to read aloud
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.23
+
+Interface change
+
+- About the position indicator gauge of the bookmarker on the bookshelf so that the color of the gauge changes when reading is finished
+- Change the scroll position being read so that it scrolls slightly beyond the place to read aloud
+
+
 Version 1.1.22
 
 Interface change
