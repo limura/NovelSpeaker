@@ -172,6 +172,13 @@
     float readingProgress = ((chapterNumber - 1.0f) + readingPoint / pageLength) / allNumber;
     self.ReadProgressView.progress = readingProgress;
     self.ReadProgressView.hidden = false;
+    
+    if (([content.general_all_no compare:story.chapter_number] == NSOrderedSame || [content.general_all_no intValue] == 0)
+        && ([story.readLocation unsignedIntValue] + 10) >= [story.content length]) {
+        self.ReadProgressView.tintColor = [[UIColor alloc] initWithRed:0.0 green:0.9 blue:0.0 alpha:1];
+    }else{
+        self.ReadProgressView.tintColor = [[UIColor alloc] initWithRed:255/256.0 green:188/256.0 blue:2/256.0 alpha:1.0];
+    }
 }
 
 // 個々の章のダウンロードが行われようとする度に呼び出されます。

@@ -46,7 +46,7 @@
 
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "Quality of voice";
 "SettingTableViewController_CorrectionOfTheReading" = "Correction of the reading";
-"SettingTableViewController_SettingOfTheTextSize" = "Setting of the text size";
+"SettingTableViewController_SettingOfTheTextSize" = "Setting of the text";
 "SettingTableViewController_SettingOfTheSpeechDelay" = "Setting of the speech delay";
 "SettingTableViewController_MaxSpeechTime" = "Max speech time";
 "SettingTableViewController_AddDefaultCorrectionOfTheReading" = "Add default correction of the reading";
