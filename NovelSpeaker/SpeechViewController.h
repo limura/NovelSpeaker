@@ -24,6 +24,8 @@
     StoryCacheData* m_CurrentReadingStory;
     BOOL m_bIsSpeaking;
     EasyAlert* m_EasyAlert;
+    BOOL m_bIsSeeking;
+    NSTimer* m_SeekTimer;
 }
 @property (weak, nonatomic) IBOutlet UISlider *ChapterSlider;
 @property (weak, nonatomic) IBOutlet UITextView *textView;

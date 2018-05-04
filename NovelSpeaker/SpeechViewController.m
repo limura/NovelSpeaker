@@ -8,6 +8,7 @@
 
 #import <CoreData/CoreData.h>
 #import <Social/Social.h>
+#import <MediaPlayer/MediaPlayer.h>
 #import "SpeechViewController.h"
 #import "Story.h"
 #import "NarouContent.h"
@@ -37,6 +38,8 @@
     [[GlobalDataSingleton GetInstance] AddSpeakRangeDelegate:self];
     
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
+    m_SeekTimer = nil;
+    m_bIsSeeking = false;
     
     // NavitationBar にボタンを配置します。
     NSString* speakText = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
@@ -128,9 +131,10 @@
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     //[self SetCurrentReadingPointFromSavedData:self.NarouContentDetail.ncode];
     [globalData AddSpeakRangeDelegate:self];
-    [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
+    //[[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     [self.textView becomeFirstResponder];
-    
+    [self enableMPRemoteCommandCenterEvents];
+
     // 読み上げる文章を改めて設定したいです
     // が、読み上げ中である場合には現在保存されている情報は古いため、
     // 読み上げを停止→現在の読み上げ位置を保存→読み上げ文章を改めてロード
@@ -156,8 +160,9 @@
 
 - (void)viewWillDisappear:(BOOL)animated
 {
+    [self disableMPRemoteCommandCenterEvents];
     [self stopSpeech];
-    [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
+    //[[UIApplication sharedApplication] endReceivingRemoteControlEvents];
     [self resignFirstResponder];
     [self SaveCurrentReadingPoint];
     [[GlobalDataSingleton GetInstance] DeleteSpeakRangeDelegate:self];
@@ -179,6 +184,48 @@
     [self performSegueWithIdentifier:@"SpeechViewToSpeechModSetingsSegue" sender:self];
 }
 
+/// MPRemoteCommandCenter でのイベントを受け取るようにします。
+- (void) enableMPRemoteCommandCenterEvents{
+    MPRemoteCommandCenter* commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+    [commandCenter.togglePlayPauseCommand addTarget:self action:@selector(togglePlayPauseEvent:)];
+    commandCenter.togglePlayPauseCommand.enabled = true;
+    [commandCenter.playCommand addTarget:self action:@selector(playEvent:)];
+    commandCenter.playCommand.enabled = true;
+    [commandCenter.stopCommand addTarget:self action:@selector(stopEvent:)];
+    commandCenter.stopCommand.enabled = true;
+    [commandCenter.nextTrackCommand addTarget:self action:@selector(nextTrackEvent:)];
+    commandCenter.nextTrackCommand.enabled = true;
+    [commandCenter.previousTrackCommand addTarget:self action:@selector(previousTrackEvent:)];
+    commandCenter.previousTrackCommand.enabled = true;
+    if ([[GlobalDataSingleton GetInstance] IsShortSkipEnabled]) {
+        [commandCenter.skipForwardCommand addTarget:self action:@selector(skipForwardEvent:)];
+        commandCenter.skipForwardCommand.enabled = true;
+        [commandCenter.skipBackwardCommand addTarget:self action:@selector(skipBackwordEvent:)];
+        commandCenter.skipBackwardCommand.enabled = true;
+    }
+    [commandCenter.seekForwardCommand addTarget:self action:@selector(seekForwardEvent:)];
+    commandCenter.seekForwardCommand.enabled = true;
+    [commandCenter.seekBackwardCommand addTarget:self action:@selector(seekBackwardEvent:)];
+    commandCenter.seekBackwardCommand.enabled = true;
+}
+/// MPRemoteCommandCenter でのイベントを受け取るのをやめます
+- (void) disableMPRemoteCommandCenterEvents{
+    MPRemoteCommandCenter* commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+    [commandCenter.togglePlayPauseCommand removeTarget:self];
+    commandCenter.togglePlayPauseCommand.enabled = false;
+    [commandCenter.playCommand removeTarget:self];
+    commandCenter.playCommand.enabled = false;
+    [commandCenter.stopCommand removeTarget:self];
+    commandCenter.stopCommand.enabled = false;
+    [commandCenter.skipForwardCommand removeTarget:self];
+    commandCenter.skipForwardCommand.enabled = false;
+    [commandCenter.skipBackwardCommand removeTarget:self];
+    commandCenter.skipBackwardCommand.enabled = false;
+    [commandCenter.seekForwardCommand removeTarget:self];
+    commandCenter.seekForwardCommand.enabled = false;
+    [commandCenter.seekBackwardCommand removeTarget:self];
+    commandCenter.seekBackwardCommand.enabled = false;
+}
 
 /// UITextField でカーソルの位置が変わった時に呼び出されるはずです。
 - (void) textViewDidChangeSelection: (UITextView*) textView
@@ -617,6 +664,143 @@
         default:
             break;
     }
+}
+
+/// MPRemoteCommandCenter からの play イベントのイベントハンドラ
+- (void)playEvent:(id)sendor {
+    [self startSpeech];
+}
+
+/// MPRemoteCommandCenter からの stop イベントのイベントハンドラ
+- (void)stopEvent:(id)sendor {
+    [self stopSpeech];
+}
+
+/// MPRemoteCommandCenter からの togglePlayPause イベントのイベントハンドラ
+- (void)togglePlayPauseEvent:(id)sendor {
+    if ([[GlobalDataSingleton GetInstance] isSpeaking]) {
+        NSLog(@"toggle stopSpeech");
+        [self stopSpeech];
+    }else{
+        NSLog(@"toggle startSpeech");
+        [self startSpeech];
+    }
+}
+
+/// MPRemoteCommandCenter からの nextTrack イベントのイベントハンドラ
+- (void)nextTrackEvent:(id)sendor {
+    [self stopSpeechWithoutDiactivate];
+    if ([self SetNextChapter]) {
+        [self startSpeech];
+    }
+}
+
+/// MPRemoteCommandCenter からの previousTrack イベントのイベントハンドラ
+- (void)previousTrackEvent:(id)sendor {
+    [self stopSpeechWithoutDiactivate];
+    if ([self SetPreviousChapter]) {
+        [self startSpeech];
+    }
+}
+
+/// MPRemoteCommandCenter からの skipForward イベントのイベントハンドラ
+- (void)skipForwardEvent:(id)sendor {
+    //[self stopSpeechWithoutDiactivate];
+    [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
+    [self skipForward:100];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+        [self startSpeech];
+    });
+}
+/// MPRemoteCommandCenter からの skipBackword イベントのイベントハンドラ
+- (void)skipBackwordEvent:(id)sendor {
+    //[self stopSpeechWithoutDiactivate];
+    [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
+    [self skipBackward:100];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+        [self startSpeech];
+    });
+}
+
+/// MPRemoteCommandCenter からの seekForward イベントのイベントハンドラ
+- (void)seekForwardEvent:(MPSeekCommandEvent *)event{
+    if (event.type == MPSeekCommandEventTypeBeginSeeking) {
+        [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_AnnounceSeekForward", @"早送り")];
+        m_bIsSeeking = true;
+        [NSTimer scheduledTimerWithTimeInterval:0.5 repeats:true block:^(NSTimer * _Nonnull timer) {
+            if (!m_bIsSeeking) {
+                [timer invalidate];
+                return;
+            }
+            [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
+            [self skipForward:50];
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+                [self startSpeech];
+            });
+        }];
+    }
+    if (event.type == MPSeekCommandEventTypeEndSeeking) {
+        m_bIsSeeking = false;
+    }
+}
+/// MPRemoteCommandCenter からの seekBackward イベントのイベントハンドラ
+- (void)seekBackwardEvent:(MPSeekCommandEvent *)event{
+    if (event.type == MPSeekCommandEventTypeBeginSeeking) {
+        [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_AnnounceSeekBackward", @"巻き戻し")];
+        m_bIsSeeking = true;
+        [NSTimer scheduledTimerWithTimeInterval:0.5 repeats:true block:^(NSTimer * _Nonnull timer) {
+            if (!m_bIsSeeking) {
+                [timer invalidate];
+                return;
+            }
+            [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
+            [self skipBackward:50];
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+                [self startSpeech];
+            });
+        }];
+    }
+    if (event.type == MPSeekCommandEventTypeEndSeeking) {
+        m_bIsSeeking = false;
+    }
+}
+
+/// 読み上げ位置を count文字分 だけ進めます。章を超えるような場合には単に次の章の先頭に移動させます。
+- (void)skipForward:(NSUInteger)count {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NSRange currentReadingPoint = [globalData GetCurrentReadingPoint];
+    NSString* currentText = self.textView.text;
+    NSUInteger currentLocation = currentReadingPoint.location;
+    if (currentLocation + count > [currentText length]) {
+        if (![self SetNextChapter]) {
+            return;
+        }
+    }else{
+        m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:currentLocation + count];
+        [globalData UpdateReadingPoint:self.NarouContentDetail story:m_CurrentReadingStory];
+        [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail.ncode];
+    }
+}
+
+/// 読み上げ位置を count文字分 だけ戻します。章を超えるような場合には前の章の末尾から count 文字分戻った位置に移動させます。
+/// その際、前の章が count文字 に満たない場合は前の章の先頭に移動させます。
+- (void)skipBackward:(NSUInteger)count {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NSRange currentReadingPoint = [globalData GetCurrentReadingPoint];
+    NSUInteger currentLocation = currentReadingPoint.location;
+    NSUInteger targetLength = 0;
+    if (currentLocation < count && [self SetPreviousChapter]) {
+        NSString* chapterText = self.textView.text;
+        NSUInteger chapterLength = [chapterText length];
+        if (chapterLength > count) {
+            targetLength = chapterLength - count;
+        }
+    }else{
+        targetLength = currentLocation - count;
+    }
+    m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:targetLength];
+    [globalData UpdateReadingPoint:self.NarouContentDetail story:m_CurrentReadingStory];
+    [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail.ncode];
 }
 
 /// 表示用のフォントサイズを変更します

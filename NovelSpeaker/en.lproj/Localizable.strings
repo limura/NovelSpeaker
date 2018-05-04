@@ -79,6 +79,8 @@
 "SettingTableViewController_SendBugReport" = "Send inquiries to developers by e-mail";
 "SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "Display bookmark position on Bookshelf";
 "SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "Only display add correction of the reading at long press menu";
+"SettingTableViewController_ShortSkipIsEnabled" = "Change rewind button on Control Center to skip a little button";
+
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -106,6 +108,8 @@
 "SpeechViewController_SpeakAlertVoiceOver" = "VoiceOver becomes effective. Do you reproduce as it is?";
 "SpeechViewController_SpeakAlertVoiceOverMessage" = "Reading aloud occurs double when it just reproduce.";
 "SpeechViewController_loading" = "loading...";
+"SpeechViewController_AnnounceSeekForward" = "Fast forward";
+"SpeechViewController_AnnounceSeekBackward" = "Rewind";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";
@@ -211,7 +215,7 @@
 "BugReportViewController_TypeSelect_BugReport" = "Problem report";
 "BugReportViewController_TypeSelectTitle" = "Type of inquiry";
 "BugReportViewController_InformationOfTheProblemWriting" = "Although it is sorry to trouble you, but as for the reproducing procedure of inconvenience, please make sure that the same operation is done from the place where you launched the application again, and inconvenience will occur, please report it. We are receiving much inconvenience reports that do not reproduce with inconvenient reproduced procedures reported. Also, when you are reading the neighborhood of the ~ chapter of the novel called web site ~ that you acquired with the web capture function rather than just the contents like \" Please write the information that detailed the state of the problem actually occurred, such as \"happened\". We are sorry to report that we can not reproduce at the hands of developers, but we can not respond. If you do not feel confident about the inconvenience reproducing procedure, please turn on \"I want a reply to this report\" and send it, it is recommended because later you can give us detailed hearing reply from the developer side. However, the developers have taken quite a bit of time to acknowledge the reply. Since it is very helpful to just reduce the need for reply, it will be helpful if you can add in the entry box of \"Description of problem\" below, \"I would like to reply by e-mail only if inconvenience does not reproduce\" .";
-"BugReportViewController_InformationOfTheTime" = "Please enter the date and time of inconvenience as accurately as possible. There is nothing meaningful only with the information just shifted one day ago, but we have received much reports on such values. In particular, if you can attach operation logs, confirmation work will be completed by referring to the logs of the relevant date and time in the operation log, so please enter the date and time as close as possible.";
+"BugReportViewController_InformationOfTheTime" = "Please enter the date and time of inconvenience as accurately as possible. A lot of reports have been received with just the value just shifted one day ago. In particular, if you can attach operation logs, confirmation work will be completed by referring to the logs of the relevant date and time in the operation log, so please enter the date and time as close as possible.";
 
 "NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
 "NarouSearchResultDetailViewControllerSwift_Writer" = "Writer";
@@ -235,14 +239,22 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.23
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.24
 
-- About the position indicator gauge of the bookmarker on the bookshelf so that the color of the gauge changes when reading is finished
-- Change the scroll position being read so that it scrolls slightly beyond the place to read aloud
+- Added settings to change to previous button in control center, button to next chapter a little bit, change to a little advance button
+- Corresponds to rewind / fast forward command from earphone
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.24
+
+Interface change
+
+- Added settings to change to previous button in control center, button to next chapter a little bit, change to a little advance button
+- Corresponds to rewind / fast forward command from earphone
+
+
 Version 1.1.23
 
 Interface change

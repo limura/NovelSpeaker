@@ -2258,6 +2258,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_FORCE_SITEINFO_RELOAD_IS_ENABLED @"ForceSiteInfoReloadIsEnabled"
 #define USER_DEFAULTS_READING_PROGRESS_DISPLAY_IS_ENABLED @"ReadingProgressDisplayIsEnabled"
 #define USER_DEFAULTS_DISPLAY_FONT_NAME @"DisplayFontName"
+#define USER_DEFAULTS_SHORT_SKIP_IS_ENABLED @"ShortSkipIsEnabled"
 #define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
@@ -3136,6 +3137,19 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (void)SetReadingProgressDisplayEnabled:(BOOL)yesNo{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setBool:yesNo forKey:USER_DEFAULTS_READING_PROGRESS_DISPLAY_IS_ENABLED];
+    [userDefaults synchronize];
+}
+
+/// コントロールセンターの「前の章へ戻る/次の章へ進む」ボタンを「少し戻る/少し進む」ボタンに変更するか否かを取得します
+- (BOOL)IsShortSkipEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_SHORT_SKIP_IS_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_SHORT_SKIP_IS_ENABLED];
+}
+/// コントロールセンターの「前の章へ戻る/次の章へ進む」ボタンを「少し戻る/少し進む」ボタンに変更するか否かを設定します
+- (void)SetShortSkipEnabled:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_SHORT_SKIP_IS_ENABLED];
     [userDefaults synchronize];
 }
 

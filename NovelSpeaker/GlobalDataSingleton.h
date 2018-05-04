@@ -417,6 +417,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 読んでいるゲージを表示する(true)か否(false)かを設定します
 - (void)SetReadingProgressDisplayEnabled:(BOOL)isDisplay;
 
+/// コントロールセンターの「前の章へ戻る/次の章へ進む」ボタンを「少し戻る/少し進む」ボタンに変更するか否かを取得します
+- (BOOL)IsShortSkipEnabled;
+/// コントロールセンターの「前の章へ戻る/次の章へ進む」ボタンを「少し戻る/少し進む」ボタンに変更するか否かを設定します
+- (void)SetShortSkipEnabled:(BOOL)isEnabled;
+
 /// 小説の表示に使用するフォント名を取得します
 - (NSString*)GetDisplayFontName;
 /// 小説の表示に使用するフォント名を設定します
