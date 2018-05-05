@@ -777,6 +777,43 @@ static GlobalDataSingleton* _singleton = nil;
     return result;
 }
 
+/// Siri さんエンジンでの読み上げの rate から1秒間に読み上げられる文字数へ変換します。
+/// 当然、当てずっぽうの値です。
++ (float)SpeechRateToCharCountInSecond:(float)rate {
+    float rateNormalized = (rate - AVSpeechUtteranceMinimumSpeechRate) / (AVSpeechUtteranceMaximumSpeechRate - AVSpeechUtteranceMinimumSpeechRate);
+    
+    // 下に膨らんでる感じの補正をかける
+    float rateCurved = powf(rateNormalized, 2.8);
+    //NSLog(@"rateNormalized: %f -> %f", rateNormalized, rateCurved);
+    // XXXX: ここ書かれている謎の値は
+    // 単に rate を AVSpeechUtteranceMinimumSpeechRate(0.0) にした時と
+    // AVSpeechUtteranceMaximumSpeechRate(1.0) にした時のそれぞれである程度の文字数を読み上げさせてみて、時間を測って出した値なのでまぁぶっちゃけ駄目。
+    float charCount = rateCurved * 20.72f + 2.96f;
+    return charCount;
+}
+
++ (NSUInteger)GuessSpeakLocationFromDulationWithConfig:(SpeechConfig*)speechConfig dulation:(float)dulation {
+    float rate = 0.5f;
+    if (speechConfig != nil) {
+        rate = speechConfig.rate;
+    }
+    float charCount = [GlobalDataSingleton SpeechRateToCharCountInSecond:rate];
+    return (NSUInteger)(dulation * charCount);
+}
+
++ (float)GuessSpeakDuration:(NSUInteger)textLength speechConfig:(SpeechConfig*)speechConfig {
+    if (speechConfig == nil) {
+        return 0.0f;
+    }
+    float charCount = [GlobalDataSingleton SpeechRateToCharCountInSecond:speechConfig.rate];
+    return textLength / charCount;
+}
+
+/// 現在の読み上げ設定による、dulation(秒数)からの読み上げ位置を推測します
+- (NSUInteger)GuessSpeakLocationFromDulation:(float)dulation {
+    return [GlobalDataSingleton GuessSpeakLocationFromDulationWithConfig:[m_NiftySpeaker GetDefaultSpeechConfig] dulation:dulation];
+}
+
 - (void)UpdatePlayingInfo:(StoryCacheData*)story
 {
     NSString* titleName = NSLocalizedString(@"GlobalDataSingleton_NoPlaing", @"再生していません");
@@ -795,6 +832,13 @@ static GlobalDataSingleton* _singleton = nil;
     NSMutableDictionary* songInfo = [NSMutableDictionary new];
     [songInfo setObject:titleName forKey:MPMediaItemPropertyTitle];
     [songInfo setObject:artist forKey:MPMediaItemPropertyArtist];
+    if ([self IsPlaybackDurationEnabled]) {
+        float playbackDuration = [GlobalDataSingleton GuessSpeakDuration:[story.content length] speechConfig:[m_NiftySpeaker GetDefaultSpeechConfig]];
+        float currentPosition = [GlobalDataSingleton GuessSpeakDuration:[story.readLocation unsignedIntValue] speechConfig:[m_NiftySpeaker GetDefaultSpeechConfig]];
+        [songInfo setObject:[[NSNumber alloc] initWithFloat:playbackDuration] forKey:MPMediaItemPropertyPlaybackDuration];
+        [songInfo setObject:[[NSNumber alloc] initWithFloat:currentPosition] forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
+        [songInfo setObject:@1.0f forKey:MPNowPlayingInfoPropertyPlaybackRate];
+    }
     UIImage* artworkImage = [UIImage imageNamed:@"NovelSpeakerIcon-167px.png"];
     MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc] initWithImage:artworkImage];
     [songInfo setObject:artwork forKey:MPMediaItemPropertyArtwork];
@@ -2259,6 +2303,8 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_READING_PROGRESS_DISPLAY_IS_ENABLED @"ReadingProgressDisplayIsEnabled"
 #define USER_DEFAULTS_DISPLAY_FONT_NAME @"DisplayFontName"
 #define USER_DEFAULTS_SHORT_SKIP_IS_ENABLED @"ShortSkipIsEnabled"
+#define USER_DEFAULTS_PLAYBACK_DURATION_IS_ENABLED @"PlaybackDurationIsEnabled"
+#define USER_DEFAULTS_DARK_THEME_IS_ENABLED @"DarkThemeIsEnabled"
 #define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
@@ -3152,6 +3198,34 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_SHORT_SKIP_IS_ENABLED];
     [userDefaults synchronize];
 }
+
+/// コントロールセンターの再生時間ゲージを有効にするか否かを取得します
+- (BOOL)IsPlaybackDurationEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_PLAYBACK_DURATION_IS_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_PLAYBACK_DURATION_IS_ENABLED];
+}
+
+/// コントロールセンターの再生時間ゲージを有効にするか否かを設定します
+- (void)SetPlaybackDurationIsEnabled:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_PLAYBACK_DURATION_IS_ENABLED];
+    [userDefaults synchronize];
+}
+
+/// 暗い色調にするか否かを取得します
+- (BOOL)IsDarkThemeIsEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_DARK_THEME_IS_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_DARK_THEME_IS_ENABLED];
+}
+/// 暗い色調にするか否かを設定します
+- (void)SetDarkThemeIsEnabled:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_DARK_THEME_IS_ENABLED];
+    [userDefaults synchronize];
+}
+
 
 /// 小説の表示に使用するフォント名を取得します
 - (NSString*)GetDisplayFontName{

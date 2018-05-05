@@ -80,6 +80,8 @@
 "SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "Display bookmark position on Bookshelf";
 "SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "Only display add correction of the reading at long press menu";
 "SettingTableViewController_ShortSkipIsEnabled" = "Change rewind button on Control Center to skip a little button";
+"SettingTableViewController_PlaybackDurationIsEnabled" = "Display the playing time on the control center (the displayed time is approximate, it will not be an accurate value)";
+"SettingTableViewController_DarkThemeIsEnabled" = "Darken the background when reading a novel";
 
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
@@ -239,14 +241,27 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.24
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.25
 
-- Added settings to change to previous button in control center, button to next chapter a little bit, change to a little advance button
-- Corresponds to rewind / fast forward command from earphone
+- Added setting tab on whether to display playing time in control center to setting tab
+- Add setting to the setting tab whether to make the screen black-based background when displaying the novel text
+- Fixed an issue where playback did not stop due to button operation of Bluetooth earphone
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.25
+
+Interface change
+
+- Added setting tab on whether to display playing time in control center to setting tab
+- Add setting to the setting tab whether to make the screen black-based background when displaying the novel text
+
+Bug fix
+
+- Fixed an issue where playback did not stop due to button operation of Bluetooth earphone
+
+
 Version 1.1.24
 
 Interface change

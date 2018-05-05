@@ -422,6 +422,16 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// コントロールセンターの「前の章へ戻る/次の章へ進む」ボタンを「少し戻る/少し進む」ボタンに変更するか否かを設定します
 - (void)SetShortSkipEnabled:(BOOL)isEnabled;
 
+/// コントロールセンターの再生時間ゲージを有効にするか否かを取得します
+- (BOOL)IsPlaybackDurationEnabled;
+/// コントロールセンターの再生時間ゲージを有効にするか否かを設定します
+- (void)SetPlaybackDurationIsEnabled:(BOOL)isEnabled;
+
+/// 暗い色調にするか否かを取得します
+- (BOOL)IsDarkThemeIsEnabled;
+/// 暗い色調にするか否かを設定します
+- (void)SetDarkThemeIsEnabled:(BOOL)isEnabled;
+
 /// 小説の表示に使用するフォント名を取得します
 - (NSString*)GetDisplayFontName;
 /// 小説の表示に使用するフォント名を設定します
@@ -450,4 +460,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
 - (void)ForceOverrideHungSpeakStringToSpeechModSettings;
 
+/// 現在の読み上げ設定による、dulation(秒数)からの読み上げ位置を推測します
+- (NSUInteger)GuessSpeakLocationFromDulation:(float)dulation;
+- (void)UpdatePlayingInfo:(StoryCacheData*)story;
 @end

@@ -9,6 +9,7 @@
 #import <CoreData/CoreData.h>
 #import <Social/Social.h>
 #import <MediaPlayer/MediaPlayer.h>
+#import <UIKit/NSAttributedString.h>
 #import "SpeechViewController.h"
 #import "Story.h"
 #import "NarouContent.h"
@@ -123,12 +124,18 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    
+    if ([globalData IsDarkThemeIsEnabled]) {
+        [self ApplyDarkTheme];
+    }else{
+        [self ApplyBrightTheme];
+    }
 
     //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidAppear %@", self.NarouContentDetail.title]]; // NSLog
 
     // なにやら登録が外れる事があるようなので、AddSpeakRangeDelegate をこのタイミングでも呼んでおきます。
     // AddSpeakRangeDelegate は複数回呼んでも大丈夫なように作ってあるはずです
-    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     //[self SetCurrentReadingPointFromSavedData:self.NarouContentDetail.ncode];
     [globalData AddSpeakRangeDelegate:self];
     //[[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
@@ -167,7 +174,46 @@
     [self SaveCurrentReadingPoint];
     [[GlobalDataSingleton GetInstance] DeleteSpeakRangeDelegate:self];
     
+    [self ApplyBrightTheme];
     [super viewWillDisappear:animated];
+}
+
+/// 背景の暗いテーマを適用します
+- (void)ApplyDarkTheme{
+    UIColor* backgroundColor = UIColor.blackColor;
+    UIColor* foregroundColor = UIColor.whiteColor;
+    
+    self.view.backgroundColor = backgroundColor;
+    self.textView.textColor = foregroundColor;
+    self.textView.backgroundColor = backgroundColor;
+    self.NextChapterButton.backgroundColor = backgroundColor;
+    self.PrevChapterButton.backgroundColor = backgroundColor;
+    self.ChapterSlider.backgroundColor = backgroundColor;
+    self.ChapterIndicatorLabel.backgroundColor = backgroundColor;
+    self.ChapterIndicatorLabel.textColor = foregroundColor;
+    self.tabBarController.tabBar.barTintColor = backgroundColor;
+    //self.navigationController.navigationBar.tintColor = [[UIColor alloc] initWithRed:0.5 green:0.5 blue:1.0 alpha:1.0];
+    self.navigationController.navigationBar.barTintColor = backgroundColor;
+    self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: foregroundColor};
+}
+
+/// 背景の明るいテーマを適用します
+- (void)ApplyBrightTheme{
+    UIColor* backgroundColor = UIColor.whiteColor;
+    UIColor* foregroundColor = UIColor.blackColor;
+    
+    self.view.backgroundColor = backgroundColor;
+    self.textView.textColor = foregroundColor;
+    self.textView.backgroundColor = backgroundColor;
+    self.NextChapterButton.backgroundColor = backgroundColor;
+    self.PrevChapterButton.backgroundColor = backgroundColor;
+    self.ChapterSlider.backgroundColor = backgroundColor;
+    self.ChapterIndicatorLabel.backgroundColor = backgroundColor;
+    self.ChapterIndicatorLabel.textColor = foregroundColor;
+    self.tabBarController.tabBar.barTintColor = backgroundColor;
+    //self.navigationController.navigationBar.tintColor = UIColor.blueColor;
+    self.navigationController.navigationBar.barTintColor = backgroundColor;
+    self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: foregroundColor};
 }
 
 /// 現在選択されている文字列を取得します
@@ -209,10 +255,17 @@
     commandCenter.seekForwardCommand.enabled = true;
     [commandCenter.seekBackwardCommand addTarget:self action:@selector(seekBackwardEvent:)];
     commandCenter.seekBackwardCommand.enabled = true;
+
+    if ([[GlobalDataSingleton GetInstance] IsPlaybackDurationEnabled]) {
+        [commandCenter.changePlaybackPositionCommand addTarget:self action:@selector(changePlaybackPositionEvent:)];
+        commandCenter.changePlaybackPositionCommand.enabled = true;
+    }
 }
 /// MPRemoteCommandCenter でのイベントを受け取るのをやめます
 - (void) disableMPRemoteCommandCenterEvents{
     MPRemoteCommandCenter* commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+    [commandCenter.changePlaybackPositionCommand removeTarget:self];
+    commandCenter.changePlaybackPositionCommand.enabled = false;
     [commandCenter.togglePlayPauseCommand removeTarget:self];
     commandCenter.togglePlayPauseCommand.enabled = false;
     [commandCenter.playCommand removeTarget:self];
@@ -767,6 +820,30 @@
     if (event.type == MPSeekCommandEventTypeEndSeeking) {
         m_bIsSeeking = false;
     }
+}
+
+- (MPRemoteCommandHandlerStatus)changePlaybackPositionEvent:(MPChangePlaybackPositionCommandEvent*)event{
+    NSLog(@"MPChangePlaybackPositionCommandEvent got: %f", event.positionTime);
+    
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NSUInteger newLocation = [globalData GuessSpeakLocationFromDulation:event.positionTime];
+    NSUInteger textLength = [m_CurrentReadingStory.content length];
+    if (newLocation > textLength) {
+        newLocation = textLength;
+    }
+    if (newLocation <= 0) {
+        newLocation = 0;
+    }
+    m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:newLocation];
+    [globalData UpdateReadingPoint:self.NarouContentDetail story:m_CurrentReadingStory];
+    [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail.ncode];
+    [globalData UpdatePlayingInfo:(m_CurrentReadingStory)];
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+        [self startSpeech];
+    });
+    
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 
 /// 読み上げ位置を count文字分 だけ進めます。章を超えるような場合には単に次の章の先頭に移動させます。

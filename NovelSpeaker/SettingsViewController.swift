@@ -130,6 +130,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_OnlyDisplayAddSpeechModSettings", comment: "本文中の長押しメニューを読み替え辞書へ登録のみにする")
                 $0.value = GlobalDataSingleton.getInstance().getMenuItemIsAddSpeechModSettingOnly()
                 $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = .systemFont(ofSize: 14.0)
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance().setMenuItemIsAddSpeechModSettingOnly(row.value!)
                 })
@@ -137,8 +138,24 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_ShortSkipIsEnabled", comment: "コントロールセンターの前後の章(トラック)への移動ボタンを、少し前/少し後の文への移動にする")
                 $0.value = GlobalDataSingleton.getInstance().isShortSkipEnabled()
                 $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = .systemFont(ofSize: 14.0)
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance().setShortSkipEnabled(row.value!)
+                })
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_PlaybackDurationIsEnabled", comment: "コントロールセンターの再生時間ゲージを有効にする(表示される時間は概算で、正確な値にはなりません)")
+                $0.value = GlobalDataSingleton.getInstance().isPlaybackDurationEnabled()
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = .systemFont(ofSize: 14.0)
+                }.onChange({ (row) in
+                    GlobalDataSingleton.getInstance().setPlaybackDurationIsEnabled(row.value!)
+                })
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_DarkThemeIsEnabled", comment: "小説を読む時に背景を暗くする")
+                $0.value = GlobalDataSingleton.getInstance().isDarkThemeIsEnabled()
+                $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ (row) in
+                    GlobalDataSingleton.getInstance().setDarkThemeIsEnabled(row.value!)
                 })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
