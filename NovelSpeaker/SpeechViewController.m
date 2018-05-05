@@ -191,6 +191,8 @@
     commandCenter.togglePlayPauseCommand.enabled = true;
     [commandCenter.playCommand addTarget:self action:@selector(playEvent:)];
     commandCenter.playCommand.enabled = true;
+    [commandCenter.pauseCommand addTarget:self action:@selector(stopEvent:)];
+    commandCenter.pauseCommand.enabled = true;
     [commandCenter.stopCommand addTarget:self action:@selector(stopEvent:)];
     commandCenter.stopCommand.enabled = true;
     [commandCenter.nextTrackCommand addTarget:self action:@selector(nextTrackEvent:)];
@@ -200,7 +202,7 @@
     if ([[GlobalDataSingleton GetInstance] IsShortSkipEnabled]) {
         [commandCenter.skipForwardCommand addTarget:self action:@selector(skipForwardEvent:)];
         commandCenter.skipForwardCommand.enabled = true;
-        [commandCenter.skipBackwardCommand addTarget:self action:@selector(skipBackwordEvent:)];
+        [commandCenter.skipBackwardCommand addTarget:self action:@selector(skipBackwardEvent:)];
         commandCenter.skipBackwardCommand.enabled = true;
     }
     [commandCenter.seekForwardCommand addTarget:self action:@selector(seekForwardEvent:)];
@@ -215,6 +217,8 @@
     commandCenter.togglePlayPauseCommand.enabled = false;
     [commandCenter.playCommand removeTarget:self];
     commandCenter.playCommand.enabled = false;
+    [commandCenter.pauseCommand removeTarget:self];
+    commandCenter.pauseCommand.enabled = false;
     [commandCenter.stopCommand removeTarget:self];
     commandCenter.stopCommand.enabled = false;
     [commandCenter.skipForwardCommand removeTarget:self];
@@ -713,7 +717,7 @@
     });
 }
 /// MPRemoteCommandCenter からの skipBackword イベントのイベントハンドラ
-- (void)skipBackwordEvent:(id)sendor {
+- (void)skipBackwardEvent:(id)sendor {
     //[self stopSpeechWithoutDiactivate];
     [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
     [self skipBackward:100];
