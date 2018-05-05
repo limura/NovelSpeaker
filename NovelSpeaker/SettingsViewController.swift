@@ -49,11 +49,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             
             <<< TimeIntervalCountDownRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
-                let dulation = GlobalDataSingleton.getInstance().getGlobalState().maxSpeechTimeInSec
-                //Date(timeIntervalSince1970: dulation as! TimeInterval)
-                //Date(timeIntervalSinceReferenceDate: dulation as! TimeInterval)
+                let duration = GlobalDataSingleton.getInstance().getGlobalState().maxSpeechTimeInSec
+                //Date(timeIntervalSince1970: duration as! TimeInterval)
+                //Date(timeIntervalSinceReferenceDate: duration as! TimeInterval)
                 $0.minuteInterval = 5
-                $0.value = dulation?.doubleValue
+                $0.value = duration?.doubleValue
                 }.onChange({ row in
                     let globalData = GlobalDataSingleton.getInstance()
                     let globalState = globalData?.getGlobalState()

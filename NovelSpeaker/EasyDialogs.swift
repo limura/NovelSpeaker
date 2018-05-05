@@ -593,8 +593,8 @@ public class EasyDialog: UIViewController {
                     }
                 }
                 NSLayoutConstraint.activate(forTextViewConstraintArray)
-                if let dulation = dic[UIKeyboardAnimationDurationUserInfoKey] as? TimeInterval {
-                    UIView.animate(withDuration: dulation, animations: {
+                if let duration = dic[UIKeyboardAnimationDurationUserInfoKey] as? TimeInterval {
+                    UIView.animate(withDuration: duration, animations: {
                         self.view.layoutIfNeeded()
                     })
                 }
@@ -620,8 +620,8 @@ public class EasyDialog: UIViewController {
                 }
             }
             NSLayoutConstraint.activate(forTextViewConstraintArray)
-            if let dulation = dic[UIKeyboardAnimationDurationUserInfoKey] as? TimeInterval {
-                UIView.animate(withDuration: dulation, animations: {
+            if let duration = dic[UIKeyboardAnimationDurationUserInfoKey] as? TimeInterval {
+                UIView.animate(withDuration: duration, animations: {
                     self.view.layoutIfNeeded()
                 })
             }
