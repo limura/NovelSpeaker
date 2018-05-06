@@ -3107,16 +3107,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 /// 通知をONにしようとします
 - (void)RegisterUserNotification {
-    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_0) {
-        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(
-                                                                               UIRemoteNotificationTypeBadge
-                                                                               | UIRemoteNotificationTypeAlert)];
-    }else{
-        UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:
-                                                            (UIUserNotificationTypeAlert | UIUserNotificationTypeBadge)
-                                                                                             categories:nil];
-        [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
-    }
+    UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:
+                                                        (UIUserNotificationTypeAlert | UIUserNotificationTypeBadge)
+                                                                                         categories:nil];
+    [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
 }
 
 /// BackgroundFetch を有効化します
