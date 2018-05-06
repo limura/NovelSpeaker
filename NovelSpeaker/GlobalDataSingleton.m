@@ -2305,6 +2305,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_SHORT_SKIP_IS_ENABLED @"ShortSkipIsEnabled"
 #define USER_DEFAULTS_PLAYBACK_DURATION_IS_ENABLED @"PlaybackDurationIsEnabled"
 #define USER_DEFAULTS_DARK_THEME_IS_ENABLED @"DarkThemeIsEnabled"
+#define USER_DEFAULTS_PAGE_TURNING_SOUND_IS_ENABLED @"PageTurningSoundIsEnabled"
 #define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
@@ -3208,7 +3209,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 /// 暗い色調にするか否かを取得します
-- (BOOL)IsDarkThemeIsEnabled{
+- (BOOL)IsDarkThemeEnabled{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults registerDefaults:@{USER_DEFAULTS_DARK_THEME_IS_ENABLED: @false}];
     return [userDefaults boolForKey:USER_DEFAULTS_DARK_THEME_IS_ENABLED];
@@ -3217,6 +3218,19 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (void)SetDarkThemeIsEnabled:(BOOL)isEnabled{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_DARK_THEME_IS_ENABLED];
+    [userDefaults synchronize];
+}
+
+/// ページめくり音を発生させるか否かを取得します
+- (BOOL)IsPageTurningSoundEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_PAGE_TURNING_SOUND_IS_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_PAGE_TURNING_SOUND_IS_ENABLED];
+}
+/// ページめくり音を発生させるか否かを設定します
+- (void)SetPageTurningSoundIsEnabled:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_PAGE_TURNING_SOUND_IS_ENABLED];
     [userDefaults synchronize];
 }
 

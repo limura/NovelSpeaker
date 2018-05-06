@@ -78,6 +78,8 @@
 		213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */; };
 		213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */; };
 		214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */; };
+		21429D84209F45E3001426F5 /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
+		21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21429D85209F45FD001426F5 /* AudioToolbox.framework */; };
 		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
@@ -116,7 +118,6 @@
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
-		21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */ = {isa = PBXBuildFile; fileRef = 21AED5D419B335CF00CE846D /* ReleaseMemo.md */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
 		21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -321,6 +322,8 @@
 		213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeIntervalCountDownRow.swift; sourceTree = "<group>"; };
 		214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiftyUtilitySwift.swift; sourceTree = "<group>"; };
+		21429D82209F4516001426F5 /* nc48625.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = nc48625.m4a; sourceTree = "<group>"; };
+		21429D85209F45FD001426F5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMultithreadTests.m; sourceTree = "<group>"; };
 		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -514,6 +517,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */,
 				216741A92047714D008A578D /* PDFKit.framework in Frameworks */,
 				215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */,
 				213515FC1F8CC06400F7AAD0 /* MessageUI.framework in Frameworks */,
@@ -688,6 +692,7 @@
 				21B53A1919619C00009658B7 /* sound.png */,
 				21B53A1A19619C00009658B7 /* sound@2x.png */,
 				2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */,
+				21429D82209F4516001426F5 /* nc48625.m4a */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -787,6 +792,7 @@
 		21F054CB1917E0F200CC6BA9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				21429D85209F45FD001426F5 /* AudioToolbox.framework */,
 				216741A82047714D008A578D /* PDFKit.framework */,
 				215B4DE91FB928A900602DB6 /* WebKit.framework */,
 				213515FB1F8CC06400F7AAD0 /* MessageUI.framework */,
@@ -1068,6 +1074,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				21429D84209F45E3001426F5 /* nc48625.m4a in Resources */,
 				2133F2A31E80E175001A0BC5 /* Icon-60@3x.png in Resources */,
 				21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */,
 				21D3979F1FC95CBB0018F883 /* earth@3x.png in Resources */,
@@ -1143,7 +1150,6 @@
 				219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */,
 				213374402013816D0043D995 /* bookmark-false@3x.png in Resources */,
 				21D397A01FC95CBB0018F883 /* earth.png in Resources */,
-				21AED5D519B335CF00CE846D /* ReleaseMemo.md in Resources */,
 				2133F2AD1E80E175001A0BC5 /* Icon-Small.png in Resources */,
 				21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */,
 			);

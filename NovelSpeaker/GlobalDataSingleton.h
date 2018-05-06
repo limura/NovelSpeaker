@@ -428,9 +428,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (void)SetPlaybackDurationIsEnabled:(BOOL)isEnabled;
 
 /// 暗い色調にするか否かを取得します
-- (BOOL)IsDarkThemeIsEnabled;
+- (BOOL)IsDarkThemeEnabled;
 /// 暗い色調にするか否かを設定します
 - (void)SetDarkThemeIsEnabled:(BOOL)isEnabled;
+
+/// ページめくり音を発生させるか否かを取得します
+- (BOOL)IsPageTurningSoundEnabled;
+/// ページめくり音を発生させるか否かを設定します
+- (void)SetPageTurningSoundIsEnabled:(BOOL)isEnabled;
 
 /// 小説の表示に使用するフォント名を取得します
 - (NSString*)GetDisplayFontName;

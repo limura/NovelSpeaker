@@ -10,6 +10,7 @@
 #import <Social/Social.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import <UIKit/NSAttributedString.h>
+#import <AudioToolbox/AudioToolbox.h>
 #import "SpeechViewController.h"
 #import "Story.h"
 #import "NarouContent.h"
@@ -106,6 +107,10 @@
     UIMenuItem* speechModMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"SpeechViewController_AddSpeechModSettings", @"読み替え辞書へ登録") action:@selector(setSpeechModSetting:)];
     [menuController setMenuItems:@[speechModMenuItem]];
     
+    // ページめくり音を設定しておきます
+    NSURL* pageTurningSoundFile = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"nc48625" ofType:@"m4a"]];
+    AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain(pageTurningSoundFile), &m_PageTurningSoundID);
+    
     m_bIsSpeaking = NO;
 }
 
@@ -126,7 +131,7 @@
     [super viewDidAppear:animated];
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     
-    if ([globalData IsDarkThemeIsEnabled]) {
+    if ([globalData IsDarkThemeEnabled]) {
         [self ApplyDarkTheme];
     }else{
         [self ApplyBrightTheme];
@@ -382,12 +387,20 @@
     //[self SaveCurrentReadingPoint];
 }
 
+/// ページめくり音を再生します
+- (void)RingPageTurningSound{
+    if ([[GlobalDataSingleton GetInstance] IsPageTurningSoundEnabled]) {
+        AudioServicesPlaySystemSound(m_PageTurningSoundID);
+    }
+}
+
 - (BOOL)SetPreviousChapter
 {
     StoryCacheData* story = [[GlobalDataSingleton GetInstance] GetPreviousChapter:m_CurrentReadingStory];
     if (story == nil) {
         return false;
     }
+    [self RingPageTurningSound];
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
     [self SaveCurrentReadingPoint];
@@ -400,6 +413,7 @@
     if (story == nil) {
         return false;
     }
+    [self RingPageTurningSound];
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
     [self SaveCurrentReadingPoint];

@@ -26,6 +26,7 @@
     EasyAlert* m_EasyAlert;
     BOOL m_bIsSeeking;
     NSTimer* m_SeekTimer;
+    SystemSoundID m_PageTurningSoundID;
 }
 @property (weak, nonatomic) IBOutlet UISlider *ChapterSlider;
 @property (weak, nonatomic) IBOutlet UITextView *textView;

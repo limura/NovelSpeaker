@@ -82,9 +82,11 @@
     [self setNotificationReciver];
     //[[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
     
-    m_UIRefreshControl = [UIRefreshControl new];
-    self.tableView.refreshControl = m_UIRefreshControl;
-    [m_UIRefreshControl addTarget:self action:@selector(refreshControlValueChangedEvent:) forControlEvents:(UIControlEventValueChanged)];
+    if (@available(iOS 10, *)) {
+        m_UIRefreshControl = [UIRefreshControl new];
+        self.tableView.refreshControl = m_UIRefreshControl;
+        [m_UIRefreshControl addTarget:self action:@selector(refreshControlValueChangedEvent:) forControlEvents:(UIControlEventValueChanged)];
+    }
     
     if ([globalData IsVersionUped]) {
         [self ShowVersionUpNotice];

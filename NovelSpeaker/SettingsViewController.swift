@@ -152,10 +152,17 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 })
             <<< SwitchRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_DarkThemeIsEnabled", comment: "小説を読む時に背景を暗くする")
-                $0.value = GlobalDataSingleton.getInstance().isDarkThemeIsEnabled()
+                $0.value = GlobalDataSingleton.getInstance().isDarkThemeEnabled()
                 $0.cell.textLabel?.numberOfLines = 0
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance().setDarkThemeIsEnabled(row.value!)
+                })
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_PageTurningSoundIsEnabled", comment: "ページめくり時に音を鳴らす")
+                $0.value = GlobalDataSingleton.getInstance().isPageTurningSoundEnabled()
+                $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ (row) in
+                    GlobalDataSingleton.getInstance().setPageTurningSoundIsEnabled(row.value!)
                 })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
