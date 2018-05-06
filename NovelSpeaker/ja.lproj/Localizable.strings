@@ -82,6 +82,7 @@
 "SettingTableViewController_PlaybackDurationIsEnabled" = "コントロールセンターに再生時間を表示する(表示される時間は概算で、正確な値にはなりません)";
 "SettingTableViewController_DarkThemeIsEnabled" = "小説を読む時に背景を暗くする";
 "SettingTableViewController_PageTurningSoundIsEnabled" = "ページめくり時に音を鳴らす";
+"SettingTableViewController_IgnoreURISpeechIsEnabled" = "URIを読み上げないようにする";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";

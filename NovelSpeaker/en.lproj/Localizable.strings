@@ -83,6 +83,7 @@
 "SettingTableViewController_PlaybackDurationIsEnabled" = "Display the playing time on the control center (the displayed time is approximate, it will not be an accurate value)";
 "SettingTableViewController_DarkThemeIsEnabled" = "Darken the background when reading a novel";
 "SettingTableViewController_PageTurningSoundIsEnabled" = "Sounds when page turning";
+"SettingTableViewController_IgnoreURISpeechIsEnabled" = "Do not speak URI";
 
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";

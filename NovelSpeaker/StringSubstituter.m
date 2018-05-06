@@ -278,5 +278,32 @@
     return result;
 }
 
+/// 与えられた文字列から、URIに当たる文字列を発見して、文字列のリストとして返します
++ (NSArray*)FindURIStrings:(NSString*)text{
+    if (text == nil) {
+        return @[];
+    }
+    NSError* error = nil;
+    // from https://qiita.com/oka_kento/items/6b3a921024d3b73c1e77
+    NSString* URIMatchString = @"[a-z][0-9a-z-+.]*:(//((%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:])*@)?(\\[(::(ffff:([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}|(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,5})?)|([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,4})?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,3})?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,2})?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3}))?)?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::([0-9a-f]|[1-9a-f][0-9a-f]{1,3})?|(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){3})))))|v[0-9a-f]\\.([0-9a-z-._~!$&'()*+,;=:])+)\\]|(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=])*)(:[1-9][0-9]*)?)?(/(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:@])*)*(\\?(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:@/?])*)?(#(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:@/?])*)?";
+    NSRegularExpression* URIMatchRegexp = [NSRegularExpression regularExpressionWithPattern:URIMatchString options:NSRegularExpressionCaseInsensitive error:&error];
+    NSMutableArray* resultArray = [NSMutableArray new];
+    
+    if (URIMatchRegexp == nil || error != nil) {
+        NSLog(@"regexp compile error: %@", [error description]);
+        return resultArray;
+    }
+
+    NSArray<NSTextCheckingResult*>* matchResultArray = [URIMatchRegexp matchesInString:text options:0 range:NSMakeRange(0, text.length)];
+    for (NSTextCheckingResult* result in matchResultArray) {
+        if (result == nil) {
+            continue;
+        }
+        [resultArray addObject:[text substringWithRange:[result range]]];
+    }
+    
+    return resultArray;
+}
+
 
 @end

@@ -164,6 +164,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance().setPageTurningSoundIsEnabled(row.value!)
                 })
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_IgnoreURISpeechIsEnabled", comment: "URIを読み上げないようにする")
+                $0.value = GlobalDataSingleton.getInstance().getIsIgnoreURIStringSpeechEnabled()
+                $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ (row) in
+                    GlobalDataSingleton.getInstance().setIgnoreURIStringSpeechIsEnabled(row.value!)
+                })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 }.onCellSelection({ (butonCellof, buttonRow) in

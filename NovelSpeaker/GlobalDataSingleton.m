@@ -1466,7 +1466,7 @@ static GlobalDataSingleton* _singleton = nil;
     for (NSString* from in [rubyDictionary keyEnumerator]) {
         NSString* to = [rubyDictionary valueForKey:from];
         if (to != nil) {
-            [m_NiftySpeaker AddSpeechModText:from to:to];
+            [niftySpeaker AddSpeechModText:from to:to];
         }
     }
 }
@@ -1474,7 +1474,21 @@ static GlobalDataSingleton* _singleton = nil;
 /// NiftySpeaker に保存されている文字列から、ルビが振られているものを取り出して読み替え辞書に登録します。
 - (void)ApplyRubyModConfig:(NiftySpeaker*)niftySpeaker
 {
-    [self ApplyRubyModConfigWithText:niftySpeaker text:[m_NiftySpeaker GetText]];
+    [self ApplyRubyModConfigWithText:niftySpeaker text:[niftySpeaker GetText]];
+}
+
+/// 指定された文字列から、URIのような文字列を取り出して読み上げられないように読み替え辞書に登録します。
+- (void)ApplyRemoveURIModConfigWithText:(NiftySpeaker*)niftySpeaker text:(NSString*)text {
+    NSArray* URIStringArray = [StringSubstituter FindURIStrings:text];
+    for (NSString* URIString in URIStringArray) {
+        NSString* toString = @" ";
+        [niftySpeaker AddSpeechModText:URIString to:toString];
+    }
+}
+
+/// NiftySpeaker に保存されている文字列から、URIのようなものを取り出して読み上げられないように読み替え辞書に登録します。
+- (void)ApplyRemoveURIModConfig:(NiftySpeaker*)niftySpeaker{
+    [self ApplyRemoveURIModConfigWithText:niftySpeaker text:[niftySpeaker GetText]];
 }
 
 /// NiftySpeakerに現在の読み替え設定を登録します
@@ -1497,6 +1511,9 @@ static GlobalDataSingleton* _singleton = nil;
     [self ApplySpeechWaitConfig:m_NiftySpeaker];
     if ([self GetOverrideRubyIsEnabled]) {
         [self ApplyRubyModConfig:m_NiftySpeaker];
+    }
+    if ([self GetIsIgnoreURIStringSpeechEnabled]) {
+        [self ApplyRemoveURIModConfig:m_NiftySpeaker];
     }
     [self ApplySpeechModConfig:m_NiftySpeaker];
     return true;
@@ -1570,6 +1587,9 @@ static GlobalDataSingleton* _singleton = nil;
        }];
     if ([self GetOverrideRubyIsEnabled]) {
         [self ApplyRubyModConfigWithText:m_NiftySpeaker text:story.content];
+    }
+    if ([self GetIsIgnoreURIStringSpeechEnabled]) {
+        [self ApplyRemoveURIModConfigWithText:m_NiftySpeaker text:story.content];
     }
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
@@ -2306,6 +2326,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_PLAYBACK_DURATION_IS_ENABLED @"PlaybackDurationIsEnabled"
 #define USER_DEFAULTS_DARK_THEME_IS_ENABLED @"DarkThemeIsEnabled"
 #define USER_DEFAULTS_PAGE_TURNING_SOUND_IS_ENABLED @"PageTurningSoundIsEnabled"
+#define USER_DEFAULTS_IGNORE_URI_SPEECH_IS_ENABLED @"IgnoreURISpeechIsEnabled"
 #define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
@@ -3232,6 +3253,20 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_PAGE_TURNING_SOUND_IS_ENABLED];
     [userDefaults synchronize];
+}
+
+/// URIを読み上げないようにするか否かを取得します
+- (BOOL)GetIsIgnoreURIStringSpeechEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IGNORE_URI_SPEECH_IS_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IGNORE_URI_SPEECH_IS_ENABLED];
+}
+/// URIを読み上げないようにするか否かを設定します
+- (void)SetIgnoreURIStringSpeechIsEnabled:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_IGNORE_URI_SPEECH_IS_ENABLED];
+    [userDefaults synchronize];
+    m_isNeedReloadSpeakSetting = true;
 }
 
 

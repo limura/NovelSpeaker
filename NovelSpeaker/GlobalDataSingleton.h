@@ -402,6 +402,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// ルビがふられた物について、ルビの部分だけを読むか否かの設定を保存します
 - (void)SetOverrideRubyIsEnabled:(BOOL)yesNo;
 
+/// URIを読み上げないようにするか否かを取得します
+- (BOOL)GetIsIgnoreURIStringSpeechEnabled;
+/// URIを読み上げないようにするか否かを設定します
+- (void)SetIgnoreURIStringSpeechIsEnabled:(BOOL)yesNo;
+
 /// 読み上げられないため、ルビとしては認識しない文字集合を取得します
 - (NSString*)GetNotRubyCharactorStringArray;
 /// 読み上げられないため、ルビとしては認識しない文字集合を設定します

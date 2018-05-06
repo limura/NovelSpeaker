@@ -37,5 +37,8 @@
 /// の二種類を出力します。
 + (NSDictionary*)FindNarouRubyNotation:(NSString*)text notRubyString:(NSString*)notRubyString;
 
+/// 与えられた文字列から、URIに当たる文字列を発見して、文字列のリストとして返します
++ (NSArray*)FindURIStrings:(NSString*)text;
+
 @end
 
