@@ -82,6 +82,10 @@
     [self setNotificationReciver];
     //[[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
     
+    m_UIRefreshControl = [UIRefreshControl new];
+    self.tableView.refreshControl = m_UIRefreshControl;
+    [m_UIRefreshControl addTarget:self action:@selector(refreshControlValueChangedEvent:) forControlEvents:(UIControlEventValueChanged)];
+    
     if ([globalData IsVersionUped]) {
         [self ShowVersionUpNotice];
     }
@@ -331,6 +335,13 @@
     
     // 更新フラグとかを更新するために全部リロードしちゃいます
     [self ReloadAllTableViewData];
+}
+
+// UIRefreshControl で値が変わった時に呼ばれるイベントハンドラ(引っ張って更新のイベントハンドラ)
+- (void)refreshControlValueChangedEvent:(id)sender {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    [globalData ReDownladAllContents];
+    [m_UIRefreshControl endRefreshing];
 }
 
 #pragma mark - Navigation

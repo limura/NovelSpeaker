@@ -14,5 +14,6 @@
 {
     NarouContentCacheData* m_NextViewDetail;
     NarouContentSortType m_SortType;
+    UIRefreshControl* m_UIRefreshControl;
 }
 @end
