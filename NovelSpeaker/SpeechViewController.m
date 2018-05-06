@@ -287,6 +287,10 @@
     commandCenter.seekForwardCommand.enabled = false;
     [commandCenter.seekBackwardCommand removeTarget:self];
     commandCenter.seekBackwardCommand.enabled = false;
+    [commandCenter.nextTrackCommand removeTarget:self];
+    commandCenter.nextTrackCommand.enabled = false;
+    [commandCenter.previousTrackCommand removeTarget:self];
+    commandCenter.previousTrackCommand.enabled = false;
 }
 
 /// UITextField でカーソルの位置が変わった時に呼び出されるはずです。
