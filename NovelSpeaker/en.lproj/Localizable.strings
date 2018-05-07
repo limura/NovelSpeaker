@@ -247,16 +247,25 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.26
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.27
 
-- Enable Pull-to-refresh on bookshelf (iOS 10+ only)
-- Add ON / OFF setting to sound when turning pages to the setting tab
-- Add settings to prevent setting up URIs to the setting tab
-- Fixed an issue where skipping to the previous and next chapters skipped multiple chapters instead of one chapter when switching the tab several times with the novel text displayed
+- Added serial status (completion, serialization etc.) on the details screen.
+- Fixed a problem that the first page disappears when adding a page to the novel added in \"Add new self-made novel\"
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.27
+
+Interface change
+
+- Added serial status (completion, serialization etc.) on the details screen.
+
+Bug fix
+
+- Fixed a problem that the first page disappears when adding a page to the novel added in \"Add new self-made novel\"
+
+
 Version 1.1.26
 
 Interface change
