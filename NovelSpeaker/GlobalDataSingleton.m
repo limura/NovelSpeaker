@@ -2391,7 +2391,7 @@ static GlobalDataSingleton* _singleton = nil;
     content.story = @"";
     content.genre = [[NSNumber alloc] initWithInt:0];
     content.keyword = @"";
-    content.general_all_no = [[NSNumber alloc] initWithInt:0];
+    content.general_all_no = [[NSNumber alloc] initWithInt:1];
     content.end = [[NSNumber alloc] initWithBool:false];
     content.global_point = [[NSNumber alloc] initWithInt:0];
     content.fav_novel_cnt = [[NSNumber alloc] initWithInt:0];
@@ -2404,6 +2404,9 @@ static GlobalDataSingleton* _singleton = nil;
     content.is_new_flug = [[NSNumber alloc] initWithBool:false];
     
     content.currentReadingStory = nil;
+    
+    [self UpdateNarouContent:content];
+    [self UpdateStory:@"" chapter_number:1 parentContent:content];
 
     return content;
 }
