@@ -113,6 +113,23 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
                 $0.value = "-"
             }
         } <<< LabelRow() {
+            $0.title = NSLocalizedString("NarouSearchResultDetailViewControllerSwift_IsEnd", comment: "連載状態")
+            if let end = content.end {
+                if end.intValue == 0 {
+                    var state = NSLocalizedString("NarouSearchResultDetailViewControllerSwift_IsEnd=0", comment: "完結 又は 短編小説")
+                    if let general_all_no = content.general_all_no {
+                        if general_all_no.intValue > 1 {
+                            state = NSLocalizedString("NarouSearchResultDetailViewControllerSwift_IsEnd=0&genelral_all_no>1", comment: "完結")
+                        }
+                    }
+                    $0.value = state
+                }else{
+                    $0.value = NSLocalizedString("NarouSearchResultDetailViewControllerSwift_IsEnd=1", comment: "連載中")
+                }
+            }else{
+                $0.value = "-"
+            }
+        } <<< LabelRow() {
             $0.title = NSLocalizedString("NarouSearchResultDetailViewControllerSwift_Keyword", comment: "キーワード")
         } <<< TextRow() {
             if let keyword = content.keyword {

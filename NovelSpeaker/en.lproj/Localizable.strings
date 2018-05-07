@@ -232,6 +232,10 @@
 "NarouSearchResultDetailViewControllerSwift_Point_count" = "Point count";
 "NarouSearchResultDetailViewControllerSwift_Keyword" = "Keyword";
 "NarouSearchResultDetailViewControllerSwift_Story" = "Story";
+"NarouSearchResultDetailViewControllerSwift_IsEnd" = "Serialized state";
+"NarouSearchResultDetailViewControllerSwift_IsEnd=0" = "Completion or short story";
+"NarouSearchResultDetailViewControllerSwift_IsEnd=1" = "Serializing";
+"NarouSearchResultDetailViewControllerSwift_IsEnd=0&genelral_all_no>1" = "Completion";
 
 "TextSizeSettingViewController_FontSettingTitle" = "Font";
 

@@ -1171,6 +1171,22 @@ Bug fix
 - Fixed an issue where skipping to the previous and next chapters skipped multiple chapters instead of one chapter when switching the tab several times with the novel text displayed
 
 
+# Version 1.1.27
+
+インタフェースの変更
+
+- なろう検索 経由の小説の詳細に連載状態(完結や連載中等の状態)を追加
+
+問題の修正
+
+- 「新規自作小説の追加」で追加した小説にページを追加すると最初のページが消える問題を修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+
+
 ----
 in Japaneze.
 

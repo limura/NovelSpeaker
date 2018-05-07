@@ -227,6 +227,10 @@
 "NarouSearchResultDetailViewControllerSwift_Point_count" = "評価数";
 "NarouSearchResultDetailViewControllerSwift_Keyword" = "キーワード";
 "NarouSearchResultDetailViewControllerSwift_Story" = "あらすじ";
+"NarouSearchResultDetailViewControllerSwift_IsEnd" = "連載状態";
+"NarouSearchResultDetailViewControllerSwift_IsEnd=0" = "完結 又は 短編小説";
+"NarouSearchResultDetailViewControllerSwift_IsEnd=1" = "連載中";
+"NarouSearchResultDetailViewControllerSwift_IsEnd=0&genelral_all_no>1" = "完結";
 
 "TextSizeSettingViewController_FontSettingTitle" = "字体設定";
 
