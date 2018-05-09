@@ -82,6 +82,9 @@
 /// SiteInfo のJSONを内部データベースに追加します。
 - (BOOL)AddSiteInfoFromData:(NSData*)siteInfo{
     NSError* error = nil;
+    if (siteInfo == nil) {
+        return false;
+    }
     NSArray* jsonArray = [NSJSONSerialization JSONObjectWithData:siteInfo options:NSJSONReadingAllowFragments error:&error];
     if (jsonArray == nil || error != nil) {
         NSLog(@"AddSiteInfoFromData jsonArray == nil or error != nil. jsonArray: %p, error: %p(%@)", jsonArray, error, error);

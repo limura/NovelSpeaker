@@ -109,7 +109,9 @@
     
     // ページめくり音を設定しておきます
     NSURL* pageTurningSoundFile = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"nc48625" ofType:@"m4a"]];
-    AudioServicesCreateSystemSoundID((CFURLRef)CFBridgingRetain(pageTurningSoundFile), &m_PageTurningSoundID);
+    CFURLRef pageTuningSoundFileCFURL = (CFURLRef)CFBridgingRetain(pageTurningSoundFile);
+    AudioServicesCreateSystemSoundID(pageTuningSoundFileCFURL, &m_PageTurningSoundID);
+    CFBridgingRelease(pageTuningSoundFileCFURL);
     
     m_bIsSpeaking = NO;
 }
@@ -645,6 +647,13 @@
 - (void)TextViewScrollTo:(NSUInteger)location {
     NSString* displayString = self.textView.text;
     NSUInteger textLength = [displayString length];
+    
+    if (textLength <= 0) {
+        location = 0;
+    }else if (location >= textLength) {
+        location = textLength - 1;
+    }
+    
     NSRange range = NSMakeRange(location, 1);
     // 何行か後までの文字数をカウントして、scrollRangeToVisible ではその行が見えるようにスクロールさせる
     const NSUInteger lineCount = 5; // 5行分まで先を表示させる
