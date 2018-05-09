@@ -3706,10 +3706,12 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     
     for (NSString* key in targetStrings) {
         // 既に読み替え辞書に登録されているのなら何もしない
+        /* 2018/05/10 読み替え辞書に登録されていてもハングする人が居るようなので、書き換えは強制にします
         SpeechModSettingCacheData* setting = [self GetSpeechModSettingWithBeforeString:key];
         if (setting != nil) {
             continue;
         }
+         */
         SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
         speechModSetting.beforeString = key;
         speechModSetting.afterString = @" ";
