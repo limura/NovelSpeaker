@@ -326,6 +326,9 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
 /// 新しくユーザ定義の本を追加します。必須項目以外は未設定のものが生成されます。
 - (NarouContentCacheData*)CreateNewUserBook;
 
+/// 新しくユーザ定義の本を追加します。基本的には CreateNewUserBook と同じですが、NarouContent は保存され、さらに空の章を追加されている所が違います。
+- (NarouContentCacheData*)CreateNewUserBookWithSaved;
+
 /// 標準の読み上げ辞書のリストを取得します
 - (NSDictionary*)GetDefaultSpeechModConfig;
 

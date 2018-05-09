@@ -2405,11 +2405,19 @@ static GlobalDataSingleton* _singleton = nil;
     
     content.currentReadingStory = nil;
     
-    [self UpdateNarouContent:content];
-    [self UpdateStory:@"" chapter_number:1 parentContent:content];
-
     return content;
 }
+
+/// 新しくユーザ定義の本を追加します。基本的には CreateNewUserBook と同じですが、NarouContent は保存され、さらに空の章を追加されている所が違います。
+- (NarouContentCacheData*)CreateNewUserBookWithSaved{
+    NarouContentCacheData* content = [self CreateNewUserBook];
+    
+    [self UpdateNarouContent:content];
+    [self UpdateStory:@"" chapter_number:1 parentContent:content];
+    
+    return content;
+}
+
 
 /// NarouContentCacheData の中から、ncode(小説家になろうのncode)のものだけを取り出して、その ncode を ncode-ncode-ncode... の形式の文字列にして返します。
 - (NSString*)createNcodeListString:(NSArray*)contentArray {

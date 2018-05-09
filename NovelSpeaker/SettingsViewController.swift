@@ -233,7 +233,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     // 新規のユーザ本を追加して、編集ページに遷移する
     func CreateNewUserText(){
-        m_NarouContentCacheData = GlobalDataSingleton.getInstance().createNewUserBook()
+        m_NarouContentCacheData = GlobalDataSingleton.getInstance().createNewUserBookWithSaved()
         performSegue(withIdentifier: "CreateNewUserTextSegue", sender: self)
     }
     /// 標準で用意された読み上げ辞書を上書き追加します。

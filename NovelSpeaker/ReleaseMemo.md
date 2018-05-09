@@ -1233,6 +1233,45 @@ Bug fix
 
 - Fixed a problem that the first page disappears when adding a page to the novel added in "Add new self-made novel"
 
+
+# Version 1.1.28
+
+インタフェースの変更
+
+- アプリ内からの問い合わせフォームにて、「この問い合わせに返事が欲しい」の初期値を「はい」に変更
+
+問題の修正
+
+- Web取込等で小説を新しく取り込んだ時に、空の「新規ユーザ小説」が作成されてしまう問題を解消
+- "*" が連続している部分を読み上げると落ちる問題について、以前は "*" に関する読み替え辞書が登録されている場合は書き換えを行わなかったが、それでも落ちる人が居るようなので強制的に "*" は " " に読み替えるように起動時に上書きするように変更
+
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+ここ最近、特にゴールデンウィーク中はとても多くのご意見ご要望、特に新機能の提案を受けました。開発ジャンキーな開発者としましては使って頂けた上に新しい機能まで考えてくださって新しい機能について考える事なく機能開発に勤しむことができ、さらに実装すると喜びの声という形のフィードバックがいただけたりすることで、いつも楽しく開発させて頂いています。ありがとうございます。
+
+ただ、既にリリースノートやQ&Aにて回答されているものにつてのお問い合わせが混じっている事も多くなっております。なので、お目障りとは思うのですが、アプリ内やサポートサイトからのお問い合わせフォームにゴテゴテと「問い合わせをする前にこれを読め」と言わんばかりの項目を追加しています。お問い合わせを行う皆様にはお手数をおかけしますが、ご協力の程よろしくお願いいたします。
+
+同様に、お問い合わせに返信が必要ないとされているお問い合わせが多くあり、それらについて返信ができればなぁと思う事も多いです。そのようなお問い合わせに返信できないのは悶々とした何かが溜まっていってしまって精神衛生上あんまりよくなさそうです。なので、今回のアップデートではアプリ内からのお問い合わせでの「このお問い合わせに返信が欲しい」の項目の初期値を試しに「はい」にしてみます。
+ただ、ここ最近のお問い合わせは数が多すぎてしまっていてそろそろ自分ひとりでなんとかできる数を超えそうに思っています。ですので、あっという間にパンクしてしまって「返事が欲しい」の初期値を「いいえ」に戻すだけのリリースをするかもしれません。
+
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+
+# Version 1.1.28
+
+Interface change
+
+- In the inquiry form from within the application, change the initial value of "I want a reply to this inquiry" to "Yes"
+
+Bug fix
+
+- Eliminate the problem that an empty "new user novel" will be created when newly importing a novel by web retrieval etc.
+- In the case where a replacement dictionary relating to "*" has been registered in the past, concerning the problem of falling off when reading out consecutive parts of "*", we did not rewrite, but since there seems to be a person who is still falling, "*" is forcibly replaced with " " Changed to overwrite on startup
+
 ----
 in Japaneze.
 
