@@ -14,7 +14,7 @@ struct BugReportViewInputData {
     var TimeOfOccurence = Date.init(timeIntervalSinceNow: 60*60*24) // 1日後にしておく(DatePickerで日付を一回戻すだけでいいので)
     var DescriptionOfTheProblem = ""
     var ProblemOccurenceProcedure = ""
-    var IsNeedResponse = false
+    var IsNeedResponse = true
     var DescriptionOfNewFeature = ""
 }
 
@@ -70,6 +70,18 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 $0.tag = "Section_NewFeature"
                 $0.hidden = true
             }
+            <<< LabelRow() {
+                $0.title = NSLocalizedString("BugReportViewController_InformationForNewFeatureSending", comment: "ことせかい は個人開発のアプリになりますので、開発力はとても低いです。提案された機能で簡単に実装できるものは実装されることが多いですが、実装しないと判断されるものも多くあります。それらについては以下のURL(サポートサイトの下部にリンクがあります)にて解説しておりますので、新機能をご提案なされる前に一度目を通しておいていただければ幸いです。")
+                $0.cell.textLabel?.font = .systemFont(ofSize: 14.0)
+                $0.cell.textLabel?.numberOfLines = 0
+            }
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_GoToSupportSite", comment: "サポートサイトを開く")
+                }.onCellSelection({ (buttonCellof, buttonRow) in
+                    if let url = URL(string: "https://limura.github.io/NovelSpeaker/") {
+                        UIApplication.shared.openURL(url)
+                }
+            })
             <<< TextAreaRow(){
                 $0.add(rule: RuleRequired())
                 $0.placeholder = NSLocalizedString("BugReportViewController_NewFeatureTextArePlaceHolder", comment: "既存の機能の改善案や新機能のご提案など、不都合以外のお問い合わせを書いてください。")
