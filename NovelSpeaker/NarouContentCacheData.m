@@ -17,6 +17,7 @@
 {
     NSDateFormatter* formatter = [NSDateFormatter new];
     [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+    [formatter setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
     return [formatter dateFromString:narouDate];
 }
 

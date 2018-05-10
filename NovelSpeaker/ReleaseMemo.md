@@ -1272,6 +1272,14 @@ Bug fix
 - Eliminate the problem that an empty "new user novel" will be created when newly importing a novel by web retrieval etc.
 - In the case where a replacement dictionary relating to "*" has been registered in the past, concerning the problem of falling off when reading out consecutive parts of "*", we did not rewrite, but since there seems to be a person who is still falling, "*" is forcibly replaced with " " Changed to overwrite on startup
 
+
+# Version 1.1.29
+
+問題の修正
+
+- 日付と時刻の設定で24時間表示をOFFにしている場合、なろう検索での検索結果に出てきた小説の更新日時が "-" になってしまう問題を修正
+
+
 ----
 in Japaneze.
 
