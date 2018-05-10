@@ -2294,6 +2294,7 @@ static GlobalDataSingleton* _singleton = nil;
     NSDate* date = [NSDate date];
     NSDateFormatter* formatter = [NSDateFormatter new];
     [formatter setDateFormat:@"HH:mm:ss"];
+    [formatter setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
     NSString* logString = [[NSString alloc] initWithFormat:@"%@ %@", [formatter stringFromDate:date], string];
     [m_LogStringArray addObject:logString];
     NSLog(@"%@", logString);

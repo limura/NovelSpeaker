@@ -248,15 +248,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.28
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.29
 
-- In the inquiry form from within the application, change the initial value of \"I want a reply to this inquiry\" to \"Yes\"
-- Eliminate the problem that an empty \"new user novel\" will be created when newly importing a novel by web retrieval etc.
-- In the case where a replacement dictionary relating to \"*\" has been registered in the past, concerning the problem of falling off when reading out consecutive parts of \"*\", we did not rewrite, but since there seems to be a person who is still falling, \"*\" is forcibly replaced with \" \" Changed to overwrite on startup
+-  Fixed a problem that the update date and time of the novel appearing in \"Search tab\" search result becomes \"-\" when 24 hour display is set to OFF in the date and time setting
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.29
+
+Bug fix
+
+-  Fixed a problem that the update date and time of the novel appearing in \"Search tab\" search result becomes \"-\" when 24 hour display is set to OFF in the date and time setting
+
+
 Version 1.1.28
 
 Interface change

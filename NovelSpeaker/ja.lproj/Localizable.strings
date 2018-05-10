@@ -243,15 +243,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.28
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.29
 
-- アプリ内からの問い合わせフォームにて、「この問い合わせに返事が欲しい」の初期値を「はい」に変更
-- Web取込等で小説を新しく取り込んだ時に、空の「新規ユーザ小説」が作成されてしまう問題を解消
-- \"*\" が連続している部分を読み上げると落ちる問題について、以前は \"*\" に関する読み替え辞書が登録されている場合は書き換えを行わなかったが、それでも落ちる人が居るようなので強制的に \"*\" は \" \" に読み替えるように起動時に上書きするように変更
+- 日付と時刻の設定で24時間表示をOFFにしている場合、なろう検索での検索結果に出てきた小説の更新日時が \"-\" になってしまう問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.29
+
+問題の修正
+
+- 日付と時刻の設定で24時間表示をOFFにしている場合、なろう検索での検索結果に出てきた小説の更新日時が \"-\" になってしまう問題を修正
+
+
 # Version 1.1.28
 
 インタフェースの変更
