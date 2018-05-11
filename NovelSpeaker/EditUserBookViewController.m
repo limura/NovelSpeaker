@@ -47,6 +47,9 @@
     self.singleTap.delegate = self;
     self.singleTap.numberOfTapsRequired = 1;
     [self.view addGestureRecognizer:self.singleTap];
+    
+    // タイトル部分が選択された場合のイベントハンドラを登録します
+    self.TitleTextBox.delegate = self;
 
     self.BookBodyTextBox.placeholder = NSLocalizedString(@"EditUserBookViewContoller_InputTextHeare", @"ここに本文を書き込んでください。");
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -494,6 +497,17 @@
     }
     if (self.TitleTextBox.isFirstResponder) {
         [self.TitleTextBox resignFirstResponder];
+    }
+}
+
+/// UITextFieldDelegate の文字が入力可能になる直前のイベントハンドラ
+- (void)textFieldDidBeginEditing:(UITextField *)textField{
+    NSLog(@"textFieldDidBeginEditing: %p, %p", textField, self.TitleTextBox);
+    if (textField == self.TitleTextBox) {
+        // 初期状態で全部選択されている状態にします。
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [textField selectAll:nil];
+        });
     }
 }
 

@@ -1305,6 +1305,18 @@ Bug fix
 
 -  Fixed a problem that the update date and time of the novel appearing in "Search tab" search result becomes "-" when 24 hour display is set to OFF in the date and time setting
 
+
+# Version 1.1.30
+
+インタフェースの変更
+
+- Web取込や自作小説の編集画面において、小説のタイトルをタップした時に全ての文字が選択状態になるように
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+
 ----
 in Japaneze.
 

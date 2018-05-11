@@ -11,7 +11,7 @@
 #import "EasyAlert.h"
 #import "SZTextView.h"
 
-@interface EditUserBookViewController : UIViewController<UIGestureRecognizerDelegate>
+@interface EditUserBookViewController : UIViewController<UIGestureRecognizerDelegate, UITextFieldDelegate>
 {
     EasyAlert* m_pEasyAlert;
     int m_CurrentChapterNumber;
