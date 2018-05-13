@@ -543,17 +543,21 @@
     [self updateChapterSlider];
     
     // TextView は使いまわされた時、selectedRange が前の値のままのようなので、このタイミングでTextView上の読み上げ位置を上書きします
-    if ([self.textView.text length] > 0) {
-        int readLocation = [story.readLocation intValue];
-        if ([self.textView.text length] <= readLocation) {
-            readLocation = (int)[self.textView.text length] - 1;
-            if (readLocation < 0) {
-                readLocation = 0;
+    // 本来なら textViewDidChange を受けてから self.textView.text を参照する必要がありますが、
+    // 色々面倒くさいのでちょっとまってからにします。
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if ([self.textView.text length] > 0) {
+            int readLocation = [story.readLocation intValue];
+            if ([self.textView.text length] <= readLocation) {
+                readLocation = (int)[self.textView.text length] - 1;
+                if (readLocation < 0) {
+                    readLocation = 0;
+                }
             }
+            self.textView.selectedRange = NSMakeRange(readLocation, 1);
+            [self TextViewScrollTo:readLocation];
         }
-        self.textView.selectedRange = NSMakeRange(readLocation, 1);
-        [self TextViewScrollTo:readLocation];
-    }
+    });
 }
 
 - (void)detailButtonClick:(id)sender {
