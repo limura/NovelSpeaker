@@ -243,13 +243,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.30
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.31
 
-- Web取込や自作小説の編集画面において、小説のタイトルをタップした時に全ての文字が選択状態になるように
+- ダウンロード中には画面上部のネットワークアクティビティインジケータ(くるくる回る奴)を表示するように
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.31
+
+インタフェースの変更
+
+- ダウンロード中には画面上部のネットワークアクティビティインジケータ(くるくる回る奴)を表示するように
+
+
 # Version 1.1.30
 
 インタフェースの変更
