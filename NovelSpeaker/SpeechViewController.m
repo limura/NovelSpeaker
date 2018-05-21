@@ -545,9 +545,9 @@
     // TextView は使いまわされた時、selectedRange が前の値のままのようなので、このタイミングでTextView上の読み上げ位置を上書きします
     // 本来なら textViewDidChange を受けてから self.textView.text を参照する必要がありますが、
     // 色々面倒くさいのでちょっとまってからにします。
+    __block int readLocation = [story.readLocation intValue]; // story は __block で定義できない？ぽいので block 内部で使う readLocation だけ __block にしてここで取り出しておきます。
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         if ([self.textView.text length] > 0) {
-            int readLocation = [story.readLocation intValue];
             if ([self.textView.text length] <= readLocation) {
                 readLocation = (int)[self.textView.text length] - 1;
                 if (readLocation < 0) {
