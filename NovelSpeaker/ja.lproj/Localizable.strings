@@ -243,13 +243,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.31
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.32
 
-- ダウンロード中には画面上部のネットワークアクティビティインジケータ(くるくる回る奴)を表示するように
+- 次/前の章へ移動すると表示位置が末尾になってしまっていた問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.32
+
+問題の修正
+
+- 次/前の章へ移動すると表示位置が末尾になってしまっていた問題を修正
+
+
 # Version 1.1.31
 
 インタフェースの変更

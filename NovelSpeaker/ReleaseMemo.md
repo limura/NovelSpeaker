@@ -1356,6 +1356,26 @@ Interface change
 - While downloading, display the network activity indicator at the top of the screen
 
 
+# Version 1.1.32
+
+問題の修正
+
+- 次/前の章へ移動すると表示位置が末尾になってしまっていた問題を修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+取り急ぎ、問題修正のみのリリースとなります。
+
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 1.1.32
+
+Bug fix
+
+- Fixed an issue where display position ended when moving to the next / previous chapter
+
 ----
 in Japaneze.
 
