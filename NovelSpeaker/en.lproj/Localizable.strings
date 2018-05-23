@@ -84,6 +84,8 @@
 "SettingTableViewController_DarkThemeIsEnabled" = "Darken the background when reading a novel";
 "SettingTableViewController_PageTurningSoundIsEnabled" = "Sounds when page turning";
 "SettingTableViewController_IgnoreURISpeechIsEnabled" = "Do not speak URI";
+"SettingTableViewController_LICENSE" = "LICENSE";
+"SettingTableViewController_LISENSE_file_can_not_read" = "can not read LICENSE.txt\nPlease read NovelSpeaker LICENSE.txt on GitHub project.";
 
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";

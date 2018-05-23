@@ -83,6 +83,8 @@
 "SettingTableViewController_DarkThemeIsEnabled" = "小説を読む時に背景を暗くする";
 "SettingTableViewController_PageTurningSoundIsEnabled" = "ページめくり時に音を鳴らす";
 "SettingTableViewController_IgnoreURISpeechIsEnabled" = "URIを読み上げないようにする";
+"SettingTableViewController_LICENSE" = "利用許諾";
+"SettingTableViewController_LISENSE_file_can_not_read" = "LICENSE.txt を読み込めませんでした。ことせかい の GitHub 側の LICENSE.txt を参照してください。";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";

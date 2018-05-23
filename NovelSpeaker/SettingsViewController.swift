@@ -185,11 +185,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GoToSupportSite", comment: "サポートサイトを開く")
-                }.onCellSelection({ (buttonCellof, buttonRow) in
-                    if let url = URL(string: "https://limura.github.io/NovelSpeaker/") {
-                        UIApplication.shared.openURL(url)
-                    }
-                })
+            }.onCellSelection({ (buttonCellof, buttonRow) in
+                if let url = URL(string: "https://limura.github.io/NovelSpeaker/") {
+                    UIApplication.shared.openURL(url)
+                }
+            })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_SendBugReport", comment: "不都合報告をmailで開発者に送る")
                 $0.presentationMode = .segueName(segueName: "BugReportViewSegue", onDismiss: nil)
@@ -204,6 +204,36 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_RightNotation", comment:"権利表記")
                 $0.presentationMode = .segueName(segueName: "CreditPageSegue", onDismiss: nil)
             }
+            
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_LICENSE", comment: "LICENSE")
+            }.onCellSelection({ (buttonCallof, buttonRow) in
+                if let path = Bundle.main.path(forResource: "LICENSE", ofType: ".txt") {
+                    do {
+                        let license = try String(contentsOfFile: path)
+                        EasyDialog.Builder(self)
+                        .textView(content: license, heightMultiplier: 0.7)
+                        .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: true)
+                            }
+                        })
+                        .build().show()
+                        return
+                    }catch{
+                        // nothing to do.
+                    }
+                }
+                EasyDialog.Builder(self)
+                .textView(content: NSLocalizedString("SettingTableViewController_LISENSE_file_can_not_read", comment: "LICENSE.txt を読み込めませんでした。ことせかい の GitHub 側の LICENSE.txt を参照してください。"), heightMultiplier: 0.7)
+                .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: true)
+                    }
+                })
+                .build().show()
+
+            })
         
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、
             // それらはこの下に記述されます

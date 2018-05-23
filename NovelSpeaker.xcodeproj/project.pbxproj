@@ -153,6 +153,7 @@
 		21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */; };
 		21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */; };
 		21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */; };
+		21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21DD0BF420B595F500DC3C39 /* LICENSE.txt */; };
 		21E46D431A94B7F400CE39B0 /* EasyShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E46D421A94B7F400CE39B0 /* EasyShare.m */; };
 		21E704CF1AF741350071F31E /* UpdateLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E704CE1AF741350071F31E /* UpdateLogViewController.m */; };
 		21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BF81FB487B1003C659F /* EasyDialogs.swift */; };
@@ -447,6 +448,7 @@
 		21D8FC5319FCB07B00CCF1B6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/coreDataMigration.storyboard; sourceTree = "<group>"; };
 		21D8FC5619FCB09B00CCF1B6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/coreDataMigration.strings; sourceTree = "<group>"; };
 		21D8FC5819FCB09E00CCF1B6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/coreDataMigration.strings; sourceTree = "<group>"; };
+		21DD0BF420B595F500DC3C39 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 2.xcdatamodel"; sourceTree = "<group>"; };
 		21E46D411A94B7F400CE39B0 /* EasyShare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EasyShare.h; sourceTree = "<group>"; };
 		21E46D421A94B7F400CE39B0 /* EasyShare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EasyShare.m; sourceTree = "<group>"; };
@@ -693,6 +695,7 @@
 				21B53A1A19619C00009658B7 /* sound@2x.png */,
 				2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */,
 				21429D82209F4516001426F5 /* nc48625.m4a */,
+				21DD0BF420B595F500DC3C39 /* LICENSE.txt */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1100,6 +1103,7 @@
 				21F563C71FD801970037F5D7 /* >.png in Resources */,
 				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
 				21F563CF1FD802400037F5D7 /* <.png in Resources */,
+				21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */,
 				210958EB1A0E1C5500E9171F /* NEW!.png in Resources */,
 				21D397B21FC97A380018F883 /* home.png in Resources */,
 				2133F2AF1E80E175001A0BC5 /* Icon-Small@3x.png in Resources */,

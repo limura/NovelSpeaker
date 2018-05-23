@@ -192,7 +192,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
         });
         
         if (targetContent == nil) {
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:false];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:false];
+            });
             if (isDownloadKicked) {
                 // ダウンロードが終わったら DownloadEnd イベントを発生させます。
                 dispatch_sync(m_MainDispatchQueue, ^{
@@ -203,7 +205,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
             continue;
         }
         
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:true];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:true];
+        });
         [self ChapterDownload:targetContent];
         isDownloadKicked = true;
     }
