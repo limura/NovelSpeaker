@@ -405,6 +405,12 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="SEf-um-YIB"/>
+                                    <barButtonItem title="Safari" image="earth.png" id="VF2-4e-3uI">
+                                        <connections>
+                                            <action selector="safariButtonClicked:" destination="Ntb-XE-J32" id="XqO-Oo-XxA"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="8" style="plain" systemItem="fixedSpace" id="ieT-Nc-RnW"/>
                                     <barButtonItem title="home" image="home.png" id="Lac-mr-xje">
                                         <connections>
                                             <action selector="homeButtonClicked:" destination="Ntb-XE-J32" id="6B8-Ep-My7"/>
@@ -471,6 +477,7 @@
                         <outlet property="forwardButton" destination="kq8-ha-234" id="Vy6-FL-ZL5"/>
                         <outlet property="progressView" destination="b2P-LC-lhM" id="mjw-Tw-BOx"/>
                         <outlet property="refreshButton" destination="q8x-rc-zlI" id="mCc-l7-Avz"/>
+                        <outlet property="safariButton" destination="VF2-4e-3uI" id="lyN-Zm-Z5k"/>
                         <outlet property="toolBar" destination="YKK-cB-MCo" id="8BE-rk-5we"/>
                     </connections>
                 </viewController>
@@ -493,7 +500,7 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="685"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <mutableString key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
+                                <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
 MIT License
 
@@ -563,7 +570,7 @@ SOFTWARE.
 
 from 
 http://commons.nicovideo.jp/material/nc48625
-作者名：赤バンダナ犬</mutableString>
+作者名：赤バンダナ犬</string>
                                 <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>

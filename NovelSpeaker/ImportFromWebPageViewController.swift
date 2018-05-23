@@ -26,6 +26,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     @IBOutlet weak var refreshButton: UIBarButtonItem!
     @IBOutlet weak var progressView: UIProgressView!
     @IBOutlet weak var addressBarUITextField: UITextField!
+    @IBOutlet weak var safariButton: UIBarButtonItem!
     
     let getCookiesStringHandler = "getCookiesStringHandler"
     let sharedWKProcessPool = WKProcessPool()
@@ -140,6 +141,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
             if let url = wkWebView.url {
                 updateAddressBarState(url: url)
                 updateBookmarkButtonState(url: url)
+                updateSafariButtonState(url: url)
                 alertCount = 0
                 alertBlock = false
             }else{
@@ -182,6 +184,15 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
             }else{
                 self.forwardButton.isEnabled = false
             }
+        }
+    }
+    
+    // 現在の状態から、Safari button の enable/disable をします
+    func updateSafariButtonState(url:URL){
+        if UIApplication.shared.canOpenURL(url) {
+            self.safariButton.isEnabled = true
+        }else{
+            self.safariButton.isEnabled = false
         }
     }
     
@@ -301,6 +312,15 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
             wkWebView.goForward()
         }
     }
+    
+    @IBAction func safariButtonClicked(_ sender: Any) {
+        if let url = self.wkWebView?.url {
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.openURL(url)
+            }
+        }
+    }
+    
     @IBAction func homeButtonClicked(_ sender: Any) {
         loadHomePage()
     }
