@@ -2329,6 +2329,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_PAGE_TURNING_SOUND_IS_ENABLED @"PageTurningSoundIsEnabled"
 #define USER_DEFAULTS_IGNORE_URI_SPEECH_IS_ENABLED @"IgnoreURISpeechIsEnabled"
 #define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
+#define USER_DEFAULTS_IS_LICENSE_FILE_READED @"IsLICENSEFileIsReaded"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3296,6 +3297,19 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (void)SetDisplayFontName:(NSString*)fontName{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:fontName forKey:USER_DEFAULTS_DISPLAY_FONT_NAME];
+    [userDefaults synchronize];
+}
+
+/// 利用許諾を読んだか否かを取得します
+- (BOOL)IsLicenseReaded{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_LICENSE_FILE_READED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IS_LICENSE_FILE_READED];
+}
+/// 利用許諾を読んだことにします
+- (void)SetLicenseIsReaded{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:true forKey:USER_DEFAULTS_IS_LICENSE_FILE_READED];
     [userDefaults synchronize];
 }
 

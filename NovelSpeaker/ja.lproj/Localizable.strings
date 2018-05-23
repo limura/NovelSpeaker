@@ -83,7 +83,7 @@
 "SettingTableViewController_DarkThemeIsEnabled" = "小説を読む時に背景を暗くする";
 "SettingTableViewController_PageTurningSoundIsEnabled" = "ページめくり時に音を鳴らす";
 "SettingTableViewController_IgnoreURISpeechIsEnabled" = "URIを読み上げないようにする";
-"SettingTableViewController_LICENSE" = "利用許諾";
+"SettingTableViewController_LICENSE" = "ことせかい 利用許諾";
 "SettingTableViewController_LISENSE_file_can_not_read" = "LICENSE.txt を読み込めませんでした。ことせかい の GitHub 側の LICENSE.txt を参照してください。";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
@@ -248,6 +248,7 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.33
 
 - 小説の本文を表示している時の上部にある地球のアイコンからその小説のWebPageを表示する時に、Web取込タブ側で表示するように
+- 設定タブに利用許諾を参照できるボタンを追加
 - コントロールセンターで前の章/後の章へ移動する時に、きちんと移動できていなかった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
@@ -258,6 +259,7 @@
 インタフェースの変更
 
 - 小説の本文を表示している時の上部にある地球のアイコンからその小説のWebPageを表示する時に、Web取込タブ側で表示するように
+- 設定タブに利用許諾を参照できるボタンを追加
 
 問題の修正
 

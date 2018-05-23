@@ -219,6 +219,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             }
                         })
                         .build().show()
+                        GlobalDataSingleton.getInstance().setLicenseIsReaded()
                         return
                     }catch{
                         // nothing to do.

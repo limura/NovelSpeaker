@@ -1382,6 +1382,7 @@ Bug fix
 インタフェースの変更
 
 - 小説の本文を表示している時の上部にある地球のアイコンからその小説のWebPageを表示する時に、Web取込タブ側で表示するように
+- 設定タブに利用許諾を参照できるボタンを追加
 
 問題の修正
 
@@ -1414,6 +1415,7 @@ Bug fix
 Interface change
 
 - When displaying the WebPage of the novel from the icon of the earth at the top when displaying the text of the novel, as shown on the Web capture tab side
+- Add LICENSE button on Settings tab.
 
 Bug fix
 

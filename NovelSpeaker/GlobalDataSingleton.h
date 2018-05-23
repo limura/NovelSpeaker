@@ -450,6 +450,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 小説の表示に使用するフォント名を設定します
 - (void)SetDisplayFontName:(NSString*)fontName;
 
+/// 利用許諾を読んだか否かを取得します
+- (BOOL)IsLicenseReaded;
+/// 利用許諾を読んだことにします
+- (void)SetLicenseIsReaded;
+
 /// Web取り込み用のBookmarkを取得します
 - (NSArray*)GetWebImportBookmarks;
 /// Web取り込み用のBookmarkに追加します。

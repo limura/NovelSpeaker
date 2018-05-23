@@ -84,7 +84,7 @@
 "SettingTableViewController_DarkThemeIsEnabled" = "Darken the background when reading a novel";
 "SettingTableViewController_PageTurningSoundIsEnabled" = "Sounds when page turning";
 "SettingTableViewController_IgnoreURISpeechIsEnabled" = "Do not speak URI";
-"SettingTableViewController_LICENSE" = "LICENSE";
+"SettingTableViewController_LICENSE" = "NovelSpeaker LICENSE";
 "SettingTableViewController_LISENSE_file_can_not_read" = "can not read LICENSE.txt\nPlease read NovelSpeaker LICENSE.txt on GitHub project.";
 
 
@@ -253,6 +253,7 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.33
 
 - When displaying the WebPage of the novel from the icon of the earth at the top when displaying the text of the novel, as shown on the Web capture tab side
+- Add LICENSE button on Settings tab.
 - Fixed an issue that could not be properly moved when moving to the previous chapter / later chapter in the control center
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
@@ -263,6 +264,7 @@ Version 1.1.33
 Interface change
 
 - When displaying the WebPage of the novel from the icon of the earth at the top when displaying the text of the novel, as shown on the Web capture tab side
+- Add LICENSE button on Settings tab.
 
 Bug fix
 
