@@ -21,6 +21,44 @@ struct BugReportViewInputData {
 class BugReportViewController: FormViewController, MFMailComposeViewControllerDelegate {
     static var value = BugReportViewInputData();
     
+    /// 最新のプライバシーポリシーを読んだことがあるか否かを判定して、読んだことがなければ表示して同意を求めます
+    func CheckAndDisplayPrivacyPolicy(){
+        if let privacyPolicyUrl = GlobalDataSingleton.getInstance().getPrivacyPolicyURL() {
+            NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data) in
+                guard let currentPrivacyPolicy = String(data: data, encoding: .utf8) else {
+                    return
+                }
+                let readedPrivacyPolicy = GlobalDataSingleton.getInstance().getReadedPrivacyPolicy()
+                if currentPrivacyPolicy == readedPrivacyPolicy {
+                    return
+                }
+                DispatchQueue.main.async {
+                    EasyDialog.Builder(self)
+                    .text(content: NSLocalizedString("BugReportViewController_PrivacyPolicyAgreementNeeded", comment: "ことせかい のプライバシーポリシーについての同意が必要です"))
+                    .textView(content: currentPrivacyPolicy, heightMultiplier: 0.5)
+                    .addButton(title: NSLocalizedString("Disagree_Button", comment:"同意しない"), callback: { dialog in
+                        DispatchQueue.main.async {
+                            dialog.dismiss(animated: false)
+                            self.navigationController?.popViewController(animated: true)
+                        }
+                    })
+                    .addButton(title: NSLocalizedString("Agree_Button", comment:"同意する"), callback: {dialog in
+                        DispatchQueue.main.async {
+                            GlobalDataSingleton.getInstance().setPrivacyPolicyIsReaded(currentPrivacyPolicy)
+                            dialog.dismiss(animated: true, completion: nil)
+                        }
+                    })
+                    .build().show()
+                }
+            }, failedAction: nil)
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        CheckAndDisplayPrivacyPolicy()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         BehaviorLogger.AddLog(description: "BugReportViewController viewDidLoad", data: [:])

@@ -233,9 +233,47 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 })
                 .build().show()
-
             })
-        
+            <<< ButtonRow() {
+            $0.title = NSLocalizedString("SettingTableViewController_PrivacyPolicy", comment: "ことせかい のプライバシーポリシーを確認する")
+            $0.cell.textLabel?.numberOfLines = 0
+            $0.cell.textLabel?.font = .systemFont(ofSize: 14.0)
+            }.onCellSelection({ (buttonCellOf, buttonRow) in
+                if let privacyPolicyUrl = GlobalDataSingleton.getInstance().getPrivacyPolicyURL() {
+                    func privacyPolycyLoadFailed(){
+                        DispatchQueue.main.async {
+                            EasyDialog.Builder(self)
+                            .textView(content: NSLocalizedString("SettingTableViewController_PrivacyPolicy_can_not_load", comment: "最新のプライバシーポリシーを読み込めませんでした。\nSafariでの表示を試みます。"), heightMultiplier: 0.6)
+                            .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: true)
+                                    UIApplication.shared.openURL(privacyPolicyUrl)
+                                }
+                            })
+                            .build().show()
+                        }
+                    }
+                    NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data) in
+                        if let currentPrivacyPolicy = String(data: data, encoding: .utf8) {
+                            DispatchQueue.main.async {
+                                EasyDialog.Builder(self)
+                                .textView(content: currentPrivacyPolicy, heightMultiplier: 0.7)
+                                .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                                    DispatchQueue.main.async {
+                                        dialog.dismiss(animated: true)
+                                    }
+                                })
+                                .build().show()
+                            }
+                        }else{
+                            privacyPolycyLoadFailed()
+                        }
+                    }, failedAction: { (error) in
+                        privacyPolycyLoadFailed()
+                    })
+                }
+            })
+
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、
             // それらはこの下に記述されます
             +++ Section("Debug") {

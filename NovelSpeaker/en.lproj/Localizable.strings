@@ -10,6 +10,8 @@
 "DownloadButton" = "Download";
 "Setings_button" = "Settings";
 "Cancel_button" = "Cancel";
+"Disagree_Button" = "Disagree";
+"Agree_Button" = "Agree";
 //"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
 
 "SpeakPitchSettingView_NoTitleStringAlert" = "No title string.";
@@ -86,7 +88,8 @@
 "SettingTableViewController_IgnoreURISpeechIsEnabled" = "Do not speak URI";
 "SettingTableViewController_LICENSE" = "NovelSpeaker LICENSE";
 "SettingTableViewController_LISENSE_file_can_not_read" = "can not read LICENSE.txt\nPlease read NovelSpeaker LICENSE.txt on GitHub project.";
-
+"SettingTableViewController_PrivacyPolicy_can_not_load" = "We could not load the latest privacy policy. Try to display in Safari.";
+"SettingTableViewController_PrivacyPolicy" = "Check NovelSpeaker's privacy policy";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -223,6 +226,7 @@
 "BugReportViewController_InformationOfTheProblemWriting" = "Although it is sorry to trouble you, but as for the reproducing procedure of inconvenience, please make sure that the same operation is done from the place where you launched the application again, and inconvenience will occur, please report it. We are receiving much inconvenience reports that do not reproduce with inconvenient reproduced procedures reported. Also, when you are reading the neighborhood of the ~ chapter of the novel called web site ~ that you acquired with the web capture function rather than just the contents like \" Please write the information that detailed the state of the problem actually occurred, such as \"happened\". We are sorry to report that we can not reproduce at the hands of developers, but we can not respond. If you do not feel confident about the inconvenience reproducing procedure, please turn on \"I want a reply to this report\" and send it, it is recommended because later you can give us detailed hearing reply from the developer side. However, the developers have taken quite a bit of time to acknowledge the reply. Since it is very helpful to just reduce the need for reply, it will be helpful if you can add in the entry box of \"Description of problem\" below, \"I would like to reply by e-mail only if inconvenience does not reproduce\" .";
 "BugReportViewController_InformationOfTheTime" = "Please enter the date and time of inconvenience as accurately as possible. A lot of reports have been received with just the value just shifted one day ago. In particular, if you can attach operation logs, confirmation work will be completed by referring to the logs of the relevant date and time in the operation log, so please enter the date and time as close as possible.";
 "BugReportViewController_InformationForNewFeatureSending" = "Since NovelSpeaker will be an application of personal development, development power is very low. Those that can be easily implemented with the proposed function are often implemented, but there are many that are judged not to be implemented. We have a link at the bottom of the support site about them, we will explain it on the Q&A page, so it would be greatly appreciated if you could pass through the first time before suggesting new features.";
+"BugReportViewController_PrivacyPolicyAgreementNeeded" = "You need consent to NovelSpeaker's privacy policy";
 
 "NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
 "NarouSearchResultDetailViewControllerSwift_Writer" = "Writer";
@@ -253,7 +257,8 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.33
 
 - When displaying the WebPage of the novel from the icon of the earth at the top when displaying the text of the novel, as shown on the Web capture tab side
-- Add LICENSE button on Settings tab.
+- Added a button to refer the license to the setting tab
+- Added button to refer privacy policy to setting tab
 - Fixed an issue that could not be properly moved when moving to the previous chapter / later chapter in the control center
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
@@ -264,7 +269,8 @@ Version 1.1.33
 Interface change
 
 - When displaying the WebPage of the novel from the icon of the earth at the top when displaying the text of the novel, as shown on the Web capture tab side
-- Add LICENSE button on Settings tab.
+- Added a button to refer the license to the setting tab
+- Added button to refer privacy policy to setting tab
 
 Bug fix
 

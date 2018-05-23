@@ -455,6 +455,13 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 利用許諾を読んだことにします
 - (void)SetLicenseIsReaded;
 
+/// 最新のプライバシーポリシーのURLを取得します
+- (NSURL*)GetPrivacyPolicyURL;
+/// 一度読んだ事のあるプライバシーポリシーを取得します(読んだことがなければ @"" が取得されます)
+- (NSString*)GetReadedPrivacyPolicy;
+/// 引数で表される利用許諾を読んだとして保存します
+- (void)SetPrivacyPolicyIsReaded:(NSString*)privacyPolicy;
+
 /// Web取り込み用のBookmarkを取得します
 - (NSArray*)GetWebImportBookmarks;
 /// Web取り込み用のBookmarkに追加します。

@@ -1382,7 +1382,8 @@ Bug fix
 インタフェースの変更
 
 - 小説の本文を表示している時の上部にある地球のアイコンからその小説のWebPageを表示する時に、Web取込タブ側で表示するように
-- 設定タブに利用許諾を参照できるボタンを追加
+- 設定タブに利用許諾を参照するボタンを追加
+- 設定タブにプライバシーポリシーを参照するボタンを追加
 
 問題の修正
 
@@ -1407,6 +1408,8 @@ Bug fix
 
 でもそれって無制限のWebアクセスに該当しないのだろうかとも思うのですが、そもそもチャイルドロック的な事がなされている iOS端末 では Safari 自体が開けませんので上記の操作ができないため、問題ないのではないかな、と思っています。駄目であればアプリの審査で弾いてくれると思われるのでこれがリリースされたということは大丈夫ということだと認識しています。
 
+また、ことせかい の利用許諾とプライバシーポリシーを明確に文書化し、アプリ内から確認できるようにしました。プライバシーポリシーはユーザサポート時に必要となるため、お問い合わせを行う場合には同意して頂く必要があります。
+
 それでは、これからも ことせかい をよろしくお願いいたします。
 
 
@@ -1415,7 +1418,8 @@ Bug fix
 Interface change
 
 - When displaying the WebPage of the novel from the icon of the earth at the top when displaying the text of the novel, as shown on the Web capture tab side
-- Add LICENSE button on Settings tab.
+- Added a button to refer the license to the setting tab
+- Added button to refer privacy policy to setting tab
 
 Bug fix
 

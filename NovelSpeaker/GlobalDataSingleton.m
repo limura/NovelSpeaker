@@ -2330,6 +2330,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_IGNORE_URI_SPEECH_IS_ENABLED @"IgnoreURISpeechIsEnabled"
 #define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
 #define USER_DEFAULTS_IS_LICENSE_FILE_READED @"IsLICENSEFileIsReaded"
+#define USER_DEFAULTS_CURRENT_READED_PRIVACY_POLICY @"CurrentReadedPrivacyPolicy"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3313,6 +3314,22 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// 最新のプライバシーポリシーのURLを取得します
+- (NSURL*)GetPrivacyPolicyURL {
+    return [[NSURL alloc] initWithString:@"https://raw.githubusercontent.com/limura/NovelSpeaker/master/PrivacyPolicy.txt"];
+}
+/// 一度読んだ事のあるプライバシーポリシーを取得します(読んだことがなければ @"" が取得されます)
+- (NSString*)GetReadedPrivacyPolicy{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_CURRENT_READED_PRIVACY_POLICY: @""}];
+    return [userDefaults stringForKey:USER_DEFAULTS_CURRENT_READED_PRIVACY_POLICY];
+}
+/// 引数で表される利用許諾を読んだとして保存します
+- (void)SetPrivacyPolicyIsReaded:(NSString*)privacyPolicy{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:privacyPolicy forKey:USER_DEFAULTS_CURRENT_READED_PRIVACY_POLICY];
+    [userDefaults synchronize];
+}
 
 /// Web取り込み用のBookmarkを取得します
 - (NSArray*)GetWebImportBookmarks{
