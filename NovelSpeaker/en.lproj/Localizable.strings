@@ -248,13 +248,24 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.32
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.33
 
-- Fixed an issue where display position ended when moving to the next / previous chapter
+- When displaying the WebPage of the novel from the icon of the earth at the top when displaying the text of the novel, as shown on the Web capture tab side
+- Fixed an issue that could not be properly moved when moving to the previous chapter / later chapter in the control center
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.33
+
+Interface change
+
+- When displaying the WebPage of the novel from the icon of the earth at the top when displaying the text of the novel, as shown on the Web capture tab side
+
+Bug fix
+
+- Fixed an issue that could not be properly moved when moving to the previous chapter / later chapter in the control center
+
 Version 1.1.32
 
 Bug fix

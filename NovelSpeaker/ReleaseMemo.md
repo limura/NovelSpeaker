@@ -1376,6 +1376,49 @@ Bug fix
 
 - Fixed an issue where display position ended when moving to the next / previous chapter
 
+
+# Version 1.1.33
+
+インタフェースの変更
+
+- 小説の本文を表示している時の上部にある地球のアイコンからその小説のWebPageを表示する時に、Web取込タブ側で表示するように
+
+問題の修正
+
+- コントロールセンターで前の章/後の章へ移動する時に、きちんと移動できていなかった問題を修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正はWeb取込タブが登録された時、一時的にアプリのレーティングが17+になった原因である、Googleのような検索サイトへアプリ内からの操作だけでアクセスできる状態(無制限のWebアクセスと判断される状態)を回避するために、Web取込タブのホームページに登録されていた Google検索 へのリンクを復活させることが楽にできるようにするための修正となります。
+今までも、設定タブの「再ダウンロード用データの生成」で作成したバックアップファイルを書き換えてから復元させることや、初期に登録されているWebサイトを手繰ることでGoogle検索ページをなんとかして表示させることでGoogle検索ページをWeb取込タブのホームページに登録することができていましたが、これからは、
+
+1. Safari で Google検索ページを表示する
+
+2. シェアボタンから「ことせかい へ読み込む」を選択して ことせかい 側に Google検索ページ を小説として取り込ませる(Safari からの「ことせかい へ読み込む」機能についてはサポートサイト下部からリンクしております、「Web取込機能について」内の「Safari からの取込」の項目を御覧ください)
+
+3. その取り込まれたGoogle検索ページを本棚から開き、上部にある地球のアイコンを押す
+
+4. Web取込タブでGoogle検索ページが表示されるのでそれをブックマークに追加する
+
+という手順で Google検索ページ や他のWebサイトをブックマークに登録することができるようになります。
+
+でもそれって無制限のWebアクセスに該当しないのだろうかとも思うのですが、そもそもチャイルドロック的な事がなされている iOS端末 では Safari 自体が開けませんので上記の操作ができないため、問題ないのではないかな、と思っています。駄目であればアプリの審査で弾いてくれると思われるのでこれがリリースされたということは大丈夫ということだと認識しています。
+
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+# Version 1.1.33
+
+Interface change
+
+- When displaying the WebPage of the novel from the icon of the earth at the top when displaying the text of the novel, as shown on the Web capture tab side
+
+Bug fix
+
+- Fixed an issue that could not be properly moved when moving to the previous chapter / later chapter in the control center
+
 ----
 in Japaneze.
 

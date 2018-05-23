@@ -409,6 +409,7 @@
     [self RingPageTurningSound];
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
+    self.textView.selectedRange = NSMakeRange(0, 0);
     [self SaveCurrentReadingPoint];
     return true;
 }
@@ -422,6 +423,7 @@
     [self RingPageTurningSound];
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
+    self.textView.selectedRange = NSMakeRange(0, 0);
     [self SaveCurrentReadingPoint];
     return true;
 }
@@ -1068,7 +1070,13 @@
         url = [[NSURL alloc] initWithString:urlString];
     }
     if (url != nil) {
-        if ([UIApplication.sharedApplication canOpenURL:url]) {
+        NSUInteger targetTabIndex = 2; // XXXXX TODO: 謎の数字 2 が確認されている(WKWebViewのタブのindexなんだけれども)
+        id targetViewController = [self.tabBarController.viewControllers objectAtIndex:targetTabIndex];
+        if ([targetViewController isKindOfClass:[ImportFromWebPageViewController class]]) {
+            ImportFromWebPageViewController* importFromWebPageViewController = (ImportFromWebPageViewController*)targetViewController;
+            importFromWebPageViewController.openTargetUrl = url;
+            [self.tabBarController setSelectedIndex:targetTabIndex];
+        }else if ([UIApplication.sharedApplication canOpenURL:url]) {
             [UIApplication.sharedApplication openURL:url];
         }
     }

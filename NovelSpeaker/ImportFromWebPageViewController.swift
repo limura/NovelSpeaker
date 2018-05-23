@@ -30,6 +30,8 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     let getCookiesStringHandler = "getCookiesStringHandler"
     let sharedWKProcessPool = WKProcessPool()
     
+    @objc public var openTargetUrl:URL? = nil
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         BehaviorLogger.AddLog(description: "ImportFromWebPageViewController viewDidLoad", data: [:])
@@ -66,6 +68,14 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     
     deinit {
         delObservers()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let url = openTargetUrl, let webView = wkWebView {
+            webView.load(URLRequest(url: url))
+            openTargetUrl = nil
+        }
     }
 
     override func didReceiveMemoryWarning() {
