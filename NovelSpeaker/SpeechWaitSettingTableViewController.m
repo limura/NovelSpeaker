@@ -85,13 +85,6 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
         }
         return cell;
     }
-#if 0
-    if (indexPath.row == 1) {
-        cell.textLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_EnterEnter", @"<改行><改行>");
-        cell.detailTextLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_Enabled", @"有効");
-        return cell;
-    }
-#endif
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     NSUInteger targetRow = indexPath.row - 1;
     NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
@@ -100,11 +93,8 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
         return cell;
     }
     SpeechWaitConfigCacheData* speechWaitConfigCache = [speechWaitConfigList objectAtIndex:targetRow];
-    if ([speechWaitConfigCache.targetText compare:@"\r\n\r\n"] == NSOrderedSame) {
-        cell.textLabel.text = NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_EnterEnter", @"<改行><改行>");
-    }else{
-        cell.textLabel.text = speechWaitConfigCache.targetText;
-    }
+    NSString* targetText = [speechWaitConfigCache.targetText stringByReplacingOccurrencesOfString:@"\r\n" withString:NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_Enter", @"<改行>")];
+    cell.textLabel.text = targetText;
     cell.detailTextLabel.text = [[NSString alloc] initWithFormat:@"%0.2f", [speechWaitConfigCache.delayTimeInSec floatValue]];
     
     return cell;
@@ -121,11 +111,6 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 // Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.row == 0) {
-        return NO;
-    }
-    NSArray* speechWaitConfigList = [[GlobalDataSingleton GetInstance] GetAllSpeechWaitConfig];
-    SpeechWaitConfigCacheData* speechWaitConfigCache = [speechWaitConfigList objectAtIndex:indexPath.row - 1];
-    if ([speechWaitConfigCache.targetText compare:@"\r\n\r\n"] == NSOrderedSame) {
         return NO;
     }
     return YES;

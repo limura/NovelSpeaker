@@ -31,15 +31,10 @@
     
     if(self.speechWaitConfigCacheData != nil)
     {
-        if ([self.speechWaitConfigCacheData.targetText compare:@"\r\n\r\n"] == NSOrderedSame)
-        {
-            // 改行については表示を変えて編集不可にします
-            self.inputTextField.text = NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_EnterEnter", @"<改行><改行>");;
-            self.inputTextField.enabled = false;
-        }else{
-            self.inputTextField.text = self.speechWaitConfigCacheData.targetText;
-            [self UpdateSpeechTestTextBox:self.speechWaitConfigCacheData.targetText];
-        }
+        NSString* targetText = [self.speechWaitConfigCacheData.targetText stringByReplacingOccurrencesOfString:@"\r\n" withString:NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_Enter", @"<改行>")];
+        self.inputTextField.text = targetText;
+        self.inputTextField.enabled = true;
+        [self UpdateSpeechTestTextBox:targetText];
         if (self.speechWaitConfigCacheData.delayTimeInSec != nil) {
             self.waitTimeSlider.value = [self.speechWaitConfigCacheData.delayTimeInSec floatValue];
         }else{
@@ -75,16 +70,6 @@
 /// シングルタップのイベントハンドルは、対象のテキストボックスでキーボードが表示されている時だけにします
 -(BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
     return YES;
-    if (gestureRecognizer == self.singleTap) {
-        // キーボード表示中のみ有効
-        if (self.inputTextField.isFirstResponder
-            || self.SampleSpeechTextField.isFirstResponder) {
-            return YES;
-        } else {
-            return NO;
-        }
-    }
-    return YES;
 }
 
 /// 読み上げの間の設定が変わったことのアナウンスを行います。
@@ -104,12 +89,8 @@
     }
     
     SpeechWaitConfigCacheData* waitConfig = [SpeechWaitConfigCacheData new];
-    if ([self.inputTextField.text compare:NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_EnterEnter", @"<改行><改行>")] == NSOrderedSame)
-    {
-        waitConfig.targetText = @"\r\n\r\n";
-    }else{
-        waitConfig.targetText = self.inputTextField.text;
-    }
+    NSString* targetText = [self.inputTextField.text stringByReplacingOccurrencesOfString:NSLocalizedString(@"SpeechWaitConfigTableView_TargetText_Enter", @"<改行>") withString:@"\r\n"];
+    waitConfig.targetText = targetText;
     waitConfig.delayTimeInSec = [[NSNumber alloc] initWithFloat:self.waitTimeSlider.value];
     if([[GlobalDataSingleton GetInstance] AddSpeechWaitSetting:waitConfig] != false)
     {
@@ -150,6 +131,7 @@
     
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     [m_NiftySpeaker StopSpeech];
+    m_NiftySpeaker = [NiftySpeaker new];
     [m_NiftySpeaker ClearSpeakSettings];
     [globalData ApplyDefaultSpeechconfig:m_NiftySpeaker];
     [globalData ApplySpeakPitchConfig:m_NiftySpeaker];

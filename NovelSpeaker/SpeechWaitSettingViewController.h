@@ -15,7 +15,6 @@
 {
     EasyAlert* m_EasyAlert;
     NiftySpeaker* m_NiftySpeaker;
-    
 }
 // シングルタップを取ってキーボードを閉じます
 @property(nonatomic, strong) UITapGestureRecognizer *singleTap;

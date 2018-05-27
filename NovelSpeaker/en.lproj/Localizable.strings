@@ -127,6 +127,7 @@
 "SpeechWaitConfigSettingView_SpeechTestTextBoxRightSide" = "テストで読み上げます";
 "SpeechWaitConfigSettingView_NowTestSpeaking" = "Now test speaking...";
 "SpeechWaitConfigTableView_TargetText_EnterEnter" = "<Enter><Enter>";
+"SpeechWaitConfigTableView_TargetText_Enter" = "<Enter>";
 "SpeechWaitConfigTableView_DelayTimeInSec_Enabled" = "Enabled";
 "SpeechWaitConfigTableView_DelayTimeInSec_Disabled" = "Disabled";
 "SpeechWaitConfigSettingView_PleaseInputText" = "Please input text";
