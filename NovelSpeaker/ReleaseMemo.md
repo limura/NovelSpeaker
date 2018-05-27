@@ -1425,6 +1425,33 @@ Bug fix
 
 - Fixed an issue that could not be properly moved when moving to the previous chapter / later chapter in the control center
 
+
+# Version 1.1.34
+
+問題の修正
+
+- 「小説を読むときに背景を暗くする」がONのときに、ステータスバーの文字色が黒のままで読めなかったのを修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+しばらく前のページ切替時の不都合の時に沢山の不都合報告を頂いたのですが、その時に受け取った負の感情を整理しきれていないっぽくて正直やる気がなくなっている開発者です。こんにちは。最近はSF分の摂取量が少なくなっていて私好みの何か嘘が少なくてワンダーが多いSF小説が読みたいんですが Web小説 にはそういうのが少なくて Kindle だと読み上げサポートがちょっと弱くて寂しいんですけれど何か良さそうなSF小説ないですかね……(´・ω・`)
+
+では今回も、ご提案は頂きましたが採用できませんでしたアイディアについて告知しておきます。
+
+Version 1.1.20 から導入された、小説の本文を表示している時の上部に表示されている地球のアイコンについて、アイコンを押したときにはその小説のその章のWebPageが開いて欲しい、というご要望なのですが、Web取込で取り込んだ小説についてはその章のWebPageへのURLが保存されていないため、その章のWebPageを開くことができないため、実装できませんでした。
+
+手短ですが以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+# Version 1.1.34
+
+Bug fix
+
+- Fixed the fact that the character color of the status bar was still black and could not be read when the "Darken the background when reading a novel" is ON
+
 ----
 in Japaneze.
 
