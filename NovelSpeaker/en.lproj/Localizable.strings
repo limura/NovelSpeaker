@@ -257,12 +257,17 @@
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.34
 
+- Specification change so that the thing written as \"<newline>\" (\"<Enter>\" in English environment) is handled as a line feed at the setting between reading-out time
 - Fixed the fact that the character color of the status bar was still black and could not be read when the \"Darken the background when reading a novel\" is ON
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
 Version 1.1.34
+
+Interface Change
+
+- Specification change so that the thing written as \"<newline>\" (\"<Enter>\" in English environment) is handled as a line feed at the setting between reading-out time
 
 Bug fix
 
