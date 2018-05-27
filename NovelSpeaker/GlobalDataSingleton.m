@@ -1451,6 +1451,13 @@ static GlobalDataSingleton* _singleton = nil;
                     for (float x = 0.0f; x < delay; x += 0.1f) {
                         [waitString appendString:@"_。"];
                     }
+                    NSRange enterRange = [speechWaitConfigCache.targetText rangeOfString:@"\r\n"];
+                    if (enterRange.location != NSNotFound) {
+                        NSString* otherEnterText = [speechWaitConfigCache.targetText stringByReplacingOccurrencesOfString:@"\r\n" withString:@"\n"];
+                        [niftySpeaker AddSpeechModText:otherEnterText to:waitString];
+                        otherEnterText = [speechWaitConfigCache.targetText stringByReplacingOccurrencesOfString:@"\r\n" withString:@"\r"];
+                        [niftySpeaker AddSpeechModText:otherEnterText to:waitString];
+                    }
                     [niftySpeaker AddSpeechModText:speechWaitConfigCache.targetText to:waitString];
                 }else{
                     [niftySpeaker AddDelayBlockSeparator:speechWaitConfigCache.targetText delay:delay];

@@ -63,6 +63,23 @@
     XCTAssertEqual([answer compare:conved], NSOrderedSame, @"conv failed:\n  from:\"%@\"\nanswer:\"%@\"\n    to:\"%@\"", from, answer, conved);
 }
 
+- (void)testConvertEnter
+{
+    StringSubstituter* substituter = [StringSubstituter new];
+    
+    XCTAssertTrue([substituter AddSetting_From:@"\r\n" to:@"x"], @"add failed");
+    XCTAssertTrue([substituter AddSetting_From:@"\r" to:@"y"], @"add failed");
+    XCTAssertTrue([substituter AddSetting_From:@"\n" to:@"z"], @"add failed");
+    
+    NSString* from = @"a\r\n\r\n\r\r\n\n";
+    NSString* answer = @"axxyxz";
+    
+    SpeechConfig* conf = [SpeechConfig new];
+    SpeechBlock* block = [substituter Convert:from speechConfig:conf];
+    NSString* conved = [block GetSpeechText];
+    XCTAssertEqual([answer compare:conved], NSOrderedSame, @"conv failed:\n  from:\"%@\"\nanswer:\"%@\"\n    to:\"%@\"", from, answer, conved);
+}
+
 - (void)testConvertJP
 {
     StringSubstituter* substituter = [StringSubstituter new];

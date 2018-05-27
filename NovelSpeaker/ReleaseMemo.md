@@ -1428,6 +1428,10 @@ Bug fix
 
 # Version 1.1.34
 
+インタフェースの変更
+
+- 読み上げ時の間の設定にて、「<改行>」と書いたもの(英語環境化では"<Enter>")が改行として扱われるように仕様変更
+
 問題の修正
 
 - 「小説を読むときに背景を暗くする」がONのときに、ステータスバーの文字色が黒のままで読めなかったのを修正
@@ -1447,6 +1451,10 @@ Version 1.1.20 から導入された、小説の本文を表示している時�
 
 
 # Version 1.1.34
+
+Interface Change
+
+- Specification change so that the thing written as "<newline>" ("<Enter>" in English environment) is handled as a line feed at the setting between reading-out time
 
 Bug fix
 

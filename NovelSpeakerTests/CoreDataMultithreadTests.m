@@ -54,9 +54,10 @@
         NSLog(@"add siteinfo success.");
         NSURL* targetURL = [[NSURL alloc] initWithString:@"https://kakuyomu.jp/works/1177354054880210298/episodes/1177354054880210374"];
         [uriLoader LoadURL:targetURL cookieArray:@[] startCount:0
-        successAction:^(HtmlStory* story, NSURL* url){
+        successAction:^BOOL(HtmlStory* story, NSURL* url){
             NSLog(@"LoadURL success:");
             [dataArray addObject:story];
+            return true;
         } failedAction:^(NSURL* url){
             NSLog(@"LoadURL failed: %@", [url absoluteString]);
             done = true;
