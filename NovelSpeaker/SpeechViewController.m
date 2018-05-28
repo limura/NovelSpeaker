@@ -170,19 +170,6 @@
     }else{
         startStopButton.title = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
     }
-    
-    // ステータスバーの色を指定する(背景色対応)
-    if ([globalData IsDarkThemeEnabled]) {
-        if (self.navigationController != nil) {
-            NSLog(@"is dark theme.");
-            self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-        }
-    }else{
-        if (self.navigationController != nil) {
-            NSLog(@"is not dark theme.");
-            self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
-        }
-    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -215,6 +202,11 @@
     //self.navigationController.navigationBar.tintColor = [[UIColor alloc] initWithRed:0.5 green:0.5 blue:1.0 alpha:1.0];
     self.navigationController.navigationBar.barTintColor = backgroundColor;
     self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: foregroundColor};
+
+    // ステータスバーの色を指定する
+    if (self.navigationController != nil) {
+        self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    }
 }
 
 /// 背景の明るいテーマを適用します
@@ -234,6 +226,11 @@
     //self.navigationController.navigationBar.tintColor = UIColor.blueColor;
     self.navigationController.navigationBar.barTintColor = backgroundColor;
     self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: foregroundColor};
+
+    // ステータスバーの色を指定する
+    if (self.navigationController != nil) {
+        self.navigationController.navigationBar.barStyle = UIBarStyleDefault;
+    }
 }
 
 /// 現在選択されている文字列を取得します

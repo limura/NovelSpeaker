@@ -1461,6 +1461,29 @@ Bug fix
 
 - Fixed the fact that the character color of the status bar was still black and could not be read when the "Darken the background when reading a novel" is ON
 
+
+# Version 1.1.35
+
+問題の修正
+
+- 「小説を読むときに背景を暗くする」がONのときに、ステータスバーの色が白に変わったまま読めなくなる場合があった問題を修正
+
+ご提案で採用されなかったアイディアについての告知
+
+一旦 ことせかい にダウンロードした小説の章が、小説サイト側で更新された場合に再度ダウンロードする方法が無い件について。
+既に Q&A に記述した https://limura.github.io/NovelSpeaker/QandA.html#DownloadFailed と同じ理由で採用されません。
+
+以上
+
+
+
+# Version 1.1.35
+
+Bug fix
+
+- Fixed a problem where the color of the status bar changed to white and it became impossible to read when "Dark background when reading novels" was ON
+
+
 ----
 in Japaneze.
 

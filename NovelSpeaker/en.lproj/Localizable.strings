@@ -255,14 +255,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.34
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.35
 
-- Specification change so that the thing written as \"<newline>\" (\"<Enter>\" in English environment) is handled as a line feed at the setting between reading-out time
-- Fixed the fact that the character color of the status bar was still black and could not be read when the \"Darken the background when reading a novel\" is ON
+- Fixed a problem where the color of the status bar changed to white and it became impossible to read when \"Dark background when reading novels\" was ON
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.35
+
+Bug fix
+
+- Fixed a problem where the color of the status bar changed to white and it became impossible to read when \"Dark background when reading novels\" was ON
+
+
 Version 1.1.34
 
 Interface Change

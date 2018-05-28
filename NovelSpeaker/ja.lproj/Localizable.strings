@@ -251,14 +251,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.34
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.35
 
-- 読み上げ時の間の設定にて、「<改行>」と書いたもの(英語環境化では\"<Enter>\")が改行として扱われるように仕様変更
-- 「小説を読むときに背景を暗くする」がONのときに、ステータスバーの文字色が黒のままで読めなかったのを修正
+- 「小説を読むときに背景を暗くする」がONのときに、ステータスバーの色が白に変わったまま読めなくなる場合があった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+#Version 1.1.35
+
+問題の修正
+
+- 「小説を読むときに背景を暗くする」がONのときに、ステータスバーの色が白に変わったまま読めなくなる場合があった問題を修正
+
+
 # Version 1.1.34
 
 インタフェースの変更
