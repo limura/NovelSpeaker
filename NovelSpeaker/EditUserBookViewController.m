@@ -261,11 +261,17 @@
 
 - (BOOL)SaveStoryTo:(int)chapterNumber
 {
-    if (![self SaveCurrentContent]) {
-        return false;
-    }
     if (self.BookBodyTextBox.text == nil || [self.BookBodyTextBox.text length] <= 0) {
         [m_pEasyAlert ShowAlertOKButton:NSLocalizedString(@"EditUserBookViewController_PleaseInputBookBody", @"本文を入力してください") message:nil];
+        return false;
+    }
+    // 保存先が currentReadingStory であればそちらも変更する必要がある
+    if (self.NarouContentDetail.currentReadingStory != nil &&
+        [self.NarouContentDetail.currentReadingStory.chapter_number intValue] == chapterNumber) {
+        self.NarouContentDetail.currentReadingStory.content = self.BookBodyTextBox.text;
+    }
+    // タイトル変更用
+    if (![self SaveCurrentContent]) {
         return false;
     }
     if([[GlobalDataSingleton GetInstance] UpdateStory:self.BookBodyTextBox.text chapter_number:chapterNumber parentContent:self.NarouContentDetail]) {
