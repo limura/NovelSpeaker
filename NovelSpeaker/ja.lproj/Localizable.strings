@@ -251,13 +251,19 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.35
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.36
 
-- 「小説を読むときに背景を暗くする」がONのときに、ステータスバーの色が白に変わったまま読めなくなる場合があった問題を修正
-
+- 編集可能な小説を編集中に、最初に開かれている章(現在読んでいる章)から別の章へ移動した時にその変更が保存されない問題を修正
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.36
+
+問題の修正
+
+- 編集可能な小説を編集中に、最初に開かれている章(現在読んでいる章)から別の章へ移動した時にその変更が保存されない問題を修正
+
+
 #Version 1.1.35
 
 問題の修正

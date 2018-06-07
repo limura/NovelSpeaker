@@ -1488,6 +1488,24 @@ Bug fix
 - Fixed a problem where the color of the status bar changed to white and it became impossible to read when "Dark background when reading novels" was ON
 
 
+# Version 1.1.36
+
+問題の修正
+
+- 編集可能な小説を編集中に、最初に開かれている章(現在読んでいる章)から別の章へ移動した時にその変更が保存されない問題を修正 
+
+追伸
+
+あんまり ことせかい の開発に元気が出せないのでしばらくはメンテナンスリリースのみ、追伸は省力化でお送りします。原因に当たる事象については Version 1.1.34 のリリースノートを御覧ください。
+
+
+
+# Version 1.1.36
+
+Bug fix
+
+- Fixed an issue that was not saved when editing an editable novel when moving from the first opened chapter (currently reading chapter) to another chapter
+
 ----
 in Japaneze.
 

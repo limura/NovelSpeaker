@@ -255,13 +255,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.35
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.36
 
-- Fixed a problem where the color of the status bar changed to white and it became impossible to read when \"Dark background when reading novels\" was ON
+- Fixed an issue that was not saved when editing an editable novel when moving from the first opened chapter (currently reading chapter) to another chapter
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.36
+
+Bug fix
+
+- Fixed an issue that was not saved when editing an editable novel when moving from the first opened chapter (currently reading chapter) to another chapter
+
+
 Version 1.1.35
 
 Bug fix
