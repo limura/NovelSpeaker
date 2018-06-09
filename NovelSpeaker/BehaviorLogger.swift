@@ -12,11 +12,15 @@ class BehaviorLogger: NSObject {
     static let USERDEFAULTS_NAME = "BehaviorLoggerUserDefaults";
     static let LOG_KEY = "log";
     static let MAX_LOG_COUNTS = 1000;
+    public static let LOGGER_ENABLED = false;
     
     /// ログを追加します。ログは UserDefaults の特定のSuiteに最大 n件(default 1000件) 保存されます。
     /// ログには AddLog() を呼び出した時間が追加されます。
     /// 注意：何らかの失敗をした場合でも、特に何もエラーをすることなくこの関数は終了します。
     @objc static public func AddLog(description: String, data: Dictionary<String, Any>) -> Void {
+        if !LOGGER_ENABLED {
+            return
+        }
         var logDictionary = ["description": description,
                              "dateTime": Date().description(with: Locale.init(identifier: "ja_JP"))] as [String : Any];
         if data.count > 0 {

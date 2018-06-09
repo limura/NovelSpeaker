@@ -63,8 +63,12 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         super.viewDidLoad()
         BehaviorLogger.AddLog(description: "BugReportViewController viewDidLoad", data: [:])
 
-        // 日付は ViewDidLoad のたびに上書きで不正な値にしておきます。
-        BugReportViewController.value.TimeOfOccurence = Date.init(timeIntervalSinceNow: 60*60*24) // 1日後にしておく(DatePickerで日付を一回戻すだけでいいので)
+        // 日付は LOGGER_ENABLED であれば ViewDidLoad のたびに上書きで不正な値にしておきます。
+        if BehaviorLogger.LOGGER_ENABLED {
+            BugReportViewController.value.TimeOfOccurence = Date.init(timeIntervalSinceNow: 60*60*24) // 1日後にしておく(DatePickerで日付を一回戻すだけでいいので)
+        }else{
+            BugReportViewController.value.TimeOfOccurence = Date.init(timeIntervalSinceNow: 0) // 今
+        }
 
         // Do any additional setup after loading the view.
         form +++ Section(NSLocalizedString("BugReportViewController_HiddenImportantInformationSectionHeader", comment: "お知らせ")) {
@@ -244,21 +248,25 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                         .build().show()
                     return;
                 }
-                EasyDialog.Builder(self)
-                    .label(text: NSLocalizedString("BugReportViewController_AddBehaviourLogAnnounce", comment: "ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合には「いいえ」を選択する必要があります。\nまた、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), textAlignment: .left)
-                    .addButton(title: NSLocalizedString("BugReportViewController_NO", comment: "いいえ"), callback: { (dialog) in
-                        self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
-                        DispatchQueue.main.async {
-                            dialog.dismiss(animated: false, completion: nil)
-                        }
-                    })
-                    .addButton(title: NSLocalizedString("BugReportViewController_YES", comment: "はい"), callback: { (dialog) in
-                        self.sendBugReportMail(log: BehaviorLogger.LoadLog(), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
-                        DispatchQueue.main.async {
-                            dialog.dismiss(animated: false, completion: nil)
-                        }
-                    })
-                .build().show()
+                if BehaviorLogger.LOGGER_ENABLED {
+                    EasyDialog.Builder(self)
+                        .label(text: NSLocalizedString("BugReportViewController_AddBehaviourLogAnnounce", comment: "ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合には「いいえ」を選択する必要があります。\nまた、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), textAlignment: .left)
+                        .addButton(title: NSLocalizedString("BugReportViewController_NO", comment: "いいえ"), callback: { (dialog) in
+                            self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: false, completion: nil)
+                            }
+                        })
+                        .addButton(title: NSLocalizedString("BugReportViewController_YES", comment: "はい"), callback: { (dialog) in
+                            self.sendBugReportMail(log: BehaviorLogger.LoadLog(), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: false, completion: nil)
+                            }
+                        })
+                    .build().show()
+                }else{
+                    self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
+                }
                 self.navigationController?.popViewController(animated: true)
             })
         

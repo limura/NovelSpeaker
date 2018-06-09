@@ -1506,6 +1506,13 @@ Bug fix
 
 - Fixed an issue that was not saved when editing an editable novel when moving from the first opened chapter (currently reading chapter) to another chapter
 
+
+# Version 1.1.37
+
+インタフェースの変更
+
+- 
+
 ----
 in Japaneze.
 
