@@ -266,4 +266,16 @@ class NiftyUtilitySwift: NSObject {
             }
         })
     }
+    
+    /// 指定された文字列がフォント名として正しいか否かを判定します
+    @objc public static func isValidFontName(fontName: String) -> Bool {
+        for familyName in UIFont.familyNames.sorted() {
+            for currentFontName in UIFont.fontNames(forFamilyName: familyName).sorted() {
+                if currentFontName == fontName {
+                    return true
+                }
+            }
+        }
+        return false
+    }
 }

@@ -35,6 +35,7 @@
 "GlobalDataSingleton_URLisAlreadyDownload" = "This URL is already downloaded.";
 "GlobalDataSingleton_PDFToStringFailed_Title" = "Failed to read PDF text";
 "GlobalDataSingleton_PDFToStringFailed_Body" = "Failed to read text string from PDF file.\nSome character strings can not be read depending on the PDF file. Also, iOS prior to iOS 11 does not work with PSF reading function.";
+"GlobalDataSingleton_BackupDataLoaded" = "The setting data was loaded. The downloaded novel is currently being downloaded. Downloading all the novels will take some time.";
 
 
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";

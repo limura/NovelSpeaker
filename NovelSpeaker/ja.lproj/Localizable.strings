@@ -35,6 +35,7 @@
 "GlobalDataSingleton_URLisAlreadyDownload" = "既に本棚に登録されているURLでした";
 "GlobalDataSingleton_PDFToStringFailed_Title" = "PDFのテキスト読み込みに失敗";
 "GlobalDataSingleton_PDFToStringFailed_Body" = "PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPSF読み込み機能は動作しません。";
+"GlobalDataSingleton_BackupDataLoaded" = "設定データを読み込みました。\nダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。";
 
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "ダウンロードキューへの追加に失敗";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "作品名: %@";

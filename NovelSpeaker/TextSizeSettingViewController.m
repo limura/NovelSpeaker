@@ -25,6 +25,17 @@
         font = [UIFont systemFontOfSize:140.0];
     }
     GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
+    [self setFontFromGlobalState:globalState];
+
+    NSMutableArray* buttonItemList = [NSMutableArray new];
+    UIBarButtonItem* fontButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"TextSizeSettingViewController_FontSettingTitle", @"字体設定") style:UIBarButtonItemStylePlain target:self action:@selector(fontButtonClick:)];
+    [buttonItemList addObject:fontButton];
+    self.navigationItem.rightBarButtonItems = buttonItemList;
+    
+    [self setNotificationReciver];
+}
+
+- (void)setFontFromGlobalState:(GlobalStateCacheData*)globalState {
     float fontSizeValue = [globalState.textSizeValue floatValue];
     if (fontSizeValue < 1.0f) {
         fontSizeValue = 50.0f;
@@ -33,13 +44,6 @@
     }
     [self SetFontSizeByFontSizeValue:fontSizeValue];
     self.textSizeSlider.value = fontSizeValue;
-
-    NSMutableArray* buttonItemList = [NSMutableArray new];
-    UIBarButtonItem* fontButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"TextSizeSettingViewController_FontSettingTitle", @"字体設定") style:UIBarButtonItemStylePlain target:self action:@selector(fontButtonClick:)];
-    [buttonItemList addObject:fontButton];
-    self.navigationItem.rightBarButtonItems = buttonItemList;
-    
-    [self setNotificationReciver];
 }
 
 - (void)dealloc
@@ -109,6 +113,7 @@
 {
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     [notificationCenter addObserver:self selector:@selector(FontNameChanged:) name:@"FontNameChanged" object:nil];
+    [notificationCenter addObserver:self selector:@selector(displayUpdateNeededNotificationReciever:) name:@"ConfigReloaded_DisplayUpdateNeeded" object:nil];
 }
 
 /// NotificationCenter の受信者の設定を解除します。
@@ -116,6 +121,7 @@
 {
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     [notificationCenter removeObserver:self name:@"FontNameChanged" object:nil];
+    [notificationCenter removeObserver:self name:@"ConfigReloaded_DisplayUpdateNeeded" object:nil];
 }
 
 /// フォント変更イベントの受信
@@ -123,6 +129,12 @@
 {
     float currentValue = self.textSizeSlider.value;
     [self SetFontSizeByFontSizeValue:currentValue];
+}
+
+- (void)displayUpdateNeededNotificationReciever:(NSNotification*)notification{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self setFontFromGlobalState:[[GlobalDataSingleton GetInstance] GetGlobalState]];
+    });
 }
 
 @end

@@ -23,6 +23,26 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         GlobalDataSingleton.getInstance().reloadSpeechSetting()
+        addNotificationCenter()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        removeNotificationCenter()
+    }
+    
+    func addNotificationCenter(){
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(forName: NSNotification.Name(rawValue: "ConfigReloaded_DisplayUpdateNeeded"), object: nil, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.form.removeAll()
+                self.createSettingsTable()
+            }
+        }
+    }
+
+    func removeNotificationCenter(){
+        NotificationCenter.default.removeObserver(self)
     }
     
     func createSettingsTable(){

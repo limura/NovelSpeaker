@@ -726,6 +726,19 @@ typedef enum {
     return countryVoiceList;
 }
 
+/// 指定された voice identifier が利用可能なものかどうかを判定する(TODO: 日本語環境しか考慮していない)
++ (BOOL)isValidVoiceIdentifier:(NSString*)targetIdentifier{
+    if (targetIdentifier == nil || [targetIdentifier length] <= 0) {
+        return NO;
+    }
+    NSArray* voiceList = [NiftySpeaker getSupportedSpeaker:@"ja-JP"];
+    for (AVSpeechSynthesisVoice* voice in voiceList) {
+        if ([voice.identifier compare:targetIdentifier] == NSOrderedSame) {
+            return YES;
+        }
+    }
+    return NO;
+}
 
 /// AVSpeechSynthesisVoice.identifier から .name を取得します。該当がなければ nil を返します。
 + (NSString*)getDisplayStringForVoiceIdentifier:(NSString*)identifier {

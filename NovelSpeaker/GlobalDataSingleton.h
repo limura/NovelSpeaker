@@ -348,7 +348,7 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
 - (void)HandleBackgroundFetch:(UIApplication *)application
 performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
 
-// 設定されていpod 'SZTextView'る読み上げに使う音声の identifier を取得します
+// 設定されている読み上げに使う音声の identifier を取得します
 // XXX TODO: 本来なら core data 側でなんとかすべきです
 - (NSString*)GetVoiceIdentifier;
 

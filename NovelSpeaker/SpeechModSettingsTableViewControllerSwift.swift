@@ -30,10 +30,30 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
         let filterButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonSystemItem.search, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.filterButtonClicked))
         navigationItem.rightBarButtonItems = [addButton, editButtonItem, filterButton]
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        addNotificationReceiver()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        removeNotificationReceiver()
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func addNotificationReceiver(){
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "ConfigReloaded_DisplayUpdateNeeded"), object: nil, queue: .main) { (notification) in
+            print("ConfigReloaded_DisplayUpdateNeeded got. reloading...")
+            self.tableView.reloadData()
+        }
+    }
+    func removeNotificationReceiver(){
+        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Table view data source

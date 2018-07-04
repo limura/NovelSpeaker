@@ -100,6 +100,45 @@
     return nil;
 }
 
+/// dictionary の key に入っているデータが正しく NSNumber であることを確認した上で取り出します
++ (NSNumber*)validateNSDictionaryForNumber:(NSDictionary*)dictionary key:(id)key{
+    id obj = [dictionary objectForKey:key];
+    if (obj != nil && [obj isKindOfClass:[NSNumber class]]) {
+        return obj;
+    }
+    return nil;
+}
+
+/// NSNumber で BOOL が表現されているものを、JSON に変換される予定の NSMutableDictionary に入れます。number が nil であった場合など、エラーがある場合は NSDictionary には追加されません。
++ (void)addBoolValueForJSONNSDictionary:(NSMutableDictionary*)dictionary key:(id)key number:(NSNumber*)number{
+    if (number == nil) {
+        return;
+    }
+    [dictionary setObject:number forKey:key];
+}
+/// NSNumber で intValue が表現されているものを、JSON に変換される予定の NSMutableDictionary に入れます。number が nil であった場合など、エラーがある場合は NSDictionary には追加されません。
++ (void)addIntValueForJSONNSDictionary:(NSMutableDictionary*)dictionary key:(id)key number:(NSNumber*)number{
+    if (number == nil) {
+        return;
+    }
+    [dictionary setObject:number forKey:key];
+}
+/// NSNumber で floatValue が表現されているものを、JSON に変換される予定の NSMutableDictionary に入れます。number が nil であった場合など、エラーがある場合は NSDictionary には追加されません。
++ (void)addFloatValueForJSONNSDictionary:(NSMutableDictionary*)dictionary key:(id)key number:(NSNumber*)number{
+    if (number == nil) {
+        return;
+    }
+    [dictionary setObject:number forKey:key];
+}
+/// NSString を、JSON に変換される予定の NSMutableDictionary に入れます。number が nil であった場合など、エラーがある場合は NSDictionary には追加されません。
++ (void)addStringForJSONNSDictionary:(NSMutableDictionary*)dictionary key:(id)key string:(NSString*)string{
+    if (string == nil) {
+        return;
+    }
+    [dictionary setObject:string forKey:key];
+}
+
+
 /// HTML のエスケープ文字を元に戻します。(TODO: &#... 形式に対応する必要があります)
 + (NSString*)decodeHtmlEscape:(NSString*)htmlString {
     if (htmlString == nil) {

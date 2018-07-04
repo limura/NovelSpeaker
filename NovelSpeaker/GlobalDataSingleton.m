@@ -3499,17 +3499,87 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return resultArray;
 }
 
+// 声質の設定などの情報をJSON(用のNSDictionary*)に変換して取得します。
+- (NSDictionary*)CreateSpeakPitchConfigDictionaryForJSON{
+    NSMutableDictionary* result = [NSMutableDictionary new];
+
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    [result setObject:@{
+        @"pitch": globalState.defaultPitch,
+        @"rate": globalState.defaultRate
+    } forKey:@"default"];
+
+    NSArray* speakPitchArray = [self GetAllSpeakPitchConfig];
+    NSMutableArray* otherSettingArray = [NSMutableArray new];
+    for (SpeakPitchConfigCacheData* pitchConfig in speakPitchArray) {
+        NSMutableDictionary* pitchDictionary = [NSMutableDictionary new];
+        [pitchDictionary setObject:pitchConfig.title forKey:@"title"];
+        [pitchDictionary setObject:pitchConfig.startText forKey:@"start_text"];
+        [pitchDictionary setObject:pitchConfig.endText forKey:@"end_text"];
+        [pitchDictionary setObject:pitchConfig.pitch forKey:@"pitch"];
+        [otherSettingArray addObject:pitchDictionary];
+    }
+    [result setObject:otherSettingArray forKey:@"others"];
+    return result;
+}
+
+// 読み上げの間の設定をJSON(用のNSDictionary*)に変換して取得します。
+- (NSArray*)CreateSpeechWaitConfigArrayForJSON{
+    NSMutableArray* result = [NSMutableArray new];
+    NSArray* waitConfigArray = [self GetAllSpeechWaitConfig];
+    for (SpeechWaitConfigCacheData* waitConfig in waitConfigArray) {
+        NSDictionary* dic = @{
+            @"target_text": waitConfig.targetText,
+            @"delay_time_in_sec": waitConfig.delayTimeInSec,
+        };
+        [result addObject:dic];
+    }
+    
+    return result;
+}
+
+// GlobalData に入っているような情報をJSON(用のNSDictionary*)に変換して取得します
+- (NSDictionary*)CreateMiscSettingsDictionaryForJSON{
+    NSMutableDictionary* result = [NSMutableDictionary new];
+    
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    [NiftyUtility addIntValueForJSONNSDictionary:result key:@"max_speech_time_in_sec" number:globalState.maxSpeechTimeInSec];
+    [NiftyUtility addFloatValueForJSONNSDictionary:result key:@"text_size_value" number:globalState.textSizeValue];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"speech_wait_setting_use_experimental_wait" number:globalState.speechWaitSettingUseExperimentalWait];
+    [NiftyUtility addStringForJSONNSDictionary:result key:@"default_voice_identifier" string:[self GetVoiceIdentifier]];
+    [NiftyUtility addIntValueForJSONNSDictionary:result key:@"content_sort_type" number:[[NSNumber alloc] initWithInt:[self GetBookSelfSortType]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"menuitem_is_add_speech_mod_setting_only" number:[[NSNumber alloc] initWithBool:[self GetMenuItemIsAddSpeechModSettingOnly]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"override_ruby_is_enabled" number:[[NSNumber alloc] initWithBool:[self GetOverrideRubyIsEnabled]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_ignore_url_speech_enabled" number:[[NSNumber alloc] initWithBool:[self GetIsIgnoreURIStringSpeechEnabled]]];
+    [NiftyUtility addStringForJSONNSDictionary:result key:@"not_ruby_charactor_array" string:[self GetNotRubyCharactorStringArray]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"force_siteinfo_reload_is_enabled" number:[[NSNumber alloc] initWithBool:[self GetForceSiteInfoReloadIsEnabled]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_reading_progress_display_enabled" number:[[NSNumber alloc] initWithBool:[self IsReadingProgressDisplayEnabled]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_short_skip_enabled" number:[[NSNumber alloc] initWithBool:[self IsShortSkipEnabled]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_playback_duration_enabled" number:[[NSNumber alloc] initWithBool:[self IsPlaybackDurationEnabled]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_dark_theme_enabled" number:[[NSNumber alloc] initWithBool:[self IsDarkThemeEnabled]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_page_turning_sound_enabled" number:[[NSNumber alloc] initWithBool:[self IsPageTurningSoundEnabled]]];
+    [NiftyUtility addStringForJSONNSDictionary:result key:@"display_font_name" string:[self GetDisplayFontName]];
+    
+    return result;
+}
+
 // バックアップ用のデータを JSON に encode したものを生成して取得します
 - (NSData*)CreateBackupJSONData{
     NSArray* bookselfArray = [self CreateBookselfBackupForJSONArray];
     NSDictionary* speechModDictionary = [self CreateSpeechModifierSettingDictionaryForJSON];
     NSArray* webImportBookmarkArray = [self CreateWebImportBookmarkSettingArrayForJSON];
+    NSDictionary* speakPitchConfigDictionary = [self CreateSpeakPitchConfigDictionaryForJSON];
+    NSArray* speechWaitConfigArray = [self CreateSpeechWaitConfigArrayForJSON];
+    NSDictionary* miscSettingsDictionary = [self CreateMiscSettingsDictionaryForJSON];
     NSDictionary* backupData = @{
          @"data_version": @"1.0.0",
          @"bookshelf": bookselfArray,
          @"word_replacement_dictionary": speechModDictionary,
          @"web_import_bookmarks": webImportBookmarkArray,
-         };
+         @"speak_pitch_config": speakPitchConfigDictionary,
+         @"speech_wait_config": speechWaitConfigArray,
+         @"misc_settings": miscSettingsDictionary,
+    };
     NSError* err = nil;
     NSData* resultData = [NSJSONSerialization dataWithJSONObject:backupData options:NSJSONWritingPrettyPrinted error:&err];
     if (err != nil) {
@@ -3644,6 +3714,159 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
 }
 
+- (void)RestoreBackupFromSpeakPitchConfigDictionary_V1_0_0:(NSDictionary*)configDictionary{
+    NSDictionary* defaultSetting = [NiftyUtility validateNSDictionaryForDictionary:configDictionary key:@"default"];
+    
+    if (defaultSetting != nil) {
+        GlobalStateCacheData* globalState = [self GetGlobalState];
+        BOOL isOverride = false;
+        NSNumber* pitch = [NiftyUtility validateNSDictionaryForNumber:defaultSetting key:@"pitch"];
+        if (pitch != nil) {
+            float pitchFloat = [pitch floatValue];
+            if (pitchFloat >= 0.5f && pitchFloat <= 2.0f) {
+                globalState.defaultPitch = pitch;
+                isOverride = true;
+            }
+        }
+        NSNumber* rate = [NiftyUtility validateNSDictionaryForNumber:defaultSetting key:@"rate"];
+        if (rate != nil) {
+            float rateFloat = [rate floatValue];
+            if (rateFloat >= AVSpeechUtteranceMinimumSpeechRate && rateFloat <= AVSpeechUtteranceMaximumSpeechRate) {
+                globalState.defaultRate = rate;
+                isOverride = true;
+            }
+        }
+        if (isOverride) {
+            [self UpdateGlobalState:globalState];
+        }
+    }
+
+    NSArray* otherSettingArray = [NiftyUtility validateNSDictionaryForArray:configDictionary key:@"others"];
+    if (otherSettingArray != nil) {
+        for (id obj in otherSettingArray) {
+            if (obj != nil && [obj isKindOfClass:[NSDictionary class]]) {
+                NSDictionary* dic = (NSDictionary*)obj;
+                NSString* title = [NiftyUtility validateNSDictionaryForString:dic key:@"title"];
+                NSString* startText = [NiftyUtility validateNSDictionaryForString:dic key:@"start_text"];
+                NSString* endText = [NiftyUtility validateNSDictionaryForString:dic key:@"end_text"];
+                NSNumber* pitch = [NiftyUtility validateNSDictionaryForNumber:dic key:@"pitch"];
+                float pitchFloat = [pitch floatValue];
+                if (title != nil && [title length] > 0
+                    && startText != nil && [startText length] > 0
+                    && endText != nil && [endText length] > 0
+                    && pitchFloat >= 0.5f && pitchFloat <= 2.0f) {
+                    SpeakPitchConfigCacheData* pitchConfig = [SpeakPitchConfigCacheData new];
+                    pitchConfig.title = title;
+                    pitchConfig.startText = startText;
+                    pitchConfig.endText = endText;
+                    pitchConfig.pitch = pitch;
+                    [self UpdateSpeakPitchConfig:pitchConfig];
+                }
+            }
+        }
+    }
+}
+
+- (void)RestoreBackupFromSpeechWaitConfigArray_V1_0_0:(NSArray*)speechWaitConfigArray{
+    for (id obj in speechWaitConfigArray) {
+        if (obj != nil && [obj isKindOfClass:[NSDictionary class]]) {
+            NSDictionary* dic = (NSDictionary*)obj;
+            NSString* target_text = [NiftyUtility validateNSDictionaryForString:dic key:@"target_text"];
+            NSNumber* delay_time_in_sec = [NiftyUtility validateNSDictionaryForNumber:dic key:@"delay_time_in_sec"];
+            if (target_text != nil && [target_text length] > 0 && delay_time_in_sec != nil) {
+                SpeechWaitConfigCacheData* waitConfig = [SpeechWaitConfigCacheData new];
+                waitConfig.targetText = target_text;
+                waitConfig.delayTimeInSec = delay_time_in_sec;
+                [self AddSpeechWaitSetting:waitConfig];
+            }
+        }
+    }
+}
+
+- (void)RestoreBackupFromMiscSettingsDictionary_V1_0_0:(NSDictionary*)miscSettingsDictionary {
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    
+    BOOL isUpdated = false;
+    NSNumber* max_speech_time_in_sec = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"max_speech_time_in_sec"];
+    if (max_speech_time_in_sec != nil) {
+        globalState.maxSpeechTimeInSec = max_speech_time_in_sec;
+        isUpdated = true;
+    }
+    NSNumber* text_size_value = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"text_size_value"];
+    if (text_size_value != nil) {
+        globalState.textSizeValue = text_size_value;
+        isUpdated = true;
+    }
+    NSNumber* speech_wait_setting_use_experimental_wait = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"speech_wait_setting_use_experimental_wait"];
+    if (speech_wait_setting_use_experimental_wait != nil) {
+        globalState.speechWaitSettingUseExperimentalWait = speech_wait_setting_use_experimental_wait;
+        isUpdated = true;
+    }
+    if (isUpdated) {
+        [self UpdateGlobalState:globalState];
+    }
+    
+    NSString* default_voice_identifier = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"default_voice_identifier"];
+    if (default_voice_identifier != nil && [default_voice_identifier length] > 0 && [NiftySpeaker isValidVoiceIdentifier:default_voice_identifier]) {
+        [self SetVoiceIdentifier:default_voice_identifier];
+    }
+    NSNumber* content_sort_type = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"content_sort_type"];
+    if (content_sort_type != nil) {
+        NSUInteger uint = [content_sort_type unsignedIntegerValue];
+        if (uint == NarouContentSortType_Ncode
+            || uint == NarouContentSortType_Title
+            || uint == NarouContentSortType_Writer
+            || uint == NarouContentSortType_NovelUpdatedAt
+            ) {
+            [self SetBookSelfSortType:uint];
+        }
+    }
+    NSNumber* menuitem_is_add_speech_mod_setting_only = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"menuitem_is_add_speech_mod_setting_only"];
+    if (menuitem_is_add_speech_mod_setting_only != nil) {
+        [self SetMenuItemIsAddSpeechModSettingOnly:[menuitem_is_add_speech_mod_setting_only boolValue]];
+    }
+    NSNumber* override_ruby_is_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"override_ruby_is_enabled"];
+    if (override_ruby_is_enabled != nil) {
+        [self SetOverrideRubyIsEnabled:[override_ruby_is_enabled boolValue]];
+    }
+    NSNumber* is_ignore_url_speech_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_ignore_url_speech_enabled"];
+    if (is_ignore_url_speech_enabled != nil) {
+        [self SetIgnoreURIStringSpeechIsEnabled:[is_ignore_url_speech_enabled boolValue]];
+    }
+    NSString* not_ruby_charactor_array = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"not_ruby_charactor_array"];
+    if (not_ruby_charactor_array != nil) {
+        [self SetNotRubyCharactorStringArray:not_ruby_charactor_array];
+    }
+    NSNumber* force_siteinfo_reload_is_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"force_siteinfo_reload_is_enabled"];
+    if (force_siteinfo_reload_is_enabled != nil) {
+        [self SetForceSiteInfoReloadIsEnabled:[force_siteinfo_reload_is_enabled boolValue]];
+    }
+    NSNumber* is_reading_progress_display_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_reading_progress_display_enabled"];
+    if (is_reading_progress_display_enabled != nil) {
+        [self SetReadingProgressDisplayEnabled:[is_reading_progress_display_enabled boolValue]];
+    }
+    NSNumber* is_short_skip_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_short_skip_enabled"];
+    if (is_short_skip_enabled != nil) {
+        [self SetShortSkipEnabled:[is_short_skip_enabled boolValue]];
+    }
+    NSNumber* is_playback_duration_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_playback_duration_enabled"];
+    if (is_playback_duration_enabled != nil) {
+        [self SetPlaybackDurationIsEnabled:[is_playback_duration_enabled boolValue]];
+    }
+    NSNumber* is_dark_theme_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_dark_theme_enabled"];
+    if (is_dark_theme_enabled != nil) {
+        [self SetDarkThemeIsEnabled:[is_dark_theme_enabled boolValue]];
+    }
+    NSNumber* is_page_turning_sound_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_page_turning_sound_enabled"];
+    if (is_page_turning_sound_enabled != nil) {
+        [self SetPageTurningSoundIsEnabled:[is_page_turning_sound_enabled boolValue]];
+    }
+    NSString* display_font_name = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"display_font_name"];
+    if (display_font_name != nil && [display_font_name length] > 0 && [NiftyUtilitySwift isValidFontNameWithFontName:display_font_name]) {
+        [self SetDisplayFontName:display_font_name];
+    }
+}
+
 /// JSONData に入っているバックアップを書き戻します。
 - (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData {
     NSError* err = nil;
@@ -3675,6 +3898,26 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         if (webImportBookmarkDataArray != nil) {
             [self RestoreBackupFromWebImportBookmarkArray_V1_0_0:webImportBookmarkDataArray];
         }
+        NSDictionary* pitchConfigDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"speak_pitch_config"];
+        if (pitchConfigDictionary != nil) {
+            [self RestoreBackupFromSpeakPitchConfigDictionary_V1_0_0:pitchConfigDictionary];
+        }
+        NSArray* speechWaitConfigArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"speech_wait_config"];
+        if (speechWaitConfigArray != nil) {
+            [self RestoreBackupFromSpeechWaitConfigArray_V1_0_0:speechWaitConfigArray];
+        }
+        NSDictionary* miscSettingsDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"misc_settings"];
+        if (miscSettingsDictionary != nil) {
+            [self RestoreBackupFromMiscSettingsDictionary_V1_0_0:miscSettingsDictionary];
+        }
+        // config が書き換わったことをアナウンスする
+        NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+        NSNotification* notification = [NSNotification notificationWithName:@"ConfigReloaded_DisplayUpdateNeeded" object:self userInfo:nil];
+        [notificationCenter postNotification:notification];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_BackupDataLoaded", @"設定データを読み込みました。ダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+        });
     }
 
     return true;

@@ -62,6 +62,31 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    [self addNotificationReceiver];
+}
+
+- (void)viewDidDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
+    [self removeNotificationReciever];
+}
+
+- (void)addNotificationReceiver{
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    [notificationCenter addObserver:self selector:@selector(displayUpdateNeededNotificationReciever:) name:@"ConfigReloaded_DisplayUpdateNeeded" object:nil];
+}
+
+- (void)removeNotificationReciever{
+    [NSNotificationCenter.defaultCenter removeObserver:self];
+}
+
+- (void)displayUpdateNeededNotificationReciever:(NSNotification*)notification{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.tableView reloadData];
+    });
+}
+
 // テキストフィールドでEnterが押された
 - (BOOL)textFieldShouldReturn:(UITextField *)sender {
     // キーボードを閉じる

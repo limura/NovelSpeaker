@@ -116,6 +116,9 @@
 /// countryCode の発音をサポートしている音声の AVSpeechSynthesisVoice のリストを取得します。
 + (NSArray*)getSupportedSpeaker:(NSString*)countryCode;
 
+/// 指定された voice identifier が利用可能なものかどうかを判定する(TODO: 日本語環境しか考慮していない)
++ (BOOL)isValidVoiceIdentifier:(NSString*)targetIdentifier;
+
 /// AVSpeechSynthesisVoice.identifier から .name を取得します。該当がなければ nil を返します。
 + (NSString*)getDisplayStringForVoiceIdentifier:(NSString*)identifier;
 
