@@ -137,7 +137,11 @@
 - (BOOL)save
 {
     NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
-    if (![context hasChanges]) {
+    __block BOOL isChanged = false;
+    [context performBlockAndWait:^{
+        isChanged = [context hasChanges];
+    }];
+    if (!isChanged) {
         return true;
     }
     __block BOOL result = true;
@@ -291,8 +295,10 @@
     }
     // 親は Main です。
     //[context setParentContext:m_MainManagedObjectContext];
-    [context setPersistentStoreCoordinator:coordinator];
-    [context setMergePolicy:m_MergePolicy];
+    [context performBlockAndWait:^{
+        [context setPersistentStoreCoordinator:coordinator];
+        [context setMergePolicy:m_MergePolicy];
+    }];
     
     // 他のthread の context で書き換えが起きた時の Notification ハンドラを登録します。
     NSNotificationCenter *notify = [NSNotificationCenter defaultCenter];
@@ -326,7 +332,9 @@
 {
     NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
     NSDate* startDate = [NSDate date];
-    [context deleteObject:entity];
+    [context performBlockAndWait:^{
+        [context deleteObject:entity];
+    }];
     [LPPerformanceChecker CheckTimeInterval:@"DeleteEntity時間かかりすぎ" startDate:startDate logTimeInterval:1.0f];
 }
 
@@ -338,10 +346,12 @@
     NSEntityDescription* entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
     [fetchRequest setEntity:entity];
     
-    NSError* err = nil;
-    NSArray* results = nil;
+    __block NSError* err = nil;
+    __block NSArray* results = nil;
     NSDate* startDate = [NSDate date];
-    results = [context executeFetchRequest:fetchRequest error:&err];
+    [context performBlockAndWait:^{
+        results = [context executeFetchRequest:fetchRequest error:&err];
+    }];
     [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"FetchAllEntity (%@) 時間かかりすぎ", entityName] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
@@ -362,10 +372,12 @@
     // 数を数えるだけなのでidしか返却しないようにします。
     [fetchRequest setIncludesPropertyValues:NO];
     
-    NSError* err = nil;
-    NSArray* results;
+    __block NSError* err = nil;
+    __block NSArray* results;
     NSDate* startDate = [NSDate date];
-    results = [context executeFetchRequest:fetchRequest error:&err];
+    [context performBlockAndWait:^{
+        results = [context executeFetchRequest:fetchRequest error:&err];
+    }];
     [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"CountEntity (%@) 時間かかりすぎ", entityName] startDate:startDate logTimeInterval:1.0f];
   
     if (err != nil) {
@@ -382,7 +394,7 @@
 - (NSArray*)FetchAllEntity:(NSString*)entityName sortAttributeName:(NSString*)sortAttributeName ascending:(BOOL)ascending
 {
     NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
-    NSArray* results = nil;
+    __block NSArray* results = nil;
     NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
     NSEntityDescription* entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
     [fetchRequest setEntity:entity];
@@ -391,9 +403,11 @@
     NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
     [fetchRequest setSortDescriptors:sortDescriptors];
     
-    NSError* err = nil;
+    __block NSError* err = nil;
     NSDate* startDate = [NSDate date];
-    results = [context executeFetchRequest:fetchRequest error:&err];
+    [context performBlockAndWait:^{
+        results = [context executeFetchRequest:fetchRequest error:&err];
+    }];
     [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"FetchAllEntity %@ sortAttributeName: %@ 時間かかりすぎ", entityName, sortAttributeName] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
@@ -413,10 +427,12 @@
     
     [fetchRequest setPredicate:predicate];
     
-    NSError* err = nil;
-    NSArray* results;
+    __block NSError* err = nil;
+    __block NSArray* results;
     NSDate* startDate = [NSDate date];
-    results = [context executeFetchRequest:fetchRequest error:&err];
+    [context performBlockAndWait:^{
+        results = [context executeFetchRequest:fetchRequest error:&err];
+    }];
     [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"SearchEntity %@ predicate: %@ 時間かかりすぎ", entityName, predicate] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
@@ -440,10 +456,12 @@
     NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
     [fetchRequest setSortDescriptors:sortDescriptors];
 
-    NSError* err = nil;
-    NSArray* results;
+    __block NSError* err = nil;
+    __block NSArray* results;
     NSDate* startDate = [NSDate date];
-    results = [context executeFetchRequest:fetchRequest error:&err];
+    [context performBlockAndWait:^{
+        results = [context executeFetchRequest:fetchRequest error:&err];
+    }];
     [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"SearchEntity %@ predicate: %@ sortAttributeName: %@ 時間かかりすぎ", entityName, predicate, sortAttributeName] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
@@ -467,10 +485,12 @@
     // 数を数えるだけなのでidしか返却しないようにします。
     [fetchRequest setIncludesPropertyValues:NO];
 
-    NSError* err = nil;
-    NSArray* results;
+    __block NSError* err = nil;
+    __block NSArray* results;
     NSDate* startDate = [NSDate date];
-    results = [context executeFetchRequest:fetchRequest error:&err];
+    [context performBlockAndWait:^{
+        results = [context executeFetchRequest:fetchRequest error:&err];
+    }];
     [LPPerformanceChecker CheckTimeInterval:[[NSString alloc] initWithFormat:@"CountEntity %@ predicate: %@ 時間かかりすぎ", entityName, predicate] startDate:startDate logTimeInterval:1.0f];
     if (err != nil) {
         NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
