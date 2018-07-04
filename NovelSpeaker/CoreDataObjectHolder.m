@@ -503,11 +503,11 @@
 /// 現在のthreadでの NSManagedObjectContext で、performBlockAndWait を実行します。
 - (void)performBlockAndWait:(void(^)(void))block{
     NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
-    @synchronized([CoreDataObjectHolder GetSyncObject]){
+    //@synchronized([CoreDataObjectHolder GetSyncObject]){
         [context performBlockAndWait:^{
             block();
         }];
-    }
+    //}
 }
 
 
