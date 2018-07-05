@@ -9,6 +9,9 @@ target 'NovelSpeaker' do
   pod 'SZTextView'
   pod 'Eureka', :git => 'https://github.com/xmartlabs/Eureka.git'
 
+  source 'https://github.com/CocoaPods/Specs.git'
+  pod 'Zip', '~> 1.1'
+
   target 'NovelSpeakerTests' do
     inherit! :search_paths
     # Pods for testing
