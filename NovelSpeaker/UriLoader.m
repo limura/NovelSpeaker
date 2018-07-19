@@ -171,7 +171,7 @@
         }
     }
 
-    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"//a[@rel=\"next\"]" pageElement:@"//*[@class=\"autopagerize_page_element\"]" title:@"//title" author:@"" firstPageLink:@""];
+    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]" pageElement:@"//*[contains(@class,'autopagerize_page_element')]|//*[contains(@itemprop,'articleBody')]" title:@"//title" author:@"" firstPageLink:@""];
     [resultArray addObject:defaultSiteInfo];
     SiteInfo* fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//body" title:@"//title" author:@"" firstPageLink:@""];
     [resultArray addObject:fallbackSiteInfo];
