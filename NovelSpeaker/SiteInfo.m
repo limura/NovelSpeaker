@@ -12,7 +12,7 @@
 
 
 @implementation SiteInfo
-- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString *)author firstPageLink:(NSString *)firstPageLink{
+- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString *)author firstPageLink:(NSString *)firstPageLink tag:(NSString*)tag{
     self = [super init];
     if (self == nil) {
         NSLog(@"super init return nil");
@@ -29,6 +29,7 @@
     m_Title = title == nil ? @"//title" : title;
     m_Author = author == nil ? @"" : author;
     m_FirstPageLink = firstPageLink == nil ? @"" : firstPageLink;
+    m_Tag = tag == nil ? @"" : tag;
     
     return self;
 }
@@ -94,6 +95,15 @@
         return nil;
     }
     return [[NSString alloc] initWithFormat:@"%@", [SiteInfo RemoveHtmlTag:authorString]];
+}
+
+/// タグのリストを抽出します
+/// 注意：
+/// タグはリストに分かれている場合、タグ毎にNSArrayの1要素になっているはずです
+/// NSArray の中身は NSString* ですが、HTMLを含む文字列なので、HtmlStringToAttributedString を呼ぶ必要があるかもしれません。
+- (NSArray*)GetTagArray:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding {
+    NSArray* tagArray = [self ExecuteXpathToStringArray:m_Author document:document context:context documentEncoding:documentEncoding];
+    return tagArray;
 }
 
 /// HTML文字列の中の表示にはいらなそうなタグの部分をまるっと削除して返します。
@@ -194,7 +204,7 @@
     return html;
 }
 
-- (NSString*)ExecuteXpathToString:(NSString*)xpathString document:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding {
+- (NSArray*)ExecuteXpathToStringArray:(NSString*)xpathString document:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding {
     xmlChar* xpath = (xmlChar*)[xpathString cStringUsingEncoding:NSUTF8StringEncoding];
     xmlXPathObjectPtr result = xmlXPathEvalExpression(xpath, context);
     if (result == NULL || result->nodesetval == NULL) {
@@ -202,7 +212,7 @@
     }
     //NSLog(@"xmlXPathEvalExpression: result: %p->nodesetval(%p)->nodeNr(%d)", result, result->nodesetval, result->nodesetval->nodeNr);
     xmlNodeSetPtr nodeSet = result->nodesetval;
-    NSMutableString* htmlString = [NSMutableString new];
+    NSMutableArray* stringArray = [NSMutableArray new];
     for (int i = 0; i < nodeSet->nodeNr; i++) {
         xmlNodePtr node = nodeSet->nodeTab[i];
         if (node == NULL) {
@@ -220,13 +230,25 @@
                 if (docString == nil) {
                     continue;
                 }
-                [htmlString appendString:docString];
-                [htmlString appendString:@"<br><br>"];
+                [stringArray addObject:docString];
             }
         }
         xmlBufferFree(buffer);
     }
     xmlXPathFreeObject(result);
+    return stringArray;
+}
+
+- (NSString*)ExecuteXpathToString:(NSString*)xpathString document:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding {
+    NSArray* stringArray = [self ExecuteXpathToStringArray:xpathString document:document context:context documentEncoding:documentEncoding];
+    if (stringArray == nil) {
+        return nil;
+    }
+    NSMutableString* htmlString = [NSMutableString new];
+    for (NSString* str in stringArray) {
+        [htmlString appendString:str];
+        [htmlString appendString:@"<br><br>"];
+    }
     return htmlString;
 }
 
@@ -240,7 +262,10 @@
     return [[NSString alloc] initWithFormat:@"nextLink: %@, pageElement: %@, title: %@, author: %@, firstPageLink: %@, urlPattern: %@", m_NextLink, m_PageElement, m_Title, m_Author, m_FirstPageLink, [m_UrlPattern pattern]];
 }
 
-
+/// SiteInfo の sort用のヒント(UrlPattern の文字数)を返します
+- (NSUInteger)GetSortHint{
+    return [[m_UrlPattern pattern] length];
+}
 
 
 @end

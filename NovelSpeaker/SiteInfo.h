@@ -19,9 +19,10 @@
     NSString* m_Title;
     NSString* m_Author;
     NSString* m_FirstPageLink;
+    NSString* m_Tag;
 }
 
-- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString*)author firstPageLink:(NSString*)firstPageLink;
+- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString*)author firstPageLink:(NSString*)firstPageLink tag:(NSString*)tag;
 
 /// 指定された url がこの SiteInfo の示すURLであるか否かを判定します
 - (BOOL)isTargetUrl:(NSURL*)url;
@@ -35,6 +36,12 @@
 - (NSString*)GetTitle:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding;
 /// 著者を抽出します
 - (NSString*)GetAuthor:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding;
+
+/// タグのリストを抽出します
+/// 注意：
+/// タグはリストに分かれている場合、タグ毎にNSArrayの1要素になっているはずです
+/// NSArray の中身は NSString* ですが、HTMLを含む文字列なので、HtmlStringToAttributedString を呼ぶ必要があるかもしれません。
+- (NSArray*)GetTagArray:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding;
 
 /// PageElementに当たる HTML を、NSString の形式で取り出します。
 /// HTML から単純な String にするには、HtmlStringToAttributedString 等のユーティリティを用いてください。
@@ -57,5 +64,8 @@
 
 /// 概要を文字列で返します
 - (NSString*)GetDescription;
+
+/// SiteInfo の sort用のヒント(UrlPattern の文字数)を返します
+- (NSUInteger)GetSortHint;
 
 @end

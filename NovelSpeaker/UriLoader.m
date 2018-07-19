@@ -31,6 +31,7 @@
 
 /// SiteInfo のJSONを解析した後の NSArray を元に内部データベースに追加します
 - (BOOL)AddSiteInfoFromJsonArray:(NSArray *)siteInfoJsonArray targetSiteInfoArray:(NSMutableArray*)targetSiteInfoArray {
+    NSMutableArray* tmpArray = [NSMutableArray new];
     if (siteInfoJsonArray == nil || ![siteInfoJsonArray isKindOfClass:[NSArray class]]) {
         NSLog(@"AddSiteInfoFromJsonArray: siteInfoJsonArray invalid: %@", siteInfoJsonArray);
         return false;
@@ -68,12 +69,31 @@
         if (firstPageLink == nil) {
             firstPageLink = @"";
         }
-        SiteInfo* siteInfo = [[SiteInfo alloc] initWithParams:urlPattern nextLink:nextLink pageElement:pageElement title:title author:author firstPageLink:firstPageLink];
+        NSString* tag = [NiftyUtility validateNSDictionaryForString:secondObject key:@"tag"];
+        if (tag == nil) {
+            tag = @"";
+        }
+        SiteInfo* siteInfo = [[SiteInfo alloc] initWithParams:urlPattern nextLink:nextLink pageElement:pageElement title:title author:author firstPageLink:firstPageLink tag:tag];
         if (siteInfo == nil) {
             NSLog(@"AddSiteInfoFromJsonArray: siteInfo == nil");
             continue;
         }
         //NSLog(@"AddSiteInfoFromJsonArray: addObject: %@", [siteInfo GetDescription]);
+        [tmpArray addObject:siteInfo];
+    }
+    NSArray* sortedArray = [tmpArray sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+        SiteInfo* a = obj1;
+        SiteInfo* b = obj2;
+        NSUInteger aLength = [a GetSortHint];
+        NSUInteger bLength = [b GetSortHint];
+        if (aLength > bLength) {
+            return NSOrderedAscending;
+        }else if (aLength < bLength) {
+            return NSOrderedDescending;
+        }
+        return NSOrderedSame;
+    }];
+    for (SiteInfo* siteInfo in sortedArray) {
         [targetSiteInfoArray addObject:siteInfo];
     }
     return true;
@@ -141,21 +161,6 @@
 - (NSArray*)searchSiteInfoForURL:(NSURL*)url {
     NSMutableArray* resultArray = [NSMutableArray new];
 
-    /// XXXX ことせかい でのカスタムSiteInfoをとりあえずここに書きます。
-    /// TODO: 将来的には外部からの読み込みをできるようにしておいたほうが良いです。
-    /*
-    NSArray* novelSpeakerCustomSiteInfoArray = @[
-        // Arcadia
-         [[SiteInfo alloc] initWithParams:@"^https?://(www\\.)?mai-net\\.(net|ath\\.cx)/bbs/sst/sst.php" nextLink:@"//table[@class='brdr']//a[contains(., '次を表示する')]" pageElement:@"//blockquote/div" title:@"//title" author:@""],
-     ];
-
-    for (SiteInfo* siteInfo in novelSpeakerCustomSiteInfoArray) {
-        if ([siteInfo isTargetUrl:url]) {
-            [resultArray addObject:siteInfo];
-        }
-    }
-     */
-
     for (SiteInfo* siteInfo in m_CustomSiteInfoArray) {
         //NSLog(@"check: %@", [siteInfo GetDescription]);
         if ([siteInfo isTargetUrl:url]) {
@@ -171,9 +176,9 @@
         }
     }
 
-    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]" pageElement:@"//*[contains(@class,'autopagerize_page_element')]|//*[contains(@itemprop,'articleBody')]" title:@"//title" author:@"" firstPageLink:@""];
+    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]" pageElement:@"//*[contains(@class,'autopagerize_page_element')]|//*[contains(@itemprop,'articleBody')]" title:@"//title" author:@"" firstPageLink:@"" tag:@""];
     [resultArray addObject:defaultSiteInfo];
-    SiteInfo* fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//body" title:@"//title" author:@"" firstPageLink:@""];
+    SiteInfo* fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//body" title:@"//title" author:@"" firstPageLink:@"" tag:@""];
     [resultArray addObject:fallbackSiteInfo];
     /*
     fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//\*" title:@"//title" author:@""];
