@@ -14,7 +14,7 @@
 				<string>NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024</string>
 			</array>
 			<key>CFBundleTypeName</key>
-			<string>NovelSpeaker Backup data</string>
+			<string>NovelSpeaker Backup data JSON type</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSHandlerRank</key>
@@ -57,6 +57,22 @@
 				<string>com.adobe.pdf</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>NovelSpeaker backup data ZIP type</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.limuraproducts.novelspeaker.backupdataziputi</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
@@ -69,7 +85,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.1.36</string>
+	<string>1.1.37</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -89,7 +105,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.1.61</string>
+	<string>1.1.62</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -151,7 +167,9 @@
 				<string>public.text</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>NovelSpeaker Backup data</string>
+			<string>NovelSpeaker Backup data JSON type</string>
+			<key>UTTypeIconFiles</key>
+			<array/>
 			<key>UTTypeIdentifier</key>
 			<string>com.limuraproducts.novelspeaker.backupdatauti</string>
 			<key>UTTypeSize320IconFile</key>
@@ -162,6 +180,27 @@
 			<dict>
 				<key>public.filename-extension</key>
 				<string>novelspeaker-backup-json</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>NovelSpeaker Backupdata ZIP type</string>
+			<key>UTTypeIconFiles</key>
+			<array/>
+			<key>UTTypeIdentifier</key>
+			<string>com.limuraproducts.novelspeaker.backupdataziputi</string>
+			<key>UTTypeSize320IconFile</key>
+			<string>NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024</string>
+			<key>UTTypeSize64IconFile</key>
+			<string>NovelSpeakerIcon-167px</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<string>novelspeaker-backup-zip</string>
 			</dict>
 		</dict>
 	</array>

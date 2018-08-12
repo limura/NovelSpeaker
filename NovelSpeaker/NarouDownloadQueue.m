@@ -47,7 +47,8 @@ static float SLEEP_TIME_SECOND = 10.5f;
     
     m_CurrentDownloadContentAllData = nil;
     m_DownloadCount = 0;
-    
+    m_isDownloadPaused = false;
+
     [self StartDownloadThread];
     
     return self;
@@ -182,6 +183,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
             break;
         }
         [NSThread sleepForTimeInterval:0.1];
+        if (m_isDownloadPaused) {
+            continue;
+        }
         
         __block NarouContentCacheData* targetContent = nil;
         dispatch_sync(m_DownloadQueueReadWriteDispatchQueue, ^{
@@ -345,6 +349,8 @@ static float SLEEP_TIME_SECOND = 10.5f;
         localContent = content;
     }
     [self announceDownloadStatusEnd:localContent];
+    [loader ClearSiteInfoCache];
+    loader = nil;
 
     return result;
 }
@@ -560,5 +566,14 @@ static float SLEEP_TIME_SECOND = 10.5f;
     return m_NewDownloadCount;
 }
 
+/// ダウンロードを一時停止します
+- (void)PauseDownload{
+    m_isDownloadPaused = true;
+}
+
+/// 一時停止したダウンロードを再開します
+- (void)ResumeDownload{
+    m_isDownloadPaused = false;
+}
 
 @end

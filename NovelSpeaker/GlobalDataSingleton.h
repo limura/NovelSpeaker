@@ -471,8 +471,17 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// Web取り込み用のBookmarkを全て消し去ります
 - (void)ClearWebImportBookmarks;
 
+/// バックアップに使う情報を NSDictionary にして返します
+- (NSDictionary*)CreateBackupDataDictionary;
+
 // バックアップ用のデータを JSON に encode したものを生成して取得します
 - (NSData*)CreateBackupJSONData;
+
+/// JSONData に入っているバックアップを書き戻します。
+/// dataDirectory が指示されていて、かつ、本棚データに content_directory が存在した場合は
+/// ダウンロードせずにそのディレクトリにあるファイル群を章のデータとして読み込みます。
+- (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData dataDirectory:(NSURL*)dataDirectory;
+
 
 /// 起動されるまでの間に新規にダウンロードされた小説の数を取得します
 - (NSInteger)GetBackgroundFetchedNovelCount;

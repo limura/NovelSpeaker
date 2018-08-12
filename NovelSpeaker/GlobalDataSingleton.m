@@ -1282,6 +1282,9 @@ static GlobalDataSingleton* _singleton = nil;
         // 2015/09/27 added.
         //, @"あ、": @"あぁ、"
         
+        // 2018/07/25 added.
+        , @"お守り": @"おまもり"
+        
         , @"〜": @"ー"
         
         , @"α": @"アルファ"
@@ -2935,6 +2938,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     } failedAction:^(NSURL *url, NSString *errorString) {
         NSLog(@"FetchOneUrl failed: %@ %@", [url absoluteString], errorString);
     }];
+    [uriLoader ClearSiteInfoCache];
 }
 
 /// 始めの章の内容やタイトルが確定しているURLについて、新規登録をしてダウンロードqueueに追加しようとします
@@ -3448,6 +3452,17 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             if (content.keyword != nil && [content.keyword length] > 0) {
                 [obj setObject: [NiftyUtility stringEncrypt:content.keyword key:content.ncode] forKey:@"secret"];
             }
+            if (content.currentReadingStory != nil) {
+                if (content.currentReadingStory.chapter_number != nil) {
+                    [obj setObject:content.currentReadingStory.chapter_number forKey:@"current_reading_chapter_number"];
+                }
+                if (content.currentReadingStory.readLocation != nil) {
+                    [obj setObject:content.currentReadingStory.readLocation forKey:@"current_reading_chapter_read_location"];
+                }
+            }
+            if (content.userid != nil && [content.userid length] > 0) {
+                [obj setObject:content.userid forKey:@"last_download_url"];
+            }
         }else if ([content isUserCreatedContent]) {
             if (content.title == nil || content.ncode == nil) {
                 continue;
@@ -3563,8 +3578,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return result;
 }
 
-// バックアップ用のデータを JSON に encode したものを生成して取得します
-- (NSData*)CreateBackupJSONData{
+/// バックアップに使う情報を NSDictionary にして返します
+- (NSDictionary*)CreateBackupDataDictionary{
     NSArray* bookselfArray = [self CreateBookselfBackupForJSONArray];
     NSDictionary* speechModDictionary = [self CreateSpeechModifierSettingDictionaryForJSON];
     NSArray* webImportBookmarkArray = [self CreateWebImportBookmarkSettingArrayForJSON];
@@ -3580,6 +3595,12 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
          @"speech_wait_config": speechWaitConfigArray,
          @"misc_settings": miscSettingsDictionary,
     };
+    return backupData;
+}
+
+// バックアップ用のデータを JSON に encode したものを生成して取得します
+- (NSData*)CreateBackupJSONData{
+    NSDictionary* backupData = [self CreateBackupDataDictionary];
     NSError* err = nil;
     NSData* resultData = [NSJSONSerialization dataWithJSONObject:backupData options:NSJSONWritingPrettyPrinted error:&err];
     if (err != nil) {
@@ -3589,7 +3610,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return resultData;
 }
 
-- (void)RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray{
+- (void)RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray dataDirectory:(NSURL*)dataDirectory{
+    // 一時的に小説のダウンロードを止めておきます
+    [m_DownloadQueue PauseDownload];
     NSMutableDictionary* requestedURLHosts = [NSMutableDictionary new];
     for (id obj in bookshelfDataArray) {
         if (![obj isKindOfClass:[NSDictionary class]]) {
@@ -3668,6 +3691,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             }
         }
     }
+    // 停止していたダウンロードを再開させます
+    [m_DownloadQueue ResumeDownload];
 }
 
 - (void)RestoreBackupFromSpeechModDictionary_V1_0_0:speechModDictionary{
@@ -3868,7 +3893,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 /// JSONData に入っているバックアップを書き戻します。
-- (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData {
+/// dataDirectory が指示されていて、かつ、本棚データに content_directory が存在した場合は
+/// ダウンロードせずにそのディレクトリにあるファイル群を章のデータとして読み込みます。
+- (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData dataDirectory:(NSURL*)dataDirectory {
     NSError* err = nil;
     id jsonObj = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&err];
     if (err != nil || jsonObj == nil) {
@@ -3886,10 +3913,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     
     if ([dataVersion compare:@"1.0.0"] == NSOrderedSame) {
-        NSArray* bookshelfDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"bookshelf"];
-        if (bookshelfDataArray != nil) {
-            [self RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray];
-        }
         NSDictionary* speechModDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"word_replacement_dictionary"];
         if (speechModDictionary != nil) {
             [self RestoreBackupFromSpeechModDictionary_V1_0_0:speechModDictionary];
@@ -3910,17 +3933,27 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         if (miscSettingsDictionary != nil) {
             [self RestoreBackupFromMiscSettingsDictionary_V1_0_0:miscSettingsDictionary];
         }
+        // 本棚は最後に確認して読み込むようにします。
+        NSArray* bookshelfDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"bookshelf"];
+        if (bookshelfDataArray != nil) {
+            [self RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray dataDirectory:dataDirectory];
+        }
+
         // config が書き換わったことをアナウンスする
         NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
         NSNotification* notification = [NSNotification notificationWithName:@"ConfigReloaded_DisplayUpdateNeeded" object:self userInfo:nil];
         [notificationCenter postNotification:notification];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_BackupDataLoaded", @"設定データを読み込みました。ダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
-        });
     }
 
     return true;
+}
+
+/// JSONData に入っているバックアップを書き戻します。
+- (BOOL)RestoreBackupFromZIPData:(NSURL*)filePath {
+    if (filePath == nil) {
+        return false;
+    }
+    return [NovelSpeakerBackup parseBackupFileWithUrl:filePath progress:nil];
 }
 
 /// 指定されたファイルを自作小説として読み込む
@@ -3979,7 +4012,31 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         }
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            [self RestoreBackupFromJSONData:data];
+            BOOL result = [self RestoreBackupFromJSONData:data dataDirectory:nil];
+            if (result) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_BackupDataLoaded", @"設定データを読み込みました。ダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+                });
+                return;
+            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreBackupDataFailed", @"設定データの読み込みに失敗しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+            });
+        });
+        return true;
+    }
+    if ([[url pathExtension] isEqualToString:@"novelspeaker-backup-zip"]) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            BOOL result = [self RestoreBackupFromZIPData:url];
+            if (result) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreFullBackupEnd", @"バックアップデータからの復元を完了しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+                });
+                return;
+            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreBackupDataFailed", @"バックアップデータの読み込みに失敗しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+            });
         });
         return true;
     }

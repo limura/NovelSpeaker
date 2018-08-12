@@ -72,6 +72,7 @@
     AVSpeechSynthesisVoice* targetVoice = nil;
     NSMutableArray* displayTextList = [NSMutableArray new];
     for (AVSpeechSynthesisVoice* voice in voiceArray) {
+        //NSLog(@"voice:%@ %@", voice.name, voice.identifier);
         [displayTextList addObject:voice.name];
         if ([voice.identifier compare:targetIdentifier] == NSOrderedSame) {
             targetVoice = voice;

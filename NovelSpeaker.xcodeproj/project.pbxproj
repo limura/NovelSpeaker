@@ -87,6 +87,7 @@
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
 		216741A92047714D008A578D /* PDFKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 216741A82047714D008A578D /* PDFKit.framework */; };
+		216A545D20EE257000D75458 /* NovelSpeakerBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216A545C20EE257000D75458 /* NovelSpeakerBackup.swift */; };
 		216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */; };
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
@@ -332,6 +333,7 @@
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
 		216741A82047714D008A578D /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = System/Library/Frameworks/PDFKit.framework; sourceTree = SDKROOT; };
+		216A545C20EE257000D75458 /* NovelSpeakerBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSpeakerBackup.swift; sourceTree = "<group>"; };
 		216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSelectViewController.swift; sourceTree = "<group>"; };
 		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
 		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
@@ -733,6 +735,7 @@
 				21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */,
 				2167419F2043D592008A578D /* BehaviorLogger.swift */,
 				216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */,
+				216A545C20EE257000D75458 /* NovelSpeakerBackup.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1297,6 +1300,7 @@
 				21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */,
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
+				216A545D20EE257000D75458 /* NovelSpeakerBackup.swift in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
 				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
 				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
@@ -1671,10 +1675,16 @@
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_ROOT}/Headers/Public\" \"${PODS_ROOT}/Headers/Public/SZTextView\" \"${SDKROOT}/usr/include/libxml2\"";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
+					"\"${SDKROOT}/usr/include/libxml2\"",
+				);
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" -Xfrontend -warn-long-expression-type-checking=100 -Xfrontend -warn-long-function-bodies=100";
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1700,7 +1710,12 @@
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_ROOT}/Headers/Public\" \"${PODS_ROOT}/Headers/Public/SZTextView\" \"${SDKROOT}/usr/include/libxml2\"";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
+					"\"${SDKROOT}/usr/include/libxml2\"",
+				);
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

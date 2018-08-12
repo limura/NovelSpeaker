@@ -49,4 +49,7 @@
 // 補足: この 変なkey があると、同じkeyが延々と追加されていってしまいには cookie header がでかくなりすぎて 400 を返すことになる(と思う)
 + (void)RemoveInvalidKeyDataFromCookieStorage:(NSHTTPCookieStorage*)storage;
 
+/// 保存されている SiteInfo を開放します
+- (void)ClearSiteInfoCache;
+
 @end

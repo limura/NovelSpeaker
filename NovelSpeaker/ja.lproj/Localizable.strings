@@ -90,6 +90,18 @@
 "SettingTableViewController_LISENSE_file_can_not_read" = "LICENSE.txt を読み込めませんでした。ことせかい の GitHub 側の LICENSE.txt を参照してください。";
 "SettingTableViewController_PrivacyPolicy_can_not_load" = "最新のプライバシーポリシーを読み込めませんでした。\nSafariでの表示を試みます。";
 "SettingTableViewController_PrivacyPolicy" = "ことせかい のプライバシーポリシーを確認する";
+"SettingTableView_SendEmailWithLargeFileWarning" = "なお、今回添付されているファイルはとても大きいため、メールの転送経路によってはエラーを引き起こす可能性があります。\r\niCloud DriveのMail Dropという機能を使うとかなり大きなファイル(最大5GBytesまで)のファイルを送信できるようになるので、そちらの利用を検討したほうが良いかもしれません。";
+"SettingsViewController_CreatingBackupData" = "バックアップデータ作成中です。\r\nしばらくお待ち下さい\r\n";
+"SettingsViewController_GenerateBackupDataFailed" = "バックアップデータの生成に失敗しました。";
+"SettingsViewController_IsCreateFullBackup?" = "小説の本文まで含めた完全なバックアップファイルを生成しますか？\r\n登録小説数が多い場合は生成に膨大な時間と本体容量が必要となります。";
+"SettingsViewController_ChooseCancel" = "バックアップ生成をやめる";
+"SettingsViewController_ChooseFullBackup" = "完全バックアップを生成する(時間がかかります)";
+"SettingsViewController_ChooseSmallBackup" = "軽量バックアップを生成する(時間はかかりません)";
+
+"NovelSpeakerBackup_InitializeBackup" = "初期化中";
+"NovelSpeakerBackup_ExportingNovelText" = "小説本文を抽出中";
+"NovelSpeakerBackup_CompressingBackupData" = "圧縮中";
+"NovelSpeakerBackup_CompressingBackupDataProgress" = "圧縮中";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
@@ -252,12 +264,19 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.36
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.37
 
-- 編集可能な小説を編集中に、最初に開かれている章(現在読んでいる章)から別の章へ移動した時にその変更が保存されない問題を修正
+- 「再ダウンロード用データの生成」で保存される設定項目を増加
+
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.37
+
+インタフェースの変更
+
+- 「再ダウンロード用データの生成」で保存される設定項目を増加
+
 # Version 1.1.36
 
 問題の修正

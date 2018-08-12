@@ -278,4 +278,25 @@ class NiftyUtilitySwift: NSObject {
         }
         return false
     }
+    
+    static func sleep(second:TimeInterval) {
+        Thread.sleep(forTimeInterval: second)
+        //RunLoop.current.run(mode: .defaultRunLoopMode, before: Date(timeIntervalSinceNow: second))
+    }
+    
+    static let backgroundQueue = DispatchQueue(label: "com.limuraproducts.novelspeaker.backgroundqueue", qos: .background, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil)
+    /// 怪しく background で回しつつ終了を待ちます(ただ、コレを使おうと思う場合はなにかおかしいと思ったほうが良さそうです)
+    public static func backgroundAndWait(block:(()->Void)?) {
+        guard let block = block else {
+            return
+        }
+        let dispatchSemaphore = DispatchSemaphore(value: 0)
+        NiftyUtilitySwift.backgroundQueue.asyncAfter(deadline: .init(uptimeNanoseconds: 1000*50)) {
+            block()
+            dispatchSemaphore.signal()
+        }
+        while dispatchSemaphore.wait(timeout: DispatchTime.now()) == DispatchTimeoutResult.timedOut {
+            NiftyUtilitySwift.sleep(second: 0.1)
+        }
+    }
 }

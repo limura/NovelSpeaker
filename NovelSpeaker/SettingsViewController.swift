@@ -365,7 +365,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         let picker = MFMailComposeViewController()
         picker.mailComposeDelegate = self;
         picker.setSubject(NSLocalizedString("SettingTableView_SendEmailForBackupTitle", comment:"ことせかい バックアップ"))
-        picker.setMessageBody(NSLocalizedString("SettingTableView_SendEmailForBackupBody", comment:"添付されたファイルを ことせかい で読み込む事で、小説のリストが再生成されます。"), isHTML: false)
+        var messageBody = NSLocalizedString("SettingTableView_SendEmailForBackupBody", comment:"添付されたファイルを ことせかい で読み込む事で、小説のリストが再生成されます。")
+        if data.count > 1024*512 {
+            messageBody += "\r\n" + NSLocalizedString("SettingTableView_SendEmailWithLargeFileWarning", comment: "なお、今回添付されているファイルはとても大きいため、メールの転送経路によってはエラーを引き起こす可能性があります。\r\niCloud DriveのMail Dropという機能を使うとかなり大きなファイル(最大5GBytesまで)のファイルを送信できるようになるので、そちらの利用を検討したほうが良いかもしれません。")
+        }
+        picker.setMessageBody(messageBody, isHTML: false)
         picker.addAttachmentData(data, mimeType: mimeType, fileName: fileName)
         present(picker, animated: true, completion: nil)
         return true;
@@ -373,18 +377,113 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     /// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
     func ShareNcodeListURLScheme(){
-        let backupData = GlobalDataSingleton.getInstance().createBackupJSONData()
-        if backupData == nil {
+        self.ShareBackupSmallData()
+        return
+        DispatchQueue.main.async {
+            EasyDialog.Builder(self)
+            .text(content: NSLocalizedString("SettingsViewController_IsCreateFullBackup?", comment: "小説の本文まで含めた完全なバックアップファイルを生成しますか？\r\n登録小説数が多い場合は生成に膨大な時間と本体容量が必要となります。"))
+            .addButton(title: NSLocalizedString("SettingsViewController_ChooseCancel", comment: "キャンセル")) { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
+                }
+            }.addButton(title: NSLocalizedString("SettingsViewController_ChooseFullBackup", comment: "完全バックアップを生成する(時間がかかります)")) { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        self.ShareBackupFullData()
+                    })
+                }
+            }.addButton(title: NSLocalizedString("SettingsViewController_ChooseSmallBackup", comment: "軽量バックアップを生成する(時間はかかりません)")) { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        self.ShareBackupSmallData()
+                    })
+                }
+            }.build().show()
+        }
+    }
+    /// 現在の設定をJSONファイルにして mail に添付します。
+    func ShareBackupSmallData(){
+        let backupDataJson = GlobalDataSingleton.getInstance().createBackupDataDictionary()
+        var backupData:Data? = nil
+        do {
+            backupData = try JSONSerialization.data(withJSONObject: backupDataJson as Any, options: .prettyPrinted)
+        }catch{
+            backupData = nil
             return
         }
-        // どうやら勝手に NSData から Data へ変換してくれているっぽい？
-        //let backupData = Data.init(referencing: backupNSData)
+        guard let backupDataBinary = backupData else{
+            DispatchQueue.main.async {
+                EasyDialog.Builder(self)
+                    .text(content: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"))
+                    .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+                        dialog.dismiss(animated: false, completion: nil)
+                    }.build().show()
+            }
+            return
+        }
+        
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale.current
         dateFormatter.dateFormat = "yyyyMMddHHmm"
         let dateString = dateFormatter.string(from: Date())
         let fileName = String.init(format: "%@.novelspeaker-backup-json", dateString)
-        sendMailWithBinary(data: backupData!, fileName: fileName, mimeType: "application/octet-stream")
+        DispatchQueue.main.async {
+            self.sendMailWithBinary(data: backupDataBinary, fileName: fileName, mimeType: "application/octet-stream")
+        }
+    }
+    
+    /// 現在の状態の全てをバックアップして mail に添付します。
+    func ShareBackupFullData(){
+        let labelTag = 100
+        //let backupData = GlobalDataSingleton.getInstance().createBackupJSONData()
+        let dialog = EasyDialog.Builder(self)
+            .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
+            .build()
+        /*
+        let dialog =
+            .textField(tag: 100, placeholder: "", content: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: UITextBorderStyle.none)
+            //.text(content: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"))
+            .build()
+        */
+        DispatchQueue.main.async {
+            dialog.show()
+            print("dialog.show()")
+        }
+        NiftyUtilitySwift.backgroundQueue.async {
+            let backupData = NovelSpeakerBackup.createBackupData(progress: { (message) in
+                DispatchQueue.main.async {
+                    if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
+                        label.text = NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……") + "\r\n"
+                            + message
+                    }
+                }
+            })
+            DispatchQueue.main.async {
+                dialog.dismiss(animated: false, completion: {
+                    if backupData == nil {
+                        EasyDialog.Builder(self)
+                            .text(content: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"))
+                            .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+                                dialog.dismiss(animated: false, completion: nil)
+                            }.build().show()
+                    }
+                })
+            }
+            if backupData == nil {
+                return
+            }
+            // どうやら勝手に NSData から Data へ変換してくれているっぽい？
+            //let backupData = Data.init(referencing: backupNSData)
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = Locale.current
+            dateFormatter.dateFormat = "yyyyMMddHHmm"
+            let dateString = dateFormatter.string(from: Date())
+            //let fileName = String.init(format: "%@.novelspeaker-backup-json", dateString)
+            let fileName = String.init(format: "%@.novelspeaker-backup-zip", dateString)
+            DispatchQueue.main.async {
+                self.sendMailWithBinary(data: backupData!, fileName: fileName, mimeType: "application/octet-stream")
+            }
+        }
     }
     
     // MFMailComposeViewController でmailアプリ終了時に呼び出されるのでこのタイミングで viewController を取り戻します

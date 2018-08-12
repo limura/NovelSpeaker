@@ -49,6 +49,9 @@
     
     /// 小説家になろうから新たにダウンロードした小説の数(バッヂ用)
     int m_NewDownloadCount;
+    
+    /// ダウンロードが停止中か否か
+    bool m_isDownloadPaused;
 }
 
 /// ダウンロード周りのイベントハンドラ用のdelegateに追加します。
@@ -88,5 +91,11 @@
 
 /// 現在の新規ダウンロード数カウントを取得します
 - (int)GetNewDownloadCount;
+
+/// ダウンロードを一時停止します
+- (void)PauseDownload;
+
+/// 一時停止したダウンロードを再開します
+- (void)ResumeDownload;
 
 @end

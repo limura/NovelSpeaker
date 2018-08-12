@@ -29,6 +29,18 @@
     return self;
 }
 
+/// 保存されている SiteInfo を開放します
+- (void)ClearSiteInfoCache{
+    if (m_SiteInfoArray != nil) {
+        [m_SiteInfoArray removeAllObjects];
+    }
+    if (m_CustomSiteInfoArray != nil) {
+        [m_CustomSiteInfoArray removeAllObjects];
+    }
+    m_SiteInfoArray = [NSMutableArray new];
+    m_CustomSiteInfoArray = [NSMutableArray new];
+}
+
 /// SiteInfo のJSONを解析した後の NSArray を元に内部データベースに追加します
 - (BOOL)AddSiteInfoFromJsonArray:(NSArray *)siteInfoJsonArray targetSiteInfoArray:(NSMutableArray*)targetSiteInfoArray {
     NSMutableArray* tmpArray = [NSMutableArray new];

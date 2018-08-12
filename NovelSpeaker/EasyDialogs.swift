@@ -256,6 +256,20 @@ public class EasyDialog: UIViewController {
             return self
         }
         
+        public func label(text: String, textAlignment: NSTextAlignment = .left, tag: Int? = nil) -> Self {
+            let label = UILabel()
+            label.text = text
+            label.textAlignment = textAlignment
+            label.numberOfLines = 0
+            label.textColor = theme.textColor
+            label.font = theme.textFont
+            if let tag = tag {
+                label.tag = tag
+            }
+            views.append(label)
+            return self
+        }
+        
         public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextBorderStyle = .none) -> Self {
             let textField = EasyDialogCustomUITextField()
             textField.placeholder = placeholder

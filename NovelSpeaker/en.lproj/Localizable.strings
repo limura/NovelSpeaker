@@ -91,6 +91,18 @@
 "SettingTableViewController_LISENSE_file_can_not_read" = "can not read LICENSE.txt\nPlease read NovelSpeaker LICENSE.txt on GitHub project.";
 "SettingTableViewController_PrivacyPolicy_can_not_load" = "We could not load the latest privacy policy. Try to display in Safari.";
 "SettingTableViewController_PrivacyPolicy" = "Check NovelSpeaker's privacy policy";
+"SettingTableView_SendEmailWithLargeFileWarning" = "Please note that the file attached this time is very large, so it may cause an error depending on the mail transfer route.\r\nUsing iCloud Drive's Mail Drop feature will make it possible to send files of quite large files (up to 5 GBytes), so you may want to consider using that file.";
+"SettingsViewController_CreatingBackupData" = "Generating backup data\r\n";
+"SettingsViewController_GenerateBackupDataFailed" = "Generate backup data failed.";
+"SettingsViewController_IsCreateFullBackup?" = "Do you want to generate a complete backup file including the text of the novel?\r\nWhen there are a large number of registered novels, enormous time and body capacity are required for generation.";
+"SettingsViewController_ChooseCancel" = "Stop generating backups";
+"SettingsViewController_ChooseFullBackup" = "Generate a full backup (it will take time)";
+"SettingsViewController_ChooseSmallBackup" = "Generate a lightweight backup (it will not take time)";
+
+"NovelSpeakerBackup_InitializeBackup" = "Initializing";
+"NovelSpeakerBackup_ExportingNovelText" = "Extracting novel texts";
+"NovelSpeakerBackup_CompressingBackupData" = "Compressing";
+"NovelSpeakerBackup_CompressingBackupDataProgress" = "Compressing";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -256,13 +268,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.36
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.37
 
-- Fixed an issue that was not saved when editing an editable novel when moving from the first opened chapter (currently reading chapter) to another chapter
+- Increase setting items saved in \"Create backup data\"
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 1.1.37
+
+Interface cange
+
+- Increase setting items saved in \"Create backup data\"
+
+
 Version 1.1.36
 
 Bug fix
