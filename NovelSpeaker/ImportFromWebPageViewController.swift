@@ -281,6 +281,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         homePageHtmlString += "<ul>"
         //homePageHtmlString += "<li><a href=\"\"></a></li>"
         homePageHtmlString += "<li><a href=\"https://limura.github.io/NovelSpeaker/\">ことせかい サポートサイト</a></li>"
+            + "<li><a href=\"https://limura.github.io/NovelSpeaker/WebImport.html\">Web取込機能の使い方(下記のサイト以外の取り込み方等)</a></li>"
         let bookmarks = getBookmark()
         for bookmark in bookmarks {
             for (name, url) in bookmark {
