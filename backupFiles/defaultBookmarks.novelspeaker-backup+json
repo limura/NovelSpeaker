@@ -1,0 +1,29 @@
+{
+  "data_version" : "1.0.0",
+  "web_import_bookmarks" : [
+    {
+      "Google" : "https:\/\/www.google.co.jp\/"
+    },
+    {
+      "小説家になろう" : "https:\/\/syosetu.com\/"
+    },
+    {
+      "青空文庫" : "http:\/\/www.aozora.gr.jp\/"
+    },
+    {
+      "ハーメルン" : "https:\/\/syosetu.org\/"
+    },
+    {
+      "暁" : "https:\/\/www.akatsuki-novels.com\/"
+    },
+    {
+      "カクヨム" : "https:\/\/kakuyomu.jp\/"
+    },
+    {
+      "アルファポリス" : "https:\/\/www.alphapolis.co.jp\/novel\/"
+    },
+    {
+      "星空文庫" : "https:\/\/slib.net\/"
+    }
+  ]
+}
