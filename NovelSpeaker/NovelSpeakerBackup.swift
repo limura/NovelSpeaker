@@ -61,7 +61,7 @@ class NovelSpeakerBackup: NSObject {
         }
     }
     
-    /// novelspeaker-backup-zip のバイナリを生成して返します。一時的に zip 用のディレクトリやファイルが作成されます。
+    /// novelspeaker-backup+zip のバイナリを生成して返します。一時的に zip 用のディレクトリやファイルが作成されます。
     @objc public static func createBackupData(progress:((String)->Void)?) -> Data? {
         func UpdateProgress(message:String) {
             if let progress = progress {
@@ -189,7 +189,7 @@ class NovelSpeakerBackup: NSObject {
         let dateString = NovelSpeakerBackup.createDateString()
         //let zipFilePath = URL(fileURLWithPath: NovelSpeakerBackup.getBackupDirectoryPath()).appendingPathComponent(dateString + ".zip")
         let zipFilePath = URL(fileURLWithPath: NovelSpeakerBackup.getDocumentsBackupDirectoryPathString()).appendingPathComponent("NovelSpeakerBackup-" + dateString + ".zip")
-        let novelSpeakerBackupZipFilePath = URL(fileURLWithPath: NovelSpeakerBackup.getDocumentsBackupDirectoryPathString()).appendingPathComponent("NovelSpeakerBackup-" + dateString + ".novelspeaker-backup-zip")
+        let novelSpeakerBackupZipFilePath = URL(fileURLWithPath: NovelSpeakerBackup.getDocumentsBackupDirectoryPathString()).appendingPathComponent("NovelSpeakerBackup-" + dateString + ".novelspeaker-backup+zip")
         UpdateProgress(message: NSLocalizedString("NovelSpeakerBackup_CompressingBackupData", comment: "バックアップデータを圧縮中"))
         do {
             print("zipPaths", zipPaths)
@@ -226,11 +226,20 @@ class NovelSpeakerBackup: NSObject {
         }
     }
     
-    /// novelspeaker-backup-zip へのパス(URL)を受け取って、それを適用します。成否を返します。
-    @objc public static func parseBackupFile(url: URL, progress:((String)->Void)?) -> Bool {
+    /// novelspeaker-backup+zip へのパス(URL)を受け取って、それを適用します。成否を返します。
+    @objc public static func parseBackupFile(url: URL, toplevelViewController:UIViewController, finally:((Bool)->Void)? = nil) -> Bool {
+        let dialog = EasyDialog.Builder(toplevelViewController)
+        .label(text: NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元"), textAlignment: .center, tag: 100)
+        .build()
+        DispatchQueue.main.async {
+            dialog.show()
+        }
+        
         func announceProgress(text:String){
-            if let progress = progress {
-                progress(text)
+            DispatchQueue.main.async {
+                if let label = dialog.view.viewWithTag(100) as? UILabel {
+                    label.text = NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元") + "\r\n" + text
+                }
             }
         }
         // 最初に有無を言わさず作業用ディレクトリの中身を吹き飛ばします
@@ -239,19 +248,33 @@ class NovelSpeakerBackup: NSObject {
         guard let tmpDirURL = createBackupDirectory(),
             let globalDataSingleton = GlobalDataSingleton.getInstance() else {
             print("create backup directory failed.")
+            DispatchQueue.main.async {
+                dialog.dismiss(animated: false, completion: {
+                    if let finally = finally {
+                        finally(false)
+                    }
+                })
+            }
             return false;
         }
 
         do {
-            Zip.addCustomFileExtension("novelspeaker-backup-zip")
+            Zip.addCustomFileExtension("novelspeaker-backup+zip")
             try Zip.unzipFile(url, destination: tmpDirURL, overwrite: false, password: nil, progress: { (progress) in
-                print("progress", progress)
-                announceProgress(text: NSLocalizedString("NovelSpeakerBackup_ProgressExtractingZip", comment: "展開中") + " (" + Int(progress * 100).description + ")")
+                //print("progress", progress)
+                announceProgress(text: NSLocalizedString("NovelSpeakerBackup_ProgressExtractingZip", comment: "展開中") + " (" + Int(progress * 100).description + "%)")
             }) { (url) in
-                print("fileOutput", url)
+                // print("fileOutput", url)
             }
         }catch let error{
             print("unzip failed", error)
+            DispatchQueue.main.async {
+                dialog.dismiss(animated: false, completion: {
+                    if let finally = finally {
+                        finally(false)
+                    }
+                })
+            }
             return false
         }
         var jsonData:Data? = nil
@@ -260,24 +283,56 @@ class NovelSpeakerBackup: NSObject {
             try jsonData = Data(contentsOf: backupDataJsonFilePath)
         }catch let error{
             print("read backup_data.json failed", error)
+            DispatchQueue.main.async {
+                dialog.dismiss(animated: false, completion: {
+                    if let finally = finally {
+                        finally(false)
+                    }
+                })
+            }
             return false
         }
 
         guard let jsonDataClean = jsonData else {
             print("no jsonData")
+            DispatchQueue.main.async {
+                dialog.dismiss(animated: false, completion: {
+                    if let finally = finally {
+                        finally(false)
+                    }
+                })
+            }
             return false
         }
         announceProgress(text: NSLocalizedString("NovelSpeakerBackup_RestoreingBackupData", comment: "適用中"))
-        let result = globalDataSingleton.restoreBackup(fromJSONData: jsonDataClean, dataDirectory: tmpDirURL)
+        let result = globalDataSingleton.restoreBackup(fromJSONData: jsonDataClean, dataDirectory: tmpDirURL) { (text) in
+            if let text = text {
+                announceProgress(text: text)
+            }
+        }
         
         // zip展開に使ったディレクトリを消します
         do {
             try FileManager.default.removeItem(at: tmpDirURL)
         }catch let error {
             print("zip directory delete error", tmpDirURL, error)
+            DispatchQueue.main.async {
+                dialog.dismiss(animated: false, completion: {
+                    if let finally = finally {
+                        finally(false)
+                    }
+                })
+            }
             return false
         }
         
+        DispatchQueue.main.async {
+            dialog.dismiss(animated: false, completion: {
+                if let finally = finally {
+                    finally(result)
+                }
+            })
+        }
         return result
     }
 }

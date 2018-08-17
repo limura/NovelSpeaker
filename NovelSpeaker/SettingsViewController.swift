@@ -226,6 +226,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }
             
             <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について")
+            }.onCellSelection({ (buttonCellof, buttonRow) in
+                EasyDialog.Builder(self)
+                .label(text: NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について"))
+                .label(text: "Version: " + NiftyUtilitySwift.GetAppVersionString())
+                    .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                        dialog.dismiss(animated: false, completion: nil)
+                    })
+                .build().show()
+            })
+            
+            <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_LICENSE", comment: "LICENSE")
             }.onCellSelection({ (buttonCallof, buttonRow) in
                 if let path = Bundle.main.path(forResource: "LICENSE", ofType: ".txt") {
@@ -366,8 +378,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         picker.mailComposeDelegate = self;
         picker.setSubject(NSLocalizedString("SettingTableView_SendEmailForBackupTitle", comment:"ことせかい バックアップ"))
         var messageBody = NSLocalizedString("SettingTableView_SendEmailForBackupBody", comment:"添付されたファイルを ことせかい で読み込む事で、小説のリストが再生成されます。")
-        if data.count > 1024*512 {
-            messageBody += "\r\n" + NSLocalizedString("SettingTableView_SendEmailWithLargeFileWarning", comment: "なお、今回添付されているファイルはとても大きいため、メールの転送経路によってはエラーを引き起こす可能性があります。\r\niCloud DriveのMail Dropという機能を使うとかなり大きなファイル(最大5GBytesまで)のファイルを送信できるようになるので、そちらの利用を検討したほうが良いかもしれません。")
+        if data.count >= 1024*1024*5 { // 5MBytes以上
+            messageBody += "\r\n" + String(format: NSLocalizedString("SettingTableView_SendEmailWithLargeFileWarning", comment: "なお、今回添付されているファイルは %@ ととても大きいため、メールの転送経路によってはエラーを引き起こす可能性があります。\r\niCloud DriveのMail Dropという機能を使うとかなり大きなファイル(最大5GBytesまで)のファイルを送信できるようになるので、そちらの利用を検討したほうが良いかもしれません。"), NiftyUtilitySwift.ByteSizeToVisibleString(byteSize: data.count)) 
         }
         picker.setMessageBody(messageBody, isHTML: false)
         picker.addAttachmentData(data, mimeType: mimeType, fileName: fileName)
@@ -377,16 +389,10 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     /// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
     func ShareNcodeListURLScheme(){
-        self.ShareBackupSmallData()
-        return
         DispatchQueue.main.async {
             EasyDialog.Builder(self)
             .text(content: NSLocalizedString("SettingsViewController_IsCreateFullBackup?", comment: "小説の本文まで含めた完全なバックアップファイルを生成しますか？\r\n登録小説数が多い場合は生成に膨大な時間と本体容量が必要となります。"))
-            .addButton(title: NSLocalizedString("SettingsViewController_ChooseCancel", comment: "キャンセル")) { (dialog) in
-                DispatchQueue.main.async {
-                    dialog.dismiss(animated: false, completion: nil)
-                }
-            }.addButton(title: NSLocalizedString("SettingsViewController_ChooseFullBackup", comment: "完全バックアップを生成する(時間がかかります)")) { (dialog) in
+            .addButton(title: NSLocalizedString("SettingsViewController_ChooseFullBackup", comment: "完全バックアップを生成する(時間がかかります)")) { (dialog) in
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: {
                         self.ShareBackupFullData()
@@ -398,6 +404,10 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         self.ShareBackupSmallData()
                     })
                 }
+            }.addButton(title: NSLocalizedString("SettingsViewController_ChooseCancel", comment: "キャンセル")) { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
+                    }
             }.build().show()
         }
     }
@@ -439,12 +449,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         let dialog = EasyDialog.Builder(self)
             .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
             .build()
-        /*
-        let dialog =
-            .textField(tag: 100, placeholder: "", content: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: UITextBorderStyle.none)
-            //.text(content: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"))
-            .build()
-        */
         DispatchQueue.main.async {
             dialog.show()
             print("dialog.show()")
@@ -479,7 +483,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             dateFormatter.dateFormat = "yyyyMMddHHmm"
             let dateString = dateFormatter.string(from: Date())
             //let fileName = String.init(format: "%@.novelspeaker-backup-json", dateString)
-            let fileName = String.init(format: "%@.novelspeaker-backup-zip", dateString)
+            let fileName = String.init(format: "%@.novelspeaker-backup+zip", dateString)
             DispatchQueue.main.async {
                 self.sendMailWithBinary(data: backupData!, fileName: fileName, mimeType: "application/octet-stream")
             }

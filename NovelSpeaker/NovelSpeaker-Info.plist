@@ -10,9 +10,7 @@
 	<array>
 		<dict>
 			<key>CFBundleTypeIconFiles</key>
-			<array>
-				<string>NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024</string>
-			</array>
+			<array/>
 			<key>CFBundleTypeName</key>
 			<string>NovelSpeaker Backup data JSON type</string>
 			<key>CFBundleTypeRole</key>
@@ -26,10 +24,7 @@
 		</dict>
 		<dict>
 			<key>CFBundleTypeIconFiles</key>
-			<array>
-				<string>/Users/limura/Desktop/sources/NovelSpeaker/NovelSpeaker/NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png</string>
-				<string>NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024</string>
-			</array>
+			<array/>
 			<key>CFBundleTypeName</key>
 			<string>Text File</string>
 			<key>CFBundleTypeRole</key>
@@ -43,9 +38,7 @@
 		</dict>
 		<dict>
 			<key>CFBundleTypeIconFiles</key>
-			<array>
-				<string>NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024</string>
-			</array>
+			<array/>
 			<key>CFBundleTypeName</key>
 			<string>PDF File</string>
 			<key>CFBundleTypeRole</key>
@@ -59,9 +52,7 @@
 		</dict>
 		<dict>
 			<key>CFBundleTypeIconFiles</key>
-			<array>
-				<string>NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png</string>
-			</array>
+			<array/>
 			<key>CFBundleTypeName</key>
 			<string>NovelSpeaker backup data ZIP type</string>
 			<key>CFBundleTypeRole</key>
@@ -71,6 +62,34 @@
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.limuraproducts.novelspeaker.backupdataziputi</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array/>
+			<key>CFBundleTypeName</key>
+			<string>RTF File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.rtf</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array/>
+			<key>CFBundleTypeName</key>
+			<string>RTFD</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.apple.rtfd</string>
 			</array>
 		</dict>
 	</array>
@@ -105,7 +124,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.1.62</string>
+	<string>1.1.64</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -185,7 +204,7 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.text</string>
+				<string>com.pkware.zip-archive</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>NovelSpeaker Backupdata ZIP type</string>
@@ -200,7 +219,7 @@
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
-				<string>novelspeaker-backup-zip</string>
+				<string>novelspeaker-backup+zip</string>
 			</dict>
 		</dict>
 	</array>

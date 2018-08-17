@@ -34,8 +34,12 @@
 "GlobalDataSingleton_NovelUpdateAlertAction" = "アプリを開く";
 "GlobalDataSingleton_URLisAlreadyDownload" = "既に本棚に登録されているURLでした";
 "GlobalDataSingleton_PDFToStringFailed_Title" = "PDFのテキスト読み込みに失敗";
-"GlobalDataSingleton_PDFToStringFailed_Body" = "PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPSF読み込み機能は動作しません。";
+"GlobalDataSingleton_PDFToStringFailed_Body" = "PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPDF読み込み機能は動作しません。";
+"GlobalDataSingleton_RTFToStringFailed_Title" = "RTFの読み込みに失敗";
 "GlobalDataSingleton_BackupDataLoaded" = "設定データを読み込みました。\nダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。";
+"GlobalDataSingleton_RestoreFullBackupEnd" = "バックアップデータからの復元を完了しました。";
+"GlobalDataSingleton_RestoreingBookProgress" = "工程 2\r\n小説を本棚に登録中";
+"GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings" = "工程 1\r\n設定の復元中";
 
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "ダウンロードキューへの追加に失敗";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "作品名: %@";
@@ -90,7 +94,8 @@
 "SettingTableViewController_LISENSE_file_can_not_read" = "LICENSE.txt を読み込めませんでした。ことせかい の GitHub 側の LICENSE.txt を参照してください。";
 "SettingTableViewController_PrivacyPolicy_can_not_load" = "最新のプライバシーポリシーを読み込めませんでした。\nSafariでの表示を試みます。";
 "SettingTableViewController_PrivacyPolicy" = "ことせかい のプライバシーポリシーを確認する";
-"SettingTableView_SendEmailWithLargeFileWarning" = "なお、今回添付されているファイルはとても大きいため、メールの転送経路によってはエラーを引き起こす可能性があります。\r\niCloud DriveのMail Dropという機能を使うとかなり大きなファイル(最大5GBytesまで)のファイルを送信できるようになるので、そちらの利用を検討したほうが良いかもしれません。";
+"SettingTableView_SendEmailWithLargeFileWarning" = "なお、今回添付されているファイルは %@ ととても大きいため、メールの転送経路によってはエラーを引き起こす可能性があります。\r\niCloud DriveのMail Dropという機能を使うとかなり大きなファイル(最大5GBytesまで)のファイルを送信できるようになるので、そちらの利用を検討したほうが良いかもしれません。";
+"SettingTableViewController_About" = "ことせかい について";
 "SettingsViewController_CreatingBackupData" = "バックアップデータ作成中です。\r\nしばらくお待ち下さい\r\n";
 "SettingsViewController_GenerateBackupDataFailed" = "バックアップデータの生成に失敗しました。";
 "SettingsViewController_IsCreateFullBackup?" = "小説の本文まで含めた完全なバックアップファイルを生成しますか？\r\n登録小説数が多い場合は生成に膨大な時間と本体容量が必要となります。";
@@ -99,9 +104,12 @@
 "SettingsViewController_ChooseSmallBackup" = "軽量バックアップを生成する(時間はかかりません)";
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";
-"NovelSpeakerBackup_ExportingNovelText" = "小説本文を抽出中";
-"NovelSpeakerBackup_CompressingBackupData" = "圧縮中";
-"NovelSpeakerBackup_CompressingBackupDataProgress" = "圧縮中";
+"NovelSpeakerBackup_ExportingNovelText" = "工程 1\r\n小説本文を抽出中";
+"NovelSpeakerBackup_CompressingBackupData" = "工程 2\r\n圧縮中";
+"NovelSpeakerBackup_CompressingBackupDataProgress" = "工程 2\r\n圧縮中";
+"NovelSpeakerBackup_Restoreing" = "バックアップより復元";
+"NovelSpeakerBackup_ProgressExtractingZip" = "工程 1\r\n展開中";
+"NovelSpeakerBackup_RestoreingBackupData" = "工程 2\r\n適用中";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
@@ -267,6 +275,9 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.37
 
 - 「再ダウンロード用データの生成」で保存される設定項目を増加
+- 「再ダウンロード用データの生成」で小説の本文を含むバックアップもできるように
+- 対応読み込みファイルタイプに RTF(Rich Text Format) を追加
+- 設定タブに「ことせかい について」(バージョン番号の確認)を追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
@@ -276,6 +287,10 @@
 インタフェースの変更
 
 - 「再ダウンロード用データの生成」で保存される設定項目を増加
+- 「再ダウンロード用データの生成」で小説の本文を含むバックアップもできるように
+- 対応読み込みファイルタイプに RTF(Rich Text Format) を追加
+- 設定タブに「ことせかい について」(バージョン番号の確認)を追加
+
 
 # Version 1.1.36
 

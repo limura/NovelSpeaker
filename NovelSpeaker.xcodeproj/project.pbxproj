@@ -140,6 +140,9 @@
 		21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA31967FD390039A706 /* NarouDownloadQueue.m */; };
 		21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD3196831070039A706 /* DownloadStatusViewController.m */; };
 		21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD6196843280039A706 /* BookShelfTableViewController.m */; };
+		21CAC8192125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */; };
+		21CAC81A2125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */; };
+		21CAC81C21273C0A00F74092 /* UpdateMemo.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC81B21273C0A00F74092 /* UpdateMemo.txt */; };
 		21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */; };
 		21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */; };
 		21D3979E1FC95CBB0018F883 /* earth@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D3979B1FC95CB90018F883 /* earth@2x.png */; };
@@ -246,6 +249,7 @@
 		210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSizeSettingViewController.h; sourceTree = "<group>"; };
 		210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextSizeSettingViewController.m; sourceTree = "<group>"; };
 		210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 6.xcdatamodel"; sourceTree = "<group>"; };
+		210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
 		2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BookShelfTableViewCell.xib; sourceTree = "<group>"; };
 		2117251F19B2093600FB97D2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/SpeakSettingSampleTextTableViewCell.xib; sourceTree = "<group>"; };
@@ -432,6 +436,9 @@
 		21C74FD3196831070039A706 /* DownloadStatusViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadStatusViewController.m; sourceTree = "<group>"; };
 		21C74FD5196843280039A706 /* BookShelfTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewController.h; sourceTree = "<group>"; };
 		21C74FD6196843280039A706 /* BookShelfTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewController.m; sourceTree = "<group>"; };
+		21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-monochrome-64x64-reverse.png"; sourceTree = "<group>"; };
+		21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-monochrome-320x320-reverse.png"; sourceTree = "<group>"; };
+		21CAC81B21273C0A00F74092 /* UpdateMemo.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UpdateMemo.txt; sourceTree = "<group>"; };
 		21D317E51B6BBF3600023B3B /* EditUserBookViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditUserBookViewController.h; sourceTree = "<group>"; };
 		21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditUserBookViewController.m; sourceTree = "<group>"; };
 		21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogViewControllerSwift.swift; sourceTree = "<group>"; };
@@ -600,6 +607,8 @@
 				2133F29B1E80E175001A0BC5 /* Icon-Small.png */,
 				2133F29C1E80E175001A0BC5 /* Icon-Small@2x.png */,
 				2133F29D1E80E175001A0BC5 /* Icon-Small@3x.png */,
+				21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */,
+				21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */,
 				2133F29E1E80E175001A0BC5 /* Icon.png */,
 				2133F29F1E80E175001A0BC5 /* Icon@2x.png */,
 				2133F2A01E80E175001A0BC5 /* iTunesArtwork */,
@@ -825,6 +834,7 @@
 			isa = PBXGroup;
 			children = (
 				21AED5D419B335CF00CE846D /* ReleaseMemo.md */,
+				21CAC81B21273C0A00F74092 /* UpdateMemo.txt */,
 				21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */,
 				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
@@ -870,6 +880,7 @@
 				217E683D199A80A200C656AA /* NiftySpeakerTests.m */,
 				217BD9E519E038BE008A0D9D /* StringSubstituterTests.m */,
 				2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */,
+				210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -1035,6 +1046,7 @@
 					};
 					21F054E91917E0F200CC6BA9 = {
 						DevelopmentTeam = 4KZE8276ZF;
+						LastSwiftMigration = 0940;
 						TestTargetID = 21F054C81917E0F200CC6BA9;
 					};
 				};
@@ -1090,6 +1102,7 @@
 				210958C31A0DF55600E9171F /* arrow_down@3x.png in Resources */,
 				2133F2A91E80E175001A0BC5 /* Icon-Small-40.png in Resources */,
 				210958CC1A0DF55600E9171F /* soundbook@2x.png in Resources */,
+				21CAC8192125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png in Resources */,
 				210958CA1A0DF55600E9171F /* icloud1@3x.png in Resources */,
 				21F563D01FD802400037F5D7 /* <@2x.png in Resources */,
 				21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */,
@@ -1108,6 +1121,7 @@
 				2133F2AF1E80E175001A0BC5 /* Icon-Small@3x.png in Resources */,
 				2133F2B01E80E175001A0BC5 /* Icon.png in Resources */,
 				2133F2AE1E80E175001A0BC5 /* Icon-Small@2x.png in Resources */,
+				21CAC81C21273C0A00F74092 /* UpdateMemo.txt in Resources */,
 				213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */,
 				21D397A81FC960E10018F883 /* bookmark-true@2x.png in Resources */,
 				21F563C81FD801970037F5D7 /* >@2x.png in Resources */,
@@ -1142,6 +1156,7 @@
 				21C74F961964502A0039A706 /* arrow_down.png in Resources */,
 				2133F21C1E7D5674001A0BC5 /* CustomAutopagerizeItems.json in Resources */,
 				2133F2AA1E80E175001A0BC5 /* Icon-Small-40@2x.png in Resources */,
+				21CAC81A2125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png in Resources */,
 				2117251019B2064400FB97D2 /* BookShelfTableViewCell.xib in Resources */,
 				210958CD1A0DF55600E9171F /* soundbook@3x.png in Resources */,
 				21D397A71FC960E10018F883 /* bookmark-true@3x.png in Resources */,
@@ -1736,6 +1751,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
@@ -1749,9 +1765,13 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "NovelSpeakerTests/NovelSpeakerTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-v";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.limurasoftware.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerTests/NovelSpeakerTests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NovelSpeaker.app/NovelSpeaker";
 				WRAPPER_EXTENSION = xctest;
 			};
@@ -1763,6 +1783,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
@@ -1772,9 +1793,12 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
 				INFOPLIST_FILE = "NovelSpeakerTests/NovelSpeakerTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-v";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.limurasoftware.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerTests/NovelSpeakerTests-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NovelSpeaker.app/NovelSpeaker";
 				WRAPPER_EXTENSION = xctest;
 			};

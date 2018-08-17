@@ -699,6 +699,7 @@ static GlobalDataSingleton* _singleton = nil;
     if (content == nil || story == nil
         || content.ncode == nil
         || ![content.ncode isEqual:story.ncode]) {
+        NSLog(@"UpdateReadingPoint return false: nil");
         return false;
     }
     NSUInteger location = [story.readLocation integerValue];
@@ -714,6 +715,7 @@ static GlobalDataSingleton* _singleton = nil;
         Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:story.ncode chapter_no:[story.chapter_number intValue]];
         GlobalState* globalState = [self GetCoreDataGlobalStateThreadUnsafe];
         if (coreDataContent == nil || coreDataStory == nil || globalState == nil) {
+            NSLog(@"UpdateReadingPoint failed: coreData* nil");
             result = false;
         }else{
             coreDataStory.readLocation = [[NSNumber alloc] initWithUnsignedInteger:location];
@@ -2902,7 +2904,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     if (cookieParameter != nil && [cookieParameter length] > 0) {
         cookieArray = [cookieParameter componentsSeparatedByString:@";"];
     }
-    UIViewController* rootViewController = [UIViewController toplevelViewController];
+    __block UIViewController* rootViewController = nil;
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        rootViewController = [UIViewController toplevelViewController];
+    }];
     [NiftyUtilitySwift checkUrlAndConifirmToUserWithViewController:rootViewController url:url cookieArray:cookieArray depth:0];
     return nil;
 }
@@ -3452,6 +3457,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             if (content.keyword != nil && [content.keyword length] > 0) {
                 [obj setObject: [NiftyUtility stringEncrypt:content.keyword key:content.ncode] forKey:@"secret"];
             }
+            if (content.novelupdated_at != nil) {
+                [obj setObject:[NiftyUtilitySwift Date2ISO8601StringWithDate:content.novelupdated_at] forKey:@"novelupdated_at"];
+            }
             if (content.currentReadingStory != nil) {
                 if (content.currentReadingStory.chapter_number != nil) {
                     [obj setObject:content.currentReadingStory.chapter_number forKey:@"current_reading_chapter_number"];
@@ -3482,6 +3490,36 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             }
             [obj setObject:@"ncode" forKey:@"type"];
             [obj setObject:content.ncode forKey:@"ncode"];
+#define SET_OBJECT_TARGET(target, key) \
+            if (target != nil) { \
+                [obj setObject:target forKey:key];\
+            }
+            SET_OBJECT_TARGET(content.all_hyoka_cnt, @"all_hyoka_cnt")
+            SET_OBJECT_TARGET(content.all_point, @"all_point")
+            SET_OBJECT_TARGET(content.end, @"end")
+            SET_OBJECT_TARGET(content.fav_novel_cnt, @"fav_novel_cnt")
+            SET_OBJECT_TARGET(content.genre, @"genre")
+            SET_OBJECT_TARGET(content.global_point, @"global_point")
+            SET_OBJECT_TARGET(content.is_new_flug, @"is_new_flug")
+            SET_OBJECT_TARGET(content.keyword, @"keyword")
+            SET_OBJECT_TARGET(content.review_cnt, @"review_cnt")
+            SET_OBJECT_TARGET(content.sasie_cnt, @"sasie_cnt")
+            SET_OBJECT_TARGET(content.story, @"story")
+            SET_OBJECT_TARGET(content.title, @"title")
+            SET_OBJECT_TARGET(content.userid, @"userid")
+            SET_OBJECT_TARGET(content.writer, @"writer")
+#undef SET_OBJECT_TARGET
+            if (content.novelupdated_at != nil) {
+                [obj setObject:[NiftyUtilitySwift Date2ISO8601StringWithDate:content.novelupdated_at] forKey:@"novelupdated_at"];
+            }
+            if (content.currentReadingStory != nil) {
+                if (content.currentReadingStory.chapter_number != nil) {
+                    [obj setObject:content.currentReadingStory.chapter_number forKey:@"current_reading_chapter_number"];
+                }
+                if (content.currentReadingStory.readLocation != nil) {
+                    [obj setObject:content.currentReadingStory.readLocation forKey:@"current_reading_chapter_read_location"];
+                }
+            }
         }
         [resultArray addObject:obj];
     }
@@ -3574,6 +3612,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_dark_theme_enabled" number:[[NSNumber alloc] initWithBool:[self IsDarkThemeEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_page_turning_sound_enabled" number:[[NSNumber alloc] initWithBool:[self IsPageTurningSoundEnabled]]];
     [NiftyUtility addStringForJSONNSDictionary:result key:@"display_font_name" string:[self GetDisplayFontName]];
+    NarouContentCacheData* currentReadingContent = [self GetCurrentReadingContent];
+    if (currentReadingContent != nil) {
+        [NiftyUtility addStringForJSONNSDictionary:result key:@"current_reading_content" string:currentReadingContent.ncode];
+    }
     
     return result;
 }
@@ -3610,57 +3652,260 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return resultData;
 }
 
-- (void)RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray dataDirectory:(NSURL*)dataDirectory{
+// 指定された directory に保存されているファイルを個々の章として読み込みます
+// 返り値として、読み込んだ最後の章番号(general_all_no)を返します。
+// エラーの場合は負の数を返します。
+- (long)LoadStoryText:(NarouContentCacheData*)content dataDirectory:(NSURL*)dataDirectory current_reading_chapter_number:(NSNumber*)current_reading_chapter_number current_reading_chapter_read_location:(NSNumber*)current_reading_chapter_read_location{
+    if (dataDirectory == nil) {
+        return -1;
+    }
+    NSError* error = nil;
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSArray* fileURLArray = [fileManager contentsOfDirectoryAtURL:dataDirectory includingPropertiesForKeys:nil options:(NSDirectoryEnumerationSkipsHiddenFiles) error:&error];
+    if (fileURLArray == nil || error != nil) {
+        NSLog(@"directory file list read failed. %@ %@", [dataDirectory absoluteString], error);
+        return false;
+    }
+    long fileNum = 0;
+    long maxStoryNum = 0;
+    for (NSURL* fileURL in fileURLArray) {
+        NSString* lastPathComponent = [fileURL lastPathComponent];
+        NSRange extensionLocation = [lastPathComponent rangeOfString:@".txt"];
+        if (extensionLocation.location == NSNotFound) {
+            NSLog(@"\".txt\" not found: %@", [fileURL absoluteString]);
+            return false;
+        }
+        NSString* chapterNumberString = [lastPathComponent substringToIndex:extensionLocation.location];
+        long chapterNumber = [chapterNumberString integerValue];
+        if (chapterNumber <= 0) {
+            NSLog(@"invalid fileNumber: %ld (%@)", chapterNumber, [fileURL absoluteString]);
+            return false;
+        }
+        if (maxStoryNum < chapterNumber) {
+            maxStoryNum = chapterNumber;
+        }
+        
+        NSError* error = nil;
+        NSString* story = [[NSString alloc] initWithContentsOfURL:fileURL encoding:NSUTF8StringEncoding error:&error];
+        if (error != nil) {
+            NSLog(@"file read error: %@", error);
+            return false;
+        }
+        [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+            [self UpdateStory:story chapter_number:(int)chapterNumber parentContent:content];
+        }];
+
+        fileNum += 1;
+    }
+    content.general_all_no = [[NSNumber alloc] initWithLong:maxStoryNum];
+    [self UpdateNarouContent:content];
+    
+    StoryCacheData* storyCacheData = [self SearchStory:content.ncode chapter_no:[current_reading_chapter_number intValue]];
+    if (storyCacheData != nil) {
+        if (current_reading_chapter_read_location != nil) {
+            storyCacheData.readLocation = current_reading_chapter_read_location;
+        }
+        BOOL result = [self UpdateReadingPoint:content story:storyCacheData];
+        if (result == false) {
+            NSLog(@"UpdateReadingPoint failed.");
+        }
+    }else{
+        NSLog(@"can not find story: %@, chapter: %@", content.ncode, current_reading_chapter_number);
+    }
+
+    return maxStoryNum;
+}
+
+- (BOOL)LoadBookshelfURLType_V1_0_0:(NSDictionary*)bookshelfDictionary dataDirectory:(NSURL*)dataDirectory requestedURLHosts:(NSMutableDictionary*)requestedURLHosts{
+    NSString* url = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"url"];
+    NSString* secret = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"secret"];
+    NSString* last_download_url = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"last_download_url"];
+    //NSLog(@"url: %@", url);
+    //NSLog(@"secret: %@", secret);
+    if (url == nil) {
+        return false;
+    }
+    NSURL* urlObj = [NSURL URLWithString:url];
+    if (urlObj == nil) {
+        return false;
+    }
+    NSNumber* current_reading_chapter_number = [NiftyUtility validateNSDictionaryForNumber:bookshelfDictionary key:@"current_reading_chapter_number"];
+    NSNumber* current_reading_chapter_read_location = [NiftyUtility validateNSDictionaryForNumber:bookshelfDictionary key:@"current_reading_chapter_read_location"];
+    NSString* cookie = [NiftyUtility stringDecrypt:secret key:url];
+    NSString* author = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"author"];
+    NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
+    NSString* novelupdated_at_string = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"novelupdated_at"];
+    if (novelupdated_at_string == nil) {
+        novelupdated_at_string = @"1970-01-01T00:00:00Z";
+    }
+    NSDate* novelupdated_at = [NiftyUtilitySwift ISO8601String2DateWithIso8601String:novelupdated_at_string];
+    if (novelupdated_at == nil) {
+        novelupdated_at = [[NSDate alloc] initWithTimeIntervalSince1970:0];
+    }
+    // とりあえずここまでの情報で NarouContent としてDBにエントリを作成しておく
+    NarouContentCacheData* content = [NarouContentCacheData new];
+    content.all_hyoka_cnt = [[NSNumber alloc] initWithInt:0];
+    content.all_point = [[NSNumber alloc] initWithInt:0];
+    content.end = [[NSNumber alloc] initWithBool:false];
+    content.fav_novel_cnt = [[NSNumber alloc] initWithInt:0];
+    content.general_all_no = [[NSNumber alloc] initWithInt:1];
+    content.genre = [[NSNumber alloc] initWithInt:0];
+    content.global_point = [[NSNumber alloc] initWithInt:0];
+    content.is_new_flug = [[NSNumber alloc] initWithBool:false];
+    content.keyword = cookie;
+    content.ncode = url;
+    content.novelupdated_at = novelupdated_at;
+    content.reading_chapter = [[NSNumber alloc] initWithInt:0];
+    content.review_cnt = [[NSNumber alloc] initWithInt:0];
+    content.sasie_cnt = [[NSNumber alloc] initWithInt:0];
+    content.story = @"";
+    content.title = title;
+    if (dataDirectory != nil) {
+        content.userid = last_download_url;
+    }else{
+        content.userid = nil;
+    }
+    content.writer = author;
+    content.current_download_complete_count = 0;
+    
+    NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:url];
+    if (targetContentCacheData != nil) {
+        // 既に登録済み情報があった場合はダウンロードに関する情報については登録済みの情報を優先する
+        content.general_all_no = targetContentCacheData.general_all_no;
+        content.userid = targetContentCacheData.userid;
+    }
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        [self UpdateNarouContent:content];
+    }];
+    
+    // dataDirectory が指定されていて、content_directory に値が入っているならば、
+    // そちらのデータで復元を試みる
+    NSString* contentDirectory = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"content_directory"];
+    long general_all_no = 0;
+    if (dataDirectory != nil && contentDirectory != nil &&
+        (general_all_no = [self LoadStoryText:content dataDirectory:[dataDirectory URLByAppendingPathComponent:contentDirectory isDirectory:true] current_reading_chapter_number:current_reading_chapter_number current_reading_chapter_read_location:current_reading_chapter_read_location]) > 0){
+        // それで正しく復元できたのであればダウンロードキューに入れることはせずに終了
+        return true;
+    }
+    // テキストファイルからの復元はされなかったようなのでダウンロードキューに入れる
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        //[self AddDirectoryDownloadQueueForURL:url cookieParameter:cookie author:author title:title];
+        [self AddDownloadQueueForNarou:content];
+    }];
+
+    return true;
+}
+
+- (BOOL)LoadBookshelfNcodeType_V1_0_0:(NSDictionary*)bookshelfDictionary dataDirectory:(NSURL*)dataDirectory{
+    NSString* ncode = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"ncode"];
+    //NSLog(@"ncode: %@", ncode);
+    if ([ncode length] <= 0) {
+        return false;
+    }
+    NarouContentCacheData* content = [NarouContentCacheData new];
+    content.ncode = ncode;
+#define LOAD_NUMBER_DATA(target, keyString) \
+    { \
+        NSNumber* tmpNumber = [NiftyUtility validateNSDictionaryForNumber:bookshelfDictionary key: keyString ]; \
+        if (tmpNumber != nil) { \
+            target = tmpNumber; \
+        }else{ \
+            target = [[NSNumber alloc] initWithInt:0]; \
+        } \
+    }
+    LOAD_NUMBER_DATA(content.all_hyoka_cnt, @"all_hyoka_cnt")
+    LOAD_NUMBER_DATA(content.all_point, @"all_point")
+    LOAD_NUMBER_DATA(content.end, @"end")
+    LOAD_NUMBER_DATA(content.fav_novel_cnt, @"fav_novel_cnt")
+    LOAD_NUMBER_DATA(content.general_all_no, @"general_all_no")
+    LOAD_NUMBER_DATA(content.genre, @"genre")
+    LOAD_NUMBER_DATA(content.global_point, @"global_point")
+    LOAD_NUMBER_DATA(content.is_new_flug, @"is_new_flug")
+    LOAD_NUMBER_DATA(content.reading_chapter, @"reading_chapter")
+    LOAD_NUMBER_DATA(content.review_cnt, @"review_cnt")
+    LOAD_NUMBER_DATA(content.sasie_cnt, @"sasie_cnt")
+#undef LOAD_NUMBER_DATA
+
+#define LOAD_STRING_DATA(target, keyString) \
+    { \
+        NSString* tmpString = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key: keyString ]; \
+        if (tmpString != nil) { \
+            target = tmpString; \
+        }else{ \
+            target = @"";\
+        } \
+    }
+    LOAD_STRING_DATA(content.keyword, @"keyword")
+    LOAD_STRING_DATA(content.story, @"story")
+    LOAD_STRING_DATA(content.title, @"title")
+    LOAD_STRING_DATA(content.userid, @"userid")
+    LOAD_STRING_DATA(content.writer, @"writer")
+#undef LOAD_STRING_DATA
+    NSString* novelupdated_at_string = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"novelupdated_at"];
+    if (novelupdated_at_string == nil) {
+        novelupdated_at_string = @"1970-01-01T00:00:00Z";
+    }
+    content.novelupdated_at = [NiftyUtilitySwift ISO8601String2DateWithIso8601String:novelupdated_at_string];
+    if (content.novelupdated_at == nil) {
+        content.novelupdated_at = [[NSDate alloc] initWithTimeIntervalSince1970:0];
+    }
+
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        [self UpdateNarouContent:content];
+    }];
+    
+    NSNumber* current_reading_chapter_number = [NiftyUtility validateNSDictionaryForNumber:bookshelfDictionary key:@"current_reading_chapter_number"];
+    NSNumber* current_reading_chapter_read_location = [NiftyUtility validateNSDictionaryForNumber:bookshelfDictionary key:@"current_reading_chapter_read_location"];
+
+    // dataDirectory が指定されていて、content_directory に値が入っているならば、
+    // そちらのデータで復元を試みる
+    NSString* contentDirectory = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"content_directory"];
+    long general_all_no = 0;
+    if (dataDirectory != nil && contentDirectory != nil &&
+        (general_all_no = [self LoadStoryText:content dataDirectory:[dataDirectory URLByAppendingPathComponent:contentDirectory isDirectory:true] current_reading_chapter_number:current_reading_chapter_number current_reading_chapter_read_location:current_reading_chapter_read_location]) > 0){
+        [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+            content.general_all_no = [[NSNumber alloc] initWithLong:general_all_no];
+            [self UpdateNarouContent:content];
+        }];
+        // それで正しく復元できたのであればダウンロードキューに入れることはせずに終了
+        return true;
+    }
+    
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        [self AddDownloadQueueForNarouNcode:ncode];
+    }];
+    
+    return true;
+}
+
+- (void)RestoreBackupFromBookshelfDataArray_V1_0_0:(NSArray*)bookshelfDataArray dataDirectory:(NSURL*)dataDirectory progress:(void (^)(NSString*))progress{
     // 一時的に小説のダウンロードを止めておきます
     [m_DownloadQueue PauseDownload];
     NSMutableDictionary* requestedURLHosts = [NSMutableDictionary new];
+    int n = 0;
     for (id obj in bookshelfDataArray) {
+        n += 1;
+        if (progress != nil) {
+            progress([[NSString alloc] initWithFormat:@"%@ (%d/%lu)"
+                      , NSLocalizedString(@"GlobalDataSingleton_RestoreingBookProgress", @"小説の復元中")
+                      , n, (unsigned long)[bookshelfDataArray count]]);
+        }
         if (![obj isKindOfClass:[NSDictionary class]]) {
             continue;
         }
         NSDictionary* bookshelfDictionary = obj;
         NSString* type = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"type"];
-        NSLog(@"type: %@", type);
+        //NSLog(@"type: %@", type);
         if ([type compare:@"ncode"] == NSOrderedSame) {
-            NSString* ncode = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"ncode"];
-            NSLog(@"ncode: %@", ncode);
-            if ([ncode length] <= 0) {
-                continue;
-            }
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self AddDownloadQueueForNarouNcode:ncode];
-            });
+            [self LoadBookshelfNcodeType_V1_0_0:bookshelfDictionary dataDirectory:dataDirectory];
         }else if([type compare:@"url"] == NSOrderedSame) {
-            NSString* url = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"url"];
-            NSString* secret = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"secret"];
-            NSLog(@"url: %@", url);
-            NSLog(@"secret: %@", secret);
-            if (url == nil) {
-                continue;
-            }
-            NSURL* urlObj = [NSURL URLWithString:url];
-            if (urlObj == nil) {
-                continue;
-            }
-            NSString* cookie = [NiftyUtility stringDecrypt:secret key:url];
-            NSString* author = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"author"];
-            NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
-            // 既に登録されているホストであれば1秒待ってから AddDirectoryDownloadQueueForURL をする。でないと連続でアクセスしまくることになってしまう
-            NSString* hostName = [urlObj host];
-            if ([requestedURLHosts objectForKey:hostName] == nil) {
-                [requestedURLHosts setObject:hostName forKey:hostName];
-            }else{
-                [NSThread sleepForTimeInterval:1.1f];
-            }
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                [self AddDirectoryDownloadQueueForURL:url cookieParameter:cookie author:author title:title];
-            });
+            [self LoadBookshelfURLType_V1_0_0:bookshelfDictionary dataDirectory:dataDirectory requestedURLHosts:requestedURLHosts];
         }else if([type compare:@"user"] == NSOrderedSame) {
             NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
             NSString* ncode = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"id"];
             NSArray* storyArray = [NiftyUtility validateNSDictionaryForArray:bookshelfDictionary key:@"storys"];
-            NSLog(@"title: %@", title);
-            NSLog(@"ncode: %@", ncode);
+            //NSLog(@"title: %@", title);
+            //NSLog(@"ncode: %@", ncode);
             if (title == nil) {
                 title = NSLocalizedString(@"GlobalDataSingleton_NewUserBookTitle", @"新規ユーザ小説");
             }
@@ -3675,18 +3920,18 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             content.ncode = ncode;
             content.title = title;
             content.general_all_no = [[NSNumber alloc] initWithUnsignedInteger:[storyArray count]];
-            dispatch_sync(dispatch_get_main_queue(), ^{
+            [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
                 [self UpdateNarouContent:content];
-            });
+            }];
             int chapterNumber = 1;
             for (id storyObj in storyArray) {
                 if (![storyObj isKindOfClass:[NSString class]]) {
                     continue;
                 }
                 NSString* story = storyObj;
-                dispatch_sync(dispatch_get_main_queue(), ^{
+                [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
                     [self UpdateStory:story chapter_number:chapterNumber parentContent:content];
-                });
+                }];
                 chapterNumber += 1;
             }
         }
@@ -3808,7 +4053,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
 }
 
-- (void)RestoreBackupFromMiscSettingsDictionary_V1_0_0:(NSDictionary*)miscSettingsDictionary {
+- (NSString*)RestoreBackupFromMiscSettingsDictionary_V1_0_0:(NSDictionary*)miscSettingsDictionary {
     GlobalStateCacheData* globalState = [self GetGlobalState];
     
     BOOL isUpdated = false;
@@ -3890,12 +4135,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     if (display_font_name != nil && [display_font_name length] > 0 && [NiftyUtilitySwift isValidFontNameWithFontName:display_font_name]) {
         [self SetDisplayFontName:display_font_name];
     }
+    NSString* current_reading_content = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"current_reading_content"];
+    return current_reading_content;
 }
 
 /// JSONData に入っているバックアップを書き戻します。
 /// dataDirectory が指示されていて、かつ、本棚データに content_directory が存在した場合は
 /// ダウンロードせずにそのディレクトリにあるファイル群を章のデータとして読み込みます。
-- (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData dataDirectory:(NSURL*)dataDirectory {
+- (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData dataDirectory:(NSURL*)dataDirectory progress:(void (^)(NSString*))progress {
     NSError* err = nil;
     id jsonObj = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:&err];
     if (err != nil || jsonObj == nil) {
@@ -3913,6 +4160,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     
     if ([dataVersion compare:@"1.0.0"] == NSOrderedSame) {
+        if (progress != nil) {
+            progress(NSLocalizedString(@"GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings", @"工程 1\r\n設定の復元中"));
+        }
         NSDictionary* speechModDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"word_replacement_dictionary"];
         if (speechModDictionary != nil) {
             [self RestoreBackupFromSpeechModDictionary_V1_0_0:speechModDictionary];
@@ -3929,14 +4179,22 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         if (speechWaitConfigArray != nil) {
             [self RestoreBackupFromSpeechWaitConfigArray_V1_0_0:speechWaitConfigArray];
         }
+        NSString* currentReadingNcode = nil;
         NSDictionary* miscSettingsDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"misc_settings"];
         if (miscSettingsDictionary != nil) {
-            [self RestoreBackupFromMiscSettingsDictionary_V1_0_0:miscSettingsDictionary];
+            currentReadingNcode = [self RestoreBackupFromMiscSettingsDictionary_V1_0_0:miscSettingsDictionary];
         }
-        // 本棚は最後に確認して読み込むようにします。
+        // 本棚は最後に読み込むようにします。
         NSArray* bookshelfDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"bookshelf"];
         if (bookshelfDataArray != nil) {
-            [self RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray dataDirectory:dataDirectory];
+            [self RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray dataDirectory:dataDirectory progress:progress];
+        }
+        // 最後に読んでいたコンテンツを上書きしておきます(本棚を読み込んだ時に上書きされているので)
+        if (currentReadingNcode != nil) {
+            NarouContentCacheData* content = [self SearchNarouContentFromNcode:currentReadingNcode];
+            if (content != nil && content.currentReadingStory != nil) {
+                [self UpdateReadingPoint:content story:content.currentReadingStory];
+            }
         }
 
         // config が書き換わったことをアナウンスする
@@ -3949,11 +4207,23 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 /// JSONData に入っているバックアップを書き戻します。
-- (BOOL)RestoreBackupFromZIPData:(NSURL*)filePath {
+- (BOOL)RestoreBackupFromZIPData:(NSURL*)filePath finally:(void(^)(BOOL))finally {
     if (filePath == nil) {
+        if (finally != nil) {
+            finally(false);
+        }
         return false;
     }
-    return [NovelSpeakerBackup parseBackupFileWithUrl:filePath progress:nil];
+    __block UIViewController* toplevelViewController = nil;
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        toplevelViewController = [UIViewController toplevelViewController];
+    }];
+    BOOL result = [NovelSpeakerBackup parseBackupFileWithUrl:filePath toplevelViewController:toplevelViewController finally:^(BOOL finalResult) {
+        if (finally != nil) {
+            finally(finalResult);
+        }
+    }];
+    return result;
 }
 
 /// 指定されたファイルを自作小説として読み込む
@@ -3972,15 +4242,22 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     if (title == nil) {
         title = @"unknown title";
     }
-    UIViewController* rootViewController = [UIViewController toplevelViewController];
+    __block UIViewController* rootViewController = nil;
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        rootViewController = [UIViewController toplevelViewController];
+    }];
     [NiftyUtilitySwift checkTextImportConifirmToUserWithViewController:rootViewController title:title content:text hintString:nil];
     return true;
 }
 
 - (BOOL)ImportNovelFromPDFFile:(NSURL*)url{
     NSString* text = [NiftyUtilitySwift FilePDFToStringWithUrl:url];
+    __block UIViewController* toplevelViewController = nil;
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        toplevelViewController = [UIViewController toplevelViewController];
+    }];
     if (text == nil) {
-        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Title", @"PDFのテキスト読み込みに失敗") message:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Body", @"PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPSF読み込み機能は動作しません。") buttonTitle:nil buttonAction:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:toplevelViewController title:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Title", @"PDFのテキスト読み込みに失敗") message:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Body", @"PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPSF読み込み機能は動作しません。") buttonTitle:nil buttonAction:nil];
         return false;
     }
     NSString* fileName = [url lastPathComponent];
@@ -3991,9 +4268,52 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     if (title == nil) {
         title = @"unknown title";
     }
-    UIViewController* rootViewController = [UIViewController toplevelViewController];
-    [NiftyUtilitySwift checkTextImportConifirmToUserWithViewController:rootViewController title:title content:text hintString:nil];
+    [NiftyUtilitySwift checkTextImportConifirmToUserWithViewController:toplevelViewController title:title content:text hintString:nil];
     return true;
+}
+
+- (BOOL)ImportNovelFromRTFFile:(NSURL*)url{
+    NSAttributedString* text = [NiftyUtilitySwift FileRTFToAttributedStringWithUrl:url];
+    __block UIViewController* toplevelViewController = nil;
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        toplevelViewController = [UIViewController toplevelViewController];
+    }];
+    if (text == nil) {
+        
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:toplevelViewController title:nil message:NSLocalizedString(@"GlobalDataSingleton_RTFToStringFailed_Title", @"RTFのテキスト読み込みに失敗")  buttonTitle:nil buttonAction:nil];
+        return false;
+    }
+    NSString* fileName = [url lastPathComponent];
+    if (fileName == nil) {
+        fileName = @"unknown.txt";
+    }
+    NSString* title = [fileName stringByDeletingPathExtension];
+    if (title == nil) {
+        title = @"unknown title";
+    }
+    [NiftyUtilitySwift checkTextImportConifirmToUserWithViewController:toplevelViewController title:title content:[text string] hintString:nil];
+    return false;
+}
+- (BOOL)ImportNovelFromRTFDFile:(NSURL*)url{
+    NSAttributedString* text = [NiftyUtilitySwift FileRTFDToAttributedStringWithUrl:url];
+    __block UIViewController* toplevelViewController = nil;
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        toplevelViewController = [UIViewController toplevelViewController];
+    }];
+    if (text == nil) {
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:toplevelViewController title:nil message:NSLocalizedString(@"GlobalDataSingleton_RTFToStringFailed_Title", @"RTFのテキスト読み込みに失敗")  buttonTitle:nil buttonAction:nil];
+        return false;
+    }
+    NSString* fileName = [url lastPathComponent];
+    if (fileName == nil) {
+        fileName = @"unknown.txt";
+    }
+    NSString* title = [fileName stringByDeletingPathExtension];
+    if (title == nil) {
+        title = @"unknown title";
+    }
+    [NiftyUtilitySwift checkTextImportConifirmToUserWithViewController:toplevelViewController title:title content:[text string] hintString:nil];
+    return false;
 }
 
 /// UTI(ファイル拡張子？)で呼び出された時の反応をします。
@@ -4005,45 +4325,48 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (BOOL)ProcessCustomFileUTI:(NSURL*)url{
     NSLog(@"ProcessCustomFileUTI in. %@", url);
     [BehaviorLogger AddLogWithDescription:@"GobalDataSingleton ProcessCustomFileUTI" data:@{@"url": url == nil ? @"nil": [url absoluteString]}];
-    if ([[url pathExtension] isEqualToString:@"novelspeaker-backup-json"]) {
+    __block UIViewController* toplevelViewController = nil;
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        toplevelViewController = [UIViewController toplevelViewController];
+    }];
+    if ([[url pathExtension] isEqualToString:@"novelspeaker-backup-json"]
+        | [[url pathExtension] isEqualToString:@"novelspeaker-backup+json"]) {
         NSData* data = [NSData dataWithContentsOfURL:url];
         if (data == nil){
             return false;
         }
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            BOOL result = [self RestoreBackupFromJSONData:data dataDirectory:nil];
-            if (result) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_BackupDataLoaded", @"設定データを読み込みました。ダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
-                });
-                return;
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreBackupDataFailed", @"設定データの読み込みに失敗しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
-            });
+            [NiftyUtilitySwift RestoreBackupFromJSONWithProgressDialogWithJsonData:data dataDirectory:nil rootViewController:toplevelViewController];
         });
         return true;
     }
-    if ([[url pathExtension] isEqualToString:@"novelspeaker-backup-zip"]) {
+    if ([[url pathExtension] isEqualToString:@"novelspeaker-backup+zip"]) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-            BOOL result = [self RestoreBackupFromZIPData:url];
-            if (result) {
+            [self RestoreBackupFromZIPData:url finally:^(BOOL finalResult) {
+                if (finalResult) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:toplevelViewController title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreFullBackupEnd", @"バックアップデータからの復元を完了しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+                    });
+                    return;
+                }
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreFullBackupEnd", @"バックアップデータからの復元を完了しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+                    [NiftyUtilitySwift EasyDialogOneButtonWithViewController:toplevelViewController title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreBackupDataFailed", @"バックアップデータの読み込みに失敗しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
                 });
-                return;
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [NiftyUtilitySwift EasyDialogOneButtonWithViewController:[UIViewController toplevelViewController] title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreBackupDataFailed", @"バックアップデータの読み込みに失敗しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
-            });
+            }];
         });
         return true;
     }
     if ([[[url pathExtension] lowercaseString] isEqualToString:@"pdf"]) {
         return [self ImportNovelFromPDFFile:url];
     }
-    // .novelspeaker-backup-json, .pdf 以外であれば plain-text として読み込む
+    if ([[[url pathExtension] lowercaseString] isEqualToString:@"rtf"]) {
+        return [self ImportNovelFromRTFFile:url];
+    }
+    if ([[[url pathExtension] lowercaseString] isEqualToString:@"rtfd"]) {
+        return [self ImportNovelFromRTFDFile:url];
+    }
+    // 上記色々と調べた拡張子以外であれば plain-text として読み込む
     return [self ImportNovelFromFile:url];
 }
 

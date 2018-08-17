@@ -201,7 +201,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
             });
             if (isDownloadKicked) {
                 // ダウンロードが終わったら DownloadEnd イベントを発生させます。
-                dispatch_sync(m_MainDispatchQueue, ^{
+                dispatch_async(m_MainDispatchQueue, ^{
                     [self KickDoenloadEnd];
                 });
             }
@@ -304,12 +304,10 @@ static float SLEEP_TIME_SECOND = 10.5f;
             return false;
         }
         // ダウンロード中に本棚からNarouContentが消されている場合はダウンロードを打ち切る必要があります。
-        {
-            NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:localContent.ncode];
-            if (content == nil) {
-                NSLog(@"already deleted content!!!!!!!!");
-                return false;
-            }
+        NarouContentCacheData* currentContent = [globalData SearchNarouContentFromNcode:localContent.ncode];
+        if (currentContent == nil) {
+            NSLog(@"already deleted content!!!!!!!!");
+            return false;
         }
         
         if ([localContent.general_all_no intValue] < story.count) {
@@ -317,12 +315,19 @@ static float SLEEP_TIME_SECOND = 10.5f;
         }
         // XXXXX TODO: .userid が最後に読み込んだ URL になってるのをなんとかしたい……(´・ω・`)
         localContent.userid = [currentURL absoluteString];
-        if (story.count != startCount) {
-            // 最初に読んだもの以外は内容を更新する。(最初に読むのは前回最後に読んだものなので、ユーザが内容を更新している可能性があるため更新しない)
+        if (story.count != startCount
+            || ([globalData SearchStory:localContent.ncode chapter_no:startCount] == nil)) {
+            // 最初に読んだ count が DB に登録されていないか、
+            // 最初に読んだもの以外のものは内容を更新する。
+            // (最初に読むのは前回最後に読んだものなので、ユーザが内容を更新している可能性があるため更新しないが、
+            // リストア時は何も読んでおらず Story も登録されていないので更新する必要がある)
             [globalData UpdateStory:story.content chapter_number:story.count parentContent:localContent];
             localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
             localContent.novelupdated_at = [[NSDate alloc] initWithTimeIntervalSinceNow:0];
         }
+        // さっき現在の NarouContent の状態を読んだので、読み上げ位置的なものはそれで上書きした上で状態を更新する
+        localContent.reading_chapter = currentContent.reading_chapter;
+        localContent.currentReadingStory = currentContent.currentReadingStory;
         [globalData UpdateNarouContent:localContent];
         result = true;
         // ダウンロードされたので、ダウンロード状態を更新します。

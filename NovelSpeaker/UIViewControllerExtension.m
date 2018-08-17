@@ -12,21 +12,25 @@
 
 /// 最前面のUIViewControllerを取得します(nilが帰る可能性があります)
 + (UIViewController*)toplevelViewController:(UIViewController*)controller{
-    if (controller == nil) {
-        controller = [UIApplication sharedApplication].keyWindow.rootViewController;
+    UIViewController* view = controller;
+    if (view == nil) {
+        view = [UIApplication sharedApplication].keyWindow.rootViewController;
     }
     if ([controller isMemberOfClass:[UITabBarController class]]) {
         UITabBarController* tbc = (UITabBarController*)controller;
-        return [UIViewController toplevelViewController:tbc.selectedViewController];
+        view = [UIViewController toplevelViewController:tbc.selectedViewController];
+        return view;
     }
     if ([controller isMemberOfClass:[UINavigationController class]]) {
         UINavigationController* nc = (UINavigationController*)controller;
-        return [UIViewController toplevelViewController:nc.visibleViewController];
+        view = [UIViewController toplevelViewController:nc.visibleViewController];
+        return view;
     }
     if (controller.presentedViewController != nil) {
-        return [UIViewController toplevelViewController:controller.presentedViewController];
+        view = [UIViewController toplevelViewController:controller.presentedViewController];
+        return view;
     }
-    return controller;
+    return view;
 }
 
 /// 最前面のUIViewControllerを取得します(nilが帰る可能性があります)

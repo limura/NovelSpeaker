@@ -34,8 +34,12 @@
 "GlobalDataSingleton_NovelUpdateAlertAction" = "open app";
 "GlobalDataSingleton_URLisAlreadyDownload" = "This URL is already downloaded.";
 "GlobalDataSingleton_PDFToStringFailed_Title" = "Failed to read PDF text";
-"GlobalDataSingleton_PDFToStringFailed_Body" = "Failed to read text string from PDF file.\nSome character strings can not be read depending on the PDF file. Also, iOS prior to iOS 11 does not work with PSF reading function.";
+"GlobalDataSingleton_PDFToStringFailed_Body" = "Failed to read text string from PDF file.\nSome character strings can not be read depending on the PDF file. Also, iOS prior to iOS 11 does not work with PDF reading function.";
+"GlobalDataSingleton_RTFToStringFailed_Title" = "Failed to read RTF";
 "GlobalDataSingleton_BackupDataLoaded" = "The setting data was loaded. The downloaded novel is currently being downloaded. Downloading all the novels will take some time.";
+"GlobalDataSingleton_RestoreFullBackupEnd" = "Restoration from backup data has been completed.";
+"GlobalDataSingleton_RestoreingBookProgress" = "Step 2\r\nRestoring novels";
+"GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings" = "Step 1\r\nRestoring settings";
 
 
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";
@@ -91,7 +95,8 @@
 "SettingTableViewController_LISENSE_file_can_not_read" = "can not read LICENSE.txt\nPlease read NovelSpeaker LICENSE.txt on GitHub project.";
 "SettingTableViewController_PrivacyPolicy_can_not_load" = "We could not load the latest privacy policy. Try to display in Safari.";
 "SettingTableViewController_PrivacyPolicy" = "Check NovelSpeaker's privacy policy";
-"SettingTableView_SendEmailWithLargeFileWarning" = "Please note that the file attached this time is very large, so it may cause an error depending on the mail transfer route.\r\nUsing iCloud Drive's Mail Drop feature will make it possible to send files of quite large files (up to 5 GBytes), so you may want to consider using that file.";
+"SettingTableView_SendEmailWithLargeFileWarning" = "Please note that the file attached this time is very large with %@, so there is a possibility of causing errors depending on the mail transfer route.\r\nUsing iCloud Drive's Mail Drop feature will make it possible to send files of quite large files (up to 5 GBytes), so you may want to consider using that file.";
+"SettingTableViewController_About" = "About NovelSpeaker";
 "SettingsViewController_CreatingBackupData" = "Generating backup data\r\n";
 "SettingsViewController_GenerateBackupDataFailed" = "Generate backup data failed.";
 "SettingsViewController_IsCreateFullBackup?" = "Do you want to generate a complete backup file including the text of the novel?\r\nWhen there are a large number of registered novels, enormous time and body capacity are required for generation.";
@@ -100,9 +105,12 @@
 "SettingsViewController_ChooseSmallBackup" = "Generate a lightweight backup (it will not take time)";
 
 "NovelSpeakerBackup_InitializeBackup" = "Initializing";
-"NovelSpeakerBackup_ExportingNovelText" = "Extracting novel texts";
-"NovelSpeakerBackup_CompressingBackupData" = "Compressing";
-"NovelSpeakerBackup_CompressingBackupDataProgress" = "Compressing";
+"NovelSpeakerBackup_ExportingNovelText" = "Step 1\r\nExtracting novel texts";
+"NovelSpeakerBackup_CompressingBackupData" = "Step 2\r\nCompressing";
+"NovelSpeakerBackup_CompressingBackupDataProgress" = "Step 2\r\nCompressing";
+"NovelSpeakerBackup_Restoreing" = "Restore from backup";
+"NovelSpeakerBackup_ProgressExtractingZip" = "Step 1\r\nExpanding";
+"NovelSpeakerBackup_RestoreingBackupData" = "Step 2\r\nApplying";
 
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -271,6 +279,9 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.37
 
 - Increase setting items saved in \"Create backup data\"
+- In the \"Create backup data\" so that you can back up including the text of the novel
+- Added RTF (Rich Text Format) to corresponding read file type
+- Added \"About\" (confirmation of version number) on setting tab
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -280,6 +291,9 @@ Version 1.1.37
 Interface cange
 
 - Increase setting items saved in \"Create backup data\"
+- In the \"Create backup data\" so that you can back up including the text of the novel
+- Added RTF (Rich Text Format) to corresponding read file type
+- Added \"About\" (confirmation of version number) on setting tab
 
 
 Version 1.1.36

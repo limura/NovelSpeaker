@@ -480,7 +480,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// JSONData に入っているバックアップを書き戻します。
 /// dataDirectory が指示されていて、かつ、本棚データに content_directory が存在した場合は
 /// ダウンロードせずにそのディレクトリにあるファイル群を章のデータとして読み込みます。
-- (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData dataDirectory:(NSURL*)dataDirectory;
+- (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData dataDirectory:(NSURL*)dataDirectory progress:(void (^)(NSString*))progress;
 
 
 /// 起動されるまでの間に新規にダウンロードされた小説の数を取得します

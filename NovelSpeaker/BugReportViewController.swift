@@ -323,10 +323,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         if !MFMailComposeViewController.canSendMail() {
             return false;
         }
-        var appVersionString = "*"
-        if let infoDictionary = Bundle.main.infoDictionary, let bundleVersion = infoDictionary["CFBundleVersion"] as? String, let shortVersion = infoDictionary["CFBundleShortVersionString"] as? String {
-            appVersionString = String.init(format: "%@(%@)", shortVersion, bundleVersion)
-        }
+        let appVersionString = NiftyUtilitySwift.GetAppVersionString()
         
         let picker = MFMailComposeViewController()
         picker.mailComposeDelegate = self;

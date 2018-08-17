@@ -44,7 +44,7 @@ class NiftyUtilitySwift: NSObject {
                         return
                     }
                 }
-                DispatchQueue.main.sync {
+                DispatchQueue.main.async {
                     EasyDialog.Builder(viewController)
                         .title(title: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー"))
                         .label(text: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfBody", comment: "本棚への追加に失敗しました。"))
@@ -72,7 +72,7 @@ class NiftyUtilitySwift: NSObject {
             let siteInfoData = GlobalDataSingleton.getInstance().getCachedAutoPagerizeSiteInfoData()
             uriLoader.addSiteInfo(from: siteInfoData)
             uriLoader.fetchOneUrl(url, cookieArray: cookieArray, successAction: { (story: HtmlStory?) in
-                DispatchQueue.main.sync {
+                DispatchQueue.main.async {
                     alertActionHolder?.closeAlert(false, completion: {
                         // firstPageLink があった場合はそっちを読み直します
                         if let firstPageLink = story?.firstPageLink {
@@ -128,7 +128,7 @@ class NiftyUtilitySwift: NSObject {
                                         dialog.dismiss(animated: false, completion: nil)
                                     }
                                     guard let globalData = GlobalDataSingleton.getInstance() else {
-                                        DispatchQueue.main.sync {
+                                        DispatchQueue.main.async {
                                             EasyDialog.Builder(viewController)
                                                 .title(title: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー"))
                                                 .label(text: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfBody", comment: "本棚への追加に失敗しました。"))
@@ -190,6 +190,25 @@ class NiftyUtilitySwift: NSObject {
         return nil
     }
     
+    @objc public static func FileRTFToAttributedString(url: URL) -> NSAttributedString? {
+        do {
+            let attributedString = try NSAttributedString(fileURL: url, options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+            return attributedString
+        }catch let error{
+            print("AttributedString from RTF failed. error: ", error)
+        }
+        return nil
+    }
+    @objc public static func FileRTFDToAttributedString(url: URL) -> NSAttributedString? {
+        do {
+            let attributedString = try NSAttributedString(fileURL: url, options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.rtfd], documentAttributes: nil)
+            return attributedString
+        }catch let error{
+            print("AttributedString from RTFD failed. error: ", error)
+        }
+        return nil
+    }
+
     @objc public static func EasyDialogOneButton(viewController: UIViewController, title: String?, message: String?, buttonTitle: String?, buttonAction:(()->Void)?) {
         var dialog = EasyDialog.Builder(viewController)
         if let title = title {
@@ -298,5 +317,119 @@ class NiftyUtilitySwift: NSObject {
         while dispatchSemaphore.wait(timeout: DispatchTime.now()) == DispatchTimeoutResult.timedOut {
             NiftyUtilitySwift.sleep(second: 0.1)
         }
+    }
+    
+    // バイト数(例えば 4096)から "4.00[KBytes]" みたいな文字列に変換します
+    public static func ByteSizeToVisibleString(byteSize:Int) -> String {
+        let unitArray = ["Byte", "KByte", "MByte", "GByte", "TByte", "PByte"]
+        var unitCount = 0
+        var currentSizeUnit = byteSize
+        var currentRemainder = 0
+        while currentSizeUnit > 1024 {
+            currentRemainder = currentSizeUnit % 1024
+            currentSizeUnit /= 1024
+            unitCount += 1
+            if unitArray.count <= unitCount {
+                break
+            }
+        }
+        let answer = Float(currentSizeUnit * 1024 + currentRemainder) / 1024.0
+        var s = ""
+        if answer > 1 {
+            s = "s"
+        }
+        return String(format: "%.2f[%@%@]", answer, unitArray[unitCount], s)
+    }
+    
+    @objc public static func Date2EpochSecond(date:Date) -> UInt {
+        return UInt(date.timeIntervalSince1970)
+    }
+    @objc public static func EpochSecond2Date(second:UInt) -> Date {
+        return Date.init(timeIntervalSince1970: TimeInterval(second))
+    }
+    // ISO-8601 形式っぽい文字列を Date に変換する。失敗すると nil を返す。
+    // ISO-8601 の一部にしか対応してない。
+    // 例えばタイムゾーン部分は Z と +0900 みたいなのは対応しているけれど、+09:00 には対応していない
+    // (そっちに対応するなら Z 一文字じゃなくて ZZZZZ と Zを5文字にしないと駄目なんだけれど
+    // そうすると +0900 (":"が無い)に対応できない)
+    // 同様に yyyy-MM... と "-" の入った拡張表記が強制であったり、MM や dd を省く形式にも対応していない。
+    // YYYY-Www-D のような週の記述にも対応していない。
+    // 時刻の hh:mm, hh のような省略形式にも対応していない。
+    // 11:30:30,5 といった1秒未満の値も対応していない。当然 11,5 (11時半) という表記も対応していない。
+    @objc public static func Date2ISO8601String(date:Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        return formatter.string(from:date)
+    }
+    @objc public static func ISO8601String2Date(iso8601String:String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone.autoupdatingCurrent
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        return formatter.date(from: iso8601String)
+    }
+    
+    @objc public static func RestoreBackupFromJSONWithProgressDialog(jsonData:Data, dataDirectory:URL?, rootViewController:UIViewController){
+        let globalDataSingleton = GlobalDataSingleton.getInstance()
+        var builder = EasyDialog.Builder(rootViewController)
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            builder = builder.label(text: NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元"), textAlignment: .center, tag: 100)
+        }
+        let dialog = builder.build()
+        
+        DispatchQueue.main.async {
+            dialog.show()
+        }
+        
+        let result = globalDataSingleton?.restoreBackup(fromJSONData: jsonData, dataDirectory: dataDirectory, progress: { (progressText) in
+            DispatchQueue.main.async {
+                if let label = dialog.view.viewWithTag(100) as? UILabel, let progressText = progressText{
+                    label.text = NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元")
+                    + "\r\n" + progressText
+                }
+            }
+        })
+        DispatchQueue.main.async {
+            dialog.dismiss(animated: false, completion: {
+                if result == true {
+                    EasyDialog.Builder(rootViewController)
+                    .label(text: NSLocalizedString("GlobalDataSingleton_BackupDataLoaded", comment:"設定データを読み込みました。ダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。"), textAlignment: .center)
+                    .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                        dialog.dismiss(animated: false, completion: nil)
+                    })
+                    .build().show()
+                }else{
+                    EasyDialog.Builder(rootViewController)
+                    .label(text: NSLocalizedString("GlobalDataSingleton_RestoreBackupDataFailed", comment:"設定データの読み込みに失敗しました。"), textAlignment: .center)
+                    .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                        dialog.dismiss(animated: false, completion: nil)
+                    })
+                    .build().show()
+                }
+            })
+        }
+    }
+    
+    @objc static public func DispatchSyncMainQueue(block:(()->Void)?) -> Void {
+        guard let block = block else {
+            return
+        }
+        if Thread.isMainThread {
+            block()
+        }else{
+            DispatchQueue.main.sync {
+                block()
+            }
+        }
+    }
+    
+    @objc static public func GetAppVersionString() -> String {
+        var appVersionString = "*"
+        if let infoDictionary = Bundle.main.infoDictionary, let bundleVersion = infoDictionary["CFBundleVersion"] as? String, let shortVersion = infoDictionary["CFBundleShortVersionString"] as? String {
+            appVersionString = String.init(format: "%@(%@)", shortVersion, bundleVersion)
+        }
+        return appVersionString
     }
 }

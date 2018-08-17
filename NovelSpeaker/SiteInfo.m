@@ -7,9 +7,7 @@
 //
 
 #import "SiteInfo.h"
-
-
-
+#import "NovelSpeaker-Swift.h"
 
 @implementation SiteInfo
 - (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString *)author firstPageLink:(NSString *)firstPageLink tag:(NSString*)tag{
@@ -151,15 +149,14 @@
         }
     }else{
         //dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-        dispatch_queue_t queue = dispatch_get_main_queue();
-        dispatch_sync(queue, ^(){
+        [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
             NSError* error = nil;
             attributedString = [[NSAttributedString alloc] initWithData:[htmlString dataUsingEncoding:NSUTF8StringEncoding] options:@{NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,                                                                                                                 NSCharacterEncodingDocumentAttribute: @(NSUTF8StringEncoding)} documentAttributes:nil error:&error];
             if (error != nil) {
                 NSLog(@"html to string failed(in other thread): %@", [error localizedDescription]);
             }
             //dispatch_semaphore_signal(semaphore);
-        });
+        }];
         //dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
     }
     

@@ -461,6 +461,16 @@
                 }];
         return nil;
     }
+    /*
+    if(false){
+        NSString* htmlString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"show\\.php\\?(id=[0-9]*)" options:NSRegularExpressionCaseInsensitive error:nil];
+        [regex enumerateMatchesInString:htmlString options:0 range:NSMakeRange(0, [htmlString length]) usingBlock:^(NSTextCheckingResult * _Nullable result, NSMatchingFlags flags, BOOL * _Nonnull stop) {
+            NSLog(@"html regex match: %@", [htmlString substringWithRange:[result range]]);
+        }];
+        NSLog(@"%@ loaded\n%@", [targetUrl absoluteString], htmlString);
+    }
+    */
     
     xmlDocPtr document = htmlReadMemory([data bytes], (int)[data length], [[targetUrl absoluteString] cStringUsingEncoding:NSUTF8StringEncoding], [[charSetString lowercaseString] cStringUsingEncoding:NSUTF8StringEncoding], HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR);
     if (document == NULL) {
