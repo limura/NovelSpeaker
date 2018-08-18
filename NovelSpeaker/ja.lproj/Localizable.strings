@@ -102,6 +102,10 @@
 "SettingsViewController_ChooseCancel" = "バックアップ生成をやめる";
 "SettingsViewController_ChooseFullBackup" = "完全バックアップを生成する(時間がかかります)";
 "SettingsViewController_ChooseSmallBackup" = "軽量バックアップを生成する(時間はかかりません)";
+"SettingTableViewController_RepeatTypeTitle" = "繰り返し再生";
+"SettingTableViewController_RepeatType_NoRepeat" = "しない";
+"SettingTableViewController_RepeatType_RewindToFirstStory" = "最初から";
+"SettingTableViewController_RepeatType_RewindToThisStory" = "一つの章";
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";
 "NovelSpeakerBackup_ExportingNovelText" = "工程 1\r\n小説本文を抽出中";
@@ -278,6 +282,7 @@
 - 「再ダウンロード用データの生成」で小説の本文を含むバックアップもできるように
 - 対応読み込みファイルタイプに RTF(Rich Text Format) を追加
 - 設定タブに「ことせかい について」(バージョン番号の確認)を追加
+- 設定タブに「繰り返し再生」の項目を追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
@@ -290,6 +295,7 @@
 - 「再ダウンロード用データの生成」で小説の本文を含むバックアップもできるように
 - 対応読み込みファイルタイプに RTF(Rich Text Format) を追加
 - 設定タブに「ことせかい について」(バージョン番号の確認)を追加
+- 設定タブに「繰り返し再生」の項目を追加
 
 
 # Version 1.1.36

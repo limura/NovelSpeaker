@@ -191,6 +191,37 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance().setIgnoreURIStringSpeechIsEnabled(row.value!)
                 })
+            <<< AlertRow<String>() { row in
+                row.title = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
+                row.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
+                let noRepeat = NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
+                let rewindToFirstStory = NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
+                let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
+                row.options = [noRepeat, rewindToFirstStory, rewindToThisStory]
+                let type = GlobalDataSingleton.getInstance().getRepeatSpeechType()
+                row.value = noRepeat
+                if type == RepeatSpeechType.rewindToFirstStory {
+                    row.value = rewindToFirstStory
+                }
+                if type == RepeatSpeechType.rewindToThisStory {
+                    row.value = rewindToThisStory
+                }
+                }.onChange({ (row) in
+                    let noRepeat = NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
+                    let rewindToFirstStory = NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
+                    let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
+                    if let typeString = row.value {
+                        if typeString == noRepeat {
+                            GlobalDataSingleton.getInstance().setRepeatSpeechType(.noRepeat)
+                        }
+                        if typeString == rewindToFirstStory {
+                            GlobalDataSingleton.getInstance().setRepeatSpeechType(.rewindToFirstStory)
+                        }
+                        if typeString == rewindToThisStory {
+                            GlobalDataSingleton.getInstance().setRepeatSpeechType(.rewindToThisStory)
+                        }
+                    }
+                })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 }.onCellSelection({ (butonCellof, buttonRow) in

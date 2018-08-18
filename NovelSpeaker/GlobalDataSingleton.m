@@ -2343,6 +2343,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY @"WebImportBookmarkArray"
 #define USER_DEFAULTS_IS_LICENSE_FILE_READED @"IsLICENSEFileIsReaded"
 #define USER_DEFAULTS_CURRENT_READED_PRIVACY_POLICY @"CurrentReadedPrivacyPolicy"
+#define USER_DEFAULTS_REPEAT_SPEECH_TYPE @"RepeatSpeechType"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3330,6 +3331,30 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// リピート再生の設定を取得します
+- (RepeatSpeechType)GetRepeatSpeechType{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_REPEAT_SPEECH_TYPE: [[NSNumber alloc] initWithInt:RepeatSpeechType_NoRepeat]}];
+    NSInteger type = [userDefaults integerForKey:USER_DEFAULTS_REPEAT_SPEECH_TYPE];
+    if (type != RepeatSpeechType_NoRepeat
+        && type != RepeatSpeechType_RewindToFirstStory
+        && type != RepeatSpeechType_RewindToThisStory) {
+        type = RepeatSpeechType_NoRepeat;
+    }
+    return type;
+}
+/// リピート再生の設定を上書きします。
+- (void)SetRepeatSpeechType:(RepeatSpeechType)type{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    if (type != RepeatSpeechType_NoRepeat
+        && type != RepeatSpeechType_RewindToFirstStory
+        && type != RepeatSpeechType_RewindToThisStory) {
+        type = RepeatSpeechType_NoRepeat;
+    }
+    [userDefaults setInteger:type forKey:USER_DEFAULTS_REPEAT_SPEECH_TYPE];
+    [userDefaults synchronize];
+}
+
 /// 最新のプライバシーポリシーのURLを取得します
 - (NSURL*)GetPrivacyPolicyURL {
     return [[NSURL alloc] initWithString:@"https://raw.githubusercontent.com/limura/NovelSpeaker/master/PrivacyPolicy.txt"];
@@ -3612,6 +3637,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_dark_theme_enabled" number:[[NSNumber alloc] initWithBool:[self IsDarkThemeEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_page_turning_sound_enabled" number:[[NSNumber alloc] initWithBool:[self IsPageTurningSoundEnabled]]];
     [NiftyUtility addStringForJSONNSDictionary:result key:@"display_font_name" string:[self GetDisplayFontName]];
+    [NiftyUtility addIntValueForJSONNSDictionary:result key:@"repeat_speech_type" number:[[NSNumber alloc] initWithInteger:[self GetRepeatSpeechType]]];
     NarouContentCacheData* currentReadingContent = [self GetCurrentReadingContent];
     if (currentReadingContent != nil) {
         [NiftyUtility addStringForJSONNSDictionary:result key:@"current_reading_content" string:currentReadingContent.ncode];
@@ -4134,6 +4160,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSString* display_font_name = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"display_font_name"];
     if (display_font_name != nil && [display_font_name length] > 0 && [NiftyUtilitySwift isValidFontNameWithFontName:display_font_name]) {
         [self SetDisplayFontName:display_font_name];
+    }
+    NSNumber* repeat_speech_type = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"repeat_speech_type"];
+    if (repeat_speech_type != nil) {
+        [self SetRepeatSpeechType:[repeat_speech_type integerValue]];
     }
     NSString* current_reading_content = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"current_reading_content"];
     return current_reading_content;

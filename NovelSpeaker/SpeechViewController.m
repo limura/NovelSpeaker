@@ -710,12 +710,35 @@
         });
         return;
     }
+    // 一つの章を繰り返し再生するように設定されている場合はそのようにします。
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    RepeatSpeechType repeatType = [globalData GetRepeatSpeechType];
+    if (repeatType == RepeatSpeechType_RewindToThisStory) {
+        [self ChangeChapterWithLastestReadLocation:[m_CurrentReadingStory.chapter_number intValue]];
+        self.textView.selectedRange = NSMakeRange(0, 0);
+        [self SaveCurrentReadingPoint];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self startSpeech];
+        });
+        return;
+    }
+
     //[self stopSpeechWithoutDiactivate];
     if ([self SetNextChapter]) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [self startSpeech];
         });
     }else{
+        // 最初の章から繰り返し再生するように設定されている場合はそのようにします。
+        if (repeatType == RepeatSpeechType_RewindToFirstStory) {
+            [self ChangeChapterWithLastestReadLocation:1];
+            self.textView.selectedRange = NSMakeRange(0, 0);
+            [self SaveCurrentReadingPoint];
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [self startSpeech];
+            });
+            return;
+        }
         [self stopSpeech];
         [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_SpeechStopedByEnd", @"Speak")];
     }

@@ -27,6 +27,13 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
     NarouContentSortType_Ncode,
 };
 
+/// 繰り返し再生の対象タイプ
+typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
+    RepeatSpeechType_NoRepeat = 0, // 繰り返し再生はしない
+    RepeatSpeechType_RewindToFirstStory = 1, // 全ての章が対象(全ての章を読み終えたら最初の章に戻る)
+    RepeatSpeechType_RewindToThisStory = 2, // 一つの章が対象(一つの章を読み終えたらその章の最初に戻る)
+};
+
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
 {
@@ -454,6 +461,12 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (BOOL)IsLicenseReaded;
 /// 利用許諾を読んだことにします
 - (void)SetLicenseIsReaded;
+
+/// リピート再生の設定を取得します
+- (RepeatSpeechType)GetRepeatSpeechType;
+/// リピート再生の設定を上書きします。
+- (void)SetRepeatSpeechType:(RepeatSpeechType)type;
+
 
 /// 最新のプライバシーポリシーのURLを取得します
 - (NSURL*)GetPrivacyPolicyURL;
