@@ -419,7 +419,10 @@
     [self RingPageTurningSound];
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
-    self.textView.selectedRange = NSMakeRange(0, 0);
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        self.textView.selectedRange = NSMakeRange(0, 0);
+    }];
+    //self.textView.selectedRange = NSMakeRange(0, 0);
     [self SaveCurrentReadingPoint];
     return true;
 }
@@ -433,7 +436,10 @@
     [self RingPageTurningSound];
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
-    self.textView.selectedRange = NSMakeRange(0, 0);
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        self.textView.selectedRange = NSMakeRange(0, 0);
+    }];
+    //self.textView.selectedRange = NSMakeRange(0, 0);
     [self SaveCurrentReadingPoint];
     return true;
 }
@@ -701,6 +707,23 @@
     [self TextViewScrollTo:range.location];
 }
 
+/// 指定された章の先頭に巻き戻します
+- (BOOL)RewindTo:(int)chapterNumber {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    StoryCacheData* story = [globalData SearchStory:m_CurrentReadingStory.ncode chapter_no:chapterNumber];
+    NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:m_CurrentReadingStory.ncode];
+    BOOL result = false;
+    if (story != nil && content != nil) {
+        story.readLocation = [[NSNumber alloc] initWithInt:0];
+        [globalData UpdateReadingPoint:content story:story];
+        result = false;
+    }
+    [self ChangeChapterWithLastestReadLocation:chapterNumber];
+    self.textView.selectedRange = NSMakeRange(0, 0);
+    [self SaveCurrentReadingPoint];
+    return true;
+}
+
 /// 読み上げが停止したとき
 - (void) finishSpeak
 {
@@ -714,9 +737,7 @@
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     RepeatSpeechType repeatType = [globalData GetRepeatSpeechType];
     if (repeatType == RepeatSpeechType_RewindToThisStory) {
-        [self ChangeChapterWithLastestReadLocation:[m_CurrentReadingStory.chapter_number intValue]];
-        self.textView.selectedRange = NSMakeRange(0, 0);
-        [self SaveCurrentReadingPoint];
+        [self RewindTo:[m_CurrentReadingStory.chapter_number intValue]];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [self startSpeech];
         });
@@ -731,9 +752,7 @@
     }else{
         // 最初の章から繰り返し再生するように設定されている場合はそのようにします。
         if (repeatType == RepeatSpeechType_RewindToFirstStory) {
-            [self ChangeChapterWithLastestReadLocation:1];
-            self.textView.selectedRange = NSMakeRange(0, 0);
-            [self SaveCurrentReadingPoint];
+            [self RewindTo:1];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [self startSpeech];
             });
