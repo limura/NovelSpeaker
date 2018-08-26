@@ -14,7 +14,7 @@ struct BugReportViewInputData {
     var TimeOfOccurence = Date.init(timeIntervalSinceNow: 60*60*24) // 1日後にしておく(DatePickerで日付を一回戻すだけでいいので)
     var DescriptionOfTheProblem = ""
     var ProblemOccurenceProcedure = ""
-    var IsNeedResponse = true
+    var IsNeedResponse = NSLocalizedString("BugReportViewController_IsNeedResponse_Maybe", comment: "あっても良い")
     var DescriptionOfNewFeature = ""
 }
 
@@ -134,14 +134,19 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                         BugReportViewController.value.DescriptionOfNewFeature = value
                     }
                 })
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "この報告への返事が欲しい")
-                $0.value = BugReportViewController.value.IsNeedResponse
-            }.onChange({ (row) in
-                if let value = row.value {
-                    BugReportViewController.value.IsNeedResponse = value
-                }
-            })
+            <<< AlertRow<String>() { row in
+                row.title = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
+                row.selectorTitle = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
+                let never = NSLocalizedString("BugReportViewController_IsNeedResponse_Never", comment: "必要無い")
+                let maybe = NSLocalizedString("BugReportViewController_IsNeedResponse_Maybe", comment: "あっても良い")
+                let must = NSLocalizedString("BugReportViewController_IsNeedResponse_Must", comment: "必ず欲しい")
+                row.options = [maybe, must, never]
+                row.value = BugReportViewController.value.IsNeedResponse
+                }.onChange({ (row) in
+                    if let value = row.value {
+                        BugReportViewController.value.IsNeedResponse = value
+                    }
+                })
             <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_InformationForIsNeedResponse", comment: "返事が欲しいと設定されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる可能性があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合があります。")
                 $0.cell.textLabel?.font = .systemFont(ofSize: 12.0)
@@ -212,15 +217,21 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     BugReportViewController.value.ProblemOccurenceProcedure = value
                 }
             })
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "この報告への返事が欲しい")
-                $0.value = BugReportViewController.value.IsNeedResponse
+            <<< AlertRow<String>() { row in
+                row.title = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
+                row.selectorTitle = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
+                let never = NSLocalizedString("BugReportViewController_IsNeedResponse_Never", comment: "必要無い")
+                let maybe = NSLocalizedString("BugReportViewController_IsNeedResponse_Maybe", comment: "あっても良い")
+                let must = NSLocalizedString("BugReportViewController_IsNeedResponse_Must", comment: "必ず欲しい")
+                row.options = [maybe, must, never]
+                row.value = BugReportViewController.value.IsNeedResponse
             }.onChange({ (row) in
                 if let value = row.value {
                     BugReportViewController.value.IsNeedResponse = value
                 }
-            }) <<< LabelRow() {
-                $0.title = NSLocalizedString("BugReportViewController_InformationForIsNeedResponse", comment: "返事が欲しいと設定されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる可能性があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合があります。")
+            })
+            <<< LabelRow() {
+                $0.title = NSLocalizedString("BugReportViewController_InformationForIsNeedResponse", comment: "返事が許可されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる可能性があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合があります。")
                 $0.cell.textLabel?.font = .systemFont(ofSize: 12.0)
                 $0.cell.textLabel?.numberOfLines = 0
             } <<< ButtonRow() {
@@ -319,7 +330,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     */
     
     @discardableResult
-    func sendNewFeatureMail(description:String, needResponse:Bool) -> Bool {
+    func sendNewFeatureMail(description:String, needResponse:String) -> Bool {
         if !MFMailComposeViewController.canSendMail() {
             return false;
         }
@@ -332,7 +343,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         picker.setMessageBody(
             description
             + NSLocalizedString("BugReportViewController_SendNewFeatureMailInformation", comment: "\n\n===============\nここより下の行は編集しないでください。\n\n")
-            + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信を希望する") + ": " + (needResponse ? NSLocalizedString("BugReportViewController_YES", comment: "はい") : NSLocalizedString("BugReportViewController_NO", comment: "いいえ"))
+            + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信") + ": " + needResponse
             + "\niOS version: " + UIDevice.current.systemVersion
             + "\nmodel: " + UIDevice.modelName
             + "\nApp version:" + appVersionString
@@ -343,7 +354,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     }
 
     @discardableResult
-    func sendBugReportMail(log:String?, description:String, procedure:String, date:Date, needResponse:Bool) -> Bool {
+    func sendBugReportMail(log:String?, description:String, procedure:String, date:Date, needResponse:String) -> Bool {
         if !MFMailComposeViewController.canSendMail() {
             return false;
         }
@@ -359,7 +370,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         picker.setMessageBody(
             NSLocalizedString("BugReportViewController_SendBugReportMailInformation", comment: "\n\n===============\nここより下の行は編集しないでください。\nなお、問題の発生している場面のスクリーンショットなどを添付して頂けると、より対応しやすくなるかと思われます。")
             + "\n"
-            + "\n" + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信を希望する") + ": " + (needResponse ? NSLocalizedString("BugReportViewController_YES", comment: "はい") : NSLocalizedString("BugReportViewController_NO", comment: "いいえ"))
+            + "\n" + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信を希望する") + ": " + needResponse
             + "\niOS version: " + UIDevice.current.systemVersion
             + "\nmodel: " + UIDevice.modelName
             + "\nApp version:" + appVersionString

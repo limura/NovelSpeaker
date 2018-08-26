@@ -225,7 +225,10 @@
 "BugReportViewController_DescriptionOfTheProblemPlaceHolder" = "Describe the problem that is happening";
 "BugReportViewController_ProblemOccurrenceProcedure" = "Problem occurrence procedure";
 "BugReportViewController_ProblemOccurrenceProcedurePlaceHolder" = "Describe the operation procedure until the problem occurs";
-"BugReportViewController_IsNeedResponse" = "I want an answer to this report";
+"BugReportViewController_IsNeedResponse" = "I want an answer";
+"BugReportViewController_IsNeedResponse_Never" = "Unnecessary";
+"BugReportViewController_IsNeedResponse_Maybe" = "No need";
+"BugReportViewController_IsNeedResponse_Must" = "Essential";
 "BugReportViewController_SendBugReportButtonTitle" = "Create inconvenience report mail";
 "BugReportViewController_InvalidTimeOfOccurence" = "* Please specify the date and time as accurate as possible. The date and time of the future can not be specified.";
 "BugReportViewController_NoDescriptonOfTheProblem" = "* The explanation column of the problem is blank.";
@@ -234,11 +237,11 @@
 "BugReportViewController_YES" = "Yes";
 "BugReportViewController_SendBugReportMailSubject" = "NovelSpeaker problem report";
 "BugReportViewController_SendBugReportMailInformation" = "\n\n===============\nPlease do not edit the line below this.\nIf you attach a screenshot etc. of the scene where the problem occurs, it seems that it will be easier to correspond.";
-"BugReportViewController_SendBugReport_IsNeedResponse" = "Need response";
+"BugReportViewController_SendBugReport_IsNeedResponse" = "Response";
 "BugReportViewController_SendBugReport_Description" = "Description";
 "BugReportViewController_SendBugReport_Procedure" = "Procedure";
 "BugReportViewController_ErrorDialog" = "Error";
-"BugReportViewController_InformationForIsNeedResponse" = "If it is set that you want a reply, we will reply to the sender's email address. Reply may be delayed. Also, please note that if you do not receive mail from @gmail.com, you will not receive a reply.";
+"BugReportViewController_InformationForIsNeedResponse" = "In case reply is permitted, the developer may reply to the sender's mail address from the developer. Reply may be delayed. Also, please note that if you do not receive mail from @gmail.com, you will not receive a reply.";
 "BugReportViewController_HiddenImportantInformationSectionHeader" = "Information";
 "BugReportViewController_SendNewFeatureMailInformation" = "\n\n===============\nPlease do not edit the line below this.\n";
 "BugReportViewController_SendNewFeatureMailSubject" = "NovelSpeaker Proposal of new function";
@@ -280,13 +283,23 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.38
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.39
 
-- Corrected a problem that the reading-out position might not return to the beginning when repeating playback
+- Change \"Reply to report\" in \"Send inquiries to developers by e-mail\" on \"Settings\" tab to selection formula of \"unnecessary\" \"no need\" \"essential\"
+- \"Ruby reads ruby only\" function, which fixes a problem which was not responding to ｜(double-byte) in ruby of |...《...》 format
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.39
+
+Interface change
+- Change \"Reply to report\" in \"Send inquiries to developers by e-mail\" on \"Settings\" tab to selection formula of \"unnecessary\" \"no need\" \"essential\"
+
+Bug fix
+- \"Ruby reads ruby only\" function, which fixes a problem which was not responding to ｜(double-byte) in ruby of |...《...》 format
+
+
 Version 1.1.38
 
 Bug fix

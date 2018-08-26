@@ -221,7 +221,10 @@
 "BugReportViewController_DescriptionOfTheProblemPlaceHolder" = "起こっている問題を説明してください。\n説明はできるだけ詳しく書いて頂けるとありがたいです。「〜ができません」や「〜すると落ちます」といった簡単な報告のみですと、開発者が状況を把握できず対応できません。";
 "BugReportViewController_ProblemOccurrenceProcedure" = "問題発生手順";
 "BugReportViewController_ProblemOccurrenceProcedurePlaceHolder" = "問題が発生するまでの操作手順を書いてください。\nアプリを触ったことが無い人でも同じ事ができるような操作方法を書くつもりで書いて頂けるといいと思います。";
-"BugReportViewController_IsNeedResponse" = "この報告への返事が欲しい";
+"BugReportViewController_IsNeedResponse" = "報告への返事";
+"BugReportViewController_IsNeedResponse_Never" = "不要";
+"BugReportViewController_IsNeedResponse_Maybe" = "無くても良い";
+"BugReportViewController_IsNeedResponse_Must" = "必須";
 "BugReportViewController_SendBugReportButtonTitle" = "不都合報告メールを作成する";
 "BugReportViewController_InvalidTimeOfOccurence" = "※ 不都合の起こった正確な日時を設定してください。なお、未来の日時は指定できません。";
 "BugReportViewController_NoDescriptonOfTheProblem" = "※ 問題の説明欄が空欄になっています。";
@@ -230,11 +233,11 @@
 "BugReportViewController_YES" = "はい";
 "BugReportViewController_SendBugReportMailSubject" = "ことせかい 不都合報告";
 "BugReportViewController_SendBugReportMailInformation" = "\n\n===============\nここより下の行は編集しないでください。\nなお、問題の発生している場面のスクリーンショットなどを添付して頂けると、より対応しやすくなるかと思われます。";
-"BugReportViewController_SendBugReport_IsNeedResponse" = "返信を希望する";
+"BugReportViewController_SendBugReport_IsNeedResponse" = "返信";
 "BugReportViewController_SendBugReport_Description" = "不都合の概要";
 "BugReportViewController_SendBugReport_Procedure" = "不都合の再現方法";
 "BugReportViewController_ErrorDialog" = "問題のある入力項目があります";
-"BugReportViewController_InformationForIsNeedResponse" = "返事が欲しいと設定されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる場合があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合もあります。";
+"BugReportViewController_InformationForIsNeedResponse" = "返信が許可されている場合には開発者から送信元のメールアドレスへ返信を行う場合があります。返信は遅くなる場合があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合もあります。";
 "BugReportViewController_HiddenImportantInformationSectionHeader" = "お知らせ";
 "BugReportViewController_SendNewFeatureMailInformation" = "\n\n===============\nここより下の行は編集しないでください。\n";
 "BugReportViewController_SendNewFeatureMailSubject" = "ことせかい 新機能等の提案";
@@ -276,13 +279,23 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.38
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.39
 
-- 繰り返し再生時に、読み上げ位置が先頭に戻らない場合があった問題を修正
+- 「設定」タブの「開発者に問い合わせる」内の「報告への返事」を「不要」「無くても良い」「必須」の選択式に変更
+- 「ルビはルビだけ読む」機能で、 |...《...》 の形式のルビにおいて、｜(全角) には反応していなかった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.39
+
+インタフェースの変更
+- 「設定」タブの「開発者に問い合わせる」内の「報告への返事」を「不要」「無くても良い」「必須」の選択式に変更
+
+問題の修正
+- 「ルビはルビだけ読む」機能で、 |...《...》 の形式のルビにおいて、｜(全角) には反応していなかった問題を修正
+
+
 # Version 1.1.38
 
 不都合の修正
