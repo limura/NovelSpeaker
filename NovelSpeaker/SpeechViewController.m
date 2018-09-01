@@ -193,6 +193,7 @@
     self.view.backgroundColor = backgroundColor;
     self.textView.textColor = foregroundColor;
     self.textView.backgroundColor = backgroundColor;
+    self.textView.indicatorStyle = UIScrollViewIndicatorStyleWhite;
     self.NextChapterButton.backgroundColor = backgroundColor;
     self.PrevChapterButton.backgroundColor = backgroundColor;
     self.ChapterSlider.backgroundColor = backgroundColor;
@@ -217,6 +218,7 @@
     self.view.backgroundColor = backgroundColor;
     self.textView.textColor = foregroundColor;
     self.textView.backgroundColor = backgroundColor;
+    self.textView.indicatorStyle = UIScrollViewIndicatorStyleBlack;
     self.NextChapterButton.backgroundColor = backgroundColor;
     self.PrevChapterButton.backgroundColor = backgroundColor;
     self.ChapterSlider.backgroundColor = backgroundColor;
