@@ -1629,6 +1629,19 @@ Interface change
 Fixing problems
 - "Ruby reads ruby only" function, which fixes a problem which was not responding to ｜ (double-byte) in ruby of  |...《...》 format
 
+
+# Version 1.1.40
+
+問題の修正
+
+- 「小説を読む時に背景を暗くする」がONになっているときに、小説本文のスクロールバーが見えなくなっていた問題を修正
+
+# Version 1.1.40
+
+Bug fix
+- Fixed an issue in which the scroll bar of the novel text disappeared when "Darken the background when reading a novel" was ON
+
+
 TODO
 
 - DispatchQueue.main.sync {...} を main thread では単なるblockの実行だけにした辺りで、blockされているような挙動が見当たるようになったような気が……何故だ(´・ω・`)

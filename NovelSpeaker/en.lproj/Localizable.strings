@@ -283,14 +283,19 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.39
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.40
 
-- Change \"Reply to report\" in \"Send inquiries to developers by e-mail\" on \"Settings\" tab to selection formula of \"unnecessary\" \"no need\" \"essential\"
-- \"Ruby reads ruby only\" function, which fixes a problem which was not responding to ｜(double-byte) in ruby of |...《...》 format
+- Fixed an issue in which the scroll bar of the novel text disappeared when \"Darken the background when reading a novel\" was ON
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.40
+
+Bug fix
+- Fixed an issue in which the scroll bar of the novel text disappeared when \"Darken the background when reading a novel\" was ON
+
+
 # Version 1.1.39
 
 Interface change

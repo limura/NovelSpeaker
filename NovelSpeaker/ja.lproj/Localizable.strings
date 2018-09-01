@@ -279,14 +279,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.39
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.40
 
-- 「設定」タブの「開発者に問い合わせる」内の「報告への返事」を「不要」「無くても良い」「必須」の選択式に変更
-- 「ルビはルビだけ読む」機能で、 |...《...》 の形式のルビにおいて、｜(全角) には反応していなかった問題を修正
+- 「小説を読む時に背景を暗くする」がONになっているときに、小説本文のスクロールバーが見えなくなっていた問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.40
+
+問題の修正
+
+- 「小説を読む時に背景を暗くする」がONになっているときに、小説本文のスクロールバーが見えなくなっていた問題を修正
+
+
 # Version 1.1.39
 
 インタフェースの変更
