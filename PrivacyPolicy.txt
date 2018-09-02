@@ -21,3 +21,30 @@
 
 ことせかい では個人情報に関して適用される日本の法令を遵守するとともに、本プライバシーポリシーの内容を適宜見直しその改善に努めます。
 修正された最新のプライバシーポリシーは GitHub に登録されております ことせかい(NovelSpeaker) 内の PrivacyPolicy.txt(https://github.com/limura/NovelSpeaker/blob/master/PrivacyPolicy.txt) にて開示されます。
+
+
+English sentences by machine translation are shown below. For accurate information Japanese language takes precedence.
+
+# Purpose of using personal information
+
+In that case, we may ask you to send personal information such as e-mail address from users of inquiries when making inquiries via web form or inquiries from inside of the application.
+
+These personal information will be used to verify the contents of the inquiry itself and the contents of the inquiry itself on the developer's side, and will not use it except for the purpose of providing personal information .
+
+# Disclosure of personal information to third parties
+
+Personal information sent to the wishes will be managed properly and will not be disclosed to third parties unless it falls under the following.
+
+- When disclosure is required for cooperation with laws and regulations
+
+# Delete personal information
+
+Personal information sent to the wishes will be deleted if it falls under the following conditions.
+
+- We have dealt with about the personal information that we got, and after more than one year passed after acquiring that information, we will carry out the deletion within 2 years (periodically on a once-a-year basis)
+- When you receive a request for deletion from yourself
+
+# About change of privacy policy
+
+In the case, we will comply with Japanese laws applicable to personal information, and we will review the contents of this Privacy Policy from time to time and make efforts to improve it.
+Disclosed in PrivacyPolicy.txt (https://github.com/limura/NovelSpeaker/blob/master/PrivacyPolicy.txt) within the wisdom (NovelSpeaker) registered with the latest GitHub privacy policy modified It will be.
