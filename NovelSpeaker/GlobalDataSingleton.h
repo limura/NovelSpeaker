@@ -259,7 +259,8 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 - (NSArray*)GetAllSpeechModSettings;
 
 /// 読み上げ時の読み替え設定を beforeString指定 で読み出します
-- (SpeechModSettingCacheData*)GetSpeechModSettingWithBeforeString:(NSString*)beforeString;
+// TODO: 正規表現周りのON/OFFを beforeString に混ぜてしまっているため、beforeString だけでは検索できなくなっているので一旦封印します
+//- (SpeechModSettingCacheData*)GetSpeechModSettingWithBeforeString:(NSString*)beforeString;
 
 /// 読み上げ時の読み替え設定をリストで受け取り、上書き更新します。
 - (BOOL)UpdateSpeechModSettingMultiple:(NSArray*)modSettingArray;

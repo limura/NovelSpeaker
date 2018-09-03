@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "StringSubstituter.h"
+#import "SpeechModSettingCacheData.h"
 
 @interface StringSubstituterTests : XCTestCase
 
@@ -163,6 +164,61 @@
         }
         XCTAssertTrue([to compare:toAnswer] == NSOrderedSame);
     }
+}
+    
+- (void)testRegexpSpeechModConfigs
+{
+    NSString* targetText = @"　メロスは激怒した。必ず、かの邪智暴虐じゃちぼうぎゃくの王を除かなければならぬと決意した。メロスには政治がわからぬ。メロスは、村の牧人である。笛を吹き、羊と遊んで暮して来た。けれども邪悪に対しては、人一倍に敏感であった。きょう未明メロスは村を出発し、野を越え山越え、十里はなれた此このシラクスの市にやって来た。メロスには父も、母も無い。女房も無い。十六の、内気な妹と二人暮しだ。この妹は、村の或る律気な一牧人を、近々、花婿はなむことして迎える事になっていた。結婚式も間近かなのである。メロスは、それゆえ、花嫁の衣裳やら祝宴の御馳走やらを買いに、はるばる市にやって来たのだ。先ず、その品々を買い集め、それから都の大路をぶらぶら歩いた。メロスには竹馬の友があった。セリヌンティウスである。今は此のシラクスの市で、石工をしている。その友を、これから訪ねてみるつもりなのだ。久しく逢わなかったのだから、訪ねて行くのが楽しみである。歩いているうちにメロスは、まちの様子を怪しく思った。ひっそりしている。もう既に日も落ちて、まちの暗いのは当りまえだが、けれども、なんだか、夜のせいばかりでは無く、市全体が、やけに寂しい。";
+    
+    // 不正な入力: 空文字列
+    NSString* pattern = @"";
+    NSString* to = @"";
+    NSArray* result = [StringSubstituter FindRegexpSpeechModConfigs:targetText pattern:pattern to:to];
+    XCTAssertEqual([result count], 0);
+
+    // 不正な入力: nil
+    pattern = nil;
+    to = nil;
+    result = [StringSubstituter FindRegexpSpeechModConfigs:targetText pattern:pattern to:to];
+    XCTAssertEqual([result count], 0);
+
+    // 不正な入力: 正規表現として壊れている
+    pattern = @"(abc"; // ')' が無い
+    to = @"abc";
+    result = [StringSubstituter FindRegexpSpeechModConfigs:targetText pattern:pattern to:to];
+    XCTAssertEqual([result count], 0);
+
+    pattern = @"メロス(\\p{Hiragana}+)";
+    to = @"太郎$1";
+    result = [StringSubstituter FindRegexpSpeechModConfigs:targetText pattern:pattern to:to];
+    XCTAssertEqual([result count], 2);
+    SpeechModSettingCacheData* modSetting = result[0];
+    XCTAssertEqual([modSetting.beforeString compare:@"メロスは"], NSOrderedSame, @"「メロスは」が発見されていない");
+    XCTAssertEqual([modSetting.afterString compare:@"太郎は"], NSOrderedSame, @"「メロスは」が「太郎は」に書き換えようとされていない");
+    modSetting = result[1];
+    XCTAssertEqual([modSetting.beforeString compare:@"メロスには"], NSOrderedSame, @"「メロスには」が発見されていない");
+    XCTAssertEqual([modSetting.afterString compare:@"太郎には"], NSOrderedSame, @"「メロスには」が「太郎には」に書き換えようとされていない");
+
+    targetText = @"時は西暦199X年、世界は核の炎に包まれた。そして200x年、人類は……";
+    pattern = @"([0-9xX]+)年";
+    to = @"$1ネン";
+    result = [StringSubstituter FindRegexpSpeechModConfigs:targetText pattern:pattern to:to];
+    XCTAssertEqual([result count], 2);
+    modSetting = result[0];
+    XCTAssertEqual([modSetting.beforeString compare:@"199X年"], NSOrderedSame, @"「199X年」が発見されていない");
+    XCTAssertEqual([modSetting.afterString compare:@"199Xネン"], NSOrderedSame, @"「199X年」が「199xネン」に書き換えようとされていない");
+    modSetting = result[1];
+    XCTAssertEqual([modSetting.beforeString compare:@"200x年"], NSOrderedSame, @"「200x年」が発見されていない");
+    XCTAssertEqual([modSetting.afterString compare:@"200xネン"], NSOrderedSame, @"「200x年」が「200xネン」に書き換えようとされていない");
+
+    targetText = @"abcdefghijklmnopqrstu";
+    pattern = @"(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)(m)(n)(o)(p)(q)(r)";
+    to = @"$18$17$16$15$14$13$12$11$10$9$8$7$6$5$4$3$2$1";
+    result = [StringSubstituter FindRegexpSpeechModConfigs:targetText pattern:pattern to:to];
+    XCTAssertEqual([result count], 1);
+    modSetting = result[0];
+    XCTAssertEqual([modSetting.beforeString compare:@"abcdefghijklmnopqr"], NSOrderedSame, @"「abcdefghijklmnopqr」が発見されていない");
+    XCTAssertEqual([modSetting.afterString compare:@"rqponmlkjihgfedcba"], NSOrderedSame, @"「abcdefghijklmnopqr」が「rqponmlkjihgfedcba」に書き換えようとされていない");
 }
 
 @end

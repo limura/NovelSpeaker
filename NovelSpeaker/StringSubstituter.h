@@ -40,5 +40,8 @@
 /// 与えられた文字列から、URIに当たる文字列を発見して、文字列のリストとして返します
 + (NSArray*)FindURIStrings:(NSString*)text;
 
+// 正規表現での読み替え指定について、指定された文字列に対しての読み替え辞書を生成します
++ (NSArray*)FindRegexpSpeechModConfigs:(NSString*)text pattern:(NSString*)pattern to:(NSString*)to;
+
 @end
 

@@ -52,7 +52,9 @@
 }
 
 - (IBAction)testSpeechButtonClicked:(id)sender {
-    NSString* sampleText = [[NSString alloc] initWithFormat:NSLocalizedString(@"CreateSpeechModSettingView_ReadItForAAAinBBB", @"%@を%@に読み替えます。"), self.beforeTextField.text, self.afterTextField.text];
+    [self UpdateAfterConvertTextField];
+    //NSString* sampleText = [[NSString alloc] initWithFormat:NSLocalizedString(@"CreateSpeechModSettingView_ReadItForAAAinBBB", @"%@を%@に読み替えます。"), self.beforeTextField.text, self.afterTextField.text];
+    NSString* sampleText = self.afterConvertTextField.text;
     [m_Speaker Speech:sampleText];
 }
 
@@ -63,9 +65,11 @@
         return;
     }
     
-    SpeechModSettingCacheData* speechMod = [SpeechModSettingCacheData new];
-    speechMod.beforeString = self.beforeTextField.text;
-    speechMod.afterString = self.afterTextField.text;
+    SpeechModSettingConvertType type = SpeechModSettingConvertType_JustMatch;
+    if(self.regexpSwitch.on){
+        type = SpeechModSettingConvertType_Regexp;
+    }
+    SpeechModSettingCacheData* speechMod = [[SpeechModSettingCacheData alloc] initWithBeforeString:self.beforeTextField.text afterString:self.afterTextField.text type:type];
     if ([[GlobalDataSingleton GetInstance] UpdateSpeechModSetting:speechMod] == false) {
         [self showAlertView:NSLocalizedString(@"CreateSpeechModSettingView_SettingFailed", @"設定に失敗しました。")];
         return;
@@ -74,6 +78,31 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+- (void)UpdateAfterConvertTextField{
+    NSString* prevString = self.prevConvertTextField.text;
+    
+    NiftySpeaker* niftySpeaker = [NiftySpeaker new];
+    if (self.regexpSwitch.on){
+        NSString* pattern = self.beforeTextField.text;
+        NSString* to = self.afterTextField.text;
+        NSArray* modSettingArray = [StringSubstituter FindRegexpSpeechModConfigs:prevString pattern:pattern to:to];
+        for(SpeechModSettingCacheData* modSetting in modSettingArray) {
+            [niftySpeaker AddSpeechModText:modSetting.beforeString to:modSetting.afterString];
+        }
+    }else{
+        NSString* from = self.beforeTextField.text;
+        NSString* to = self.afterTextField.text;
+        [niftySpeaker AddSpeechModText:from to:to];
+    }
+    [niftySpeaker SetText:prevString];
+    NSString* afterString = [niftySpeaker GetSpeechText];
+    self.afterConvertTextField.text = afterString;
+}
+    
+- (IBAction)RefreshButtonClicked:(id)sender {
+    [self UpdateAfterConvertTextField];
+}
+    
 /*
 #pragma mark - Navigation
 

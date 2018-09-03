@@ -9,10 +9,17 @@
 #import <Foundation/Foundation.h>
 #import "SpeechModSetting.h"
 
+typedef NS_ENUM(NSUInteger, SpeechModSettingConvertType) {
+    SpeechModSettingConvertType_JustMatch = 0,
+    SpeechModSettingConvertType_Regexp = 1,
+};
+
 @interface SpeechModSettingCacheData : NSObject
 
-@property (nonatomic) NSString* beforeString;
-@property (nonatomic) NSString* afterString;
+@property (nonatomic, readonly) NSString* beforeString;
+@property (nonatomic, readonly) NSString* afterString;
+@property (nonatomic, readonly) SpeechModSettingConvertType convertType;
+
 
 /// CoreData のデータから初期化します。
 - (id)initWithCoreData: (SpeechModSetting*)coreDatacontent;
@@ -20,6 +27,14 @@
 - (BOOL)AssignToCoreData: (SpeechModSetting*)content;
 
 /// 値付き初期化
-- (id)initWithBeforeString:(NSString*)beforeString afterString:(NSString*)afterString;
+- (id)initWithBeforeString:(NSString*)beforeString afterString:(NSString*)afterString type:(SpeechModSettingConvertType)type;
+
+/// 単純マッチでの置換か否かを取得します
+- (BOOL)isJustMatchType;
+/// 正規表現での置換か否かを取得します
+- (BOOL)isRegexpType;
+    
+/// CoreData で検索するための beforeString を取得します
+- (NSString*)GetBeforeStringForCoreDataSearch;
 
 @end

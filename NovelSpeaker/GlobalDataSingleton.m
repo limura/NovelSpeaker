@@ -1355,6 +1355,13 @@ static GlobalDataSingleton* _singleton = nil;
         };
     return dataDictionary;
 }
+    
+- (NSDictionary*)GetDefaultSpeechModConfigForRegexp
+{
+    return @{
+       //@"([^\\p{Han}])己": @"$1おのれ",
+    };
+}
 
 /// 標準の読み替え辞書を上書き追加します。
 - (void)InsertDefaultSpeechModConfig
@@ -1362,9 +1369,12 @@ static GlobalDataSingleton* _singleton = nil;
     NSDictionary* dataDictionary = [self GetDefaultSpeechModConfig];
     NSMutableArray* mutableArray = [NSMutableArray new];
     for (NSString* key in [dataDictionary keyEnumerator]) {
-        SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
-        speechModSetting.beforeString = key;
-        speechModSetting.afterString = [dataDictionary objectForKey:key];
+        SpeechModSettingCacheData* speechModSetting = [[SpeechModSettingCacheData alloc] initWithBeforeString:key afterString:[dataDictionary objectForKey:key] type:SpeechModSettingConvertType_JustMatch];
+        [mutableArray addObject:speechModSetting];
+    }
+    dataDictionary = [self GetDefaultSpeechModConfigForRegexp];
+    for (NSString* key in [dataDictionary keyEnumerator]) {
+        SpeechModSettingCacheData* speechModSetting = [[SpeechModSettingCacheData alloc] initWithBeforeString:key afterString:[dataDictionary objectForKey:key] type:SpeechModSettingConvertType_Regexp];
         [mutableArray addObject:speechModSetting];
     }
     [self UpdateSpeechModSettingMultiple:mutableArray];
@@ -1502,14 +1512,35 @@ static GlobalDataSingleton* _singleton = nil;
 - (void)ApplyRemoveURIModConfig:(NiftySpeaker*)niftySpeaker{
     [self ApplyRemoveURIModConfigWithText:niftySpeaker text:[niftySpeaker GetText]];
 }
-
+    
 /// NiftySpeakerに現在の読み替え設定を登録します
 - (void)ApplySpeechModConfig:(NiftySpeaker*)niftySpeaker
 {
     NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
     if (speechModConfigArray != nil) {
         for (SpeechModSettingCacheData* speechModSetting in speechModConfigArray) {
+            if (![speechModSetting isJustMatchType]) {
+                continue;
+            }
             [niftySpeaker AddSpeechModText:speechModSetting.beforeString to:speechModSetting.afterString];
+        }
+    }
+}
+
+/// NiftySpeaker に正規表現での読み替え設定を登録します。
+- (void)ApplySpeechModConfigForRegexp:(NiftySpeaker*)niftySpeaker targetText:(NSString*)targetText
+{
+    NSArray* speechModConfigArray = [self GetAllSpeechModSettings];
+    if(speechModConfigArray == nil){
+        return;
+    }
+    for (SpeechModSettingCacheData* speechModSetting in speechModConfigArray) {
+        if (![speechModSetting isRegexpType]) {
+            continue;
+        }
+        NSArray* regexpModConfigArray = [StringSubstituter FindRegexpSpeechModConfigs:targetText pattern:speechModSetting.beforeString to:speechModSetting.afterString];
+        for (SpeechModSettingCacheData* modSetting in regexpModConfigArray) {
+            [niftySpeaker AddSpeechModText:modSetting.beforeString to:modSetting.afterString];
         }
     }
 }
@@ -1603,6 +1634,8 @@ static GlobalDataSingleton* _singleton = nil;
     if ([self GetIsIgnoreURIStringSpeechEnabled]) {
         [self ApplyRemoveURIModConfigWithText:m_NiftySpeaker text:story.content];
     }
+    [self ApplySpeechModConfigForRegexp:m_NiftySpeaker targetText:story.content];
+    
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
         return false;
@@ -1998,7 +2031,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block BOOL result = true;
     [self coreDataPerfomBlockAndWait:^{
         for (SpeechModSettingCacheData* modSetting in modSettingArray) {
-            SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:modSetting.beforeString];
+            SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:[modSetting GetBeforeStringForCoreDataSearch]];
             if (coreDataConfig == nil) {
                 coreDataConfig = [self CreateNewSpeechModSettingThreadUnsafe:modSetting];
             }
@@ -2025,7 +2058,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block BOOL result = false;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:modSetting.beforeString];
+        SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:[modSetting GetBeforeStringForCoreDataSearch]];
         if (coreDataConfig == nil) {
             coreDataConfig = [self CreateNewSpeechModSettingThreadUnsafe:modSetting];
         }
@@ -2048,7 +2081,7 @@ static GlobalDataSingleton* _singleton = nil;
     __block BOOL result = false;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:modSetting.beforeString];
+        SpeechModSetting* coreDataConfig = [self GetSpeechModSettingWithBeforeStringThreadUnsafe:[modSetting GetBeforeStringForCoreDataSearch]];
         if (coreDataConfig == nil) {
             result = false;
         }else{
@@ -3556,7 +3589,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSArray* array = [self GetAllSpeechModSettings];
     NSMutableDictionary* resultDictionary = [NSMutableDictionary new];
     for (SpeechModSettingCacheData* speechMod in array) {
-        [resultDictionary setObject:speechMod.afterString forKey:speechMod.beforeString];
+        [resultDictionary setObject:@{
+          @"afterString": speechMod.afterString,
+          @"type": [[NSNumber alloc] initWithUnsignedInt:speechMod.convertType],
+          } forKey:speechMod.beforeString];
     }
     return resultDictionary;
 }
@@ -3655,7 +3691,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSArray* speechWaitConfigArray = [self CreateSpeechWaitConfigArrayForJSON];
     NSDictionary* miscSettingsDictionary = [self CreateMiscSettingsDictionaryForJSON];
     NSDictionary* backupData = @{
-         @"data_version": @"1.0.0",
+         @"data_version": @"1.1.0",
          @"bookshelf": bookselfArray,
          @"word_replacement_dictionary": speechModDictionary,
          @"web_import_bookmarks": webImportBookmarkArray,
@@ -3977,9 +4013,37 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         if (value == nil) {
             continue;
         }
-        SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
-        speechModSetting.beforeString = key;
-        speechModSetting.afterString = value;
+        SpeechModSettingCacheData* speechModSetting = [[SpeechModSettingCacheData alloc] initWithBeforeString:key afterString:value type:SpeechModSettingConvertType_JustMatch];
+        [mutableArray addObject:speechModSetting];
+    }
+    [self UpdateSpeechModSettingMultiple:mutableArray];
+}
+
+- (void)RestoreBackupFromSpeechModDictionary_V1_1_0:speechModDictionary{
+    NSMutableArray* mutableArray = [NSMutableArray new];
+    for (id keyObj in [speechModDictionary keyEnumerator]) {
+        if (![keyObj isKindOfClass:[NSString class]]) {
+            continue;
+        }
+        NSString* key = keyObj;
+        NSDictionary* data = [NiftyUtility validateNSDictionaryForDictionary:speechModDictionary key:key];
+        if(data == nil){
+            continue;
+        }
+        NSString* value = [NiftyUtility validateNSDictionaryForString:data key:@"afterString"];
+        if (value == nil) {
+            continue;
+        }
+        NSNumber* typeNumber = [NiftyUtility validateNSDictionaryForNumber:data key:@"type"];
+        if (typeNumber == nil) {
+            continue;
+        }
+        NSUInteger type = [typeNumber unsignedIntegerValue];
+        if(type != SpeechModSettingConvertType_JustMatch
+           && type != SpeechModSettingConvertType_Regexp){
+            continue;
+        }
+        SpeechModSettingCacheData* speechModSetting = [[SpeechModSettingCacheData alloc] initWithBeforeString:key afterString:value type:type];
         [mutableArray addObject:speechModSetting];
     }
     [self UpdateSpeechModSettingMultiple:mutableArray];
@@ -4169,6 +4233,94 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return current_reading_content;
 }
 
+- (void)RestoreBackupFromJSONData_V1_0_0:(NSDictionary*)toplevelDictionary dataDirectory:(NSURL*)dataDirectory progress:(void (^)(NSString*))progress{
+    if (progress != nil) {
+        progress(NSLocalizedString(@"GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings", @"工程 1\r\n設定の復元中"));
+    }
+    NSDictionary* speechModDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"word_replacement_dictionary"];
+    if (speechModDictionary != nil) {
+        [self RestoreBackupFromSpeechModDictionary_V1_0_0:speechModDictionary];
+    }
+    NSArray* webImportBookmarkDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"web_import_bookmarks"];
+    if (webImportBookmarkDataArray != nil) {
+        [self RestoreBackupFromWebImportBookmarkArray_V1_0_0:webImportBookmarkDataArray];
+    }
+    NSDictionary* pitchConfigDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"speak_pitch_config"];
+    if (pitchConfigDictionary != nil) {
+        [self RestoreBackupFromSpeakPitchConfigDictionary_V1_0_0:pitchConfigDictionary];
+    }
+    NSArray* speechWaitConfigArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"speech_wait_config"];
+    if (speechWaitConfigArray != nil) {
+        [self RestoreBackupFromSpeechWaitConfigArray_V1_0_0:speechWaitConfigArray];
+    }
+    NSString* currentReadingNcode = nil;
+    NSDictionary* miscSettingsDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"misc_settings"];
+    if (miscSettingsDictionary != nil) {
+        currentReadingNcode = [self RestoreBackupFromMiscSettingsDictionary_V1_0_0:miscSettingsDictionary];
+    }
+    // 本棚は最後に読み込むようにします。
+    NSArray* bookshelfDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"bookshelf"];
+    if (bookshelfDataArray != nil) {
+        [self RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray dataDirectory:dataDirectory progress:progress];
+    }
+    // 最後に読んでいたコンテンツを上書きしておきます(本棚を読み込んだ時に上書きされているので)
+    if (currentReadingNcode != nil) {
+        NarouContentCacheData* content = [self SearchNarouContentFromNcode:currentReadingNcode];
+        if (content != nil && content.currentReadingStory != nil) {
+            [self UpdateReadingPoint:content story:content.currentReadingStory];
+        }
+    }
+    
+    // config が書き換わったことをアナウンスする
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    NSNotification* notification = [NSNotification notificationWithName:@"ConfigReloaded_DisplayUpdateNeeded" object:self userInfo:nil];
+    [notificationCenter postNotification:notification];
+}
+
+- (void)RestoreBackupFromJSONData_V1_1_0:(NSDictionary*)toplevelDictionary dataDirectory:(NSURL*)dataDirectory progress:(void (^)(NSString*))progress{
+    if (progress != nil) {
+        progress(NSLocalizedString(@"GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings", @"工程 1\r\n設定の復元中"));
+    }
+    NSDictionary* speechModDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"word_replacement_dictionary"];
+    if (speechModDictionary != nil) {
+        [self RestoreBackupFromSpeechModDictionary_V1_1_0:speechModDictionary];
+    }
+    NSArray* webImportBookmarkDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"web_import_bookmarks"];
+    if (webImportBookmarkDataArray != nil) {
+        [self RestoreBackupFromWebImportBookmarkArray_V1_0_0:webImportBookmarkDataArray];
+    }
+    NSDictionary* pitchConfigDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"speak_pitch_config"];
+    if (pitchConfigDictionary != nil) {
+        [self RestoreBackupFromSpeakPitchConfigDictionary_V1_0_0:pitchConfigDictionary];
+    }
+    NSArray* speechWaitConfigArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"speech_wait_config"];
+    if (speechWaitConfigArray != nil) {
+        [self RestoreBackupFromSpeechWaitConfigArray_V1_0_0:speechWaitConfigArray];
+    }
+    NSString* currentReadingNcode = nil;
+    NSDictionary* miscSettingsDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"misc_settings"];
+    if (miscSettingsDictionary != nil) {
+        currentReadingNcode = [self RestoreBackupFromMiscSettingsDictionary_V1_0_0:miscSettingsDictionary];
+    }
+    // 本棚は最後に読み込むようにします。
+    NSArray* bookshelfDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"bookshelf"];
+    if (bookshelfDataArray != nil) {
+        [self RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray dataDirectory:dataDirectory progress:progress];
+    }
+    // 最後に読んでいたコンテンツを上書きしておきます(本棚を読み込んだ時に上書きされているので)
+    if (currentReadingNcode != nil) {
+        NarouContentCacheData* content = [self SearchNarouContentFromNcode:currentReadingNcode];
+        if (content != nil && content.currentReadingStory != nil) {
+            [self UpdateReadingPoint:content story:content.currentReadingStory];
+        }
+    }
+    
+    // config が書き換わったことをアナウンスする
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    NSNotification* notification = [NSNotification notificationWithName:@"ConfigReloaded_DisplayUpdateNeeded" object:self userInfo:nil];
+    [notificationCenter postNotification:notification];
+}
+    
 /// JSONData に入っているバックアップを書き戻します。
 /// dataDirectory が指示されていて、かつ、本棚データに content_directory が存在した場合は
 /// ダウンロードせずにそのディレクトリにあるファイル群を章のデータとして読み込みます。
@@ -4190,47 +4342,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     
     if ([dataVersion compare:@"1.0.0"] == NSOrderedSame) {
-        if (progress != nil) {
-            progress(NSLocalizedString(@"GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings", @"工程 1\r\n設定の復元中"));
-        }
-        NSDictionary* speechModDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"word_replacement_dictionary"];
-        if (speechModDictionary != nil) {
-            [self RestoreBackupFromSpeechModDictionary_V1_0_0:speechModDictionary];
-        }
-        NSArray* webImportBookmarkDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"web_import_bookmarks"];
-        if (webImportBookmarkDataArray != nil) {
-            [self RestoreBackupFromWebImportBookmarkArray_V1_0_0:webImportBookmarkDataArray];
-        }
-        NSDictionary* pitchConfigDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"speak_pitch_config"];
-        if (pitchConfigDictionary != nil) {
-            [self RestoreBackupFromSpeakPitchConfigDictionary_V1_0_0:pitchConfigDictionary];
-        }
-        NSArray* speechWaitConfigArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"speech_wait_config"];
-        if (speechWaitConfigArray != nil) {
-            [self RestoreBackupFromSpeechWaitConfigArray_V1_0_0:speechWaitConfigArray];
-        }
-        NSString* currentReadingNcode = nil;
-        NSDictionary* miscSettingsDictionary = [NiftyUtility validateNSDictionaryForDictionary:toplevelDictionary key:@"misc_settings"];
-        if (miscSettingsDictionary != nil) {
-            currentReadingNcode = [self RestoreBackupFromMiscSettingsDictionary_V1_0_0:miscSettingsDictionary];
-        }
-        // 本棚は最後に読み込むようにします。
-        NSArray* bookshelfDataArray = [NiftyUtility validateNSDictionaryForArray:toplevelDictionary key:@"bookshelf"];
-        if (bookshelfDataArray != nil) {
-            [self RestoreBackupFromBookshelfDataArray_V1_0_0:bookshelfDataArray dataDirectory:dataDirectory progress:progress];
-        }
-        // 最後に読んでいたコンテンツを上書きしておきます(本棚を読み込んだ時に上書きされているので)
-        if (currentReadingNcode != nil) {
-            NarouContentCacheData* content = [self SearchNarouContentFromNcode:currentReadingNcode];
-            if (content != nil && content.currentReadingStory != nil) {
-                [self UpdateReadingPoint:content story:content.currentReadingStory];
-            }
-        }
-
-        // config が書き換わったことをアナウンスする
-        NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
-        NSNotification* notification = [NSNotification notificationWithName:@"ConfigReloaded_DisplayUpdateNeeded" object:self userInfo:nil];
-        [notificationCenter postNotification:notification];
+        [self RestoreBackupFromJSONData_V1_0_0:toplevelDictionary dataDirectory:dataDirectory progress:progress];
+    }else if ([dataVersion compare:@"1.1.0"] == NSOrderedSame){
+        [self RestoreBackupFromJSONData_V1_1_0:toplevelDictionary dataDirectory:dataDirectory progress:progress];
     }
 
     return true;
@@ -4287,7 +4401,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         toplevelViewController = [UIViewController toplevelViewController];
     }];
     if (text == nil) {
-        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:toplevelViewController title:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Title", @"PDFのテキスト読み込みに失敗") message:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Body", @"PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPSF読み込み機能は動作しません。") buttonTitle:nil buttonAction:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:toplevelViewController title:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Title", @"PDFのテキスト読み込みに失敗") message:NSLocalizedString(@"GlobalDataSingleton_PDFToStringFailed_Body", @"PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPDF読み込み機能は動作しません。") buttonTitle:nil buttonAction:nil];
         return false;
     }
     NSString* fileName = [url lastPathComponent];
@@ -4412,9 +4526,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             continue;
         }
          */
-        SpeechModSettingCacheData* speechModSetting = [SpeechModSettingCacheData new];
-        speechModSetting.beforeString = key;
-        speechModSetting.afterString = @" ";
+        SpeechModSettingCacheData* speechModSetting = [[SpeechModSettingCacheData alloc] initWithBeforeString:key afterString:@" " type:SpeechModSettingConvertType_JustMatch];
         [self UpdateSpeechModSetting:speechModSetting];
     }
 }

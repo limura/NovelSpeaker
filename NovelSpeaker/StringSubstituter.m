@@ -7,6 +7,7 @@
 //
 
 #import "StringSubstituter.h"
+#import "SpeechModSettingCacheData.h"
 
 /*
  変換用の設定 (変換元(from)と変換先(to))を、ConvertSeting (このファイル内だけの inetrface) に入れて保存して、
@@ -304,6 +305,44 @@
     }
     
     return resultArray;
+}
+
+// 正規表現での読み替え指定について、指定された文字列に対しての読み替え辞書を生成します
++ (NSArray*)FindRegexpSpeechModConfigs:(NSString*)text pattern:(NSString*)pattern to:(NSString*)to {
+    NSMutableArray* returnQueue = [NSMutableArray new];
+    if(pattern == nil || to == nil){
+        return returnQueue;
+    }
+
+    NSError* error = nil;
+    NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&error];
+    if(regexp == nil || error != nil){
+        return returnQueue;
+    }
+    NSMutableDictionary* fromToCache = [NSMutableDictionary new];
+    [regexp enumerateMatchesInString:text options:0 range:NSMakeRange(0, [text length]) usingBlock:^(NSTextCheckingResult * _Nullable result, NSMatchingFlags flags, BOOL * _Nonnull stop) {
+        NSString* target = [text substringWithRange:[result range]];
+        NSUInteger num = [result numberOfRanges];
+        NSMutableString* convertTo = [[NSMutableString alloc] initWithString:to];
+        for(NSUInteger i = 1; i < num; i++){
+            NSRange range = [result rangeAtIndex:(num - i)]; // $10 とかに対応できるように後ろから取得します。
+            if(range.location == NSNotFound){
+                continue;
+            }
+            NSString* from = [[NSString alloc] initWithFormat:@"$%lu", (unsigned long)(num - i)];
+            NSString* to = [text substringWithRange:range];
+            [convertTo replaceOccurrencesOfString:from withString:to options:0 range:NSMakeRange(0, [convertTo length])];
+        }
+        SpeechModSettingCacheData* mod = [[SpeechModSettingCacheData alloc] initWithBeforeString:target afterString:convertTo type:SpeechModSettingConvertType_JustMatch];
+        if([fromToCache objectForKey:mod.beforeString] != nil){
+            // 既に同じ文字列が登録されていたら無視する
+            return;
+        }
+        [fromToCache setObject:mod.afterString forKey:mod.beforeString];
+        [returnQueue addObject:mod];
+    }];
+    
+    return returnQueue;
 }
 
 
