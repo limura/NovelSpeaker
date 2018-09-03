@@ -188,7 +188,7 @@
         }
     }
 
-    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]" pageElement:@"//*[contains(@class,'autopagerize_page_element')]|//*[contains(@itemprop,'articleBody')]" title:@"//title" author:@"" firstPageLink:@"" tag:@""];
+    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]" pageElement:@"//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]" title:@"//title" author:@"" firstPageLink:@"" tag:@""];
     [resultArray addObject:defaultSiteInfo];
     SiteInfo* fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//body" title:@"//title" author:@"" firstPageLink:@"" tag:@""];
     [resultArray addObject:fallbackSiteInfo];
