@@ -55,6 +55,11 @@
     [self UpdateAfterConvertTextField];
     //NSString* sampleText = [[NSString alloc] initWithFormat:NSLocalizedString(@"CreateSpeechModSettingView_ReadItForAAAinBBB", @"%@を%@に読み替えます。"), self.beforeTextField.text, self.afterTextField.text];
     NSString* sampleText = self.afterConvertTextField.text;
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    GlobalStateCacheData* globalState = [globalData GetGlobalState];
+    [m_Speaker SetRate:[globalState.defaultRate floatValue]];
+    [m_Speaker SetPitch:[globalState.defaultPitch floatValue]];
+    [m_Speaker SetVoiceWithIdentifier:[globalData GetVoiceIdentifier]];
     [m_Speaker Speech:sampleText];
 }
 

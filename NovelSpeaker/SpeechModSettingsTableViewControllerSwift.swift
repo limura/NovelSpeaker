@@ -23,6 +23,10 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
         
+        if let globalState = GlobalDataSingleton.getInstance().getGlobalState() {
+            m_Speaker.setPitch(globalState.defaultPitch.floatValue)
+            m_Speaker.setRate(globalState.defaultRate.floatValue)
+        }
         m_Speaker.setVoiceWithIdentifier(GlobalDataSingleton.getInstance().getVoiceIdentifier())
         
         // 追加ボタンとEditボタンと検索ボタンをつけます。
