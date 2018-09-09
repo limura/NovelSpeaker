@@ -165,6 +165,18 @@
         XCTAssertTrue([to compare:toAnswer] == NSOrderedSame);
     }
 }
+- (void)testRegexpSpeechModConfigs_Escape
+{
+    NSString* targetText = @"あいうえお";
+    NSString* pattern = @"(あ)(い)(う)(え)";
+    NSString* to = @"\\$1\\$2\\$3\\\\$1\\\\$2\\\\$3"; // "\$1\$2\$3\\$1\\$2\\$3" になる
+    NSArray* result = [StringSubstituter FindRegexpSpeechModConfigs:targetText pattern:pattern to:to];
+    XCTAssertEqual([result count], 1);
+    SpeechModSettingCacheData* modSetting = result[0];
+    XCTAssertEqual([modSetting.beforeString compare:@"あいうえ"], NSOrderedSame, @"「あいうえ」が発見されていない");
+    NSLog(@"%@ -> %@", modSetting.beforeString, modSetting.afterString);
+    XCTAssertEqual([modSetting.afterString compare:@"$1$2$3\\あ\\い\\う"], NSOrderedSame, @"「あいうえ」が「$1$2$3\\あ\\い\\う」に書き換えようとされていない");
+}
     
 - (void)testRegexpSpeechModConfigs
 {
