@@ -2210,9 +2210,19 @@ static GlobalDataSingleton* _singleton = nil;
 /// CoreData のデータファイルが存在するかどうかを取得します
 - (BOOL)isAliveCoreDataSaveFile
 {
+    NSLog(@"isAliveCoreDataSaveFile");
     return [m_CoreDataObjectHolder isAliveSaveDataFile];
 }
 
+- (BOOL)isAliveOLDSaveDataFile{
+    NSLog(@"isAliveOLDSaveDataFile");
+    return [m_CoreDataObjectHolder isAliveOLDSaveDataFile];
+}
+
+- (BOOL)moveOLDSaveDataFileToNewLocation{
+    NSLog(@"moveOLDSaveDataFileToNewLocation");
+    return [m_CoreDataObjectHolder moveOLDSaveDataFileToNewLocation];
+}
 
 /// フォントサイズ値を実際のフォントのサイズに変換します。
 /// 1 〜 100 までの float で、50 だと 14(default値)、1 だと 1、100 だと200 位になるような曲線でフォントサイズを計算します。
@@ -4359,13 +4369,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         return false;
     }
     __block UIViewController* toplevelViewController = nil;
+    __block BOOL result = false;
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
         toplevelViewController = [UIViewController toplevelViewController];
-    }];
-    BOOL result = [NovelSpeakerBackup parseBackupFileWithUrl:filePath toplevelViewController:toplevelViewController finally:^(BOOL finalResult) {
-        if (finally != nil) {
-            finally(finalResult);
-        }
+        result = [NovelSpeakerBackup parseBackupFileWithUrl:filePath toplevelViewController:toplevelViewController finally:^(BOOL finalResult) {
+            if (finally != nil) {
+                finally(finalResult);
+            }
+        }];
     }];
     return result;
 }
@@ -4468,6 +4479,16 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// です。
 - (BOOL)ProcessCustomFileUTI:(NSURL*)url{
     NSLog(@"ProcessCustomFileUTI in. %@", url);
+    BOOL isSecurityScopeURL = [url startAccessingSecurityScopedResource];
+    NSLog(@"isSecurityScopeURL: %@", isSecurityScopeURL ? @"yes" : @"no");
+    {
+        NSFileManager* fileManager = [NSFileManager defaultManager];
+        if ([fileManager fileExistsAtPath:[url path]]) {
+            NSLog(@"%@ is alive.", url);
+        }else{
+            NSLog(@"%@ is NOT alive.", url);
+        }
+    }
     [BehaviorLogger AddLogWithDescription:@"GobalDataSingleton ProcessCustomFileUTI" data:@{@"url": url == nil ? @"nil": [url absoluteString]}];
     __block UIViewController* toplevelViewController = nil;
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
@@ -4477,12 +4498,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         | [[url pathExtension] isEqualToString:@"novelspeaker-backup+json"]) {
         NSData* data = [NSData dataWithContentsOfURL:url];
         if (data == nil){
+            if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
             return false;
         }
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
             [NiftyUtilitySwift RestoreBackupFromJSONWithProgressDialogWithJsonData:data dataDirectory:nil rootViewController:toplevelViewController];
         });
+        if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
         return true;
     }
     if ([[url pathExtension] isEqualToString:@"novelspeaker-backup+zip"]) {
@@ -4492,26 +4515,36 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [NiftyUtilitySwift EasyDialogOneButtonWithViewController:toplevelViewController title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreFullBackupEnd", @"バックアップデータからの復元を完了しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
                     });
+                    if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
                     return;
                 }
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [NiftyUtilitySwift EasyDialogOneButtonWithViewController:toplevelViewController title:nil message:NSLocalizedString(@"GlobalDataSingleton_RestoreBackupDataFailed", @"バックアップデータの読み込みに失敗しました。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+                    if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
                 });
             }];
         });
         return true;
     }
     if ([[[url pathExtension] lowercaseString] isEqualToString:@"pdf"]) {
-        return [self ImportNovelFromPDFFile:url];
+        BOOL result = [self ImportNovelFromPDFFile:url];
+        if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
+        return result;
     }
     if ([[[url pathExtension] lowercaseString] isEqualToString:@"rtf"]) {
-        return [self ImportNovelFromRTFFile:url];
+        BOOL result = [self ImportNovelFromRTFFile:url];
+        if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
+        return result;
     }
     if ([[[url pathExtension] lowercaseString] isEqualToString:@"rtfd"]) {
-        return [self ImportNovelFromRTFDFile:url];
+        BOOL result = [self ImportNovelFromRTFDFile:url];
+        if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
+        return result;
     }
     // 上記色々と調べた拡張子以外であれば plain-text として読み込む
-    return [self ImportNovelFromFile:url];
+    BOOL result = [self ImportNovelFromFile:url];
+    if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
+    return result;
 }
 
 /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します

@@ -33,7 +33,9 @@ void uncaughtExceptionHandler(NSException *exception)
     // Override point for customization after application launch.
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     if ([globalData isAliveCoreDataSaveFile] == false) {
-        [globalData InsertDefaultSetting];
+        if (![globalData isAliveOLDSaveDataFile] || ![globalData moveOLDSaveDataFileToNewLocation]){
+            [globalData InsertDefaultSetting];
+        }
     }
     
     // background fetch activate
@@ -109,6 +111,8 @@ void uncaughtExceptionHandler(NSException *exception)
     return [globalData ProcessURL:url];
 }
 
+// iOS9 で deprecated になったらしい。
+// https://qiita.com/ShingoFukuyama/items/e85d34360f3f951ca612
 - (BOOL)application:(UIApplication*)application openURL:(NSURL*)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation
 {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];

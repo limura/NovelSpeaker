@@ -40,7 +40,7 @@
 "GlobalDataSingleton_RestoreFullBackupEnd" = "Restoration from backup data has been completed.";
 "GlobalDataSingleton_RestoreingBookProgress" = "Step 2\r\nRestoring novels";
 "GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings" = "Step 1\r\nRestoring settings";
-
+"GlobalDataSingleton_RestoreBackupDataFailed" = "Restore backup data failed.";
 
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "Title: %@";
@@ -283,13 +283,23 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.40
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.41
 
-- Fixed an issue in which the scroll bar of the novel text disappeared when \"Darken the background when reading a novel\" was ON
+- In order to be able to read by regular expression in \"Correction of reading\"
+- To use the standard setting of \"Voice quality setting\" when reading the test in \"Correction of reading\"
+- The internal database storage location has been moved
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.41
+
+Interface change
+- In order to be able to read by regular expression in \"Correction of reading\"
+- To use the standard setting of \"Voice quality setting\" when reading the test in \"Correction of reading\"
+- The internal database storage location has been moved
+
+
 # Version 1.1.40
 
 Bug fix

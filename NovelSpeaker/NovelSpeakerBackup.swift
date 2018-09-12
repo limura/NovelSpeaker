@@ -267,7 +267,7 @@ class NovelSpeakerBackup: NSObject {
                 // print("fileOutput", url)
             }
         }catch let error{
-            print("unzip failed", error)
+            print("unzip failed", error, url)
             DispatchQueue.main.async {
                 dialog.dismiss(animated: false, completion: {
                     if let finally = finally {

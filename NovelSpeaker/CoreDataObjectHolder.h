@@ -48,6 +48,12 @@ typedef enum {
 /// SQLiteのファイルが存在するかどうかを取得します
 - (BOOL)isAliveSaveDataFile;
 
+/// 古いディレクトリにSQLiteのファイルが存在するかどうかを取得します
+- (BOOL)isAliveOLDSaveDataFile;
+
+/// 古いディレクトリにあるSQLiteのファイルを新しいディレクトリに移動します
+- (BOOL)moveOLDSaveDataFileToNewLocation;
+
 /// マイグレーションが必要かどうかを取得します。
 - (BOOL)isNeedMigration;
 

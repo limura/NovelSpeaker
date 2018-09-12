@@ -67,9 +67,82 @@
     if (path == nil) {
         return false;
     }
-    
-    return [[NSFileManager defaultManager] fileExistsAtPath:path];
+
+    BOOL result = [[NSFileManager defaultManager] fileExistsAtPath:path];
+    NSLog(@"isAliveSaveDataFile: %@, %@", result ? @"YES" : @"NO", path);
+    [self isAliveOLDSaveDataFile];
+    return result;
 }
+
+/// 古いディレクトリにSQLiteのファイルが存在するかどうかを取得します
+- (BOOL)isAliveOLDSaveDataFile{
+    NSURL* storeURL = [self GetSqlFileURL_Old];
+    if (storeURL == nil) {
+        return false;
+    }
+    NSString* path = [storeURL path];
+    if (path == nil) {
+        return false;
+    }
+    if(/* DISABLES CODE */ (false)){
+        NSURL* url = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+        NSString* path = [url path];
+        NSError* err = nil;
+        NSArray* pathList = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:&err];
+        NSLog(@"%@ have %lu files:", path, (unsigned long)[pathList count]);
+        for (NSString* path in pathList) {
+            NSLog(@"  %@", path);
+        }
+    }
+    
+    
+    BOOL result = [[NSFileManager defaultManager] fileExistsAtPath:path];
+    NSLog(@"isAliveOLDSaveDataFile: %@, %@", result ? @"YES" : @"NO", path);
+    return result;
+}
+
+/// 古いディレクトリにあるSQLiteのファイルを新しいディレクトリに移動します
+- (BOOL)moveOLDSaveDataFileToNewLocation{
+    NSURL* storeURL = [self GetSqlFileURL_Old];
+    if (storeURL == nil) {
+        return false;
+    }
+    NSString* fromPath = [storeURL path];
+    if (fromPath == nil) {
+        return false;
+    }
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    if(![fileManager fileExistsAtPath:fromPath]){
+        return false;
+    }
+    storeURL = [self GetSqlFileURL];
+    if (storeURL == nil) {
+        return false;
+    }
+    NSString* toPath = [storeURL path];
+    if (toPath == nil) {
+        return false;
+    }
+    if (![self CreateCoreDataDirectory]){
+        return false;
+    }
+    NSArray* fileList = @[@"", @"-shm", @"-wal"];
+    for (NSString* fileTypes in fileList) {
+        NSError* err = nil;
+        NSString* targetFile = [fromPath stringByAppendingString:fileTypes];
+        NSString* toFilePath = [toPath stringByAppendingString:fileTypes];
+        if (![fileManager fileExistsAtPath:targetFile]) {
+            continue;
+        }
+        BOOL moveResult = [fileManager moveItemAtPath:targetFile toPath:toFilePath error:&err];
+        if (moveResult == false && [fileTypes compare:@""] == NSOrderedSame) {
+            return false;
+        }
+    }
+    NSLog(@"moveOLDSaveDataFileToNewLocation success.");
+    return true;
+}
+
 
 /// マイグレーションが必要かどうかを取得します。
 - (BOOL)isNeedMigration
@@ -176,7 +249,7 @@
     
     switch (m_FolderType) {
         case DOCUMENTS_FOLDER_TYPE:
-            directoryURL = [[fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+            directoryURL = [[fileManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask] lastObject];
             break;
         case CACHE_FOLDER_TYPE:
             directoryURL = [[fileManager URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] lastObject];
@@ -189,6 +262,17 @@
     // フォルダを追加したい場合はこのようにします。
     // [directoryURL URLByAppendingPathComponent:m_SaveFolderName];
     return directoryURL;
+}
+
+- (NSURL*)GetSqlFileURL_Old
+{
+    NSURL* storeDirectoryURL = [self GetStoreDirectoryURL];
+    if (m_FolderType == DOCUMENTS_FOLDER_TYPE) {
+        NSFileManager* fileManager = [NSFileManager defaultManager];
+        storeDirectoryURL = [[fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+    }
+    
+    return [[storeDirectoryURL URLByAppendingPathComponent:m_FileName] URLByAppendingPathExtension:@"sqlite"];
 }
 
 - (NSURL*)GetSqlFileURL
