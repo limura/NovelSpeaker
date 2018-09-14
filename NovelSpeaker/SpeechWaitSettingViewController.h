@@ -29,5 +29,6 @@
 @property (weak, nonatomic) IBOutlet UITextField *SampleSpeechTextField;
 - (IBAction)SampleSpeechButtonClicked:(id)sender;
 - (IBAction)inputTextFieldChanged:(id)sender;
+- (IBAction)textFieldDidEndOnExit:(id)sender;
 
 @end

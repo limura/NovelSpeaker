@@ -1684,6 +1684,19 @@ Interface change
 - To use the standard setting of "Voice quality setting" when reading the test in "Correction of reading"
 - The internal database storage location has been moved
 
+# Version 1.1.42
+
+インタフェースの変更
+
+- キーボードが出るシーンにおいて、キーボードが閉じられない場合があったのを改行を入れるなどで閉じられるように変更
+
+# Version 1.1.42
+
+Interface change
+
+- In the scene where the keyboard comes out, the keyboard may not be closed In some cases it is changed so that it can be closed by putting a line feed etc.
+
+
 TODO
 
 - DispatchQueue.main.sync {...} を main thread では単なるblockの実行だけにした辺りで、blockされているような挙動が見当たるようになったような気が……何故だ(´・ω・`)

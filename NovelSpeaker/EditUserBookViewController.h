@@ -36,4 +36,5 @@
 - (IBAction)ChapterSlidebarValueChanged:(id)sender;
 - (IBAction)AddChapterButtonClicked:(id)sender;
 - (IBAction)DelChapterButtonClicked:(id)sender;
+- (IBAction)uiTextFieldDidEndOnExit:(id)sender;
 @end

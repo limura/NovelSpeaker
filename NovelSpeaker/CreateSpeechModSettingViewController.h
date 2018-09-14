@@ -27,4 +27,6 @@
 @property (weak, nonatomic) IBOutlet UISwitch *regexpSwitch;
 @property (weak, nonatomic) IBOutlet UITextField *prevConvertTextField;
 @property (weak, nonatomic) IBOutlet UITextField *afterConvertTextField;
+- (IBAction)uiTextFieldDidEndOnExit:(id)sender;
+- (IBAction)viewTapEvent:(id)sender;
 @end

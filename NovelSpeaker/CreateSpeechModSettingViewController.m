@@ -119,4 +119,11 @@
 }
 */
 
+- (IBAction)uiTextFieldDidEndOnExit:(id)sender {
+    [sender resignFirstResponder];
+}
+- (IBAction)viewTapEvent:(id)sender {
+    NSLog(@"viewTapEvent.");
+    [self.view endEditing:true];
+}
 @end

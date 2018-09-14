@@ -281,11 +281,17 @@
                                 <rect key="frame" x="20" y="83" width="335" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="uiTextFieldDidEndOnExit:" destination="kSq-hq-E9G" eventType="editingDidEndOnExit" id="cgp-MB-wVg"/>
+                                </connections>
                             </textField>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="7kv-GD-fng">
                                 <rect key="frame" x="20" y="150" width="335" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="uiTextFieldDidEndOnExit:" destination="kSq-hq-E9G" eventType="editingDidEndOnExit" id="Ls0-2y-GRC"/>
+                                </connections>
                             </textField>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="から" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Hd-Nn-nzI">
                                 <rect key="frame" x="20" y="121" width="35" height="20.5"/>
@@ -332,6 +338,9 @@
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="uiTextFieldDidEndOnExit:" destination="kSq-hq-E9G" eventType="editingDidEndOnExit" id="SGU-Hl-6U0"/>
+                                </connections>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="TW3-rn-Z4n">
                                 <rect key="frame" x="20" y="356" width="335" height="30"/>
@@ -357,6 +366,7 @@
                             </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="Kyj-Nq-aQn" firstAttribute="leading" secondItem="cIY-9F-MLx" secondAttribute="leading" id="17d-Mj-lJK"/>
                             <constraint firstAttribute="trailing" secondItem="cIY-9F-MLx" secondAttribute="trailing" constant="20" id="2Ls-pm-Jke"/>
@@ -389,6 +399,9 @@
                             <constraint firstItem="0Lz-2c-zLQ" firstAttribute="top" secondItem="TW3-rn-Z4n" secondAttribute="bottom" constant="8" id="xtM-LS-Mdk"/>
                             <constraint firstItem="YNA-4h-iVb" firstAttribute="trailing" secondItem="cIY-9F-MLx" secondAttribute="trailing" id="yw9-wT-RZU"/>
                         </constraints>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="LtW-ej-4qe" appends="YES" id="bSD-4z-TUw"/>
+                        </connections>
                     </view>
                     <navigationItem key="navigationItem" title="読みの修正詳細" id="jOk-mr-1xo"/>
                     <connections>
@@ -400,6 +413,11 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Qga-R3-4OQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="LtW-ej-4qe">
+                    <connections>
+                        <action selector="viewTapEvent:" destination="kSq-hq-E9G" id="3G3-uU-OZy"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1420.5" y="1617.5"/>
         </scene>
@@ -786,6 +804,7 @@ SOFTWARE.
                                 <textInputTraits key="textInputTraits"/>
                                 <connections>
                                     <action selector="inputTextFieldChanged:" destination="C7M-ZK-1Ak" eventType="editingChanged" id="vwK-NL-PLK"/>
+                                    <action selector="textFieldDidEndOnExit:" destination="C7M-ZK-1Ak" eventType="editingDidEndOnExit" id="pAC-8V-ehZ"/>
                                 </connections>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="読み上げテスト用文字列" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Dls-qY-Z7E">
@@ -798,6 +817,9 @@ SOFTWARE.
                                 <rect key="frame" x="8" y="233.5" width="359" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="textFieldDidEndOnExit:" destination="C7M-ZK-1Ak" eventType="editingDidEndOnExit" id="C5P-b0-em4"/>
+                                </connections>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lda-DN-gyF">
                                 <rect key="frame" x="8" y="168" width="39" height="30"/>
@@ -1366,6 +1388,9 @@ SOFTWARE.
                                 <rect key="frame" x="57.5" y="77" width="252.5" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <action selector="uiTextFieldDidEndOnExit:" destination="dCR-kh-Ivz" eventType="editingDidEndOnExit" id="DuT-EY-Nzi"/>
+                                </connections>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hYi-6O-tpR">
                                 <rect key="frame" x="16" y="81" width="33.5" height="22"/>

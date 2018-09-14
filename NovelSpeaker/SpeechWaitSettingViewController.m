@@ -183,4 +183,8 @@
 - (IBAction)inputTextFieldChanged:(id)sender {
     [self UpdateSpeechTestTextBox:self.inputTextField.text];
 }
+
+- (IBAction)textFieldDidEndOnExit:(id)sender {
+    [sender resignFirstResponder];
+}
 @end

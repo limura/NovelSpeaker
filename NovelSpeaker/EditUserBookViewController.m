@@ -400,6 +400,10 @@
         }];
 }
 
+- (IBAction)uiTextFieldDidEndOnExit:(id)sender {
+    [sender resignFirstResponder];
+}
+
 
 
 // フォントサイズあたり

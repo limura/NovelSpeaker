@@ -31,5 +31,6 @@
 @property (nonatomic) UIPickerView *SearchOrderPickerView;
 @property (nonatomic) UIToolbar* KeyboardToolbar;
 @property (weak, nonatomic) IBOutlet UITextField *SearchOrderTextBox;
+@property (strong, nonatomic) UITapGestureRecognizer *singleTap;
 
 @end

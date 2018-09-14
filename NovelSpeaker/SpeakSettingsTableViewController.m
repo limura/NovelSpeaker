@@ -32,6 +32,8 @@
 {
     [super viewDidLoad];
     [BehaviorLogger AddLogWithDescription:@"SpeakSettingsTableViewController viewDidLoad" data:@{}];
+    
+    self.tableView.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
 
     // 追加ボタンとEditボタンをつけます。
     UIBarButtonItem* addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonClicked)];

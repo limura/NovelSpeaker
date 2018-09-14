@@ -31,6 +31,12 @@
     m_SearchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.search", DISPATCH_QUEUE_SERIAL);
     self.SearchTextBox.delegate = self;
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
+    
+    // キーボードを閉じるためにシングルタップのイベントを取るようにします
+    self.singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onSingleTap:)];
+    self.singleTap.delegate = self;
+    self.singleTap.numberOfTapsRequired = 1;
+    [self.view addGestureRecognizer:self.singleTap];
 
     [self SetSearchOrderTargets];
     
@@ -70,6 +76,10 @@
     [self CreateInitializeObjects];
 }
 
+/// シングルタップのイベントハンドラ
+-(void)onSingleTap:(UITapGestureRecognizer *)recognizer {
+    [self.view endEditing:true];
+}
 // 検索オーダーのリストを作ります
 - (void)SetSearchOrderTargets
 {
