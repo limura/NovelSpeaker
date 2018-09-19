@@ -30,8 +30,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
         m_Speaker.setVoiceWithIdentifier(GlobalDataSingleton.getInstance().getVoiceIdentifier())
         
         // 追加ボタンとEditボタンと検索ボタンをつけます。
-        let addButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonSystemItem.add, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.addButtonClicked))
-        let filterButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonSystemItem.search, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.filterButtonClicked))
+        let addButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.add, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.addButtonClicked))
+        let filterButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.search, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.filterButtonClicked))
         navigationItem.rightBarButtonItems = [addButton, editButtonItem, filterButton]
     }
     
@@ -77,7 +77,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
         var cell = tableView.dequeueReusableCell(withIdentifier: SpeechModSettingsTableViewControllerSwift.speechModSettingsTableViewDefaultCellID, for: indexPath)
 
         if cell == nil {
-            cell = UITableViewCell.init(style: UITableViewCellStyle.default, reuseIdentifier: SpeechModSettingsTableViewControllerSwift.speechModSettingsTableViewDefaultCellID)
+            cell = UITableViewCell.init(style: UITableViewCell.CellStyle.default, reuseIdentifier: SpeechModSettingsTableViewControllerSwift.speechModSettingsTableViewDefaultCellID)
         }
 
         let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)
@@ -97,16 +97,16 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
 
     // スワイプでは削除させない
     // from http://codingcafe.jp/uitableview%E3%81%A7%E3%82%B9%E3%83%AF%E3%82%A4%E3%83%97%E5%89%8A%E9%99%A4%E3%82%92%E7%84%A1%E5%8A%B9%E3%81%AB/
-    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
+    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
         if self.isEditing {
-            return UITableViewCellEditingStyle.delete
+            return UITableViewCell.EditingStyle.delete
         }else{
-            return UITableViewCellEditingStyle.none
+            return UITableViewCell.EditingStyle.none
         }
     }
 
     // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
             let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)

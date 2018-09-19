@@ -679,6 +679,7 @@ typedef enum {
 
 #pragma mark -
 #pragma mark Interruption event handling
+/*
 // 電話がかかってきたなどで再生中止したときの処理(再生は既に中止されている)
 - (void)beginInterruption
 {
@@ -694,6 +695,7 @@ typedef enum {
     }
     [self StartSpeech];
 }
+ */
 
 /// 読み上げ設定を初期化します
 - (void)ClearSpeakSettings

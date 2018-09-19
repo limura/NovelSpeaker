@@ -15,7 +15,7 @@
 /// 「イイカンジ」の読み上げclass
 /// 与えられた文字列を、読み上げの声色や区切り毎で分割した
 /// SpeechBlock の配列に変換してから読み上げを行う。
-@interface NiftySpeaker : NSObject<SpeakRangeDelegate, AVAudioSessionDelegate>
+@interface NiftySpeaker : NSObject<SpeakRangeDelegate>
 {
     /// 読み上げ用object
     Speaker* m_Speaker;

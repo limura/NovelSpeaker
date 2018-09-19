@@ -68,10 +68,10 @@ fileprivate func applyLine(to view: UIView, on side: Side, color: UIColor = UICo
         } else {
             // Fallback on earlier versions
             NSLayoutConstraint.activate([
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.top, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.top, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.right, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.right, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.left, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.left, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1.0, constant: 0.5)
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.top, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.top, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.height, multiplier: 1.0, constant: 0.5)
             ])
         }
     case .right:
@@ -83,10 +83,10 @@ fileprivate func applyLine(to view: UIView, on side: Side, color: UIColor = UICo
                 line.widthAnchor.constraint(equalToConstant: 0.5)])
         } else {
             NSLayoutConstraint.activate([
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.top, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.top, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.bottom, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.right, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.right, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1.0, constant: 0.5)
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.top, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.top, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.width, multiplier: 1.0, constant: 0.5)
                 ])
         }
     case .bottom:
@@ -98,10 +98,10 @@ fileprivate func applyLine(to view: UIView, on side: Side, color: UIColor = UICo
                 line.heightAnchor.constraint(equalToConstant: 0.5)])
         } else {
             NSLayoutConstraint.activate([
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.bottom, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.right, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.right, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.left, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.left, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1.0, constant: 0.5)
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.height, multiplier: 1.0, constant: 0.5)
                 ])
         }
     case .left:
@@ -113,10 +113,10 @@ fileprivate func applyLine(to view: UIView, on side: Side, color: UIColor = UICo
                 line.widthAnchor.constraint(equalToConstant: 0.5)])
         } else {
             NSLayoutConstraint.activate([
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.top, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.top, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.bottom, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.left, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.left, multiplier: 1.0, constant: 0),
-                NSLayoutConstraint.init(item: line, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.width, multiplier: 1.0, constant: 0.5)
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.top, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.top, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1.0, constant: 0),
+                NSLayoutConstraint.init(item: line, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.width, multiplier: 1.0, constant: 0.5)
                 ])
         }
     }
@@ -179,7 +179,7 @@ public class EasyDialog: UIViewController {
         let action: (EasyDialog) -> ()
         weak var dialog: EasyDialog? = nil
         
-        init(sender: UIControl, action: @escaping (EasyDialog) -> (), event: UIControlEvents = .touchUpInside) {
+        init(sender: UIControl, action: @escaping (EasyDialog) -> (), event: UIControl.Event = .touchUpInside) {
             self.sender = sender
             self.action = action
             sender.addTarget(self, action: #selector(actionPerformed), for: event)
@@ -270,7 +270,7 @@ public class EasyDialog: UIViewController {
             return self
         }
         
-        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextBorderStyle = .none) -> Self {
+        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextField.BorderStyle = .none) -> Self {
             let textField = EasyDialogCustomUITextField()
             textField.placeholder = placeholder
             textField.text = content
@@ -333,7 +333,7 @@ public class EasyDialog: UIViewController {
             } else {
                 // Fallback on earlier versions
                 NSLayoutConstraint.activate([
-                    NSLayoutConstraint(item: view, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1.0, constant: size)
+                    NSLayoutConstraint(item: view, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.height, multiplier: 1.0, constant: size)
                 ])
             }
             views.append(view)
@@ -374,7 +374,7 @@ public class EasyDialog: UIViewController {
             dialog.baseView = baseView
             dialog.views = views
             dialog.forTextViewConstraintArray = []
-            dialog.forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: 0)
+            dialog.forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: dialog.view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: 0)
             
             baseView.backgroundColor = theme.alertBackgroudColor
             baseView.translatesAutoresizingMaskIntoConstraints = false
@@ -393,10 +393,10 @@ public class EasyDialog: UIViewController {
             } else {
                 // Fallback on earlier versions
                 NSLayoutConstraint.activate([
-                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.leading, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.leading, multiplier: 1.0, constant: 24),
-                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.trailing, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.trailing, multiplier: 1.0, constant: -24),
-                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.greaterThanOrEqual, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1.0, constant: 1),
-                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.centerX, multiplier: 1.0, constant: 0),
+                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.leading, relatedBy: NSLayoutConstraint.Relation.equal, toItem: dialog.view, attribute: NSLayoutConstraint.Attribute.leading, multiplier: 1.0, constant: 24),
+                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.trailing, relatedBy: NSLayoutConstraint.Relation.equal, toItem: dialog.view, attribute: NSLayoutConstraint.Attribute.trailing, multiplier: 1.0, constant: -24),
+                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.greaterThanOrEqual, toItem: nil, attribute: NSLayoutConstraint.Attribute.height, multiplier: 1.0, constant: 1),
+                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerX, relatedBy: NSLayoutConstraint.Relation.equal, toItem: dialog.view, attribute: NSLayoutConstraint.Attribute.centerX, multiplier: 1.0, constant: 0),
                     //NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: 0)
                     dialog.forKeyboardConstraint
                     ])
@@ -441,10 +441,10 @@ public class EasyDialog: UIViewController {
                             view.centerXAnchor.constraint(equalTo: baseView.centerXAnchor)])
                     } else {
                         NSLayoutConstraint.activate([
-                            NSLayoutConstraint.init(item: view, attribute: NSLayoutAttribute.top, relatedBy: NSLayoutRelation.equal, toItem: pv, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: constant),
-                            NSLayoutConstraint.init(item: view, attribute: NSLayoutAttribute.leading, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.leading, multiplier: 1.0, constant: sideInset),
-                            NSLayoutConstraint.init(item: view, attribute: NSLayoutAttribute.trailing, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.trailing, multiplier: 1.0, constant: sideInset),
-                            NSLayoutConstraint.init(item: view, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.centerX, multiplier: 1.0, constant: 0)
+                            NSLayoutConstraint.init(item: view, attribute: NSLayoutConstraint.Attribute.top, relatedBy: NSLayoutConstraint.Relation.equal, toItem: pv, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1.0, constant: constant),
+                            NSLayoutConstraint.init(item: view, attribute: NSLayoutConstraint.Attribute.leading, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.leading, multiplier: 1.0, constant: sideInset),
+                            NSLayoutConstraint.init(item: view, attribute: NSLayoutConstraint.Attribute.trailing, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.trailing, multiplier: 1.0, constant: sideInset),
+                            NSLayoutConstraint.init(item: view, attribute: NSLayoutConstraint.Attribute.centerX, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.centerX, multiplier: 1.0, constant: 0)
                             ])
                     }
                 } else {
@@ -456,10 +456,10 @@ public class EasyDialog: UIViewController {
                             view.centerXAnchor.constraint(equalTo: baseView.centerXAnchor)])
                     } else {
                         NSLayoutConstraint.activate([
-                            NSLayoutConstraint.init(item: view, attribute: NSLayoutAttribute.top, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.top, multiplier: 1.0, constant: 24),
-                            NSLayoutConstraint.init(item: view, attribute: NSLayoutAttribute.leading, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.leading, multiplier: 1.0, constant: sideInset),
-                            NSLayoutConstraint.init(item: view, attribute: NSLayoutAttribute.trailing, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.trailing, multiplier: 1.0, constant: sideInset),
-                            NSLayoutConstraint.init(item: view, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.centerX, multiplier: 1.0, constant: 0),
+                            NSLayoutConstraint.init(item: view, attribute: NSLayoutConstraint.Attribute.top, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.top, multiplier: 1.0, constant: 24),
+                            NSLayoutConstraint.init(item: view, attribute: NSLayoutConstraint.Attribute.leading, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.leading, multiplier: 1.0, constant: sideInset),
+                            NSLayoutConstraint.init(item: view, attribute: NSLayoutConstraint.Attribute.trailing, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.trailing, multiplier: 1.0, constant: sideInset),
+                            NSLayoutConstraint.init(item: view, attribute: NSLayoutConstraint.Attribute.centerX, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.centerX, multiplier: 1.0, constant: 0),
 
                             ])
                     }
@@ -503,17 +503,17 @@ public class EasyDialog: UIViewController {
                         right.widthAnchor.constraint(equalTo: left.widthAnchor)])
                 } else {
                     NSLayoutConstraint.activate([
-                        NSLayoutConstraint.init(item: left, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1.0, constant: 44),
-                        NSLayoutConstraint.init(item: left, attribute: NSLayoutAttribute.top, relatedBy: NSLayoutRelation.equal, toItem: topView, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: 24),
-                        NSLayoutConstraint.init(item: left, attribute: NSLayoutAttribute.leading, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.leading, multiplier: 1.0, constant: 0),
-                        NSLayoutConstraint.init(item: left, attribute: NSLayoutAttribute.trailing, relatedBy: NSLayoutRelation.equal, toItem: right, attribute: NSLayoutAttribute.leading, multiplier: 1.0, constant: 0),
-                        NSLayoutConstraint.init(item: left, attribute: NSLayoutAttribute.bottom, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: 0)
+                        NSLayoutConstraint.init(item: left, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.height, multiplier: 1.0, constant: 44),
+                        NSLayoutConstraint.init(item: left, attribute: NSLayoutConstraint.Attribute.top, relatedBy: NSLayoutConstraint.Relation.equal, toItem: topView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1.0, constant: 24),
+                        NSLayoutConstraint.init(item: left, attribute: NSLayoutConstraint.Attribute.leading, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.leading, multiplier: 1.0, constant: 0),
+                        NSLayoutConstraint.init(item: left, attribute: NSLayoutConstraint.Attribute.trailing, relatedBy: NSLayoutConstraint.Relation.equal, toItem: right, attribute: NSLayoutConstraint.Attribute.leading, multiplier: 1.0, constant: 0),
+                        NSLayoutConstraint.init(item: left, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1.0, constant: 0)
                         ])
                     NSLayoutConstraint.activate([
-                        NSLayoutConstraint.init(item: right, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1.0, constant: 44),
-                        NSLayoutConstraint.init(item: right, attribute: NSLayoutAttribute.top, relatedBy: NSLayoutRelation.equal, toItem: topView, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: 24),
-                        NSLayoutConstraint.init(item: right, attribute: NSLayoutAttribute.trailing, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.trailing, multiplier: 1.0, constant: 0),
-                        NSLayoutConstraint.init(item: right, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: left, attribute: NSLayoutAttribute.width, multiplier: 1.0, constant: 0),
+                        NSLayoutConstraint.init(item: right, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.height, multiplier: 1.0, constant: 44),
+                        NSLayoutConstraint.init(item: right, attribute: NSLayoutConstraint.Attribute.top, relatedBy: NSLayoutConstraint.Relation.equal, toItem: topView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1.0, constant: 24),
+                        NSLayoutConstraint.init(item: right, attribute: NSLayoutConstraint.Attribute.trailing, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.trailing, multiplier: 1.0, constant: 0),
+                        NSLayoutConstraint.init(item: right, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: left, attribute: NSLayoutConstraint.Attribute.width, multiplier: 1.0, constant: 0),
                         ])
                 }
                 
@@ -524,7 +524,7 @@ public class EasyDialog: UIViewController {
                         button.heightAnchor.constraint(equalToConstant: 44.0).isActive = true
                     } else {
                         NSLayoutConstraint.activate([
-                            NSLayoutConstraint.init(item: button, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.height, multiplier: 1.0, constant: 44)
+                            NSLayoutConstraint.init(item: button, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.height, multiplier: 1.0, constant: 44)
                             ])
                     }
                     addViewToBaseView(view: button, index: views.count + index + 1, sideInset: 0)
@@ -534,7 +534,7 @@ public class EasyDialog: UIViewController {
                 } else {
                     if(previousView != nil) {
                         NSLayoutConstraint.activate([
-                            NSLayoutConstraint.init(item: previousView!, attribute: NSLayoutAttribute.bottom, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: 0)
+                            NSLayoutConstraint.init(item: previousView!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1.0, constant: 0)
                             ])
                     }
                 }
@@ -544,7 +544,7 @@ public class EasyDialog: UIViewController {
                 } else {
                     if(previousView != nil){
                         NSLayoutConstraint.activate([
-                            NSLayoutConstraint.init(item: previousView!, attribute: NSLayoutAttribute.bottom, relatedBy: NSLayoutRelation.equal, toItem: baseView, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: -24)
+                            NSLayoutConstraint.init(item: previousView!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: baseView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1.0, constant: -24)
                         ])
                     }
                 }
@@ -575,14 +575,14 @@ public class EasyDialog: UIViewController {
     // キーボードが開いた時にかなりあやしい感じでウィンドウのサイズを変更します。
     func keyboardWillShow(notification:Notification){
         if let dic = notification.userInfo {
-            if let value = dic[UIKeyboardFrameEndUserInfoKey] as? NSValue {
+            if let value = dic[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
                 // キーボードが出てきたときに余った表示領域の高さを手に入れます
                 let height = UIScreen.main.bounds.height - value.cgRectValue.minY
                 if forKeyboardConstraint != nil {
                     NSLayoutConstraint.deactivate([forKeyboardConstraint])
                 }
                 // 新しい中央の場所をそれっぽく設定します
-                forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: -height / 2)
+                forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: -height / 2)
                 NSLayoutConstraint.activate([forKeyboardConstraint])
                 // TextView は「ユーザが思い描いた感じで画面の大半を専有している」と仮定して、
                 // その高さを縮めないとキーボードを表示したために画面外に追いやられる部分がある、と思い込んで、
@@ -607,7 +607,7 @@ public class EasyDialog: UIViewController {
                     }
                 }
                 NSLayoutConstraint.activate(forTextViewConstraintArray)
-                if let duration = dic[UIKeyboardAnimationDurationUserInfoKey] as? TimeInterval {
+                if let duration = dic[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval {
                     UIView.animate(withDuration: duration, animations: {
                         self.view.layoutIfNeeded()
                     })
@@ -620,7 +620,7 @@ public class EasyDialog: UIViewController {
             if forKeyboardConstraint != nil {
                 NSLayoutConstraint.deactivate([forKeyboardConstraint])
             }
-            forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: 0)
+            forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: 0)
             NSLayoutConstraint.activate([forKeyboardConstraint])
             if forTextViewConstraintArray != nil {
                 NSLayoutConstraint.deactivate(forTextViewConstraintArray)
@@ -634,7 +634,7 @@ public class EasyDialog: UIViewController {
                 }
             }
             NSLayoutConstraint.activate(forTextViewConstraintArray)
-            if let duration = dic[UIKeyboardAnimationDurationUserInfoKey] as? TimeInterval {
+            if let duration = dic[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval {
                 UIView.animate(withDuration: duration, animations: {
                     self.view.layoutIfNeeded()
                 })
@@ -645,10 +645,10 @@ public class EasyDialog: UIViewController {
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(forName: NSNotification.Name.UIKeyboardWillShow, object: nil, queue: OperationQueue.main) { notification in
+        notificationCenter.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: OperationQueue.main) { notification in
             self.keyboardWillShow(notification: notification)
         }
-        notificationCenter.addObserver(forName: NSNotification.Name.UIKeyboardWillHide, object: nil, queue: OperationQueue.main) { notification in
+        notificationCenter.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: OperationQueue.main) { notification in
             self.keyboardWillHide(notification: notification)
         }
     }

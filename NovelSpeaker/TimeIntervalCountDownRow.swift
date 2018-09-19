@@ -13,7 +13,7 @@ open class TimeIntervalCell: Cell<TimeInterval>, CellType {
     
     public var datePicker: UIDatePicker
     
-    public required init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    public required init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         datePicker = UIDatePicker()
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
