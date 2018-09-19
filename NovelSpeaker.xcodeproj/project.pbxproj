@@ -120,7 +120,6 @@
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
-		21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
 		21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F9196037BB009658B7 /* AVFoundation.framework */; };
 		21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
@@ -1323,7 +1322,6 @@
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
 				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
-				21B53956196010FD009658B7 /* SettingDataModel.xcdatamodeld in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
