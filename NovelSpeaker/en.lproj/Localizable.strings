@@ -283,13 +283,22 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.42
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.43
 
-- In the scene where the keyboard comes out, the keyboard may not be closed In some cases it is changed so that it can be closed by putting a line feed etc.
+- Added setting using several regular expressions in standard replacement dictionary
+- In iOS 12, the display position of the character being read aloud may be incorrect Temporary coping with the problem
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.43
+
+Interface change
+
+- Added setting using several regular expressions in standard replacement dictionary
+- In iOS 12, the display position of the character being read aloud may be incorrect Temporary coping with the problem
+
+
 # Version 1.1.42
 
 Interface change
