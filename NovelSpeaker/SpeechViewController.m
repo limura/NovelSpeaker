@@ -422,6 +422,7 @@
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        [self.textView select:self];
         self.textView.selectedRange = NSMakeRange(0, 0);
     }];
     //self.textView.selectedRange = NSMakeRange(0, 0);
@@ -439,6 +440,7 @@
     story.readLocation = [[NSNumber alloc] initWithInt:0];
     [self UpdateCurrentReadingStory:story];
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        [self.textView select:self];
         self.textView.selectedRange = NSMakeRange(0, 0);
     }];
     //self.textView.selectedRange = NSMakeRange(0, 0);
@@ -509,7 +511,10 @@
     
     // 読み上げ位置を設定します
 #if 0 // 読み上げ位置を textView から取ってくると、textView が消えている事があって、selectedRange が 0,0 を返す事があるので信用しないことにします
-    NSRange range = self.textView.selectedRange;
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        [self.textView select:self];
+        NSRange range = self.textView.selectedRange;
+    }];
     [[GlobalDataSingleton GetInstance] SetSpeechRange:range];
     NSLog(@"SaveCurrentReadingPoint: %@", __func__);
     [self SaveCurrentReadingPoint];
@@ -574,6 +579,7 @@
                     readLocation = 0;
                 }
             }
+            [self.textView select:self];
             self.textView.selectedRange = NSMakeRange(readLocation, 1);
             [self TextViewScrollTo:readLocation];
         }
@@ -704,9 +710,14 @@
 /// 読み上げ位置が更新されたとき
 - (void) willSpeakRange:(NSRange)range speakText:(NSString*)text
 {
+    //NSLog(@"SpeechViewController: willSpeakRange: %lu", (unsigned long)range.location);
     m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:range.location];
-    self.textView.selectedRange = range;
-    [self TextViewScrollTo:range.location];
+    
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        [self.textView select:self];
+        self.textView.selectedRange = range;
+        [self TextViewScrollTo:range.location];
+    }];
 }
 
 /// 指定された章の先頭に巻き戻します
@@ -721,7 +732,10 @@
         result = false;
     }
     [self ChangeChapterWithLastestReadLocation:chapterNumber];
-    self.textView.selectedRange = NSMakeRange(0, 0);
+    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+        [self.textView select:self];
+        self.textView.selectedRange = NSMakeRange(0, 0);
+    }];
     [self SaveCurrentReadingPoint];
     return true;
 }
