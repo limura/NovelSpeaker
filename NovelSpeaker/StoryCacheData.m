@@ -19,7 +19,7 @@
     }
    
     self.chapter_number = coreDataStory.chapter_number;
-    self.content = [coreDataStory.content stringByReplacingOccurrencesOfString:@"\u2028" withString:@"\n"];
+    self.content = coreDataStory.content;
     self.ncode = coreDataStory.ncode;
     self.readLocation = coreDataStory.readLocation;
     
@@ -29,7 +29,7 @@
 - (BOOL)AssignToCoreData: (Story*)coreDataStory
 {
     coreDataStory.chapter_number = self.chapter_number;
-    coreDataStory.content = [self.content stringByReplacingOccurrencesOfString:@"\u2028" withString:@"\n"];
+    coreDataStory.content = self.content;
     coreDataStory.ncode = self.ncode;
     coreDataStory.readLocation = self.readLocation;
     

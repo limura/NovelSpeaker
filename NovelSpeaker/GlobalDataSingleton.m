@@ -1553,6 +1553,20 @@ static GlobalDataSingleton* _singleton = nil;
     }
 }
 
+- (void)ApplySpeechModConfigForSpeechRecognizerBugEscape:(NiftySpeaker*)niftySpeaker {
+    NSDictionary* convertTable = @{
+       @"　": @"  " // "　"(全角スペース) を読み上げさせると読み上げ位置が更新されない(iOS 12 から)
+       , @"\u2028": @"\n" // "\u2028"(LINE SEPARATOR)を読み上げさせると読み上げ位置が更新されない(iOS 12 から)   };
+   };
+   for (NSString* before in [convertTable keyEnumerator]) {
+       NSString* after = [convertTable objectForKey:before];
+       if (before == nil || after == nil) {
+           continue;
+       }
+       [niftySpeaker AddSpeechModText:before to:after];
+   }
+}
+
 /// 読み上げ設定を読み直します。
 - (BOOL)ReloadSpeechSetting
 {
@@ -1643,6 +1657,7 @@ static GlobalDataSingleton* _singleton = nil;
         [self ApplyRemoveURIModConfigWithText:m_NiftySpeaker text:story.content];
     }
     [self ApplySpeechModConfigForRegexp:m_NiftySpeaker targetText:story.content];
+    [self ApplySpeechModConfigForSpeechRecognizerBugEscape:m_NiftySpeaker];
     
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
@@ -4557,9 +4572,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
 - (void)ForceOverrideHungSpeakStringToSpeechModSettings{
-    NSArray* targetStrings = @[@"*"];
+    NSDictionary* targetStrings = @{
+        @"*": @" " // "*" が連続しているのを読み上げさせると落ちる
+        };
     
-    for (NSString* key in targetStrings) {
+    for (NSString* key in [targetStrings keyEnumerator]) {
         // 既に読み替え辞書に登録されているのなら何もしない
         /* 2018/05/10 読み替え辞書に登録されていてもハングする人が居るようなので、書き換えは強制にします
         SpeechModSettingCacheData* setting = [self GetSpeechModSettingWithBeforeString:key];
@@ -4567,7 +4584,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             continue;
         }
          */
-        SpeechModSettingCacheData* speechModSetting = [[SpeechModSettingCacheData alloc] initWithBeforeString:key afterString:@" " type:SpeechModSettingConvertType_JustMatch];
+        NSString* after = [targetStrings objectForKey:key];
+        SpeechModSettingCacheData* speechModSetting = [[SpeechModSettingCacheData alloc] initWithBeforeString:key afterString:after type:SpeechModSettingConvertType_JustMatch];
         [self UpdateSpeechModSetting:speechModSetting];
     }
 }
