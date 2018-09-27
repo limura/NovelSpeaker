@@ -1713,6 +1713,7 @@ Interface change
 
 - 標準の読み替え辞書にいくつかの正規表現を使った設定を追加
 - iOS 12 において、読み上げ中の文字の表示位置がおかしくなる場合があった問題への暫定的対処
+- iPhone X 等のノッチのある iPhone で、ダウンロード中の表示が画面上部のインジケータに出なくなっていた問題に対処
 
 iOS 12 になった後に読み上げ中の文字の表示位置がおかしくなる場合が確認されたのでその問題の一部に対して暫定的に回避するような対応を入れました。ただ、全てに対して対応できているわけではない(今回の対応では対処できていない例が発見されている)ため、依然として上記の問題は発生しえます。
 
@@ -1728,7 +1729,7 @@ Interface change
 
 - Added setting using several regular expressions in standard replacement dictionary
 - In iOS 12, the display position of the character being read aloud may be incorrect Temporary coping with the problem
-
+- Dealing with the problem that the indication being downloaded does not appear on the indicator at the top of the screen on an iPhone with a notch such as iPhone X
 
 TODO
 

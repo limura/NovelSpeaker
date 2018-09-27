@@ -11,6 +11,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import "NovelSpeaker-Swift.h"
 #import "UriLoader.h"
+#import "FTLinearActivityIndicator-Swift.h"
 
 @implementation AppDelegate
     
@@ -60,6 +61,9 @@ void uncaughtExceptionHandler(NSException *exception)
     
     // "************" でハングするようなので強制的に読み替え辞書に登録して安全な文字に読み変えるようにします(´・ω・`)
     [globalData ForceOverrideHungSpeakStringToSpeechModSettings];
+    
+    // for FTLinearActivityIndicator enable (iPhone X とかのノッチのあるタイプでの network activity indicator を上書きしてくれる奴を enable にする)
+    [UIApplication configureLinearNetworkActivityIndicatorIfNeeded];
     
     return YES;
 }

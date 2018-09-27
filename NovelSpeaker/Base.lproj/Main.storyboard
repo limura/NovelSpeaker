@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
-        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -58,7 +56,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VU5-Wx-PIG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-514" y="1618"/>
+            <point key="canvasLocation" x="-822.39999999999998" y="1455.4722638680662"/>
         </scene>
         <!--文字の大きさ-->
         <scene sceneID="KxK-FQ-fPF">
@@ -116,7 +114,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="u55-Il-lHZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-22" y="1618"/>
+            <point key="canvasLocation" x="-35.200000000000003" y="1455.4722638680662"/>
         </scene>
         <!--声質の設定-->
         <scene sceneID="AH2-bb-f0h">
@@ -138,7 +136,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="flI-io-R6f" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="945" y="925"/>
+            <point key="canvasLocation" x="1512" y="832.0839580209896"/>
         </scene>
         <!--声質設定範囲の作成-->
         <scene sceneID="N8g-wT-gmr">
@@ -193,7 +191,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EGA-cg-tKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1421" y="925"/>
+            <point key="canvasLocation" x="2273.5999999999999" y="832.0839580209896"/>
         </scene>
         <!--Bug Report View Controller-->
         <scene sceneID="r9Q-T3-N95">
@@ -212,7 +210,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="K9T-nr-cHp" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1870" y="925"/>
+            <point key="canvasLocation" x="2992" y="832.0839580209896"/>
         </scene>
         <!--Font select View Controller-->
         <scene sceneID="HJA-bV-XCn">
@@ -231,7 +229,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rmb-WZ-IqD" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-515" y="2323"/>
+            <point key="canvasLocation" x="-824" y="2089.6551724137935"/>
         </scene>
         <!--読みの修正-->
         <scene sceneID="FXd-0y-Yzq">
@@ -263,7 +261,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0sO-5g-pqB" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="945" y="1618"/>
+            <point key="canvasLocation" x="1512" y="1455.4722638680662"/>
         </scene>
         <!--読みの修正詳細-->
         <scene sceneID="me1-xj-vfp">
@@ -286,7 +284,7 @@
                                 </connections>
                             </textField>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="7kv-GD-fng">
-                                <rect key="frame" x="20" y="150" width="335" height="30"/>
+                                <rect key="frame" x="20" y="149.5" width="335" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                                 <connections>
@@ -349,7 +347,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="izM-Ul-u8s">
-                                <rect key="frame" x="324" y="322" width="31" height="30"/>
+                                <rect key="frame" x="324" y="322.5" width="31" height="30"/>
                                 <state key="normal" title="更新"/>
                                 <connections>
                                     <action selector="RefreshButtonClicked:" destination="kSq-hq-E9G" eventType="touchUpInside" id="vbd-PT-B3b"/>
@@ -419,7 +417,7 @@
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="1420.5" y="1617.5"/>
+            <point key="canvasLocation" x="2272.8000000000002" y="1455.0224887556224"/>
         </scene>
         <!--設定-->
         <scene sceneID="cAk-Lp-8bt">
@@ -449,7 +447,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="brw-Rq-p2L" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="450" y="925"/>
+            <point key="canvasLocation" x="720" y="832.0839580209896"/>
         </scene>
         <!--Web取込-->
         <scene sceneID="rme-vM-df2">
@@ -560,7 +558,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zER-k9-zQN" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-935.5" y="924.5"/>
+            <point key="canvasLocation" x="-1496.8" y="831.63418290854577"/>
         </scene>
         <!--クレジット-->
         <scene sceneID="g6V-SU-Uql">
@@ -577,7 +575,7 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="685"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
+                                <mutableString key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
 MIT License
 
@@ -668,7 +666,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-</string>
+  -------- FTLinearActivityIndicator -------- Copyright (c) 2018 Ortwin Gentz, FutureTap GmbH
+
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+</mutableString>
                                 <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
@@ -685,7 +686,7 @@ SOFTWARE.
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bLn-TN-oKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-22" y="2323"/>
+            <point key="canvasLocation" x="-35.200000000000003" y="2089.6551724137935"/>
         </scene>
         <!--更新履歴-->
         <scene sceneID="Q7Y-NW-rFh">
@@ -721,7 +722,7 @@ SOFTWARE.
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1Hj-SI-klv" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="450" y="2323"/>
+            <point key="canvasLocation" x="720" y="2089.6551724137935"/>
         </scene>
         <!--読み上げ時の間の設定-->
         <scene sceneID="HXt-mb-frC">
@@ -769,7 +770,7 @@ SOFTWARE.
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mk2-ep-VO6" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="945" y="2323"/>
+            <point key="canvasLocation" x="1512" y="2089.6551724137935"/>
         </scene>
         <!--読み上げ時の間の詳細設定-->
         <scene sceneID="7EH-So-dh4">
@@ -900,7 +901,7 @@ SOFTWARE.
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PhH-X1-Ua4" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1421" y="2323"/>
+            <point key="canvasLocation" x="2273.5999999999999" y="2089.6551724137935"/>
         </scene>
         <!--設定-->
         <scene sceneID="jLN-GL-WMq">
@@ -918,7 +919,7 @@ SOFTWARE.
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ejC-0w-H3j" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-514" y="925"/>
+            <point key="canvasLocation" x="-822.39999999999998" y="832.0839580209896"/>
         </scene>
         <!--小説家になろうで検索-->
         <scene sceneID="UWl-PZ-0Xb">
@@ -1083,7 +1084,7 @@ SOFTWARE.
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jyb-Mi-0bo" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-22" y="109"/>
+            <point key="canvasLocation" x="-35.200000000000003" y="98.050974512743636"/>
         </scene>
         <!--検索結果-->
         <scene sceneID="s4n-Mh-uAN">
@@ -1105,7 +1106,7 @@ SOFTWARE.
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="AEv-Ml-e3O" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="450" y="109"/>
+            <point key="canvasLocation" x="720" y="98.050974512743636"/>
         </scene>
         <!--詳細-->
         <scene sceneID="aH6-Zh-bCN">
@@ -1127,7 +1128,7 @@ SOFTWARE.
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GuK-Ec-by5" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="945" y="109"/>
+            <point key="canvasLocation" x="1512" y="98.050974512743636"/>
         </scene>
         <!--ダウンロード状態-->
         <scene sceneID="Tu5-EA-3am">
@@ -1203,7 +1204,7 @@ SOFTWARE.
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1Ae-cX-Tqs" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1352" y="925"/>
+            <point key="canvasLocation" x="-2163.1999999999998" y="832.0839580209896"/>
         </scene>
         <!--なろう検索-->
         <scene sceneID="fIy-nG-msd">
@@ -1220,7 +1221,7 @@ SOFTWARE.
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0Rw-Gd-sqq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-514" y="109"/>
+            <point key="canvasLocation" x="-822.39999999999998" y="98.050974512743636"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="764-8b-jS0">
@@ -1241,7 +1242,7 @@ SOFTWARE.
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="miF-Ra-PIu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1352" y="109"/>
+            <point key="canvasLocation" x="-2163.1999999999998" y="98.050974512743636"/>
         </scene>
         <!--本棚-->
         <scene sceneID="RKf-an-ikt">
@@ -1263,7 +1264,7 @@ SOFTWARE.
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Gvt-2h-g6g" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-22" y="-565"/>
+            <point key="canvasLocation" x="-35.200000000000003" y="-508.24587706146929"/>
         </scene>
         <!--本棚-->
         <scene sceneID="fHI-C2-mKL">
@@ -1280,7 +1281,7 @@ SOFTWARE.
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Pmo-cD-y4U" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-514" y="-565"/>
+            <point key="canvasLocation" x="-822.39999999999998" y="-508.24587706146929"/>
         </scene>
         <!--title-->
         <scene sceneID="ufC-wZ-h7g">
@@ -1370,7 +1371,7 @@ SOFTWARE.
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="450" y="-565"/>
+            <point key="canvasLocation" x="720" y="-508.24587706146929"/>
         </scene>
         <!--UserText-->
         <scene sceneID="izP-cz-ef9">
@@ -1424,7 +1425,7 @@ SOFTWARE.
                                 </connections>
                             </button>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="1" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="ZfF-jG-c09">
-                                <rect key="frame" x="56" y="158" width="210" height="31"/>
+                                <rect key="frame" x="56" y="158.5" width="210" height="31"/>
                                 <connections>
                                     <action selector="ChapterSlidebarValueChanged:" destination="dCR-kh-Ivz" eventType="valueChanged" id="OE5-O9-Eiw"/>
                                 </connections>
@@ -1440,7 +1441,7 @@ SOFTWARE.
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XX2-ka-OrJ" customClass="SZTextView">
-                                <rect key="frame" x="0.0" y="196" width="375" height="422"/>
+                                <rect key="frame" x="0.0" y="196.5" width="375" height="421.5"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -1519,7 +1520,7 @@ SOFTWARE.
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Jyr-j8-uwe" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="945" y="-808"/>
+            <point key="canvasLocation" x="1512" y="-726.83658170914543"/>
         </scene>
     </scenes>
     <resources>
