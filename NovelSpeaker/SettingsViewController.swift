@@ -222,6 +222,38 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         }
                     }
                 })
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
+                $0.value = GlobalDataSingleton.getInstance()?.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled()
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = .systemFont(ofSize: 14.0)
+                }.onChange({ (row) in
+                    let judge = row.value
+                    if judge! {
+                        EasyDialog.Builder(self)
+                            .title(title: NSLocalizedString("SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title", comment:"確認"))
+                            .label(text: NSLocalizedString("SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12", comment:"この設定を有効にすると、読み上げ中の読み上げ位置表示がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ)に読み替えるように設定することで回避するようになります。\nこの機能を実装した時点では、\"α\"(アルファ)は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われます。\n以上の事を理解した上でこの設定を有効にしますか？"))
+                            .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
+                                row.value = false
+                                row.updateCell()
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: true, completion: nil)
+                                }
+                            })
+                            .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
+                                let globalData = GlobalDataSingleton.getInstance()
+                                globalData?.setEscapeAboutSpeechPositionDisplayBugOniOS12Enabled(true)
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: true)
+                                }
+                            })
+                            .build().show()
+                    }else{
+                        GlobalDataSingleton.getInstance()?.setEscapeAboutSpeechPositionDisplayBugOniOS12Enabled(false)
+                    }
+                    
+                    GlobalDataSingleton.getInstance().setIgnoreURIStringSpeechIsEnabled(row.value!)
+                })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 }.onCellSelection({ (butonCellof, buttonRow) in

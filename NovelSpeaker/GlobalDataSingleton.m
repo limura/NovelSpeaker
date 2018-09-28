@@ -1553,18 +1553,23 @@ static GlobalDataSingleton* _singleton = nil;
     }
 }
 
-- (void)ApplySpeechModConfigForSpeechRecognizerBugEscape:(NiftySpeaker*)niftySpeaker {
-    NSDictionary* convertTable = @{
-       @"　": @"  " // "　"(全角スペース) を読み上げさせると読み上げ位置が更新されない(iOS 12 から)
-       , @"\u2028": @"\n" // "\u2028"(LINE SEPARATOR)を読み上げさせると読み上げ位置が更新されない(iOS 12 から)   };
-   };
-   for (NSString* before in [convertTable keyEnumerator]) {
-       NSString* after = [convertTable objectForKey:before];
-       if (before == nil || after == nil) {
-           continue;
-       }
-       [niftySpeaker AddSpeechModText:before to:after];
-   }
+- (void)ApplySpeechModConfigForSpeechRecognizerBugEscape:(NiftySpeaker*)niftySpeaker targetText:(NSString*)targetText {
+    if (![self IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled]) {
+        return;
+    }
+    NSDictionary* regexpTable = @{
+        @"\\s+": @"α"
+    };
+    for (NSString* before in [regexpTable keyEnumerator]) {
+        NSString* after = [regexpTable objectForKey:before];
+        if (before == nil || after == nil) {
+            continue;
+        }
+        NSArray* regexpModConfigArray = [StringSubstituter FindRegexpSpeechModConfigs:targetText pattern:before to:after];
+        for (SpeechModSettingCacheData* modSetting in regexpModConfigArray) {
+            [niftySpeaker AddSpeechModText:modSetting.beforeString to:modSetting.afterString];
+        }
+    }
 }
 
 /// 読み上げ設定を読み直します。
@@ -1657,7 +1662,7 @@ static GlobalDataSingleton* _singleton = nil;
         [self ApplyRemoveURIModConfigWithText:m_NiftySpeaker text:story.content];
     }
     [self ApplySpeechModConfigForRegexp:m_NiftySpeaker targetText:story.content];
-    [self ApplySpeechModConfigForSpeechRecognizerBugEscape:m_NiftySpeaker];
+    [self ApplySpeechModConfigForSpeechRecognizerBugEscape:m_NiftySpeaker targetText:story.content];
     
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
@@ -2410,6 +2415,7 @@ static GlobalDataSingleton* _singleton = nil;
 #define USER_DEFAULTS_IS_LICENSE_FILE_READED @"IsLICENSEFileIsReaded"
 #define USER_DEFAULTS_CURRENT_READED_PRIVACY_POLICY @"CurrentReadedPrivacyPolicy"
 #define USER_DEFAULTS_REPEAT_SPEECH_TYPE @"RepeatSpeechType"
+#define USER_DEFAULTS_IS_ESCAPE_ABOUT_SPEECH_POSITION_DISPLAY_BUG_ON_IOS12 @"IsEscapeAboutSpeechPositionDisplayBugOniOS12"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3383,6 +3389,21 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setObject:fontName forKey:USER_DEFAULTS_DISPLAY_FONT_NAME];
     [userDefaults synchronize];
 }
+    
+    
+/// iOS 12 からの読み上げ中の読み上げ位置がずれる問題への対応で、空白文字をαに置き換える設定のEnable/Disableを取得します
+- (BOOL)IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_ESCAPE_ABOUT_SPEECH_POSITION_DISPLAY_BUG_ON_IOS12: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IS_ESCAPE_ABOUT_SPEECH_POSITION_DISPLAY_BUG_ON_IOS12];
+}
+/// iOS 12 からの読み上げ中の読み上げ位置がずれる問題への対応で、空白文字をαに置き換える設定のEnable/Disableを設定します
+- (void)SetEscapeAboutSpeechPositionDisplayBugOniOS12Enabled:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_IS_ESCAPE_ABOUT_SPEECH_POSITION_DISPLAY_BUG_ON_IOS12];
+    [userDefaults synchronize];
+    m_isNeedReloadSpeakSetting = true;
+}
 
 /// 利用許諾を読んだか否かを取得します
 - (BOOL)IsLicenseReaded{
@@ -3705,6 +3726,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_playback_duration_enabled" number:[[NSNumber alloc] initWithBool:[self IsPlaybackDurationEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_dark_theme_enabled" number:[[NSNumber alloc] initWithBool:[self IsDarkThemeEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_page_turning_sound_enabled" number:[[NSNumber alloc] initWithBool:[self IsPageTurningSoundEnabled]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_escape_about_speech_position_display_bug_on_ios12_enabled" number:[[NSNumber alloc] initWithBool:[self IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled]]];
     [NiftyUtility addStringForJSONNSDictionary:result key:@"display_font_name" string:[self GetDisplayFontName]];
     [NiftyUtility addIntValueForJSONNSDictionary:result key:@"repeat_speech_type" number:[[NSNumber alloc] initWithInteger:[self GetRepeatSpeechType]]];
     NarouContentCacheData* currentReadingContent = [self GetCurrentReadingContent];
@@ -4261,6 +4283,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSNumber* repeat_speech_type = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"repeat_speech_type"];
     if (repeat_speech_type != nil) {
         [self SetRepeatSpeechType:[repeat_speech_type integerValue]];
+    }
+    NSNumber* is_escape_about_speech_position_display_bug_on_ios12_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_escape_about_speech_position_display_bug_on_ios12_enabled"];
+    if (is_escape_about_speech_position_display_bug_on_ios12_enabled != nil) {
+        [self SetEscapeAboutSpeechPositionDisplayBugOniOS12Enabled:[is_escape_about_speech_position_display_bug_on_ios12_enabled boolValue]];
     }
     NSString* current_reading_content = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"current_reading_content"];
     return current_reading_content;

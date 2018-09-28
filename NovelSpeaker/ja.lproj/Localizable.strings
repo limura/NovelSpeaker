@@ -107,6 +107,9 @@
 "SettingTableViewController_RepeatType_NoRepeat" = "しない";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "最初から";
 "SettingTableViewController_RepeatType_RewindToThisStory" = "一つの章";
+"SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する";
+"SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "確認";
+"SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "この設定は、読み上げ中の読み上げ位置表示がおかしくなる問題への対応です。ただし、対応手法がかなりトリッキーなので適用する前に原理を理解しておいてください。\nこの設定を有効にすると、読み上げ中の読み上げ位置がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ) に読み替えるように設定することでこの問題を回避するようになります。\nこの機能を実装した時点では、iOS の音声合成エンジンでは \"α\"(アルファ) は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により \"α\" が「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われます。\n以上の事を理解した上でこの設定を有効にしますか？";
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";
 "NovelSpeakerBackup_ExportingNovelText" = "工程 1\r\n小説本文を抽出中";
@@ -283,7 +286,8 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.43
 
 - 標準の読み替え辞書にいくつかの正規表現を使った設定を追加
-- iOS 12 において、読み上げ中の文字の表示位置がおかしくなる場合があった問題への暫定的対処
+- iOS 12 において、読み上げ中の文字の表示位置がおかしくなる場合がある問題への暫定的対処のON/OFF設定を追加
+- iPhone X 等のノッチのある iPhone で、ダウンロード中の表示が画面上部のインジケータに出なくなっていた問題に対処
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
@@ -293,7 +297,8 @@
 インタフェースの変更
 
 - 標準の読み替え辞書にいくつかの正規表現を使った設定を追加
-- iOS 12 において、読み上げ中の文字の表示位置がおかしくなる場合があった問題への暫定的対処
+- iOS 12 において、読み上げ中の文字の表示位置がおかしくなる場合がある問題への暫定的対処のON/OFF設定を追加
+- iPhone X 等のノッチのある iPhone で、ダウンロード中の表示が画面上部のインジケータに出なくなっていた問題に対処
 
 
 # Version 1.1.42

@@ -459,6 +459,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (NSString*)GetDisplayFontName;
 /// 小説の表示に使用するフォント名を設定します
 - (void)SetDisplayFontName:(NSString*)fontName;
+    
+/// iOS 12 からの読み上げ中の読み上げ位置がずれる問題への対応で、空白文字をαに置き換える設定のEnable/Disableを取得します
+- (BOOL)IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled;
+/// iOS 12 からの読み上げ中の読み上げ位置がずれる問題への対応で、空白文字をαに置き換える設定のEnable/Disableを設定します
+- (void)SetEscapeAboutSpeechPositionDisplayBugOniOS12Enabled:(BOOL)isEnabled;
 
 /// 利用許諾を読んだか否かを取得します
 - (BOOL)IsLicenseReaded;

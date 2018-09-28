@@ -107,6 +107,9 @@
 "SettingTableViewController_RepeatType_NoRepeat" = "none";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "First chapter";
 "SettingTableViewController_RepeatType_RewindToThisStory" = "This chapter";
+"SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "Apply a tentative correspondence to the case where the reading position displayed on iOS 12 is incorrect";
+"SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "Confirm";
+"SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "When this setting is enabled, it is set to change to \"α\"(alpha) for possible characters (such as blanks and line feeds are not displayed) that are thought to be wrong with the reading position display being read aloud.\nAt the time of implementing this function, \"α\"(alpha) is a character that can not be read aloud, so it seems that it will be a problematic operation in general. However, there is a possibility that it will be read aloud as iOS due to change in iOS speech synthesis engine side in the future.\nAlso, iOS 12 (or later) is supposed to need this function.\nDo you enable this setting after understanding the above?";
 
 "NovelSpeakerBackup_InitializeBackup" = "Initializing";
 "NovelSpeakerBackup_ExportingNovelText" = "Step 1\r\nExtracting novel texts";
@@ -286,7 +289,8 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.43
 
 - Added setting using several regular expressions in standard replacement dictionary
-- In iOS 12, the display position of the character being read aloud may be incorrect Temporary coping with the problem
+- Added ON / OFF setting for provisional countermeasure to problems that may be incorrect at the display position of the character being read at iOS 12
+- Dealing with the problem that the indication being downloaded does not appear on the indicator at the top of the screen on an iPhone with a notch such as iPhone X
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -296,7 +300,8 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 Interface change
 
 - Added setting using several regular expressions in standard replacement dictionary
-- In iOS 12, the display position of the character being read aloud may be incorrect Temporary coping with the problem
+- Added ON / OFF setting for provisional countermeasure to problems that may be incorrect at the display position of the character being read at iOS 12
+- Dealing with the problem that the indication being downloaded does not appear on the indicator at the top of the screen on an iPhone with a notch such as iPhone X
 
 
 # Version 1.1.42
