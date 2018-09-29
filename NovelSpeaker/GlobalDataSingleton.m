@@ -1558,7 +1558,7 @@ static GlobalDataSingleton* _singleton = nil;
         return;
     }
     NSDictionary* regexpTable = @{
-        @"\\s+": @"α"
+        @"[\\t\\f\\p{Z}]+": @"α"
     };
     for (NSString* before in [regexpTable keyEnumerator]) {
         NSString* after = [regexpTable objectForKey:before];
