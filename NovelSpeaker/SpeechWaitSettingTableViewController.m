@@ -46,6 +46,7 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
 - (void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     [self addNotificationReceiver];
+    [self.tableView reloadData];
 }
 
 - (void)viewDidDisappear:(BOOL)animated{
