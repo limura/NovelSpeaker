@@ -291,6 +291,7 @@
 - Added setting using several regular expressions in standard replacement dictionary
 - Added ON / OFF setting for provisional countermeasure to problems that may be incorrect at the display position of the character being read at iOS 12
 - Dealing with the problem that the indication being downloaded does not appear on the indicator at the top of the screen on an iPhone with a notch such as iPhone X
+- Fixed a problem that the display reflecting those changes did not appear in the setting between reading aloud on the setting tab, even after changing individual settings or after returning to the settings between reading aloud after adding them
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -302,6 +303,10 @@ Interface change
 - Added setting using several regular expressions in standard replacement dictionary
 - Added ON / OFF setting for provisional countermeasure to problems that may be incorrect at the display position of the character being read at iOS 12
 - Dealing with the problem that the indication being downloaded does not appear on the indicator at the top of the screen on an iPhone with a notch such as iPhone X
+
+Bug fix
+
+- Fixed a problem that the display reflecting those changes did not appear in the setting between reading aloud on the setting tab, even after changing individual settings or after returning to the settings between reading aloud after adding them
 
 
 # Version 1.1.42
