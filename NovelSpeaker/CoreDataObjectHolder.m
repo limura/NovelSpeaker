@@ -69,7 +69,7 @@
     }
 
     BOOL result = [[NSFileManager defaultManager] fileExistsAtPath:path];
-    NSLog(@"isAliveSaveDataFile: %@, %@", result ? @"YES" : @"NO", path);
+    //NSLog(@"isAliveSaveDataFile: %@, %@", result ? @"YES" : @"NO", path);
     [self isAliveOLDSaveDataFile];
     return result;
 }
@@ -97,7 +97,7 @@
     
     
     BOOL result = [[NSFileManager defaultManager] fileExistsAtPath:path];
-    NSLog(@"isAliveOLDSaveDataFile: %@, %@", result ? @"YES" : @"NO", path);
+    //NSLog(@"isAliveOLDSaveDataFile: %@, %@", result ? @"YES" : @"NO", path);
     return result;
 }
 

@@ -17,6 +17,7 @@
 #import "NovelSpeaker-Swift.h"
 #import "UIViewControllerExtension.h"
 #import "NSDataDetectEncodingExtension.h"
+#import "NovelSpeaker-swift.h"
 
 #define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
 #define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
@@ -32,6 +33,7 @@
 //@synthesize managedObjectContext = _managedObjectContext;
 
 static GlobalDataSingleton* _singleton = nil;
+static DummySoundLooper* dummySoundLooper = nil;
 
 - (id)init
 {
@@ -77,10 +79,13 @@ static GlobalDataSingleton* _singleton = nil;
         NSLog(@"AVAudioSessionModeDefault set failed. %@ %@", err, err.userInfo);
     }
     [session setActive:NO error:nil];
-    
+    dummySoundLooper = [DummySoundLooper new];
+    [dummySoundLooper setMediaFileForResource:@"Silent3sec" ofType:@"mp3"];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioSessionDidInterrupt:) name:AVAudioSessionInterruptionNotification object:nil];
+
     // オーディオのルートが変わったよイベントを受け取るようにする
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeAudioSessionRoute:) name:AVAudioSessionRouteChangeNotification object:nil];
-
+    
     return self;
 }
     
@@ -108,6 +113,26 @@ static GlobalDataSingleton* _singleton = nil;
 
 - (void)coreDataPerfomBlockAndWait:(void(^)(void))block {
     [m_CoreDataObjectHolder performBlockAndWait:block];
+}
+
+- (void)audioSessionDidInterrupt:(NSNotification*)notification
+{
+    if (notification == nil) {
+        return;
+    }
+    
+    switch ([notification.userInfo[AVAudioSessionInterruptionTypeKey] intValue]) {
+        case AVAudioSessionInterruptionTypeBegan:
+            NSLog(@"audio interruption begin.");
+            [dummySoundLooper stopPlay];
+            break;
+        case AVAudioSessionInterruptionTypeEnded:
+            NSLog(@"audio interuption end.");
+            [dummySoundLooper startPlay];
+            break;
+        default:
+            break;
+    }
 }
 
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
@@ -1752,6 +1777,7 @@ static GlobalDataSingleton* _singleton = nil;
     if (err != nil) {
         NSLog(@"setActive error: %@ %@", err, err.userInfo);
     }
+    [dummySoundLooper startPlay];
     [self StartMaxSpeechTimeInSecTimer];
     [BehaviorLogger AddLogWithDescription:@"StartSpeech" data:@{}];
     return [m_NiftySpeaker StartSpeech];
@@ -1832,6 +1858,7 @@ static GlobalDataSingleton* _singleton = nil;
     [self SaveCurrentReadingPoint];
     //NSLog(@"setActive NO.");
     [session setActive:NO error:nil];
+    [dummySoundLooper stopPlay];
     return result;
 }
 
@@ -2238,17 +2265,17 @@ static GlobalDataSingleton* _singleton = nil;
 /// CoreData のデータファイルが存在するかどうかを取得します
 - (BOOL)isAliveCoreDataSaveFile
 {
-    NSLog(@"isAliveCoreDataSaveFile");
+    //NSLog(@"isAliveCoreDataSaveFile");
     return [m_CoreDataObjectHolder isAliveSaveDataFile];
 }
 
 - (BOOL)isAliveOLDSaveDataFile{
-    NSLog(@"isAliveOLDSaveDataFile");
+    //NSLog(@"isAliveOLDSaveDataFile");
     return [m_CoreDataObjectHolder isAliveOLDSaveDataFile];
 }
 
 - (BOOL)moveOLDSaveDataFileToNewLocation{
-    NSLog(@"moveOLDSaveDataFileToNewLocation");
+    //NSLog(@"moveOLDSaveDataFileToNewLocation");
     return [m_CoreDataObjectHolder moveOLDSaveDataFileToNewLocation];
 }
 
