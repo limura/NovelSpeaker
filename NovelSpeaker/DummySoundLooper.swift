@@ -28,21 +28,19 @@ class DummySoundLooper: NSObject {
             print("setMediaFile failed by path")
             return false
         }
-        print("setMediaFile success")
         return true
     }
     
     @objc public func startPlay(){
         dispatchQueue.async {
             self.audioPlayer.numberOfLoops = -1
-            // 効果があるかはよくわからないため、封印しておきます
-            //self.audioPlayer.play()
+            self.audioPlayer.play()
         }
     }
     
     @objc public func stopPlay(){
         dispatchQueue.async {
-            //self.audioPlayer.stop()
+            self.audioPlayer.stop()
         }
     }
 }

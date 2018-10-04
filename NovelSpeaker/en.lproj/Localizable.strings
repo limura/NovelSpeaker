@@ -110,6 +110,7 @@
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "Apply a tentative correspondence to the case where the reading position displayed on iOS 12 is incorrect";
 "SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "Confirm";
 "SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "When this setting is enabled, it is set to change to \"α\"(alpha) for possible characters (such as blanks and line feeds are not displayed) that are thought to be wrong with the reading position display being read aloud.\nAt the time of implementing this function, \"α\"(alpha) is a character that can not be read aloud, so it seems that it will be a problematic operation in general. However, there is a possibility that it will be read aloud as iOS due to change in iOS speech synthesis engine side in the future.\nAlso, iOS 12 (or later) is supposed to need this function.\nDo you enable this setting after understanding the above?";
+"SettingTableViewController_DummySilentSoundEnable" = "Pray that playback will not stop during background play by keeping silent sounds during playback";
 
 "NovelSpeakerBackup_InitializeBackup" = "Initializing";
 "NovelSpeakerBackup_ExportingNovelText" = "Step 1\r\nExtracting novel texts";

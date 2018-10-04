@@ -386,6 +386,17 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }.onChange({ row in
                     GlobalDataSingleton.getInstance().setForceSiteInfoReloadIsEnabled(row.value!)
                 })
+            <<< SwitchRow("IsDummySilentSoundEnabled") {
+                $0.title = NSLocalizedString("SettingTableViewController_DummySilentSoundEnable", comment:"再生中に無音の音を鳴らしてバックグラウンド再生中に再生が停止しないように祈る")
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = .systemFont(ofSize: 14.0)
+                $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
+                    return self.m_RubySwitchToggleHitCount < 10
+                })
+                $0.value = GlobalDataSingleton.getInstance()?.isDummySilentSoundEnabled()
+                }.onChange({ row in
+                    GlobalDataSingleton.getInstance()?.setIsDummySilentSoundEnabled(row.value!)
+                })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
                 $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in

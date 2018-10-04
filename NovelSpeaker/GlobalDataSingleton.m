@@ -120,14 +120,17 @@ static DummySoundLooper* dummySoundLooper = nil;
     if (notification == nil) {
         return;
     }
+    if (![self IsDummySilentSoundEnabled]) {
+        return;
+    }
     
     switch ([notification.userInfo[AVAudioSessionInterruptionTypeKey] intValue]) {
         case AVAudioSessionInterruptionTypeBegan:
-            NSLog(@"audio interruption begin.");
+            [self AddLogString:@"interrupt が発生したので一旦無音音声の再生を止めます"];
             [dummySoundLooper stopPlay];
             break;
         case AVAudioSessionInterruptionTypeEnded:
-            NSLog(@"audio interuption end.");
+            [self AddLogString:@"interrupt が解消したようなので無音音声の再生を再開します"];
             [dummySoundLooper startPlay];
             break;
         default:
@@ -1777,7 +1780,10 @@ static DummySoundLooper* dummySoundLooper = nil;
     if (err != nil) {
         NSLog(@"setActive error: %@ %@", err, err.userInfo);
     }
-    [dummySoundLooper startPlay];
+    if ([self IsDummySilentSoundEnabled]) {
+        [self AddLogString:@"無音音声の再生を開始します。"];
+        [dummySoundLooper startPlay];
+    }
     [self StartMaxSpeechTimeInSecTimer];
     [BehaviorLogger AddLogWithDescription:@"StartSpeech" data:@{}];
     return [m_NiftySpeaker StartSpeech];
@@ -1858,7 +1864,10 @@ static DummySoundLooper* dummySoundLooper = nil;
     [self SaveCurrentReadingPoint];
     //NSLog(@"setActive NO.");
     [session setActive:NO error:nil];
-    [dummySoundLooper stopPlay];
+    if ([self IsDummySilentSoundEnabled]) {
+        [self AddLogString:@"無音音声の再生を停止します。"];
+        [dummySoundLooper stopPlay];
+    }
     return result;
 }
 
@@ -2443,6 +2452,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 #define USER_DEFAULTS_CURRENT_READED_PRIVACY_POLICY @"CurrentReadedPrivacyPolicy"
 #define USER_DEFAULTS_REPEAT_SPEECH_TYPE @"RepeatSpeechType"
 #define USER_DEFAULTS_IS_ESCAPE_ABOUT_SPEECH_POSITION_DISPLAY_BUG_ON_IOS12 @"IsEscapeAboutSpeechPositionDisplayBugOniOS12"
+#define USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED @"DummySilentSoundEnabled"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3430,6 +3440,19 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_IS_ESCAPE_ABOUT_SPEECH_POSITION_DISPLAY_BUG_ON_IOS12];
     [userDefaults synchronize];
     m_isNeedReloadSpeakSetting = true;
+}
+
+/// 読み上げ時に無音の音を再生し続けるか否かを取得します
+- (BOOL)IsDummySilentSoundEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED];
+}
+/// 読み上げ時に無音の音を再生し続けるか否かを設定します
+- (void)SetIsDummySilentSoundEnabled:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED];
+    [userDefaults synchronize];
 }
 
 /// 利用許諾を読んだか否かを取得します

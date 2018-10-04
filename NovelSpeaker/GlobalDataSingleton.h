@@ -465,6 +465,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// iOS 12 からの読み上げ中の読み上げ位置がずれる問題への対応で、空白文字をαに置き換える設定のEnable/Disableを設定します
 - (void)SetEscapeAboutSpeechPositionDisplayBugOniOS12Enabled:(BOOL)isEnabled;
 
+/// 読み上げ時に無音の音を再生し続けるか否かを取得します
+- (BOOL)IsDummySilentSoundEnabled;
+/// 読み上げ時に無音の音を再生し続けるか否かを設定します
+- (void)SetIsDummySilentSoundEnabled:(BOOL)isEnabled;
+
 /// 利用許諾を読んだか否かを取得します
 - (BOOL)IsLicenseReaded;
 /// 利用許諾を読んだことにします
