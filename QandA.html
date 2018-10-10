@@ -47,6 +47,7 @@
 	<li><a href="#MoreSpeaker">読み上げ時の話者について</a></li>
 	<li><a href="#Folder">小説のお気に入りや本棚のフォルダ分けなど、本棚に関する拡張について</a></li>
 	<li><a href="#pixivNovel">pixiv小説について</a></li>
+	<li><a href="#volume">読み上げ時の音量(ボリューム)について</a></li>
 </ul>
 </div>
 <hr/>
@@ -201,6 +202,19 @@
 ことせかい では Web取込時に HTTP GET request の一回で取得できるHTMLから小説の本文や次の章へのリンクを取得しているのですが、このQ＆Aを書いている時点では取得されたHTMLにはそのシリーズ小説の別の章へのリンクが含まれていません。
 そこまで深く追いかけてはいないのですが、恐らくはページが表示された後に JavaScript による読み込みによってシリーズ小説の別の章へのリンクが生成されているのではないかと思います。ことせかい側 では JavaScript は動作しませんので、そのような仕組みのWebPageの場合は対応できません。
 以上の原因により、原理的に対応が不可能な案件と判断されました。
+</p>
+<hr/>
+<h4 id="volume">読み上げ時の音量(ボリューム)について(2018/10)</h4>
+<p>
+読み上げ時の音量が小さいのでもっと大きくできないか、というお問い合わせを何回か受けました。
+なのですが、これ以上の音量は出せません。
+</p><p>
+というのは、ことせかい は iOS の提供しております <a href="https://developer.apple.com/documentation/avfoundation/aspeechsynthesizer">AVSpeechSynthesizer</a> というものを使って読み上げを行っています。
+この AVSpeechSynthesizer では <a href="https://developer.apple.com/documentation/avfoundation/avspeechutterance">AVSpeechUtterance</a> というものの <a href="https://developer.apple.com/documentation/avfoundation/avspeechutterance/1619687-volume">volume プロパティ</a>で音量の指定ができるのですが、ことせかいではこの volume プロパティを標準値の 1.0 で利用しています。
+という状態なのですが、この volume プロパティで指定できる値の範囲は 0.0 から 1.0 なのです。
+つまり、現状で最大音量で発話させています。
+ということなのでこれ以上の大きい音量では発話できないのです。
+どうしても音量を大きくする必要がある方は外部のスピーカーなどの導入をお考えください。
 </p>
 </section>
         <footer>
