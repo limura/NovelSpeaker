@@ -18,6 +18,8 @@
 {
     /// FakeSpeechText の配列
     NSMutableArray* m_FakeSpeechTextArray;
+    /// 読み上げ中に表示位置がずれる問題への対策に使う正規表現へのキャッシュ
+    NSRegularExpression* regexpForSpeechRecognizerBug;
 }
 
 /// 読み上げ時に使用するピッチやスピード

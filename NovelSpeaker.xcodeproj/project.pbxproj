@@ -119,6 +119,9 @@
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
+		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
+		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
+		21AFDF36216CF977002F34D9 /* SpeechBlockTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */; };
 		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
 		21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F9196037BB009658B7 /* AVFoundation.framework */; };
@@ -406,6 +409,9 @@
 		21AED5D119B2142E00CE846D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SpeakSettingSampleTextTableViewCell.xib; sourceTree = "<group>"; };
 		21AED5D219B2146F00CE846D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		21AED5D419B335CF00CE846D /* ReleaseMemo.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReleaseMemo.md; sourceTree = "<group>"; };
+		21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummySoundLooper.swift; sourceTree = "<group>"; };
+		21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Silent3sec.mp3; sourceTree = "<group>"; };
+		21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechBlockTests.m; sourceTree = "<group>"; };
 		21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechRegexPitchSetting.h; sourceTree = "<group>"; };
 		21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechRegexPitchSetting.m; sourceTree = "<group>"; };
 		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
@@ -705,6 +711,7 @@
 				21B53A1A19619C00009658B7 /* sound@2x.png */,
 				2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */,
 				21429D82209F4516001426F5 /* nc48625.m4a */,
+				21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */,
 				21DD0BF420B595F500DC3C39 /* LICENSE.txt */,
 			);
 			name = Resources;
@@ -744,6 +751,7 @@
 				2167419F2043D592008A578D /* BehaviorLogger.swift */,
 				216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */,
 				216A545C20EE257000D75458 /* NovelSpeakerBackup.swift */,
+				21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -880,6 +888,7 @@
 				217BD9E519E038BE008A0D9D /* StringSubstituterTests.m */,
 				2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */,
 				210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */,
+				21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -1116,6 +1125,7 @@
 				21F563CF1FD802400037F5D7 /* <.png in Resources */,
 				21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */,
 				210958EB1A0E1C5500E9171F /* NEW!.png in Resources */,
+				21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */,
 				21D397B21FC97A380018F883 /* home.png in Resources */,
 				2133F2AF1E80E175001A0BC5 /* Icon-Small@3x.png in Resources */,
 				2133F2B01E80E175001A0BC5 /* Icon.png in Resources */,
@@ -1305,6 +1315,7 @@
 				21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
+				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
 				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
 				216741A02043D592008A578D /* BehaviorLogger.swift in Sources */,
@@ -1363,6 +1374,7 @@
 				217E683E199A80A200C656AA /* NiftySpeakerTests.m in Sources */,
 				21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */,
 				2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */,
+				21AFDF36216CF977002F34D9 /* SpeechBlockTests.m in Sources */,
 				217BD9E619E038BE008A0D9D /* StringSubstituterTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

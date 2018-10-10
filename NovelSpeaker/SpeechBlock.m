@@ -7,6 +7,7 @@
 //
 
 #import "SpeechBlock.h"
+#import "GlobalDataSingleton.h"
 
 /// 表示用の文字列と、読み上げ用の文字列をそれぞれ保存します。
 @interface FakeSpeechText : NSObject
@@ -28,8 +29,27 @@
         return self;
     }
     m_FakeSpeechTextArray = [NSMutableArray new];
+    regexpForSpeechRecognizerBug = [NSRegularExpression regularExpressionWithPattern:@"\\s+" options:0 error:nil];
     
     return self;
+}
+
+- (NSString*)ConvertForSpeechRecognizerBug:(NSString*)text{
+    if (![[GlobalDataSingleton GetInstance] IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled]) {
+        return text;
+    }
+    NSString* convertTo = @"α";
+    NSRegularExpression* regexp = regexpForSpeechRecognizerBug;
+    if(regexp == nil){
+        NSLog(@"ConvertForSpeechRecognizerBug regexp generate error.");
+        return text;
+    }
+    NSString* result = [regexp stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, [text length]) withTemplate:convertTo];
+    if (result != nil && [result length] > 0) {
+        //NSLog(@"convert: %@ -> %@", text, result);
+        return result;
+    }
+    return text;
 }
 
 /// 表示用の文字列と読み上げ用の文字列を両方指定して追加します。
@@ -37,7 +57,8 @@
 {
     FakeSpeechText* fakeText = [FakeSpeechText new];
     fakeText.displayText = displayText;
-    fakeText.speechText = speechText;
+    //fakeText.speechText = speechText;
+    fakeText.speechText = [self ConvertForSpeechRecognizerBug:speechText];
     [m_FakeSpeechTextArray addObject:fakeText];
     
     return true;
@@ -90,9 +111,9 @@
     for (FakeSpeechText* fakeText in m_FakeSpeechTextArray) {
         unsigned long speechTextLength = [fakeText.speechText length];
         if ((speechP + speechTextLength) > range.location) {
+            unsigned long diffLength = range.location - speechP;
             if ([fakeText.displayText compare:fakeText.speechText] == NSOrderedSame) {
                  // 同じ文字列(同じ長さ)なので、一応その長さまでずらした値を返します。
-                unsigned long diffLength = range.location - speechP;
                 result.location = displayP + diffLength;
                 if (result.length > speechTextLength - diffLength) {
                     result.length = speechTextLength - diffLength;
@@ -102,7 +123,11 @@
             if (result.length > [fakeText.displayText length] - displayP) {
                 result.length = [fakeText.displayText length] - displayP;
             }
-            result.location = displayP;
+            if (diffLength < [fakeText.speechText length] && diffLength < [fakeText.displayText length]) {
+                result.location = displayP + diffLength;
+            }else{
+                result.location = displayP;
+            }
             break;
         }
         speechP += speechTextLength;
