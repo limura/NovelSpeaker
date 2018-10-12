@@ -46,7 +46,6 @@
     }
     NSString* result = [regexp stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, [text length]) withTemplate:convertTo];
     if (result != nil && [result length] > 0) {
-        //NSLog(@"convert: %@ -> %@", text, result);
         return result;
     }
     return text;
@@ -57,8 +56,8 @@
 {
     FakeSpeechText* fakeText = [FakeSpeechText new];
     fakeText.displayText = displayText;
-    //fakeText.speechText = speechText;
-    fakeText.speechText = [self ConvertForSpeechRecognizerBug:speechText];
+    fakeText.speechText = speechText;
+    //fakeText.speechText = [self ConvertForSpeechRecognizerBug:speechText];
     [m_FakeSpeechTextArray addObject:fakeText];
     
     return true;
@@ -123,11 +122,12 @@
             if (result.length > [fakeText.displayText length] - displayP) {
                 result.length = [fakeText.displayText length] - displayP;
             }
-            if (diffLength < [fakeText.speechText length] && diffLength < [fakeText.displayText length]) {
-                result.location = displayP + diffLength;
-            }else{
-                result.location = displayP;
-            }
+            // 微妙になる可能性がありますが、比率的には同じ位置を示すようにします
+            double doubleDisplayTextLength = [fakeText.displayText length];
+            double doubleSpeechTextLength = [fakeText.speechText length];
+            double doubleDiffLength = range.location - speechP;
+            double displayTextPoint = doubleDisplayTextLength * doubleDiffLength / doubleSpeechTextLength;
+            result.location = displayP + (unsigned long)displayTextPoint;
             break;
         }
         speechP += speechTextLength;
@@ -155,8 +155,13 @@
                 result.length = displayTextLength - diffLength;
                 break;
             }
+            // 微妙になる可能性がありますが、比率的には同じ位置を示すようにします
+            double doubleDisplayTextLength = [fakeText.displayText length];
+            double doubleSpeechTextLength = [fakeText.speechText length];
+            double diffLength = range.location - displayP;
+            double speechTextPoint = doubleSpeechTextLength * diffLength / doubleDisplayTextLength;
             result.length = [fakeText.speechText length];
-            result.location = speechP;
+            result.location = speechP + (unsigned long)speechTextPoint;
             break;
         }
         displayP += displayTextLength;

@@ -126,11 +126,11 @@ static DummySoundLooper* dummySoundLooper = nil;
     
     switch ([notification.userInfo[AVAudioSessionInterruptionTypeKey] intValue]) {
         case AVAudioSessionInterruptionTypeBegan:
-            [self AddLogString:@"interrupt が発生したので一旦無音音声の再生を止めます"];
+            //[self AddLogString:@"interrupt が発生したので一旦無音音声の再生を止めます"];
             [dummySoundLooper stopPlay];
             break;
         case AVAudioSessionInterruptionTypeEnded:
-            [self AddLogString:@"interrupt が解消したようなので無音音声の再生を再開します"];
+            //[self AddLogString:@"interrupt が解消したようなので無音音声の再生を再開します"];
             [dummySoundLooper startPlay];
             break;
         default:
@@ -1394,7 +1394,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return @{
              //@"(\\P{Han})己(\\P{Han})": @"$1おのれ$2",
              //@"(\\P{Han})掌(\\P{Han})": @"$1てのひら$2",
-             @"([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)\\s*〜\\s*([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)": @"$1から$2", // 100〜200 → 100から200
+             @"([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)\\s*[〜～]\\s*([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)": @"$1から$2", // 100〜200 → 100から200
              @"([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)\\s*話": @"$1は", // 29話 → 29は
     };
 }
@@ -1690,7 +1690,7 @@ static DummySoundLooper* dummySoundLooper = nil;
         [self ApplyRemoveURIModConfigWithText:m_NiftySpeaker text:story.content];
     }
     [self ApplySpeechModConfigForRegexp:m_NiftySpeaker targetText:story.content];
-    [self ApplySpeechModConfigForSpeechRecognizerBugEscape:m_NiftySpeaker targetText:story.content];
+    //[self ApplySpeechModConfigForSpeechRecognizerBugEscape:m_NiftySpeaker targetText:story.content];
     
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
     {
@@ -1781,7 +1781,7 @@ static DummySoundLooper* dummySoundLooper = nil;
         NSLog(@"setActive error: %@ %@", err, err.userInfo);
     }
     if ([self IsDummySilentSoundEnabled]) {
-        [self AddLogString:@"無音音声の再生を開始します。"];
+        //[self AddLogString:@"無音音声の再生を開始します。"];
         [dummySoundLooper startPlay];
     }
     [self StartMaxSpeechTimeInSecTimer];
@@ -1865,7 +1865,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     //NSLog(@"setActive NO.");
     [session setActive:NO error:nil];
     if ([self IsDummySilentSoundEnabled]) {
-        [self AddLogString:@"無音音声の再生を停止します。"];
+        //[self AddLogString:@"無音音声の再生を停止します。"];
         [dummySoundLooper stopPlay];
     }
     return result;
@@ -3444,6 +3444,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 /// 読み上げ時に無音の音を再生し続けるか否かを取得します
 - (BOOL)IsDummySilentSoundEnabled{
+    return true;
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults registerDefaults:@{USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED: @false}];
     return [userDefaults boolForKey:USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED];

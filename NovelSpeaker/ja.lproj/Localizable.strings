@@ -109,7 +109,7 @@
 "SettingTableViewController_RepeatType_RewindToThisStory" = "一つの章";
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する";
 "SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "確認";
-"SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "この設定は、読み上げ中の読み上げ位置表示がおかしくなる問題への対応です。ただし、対応手法がかなりトリッキーなので適用する前に原理を理解しておいてください。\nこの設定を有効にすると、読み上げ中の読み上げ位置がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ) に読み替えるように設定することでこの問題を回避するようになります。\nこの機能を実装した時点では、iOS の音声合成エンジンでは \"α\"(アルファ) は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により \"α\" が「アルファ」と読み上げられるようになる可能性があります。\nなお、一つの章で文章量が多い小説の場合にはこの\"α\"への変換を行うためにかかる時間が長くなってしまって表示する時や読み上げを開始する時にちょっと時間がかかる事が増えると思います。また、この機能が必要となるのは iOS 12(以降) だと思われますので iOS 11 以前でご利用の方は必要なさそうです。\n以上の事を理解した上でこの設定を有効にしますか？";
+"SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "この設定は、読み上げ中の読み上げ位置表示がおかしくなる問題への対応です。ただし、対応手法がかなりトリッキーなので適用する前に原理を理解しておいてください。\nこの設定を有効にすると、読み上げ中の読み上げ位置がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ) に読み替えるように設定することでこの問題を回避するようになります。\nこの機能を実装した時点では、iOS の音声合成エンジンでは \"α\"(アルファ) は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により \"α\" が「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われますので iOS 11 以前でご利用の方は必要なさそうです。\n以上の事を理解した上でこの設定を有効にしますか？";
 "SettingTableViewController_DummySilentSoundEnable" = "再生中に無音の音を鳴らし続けることでバックグラウンド再生中に再生が停止することがないよう祈る";
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";

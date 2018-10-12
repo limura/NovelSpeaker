@@ -12,6 +12,9 @@
 #import "SpeechConfig.h"
 #import "NovelSpeaker-Swift.h"
 
+#define iOS12WillSpeakRangeBugTargetRegexp @"[\\s•・*]"
+#define iOS12WillSpeakRangeBugConvertToString @"α"
+
 @interface BlockSeparator : NSObject
 @property (nonatomic, retain) NSString* startString;
 @property (nonatomic, retain) NSString* endString;
@@ -75,6 +78,8 @@ typedef enum {
     
     m_SpeakRangeDelegateArray = [NSMutableArray new];
     
+    m_RegexpForSpeechRecognizerBug = [NSRegularExpression regularExpressionWithPattern:iOS12WillSpeakRangeBugTargetRegexp options:0 error:nil];
+
     return self;
 }
 
@@ -108,7 +113,9 @@ typedef enum {
     m_NowSpeechBlockSpeachRange.length = 0;
     
     m_SpeakRangeDelegateArray = [NSMutableArray new];
-    
+
+    m_RegexpForSpeechRecognizerBug = [NSRegularExpression regularExpressionWithPattern:iOS12WillSpeakRangeBugTargetRegexp options:0 error:nil];
+
     return self;
 }
 
@@ -524,7 +531,15 @@ typedef enum {
     [m_Speaker SetRate:currentBlock.speechConfig.rate];
     [m_Speaker SetPitch:currentBlock.speechConfig.pitch];
     [m_Speaker SetDelay:currentBlock.speechConfig.beforeDelay];
-    [m_Speaker Speech:speakText];
+    //[m_Speaker Speech:speakText];
+    NSString* dummySpeakText = speakText;
+    if ([[GlobalDataSingleton GetInstance] IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled]) {
+        dummySpeakText = [m_RegexpForSpeechRecognizerBug stringByReplacingMatchesInString:speakText options:0 range:NSMakeRange(0, [speakText length]) withTemplate:iOS12WillSpeakRangeBugConvertToString];
+        if (dummySpeakText == nil) {
+            dummySpeakText = speakText;
+        }
+    }
+    [m_Speaker Speech:dummySpeakText];
     
     m_bIsSpeaking = true;
     return true;

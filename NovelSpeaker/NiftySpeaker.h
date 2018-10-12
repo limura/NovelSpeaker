@@ -52,6 +52,8 @@
     
     // delegate を保存します。
     NSMutableArray* m_SpeakRangeDelegateArray;
+    
+    NSRegularExpression* m_RegexpForSpeechRecognizerBug;
 }
 
 /// GlobalDataSingletonを使わない初期化
