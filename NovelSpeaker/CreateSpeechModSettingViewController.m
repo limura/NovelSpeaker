@@ -35,8 +35,17 @@
     
     m_Speaker = [Speaker new];
     m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
+    m_LoadedSpeechModSetting = nil;
     if (self.targetBeforeString != nil) {
         self.beforeTextField.text = self.targetBeforeString;
+    }else if(self.targetSpeechModSetting != nil) {
+        self.beforeTextField.text = self.targetSpeechModSetting.beforeString;
+        self.afterTextField.text = self.targetSpeechModSetting.afterString;
+        self.regexpSwitch.on = self.targetSpeechModSetting.isRegexpType;
+        if (!self.regexpSwitch.on) {
+            self.prevConvertTextField.text = self.beforeTextField.text;
+        }
+        m_LoadedSpeechModSetting = self.targetSpeechModSetting;
     }
 }
 
@@ -73,6 +82,9 @@
     SpeechModSettingConvertType type = SpeechModSettingConvertType_JustMatch;
     if(self.regexpSwitch.on){
         type = SpeechModSettingConvertType_Regexp;
+    }
+    if (m_LoadedSpeechModSetting != nil) {
+        [[GlobalDataSingleton GetInstance] DeleteSpeechModSetting:m_LoadedSpeechModSetting];
     }
     SpeechModSettingCacheData* speechMod = [[SpeechModSettingCacheData alloc] initWithBeforeString:self.beforeTextField.text afterString:self.afterTextField.text type:type];
     if ([[GlobalDataSingleton GetInstance] UpdateSpeechModSetting:speechMod] == false) {
@@ -125,5 +137,12 @@
 - (IBAction)viewTapEvent:(id)sender {
     NSLog(@"viewTapEvent.");
     [self.view endEditing:true];
+}
+- (IBAction)BeforeTextFieldEditingChanged:(id)sender {
+    if (!self.regexpSwitch.on){
+        self.prevConvertTextField.text = self.beforeTextField.text;
+    }
+}
+- (IBAction)AfterTextFieldEditingChaned:(id)sender {
 }
 @end

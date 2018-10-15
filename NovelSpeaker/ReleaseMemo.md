@@ -1756,6 +1756,20 @@ Bug fix
 
 - Fixed a problem that the display reflecting those changes did not appear in the setting between reading aloud on the setting tab, even after changing individual settings or after returning to the settings between reading aloud after adding them
 
+
+# Version 1.1.44
+
+インタフェースの変更
+
+- 設定 -> 読みの修正 で個々の変換ルールをタップすると詳細画面に移行するように
+
+# Version 1.1.44
+
+Interface change
+
+- By tapping individual conversion rules with Settings -> Correction of the reading.
+
+
 TODO
 
 - DispatchQueue.main.sync {...} を main thread では単なるblockの実行だけにした辺りで、blockされているような挙動が見当たるようになったような気が……何故だ(´・ω・`)

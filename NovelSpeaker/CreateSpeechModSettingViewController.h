@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "Speaker.h"
 #import "EasyAlert.h"
+#import "SpeechModSettingCacheData.h"
+
 @protocol CreateNewSpeechModSettingDelegate <NSObject>
 
 - (void)NewSpeechModSettingAdded;
@@ -19,6 +21,7 @@
 {
     Speaker* m_Speaker;
     EasyAlert* m_EasyAlert;
+    SpeechModSettingCacheData* m_LoadedSpeechModSetting;
 }
 @property (weak, nonatomic) IBOutlet UITextField *beforeTextField;
 @property (weak, nonatomic) IBOutlet UITextField *afterTextField;
@@ -29,4 +32,6 @@
 @property (weak, nonatomic) IBOutlet UITextField *afterConvertTextField;
 - (IBAction)uiTextFieldDidEndOnExit:(id)sender;
 - (IBAction)viewTapEvent:(id)sender;
+
+@property SpeechModSettingCacheData* targetSpeechModSetting;
 @end

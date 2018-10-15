@@ -284,15 +284,20 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.43
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.44
 
-- 標準の読み替え辞書にいくつかの正規表現を使った設定を追加
-- iOS 12 において、読み上げ中の文字の表示位置がおかしくなる場合がある問題への暫定的対処のON/OFF設定を追加
-- iPhone X 等のノッチのある iPhone で、ダウンロード中の表示が画面上部のインジケータに出なくなっていた問題に対処
--  設定タブの読み上げ時の間の設定 で、個別の設定を変えたり追加した後に読み上げ時の間の設定に戻ってもそれらの変更が反映された表示にならない問題を修正
+- 設定 -> 読みの修正 で個々の変換ルールをタップすると詳細画面に移行するように
+
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.44
+
+インタフェースの変更
+
+- 設定 -> 読みの修正 で個々の変換ルールをタップすると詳細画面に移行するように
+
+
 # Version 1.1.43
 
 インタフェースの変更

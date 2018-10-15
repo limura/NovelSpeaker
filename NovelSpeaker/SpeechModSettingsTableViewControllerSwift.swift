@@ -12,6 +12,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
     let m_Speaker = Speaker()
     static let speechModSettingsTableViewDefaultCellID = "speechModSettingsTableViewDefaultCell"
     var m_FilterString = ""
+    var m_TargetSpeechModSetting:SpeechModSettingCacheData? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +39,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         addNotificationReceiver()
+        self.tableView.reloadData()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -125,8 +127,12 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
         if modSetting == nil {
             return;
         }
+        m_TargetSpeechModSetting = modSetting
+        performSegue(withIdentifier: "newSpeechSettingSegue", sender: self)
+        /*
         let sampleText = String(format: NSLocalizedString("SpeechModSettingsTableViewController_SpeakTestPattern", comment:"%@を%@に"), (modSetting?.beforeString)!, (modSetting?.afterString)!)
         m_Speaker.speech(sampleText)
+        */
     }
 
     /*
@@ -153,10 +159,12 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
         if segue.identifier == "newSpeechSettingSegue" {
             let controller:CreateSpeechModSettingViewController = segue.destination as! CreateSpeechModSettingViewController
             controller.createNewSpeechModSettingDelegate = self;
+            controller.targetSpeechModSetting = m_TargetSpeechModSetting
         }
     }
 
     @objc func addButtonClicked(){
+        m_TargetSpeechModSetting = nil
         performSegue(withIdentifier: "newSpeechSettingSegue", sender: self)
     }
     

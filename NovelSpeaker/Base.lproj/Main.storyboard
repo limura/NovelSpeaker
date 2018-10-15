@@ -280,6 +280,7 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                                 <connections>
+                                    <action selector="BeforeTextFieldEditingChanged:" destination="kSq-hq-E9G" eventType="editingChanged" id="4gy-7X-ifn"/>
                                     <action selector="uiTextFieldDidEndOnExit:" destination="kSq-hq-E9G" eventType="editingDidEndOnExit" id="cgp-MB-wVg"/>
                                 </connections>
                             </textField>
@@ -288,6 +289,7 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                                 <connections>
+                                    <action selector="AfterTextFieldEditingChaned:" destination="kSq-hq-E9G" eventType="editingChanged" id="vKD-SA-cZq"/>
                                     <action selector="uiTextFieldDidEndOnExit:" destination="kSq-hq-E9G" eventType="editingDidEndOnExit" id="Ls0-2y-GRC"/>
                                 </connections>
                             </textField>
@@ -575,7 +577,7 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="685"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <mutableString key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
+                                <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
 MIT License
 
@@ -669,7 +671,7 @@ SOFTWARE.
   -------- FTLinearActivityIndicator -------- Copyright (c) 2018 Ortwin Gentz, FutureTap GmbH
 
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
-</mutableString>
+</string>
                                 <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
