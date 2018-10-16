@@ -191,8 +191,27 @@
 
 /// HTTP GET request for binary
 + (NSData*)HttpGetBinary:(NSString*)url {
-    NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
-    return [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
+    [request setHTTPMethod:@"GET"];
+    NSURLSession* session = [NSURLSession sharedSession];
+    __block NSData* result = nil;
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    NSURLSessionDataTask* dataTask = [session dataTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+            NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+            if (httpResponse.statusCode != 200) {
+                dispatch_semaphore_signal(semaphore);
+                return;
+            }
+            result = data;
+            dispatch_semaphore_signal(semaphore);
+        }
+    }];
+    [dataTask resume];
+    while(dispatch_semaphore_wait(semaphore, DISPATCH_TIME_NOW)){
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
+    }
+    return result;
 }
 /// HTTP GET request
 + (NSString*)HttpGet:(NSString*)url {
