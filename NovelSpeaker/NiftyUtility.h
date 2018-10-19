@@ -40,4 +40,10 @@
 /// HTML のエスケープ文字を元に戻します。
 + (NSString*)decodeHtmlEscape:(NSString*)htmlString;
 
+/// 最上位の UIViewController を取得します。nil が返る可能性があります
++ (UIViewController*)findToplevelViewController;
+
+/// 空白や改行など表示されない文字を全て排除した文字列を生成する
++ (NSString*)removeWhiteSpace:(NSString*)str;
+
 @end

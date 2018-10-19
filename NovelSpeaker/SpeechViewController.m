@@ -1027,10 +1027,10 @@
     [notificationCenter addObserver:self selector:@selector(FontNameChanged:) name:@"FontNameChanged" object:nil];
 
     NSString* notificationName = [[NSString alloc] initWithFormat:@"NarouContentDownloadStatusChanged_%@", self.NarouContentDetail.ncode];
-    [notificationCenter addObserver:self selector:@selector(NarouContentUpdated:) name:notificationName object:nil];
+    [notificationCenter addObserver:self selector:@selector(NarouContentUpdatedDownload:) name:notificationName object:nil];
     
     notificationName = [[NSString alloc] initWithFormat:@"NarouContentNewStatusUp_%@", self.NarouContentDetail.ncode];
-    [notificationCenter addObserver:self selector:@selector(NarouContentUpdated:) name:notificationName object:nil];
+    [notificationCenter addObserver:self selector:@selector(NarouContentUpdatedNewStatus:) name:notificationName object:nil];
     
     [[GlobalDataSingleton GetInstance] AddDownloadEventHandler:self];
 }
@@ -1082,7 +1082,30 @@
 }
 
 /// ダウンロード状態更新イベントの受信
-- (void)NarouContentUpdated:(NSNotification*)notification
+- (void)NarouContentUpdatedDownload:(NSNotification*)notification
+{
+    [self ReloadNarouContentDetail];
+    
+    NSDictionary* args = [notification userInfo];
+    NSNumber* isDownloading = [args objectForKey:@"isDownloading"];
+    if (![isDownloading boolValue]) {
+        // nothing to do!
+    }else{
+        NSNumber* currentPosition = [args objectForKey:@"currentPosition"];
+        if ([m_CurrentReadingStory.chapter_number intValue] == [currentPosition intValue]) {
+            StoryCacheData* story = [[GlobalDataSingleton GetInstance] SearchStory:m_CurrentReadingStory.ncode chapter_no:[m_CurrentReadingStory.chapter_number intValue]];
+            if (story != nil) {
+                m_CurrentReadingStory = story;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self setSpeechStory:story];
+                });
+            }
+        }
+    }
+}
+
+/// NEWフラグ更新イベントの受信
+- (void)NarouContentUpdatedNewStatus:(NSNotification*)notification
 {
     [self ReloadNarouContentDetail];
 }

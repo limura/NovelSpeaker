@@ -531,7 +531,7 @@
     xmlXPathFreeContext(context);
     xmlFreeDoc(document);
     
-    if (story.content == nil || [story.content length] <= 0) {
+    if (story.content == nil || [story.content length] <= 0 || [[NiftyUtility removeWhiteSpace:story.content] length] <= 0) {
         NSLog(@"fetchURL failed: story.content == nil or length <= 0");
         if (out_errorString != nil) {
             [out_errorString setString:NSLocalizedString(@"UriLoader_HTMLParseFailed_ContentIsNil", @"HTMLの解析に失敗しました。(content is nil)")];

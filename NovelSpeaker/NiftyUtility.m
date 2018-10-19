@@ -9,6 +9,7 @@
 #import "NiftyUtility.h"
 #import "NSDataZlibExtension.h"
 #import <CommonCrypto/CommonHMAC.h>
+#import "UIViewControllerExtension.h"
 
 @implementation NiftyUtility
 
@@ -153,6 +154,18 @@
     htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
     
     return htmlString;
+}
+
+/// 最上位の UIViewController を取得します。nil が返る可能性があります
++ (UIViewController*)findToplevelViewController
+{
+    return [UIViewController toplevelViewController];
+}
+
+/// 空白や改行など表示されない文字を全て排除した文字列を生成する
++ (NSString*)removeWhiteSpace:(NSString*)str{
+    NSRegularExpression* regexp = [[NSRegularExpression alloc] initWithPattern:@"\\s+" options:0 error:nil];
+    return [regexp stringByReplacingMatchesInString:str options:0 range:NSMakeRange(0, [str length]) withTemplate:@""];
 }
 
 @end

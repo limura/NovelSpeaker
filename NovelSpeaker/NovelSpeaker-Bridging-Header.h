@@ -11,3 +11,5 @@
 #import "EasyAlert.h"
 #import "NarouLoader.h"
 #import "NarouSearchResultTableViewController.h"
+#import "NiftyUtility.h"
+
