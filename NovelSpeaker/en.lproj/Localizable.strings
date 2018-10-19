@@ -290,6 +290,8 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.44
 
 - By tapping individual conversion rules with Settings -> Correction of the reading.
+- Fixed an issue where sometimes the download succeeded except for HTTP 200 OK
+- Judge that the download has failed even if the body of only characters that are not displayed such as blanks or blank lines are read
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -299,6 +301,11 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 Interface change
 
 - By tapping individual conversion rules with Settings -> Correction of the reading.
+
+Bug fix
+
+- Fixed an issue where sometimes the download succeeded except for HTTP 200 OK
+- Judge that the download has failed even if the body of only characters that are not displayed such as blanks or blank lines are read
 
 
 # Version 1.1.43

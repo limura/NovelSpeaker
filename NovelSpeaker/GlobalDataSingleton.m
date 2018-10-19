@@ -3522,7 +3522,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         @"ハーメルン\nhttps://syosetu.org/",
         @"暁\nhttps://www.akatsuki-novels.com/",
         @"カクヨム\nhttps://kakuyomu.jp/",
-        @"アルファポリス\nhttps://www.alphapolis.co.jp/novel/",
+        //@"アルファポリス\nhttps://www.alphapolis.co.jp/novel/",
         //@"pixiv/ノベル\nhttps://www.pixiv.net/novel/",
         @"星空文庫\nhttps://slib.net/",
         //@"FC2小説\nhttps://novel.fc2.com/",
@@ -3542,7 +3542,18 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         //@"短編\nhttp://tanpen.jp/",
         //@"ライトノベル作法研究所\nhttp://www.raitonoveru.jp/",
         ]}];
-    return [userDefaults arrayForKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
+    // 2018/10/20 アルファポリスがJavaScriptによる遅延読み込みになったため、
+    // 標準ブックマークとして保存されいていたアルファポリスについては非対応という表示を追加することにした
+    NSArray* bookmarkArray = [userDefaults arrayForKey:USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY];
+    NSMutableArray* modifiedArray = [NSMutableArray new];
+    for (NSString* str in bookmarkArray) {
+        if ([str compare:@"アルファポリス\nhttps://www.alphapolis.co.jp/novel/"] == NSOrderedSame) {
+            [modifiedArray addObject:@"アルファポリス(Web取込 非対応サイトになりました。詳細はサポートサイト下部にありますQ&Aを御覧ください)\nhttps://www.alphapolis.co.jp/novel/"];
+        }else{
+            [modifiedArray addObject:str];
+        }
+    }
+    return modifiedArray;
 }
 
 /// Web取り込み用のBookmarkに追加します。
