@@ -552,6 +552,53 @@ static DummySoundLooper* dummySoundLooper = nil;
     return result;
 }
 
+/// 指定された ncode の小説で、保存されている Story の chapter_no のみのリストを取得します(公開用method)
+- (NSArray*)GetAllStoryForNcodeThreadUnsafe:(NSString*)ncode
+{
+    NSArray* fetchResults = [m_CoreDataObjectHolder SearchEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode] sortAttributeName:@"chapter_number" ascending:NO];
+    
+    if(fetchResults == nil)
+    {
+        NSLog(@"fetch from CoreData failed.");
+        return @[];
+    }
+    NSMutableArray* resultArray = [[NSMutableArray alloc] initWithCapacity:[fetchResults count]];
+    int i = 0;
+    for (Story* story in fetchResults) {
+        StoryCacheData* storyCacheData = [[StoryCacheData alloc] initWithCoreData:story];
+        resultArray[i] = storyCacheData;
+        i++;
+    }
+    return resultArray;
+}
+
+/// 指定された ncode の小説で、保存されている Story を全て取得します。
+- (NSArray*)GeAllStoryForNcode:(NSString*)ncode
+{
+    __block NSArray* result = 0;
+    [self coreDataPerfomBlockAndWait:^{
+        result = [self GetAllStoryForNcodeThreadUnsafe:ncode];
+    }];
+    return result;
+}
+
+/// 指定された ncode の小説で、保存されている Story の個数を取得します
+- (NSUInteger)GetStoryCountForNcodeThreadUnsafe:(NSString*)ncode
+{
+    NSUInteger result = [m_CoreDataObjectHolder CountEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode]];
+    return result;
+}
+
+/// 指定された ncode の小説で、保存されている Story の個数を取得します
+- (NSUInteger)GetStoryCountForNcode:(NSString*)ncode
+{
+    __block NSUInteger result = 0;
+    [self coreDataPerfomBlockAndWait:^{
+        result = [self GetStoryCountForNcodeThreadUnsafe:ncode];
+    }];
+    return result;
+}
+
 /// Story を新しく生成します。必要な情報をすべて指定する必要があります
 - (Story*) CreateNewStoryThreadUnsafe:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
 {

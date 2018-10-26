@@ -1117,7 +1117,8 @@
         //      self->m_CurrentReadingStory.chapter_number,
         //      self.NarouContentDetail.general_all_no);
         self.ChapterSlider.minimumValue = 1;
-        self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
+        //self.ChapterSlider.maximumValue = [self.NarouContentDetail.general_all_no floatValue] + 0.01f;
+        self.ChapterSlider.maximumValue = [[GlobalDataSingleton GetInstance] GetStoryCountForNcode:self.NarouContentDetail.ncode] + 0.01f;
         [self UpdateChapterIndicatorLabel:[self->m_CurrentReadingStory.chapter_number intValue] max:(int)self.ChapterSlider.maximumValue];
     });
 }

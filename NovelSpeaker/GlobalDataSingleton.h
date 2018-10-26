@@ -149,6 +149,12 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// 登録がなければ nil を返します
 - (StoryCacheData*) SearchStory:(NSString*)ncode chapter_no:(int)chapter_number;
 
+/// 指定された ncode の小説で、保存されている Story を全て取得します。
+- (NSArray*)GeAllStoryForNcode:(NSString*)ncode;
+
+/// 指定された ncode の小説で、保存されている Story の個数を取得します
+- (NSUInteger)GetStoryCountForNcode:(NSString*)ncode;
+
 /// Story を新しく生成します。必要な情報をすべて伝える必要があります。
 /// private method になりました。
 //- (Story*) CreateNewStory:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
