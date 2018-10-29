@@ -1808,11 +1808,11 @@ static DummySoundLooper* dummySoundLooper = nil;
 /// 読み上げを開始します。
 - (BOOL)StartSpeech
 {
+    StoryCacheData* story = [self GetReadingChapter:[self GetCurrentReadingContent]];
     if (m_isNeedReloadSpeakSetting) {
         NSLog(@"読み上げ設定を読み直します。");
         [self ReloadSpeechSetting];
         // 読み直された読み上げ設定で発音情報を再定義させます。
-        StoryCacheData* story = [self GetReadingChapter:[self GetCurrentReadingContent]];
         if (story != nil) {
             NSLog(@"発音情報を更新します。");
             [self SetSpeechStory:story];
@@ -1830,6 +1830,10 @@ static DummySoundLooper* dummySoundLooper = nil;
     if ([self IsDummySilentSoundEnabled]) {
         //[self AddLogString:@"無音音声の再生を開始します。"];
         [dummySoundLooper startPlay];
+    }
+    
+    if (story != nil) {
+        [self UpdatePlayingInfo:story];
     }
     [self StartMaxSpeechTimeInSecTimer];
     [BehaviorLogger AddLogWithDescription:@"StartSpeech" data:@{}];
