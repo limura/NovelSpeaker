@@ -1794,6 +1794,45 @@ Bug fix
 - Fixed an issue where sometimes the download succeeded except for HTTP 200 OK
 - Judge that the download has failed even if the body of only characters that are not displayed such as blanks or blank lines are read
 
+
+# Version 1.1.45
+
+インタフェースの変更
+
+- 文章を表示している画面のスライドバーの最大値を、ダウンロードされている章(ページ)の数に変更
+- 最大連続再生時間を超えて再生が停止する時にそのようにアナウンスをするようになります
+
+問題の修正
+
+- 最大連続再生時間のカウントダウンが、読み上げ中にページ切り替えが発生した時にリセットされていた問題を修正
+
+追伸
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正では、ダウンロード中の小説の、まだダウンロードされていない部分を開くことができないようにするという修正になります(これは、ダウンロード中という事がわかりにくかった事による「表示できない部分があるのは不都合なので直せ」といったお問い合わせが減る事を期待しています)。
+
+また、「設定」->「連続再生時間」がうまく効いていない場合があった問題も修正しまして、ついでに設定された連続再生時間を超えた時にはそのようにアナウンスを入れるようにしました。
+
+後は少し安定性を高めるための修正も施しているのですが、根本的な原因を突き止めてのものではありませんので特にリリースノートには書かないでおくことにします(βテスト用の方の情報には載っていますので興味のある方はそちらを読んでみても良いかもしれません)。
+
+さて、ここ何回かのアップデート時に告知しております通り、現在 ことせかい ではβテスターの募集を行っています。βテスターの募集に関する詳しい事は、サポートサイト下部のリンクにあります「ことせかい βテスター募集要項」を参照してください。おかげさまで、βテスターの方々の数は順調に増えてきておりますが、まだまだ十分とはいえませんのでお手伝い頂ければ幸いです。
+また、βテスターの方々には様々な不都合の発見や詳しい状況の報告など、とても助けられています。ありがとうございます。お手数をおかけしますが、これからもお手伝いいただければ幸いです。
+
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+# Version 1.1.45
+
+Interface change
+
+- Change the maximum value of the slide bar of the screen displaying sentences to the number of chapters (pages) being downloaded
+- When playback stops beyond maximum continuous playback time, NovelSpeaker will announce that way
+
+Bug Fix
+
+- Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
+
 TODO
 
 - DispatchQueue.main.sync {...} を main thread では単なるblockの実行だけにした辺りで、blockされているような挙動が見当たるようになったような気が……何故だ(´・ω・`)

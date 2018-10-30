@@ -505,7 +505,7 @@
 
 /// 読み上げを開始します。
 /// 読み上げ開始点(選択範囲)がなければ一番最初から読み上げを開始することにします
-- (void)startSpeech {
+- (void)startSpeech:(BOOL)withMaxSpeechTimeReset{
     // 選択範囲を表示するようにします。
     [self.textView becomeFirstResponder];
     
@@ -527,7 +527,7 @@
     startStopButton.title = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");
     
     // 読み上げを開始します
-    [[GlobalDataSingleton GetInstance] StartSpeech];
+    [[GlobalDataSingleton GetInstance] StartSpeech:withMaxSpeechTimeReset];
 }
 
 /// 読み上げを「バックグラウンド再生としては止めずに」読み上げ部分だけ停止します
@@ -617,13 +617,13 @@
                 secondButtonText:NSLocalizedString(@"OK_button", @"OK")
                 secondActionHandler:^(UIAlertAction *action) {
                     self->m_bIsSpeaking = YES;
-                    [self startSpeech];
+                    [self startSpeech:YES];
                 }];
             return;
         }
 
         m_bIsSpeaking = YES;
-        [self startSpeech];
+        [self startSpeech:YES];
     }
     else
     {
@@ -755,7 +755,7 @@
     if (repeatType == RepeatSpeechType_RewindToThisStory) {
         [self RewindTo:[m_CurrentReadingStory.chapter_number intValue]];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [self startSpeech];
+            [self startSpeech:NO];
         });
         return;
     }
@@ -763,14 +763,14 @@
     //[self stopSpeechWithoutDiactivate];
     if ([self SetNextChapter]) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [self startSpeech];
+            [self startSpeech:NO];
         });
     }else{
         // 最初の章から繰り返し再生するように設定されている場合はそのようにします。
         if (repeatType == RepeatSpeechType_RewindToFirstStory) {
             [self RewindTo:1];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [self startSpeech];
+                [self startSpeech:NO];
             });
             return;
         }
@@ -791,7 +791,7 @@
     switch (receivedEvent.subtype) {
         case UIEventSubtypeRemoteControlPlay:
             //NSLog(@"event: play");
-            //[self startSpeech];
+            //[self startSpeech:YES];
             //break;
         case UIEventSubtypeRemoteControlPause:
             //NSLog(@"event: pause");
@@ -802,7 +802,7 @@
             if ([[GlobalDataSingleton GetInstance] isSpeaking]) {
                 [self stopSpeech];
             }else{
-                [self startSpeech];
+                [self startSpeech:YES];
             }
             break;
                 
@@ -810,7 +810,7 @@
             NSLog(@"event: prev");
             [self stopSpeechWithoutDiactivate];
             if ([self SetPreviousChapter]) {
-                [self startSpeech];
+                [self startSpeech:YES];
             }
             break;
                 
@@ -818,7 +818,7 @@
             NSLog(@"event: next");
             [self stopSpeechWithoutDiactivate];
             if ([self SetNextChapter]) {
-                [self startSpeech];
+                [self startSpeech:YES];
             }
             break;
         default:
@@ -828,7 +828,7 @@
 
 /// MPRemoteCommandCenter からの play イベントのイベントハンドラ
 - (void)playEvent:(id)sendor {
-    [self startSpeech];
+    [self startSpeech:YES];
 }
 
 /// MPRemoteCommandCenter からの stop イベントのイベントハンドラ
@@ -843,7 +843,7 @@
         [self stopSpeech];
     }else{
         NSLog(@"toggle startSpeech");
-        [self startSpeech];
+        [self startSpeech:YES];
     }
 }
 
@@ -851,7 +851,7 @@
 - (void)nextTrackEvent:(id)sendor {
     [self stopSpeechWithoutDiactivate];
     if ([self SetNextChapter]) {
-        [self startSpeech];
+        [self startSpeech:YES];
     }
 }
 
@@ -859,7 +859,7 @@
 - (void)previousTrackEvent:(id)sendor {
     [self stopSpeechWithoutDiactivate];
     if ([self SetPreviousChapter]) {
-        [self startSpeech];
+        [self startSpeech:YES];
     }
 }
 
@@ -869,7 +869,7 @@
     [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
     [self skipForward:100];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-        [self startSpeech];
+        [self startSpeech:YES];
     });
 }
 /// MPRemoteCommandCenter からの skipBackword イベントのイベントハンドラ
@@ -878,7 +878,7 @@
     [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
     [self skipBackward:100];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-        [self startSpeech];
+        [self startSpeech:YES];
     });
 }
 
@@ -895,7 +895,7 @@
             [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
             [self skipForward:50];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-                [self startSpeech];
+                [self startSpeech:YES];
             });
         }];
     }
@@ -916,7 +916,7 @@
             [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
             [self skipBackward:50];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-                [self startSpeech];
+                [self startSpeech:YES];
             });
         }];
     }
@@ -943,7 +943,7 @@
     [globalData UpdatePlayingInfo:(m_CurrentReadingStory)];
 
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
-        [self startSpeech];
+        [self startSpeech:YES];
     });
     
     return MPRemoteCommandHandlerStatusSuccess;

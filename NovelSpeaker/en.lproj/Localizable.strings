@@ -41,6 +41,7 @@
 "GlobalDataSingleton_RestoreingBookProgress" = "Step 2\r\nRestoring novels";
 "GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings" = "Step 1\r\nRestoring settings";
 "GlobalDataSingleton_RestoreBackupDataFailed" = "Restore backup data failed.";
+"GlobalDataSingleton_AnnounceStopedByTimer" = "As the maximum continuous playback time was exceeded, reading aloud was stopped.";
 
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "Title: %@";
@@ -287,15 +288,27 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.44
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.45
 
-- By tapping individual conversion rules with Settings -> Correction of the reading.
-- Fixed an issue where sometimes the download succeeded except for HTTP 200 OK
-- Judge that the download has failed even if the body of only characters that are not displayed such as blanks or blank lines are read
+- Change the maximum value of the slide bar of the screen displaying sentences to the number of chapters (pages) being downloaded
+- When playback stops beyond maximum continuous playback time, NovelSpeaker will announce that way
+- Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.45
+
+Interface change
+
+- Change the maximum value of the slide bar of the screen displaying sentences to the number of chapters (pages) being downloaded
+- When playback stops beyond maximum continuous playback time, NovelSpeaker will announce that way
+
+Bug Fix
+
+- Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
+
+
 # Version 1.1.44
 
 Interface change

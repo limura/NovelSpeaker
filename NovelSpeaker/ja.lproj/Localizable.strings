@@ -41,6 +41,7 @@
 "GlobalDataSingleton_RestoreingBookProgress" = "工程 2\r\n小説を本棚に登録中";
 "GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings" = "工程 1\r\n設定の復元中";
 "GlobalDataSingleton_RestoreBackupDataFailed" = "バックアップデータの読み込みに失敗しました。";
+"GlobalDataSingleton_AnnounceStopedByTimer" = "最大連続再生時間を超えたので、読み上げを停止しました。";
 
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "ダウンロードキューへの追加に失敗";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "作品名: %@";
@@ -284,15 +285,26 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.44
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.45
 
-- 設定 -> 読みの修正 で個々の変換ルールをタップすると詳細画面に移行するように
-- HTTP 200 OK 以外でダウンロードが成功していた場合があった問題を修正
-- 空白や空行のみといった表示されない文字だけの本文が読み込まれた場合にもダウンロードが失敗したことと判定するように
-
+- 文章を表示している画面のスライドバーの最大値を、ダウンロードされている章(ページ)の数に変更
+- 最大連続再生時間を超えて再生が停止する時にそのようにアナウンスをするようになります
+- 最大連続再生時間のカウントダウンが、読み上げ中にページ切り替えが発生した時にリセットされていた問題を修正
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.45
+
+インタフェースの変更
+
+- 文章を表示している画面のスライドバーの最大値を、ダウンロードされている章(ページ)の数に変更
+- 最大連続再生時間を超えて再生が停止する時にそのようにアナウンスをするようになります
+
+問題の修正
+
+- 最大連続再生時間のカウントダウンが、読み上げ中にページ切り替えが発生した時にリセットされていた問題を修正
+
+
 # Version 1.1.44
 
 インタフェースの変更

@@ -1799,6 +1799,9 @@ static DummySoundLooper* dummySoundLooper = nil;
         }else{
             [[GlobalDataSingleton GetInstance] AddLogString:@"MaxSpeechTimeInSecEventHandler が呼び出されたので読み上げを止めます。"]; // NSLog
             [self StopSpeech];
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [self AnnounceBySpeech:NSLocalizedString(@"GlobalDataSingleton_AnnounceStopedByTimer", @"最大連続再生時間を超えたので、読み上げを停止します。")];
+            });
         }
     }else{
         [[GlobalDataSingleton GetInstance] AddLogString:@"MaxSpeechTimeInSecEventHandler が呼び出されたけれど、m_MaxSpeechTimeInSecTimer が nil でした。"]; // NSLog
@@ -1806,9 +1809,10 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
 
 /// 読み上げを開始します。
-- (BOOL)StartSpeech
+- (BOOL)StartSpeech:(BOOL)withMaxSpeechTimeReset
 {
-    StoryCacheData* story = [self GetReadingChapter:[self GetCurrentReadingContent]];
+    GlobalStateCacheData* state = [self GetGlobalState];
+    StoryCacheData* story = state.currentReadingStory;
     if (m_isNeedReloadSpeakSetting) {
         NSLog(@"読み上げ設定を読み直します。");
         [self ReloadSpeechSetting];
@@ -1835,7 +1839,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     if (story != nil) {
         [self UpdatePlayingInfo:story];
     }
-    [self StartMaxSpeechTimeInSecTimer];
+    if (withMaxSpeechTimeReset) {
+        [self StartMaxSpeechTimeInSecTimer];
+    }
     [BehaviorLogger AddLogWithDescription:@"StartSpeech" data:@{}];
     return [m_NiftySpeaker StartSpeech];
 }
