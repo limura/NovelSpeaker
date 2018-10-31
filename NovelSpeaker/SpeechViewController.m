@@ -320,7 +320,7 @@
     if (range.location >= [textView.text length]) {
         return;
     }
-    //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld %ld", self.NarouContentDetail.title, (unsigned long)range.location(unsigned long), [textView.text length]]]; // NSLog
+    //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"長押しにより読み上げ位置を更新します。%@ %ld %lu", self.NarouContentDetail.title, (unsigned long)range.location, (unsigned long)[textView.text length]]]; // NSLog
     m_CurrentReadingStory.readLocation = [[NSNumber alloc] initWithUnsignedLong:range.location];
     [self SaveCurrentReadingPoint];
 }
@@ -600,7 +600,7 @@
     if (content == nil) {
         return;
     }
-    NSString* message = [NSString stringWithFormat:NSLocalizedString(@"SpeechViewController_TweetMessage", @"%@ %@ #narou #ことせかい %@ %@"), content.title, content.writer, [[NSString alloc] initWithFormat:@"http://ncode.syosetu.com/%@/%@/", m_CurrentReadingStory.ncode, m_CurrentReadingStory.chapter_number], @"https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185"];
+    NSString* message = [NSString stringWithFormat:NSLocalizedString(@"SpeechViewController_TweetMessage", @"%@ %@ #narou #ことせかい %@ %@"), content.title, content.writer, [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/%@/", m_CurrentReadingStory.ncode, m_CurrentReadingStory.chapter_number], @"https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185"];
     [EasyShare ShareText:message viewController:self barButton:shareButton];
 }
 
@@ -973,11 +973,13 @@
     NSRange currentReadingPoint = [globalData GetCurrentReadingPoint];
     NSUInteger currentLocation = currentReadingPoint.location;
     NSUInteger targetLength = 0;
-    if (currentLocation < count && [self SetPreviousChapter]) {
-        NSString* chapterText = self.textView.text;
-        NSUInteger chapterLength = [chapterText length];
-        if (chapterLength > count) {
-            targetLength = chapterLength - count;
+    if (currentLocation < count){
+        if ([self SetPreviousChapter]) {
+            NSString* chapterText = self.textView.text;
+            NSUInteger chapterLength = [chapterText length];
+            if (chapterLength > count) {
+                targetLength = chapterLength - count;
+            }
         }
     }else{
         targetLength = currentLocation - count;
