@@ -568,7 +568,8 @@ typedef enum {
     }
     SpeechBlock* currentBlock = [m_SpeechBlockArray objectAtIndex:m_NowSpeechBlockIndex];
     NSRange currentRange = [currentBlock ConvertSpeakRangeToDisplayRange:m_NowSpeechBlockSpeachRange];
-    currentRange.location += p;
+    //NSLog(@"range.length: %lu -> %lu", (unsigned long)m_NowSpeechBlockSpeachRange.length, (unsigned long)currentRange.length);
+    currentRange.location += p + currentRange.length; // m_NowSpeechBlockSpeachRange.length には現在読み上げ中の Block の location が入っている(はず)のでその分が currentRange.length に反映されているのでその分を増やしてやる
     
     return currentRange;
 }
@@ -600,6 +601,7 @@ typedef enum {
     NSRange currentRange = NSMakeRange(point.location - p, 0);
     NSRange speakRange = [foundBlock ConvertDisplayRangeToSpeakRange:currentRange];
     m_NowSpeechBlockSpeachRange = speakRange;
+    m_NowSpeechBlockSpeachRange.length = 0;
     m_NowSpeechBlockIndex = blockIndex;
     m_NowQueuedBlockIndex = blockIndex;
     
@@ -642,6 +644,8 @@ typedef enum {
     SpeechBlock* currentBlock = [m_SpeechBlockArray objectAtIndex:m_NowSpeechBlockIndex];
     
     NSRange adjustedRange = range;
+    //NSLog(@"willSpeakRange: %ld/%ld", (unsigned long)range.location, (unsigned long)range.length);
+    m_NowSpeechBlockSpeachRange.length = range.location; // m_NowSpeechBlockSpeachRange.length には現在読み上げ中の Block の location を入れる
     adjustedRange.location += m_NowSpeechBlockSpeachRange.location;
     NSRange displayRange = [currentBlock ConvertSpeakRangeToDisplayRange:adjustedRange];
     // ここまでで、displayRange に現在読み上げているブロックの location が入っているはず。

@@ -293,6 +293,7 @@
 - Change the maximum value of the slide bar of the screen displaying sentences to the number of chapters (pages) being downloaded
 - When playback stops beyond maximum continuous playback time, NovelSpeaker will announce that way
 - Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
+- Fixed a problem that the playback position got back a long way back when the earphone was pulled out of the earphone jack during reading
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -307,7 +308,7 @@ Interface change
 Bug Fix
 
 - Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
-
+- Fixed a problem that the playback position got back a long way back when the earphone was pulled out of the earphone jack during reading
 
 # Version 1.1.44
 

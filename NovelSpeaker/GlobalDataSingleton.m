@@ -17,7 +17,7 @@
 #import "NovelSpeaker-Swift.h"
 #import "UIViewControllerExtension.h"
 #import "NSDataDetectEncodingExtension.h"
-#import "NovelSpeaker-swift.h"
+#import "NovelSpeaker-Swift.h"
 
 #define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
 #define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
@@ -1887,8 +1887,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return [self UpdateReadingPoint:content story:globalState.currentReadingStory];
 }
 
-/// 現在の読み上げ位置をイイカンジに少し戻します
-/// count で指定された文字数だけ戻した後、改行か「。」「、」等が出て来る所まで戻します
+/// 現在の読み上げ位置を少し戻します(ページの最初以上には戻しません)
 - (void)RewindCurrentReadingPoint:(NSUInteger)count
 {
     GlobalStateCacheData* globalState = [self GetGlobalState];
@@ -1897,23 +1896,13 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
 
     NSRange currentReadingPoint = [m_NiftySpeaker GetCurrentReadingPoint];
-    NSString* content = globalState.currentReadingStory.content;
     
     long pos = currentReadingPoint.location;
     pos -= count;
     if(pos < 0) {
         pos = 0;
-    }else{
-        NSRange searchRange = NSMakeRange(0, pos);
-        NSArray* searchTargetArray = @[@"。", @"、", @"\n"];
-        for (NSString* searchTarget in searchTargetArray) {
-            NSRange range = [content rangeOfString:searchTarget options:NSBackwardsSearch range:searchRange];
-            if (range.location != NSNotFound && pos > range.location) {
-                pos = range.location;
-            }
-        }
     }
-    NSLog(@"update currentReadingPoint: %lu -> %ld", (unsigned long)currentReadingPoint.location, pos);
+    //NSLog(@"update currentReadingPoint: %lu -> %ld", (unsigned long)currentReadingPoint.location, pos);
     currentReadingPoint.location = pos;
     [m_NiftySpeaker UpdateCurrentReadingPoint:currentReadingPoint];
 }
@@ -1923,7 +1912,6 @@ static DummySoundLooper* dummySoundLooper = nil;
 {
     AVAudioSession* session = [AVAudioSession sharedInstance];
     bool result = [self StopSpeechWithoutDiactivate];
-    //[self RewindCurrentReadingPoint:5];
     [self StopMaxSpeechTimeInSecTimer];
     [self SaveCurrentReadingPoint];
     //NSLog(@"setActive NO.");
@@ -3183,7 +3171,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         if(isJointHeadphone(prevDesc.outputs)) {
             //NSLog(@"ヘッドフォンが抜かれた");
             [self StopSpeech];
-            //TODO: [self SaveCurrentReadingPoint];
+            [self RewindCurrentReadingPoint:25];
+            [self SaveCurrentReadingPoint];
         }
     }
 }
