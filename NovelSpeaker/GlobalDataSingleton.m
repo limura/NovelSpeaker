@@ -45,6 +45,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     m_LogStringArray = [NSMutableArray new];
 
     m_bIsFirstPageShowed = false;
+    m_isMaxSpeechTimeExceeded = false;
     
     m_MainQueue = dispatch_get_main_queue();
     // CoreDataアクセス用の直列queueを作ります。
@@ -1775,6 +1776,7 @@ static DummySoundLooper* dummySoundLooper = nil;
         return;
     }
     [self StopMaxSpeechTimeInSecTimer];
+    m_isMaxSpeechTimeExceeded = false;
 
     NSLog(@"StartMaxSpeechTimeInSecTimer: %@", maxSpeechTimeInSec);
     m_MaxSpeechTimeInSecTimer = [NSTimer scheduledTimerWithTimeInterval:[maxSpeechTimeInSec intValue] target:self selector:@selector(MaxSpeechTimeInSecEventHandler:) userInfo:nil repeats:NO];
@@ -1797,6 +1799,7 @@ static DummySoundLooper* dummySoundLooper = nil;
         if (m_MaxSpeechTimeInSecTimer != timer) {
             [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"MaxSpeechTimeInSecEventHandler が呼び出されたけれど、Timer のポインタが違ったので読み上げは停止しません。(timer: %p, m_MaxSpeechTimeInSecTimer: %p", timer, m_MaxSpeechTimeInSecTimer]]; // NSLog
         }else{
+            m_isMaxSpeechTimeExceeded = true;
             [[GlobalDataSingleton GetInstance] AddLogString:@"MaxSpeechTimeInSecEventHandler が呼び出されたので読み上げを止めます。"]; // NSLog
             [self StopSpeech];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -1811,6 +1814,9 @@ static DummySoundLooper* dummySoundLooper = nil;
 /// 読み上げを開始します。
 - (BOOL)StartSpeech:(BOOL)withMaxSpeechTimeReset
 {
+    if (m_isMaxSpeechTimeExceeded && (!withMaxSpeechTimeReset)) {
+        return false;
+    }
     GlobalStateCacheData* state = [self GetGlobalState];
     StoryCacheData* story = state.currentReadingStory;
     if (m_isNeedReloadSpeakSetting) {
@@ -1918,6 +1924,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     AVAudioSession* session = [AVAudioSession sharedInstance];
     bool result = [self StopSpeechWithoutDiactivate];
     //[self RewindCurrentReadingPoint:5];
+    [self StopMaxSpeechTimeInSecTimer];
     [self SaveCurrentReadingPoint];
     //NSLog(@"setActive NO.");
     [session setActive:NO error:nil];
@@ -3176,6 +3183,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         if(isJointHeadphone(prevDesc.outputs)) {
             //NSLog(@"ヘッドフォンが抜かれた");
             [self StopSpeech];
+            //TODO: [self SaveCurrentReadingPoint];
         }
     }
 }

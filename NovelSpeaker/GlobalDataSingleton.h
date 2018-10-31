@@ -72,6 +72,9 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
     
     /// 実機用log のarray
     NSMutableArray* m_LogStringArray;
+    
+    /// 最大連続再生時間を超過したか否か
+    BOOL m_isMaxSpeechTimeExceeded;
 }
 
 // 実機log用
