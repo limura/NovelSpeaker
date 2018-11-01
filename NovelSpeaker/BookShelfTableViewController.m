@@ -104,6 +104,7 @@
             [self PushNextView:currentContent];
         }
     }
+    [self ReloadAllTableViewDataAndScrollToCurrentReadingContent];
 }
 
 - (void)dealloc
@@ -234,6 +235,28 @@
     NarouContent* narouContent = (NarouContent*)contentList[indexPath.row];
     [cell setTitleLabel:narouContent.title ncode:narouContent.ncode];
     return cell;
+}
+
+- (void)ReloadAllTableViewDataAndScrollToCurrentReadingContent{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.tableView reloadData];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NarouContentCacheData* selectedContent = [[GlobalDataSingleton GetInstance] GetCurrentReadingContent];
+            if (selectedContent == nil) {
+                return;
+            }
+            
+            NSArray* contentArray = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+            int index = 0;
+            for (NarouContentCacheData* content in contentArray) {
+                if (content != nil && [content.ncode compare:selectedContent.ncode] == NSOrderedSame) {
+                    NSIndexPath* path = [NSIndexPath indexPathForRow:index inSection:0];
+                    [self.tableView scrollToRowAtIndexPath:path atScrollPosition:UITableViewScrollPositionTop animated:false];
+                }
+                index++;
+            }
+        });
+    });
 }
 
 // 強引に(表示されている？)全ての cell について表示を更新します。
