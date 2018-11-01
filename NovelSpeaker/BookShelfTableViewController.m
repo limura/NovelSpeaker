@@ -27,15 +27,20 @@
 {
     EasyAlert* alert = [[EasyAlert alloc] initWithViewController:self];
     
-    [alert ShowAlertOKButton:NSLocalizedString(
-        @"BookShelfTableViewController_AnnounceNewViersion"
-        , @"アップデートされました")
-    message:NSLocalizedString(
-        @"BookShelfTableViewController_AnnounceNewVersionMessage"
+    [alert ShowAlertOneButton:NSLocalizedString(@"BookShelfTableViewController_AnnounceNewViersion", @"アップデートされました") message:NSLocalizedString(@"BookShelfTableViewController_AnnounceNewVersionMessage"
         , @"Version 1.1.2\r\n"
         @"- なろう検索で「検索開始」ボタンを押しやすくしました\r\n"
-        @"\r\n現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。")];
-    [[GlobalDataSingleton GetInstance] UpdateCurrentVersionSaveData];
+        @"\r\n現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。") okButtonText:NSLocalizedString(@"OK_button", @"OK") okActionHandler:^(UIAlertAction * _Nullable action) {
+        GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+        [globalData UpdateCurrentVersionSaveData];
+        if(![globalData IsFirstPageShowed])
+        {
+            NarouContentCacheData* currentContent = [globalData GetCurrentReadingContent];
+            if (currentContent != nil) {
+                [self PushNextView:currentContent];
+            }
+        }
+    }];
 }
 
 - (id)initWithStyle:(UITableViewStyle)style
