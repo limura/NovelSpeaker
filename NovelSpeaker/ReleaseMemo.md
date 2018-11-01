@@ -1801,6 +1801,8 @@ Bug fix
 
 - 文章を表示している画面のスライドバーの最大値を、ダウンロードされている章(ページ)の数に変更
 - 最大連続再生時間を超えて再生が停止する時にそのようにアナウンスをするようになります
+- バージョン更新時のダイアログを消した後でも最後に読んでいた小説を開くように
+- 起動直後の一回だけ、最後に読んでいた小説が一番上に表示されるように本棚の表示位置が移動されるるように
 
 問題の修正
 
@@ -1815,12 +1817,14 @@ Bug fix
 
 また、「設定」->「連続再生時間」がうまく効いていない場合があった問題も修正しまして、ついでに設定された連続再生時間を超えた時にはそのようにアナウンスを入れるようにしました。
 
+他にも、使っていて気になっていた部分に少し手を入れています。
+
 後は少し安定性を高めるための修正も施しているのですが、根本的な原因を突き止めてのものではありませんので特にリリースノートには書かないでおくことにします(βテスト用の方の情報には載っていますので興味のある方はそちらを読んでみても良いかもしれません)。
 
 さて、ここ何回かのアップデート時に告知しております通り、現在 ことせかい ではβテスターの募集を行っています。βテスターの募集に関する詳しい事は、サポートサイト下部のリンクにあります「ことせかい βテスター募集要項」を参照してください。おかげさまで、βテスターの方々の数は順調に増えてきておりますが、まだまだ十分とはいえませんのでお手伝い頂ければ幸いです。
 また、βテスターの方々には様々な不都合の発見や詳しい状況の報告など、とても助けられています。ありがとうございます。お手数をおかけしますが、これからもお手伝いいただければ幸いです。
 
-また、これから開発者がガッツリと遊びたいゲームが出る事になっていたりするなど ことせかい 以外の事もやりたいなぁと思いますので、しばらくの間は ことせかい の開発については不都合の修正を主とする感じでやんわりと続ける感じで運用したいと思っています。そんなわけなので、お問い合わせへの対応が遅くなったりする事や新機能の実装があまりされない事などが発生するかもしれません事をご了承ください。
+また、これから開発者がガッツリと遊びたいゲームが出る事になっていたりするなど ことせかい 以外の事ももう少し多めにやりたいなぁと思いますので、しばらくの間は ことせかい の開発については不都合の修正を主とする感じでやんわりと続ける感じで行きたいと思っています。そんなわけなので、お問い合わせへの対応が遅くなったりする事や新機能の実装があまりされない事などが発生するかもしれません事をご了承ください。
 
 それでは、これからも ことせかい をよろしくお願いいたします。
 
@@ -1831,11 +1835,21 @@ Interface change
 
 - Change the maximum value of the slide bar of the screen displaying sentences to the number of chapters (pages) being downloaded
 - When playback stops beyond maximum continuous playback time, NovelSpeaker will announce that way
+- Even after erasing the dialog at the time of version update, it opens the novel that was last read
+- The display position of the bookshelf is moved so that the novel which was being read last is displayed at the top, only once after activation
 
 Bug Fix
 
 - Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
 - Fixed a problem that the playback position got back a long way back when the earphone was pulled out of the earphone jack during reading
+
+
+# Version 1.1.46
+
+インタフェースの変更
+
+
+
 
 TODO
 

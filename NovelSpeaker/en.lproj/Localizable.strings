@@ -292,6 +292,8 @@
 
 - Change the maximum value of the slide bar of the screen displaying sentences to the number of chapters (pages) being downloaded
 - When playback stops beyond maximum continuous playback time, NovelSpeaker will announce that way
+- Even after erasing the dialog at the time of version update, it opens the novel that was last read
+- The display position of the bookshelf is moved so that the novel which was being read last is displayed at the top, only once after activation
 - Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
 - Fixed a problem that the playback position got back a long way back when the earphone was pulled out of the earphone jack during reading
 
@@ -304,6 +306,8 @@ Interface change
 
 - Change the maximum value of the slide bar of the screen displaying sentences to the number of chapters (pages) being downloaded
 - When playback stops beyond maximum continuous playback time, NovelSpeaker will announce that way
+- Even after erasing the dialog at the time of version update, it opens the novel that was last read
+- The display position of the bookshelf is moved so that the novel which was being read last is displayed at the top, only once after activation
 
 Bug Fix
 
