@@ -147,6 +147,10 @@ static float SLEEP_TIME_SECOND = 10.5f;
 /// ダウンロード周りのイベントハンドラ用のdelegateから削除します。
 - (BOOL)DelDownloadEventHandlerWithNcode:(NSString*)string
 {
+    if(string == nil)
+    {
+        return false;
+    }
     [m_DownloadEventHandlerDictionary removeObjectForKey:string];
     return true;
 }
