@@ -13,6 +13,7 @@
 #import "StoryCacheData.h"
 #import "EasyAlert.h"
 #import "NarouDownloadQueue.h"
+#import "NovelSpeaker-Swift.h"
 
 @interface SpeechViewController : UIViewController<SpeakRangeDelegate, UITextViewDelegate, NarouDownloadQueueDelegate>
 {
@@ -26,7 +27,7 @@
     EasyAlert* m_EasyAlert;
     BOOL m_bIsSeeking;
     NSTimer* m_SeekTimer;
-    SystemSoundID m_PageTurningSoundID;
+    DuplicateSoundPlayer* m_PageTurningSoundPlayer;
 }
 @property (weak, nonatomic) IBOutlet UISlider *ChapterSlider;
 @property (weak, nonatomic) IBOutlet UITextView *textView;

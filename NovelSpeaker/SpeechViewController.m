@@ -108,10 +108,12 @@
     [menuController setMenuItems:@[speechModMenuItem]];
     
     // ページめくり音を設定しておきます
-    NSURL* pageTurningSoundFile = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"nc48625" ofType:@"m4a"]];
-    CFURLRef pageTuningSoundFileCFURL = (CFURLRef)CFBridgingRetain(pageTurningSoundFile);
-    AudioServicesCreateSystemSoundID(pageTuningSoundFileCFURL, &m_PageTurningSoundID);
-    CFBridgingRelease(pageTuningSoundFileCFURL);
+    {
+        m_PageTurningSoundPlayer = [DuplicateSoundPlayer new];
+        if (m_PageTurningSoundPlayer == nil || ![m_PageTurningSoundPlayer setMediaFileForResource:@"nc48625" ofType:@"m4a" maxDuplicateCount:1]){
+            NSLog(@"load Page turning sound failed.");
+        }
+    }
     
     m_bIsSpeaking = NO;
 }
@@ -408,7 +410,9 @@
 /// ページめくり音を再生します
 - (void)RingPageTurningSound{
     if ([[GlobalDataSingleton GetInstance] IsPageTurningSoundEnabled]) {
-        AudioServicesPlaySystemSound(m_PageTurningSoundID);
+        if (m_PageTurningSoundPlayer != nil) {
+            [m_PageTurningSoundPlayer startPlay];
+        }
     }
 }
 
