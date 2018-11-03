@@ -38,6 +38,7 @@
     m_LoadedSpeechModSetting = nil;
     if (self.targetBeforeString != nil) {
         self.beforeTextField.text = self.targetBeforeString;
+        self.prevConvertTextField.text = self.beforeTextField.text;
     }else if(self.targetSpeechModSetting != nil) {
         self.beforeTextField.text = self.targetSpeechModSetting.beforeString;
         self.afterTextField.text = self.targetSpeechModSetting.afterString;
