@@ -339,38 +339,72 @@ static DummySoundLooper* dummySoundLooper = nil;
     return result;
 }
 
++ (NSString*)SortTypeToSortAttributeName:(NarouContentSortType)sortType
+{
+    NSString* sortAttributeName = @"novelupdated_at";
+    switch (sortType) {
+        case NarouContentSortType_NovelUpdatedAt:
+            sortAttributeName = @"novelupdated_at";
+            break;
+        case NarouContentSortType_Title:
+            sortAttributeName = @"title";
+            break;
+        case NarouContentSortType_Writer:
+            sortAttributeName = @"writer";
+            break;
+        case NarouContentSortType_Ncode:
+            sortAttributeName = @"ncode";
+            break;
+        default:
+            sortAttributeName = @"novelupdated_at";
+            break;
+    }
+    return sortAttributeName;
+}
+
 /// NarouContent の全てを NarouContentCacheData の NSArray で取得します
 /// novelupdated_at で sort されて返されます。
-- (NSArray*) GetAllNarouContent:(NarouContentSortType)sortType;
+- (NSArray*) GetAllNarouContent:(NarouContentSortType)sortType
 {
     __block NSError* err;
     __block NSMutableArray* fetchResults = nil;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
-        NSString* sortAttributeName = @"novelupdated_at";
-        switch (sortType) {
-            case NarouContentSortType_NovelUpdatedAt:
-                sortAttributeName = @"novelupdated_at";
-                break;
-            case NarouContentSortType_Title:
-                sortAttributeName = @"title";
-                break;
-            case NarouContentSortType_Writer:
-                sortAttributeName = @"writer";
-                break;
-            case NarouContentSortType_Ncode:
-                sortAttributeName = @"ncode";
-                break;
-            default:
-                sortAttributeName = @"novelupdated_at";
-                break;
-        }
+        NSString* sortAttributeName = [GlobalDataSingleton SortTypeToSortAttributeName:sortType];
         NSArray* results = [self->m_CoreDataObjectHolder FetchAllEntity:@"NarouContent" sortAttributeName:sortAttributeName ascending:NO];
         fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
         for (int i = 0; i < [results count]; i++) {
             fetchResults[i] = [[NarouContentCacheData alloc] initWithCoreData:results[i]];
         }
     //});
+    }];
+    if(err != nil)
+    {
+        NSLog(@"fetch failed. %@, %@", err, [err userInfo]);
+        return nil;
+    }
+    return fetchResults;
+}
+
+/// 指定された文字列がタイトルか作者名に含まれる小説を取得します
+- (NSArray*) SearchNarouContentWithString:(NSString*)string sortType:(NarouContentSortType)sortType
+{
+    if (string == nil || [string length] <= 0) {
+        return [self GetAllNarouContent:sortType];
+    }
+    
+    __block NSError* err;
+    __block NSMutableArray* fetchResults = nil;
+    [self coreDataPerfomBlockAndWait:^{
+        //dispatch_sync(m_CoreDataAccessQueue, ^{
+        NSString* sortAttributeName = [GlobalDataSingleton SortTypeToSortAttributeName:sortType];
+        NSPredicate* predicate = [NSPredicate predicateWithFormat:@"title CONTAINS[c] %@ OR writer CONTAINS[c] %@", string, string];
+        NSArray* results = [self->m_CoreDataObjectHolder SearchEntity:@"NarouContent" predicate:predicate sortAttributeName:sortAttributeName ascending:NO];
+        fetchResults = [[NSMutableArray alloc] initWithCapacity:[results count]];
+        for (int i = 0; i < [results count]; i++) {
+            fetchResults[i] = [[NarouContentCacheData alloc] initWithCoreData:results[i]];
+        }
+        //});
     }];
     if(err != nil)
     {

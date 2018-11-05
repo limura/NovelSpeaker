@@ -288,12 +288,15 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
+"BookShelfTableViewController_SearchTitle" = "Search";
+"BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.45
 
 - Change the maximum value of the slide bar of the screen displaying sentences to the number of chapters (pages) being downloaded
 - When playback stops beyond maximum continuous playback time, NovelSpeaker will announce that way
 - Even after erasing the dialog at the time of version update, it opens the novel that was last read
 - The display position of the bookshelf is moved so that the novel which was being read last is displayed at the top, only once after activation
+- Place a search button on the upper left of the bookshelf
 - Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
 - Fixed a problem that the playback position got back a long way back when the earphone was pulled out of the earphone jack during reading
 - Change the handling of the sound that sounds when page turning from system sound to application side sound
@@ -310,7 +313,7 @@ Interface change
 - When playback stops beyond maximum continuous playback time, NovelSpeaker will announce that way
 - Even after erasing the dialog at the time of version update, it opens the novel that was last read
 - The display position of the bookshelf is moved so that the novel which was being read last is displayed at the top, only once after activation
-
+- Place a search button on the upper left of the bookshelf
 Bug Fix
 
 - Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading

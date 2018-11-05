@@ -78,6 +78,10 @@
     UIBarButtonItem* sortTypeSelectButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BookShelfTableViewController_SortTypeSelectButton", @"sort") style:UIBarButtonItemStyleDone target:self action:@selector(sortTypeSelectButtonClick:)];
 
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:self.editButtonItem, refreshButton, sortTypeSelectButton, nil];
+    
+    UIBarButtonItem* searchButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSearch target:self action:@selector(searchButtonClick:)];
+    self.navigationItem.leftBarButtonItems = @[searchButton];
+    m_SearchString = nil;
 
     // カスタマイズしたセルをテーブルビューにセット
     UINib *nib = [UINib nibWithNibName:BookShelfTableViewCellID bundle:nil];
@@ -193,6 +197,28 @@
     [dialog popup:nil];
 }
 
+- (void)searchButtonClick:(id)sender
+{
+    UIViewController* targetViewContoller = self.parentViewController.parentViewController;
+    [NiftyUtilitySwift EasyDialogTextInputWithViewController:targetViewContoller
+       title:NSLocalizedString(@"BookShelfTableViewController_SearchTitle", @"検索")
+       message:NSLocalizedString(@"BookShelfTableViewController_SearchMessage", @"小説名 と 作者名 が対象となります")
+       textFieldText:m_SearchString
+       placeHolder:nil
+       action:^(NSString * _Nonnull result) {
+           m_SearchString = result;
+           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.001 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+               [self ReloadAllTableViewData];
+           });
+       }
+    ];
+}
+
+// 検索やソート条件に従った上の NarouContent の配列を返します
+- (NSArray*)getNarouContentArray{
+    return [[GlobalDataSingleton GetInstance] SearchNarouContentWithString:m_SearchString sortType:m_SortType];
+}
+
 #pragma mark - Table view data source
 
 // セクションの数
@@ -204,7 +230,7 @@
 // セクション内部のセルの数
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+    NSArray* contentList = [self getNarouContentArray];
     if (contentList == nil) {
         return 0;
     }
@@ -223,7 +249,7 @@
         cell = [[BookShelfTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:BookShelfTableViewCellID];
     }
     
-    NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+    NSArray* contentList = [self getNarouContentArray];
     if(contentList == nil
        || [contentList count] <= indexPath.row)
     {
@@ -246,7 +272,7 @@
                 return;
             }
             
-            NSArray* contentArray = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+            NSArray* contentArray = [self getNarouContentArray];
             int index = 0;
             for (NarouContentCacheData* content in contentArray) {
                 if (content != nil && [content.ncode compare:selectedContent.ncode] == NSOrderedSame) {
@@ -277,7 +303,7 @@
 /// セルが選択された時
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+    NSArray* contentList = [self getNarouContentArray];
     if(contentList == nil
        || [contentList count] < indexPath.row)
     {
@@ -300,7 +326,7 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        NSArray* contentList = [[GlobalDataSingleton GetInstance] GetAllNarouContent:m_SortType];
+        NSArray* contentList = [self getNarouContentArray];
         if(contentList == nil
            || [contentList count] <= indexPath.row)
         {

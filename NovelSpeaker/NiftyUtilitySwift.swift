@@ -226,6 +226,25 @@ class NiftyUtilitySwift: NSObject {
         dialog.build().show()
     }
     
+    @objc public static func EasyDialogTextInput(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, action:((String)->Void)?) {
+        var dialog = EasyDialog.Builder(viewController)
+        if let title = title {
+            dialog = dialog.title(title: title)
+        }
+        if let message = message {
+            dialog = dialog.label(text: message, textAlignment: .left)
+        }
+        dialog.textField(tag: 100, placeholder: placeHolder, content: textFieldText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .line)
+        .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+            if let action = action {
+                let filterTextField = dialog.view.viewWithTag(100) as! UITextField
+                let newFilterString = filterTextField.text ?? ""
+                action(newFilterString)
+            }
+            dialog.dismiss(animated: false, completion: nil)
+        }.build().show()
+    }
+    
     @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
         let session: URLSession = URLSession.shared
         DispatchQueue.global(qos: DispatchQoS.QoSClass.background).async {

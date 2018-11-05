@@ -285,12 +285,15 @@
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
+"BookShelfTableViewController_SearchTitle" = "検索";
+"BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.45
 
 - 文章を表示している画面のスライドバーの最大値を、ダウンロードされている章(ページ)の数に変更
 - 最大連続再生時間を超えて再生が停止する時にそのようにアナウンスをするようになります
 - バージョン更新時のダイアログを消した後でも最後に読んでいた小説を開くように
 - 起動直後の一回だけ、最後に読んでいた小説が一番上に表示されるように本棚の表示位置が移動されるるように
+- 本棚の左上に検索ボタンを配置
 - 最大連続再生時間のカウントダウンが、読み上げ中にページ切り替えが発生した時にリセットされていた問題を修正
 - 読み上げ中にイヤホンジャックからイヤホンを引き抜いた時に、再生位置がかなり前に戻ってしまう問題を修正
 - ページめくりの時に鳴る音の扱いを、システムサウンドからアプリ側サウンドに変更
@@ -307,6 +310,7 @@
 - 最大連続再生時間を超えて再生が停止する時にそのようにアナウンスをするようになります
 - バージョン更新時のダイアログを消した後でも最後に読んでいた小説を開くように
 - 起動直後の一回だけ、最後に読んでいた小説が一番上に表示されるように本棚の表示位置が移動されるるように
+- 本棚の左上に検索ボタンを配置
 
 問題の修正
 
