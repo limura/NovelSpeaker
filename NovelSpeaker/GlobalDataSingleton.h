@@ -352,7 +352,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 - (NSDictionary*)GetDefaultSpeechModConfig;
 
 /// 全てのコンテンツを再度ダウンロードしようとします。
-- (void)ReDownladAllContents;
+- (void)ReDownloadAllContents;
 
 /// 現在の Download queue を全て削除します
 - (void)ClearDownloadQueue;

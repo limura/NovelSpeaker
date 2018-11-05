@@ -138,7 +138,7 @@
 - (void)refreshButtonClick:(id)sender
 {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    [globalData ReDownladAllContents];
+    [globalData ReDownloadAllContents];
 }
 
 - (NSDictionary*)GetDisplayStringToSortTypeDictionary {
@@ -370,7 +370,7 @@
 // UIRefreshControl で値が変わった時に呼ばれるイベントハンドラ(引っ張って更新のイベントハンドラ)
 - (void)refreshControlValueChangedEvent:(id)sender {
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    [globalData ReDownladAllContents];
+    [globalData ReDownloadAllContents];
     [m_UIRefreshControl endRefreshing];
 }
 

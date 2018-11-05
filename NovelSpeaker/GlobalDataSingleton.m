@@ -2612,7 +2612,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
 
 /// 全てのコンテンツを再度ダウンロードしようとします。
-- (void)ReDownladAllContents{
+- (void)ReDownloadAllContents{
     NSArray* contentList = [self GetAllNarouContent:NarouContentSortType_NovelUpdatedAt];
     if (contentList == nil) {
         return;
