@@ -1808,6 +1808,8 @@ Bug fix
 
 - 最大連続再生時間のカウントダウンが、読み上げ中にページ切り替えが発生した時にリセットされていた問題を修正
 - 読み上げ中にイヤホンジャックからイヤホンを引き抜いた時に、再生位置がかなり前に戻ってしまう問題を修正
+- ページめくりの時に鳴る音の扱いを、システムサウンドからアプリ側サウンドに変更
+- 本文上で長押しして出てくる「読み替え辞書へ登録」を押した後の読みの修正詳細にて、読み替え前の文字列を選択されていた文字で初期化するように
 
 追伸
 
@@ -1821,7 +1823,7 @@ Bug fix
 
 後は少し安定性を高めるための修正も施しているのですが、根本的な原因を突き止めてのものではありませんので特にリリースノートには書かないでおくことにします(βテスト用の方の情報には載っていますので興味のある方はそちらを読んでみても良いかもしれません)。
 
-さて、ここ何回かのアップデート時に告知しております通り、現在 ことせかい ではβテスターの募集を行っています。βテスターの募集に関する詳しい事は、サポートサイト下部のリンクにあります「ことせかい βテスター募集要項」を参照してください。おかげさまで、βテスターの方々の数は順調に増えてきておりますが、まだまだ十分とはいえませんのでお手伝い頂ければ幸いです。
+さて、ここ何回かのアップデート時に告知しております通り、現在 ことせかい ではβテスターの募集を行っています。βテスターの募集に関する詳しい事は、サポートサイト下部のリンクにあります「ことせかい βテスター募集要項」を参照してください。おかげさまで、βテスターの方々の数は順調に増えてきておりますが、最近はβテスターの方たちの数に比べて報告を上げて頂ける方の数が減っておりまして、十分とはとてもいえない状態になっておりますのでお手伝い頂ければ幸いです。
 また、βテスターの方々には様々な不都合の発見や詳しい状況の報告など、とても助けられています。ありがとうございます。お手数をおかけしますが、これからもお手伝いいただければ幸いです。
 
 また、これから開発者がガッツリと遊びたいゲームが出る事になっていたりするなど ことせかい 以外の事ももう少し多めにやりたいなぁと思いますので、しばらくの間は ことせかい の開発については不都合の修正を主とする感じでやんわりと続ける感じで行きたいと思っています。そんなわけなので、お問い合わせへの対応が遅くなったりする事や新機能の実装があまりされない事などが発生するかもしれません事をご了承ください。
@@ -1842,6 +1844,8 @@ Bug Fix
 
 - Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
 - Fixed a problem that the playback position got back a long way back when the earphone was pulled out of the earphone jack during reading
+- Change the handling of the sound that sounds when page turning from system sound to application side sound
+- In the main revision details after pressing "Register to replacement dictionary" coming out with long press in the text, so that the character string before replacement is initialized with the selected character
 
 
 # Version 1.1.46

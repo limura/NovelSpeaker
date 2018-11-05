@@ -296,6 +296,8 @@
 - The display position of the bookshelf is moved so that the novel which was being read last is displayed at the top, only once after activation
 - Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
 - Fixed a problem that the playback position got back a long way back when the earphone was pulled out of the earphone jack during reading
+- Change the handling of the sound that sounds when page turning from system sound to application side sound
+- In the main revision details after pressing \"Register to replacement dictionary\" coming out with long press in the text, so that the character string before replacement is initialized with the selected character
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -313,6 +315,8 @@ Bug Fix
 
 - Fixed problem that countdown of maximum continuous playing time was reset when page switching occurred during reading
 - Fixed a problem that the playback position got back a long way back when the earphone was pulled out of the earphone jack during reading
+- Change the handling of the sound that sounds when page turning from system sound to application side sound
+- In the main revision details after pressing \"Register to replacement dictionary\" coming out with long press in the text, so that the character string before replacement is initialized with the selected character
 
 # Version 1.1.44
 
