@@ -290,6 +290,7 @@
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
 "BookShelfTableViewController_SearchTitle" = "Search";
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
+"BookShelfTableViewController_SearchClear" = "Clear";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.45
 
 - Change the maximum value of the slide bar of the screen displaying sentences to the number of chapters (pages) being downloaded

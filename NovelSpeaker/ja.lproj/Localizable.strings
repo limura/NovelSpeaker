@@ -287,6 +287,7 @@
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
 "BookShelfTableViewController_SearchTitle" = "検索";
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
+"BookShelfTableViewController_SearchClear" = "クリア";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.45
 
 - 文章を表示している画面のスライドバーの最大値を、ダウンロードされている章(ページ)の数に変更

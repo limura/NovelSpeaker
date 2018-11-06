@@ -270,7 +270,7 @@ public class EasyDialog: UIViewController {
             return self
         }
         
-        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextField.BorderStyle = .none) -> Self {
+        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextField.BorderStyle = .none, clearButtonMode: UITextField.ViewMode = .never) -> Self {
             let textField = EasyDialogCustomUITextField()
             textField.placeholder = placeholder
             textField.text = content
@@ -278,6 +278,7 @@ public class EasyDialog: UIViewController {
             textField.isSecureTextEntry = secure
             textField.focusKeyboard = focusKeyboard
             textField.borderStyle = borderStyle
+            textField.clearButtonMode = clearButtonMode
             if let tag = tag {
                 textField.tag = tag
             }

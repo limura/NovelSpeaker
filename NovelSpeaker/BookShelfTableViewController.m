@@ -79,8 +79,10 @@
 
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:self.editButtonItem, refreshButton, sortTypeSelectButton, nil];
     
-    UIBarButtonItem* searchButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSearch target:self action:@selector(searchButtonClick:)];
-    self.navigationItem.leftBarButtonItems = @[searchButton];
+    //UIBarButtonItem* searchButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSearch target:self action:@selector(searchButtonClick:)];
+    m_SearchButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BookShelfTableViewController_SearchTitle", @"検索") style:UIBarButtonItemStyleDone target:self action:@selector(searchButtonClick:)];
+
+    self.navigationItem.leftBarButtonItems = @[m_SearchButton];
     m_SearchString = nil;
 
     // カスタマイズしたセルをテーブルビューにセット
@@ -200,17 +202,35 @@
 - (void)searchButtonClick:(id)sender
 {
     UIViewController* targetViewContoller = self.parentViewController.parentViewController;
-    [NiftyUtilitySwift EasyDialogTextInputWithViewController:targetViewContoller
-       title:NSLocalizedString(@"BookShelfTableViewController_SearchTitle", @"検索")
-       message:NSLocalizedString(@"BookShelfTableViewController_SearchMessage", @"小説名 と 作者名 が対象となります")
-       textFieldText:m_SearchString
-       placeHolder:nil
-       action:^(NSString * _Nonnull result) {
-           m_SearchString = result;
-           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.001 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-               [self ReloadAllTableViewData];
-           });
-       }
+    [NiftyUtilitySwift EasyDialogTextInput2ButtonWithViewController:targetViewContoller
+      title:NSLocalizedString(@"BookShelfTableViewController_SearchTitle", @"検索")
+      message:NSLocalizedString(@"BookShelfTableViewController_SearchMessage", @"小説名 と 作者名 が対象となります")
+      textFieldText:m_SearchString
+      placeHolder:nil
+      leftButtonText:NSLocalizedString(@"BookShelfTableViewController_SearchClear", @"クリア")
+      rightButtonText:NSLocalizedString(@"OK_button", @"OK")
+      leftButtonAction:^(NSString * _Nonnull str) {
+          m_SearchString = nil;
+          dispatch_async(dispatch_get_main_queue(), ^{
+              self->m_SearchButton.title = NSLocalizedString(@"BookShelfTableViewController_SearchTitle", @"検索");
+              [self ReloadAllTableViewData];
+          });
+      }
+      rightButtonAction:^(NSString * _Nonnull result) {
+          m_SearchString = result;
+          if ([m_SearchString length] <= 0) {
+              m_SearchString = nil;
+              dispatch_async(dispatch_get_main_queue(), ^{
+                  self->m_SearchButton.title = NSLocalizedString(@"BookShelfTableViewController_SearchTitle", @"検索");
+                  [self ReloadAllTableViewData];
+              });
+              return;
+          }
+          dispatch_async(dispatch_get_main_queue(), ^{
+              self->m_SearchButton.title = [[NSString alloc] initWithFormat:@"%@(%@)", NSLocalizedString(@"BookShelfTableViewController_SearchTitle", @"検索"), m_SearchString];
+              [self ReloadAllTableViewData];
+          });
+      }
     ];
 }
 

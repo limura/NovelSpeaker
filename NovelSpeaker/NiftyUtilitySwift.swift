@@ -234,17 +234,49 @@ class NiftyUtilitySwift: NSObject {
         if let message = message {
             dialog = dialog.label(text: message, textAlignment: .left)
         }
-        dialog.textField(tag: 100, placeholder: placeHolder, content: textFieldText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .line)
-        .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
-            if let action = action {
-                let filterTextField = dialog.view.viewWithTag(100) as! UITextField
-                let newFilterString = filterTextField.text ?? ""
-                action(newFilterString)
-            }
-            dialog.dismiss(animated: false, completion: nil)
-        }.build().show()
+        dialog.textField(tag: 100, placeholder: placeHolder, content: textFieldText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always)
+            .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+                if let action = action {
+                    let filterTextField = dialog.view.viewWithTag(100) as! UITextField
+                    let newFilterString = filterTextField.text ?? ""
+                    action(newFilterString)
+                }
+                dialog.dismiss(animated: false, completion: nil)
+            }.build().show()
     }
     
+    @objc public static func EasyDialogTextInput2Button(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, leftButtonText: String?, rightButtonText: String?, leftButtonAction:((String)->Void)?, rightButtonAction:((String)->Void)?) {
+        var dialog = EasyDialog.Builder(viewController)
+        if let title = title {
+            dialog = dialog.title(title: title)
+        }
+        if let message = message {
+            dialog = dialog.label(text: message, textAlignment: .left)
+        }
+        dialog = dialog.textField(tag: 100, placeholder: placeHolder, content: textFieldText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always)
+        if let leftButtonText = leftButtonText {
+            dialog = dialog.addButton(title: leftButtonText, callback: { (dialog) in
+                if let action = leftButtonAction {
+                    let filterTextField = dialog.view.viewWithTag(100) as! UITextField
+                    let newFilterString = filterTextField.text ?? ""
+                    action(newFilterString)
+                }
+                dialog.dismiss(animated: false, completion: nil)
+            })
+        }
+        if let rightButtonText = rightButtonText {
+            dialog = dialog.addButton(title: rightButtonText, callback: { (dialog) in
+                if let action = rightButtonAction {
+                    let filterTextField = dialog.view.viewWithTag(100) as! UITextField
+                    let newFilterString = filterTextField.text ?? ""
+                    action(newFilterString)
+                }
+                dialog.dismiss(animated: false, completion: nil)
+            })
+        }
+        dialog.build().show()
+    }
+
     @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
         let session: URLSession = URLSession.shared
         DispatchQueue.global(qos: DispatchQoS.QoSClass.background).async {
