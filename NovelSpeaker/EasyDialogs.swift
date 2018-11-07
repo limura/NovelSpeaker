@@ -28,6 +28,7 @@ import UIKit
 
 fileprivate class EasyDialogCustomUITextField: UITextField {
     public var focusKeyboard: Bool = false
+    public var shouldReturnEventHander: ((EasyDialog)->(Void))? = nil
 }
 
 fileprivate class EasyDialogCustomUITextView: UITextView, UITextViewDelegate {
@@ -122,7 +123,7 @@ fileprivate func applyLine(to view: UIView, on side: Side, color: UIColor = UICo
     }
 }
 
-public class EasyDialog: UIViewController {
+public class EasyDialog: UIViewController, UITextFieldDelegate {
     
     public struct Theme {
         let textColor: UIColor
@@ -270,7 +271,7 @@ public class EasyDialog: UIViewController {
             return self
         }
         
-        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextField.BorderStyle = .none, clearButtonMode: UITextField.ViewMode = .never) -> Self {
+        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextField.BorderStyle = .none, clearButtonMode: UITextField.ViewMode = .never, shouldReturnEventHandler:((EasyDialog)->(Void))? = nil) -> Self {
             let textField = EasyDialogCustomUITextField()
             textField.placeholder = placeholder
             textField.text = content
@@ -279,6 +280,7 @@ public class EasyDialog: UIViewController {
             textField.focusKeyboard = focusKeyboard
             textField.borderStyle = borderStyle
             textField.clearButtonMode = clearButtonMode
+            textField.shouldReturnEventHander = shouldReturnEventHandler
             if let tag = tag {
                 textField.tag = tag
             }
@@ -652,11 +654,27 @@ public class EasyDialog: UIViewController {
         notificationCenter.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: OperationQueue.main) { notification in
             self.keyboardWillHide(notification: notification)
         }
+        for view in views {
+            if let textField = view as? EasyDialogCustomUITextField {
+                if textField.shouldReturnEventHander != nil {
+                    textField.delegate = self
+                }
+            }
+        }
     }
     
     override public func viewWillDisappear(_ animated: Bool) {
         super.viewWillAppear(animated)
         NotificationCenter.default.removeObserver(self)
+    }
+    
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if let textField = textField as? EasyDialogCustomUITextField {
+            if let handler = textField.shouldReturnEventHander {
+                handler(self)
+            }
+        }
+        return true
     }
 }
 
