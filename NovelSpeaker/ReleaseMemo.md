@@ -1810,7 +1810,9 @@ Bug fix
 - 最大連続再生時間のカウントダウンが、読み上げ中にページ切り替えが発生した時にリセットされていた問題を修正
 - 読み上げ中にイヤホンジャックからイヤホンを引き抜いた時に、再生位置がかなり前に戻ってしまう問題を修正
 - ページめくりの時に鳴る音の扱いを、システムサウンドからアプリ側サウンドに変更
+  - アプリ側サウンドになった影響により、読み上げ中以外ではページめくり音が出ないように
 - 本文上で長押しして出てくる「読み替え辞書へ登録」を押した後の読みの修正詳細にて、読み替え前の文字列を選択されていた文字で初期化するように
+
 
 追伸
 
@@ -1849,7 +1851,7 @@ Bug Fix
 - Fixed a problem that the playback position got back a long way back when the earphone was pulled out of the earphone jack during reading
 - Change the handling of the sound that sounds when page turning from system sound to application side sound
 - In the main revision details after pressing "Register to replacement dictionary" coming out with long press in the text, so that the character string before replacement is initialized with the selected character
-
+- Turn off page turning sound except during reading aloud
 
 # Version 1.1.46
 

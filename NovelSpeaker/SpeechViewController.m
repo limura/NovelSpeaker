@@ -409,10 +409,9 @@
 
 /// ページめくり音を再生します
 - (void)RingPageTurningSound{
-    if ([[GlobalDataSingleton GetInstance] IsPageTurningSoundEnabled]) {
-        if (m_PageTurningSoundPlayer != nil) {
-            [m_PageTurningSoundPlayer startPlay];
-        }
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    if ([globalData IsPageTurningSoundEnabled] && [globalData isSpeaking] && m_PageTurningSoundPlayer != nil) {
+        [m_PageTurningSoundPlayer startPlay];
     }
 }
 
