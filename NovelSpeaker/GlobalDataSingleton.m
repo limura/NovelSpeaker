@@ -3384,6 +3384,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setBool:yesNo forKey:USER_DEFAULTS_OVERRIDE_RUBY_IS_ENABLED];
     [userDefaults synchronize];
+    m_isNeedReloadSpeakSetting = true;
 }
 
 /// 読み上げられないため、ルビとしては認識しない文字集合を取得します
@@ -3401,6 +3402,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:data forKey:USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY];
     [userDefaults synchronize];
+    m_isNeedReloadSpeakSetting = true;
 }
 
 /// SiteInfo デバッグ用に、毎回 SiteInfo の読み直しを行うか否かの設定を取得します
