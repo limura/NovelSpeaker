@@ -254,6 +254,24 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     
                     GlobalDataSingleton.getInstance().setIgnoreURIStringSpeechIsEnabled(row.value!)
                 })
+            <<< SwitchRow("MixWithOthersSwitchRow") {
+                $0.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する")
+                $0.value = GlobalDataSingleton.getInstance()?.isMixWithOthersEnabled()
+                $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ (row) in
+                    GlobalDataSingleton.getInstance()?.setIsMix(withOthersEnabled: row.value!)
+                })
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_DuckOthersIsEnabled", comment: "他のアプリの音を小さくする")
+                $0.value = GlobalDataSingleton.getInstance()?.isDuckOthersEnabled()
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.hidden = .function(["MixWithOthersSwitchRow"], { form -> Bool in
+                    let row: RowOf<Bool>! = form.rowBy(tag: "MixWithOthersSwitchRow")
+                    return row.value ?? false == false
+                })
+                }.onChange({ (row) in
+                    GlobalDataSingleton.getInstance()?.setIsDuckOthersEnabled(row.value!)
+                })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 }.onCellSelection({ (butonCellof, buttonRow) in

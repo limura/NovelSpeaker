@@ -69,17 +69,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     speechConfig.voiceIdentifier = [self GetVoiceIdentifier]; // これは現状では UserDefaults です。
     m_NiftySpeaker = [[NiftySpeaker alloc] initWithSpeechConfig:speechConfig];
 
-    AVAudioSession* session = [AVAudioSession sharedInstance];
-    NSError* err = nil;
-    [session setCategory:AVAudioSessionCategoryPlayback error:&err];
-    if (err) {
-        NSLog(@"AVAudioSessionCategoryPlayback set failed. %@ %@", err, err.userInfo);
-    }
-    [session setMode:AVAudioSessionModeDefault error:&err];
-    if (err) {
-        NSLog(@"AVAudioSessionModeDefault set failed. %@ %@", err, err.userInfo);
-    }
-    [session setActive:NO error:nil];
+    [self audioSessionInit:NO];
     dummySoundLooper = [DummySoundLooper new];
     [dummySoundLooper setMediaFileForResource:@"Silent3sec" ofType:@"mp3"];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioSessionDidInterrupt:) name:AVAudioSessionInterruptionNotification object:nil];
@@ -114,6 +104,27 @@ static DummySoundLooper* dummySoundLooper = nil;
 
 - (void)coreDataPerfomBlockAndWait:(void(^)(void))block {
     [m_CoreDataObjectHolder performBlockAndWait:block];
+}
+
+- (void)audioSessionInit:(BOOL)isActive {
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    NSError* err = nil;
+    AVAudioSessionCategoryOptions option = 0;
+    if ([self IsMixWithOthersEnabled]) {
+        option = AVAudioSessionCategoryOptionMixWithOthers;
+        if ([self IsDuckOthersEnabled]) {
+            option |= AVAudioSessionCategoryOptionDuckOthers;
+        }
+    }
+    [session setCategory:AVAudioSessionCategoryPlayback withOptions:option error:&err];
+    if (err) {
+        NSLog(@"AVAudioSessionCategoryPlayback set failed. %@ %@", err, err.userInfo);
+    }
+    [session setMode:AVAudioSessionModeDefault error:&err];
+    if (err) {
+        NSLog(@"AVAudioSessionModeDefault set failed. %@ %@", err, err.userInfo);
+    }
+    [session setActive:isActive error:nil];
 }
 
 - (void)audioSessionDidInterrupt:(NSNotification*)notification
@@ -2539,6 +2550,8 @@ static DummySoundLooper* dummySoundLooper = nil;
 #define USER_DEFAULTS_REPEAT_SPEECH_TYPE @"RepeatSpeechType"
 #define USER_DEFAULTS_IS_ESCAPE_ABOUT_SPEECH_POSITION_DISPLAY_BUG_ON_IOS12 @"IsEscapeAboutSpeechPositionDisplayBugOniOS12"
 #define USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED @"DummySilentSoundEnabled"
+#define USER_DEFAULTS_IS_MIX_WITH_OTHERS_ENABLED @"MixWithOthersEnabled"
+#define USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED @"DuckOthersEnabled"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3546,6 +3559,34 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを取得します
+- (BOOL)IsMixWithOthersEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_MIX_WITH_OTHERS_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IS_MIX_WITH_OTHERS_ENABLED];
+}
+/// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを設定します
+- (void)SetIsMixWithOthersEnabled:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_IS_MIX_WITH_OTHERS_ENABLED];
+    [userDefaults synchronize];
+    [self audioSessionInit:NO];
+}
+
+/// 読み上げ時に他のアプリと共存して鳴らせる場合、他アプリ側の音を小さくするか否かを取得します
+- (BOOL)IsDuckOthersEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED];
+}
+/// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを設定します
+- (void)SetIsDuckOthersEnabled:(BOOL)isEnabled{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED];
+    [userDefaults synchronize];
+    [self audioSessionInit:NO];
+}
+
 /// 利用許諾を読んだか否かを取得します
 - (BOOL)IsLicenseReaded{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
@@ -3881,6 +3922,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_escape_about_speech_position_display_bug_on_ios12_enabled" number:[[NSNumber alloc] initWithBool:[self IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled]]];
     [NiftyUtility addStringForJSONNSDictionary:result key:@"display_font_name" string:[self GetDisplayFontName]];
     [NiftyUtility addIntValueForJSONNSDictionary:result key:@"repeat_speech_type" number:[[NSNumber alloc] initWithInteger:[self GetRepeatSpeechType]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_mix_with_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsMixWithOthersEnabled]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_duck_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsDuckOthersEnabled]]];
     NarouContentCacheData* currentReadingContent = [self GetCurrentReadingContent];
     if (currentReadingContent != nil) {
         [NiftyUtility addStringForJSONNSDictionary:result key:@"current_reading_content" string:currentReadingContent.ncode];
@@ -4439,6 +4482,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSNumber* is_escape_about_speech_position_display_bug_on_ios12_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_escape_about_speech_position_display_bug_on_ios12_enabled"];
     if (is_escape_about_speech_position_display_bug_on_ios12_enabled != nil) {
         [self SetEscapeAboutSpeechPositionDisplayBugOniOS12Enabled:[is_escape_about_speech_position_display_bug_on_ios12_enabled boolValue]];
+    }
+    NSNumber* is_mix_with_others_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_mix_with_others_enabled"];
+    if (is_mix_with_others_enabled != nil) {
+        [self SetIsMixWithOthersEnabled:[is_mix_with_others_enabled boolValue]];
+    }
+    NSNumber* is_duck_others_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_duck_others_enabled"];
+    if (is_duck_others_enabled != nil) {
+        [self SetIsDuckOthersEnabled:[is_duck_others_enabled boolValue]];
     }
     NSString* current_reading_content = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"current_reading_content"];
     return current_reading_content;

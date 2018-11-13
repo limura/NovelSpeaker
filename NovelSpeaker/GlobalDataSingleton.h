@@ -482,6 +482,16 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 読み上げ時に無音の音を再生し続けるか否かを設定します
 - (void)SetIsDummySilentSoundEnabled:(BOOL)isEnabled;
 
+/// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを取得します
+- (BOOL)IsMixWithOthersEnabled;
+/// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを設定します
+- (void)SetIsMixWithOthersEnabled:(BOOL)isEnabled;
+
+/// 読み上げ時に他のアプリと共存して鳴らせる場合、他アプリ側の音を小さくするか否かを取得します
+- (BOOL)IsDuckOthersEnabled;
+/// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを設定します
+- (void)SetIsDuckOthersEnabled:(BOOL)isEnabled;
+
 /// 利用許諾を読んだか否かを取得します
 - (BOOL)IsLicenseReaded;
 /// 利用許諾を読んだことにします
