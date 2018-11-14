@@ -62,6 +62,9 @@ void uncaughtExceptionHandler(NSException *exception)
     // "************" でハングするようなので強制的に読み替え辞書に登録して安全な文字に読み変えるようにします(´・ω・`)
     [globalData ForceOverrideHungSpeakStringToSpeechModSettings];
     
+    // ルビとして判断されない文字列が初期値のままの人のものを最新のものに変更します(´・ω・`)
+    [globalData UpdateNotRubyChacactorStringArrayFromOldDefaultSetting];
+    
     // for FTLinearActivityIndicator enable (iPhone X とかのノッチのあるタイプでの network activity indicator を上書きしてくれる奴を enable にする)
     [UIApplication configureLinearNetworkActivityIndicatorIfNeeded];
     

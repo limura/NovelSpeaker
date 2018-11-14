@@ -255,9 +255,10 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     GlobalDataSingleton.getInstance().setIgnoreURIStringSpeechIsEnabled(row.value!)
                 })
             <<< SwitchRow("MixWithOthersSwitchRow") {
-                $0.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する")
+                $0.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)")
                 $0.value = GlobalDataSingleton.getInstance()?.isMixWithOthersEnabled()
                 $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = .systemFont(ofSize: 14.0)
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance()?.setIsMix(withOthersEnabled: row.value!)
                 })

@@ -436,6 +436,8 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (NSString*)GetNotRubyCharactorStringArray;
 /// 読み上げられないため、ルビとしては認識しない文字集合を設定します
 - (void)SetNotRubyCharactorStringArray:(NSString*)data;
+/// 読み上げられないため、ルビとしては認識しない文字集合について、過去の標準設定のものの場合、強制的に最新のものに上書きします。
+- (void)UpdateNotRubyChacactorStringArrayFromOldDefaultSetting;
 
 /// SiteInfo デバッグ用に、毎回 SiteInfo の読み直しを行うか否かの設定を取得します
 - (BOOL)GetForceSiteInfoReloadIsEnabled;

@@ -24,6 +24,7 @@
 #define APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE @"AddTextQueue"
 #define COOKIE_ENCRYPT_SECRET_KEY @"謎のエラーです。これを確認できた人はご一報ください"
 #define USER_DEFAULTS_BACKGROUND_FETCH_FETCHED_NOVEL_COUNT @"BackgroundFetchFetchedNovelCount"
+#define NOT_RUBY_STRING_ARRAY @"・、  "
 
 @implementation GlobalDataSingleton
 
@@ -3403,7 +3404,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 読み上げられないため、ルビとしては認識しない文字集合を取得します
 - (NSString*)GetNotRubyCharactorStringArray{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults registerDefaults:@{USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY: @"・、"}];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY: NOT_RUBY_STRING_ARRAY}];
     return [userDefaults stringForKey:USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY];
 }
 
@@ -3416,6 +3417,20 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setObject:data forKey:USER_DEFAULTS_NOT_RUBY_CHARACTOR_STRING_ARRAY];
     [userDefaults synchronize];
     m_isNeedReloadSpeakSetting = true;
+}
+
+/// 読み上げられないため、ルビとしては認識しない文字集合について、過去の標準設定のものの場合、強制的に最新のものに上書きします。
+- (void)UpdateNotRubyChacactorStringArrayFromOldDefaultSetting{
+    NSArray* oldDefaultSttings = @[
+       @"・", @"・、"
+    ];
+    NSString* currentSetting = [self GetNotRubyCharactorStringArray];
+    for (NSString* target in oldDefaultSttings) {
+        if ([currentSetting compare:target] == NSOrderedSame) {
+            [self SetNotRubyCharactorStringArray:NOT_RUBY_STRING_ARRAY];
+            return;
+        }
+    }
 }
 
 /// SiteInfo デバッグ用に、毎回 SiteInfo の読み直しを行うか否かの設定を取得します
@@ -3576,7 +3591,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 読み上げ時に他のアプリと共存して鳴らせる場合、他アプリ側の音を小さくするか否かを取得します
 - (BOOL)IsDuckOthersEnabled{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED: @false}];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED: @true}];
     return [userDefaults boolForKey:USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED];
 }
 /// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを設定します
