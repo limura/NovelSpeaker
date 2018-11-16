@@ -24,7 +24,7 @@
 #define APP_GROUP_USER_DEFAULTS_ADD_TEXT_QUEUE @"AddTextQueue"
 #define COOKIE_ENCRYPT_SECRET_KEY @"謎のエラーです。これを確認できた人はご一報ください"
 #define USER_DEFAULTS_BACKGROUND_FETCH_FETCHED_NOVEL_COUNT @"BackgroundFetchFetchedNovelCount"
-#define NOT_RUBY_STRING_ARRAY @"・、  "
+#define NOT_RUBY_STRING_ARRAY @"・、  ？?！!"
 
 @implementation GlobalDataSingleton
 
@@ -3422,7 +3422,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 読み上げられないため、ルビとしては認識しない文字集合について、過去の標準設定のものの場合、強制的に最新のものに上書きします。
 - (void)UpdateNotRubyChacactorStringArrayFromOldDefaultSetting{
     NSArray* oldDefaultSttings = @[
-       @"・", @"・、"
+       @"・", @"・、", @"・、 　"
     ];
     NSString* currentSetting = [self GetNotRubyCharactorStringArray];
     for (NSString* target in oldDefaultSttings) {

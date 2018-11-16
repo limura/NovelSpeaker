@@ -298,6 +298,7 @@
 - Add \"Settings\" -> \"Effort not to stop even if the music sounds in other applications\" option
 - Fixed a problem that setting will not be reflected if you start reading aloud the page of the novel that was open before and after switching Settings -> Speech ruby only ON / OFF
 - Settings -> Speech ruby only slightly changed criteria judged as ruby
+- Fixed a part of the problem that started when downloading all the novels in the bookshelf after a while when there were a lot of novels imported by Web Import and falls for a while.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -312,6 +313,7 @@ Bug fix
 
 - Fixed a problem that setting will not be reflected if you start reading aloud the page of the novel that was open before and after switching Settings -> Speech ruby only ON / OFF
 - Settings -> Speech ruby only slightly changed criteria judged as ruby
+- Fixed a part of the problem that started when downloading all the novels in the bookshelf after a while when there were a lot of novels imported by Web Import and falls for a while.
 
 
 # Version 1.1.45
