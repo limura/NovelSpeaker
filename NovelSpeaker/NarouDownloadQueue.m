@@ -272,97 +272,98 @@ static float SLEEP_TIME_SECOND = 10.5f;
 
 /// URL のコンテンツをダウンロードします。
 - (BOOL)URLDownload:(NarouContentCacheData*)localContent {
-
-    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    UriLoader* loader = [UriLoader new];
-    NSLog(@"URLDownload: %@ %@", localContent.title, localContent.ncode);
-    
-    // ことせかい用のカスタムSiteInfoデータを優先度的に上にするために先に読み込ませます
-    NSData* customSiteInfoData = [globalData GetCachedCustomAutoPagerizeSiteInfoData];
-    if(![loader AddCustomSiteInfoFromData:customSiteInfoData]){
-        NSLog(@"AddCustomSiteInfoFromData failed: %@", [[NSString alloc] initWithData:customSiteInfoData encoding:NSUTF8StringEncoding]);
-    }
-    
-    // AutoPagerizeの情報はその後です
-    NSData* siteInfoData = [globalData GetCachedAutoPagerizeSiteInfoData];
-    if(![loader AddSiteInfoFromData:siteInfoData]){
-        return false;
-    }
-    
-    NSString* urlString = localContent.ncode;
-    int startCount = 1;
-    // 最終ダウンロードURLがあるならターゲットをそれに更新する。
-    // XXXXX TODO: .userid が最後に読み込んだ URL になってるのをなんとかしたい……(´・ω・`)
-    if (localContent.userid != nil && [localContent.userid length] > 0) {
-        urlString = localContent.userid;
-        startCount = [localContent.general_all_no intValue];
-    }
-    NSURL* targetURL = [[NSURL alloc] initWithString:urlString];
-
-    //NSLog(@"URLDownload: keyword(cookie): %@", localContent.keyword);
-    NSArray* cookieArray = [localContent.keyword componentsSeparatedByString:@";"];
-
-    __block BOOL result = false;
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    [loader LoadURL:targetURL cookieArray:cookieArray startCount:startCount successAction:^BOOL(HtmlStory* story, NSURL* currentURL){
-        if (story == nil) {
-            return false;
+    @autoreleasepool {
+        GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+        UriLoader* loader = [UriLoader new];
+        NSLog(@"URLDownload: %@ %@", localContent.title, localContent.ncode);
+        
+        // ことせかい用のカスタムSiteInfoデータを優先度的に上にするために先に読み込ませます
+        NSData* customSiteInfoData = [globalData GetCachedCustomAutoPagerizeSiteInfoData];
+        if(![loader AddCustomSiteInfoFromData:customSiteInfoData]){
+            NSLog(@"AddCustomSiteInfoFromData failed: %@", [[NSString alloc] initWithData:customSiteInfoData encoding:NSUTF8StringEncoding]);
         }
-        // ダウンロード中に本棚からNarouContentが消されている場合はダウンロードを打ち切る必要があります。
-        NarouContentCacheData* currentContent = [globalData SearchNarouContentFromNcode:localContent.ncode];
-        if (currentContent == nil) {
-            NSLog(@"already deleted content!!!!!!!!");
+        
+        // AutoPagerizeの情報はその後です
+        NSData* siteInfoData = [globalData GetCachedAutoPagerizeSiteInfoData];
+        if(![loader AddSiteInfoFromData:siteInfoData]){
             return false;
         }
         
-        if ([localContent.general_all_no intValue] < story.count) {
-            localContent.general_all_no = [[NSNumber alloc] initWithInt:story.count];
-        }
+        NSString* urlString = localContent.ncode;
+        int startCount = 1;
+        // 最終ダウンロードURLがあるならターゲットをそれに更新する。
         // XXXXX TODO: .userid が最後に読み込んだ URL になってるのをなんとかしたい……(´・ω・`)
-        localContent.userid = [currentURL absoluteString];
-        if (story.count != startCount
-            || ([globalData SearchStory:localContent.ncode chapter_no:startCount] == nil)) {
-            // 最初に読んだ count が DB に登録されていないか、
-            // 最初に読んだもの以外のものは内容を更新する。
-            // (最初に読むのは前回最後に読んだものなので、ユーザが内容を更新している可能性があるため更新しないが、
-            // リストア時は何も読んでおらず Story も登録されていないので更新する必要がある)
-            [globalData UpdateStory:story.content chapter_number:story.count parentContent:localContent];
-            localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
-            localContent.novelupdated_at = [[NSDate alloc] initWithTimeIntervalSinceNow:0];
+        if (localContent.userid != nil && [localContent.userid length] > 0) {
+            urlString = localContent.userid;
+            startCount = [localContent.general_all_no intValue];
         }
-        // さっき現在の NarouContent の状態を読んだので、読み上げ位置的なものはそれで上書きした上で状態を更新する
-        localContent.reading_chapter = currentContent.reading_chapter;
-        localContent.currentReadingStory = currentContent.currentReadingStory;
-        [globalData UpdateNarouContent:localContent];
-        result = true;
-        // ダウンロードされたので、ダウンロード状態を更新します。
-        dispatch_async(self->m_MainDispatchQueue, ^{
-            [self KickDownloadStatusUpdate:localContent n:story.count maxpos:story.count];
-            self->m_CurrentDownloadContentAllData.current_download_complete_count = story.count;
-        });
-        return true;
-    } failedAction:^(NSURL* url){
-        NSLog(@"LoadURL failed. %@", [url absoluteString]);
-    } finishAction:^(NSURL* url){
-        //NSLog(@"LoadURL finish. %@", [url absoluteString]);
-        // すべてのダウンロードが完了したら、nil で状態を更新します。
-        dispatch_async(self->m_MainDispatchQueue, ^{
-            [self KickDownloadStatusUpdate:nil n:0 maxpos:0];
-            self->m_CurrentDownloadContentAllData = nil;
-        });
-        dispatch_semaphore_signal(semaphore);
-    }];
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-    // 更新された内容をアナウンスする必要があります
-    NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:localContent.ncode];
-    if (content != nil) {
-        localContent = content;
+        NSURL* targetURL = [[NSURL alloc] initWithString:urlString];
+        
+        //NSLog(@"URLDownload: keyword(cookie): %@", localContent.keyword);
+        NSArray* cookieArray = [localContent.keyword componentsSeparatedByString:@";"];
+        
+        __block BOOL result = false;
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        [loader LoadURL:targetURL cookieArray:cookieArray startCount:startCount successAction:^BOOL(HtmlStory* story, NSURL* currentURL){
+            if (story == nil) {
+                return false;
+            }
+            // ダウンロード中に本棚からNarouContentが消されている場合はダウンロードを打ち切る必要があります。
+            NarouContentCacheData* currentContent = [globalData SearchNarouContentFromNcode:localContent.ncode];
+            if (currentContent == nil) {
+                NSLog(@"already deleted content!!!!!!!!");
+                return false;
+            }
+            
+            if ([localContent.general_all_no intValue] < story.count) {
+                localContent.general_all_no = [[NSNumber alloc] initWithInt:story.count];
+            }
+            // XXXXX TODO: .userid が最後に読み込んだ URL になってるのをなんとかしたい……(´・ω・`)
+            localContent.userid = [currentURL absoluteString];
+            if (story.count != startCount
+                || ([globalData SearchStory:localContent.ncode chapter_no:startCount] == nil)) {
+                // 最初に読んだ count が DB に登録されていないか、
+                // 最初に読んだもの以外のものは内容を更新する。
+                // (最初に読むのは前回最後に読んだものなので、ユーザが内容を更新している可能性があるため更新しないが、
+                // リストア時は何も読んでおらず Story も登録されていないので更新する必要がある)
+                [globalData UpdateStory:story.content chapter_number:story.count parentContent:localContent];
+                localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
+                localContent.novelupdated_at = [[NSDate alloc] initWithTimeIntervalSinceNow:0];
+            }
+            // さっき現在の NarouContent の状態を読んだので、読み上げ位置的なものはそれで上書きした上で状態を更新する
+            localContent.reading_chapter = currentContent.reading_chapter;
+            localContent.currentReadingStory = currentContent.currentReadingStory;
+            [globalData UpdateNarouContent:localContent];
+            result = true;
+            // ダウンロードされたので、ダウンロード状態を更新します。
+            dispatch_async(self->m_MainDispatchQueue, ^{
+                [self KickDownloadStatusUpdate:localContent n:story.count maxpos:story.count];
+                self->m_CurrentDownloadContentAllData.current_download_complete_count = story.count;
+            });
+            return true;
+        } failedAction:^(NSURL* url){
+            NSLog(@"LoadURL failed. %@", [url absoluteString]);
+        } finishAction:^(NSURL* url){
+            //NSLog(@"LoadURL finish. %@", [url absoluteString]);
+            // すべてのダウンロードが完了したら、nil で状態を更新します。
+            dispatch_async(self->m_MainDispatchQueue, ^{
+                [self KickDownloadStatusUpdate:nil n:0 maxpos:0];
+                self->m_CurrentDownloadContentAllData = nil;
+            });
+            dispatch_semaphore_signal(semaphore);
+        }];
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+        // 更新された内容をアナウンスする必要があります
+        NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:localContent.ncode];
+        if (content != nil) {
+            localContent = content;
+        }
+        [self announceDownloadStatusEnd:localContent];
+        [loader ClearSiteInfoCache];
+        loader = nil;
+        
+        return result;
     }
-    [self announceDownloadStatusEnd:localContent];
-    [loader ClearSiteInfoCache];
-    loader = nil;
-
-    return result;
 }
 
 /// ncode のコンテンツのダウンロードを開始します。
