@@ -107,13 +107,9 @@
     UIMenuItem* speechModMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"SpeechViewController_AddSpeechModSettings", @"読み替え辞書へ登録") action:@selector(setSpeechModSetting:)];
     [menuController setMenuItems:@[speechModMenuItem]];
     
-    // ページめくり音を設定しておきます
-    {
-        m_PageTurningSoundPlayer = [DuplicateSoundPlayer new];
-        if (m_PageTurningSoundPlayer == nil || ![m_PageTurningSoundPlayer setMediaFileForResource:@"nc48625" ofType:@"m4a" maxDuplicateCount:1]){
-            NSLog(@"load Page turning sound failed.");
-        }
-    }
+    // ページめくり音を読み込んで準備……すると(設定如何によって)別アプリでの音楽再生が止められるため、
+    // 再生開始時までは先送りにします
+    m_PageTurningSoundPlayer = nil;
     
     m_bIsSpeaking = NO;
 }
@@ -185,6 +181,17 @@
     
     [self ApplyBrightTheme];
     [super viewWillDisappear:animated];
+}
+
+- (DuplicateSoundPlayer*)GetPageTurningSoundPlayer {
+    if (m_PageTurningSoundPlayer != nil) {
+        return m_PageTurningSoundPlayer;
+    }
+    m_PageTurningSoundPlayer = [DuplicateSoundPlayer new];
+    if (m_PageTurningSoundPlayer == nil || ![m_PageTurningSoundPlayer setMediaFileForResource:@"nc48625" ofType:@"m4a" maxDuplicateCount:1]){
+        NSLog(@"load Page turning sound failed.");
+    }
+    return nil;
 }
 
 /// 背景の暗いテーマを適用します
@@ -410,8 +417,11 @@
 /// ページめくり音を再生します
 - (void)RingPageTurningSound{
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    if ([globalData IsPageTurningSoundEnabled] && [globalData isSpeaking] && m_PageTurningSoundPlayer != nil) {
-        [m_PageTurningSoundPlayer startPlay];
+    if ([globalData IsPageTurningSoundEnabled] && [globalData isSpeaking]) {
+        DuplicateSoundPlayer* player = [self GetPageTurningSoundPlayer];
+        if (player != nil) {
+            [player startPlay];
+        }
     }
 }
 
