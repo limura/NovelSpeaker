@@ -10,20 +10,19 @@
 import UIKit
 
 class DummySoundLooper: NSObject {
-    var audioPlayer:AVAudioPlayer = AVAudioPlayer()
+    var audioPlayer:AVAudioPlayer? = nil
+    var mediaFileURL:NSURL? = nil
     let dispatchQueue = DispatchQueue(label: "NovelSpeaker.DummySoundLoader", qos: DispatchQoS.default, attributes: DispatchQueue.Attributes.concurrent, autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.inherit, target: nil)
     
     @objc public func setMediaFile(forResource:String, ofType:String) -> Bool {
         if let path = Bundle.main.path(forResource: forResource, ofType: ofType) {
-            let audio = NSURL(fileURLWithPath: path)
-            do {
-                let player = try AVAudioPlayer(contentsOf: audio as URL)
-                audioPlayer = player;
-                audioPlayer.prepareToPlay()
-            } catch {
-                print("setMediaFile failed by exception")
+            let audioURL = NSURL(fileURLWithPath: path)
+            var error:NSError?
+            if !audioURL.checkResourceIsReachableAndReturnError(&error) {
+                print("setMediaFile failed. target file is not reachable.")
                 return false
             }
+            mediaFileURL = audioURL
         }else{
             print("setMediaFile failed by path")
             return false
@@ -31,16 +30,37 @@ class DummySoundLooper: NSObject {
         return true
     }
     
+    func getPlayer() -> AVAudioPlayer? {
+        if let player = self.audioPlayer {
+            return player
+        }
+        if let mediaFileURL = self.mediaFileURL {
+            do {
+                let player = try AVAudioPlayer(contentsOf: mediaFileURL as URL)
+                player.prepareToPlay()
+                audioPlayer = player;
+            } catch {
+                print("setMediaFile failed by exception")
+                return nil
+            }
+        }
+        return nil
+    }
+    
     @objc public func startPlay(){
         dispatchQueue.async {
-            self.audioPlayer.numberOfLoops = -1
-            self.audioPlayer.play()
+            if let audioPlayer = self.getPlayer() {
+                audioPlayer.numberOfLoops = -1
+                audioPlayer.play()
+            }
         }
     }
     
     @objc public func stopPlay(){
         dispatchQueue.async {
-            self.audioPlayer.stop()
+            if let audioPlayer = self.getPlayer() {
+                audioPlayer.stop()
+            }
         }
     }
 }
