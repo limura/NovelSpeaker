@@ -30,6 +30,13 @@ class DummySoundLooper: NSObject {
         return true
     }
     
+    func isPlaying() -> Bool {
+        if let player = self.audioPlayer {
+            return player.isPlaying
+        }
+        return false
+    }
+    
     func getPlayer() -> AVAudioPlayer? {
         if let player = self.audioPlayer {
             return player
@@ -58,6 +65,9 @@ class DummySoundLooper: NSObject {
     
     @objc public func stopPlay(){
         dispatchQueue.async {
+            if !self.isPlaying() {
+                return
+            }
             if let audioPlayer = self.getPlayer() {
                 audioPlayer.stop()
             }

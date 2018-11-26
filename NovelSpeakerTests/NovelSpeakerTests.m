@@ -106,5 +106,31 @@
     
 }
 
+- (void)testPause {
+    NSString* text = @"メロスは激怒した。必ず、かの邪智暴虐じゃちぼうぎゃくの王を除かなければならぬと決意した。";
+    
+    Speaker* speaker = [Speaker new];
+    [speaker Speech:text];
+    NSLog(@"Speech");
+    [NSThread sleepForTimeInterval:2.0f];
+    [speaker PauseSpeech];
+    NSLog(@"Pause");
+    [NSThread sleepForTimeInterval:1.0f];
+    [speaker ResumeSpeech];
+    NSLog(@"Resume");
+    [NSThread sleepForTimeInterval:2.0f];
+    [speaker PauseSpeech];
+    NSLog(@"Pause");
+    [NSThread sleepForTimeInterval:2.0f];
+    [speaker Speech:text];
+    NSLog(@"Speech");
+    [NSThread sleepForTimeInterval:2.0f];
+    [speaker ResumeSpeech];
+    NSLog(@"Resume");
+    [NSThread sleepForTimeInterval:2.0f];
+    [speaker Speech:text];
+    NSLog(@"Speech");
+    [NSThread sleepForTimeInterval:2.0f];
+}
     
 @end

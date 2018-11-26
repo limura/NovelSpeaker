@@ -11,21 +11,12 @@ import UIKit
 class DuplicateSoundPlayer: NSObject, AVAudioPlayerDelegate {
     var playerArray:[AVAudioPlayer] = []
     let dispatchQueue = DispatchQueue(label: "NovelSpeaker.DuplicateSoundPlayer", qos: DispatchQoS.default, attributes: DispatchQueue.Attributes.concurrent, autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.inherit, target: nil)
+    var mediaFileURL:NSURL? = nil
+    var maxDuplicateCount:Int = 1
 
     @objc public func setMediaFile(forResource:String, ofType:String, maxDuplicateCount:Int) -> Bool {
         if let path = Bundle.main.path(forResource: forResource, ofType: ofType) {
-            let audio = NSURL(fileURLWithPath: path)
-            for _ in (1 ... maxDuplicateCount) {
-                do {
-                    let player = try AVAudioPlayer(contentsOf: audio as URL)
-                    player.prepareToPlay()
-                    player.delegate = self
-                    playerArray.append(player)
-                } catch {
-                    print("setMediaFile failed by exception")
-                    return false
-                }
-            }
+            self.mediaFileURL = NSURL(fileURLWithPath: path)
         }else{
             print("setMediaFile failed by path")
             return false
@@ -33,9 +24,43 @@ class DuplicateSoundPlayer: NSObject, AVAudioPlayerDelegate {
         return true
     }
     
+    func getPlayerArray() -> [AVAudioPlayer] {
+        if playerArray.count > 0 {
+            return playerArray
+        }
+        
+        if let mediaFileURL = self.mediaFileURL {
+            for _ in (1 ... self.maxDuplicateCount) {
+                do {
+                    let player = try AVAudioPlayer(contentsOf: mediaFileURL as URL)
+                    player.prepareToPlay()
+                    player.delegate = self
+                    self.playerArray.append(player)
+                } catch {
+                    if let urlString = mediaFileURL.absoluteString {
+                        print("setMediaFile failed by exception", urlString)
+                    }else{
+                        print("setMediaFile failed by exception")
+                    }
+                    return []
+                }
+            }
+        }
+        return self.playerArray
+    }
+    
+    func isPlaying() -> Bool {
+        for player in self.playerArray {
+            if player.isPlaying {
+                return true
+            }
+        }
+        return false
+    }
+    
     @objc public func startPlay(){
         dispatchQueue.async {
-            for player in self.playerArray {
+            for player in self.getPlayerArray() {
                 if !player.isPlaying {
                     print("play")
                     player.numberOfLoops = 0
@@ -50,7 +75,10 @@ class DuplicateSoundPlayer: NSObject, AVAudioPlayerDelegate {
     
     @objc public func stopPlay(){
         dispatchQueue.async {
-            for player in self.playerArray {
+            if !self.isPlaying() {
+                return
+            }
+            for player in self.getPlayerArray() {
                 player.stop()
             }
         }
