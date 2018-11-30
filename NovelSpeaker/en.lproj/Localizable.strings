@@ -300,6 +300,7 @@
 - Settings -> Speech ruby only slightly changed criteria judged as ruby
 - Fixed a part of the problem that started when downloading all the novels in the bookshelf after a while when there were a lot of novels imported by Web Import and falls for a while.
 - Fixed a problem that there is a possibility that music that is being played back in the background by another application is stopped when the novel text is displayed
+- Fixed the problem that automatic updating was not actually stopped when \"Settings\"-> \"Auto download for updated novel\" changed from ON to OFF
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -316,6 +317,7 @@ Bug fix
 - Settings -> Speech ruby only slightly changed criteria judged as ruby
 - Fixed a part of the problem that started when downloading all the novels in the bookshelf after a while when there were a lot of novels imported by Web Import and falls for a while.
 - Fixed a problem that there is a possibility that music that is being played back in the background by another application is stopped when the novel text is displayed
+- Fixed the problem that automatic updating was not actually stopped when \"Settings\"-> \"Auto download for updated novel\" changed from ON to OFF
 
 
 # Version 1.1.45

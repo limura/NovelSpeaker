@@ -104,11 +104,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 }
                             })
                             .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
-                                // TODO: ロジックが入ってる
                                 let globalData = GlobalDataSingleton.getInstance()
                                 globalData?.updateBackgroundNovelFetchMode(true)
-                                globalData?.registerUserNotification()
-                                globalData?.startBackgroundFetch()
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: true)
                                 }

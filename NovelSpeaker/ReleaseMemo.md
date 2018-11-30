@@ -1865,6 +1865,7 @@ Bug Fix
 - 設定 -> ルビはルビだけ読む でルビとして判断される基準を少し変更
 - Web取込 で取り込んだ小説が多めにある時に、本棚で全ての小説のダウンロードを開始してしばらくすると落ちる問題の一部を修正
 - 小説本文が表示される時など、読み上げていない時に別アプリがバックグラウンド再生している音楽等が止められる可能性がある問題に対応
+- 設定 -> 小説の自動更新 を ON から OFF に切り替えた時に、実際は自動更新が停止していなかった問題を修正
 
 追伸
 
@@ -1897,6 +1898,7 @@ Bug fix
 - Settings -> Speech ruby only slightly changed criteria judged as ruby
 - Fixed a part of the problem that started when downloading all the novels in the bookshelf after a while when there were a lot of novels imported by Web Import and falls for a while.
 - Fixed a problem that there is a possibility that music that is being played back in the background by another application is stopped when the novel text is displayed
+- Fixed the problem that automatic updating was not actually stopped when Settings -> Auto download for updated novel changed from ON to OFF
 
 
 TODO

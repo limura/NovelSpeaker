@@ -2926,6 +2926,16 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_BACKGROUND_NOVEL_FETCH_MODE];
     [userDefaults synchronize];
+    if (isEnabled) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self RegisterUserNotification];
+            [self StartBackgroundFetch];
+        });
+    }else{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self StopBackgroundFetch];
+        });
+    }
 }
 
 /// AutoPagerize の SiteInfo を保存した日付を取得します
@@ -3385,6 +3395,12 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     UIApplication* application = [UIApplication sharedApplication];
     [application setMinimumBackgroundFetchInterval:hour];
+}
+
+/// BackgroundFetch を無効化します
+- (void)StopBackgroundFetch{
+    UIApplication* application = [UIApplication sharedApplication];
+    [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalNever];
 }
 
 /// ルビがふられた物について、ルビの部分だけを読むか否かの設定を取得します
