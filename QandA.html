@@ -51,6 +51,7 @@
 	<li><a href="#alphapolice">アルファポリス様について</a></li>
 	<li><a href="#iOSTextToSpeechEngine">iOSの音声合成エンジン側の問題について(末尾がリフレインする、一部の文字を読み上げない等)</a></li>
 	<li><a href="#DownloadSpeechDataWarning">読み上げ時の話者データのダウンロードについて</a></li>
+	<li><a href="#SpeechSpeed">読み上げ時の速度上限(下限)について</a></li>
 </ul>
 </div>
 <hr/>
@@ -278,6 +279,20 @@ Web取込 機能で対応していました アルファポリス様 なので�
 	<li><a href="https://limuraproducts.ddns.net/NovelSpeaker/Kyoko-premium.novelspeaker-backup-json">Kyoko (拡張)</a></li>
 	<li><a href="https://limuraproducts.ddns.net/NovelSpeaker/Kyoko.novelspeaker-backup-json">Kyoko</a></li>
 </ul>
+
+<h4 id="SpeechSpeed">読み上げ時の速度上限(下限)について(2018/12)</h4>
+<p>
+読み上げ時の速度について、今以上の速度で読み上げをしたいというお問い合わせが何件か頂きました。
+ことせかい の読み上げ時の速度は 設定 → 声質の設定 にある 速度 で調節できるのですが、ここで指定できる値の範囲がシステム側の上限と下限そのものになりますのでこれ以上の値の設定はできません。
+</p>
+<p>
+わかる方にわかりやすく書きますと、<a href="https://developer.apple.com/documentation/avfoundation/avspeechutterance/1619708-rate">AVSpeechUtterance の rate プロパティ</a> に設定できます値の 下限(<code>AVSpeechUtteranceMinimumSpeechRate</code>) と 上限(<code>AVSpeechUtteranceMaximumSpeechRate</code>) を指定できるようにしてありますのでこれ以上の範囲を指定してもこの範囲内に丸められてしまいます。
+</p>
+<p>
+この制限を外そうとしますと、ことせかい が利用している音声合成エンジンを iOS の提供している <a href="https://developer.apple.com/documentation/avfoundation/avspeechsynthesizer">AVSpeechSynthesizer</a> ではない別のもので、合成された音声をPCM的な物で取り出せるもの(例えば<a href="https://www.a-quest.com/products/aquestalk.html">AquesTalk</a>等)に変えて、音声をPCM的に取り出してそこからさらに再生速度を早めるような処理を入れる、などの対策が必要となると考えられます。
+ただこの場合は、ことせかい の音声合成エンジン周りが <a href="https://developer.apple.com/documentation/avfoundation/avspeechsynthesizer">AVSpeechSynthesizer</a> に依存した書き方がされているものを別の音声合成エンジンを使うように書き換えないといけなくなりますし、さらに再生速度を変えるとなると恐らくは読み上げ位置の管理にあたる部分にかなり手を入れないといけなくなりそうです。これらの修正は非常に大変なことが予想されます。
+以上の理由により、現状ではそのような再生速度の限界を超える目的の変更を行う予定はありません。
+</p>
 </section>
         <footer>
           ことせかい is maintained by <a href="https://github.com/limura">limura</a><br>
@@ -285,5 +300,3 @@ Web取込 機能で対応していました アルファポリス様 なので�
         </footer>
       </div>
     </div>
-  </body>
-</html>
