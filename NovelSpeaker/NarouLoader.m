@@ -15,6 +15,16 @@
 /// SettingDataModel の NarouContent に追加するなどします。
 @implementation NarouLoader
 
+static NSURLSession* session = nil;
+
++ (NSURLSession*)GetSession {
+    if (session != nil) {
+        return session;
+    }
+    session = [NSURLSession sessionWithConfiguration:NSURLSessionConfiguration.defaultSessionConfiguration];
+    return session;
+}
+
 /// なろう検索APIのURLを使って検索結果を取得します。
 + (NSArray*)SearchWithURL:(NSString*)queryUrl
 {
@@ -157,7 +167,8 @@
 + (NSString*)GetTextDownloadURL:(NSString*)ncode
 {
     // まずは通常のHTMLを取得します。
-    NSString* htmlURL = [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/", ncode];
+    NSString* lcaseNcode = [ncode lowercaseString];
+    NSString* htmlURL = [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/", lcaseNcode];
     NSString* html = [self HttpGet:htmlURL];
     if (html == nil) {
         return nil;
@@ -165,7 +176,9 @@
     // この html から、正規表現を使って
     // onclick="javascript:window.open('http://ncode.syosetu.com/txtdownload/top/ncode/562600/'
     // といった文字列の、562600 の部分を取得します。
-    NSString* matchPattern = @"onclick=\"javascript:window.open\\('https?://ncode.syosetu.com/txtdownload/top/ncode/([^/]*)/'";
+    // 2018/12/18: textdownload の link が消えてるので他の所から取り出します
+    // trackback:ping="https://trackback.syosetu.com/send/novel/ncode/1052106/
+    NSString* matchPattern = @"trackback:ping=\\\"https://trackback.syosetu.com/send/novel/ncode/([^/]*)/\\\"";
     NSError* err = nil;
     NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:matchPattern options:NSRegularExpressionCaseInsensitive error:&err];
     if (err != nil) {
@@ -182,10 +195,23 @@
     return [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/txtdownload/dlstart/ncode/%@/", result];
 }
 
+/// 小説家になろうの小説の、指定されたページのURLを取得します
++ (NSURL*)GetStoryURLForContent:(NarouContentCacheData*)content no:(int)no {
+    if (content == nil || content.ncode == nil) {
+        return nil;
+    }
+    NSString* lcaseNcode = [content.ncode lowercaseString];
+    // 短編小説の場合は最後の /1/ はいらない
+    if ([content.general_all_no intValue] == 1 && [content.end boolValue] == false) {
+        return [[NSURL alloc] initWithString:[[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/", lcaseNcode]];
+    }
+    return [[NSURL alloc] initWithString:[[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/%d/", lcaseNcode, no]];
+}
+
 /// 小説家になろうでTextダウンロードを行います。
 + (NSString*)TextDownload:(NSString*)download_url count:(int)count
 {
-    NSString* url = [[NSString alloc] initWithFormat:@"%@?hankaku=0&code=utf-8&kaigyo=CRLF&no=%d", download_url, count];
+    NSString* url = [[NSString alloc] initWithFormat:@"%@?hankaku=0&code=utf-8&kaigyo=crlf&no=%d", download_url, count];
     return [self HttpGet:url];
 }
 
@@ -193,7 +219,7 @@
 + (NSData*)HttpGetBinary:(NSString*)url {
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
     [request setHTTPMethod:@"GET"];
-    NSURLSession* session = [NSURLSession sharedSession];
+    NSURLSession* session = [NarouLoader GetSession];
     __block NSData* result = nil;
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     NSURLSessionDataTask* dataTask = [session dataTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
@@ -203,6 +229,13 @@
                 dispatch_semaphore_signal(semaphore);
                 return;
             }
+            NSArray* cookies = [NSHTTPCookie cookiesWithResponseHeaderFields:[httpResponse allHeaderFields] forURL:[httpResponse URL]];
+            [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookies:cookies forURL:[httpResponse URL] mainDocumentURL:nil];
+            NSLog(@"Cookies for %@", [[httpResponse URL] absoluteString]);
+            for (NSHTTPCookie* cookie in cookies) {
+                NSLog(@"%@", [cookie description]);
+            }
+            NSLog(@"end Cookies\n\n");
             result = data;
             dispatch_semaphore_signal(semaphore);
         }

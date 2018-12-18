@@ -328,9 +328,11 @@
 {
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:targetUrl];
     
-    NSArray* cookieArray = [cookieStorage cookiesForURL:targetUrl];
-    NSDictionary* header = [NSHTTPCookie requestHeaderFieldsWithCookies:cookieArray];
-    [request setAllHTTPHeaderFields:header];
+    if (cookieStorage != nil) {
+        NSArray* cookieArray = [cookieStorage cookiesForURL:targetUrl];
+        NSDictionary* header = [NSHTTPCookie requestHeaderFieldsWithCookies:cookieArray];
+        [request setAllHTTPHeaderFields:header];
+    }
 
     NSError* error;
     NSURLResponse* response;
@@ -347,11 +349,13 @@
         NSLog(@"HTTP status code is not 2?? (%ld) url: %@", (long)httpResponse.statusCode, [targetUrl absoluteString]);
         if (out_errorString != nil) {
             [out_errorString setString:[[NSString alloc] initWithFormat:NSLocalizedString(@"UriLoader_HTTPResponseIsInvalid", @"サーバから返されたステータスコードが正常値(200 OK等)ではなく、%ld を返されました。ログインが必要なサイトである場合などに発生する場合があります。ことせかい アプリ側でできることはあまり無いかもしれませんが、ことせかい のサポートサイトに設置してあります、ご意見ご要望フォームにこの問題の起こったURLとこの症状が起こった前にやったことを添えて報告して頂けると、あるいはなんとかできるかもしれません。"), httpResponse.statusCode]];
+            /* TODO: ここを通ると _CFThrowFormattedException が起きるので取り急ぎコメントアウトしておく
             [BehaviorLogger AddLogWithDescription:@"GetHtmlDataAboutUTF8Encorded HTTP status code fail" data:@{
                   @"returned HTTP status code": [NSString stringWithFormat:@"%ld", (long)httpResponse.statusCode],
                   @"url": targetUrl == nil ? @"nil" : [targetUrl absoluteString],
                   @"request header": request == nil ? @"nil": [request allHTTPHeaderFields]
             }];
+             */
         }
         return nil;
     }
@@ -449,6 +453,7 @@
     return cookieStorage;
 }
 
+/// URLを一つ読み込んで HtmlStroy に変換して返します
 - (HtmlStory*)FetchStoryForURL:(NSURL*)targetUrl cookieStorage:(NSHTTPCookieStorage*)cookieStorage out_error:(NSMutableString*)out_errorString {
     NSMutableString* charSetString = [NSMutableString new];
     unsigned long charsetValue = 0;

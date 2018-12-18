@@ -155,5 +155,29 @@
     return false;
 }
 
+/// HTTP GET する時の domain に当たる文字列を返します。
+/// ユーザによる自作コンテンツ等の domain に当たるものが無い場合は nil を返します
+- (NSString*)GetDomainString {
+    if ([self isURLContent]) {
+        NSURL* url = [[NSURL alloc] initWithString:self.ncode];
+        if (url == nil) {
+            return nil;
+        }
+        NSString* host = [url host];
+        if (host == nil) {
+            return nil;
+        }
+        NSArray* parts = [host componentsSeparatedByString:@"."];
+        if ([parts count] <= 2) {
+            return host;
+        }
+        NSArray* domainParts = [parts subarrayWithRange:NSMakeRange(1, [parts count] - 1)];
+        return [domainParts componentsJoinedByString:@"."];
+    }else if ([self isUserCreatedContent]) {
+        return nil;
+    }
+    return @"syosetu.com";
+}
+
 
 @end

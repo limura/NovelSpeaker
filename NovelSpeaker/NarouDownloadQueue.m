@@ -369,134 +369,144 @@ static float SLEEP_TIME_SECOND = 10.5f;
 /// ncode のコンテンツのダウンロードを開始します。
 - (BOOL)ChapterDownload:(NarouContentCacheData*)localContent
 {
-    if (localContent == nil || localContent.ncode == nil) {
-        return false;
-    }
-    [BehaviorLogger AddLogWithDescription:@"NarouDownloadQueue ChapterDownload kicked" data:@{
-        @"ncode": localContent.ncode == nil ? @"nil" : localContent.ncode
-    }];
-    if ([localContent isURLContent]) {
-        return [self URLDownload:localContent];
-    }
-    if ([localContent isUserCreatedContent]) {
-        return false;
-    }
-    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    
-    // 与えられた content の ncode を使って最新情報を読み込んでCoreData側の情報を上書きします。
-    NarouContentCacheData* currentContent = [NarouLoader GetCurrentNcodeContentData:localContent.ncode];
-    if (currentContent == nil) {
-        NSLog(@"ncode: %@ の最新情報の読み込みに失敗しました。", localContent.ncode);
-        return false;
-    }
-    [globalData UpdateNarouContent:currentContent];
-    localContent = currentContent;
-    
-    NSString* downloadURL = [NarouLoader GetTextDownloadURL:localContent.ncode];
-    if (downloadURL == nil) {
-        NSLog(@"can not get download url for ncode: %@", localContent.ncode);
-        return false;
-    }
-
-    // 現在ダウンロード中とするデータを copy で作っておきます。
-    dispatch_async(m_MainDispatchQueue, ^{
-        self->m_CurrentDownloadContentAllData = localContent;
-        self->m_CurrentDownloadContentAllData.current_download_complete_count = 0;
-    });
-
-    int max_content_count = [localContent.general_all_no intValue];
-    Boolean isDownloaded = FALSE;
-        
-    //NSLog(@"download queue for %@ started max: %d", localContent.title, max_content_count);
-    for (int n = 1; n <= max_content_count; n++) {
-
-        //NSLog(@"Story の query をかけます。");
-        // 既に読みこんであるか否かを判定します。
-        StoryCacheData* story = [globalData SearchStory:localContent.ncode chapter_no:n];
-        //NSLog(@"Story の query が終わりました。");
-        if (story != nil) {
-            // 何かデータがありました。
-            if ([self isValidStory:story] == false) {
-                // 駄目なデータでした。削除して読み込みを行います。
-                NSLog(@"すでにあるデータは 駄目なデータだったので削除して読み込みを行います。(%d)", n);
-                [globalData DeleteStory:story];
-            }else{
-                // 既に読み込んであるようなので読み込まないで良いことにします。
-                //NSLog(@"読み込み済みなのでスキップします。%d/%d %@", n, max_content_count, localContent.title);
-                continue;
-            }
+    @autoreleasepool {
+        GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+        UriLoader* loader = [UriLoader new];
+        NSLog(@"URLDownload: %@ %@", localContent.title, localContent.ncode);
+        // ことせかい用のカスタムSiteInfoデータを優先度的に上にするために先に読み込ませます
+        NSData* customSiteInfoData = [globalData GetCachedCustomAutoPagerizeSiteInfoData];
+        if(![loader AddCustomSiteInfoFromData:customSiteInfoData]){
+            NSLog(@"AddCustomSiteInfoFromData failed: %@", [[NSString alloc] initWithData:customSiteInfoData encoding:NSUTF8StringEncoding]);
         }
-        if (m_DownloadCount >= BULK_DOWNLOAD_COUNT) {
-            //NSLog(@"download sleep.");
-            // 指定回数分までダウンロードされたので、ダウンロードを開始する前に指定の秒数だけ寝ます。
-            // これをしないで連続ダウンロードを行うとゴミデータを掴まされる事になります。
-            NSDate* endDate = [[NSDate date] dateByAddingTimeInterval:SLEEP_TIME_SECOND];
-            while ([endDate compare:[NSDate date]] != NSOrderedAscending) {
-                if (m_isNeedQuit) {
-                    break;
-                }
-                [NSThread sleepForTimeInterval:0.1];
-            }
-            m_DownloadCount = m_DownloadCount % BULK_DOWNLOAD_COUNT;
-        }
-        if (m_isNeedQuit) {
-            break;
-        }
-
-        // ダウンロードします。
-        //NSLog(@"download start %d %@", n, downloadURL);
-        m_DownloadCount += 1;
-        NSString* text = [NarouLoader TextDownload:downloadURL count:n];
-        if (text == nil) {
-            // 読み込みに失敗したのでここで終了します。
-            NSLog(@"text download failed. ncode: %@, download in %d/%d", localContent.ncode, n, max_content_count);
+        // AutoPagerizeの情報はその後です
+        NSData* siteInfoData = [globalData GetCachedAutoPagerizeSiteInfoData];
+        if(![loader AddSiteInfoFromData:siteInfoData]){
             return false;
         }
-        // ダウンロード中に本棚からNarouContentが消されている場合はダウンロードを打ち切る必要があります。
-        {
-            NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:localContent.ncode];
-            if (content == nil) {
-                NSLog(@"already deleted content!!!!!!!!");
+        
+        if (localContent == nil || localContent.ncode == nil) {
+            return false;
+        }
+        [BehaviorLogger AddLogWithDescription:@"NarouDownloadQueue ChapterDownload kicked"
+            data:@{@"ncode": localContent.ncode == nil ? @"nil" : localContent.ncode}];
+        if ([localContent isURLContent]) {
+            return [self URLDownload:localContent];
+        }
+        if ([localContent isUserCreatedContent]) {
+            return false;
+        }
+        
+        // 与えられた content の ncode を使って最新情報を読み込んでCoreData側の情報を上書きします。
+        NarouContentCacheData* currentContent = [NarouLoader GetCurrentNcodeContentData:localContent.ncode];
+        if (currentContent == nil) {
+            NSLog(@"ncode: %@ の最新情報の読み込みに失敗しました。", localContent.ncode);
+            return false;
+        }
+        [globalData UpdateNarouContent:currentContent];
+        localContent = currentContent;
+        
+        // 現在ダウンロード中とするデータを copy で作っておきます。
+        dispatch_async(m_MainDispatchQueue, ^{
+            self->m_CurrentDownloadContentAllData = localContent;
+            self->m_CurrentDownloadContentAllData.current_download_complete_count = 0;
+        });
+        
+        int max_content_count = [localContent.general_all_no intValue];
+        Boolean isDownloaded = FALSE;
+        
+        //NSLog(@"download queue for %@ started max: %d", localContent.title, max_content_count);
+        for (int n = 1; n <= max_content_count; n++) {
+            
+            //NSLog(@"Story の query をかけます。");
+            // 既に読みこんであるか否かを判定します。
+            StoryCacheData* story = [globalData SearchStory:localContent.ncode chapter_no:n];
+            //NSLog(@"Story の query が終わりました。");
+            if (story != nil) {
+                // 何かデータがありました。
+                if ([self isValidStory:story] == false) {
+                    // 駄目なデータでした。削除して読み込みを行います。
+                    NSLog(@"すでにあるデータは 駄目なデータだったので削除して読み込みを行います。(%d)", n);
+                    [globalData DeleteStory:story];
+                }else{
+                    // 既に読み込んであるようなので読み込まないで良いことにします。
+                    //NSLog(@"読み込み済みなのでスキップします。%d/%d %@", n, max_content_count, localContent.title);
+                    continue;
+                }
+            }
+            if (m_DownloadCount >= BULK_DOWNLOAD_COUNT) {
+                //NSLog(@"download sleep.");
+                // 指定回数分までダウンロードされたので、ダウンロードを開始する前に指定の秒数だけ寝ます。
+                // これをしないで連続ダウンロードを行うとゴミデータを掴まされる事になります。
+                NSDate* endDate = [[NSDate date] dateByAddingTimeInterval:SLEEP_TIME_SECOND];
+                while ([endDate compare:[NSDate date]] != NSOrderedAscending) {
+                    if (m_isNeedQuit) {
+                        break;
+                    }
+                    [NSThread sleepForTimeInterval:0.1];
+                }
+                m_DownloadCount = m_DownloadCount % BULK_DOWNLOAD_COUNT;
+            }
+            if (m_isNeedQuit) {
+                break;
+            }
+            
+            // ダウンロードします。
+            //NSLog(@"download start %d %@", n, downloadURL);
+            m_DownloadCount += 1;
+            NSMutableString* errorString = [NSMutableString new];
+            HtmlStory* htmlStory = [loader FetchStoryForURL:[NarouLoader GetStoryURLForContent:localContent no:n] cookieStorage:nil out_error:errorString];
+            if (htmlStory == nil || htmlStory.content == nil) {
+                // 読み込みに失敗したのでここで終了します。
+                NSLog(@"text download failed. ncode: %@, download in %d/%d", localContent.ncode, n, max_content_count);
                 return false;
             }
+            NSString* text = htmlStory.content;
+            // ダウンロード中に本棚からNarouContentが消されている場合はダウンロードを打ち切る必要があります。
+            {
+                NarouContentCacheData* content = [globalData SearchNarouContentFromNcode:localContent.ncode];
+                if (content == nil) {
+                    NSLog(@"already deleted content!!!!!!!!");
+                    return false;
+                }
+            }
+            //NSLog(@"create new story: %d, %@", n, localContent.title);
+            // コンテンツを生成します。
+            [globalData UpdateStory:text chapter_number:n parentContent:localContent];
+            // new flag を立てます
+            localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
+            [globalData UpdateNarouContent:localContent];
+            // 保存を走らせます。(でないと main thread側 の core data に反映されません……(´・ω・`)
+            [globalData saveContext];
+            [self announceNarouContentNewStatusUp:localContent];
+            
+            // ダウンロードされたので、ダウンロード状態を更新します。
+            dispatch_async(m_MainDispatchQueue, ^{
+                [self KickDownloadStatusUpdate:localContent n:n maxpos:max_content_count];
+                self->m_CurrentDownloadContentAllData.current_download_complete_count = n;
+            });
+            [self announceDownloadStatus:localContent n:n maxPos:max_content_count];
+            
+            isDownloaded = TRUE;
         }
-        //NSLog(@"create new story: %d, %@", n, localContent.title);
-        // コンテンツを生成します。
-        [globalData UpdateStory:text chapter_number:n parentContent:localContent];
-        // new flag を立てます
-        localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
-        [globalData UpdateNarouContent:localContent];
-        // 保存を走らせます。(でないと main thread側 の core data に反映されません……(´・ω・`)
-        [globalData saveContext];
-        [self announceNarouContentNewStatusUp:localContent];
-
-        // ダウンロードされたので、ダウンロード状態を更新します。
+        // すべてのダウンロードが完了したら、nil で状態を更新します。
         dispatch_async(m_MainDispatchQueue, ^{
-            [self KickDownloadStatusUpdate:localContent n:n maxpos:max_content_count];
-            self->m_CurrentDownloadContentAllData.current_download_complete_count = n;
+            [self KickDownloadStatusUpdate:nil n:0 maxpos:0];
+            self->m_CurrentDownloadContentAllData = nil;
         });
-        [self announceDownloadStatus:localContent n:n maxPos:max_content_count];
+        [self announceDownloadStatusEnd:localContent];
         
-        isDownloaded = TRUE;
+        // ncode で監視している奴には ちゃんと DownloadEnd を送ってやります。
+        id<NarouDownloadQueueDelegate> ncodeHandler = [m_DownloadEventHandlerDictionary objectForKey:localContent.ncode];
+        if (ncodeHandler != nil) {
+            [ncodeHandler DownloadEnd];
+        }
+        
+        if (isDownloaded) {
+            m_NewDownloadCount++;
+        }
+        
+        return true;
     }
-   // すべてのダウンロードが完了したら、nil で状態を更新します。
-    dispatch_async(m_MainDispatchQueue, ^{
-        [self KickDownloadStatusUpdate:nil n:0 maxpos:0];
-        self->m_CurrentDownloadContentAllData = nil;
-    });
-    [self announceDownloadStatusEnd:localContent];
-    
-    // ncode で監視している奴には ちゃんと DownloadEnd を送ってやります。
-    id<NarouDownloadQueueDelegate> ncodeHandler = [m_DownloadEventHandlerDictionary objectForKey:localContent.ncode];
-    if (ncodeHandler != nil) {
-        [ncodeHandler DownloadEnd];
-    }
-    
-    if (isDownloaded) {
-        m_NewDownloadCount++;
-    }
-    
-    return true;
 }
 
 /// 現在ダウンロード待ち中の NarouContentAllData* のリストを返します。

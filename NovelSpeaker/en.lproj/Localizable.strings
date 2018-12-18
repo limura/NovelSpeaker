@@ -293,18 +293,20 @@
 "BookShelfTableViewController_SearchTitle" = "Search";
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.46
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.47
 
-- Add \"Settings\" -> \"Effort not to stop even if the music sounds in other applications\" option
-- Fixed a problem that setting will not be reflected if you start reading aloud the page of the novel that was open before and after switching Settings -> Speech ruby only ON / OFF
-- Settings -> Speech ruby only slightly changed criteria judged as ruby
-- Fixed a part of the problem that started when downloading all the novels in the bookshelf after a while when there were a lot of novels imported by Web Import and falls for a while.
-- Fixed a problem that there is a possibility that music that is being played back in the background by another application is stopped when the novel text is displayed
-- Fixed the problem that automatic updating was not actually stopped when \"Settings\"-> \"Auto download for updated novel\" changed from ON to OFF
+- Corresponds to problems that downloading of novel text via Search fails
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.47
+
+Bug fix.
+
+- Corresponds to problems that downloading of novel text via Search fails
+
+
 # Version 1.1.46
 
 Interface change

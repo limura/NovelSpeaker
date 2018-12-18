@@ -30,6 +30,9 @@
 /// ことせかい用にカスタムされた SiteInfo (Autopagerize由来ではないSiteInfo) のJSONを内部データベースに追加します。
 - (BOOL)AddCustomSiteInfoFromData:(NSData*)siteInfo;
 
+/// URLを一つ読み込んで HtmlStroy に変換して返します
+- (HtmlStory*)FetchStoryForURL:(NSURL*)targetUrl cookieStorage:(NSHTTPCookieStorage*)cookieStorage out_error:(NSMutableString*)out_errorString;
+
 /// テスト用に一つのURLを取得します。
 - (void)FetchOneUrl:(NSURL*)url cookieArray:(NSArray*)cookieArray successAction:(void(^)(HtmlStory* story))successAction failedAction:(void(^)(NSURL* url, NSString* errorString))failedAction;
 

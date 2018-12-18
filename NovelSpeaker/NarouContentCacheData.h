@@ -48,4 +48,8 @@
 /// URLで指定されるコンテンツか否かを取得します
 - (BOOL)isURLContent;
 
+/// HTTP GET する時の host に当たる文字列を返します。
+/// ユーザによる自作コンテンツ等の host に当たるものが無い場合は nil を返します
+- (NSString*)GetDomainString;
+
 @end

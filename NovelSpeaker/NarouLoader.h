@@ -42,6 +42,9 @@
 /// ここではその小説のページのHTMLを読み込んで、ダウンロード用の FORM GET に渡すURLを生成します。
 + (NSString*)GetTextDownloadURL:(NSString*)ncode;
 
+/// 小説家になろうの小説の、指定されたページのURLを取得します
++ (NSURL*)GetStoryURLForContent:(NarouContentCacheData*)content no:(int)no;
+
 /// 小説家になろうでTextダウンロードを行います。
 /// ここで指定される download_url は、GetTextDownloadURL で得られたダウンロード用のURLを用います。
 + (NSString*)TextDownload:(NSString*)download_url count:(int)count;
