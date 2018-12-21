@@ -290,7 +290,8 @@
 "BookShelfTableViewController_SearchTitle" = "検索";
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.46
+"BookShelfTableViewController_Resume:" = "再開: %@";
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.47
 
 - なろう検索 経由での小説本文のダウンロードが失敗するようになった問題に対応
 

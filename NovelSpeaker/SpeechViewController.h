@@ -38,6 +38,8 @@
 
 // 前のページから得られる表示するための情報
 @property NarouContentCacheData* NarouContentDetail;
+// 開いた時に読み上げを再開するか否か
+@property BOOL NeedResumeSpeech;
 
 - (IBAction)ChapterSliderChanged:(UISlider *)sender;
 @end

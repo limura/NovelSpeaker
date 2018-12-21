@@ -160,6 +160,11 @@
     // (間髪入れずに読み出そうとすると保存されていない古い情報を読む可能性が少しだけあるはずです)
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
         [self SetCurrentReadingPointFromSavedData:self.NarouContentDetail.ncode];
+        if (self.NeedResumeSpeech) {
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(700 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+                [self startSpeech:true];
+            });
+        }
     });
     
     // 読み上げ中かどうかが画面が表示されていない時に更新される場合があるので、表示を更新しておきます。
@@ -613,7 +618,12 @@
     if (content == nil) {
         return;
     }
-    NSString* message = [NSString stringWithFormat:NSLocalizedString(@"SpeechViewController_TweetMessage", @"%@ %@ #narou #ことせかい %@ %@"), content.title, content.writer, [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/%@/", m_CurrentReadingStory.ncode, m_CurrentReadingStory.chapter_number], @"https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185"];
+    NSString* message = nil;
+    if ([content.general_all_no intValue] == 1 && [content.end boolValue] == false) {
+        message = [NSString stringWithFormat:NSLocalizedString(@"SpeechViewController_TweetMessage", @"%@ %@ #narou #ことせかい %@ %@"), content.title, content.writer, [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/", [m_CurrentReadingStory.ncode lowercaseString]], @"https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185"];
+    }else{
+        message = [NSString stringWithFormat:NSLocalizedString(@"SpeechViewController_TweetMessage", @"%@ %@ #narou #ことせかい %@ %@"), content.title, content.writer, [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/%@/", [m_CurrentReadingStory.ncode lowercaseString], m_CurrentReadingStory.chapter_number], @"https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185"];
+    }
     [EasyShare ShareText:message viewController:self barButton:shareButton];
 }
 
@@ -1173,7 +1183,7 @@
     }else if([self.NarouContentDetail isUserCreatedContent]){
         return;
     }else{
-        NSString* urlString = [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/", self.NarouContentDetail.ncode];
+        NSString* urlString = [[NSString alloc] initWithFormat:@"https://ncode.syosetu.com/%@/", [self.NarouContentDetail.ncode lowercaseString]];
         url = [[NSURL alloc] initWithString:urlString];
     }
     if (url != nil) {

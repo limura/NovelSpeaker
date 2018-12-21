@@ -1930,6 +1930,15 @@ Bug fix.
 
 - Corresponds to problems that downloading of novel text via Search fails
 
+
+# Version 1.1.48
+
+インタフェースの変更
+
+- 読み上げの話者が未設定の場合、標準のもの(kyoko)ではなく利用可能な中でリッチな話者を選択するように
+
+
+
 TODO
 
 

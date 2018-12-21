@@ -2878,6 +2878,27 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (NSString*)GetVoiceIdentifier {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
     NSString* voiceIdentifier = [userDefaults stringForKey:USER_DEFAULTS_DEFAULT_VOICE_IDENTIFIER];
+    // 未設定であれば怪しく現在利用可能な話者の中から推奨の話者を選択しておきます
+    if (voiceIdentifier == nil) {
+        NSArray* recomendIdArray = @[
+         @"com.apple.ttsbundle.siri_female_ja-JP_premium", // O-ren premium
+         @"com.apple.ttsbundle.siri_female_ja-JP_compact", // O-ren
+         @"com.apple.ttsbundle.siri_male_ja-JP_compact", // hattori
+         @"com.apple.ttsbundle.Otoya-premium", // otoya premium
+         ];
+        NSArray* voiceArray = [NiftySpeaker getSupportedSpeaker:@"ja-JP"];
+        if (voiceArray != nil) {
+            for (NSString* recomendId in recomendIdArray) {
+                for (AVSpeechSynthesisVoice* voice in voiceArray) {
+                    if ([voice.identifier compare:recomendId] == NSOrderedSame) {
+                        voiceIdentifier = voice.identifier;
+                        [self SetVoiceIdentifier:voiceIdentifier];
+                        return voiceIdentifier;
+                    }
+                }
+            }
+        }
+    }
     return voiceIdentifier;
 }
 

@@ -37,7 +37,7 @@
         {
             NarouContentCacheData* currentContent = [globalData GetCurrentReadingContent];
             if (currentContent != nil) {
-                [self PushNextView:currentContent];
+                [self PushNextView:currentContent isNeedSpeech:false];
             }
         }
     }];
@@ -98,6 +98,7 @@
         self.tableView.refreshControl = m_UIRefreshControl;
         [m_UIRefreshControl addTarget:self action:@selector(refreshControlValueChangedEvent:) forControlEvents:(UIControlEventValueChanged)];
     }
+    m_ResumeSpeechFloatingButton = nil;
     
     if ([globalData IsVersionUped]) {
         [self ShowVersionUpNotice];
@@ -107,16 +108,43 @@
     {
         NarouContentCacheData* currentContent = [globalData GetCurrentReadingContent];
         if (currentContent != nil) {
-            [self PushNextView:currentContent];
+            [self PushNextView:currentContent isNeedSpeech:false];
         }
     }
     [self ReloadAllTableViewDataAndScrollToCurrentReadingContent];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    if (m_ResumeSpeechFloatingButton != nil) {
+        [m_ResumeSpeechFloatingButton hide];
+        m_ResumeSpeechFloatingButton = nil;
+    }
 }
 
 - (void)dealloc
 {
     [self removeNotificationReciver];
     [[GlobalDataSingleton GetInstance] DeleteDownloadEventHandler:self];
+}
+
+/// 必要なら最後に開いていた小説の読み上げを再開させます
+- (void)addPreviousNovelSpeakButtonIfNeeded{
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    NarouContentCacheData* currentContent = [globalData GetCurrentReadingContent];
+    if (currentContent == nil || currentContent.currentReadingStory == nil) {
+        return;
+    }
+    StoryCacheData* story = currentContent.currentReadingStory;
+    if ([story.chapter_number integerValue] >= [currentContent.general_all_no integerValue]
+        && ([story.readLocation unsignedIntegerValue] + 5) >= [story.content length]) {
+        return;
+    }
+    m_ResumeSpeechFloatingButton = [FloatingButton createNewFloatingButton];
+    [m_ResumeSpeechFloatingButton assignToViewWithView:self.tableView text:[[NSString alloc] initWithFormat: NSLocalizedString(@"BookShelfTableViewController_Resume:", @"再開:%@"), currentContent.title] animated:true buttonClicked:^{
+        [self PushNextView:currentContent isNeedSpeech:true];
+        [m_ResumeSpeechFloatingButton hideAnimate];
+    }];
 }
 
 /// NotificationCenter の受信者の設定をします。
@@ -297,7 +325,13 @@
             for (NarouContentCacheData* content in contentArray) {
                 if (content != nil && [content.ncode compare:selectedContent.ncode] == NSOrderedSame) {
                     NSIndexPath* path = [NSIndexPath indexPathForRow:index inSection:0];
-                    [self.tableView scrollToRowAtIndexPath:path atScrollPosition:UITableViewScrollPositionTop animated:false];
+                    [UIView animateWithDuration:0.3 animations:^{
+                        [self.tableView scrollToRowAtIndexPath:path atScrollPosition:UITableViewScrollPositionTop animated:false];
+                    } completion:^(BOOL finished) {
+                        // TableView のスクロールが終わったら、再開する奴があるかどうかを確認します。
+                        // でないとこのスクロールのイベントを受けてボタンが消えてしまう……(´・ω・`)
+                        [self addPreviousNovelSpeakButtonIfNeeded];
+                    }];
                 }
                 index++;
             }
@@ -313,9 +347,10 @@
 }
 
 // 次のビューに飛ばします。
-- (void)PushNextView:(NarouContentCacheData*)narouContent
+- (void)PushNextView:(NarouContentCacheData*)narouContent isNeedSpeech:(BOOL)isNeedSpeech
 {
     m_NextViewDetail = narouContent;
+    m_isNextViewNeedResumeSpeech = isNeedSpeech;
     //NSLog(@"next view: %@ %@", narouContent.ncode, narouContent.title);
     [self performSegueWithIdentifier:@"bookShelfToReaderSegue" sender:self];
 }
@@ -333,7 +368,7 @@
     NarouContentCacheData* narouContent = (NarouContentCacheData*)contentList[indexPath.row];
     
     // 次のビューに飛ばします。
-    [self PushNextView:narouContent];
+    [self PushNextView:narouContent isNeedSpeech:false];
 }
 
 // 編集できるか否かのYES/NOを返す。
@@ -368,6 +403,12 @@
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
     }   
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    if (m_ResumeSpeechFloatingButton != nil) {
+        [m_ResumeSpeechFloatingButton scrollViewDidScroll:scrollView];
+    }
 }
 
 // 個々の章のダウンロードが行われようとする度に呼び出されます。
@@ -428,6 +469,7 @@
     if ([[segue identifier] isEqualToString:@"bookShelfToReaderSegue"]) {
         SpeechViewController* nextViewController = [segue destinationViewController];
         nextViewController.NarouContentDetail = m_NextViewDetail;
+        nextViewController.NeedResumeSpeech = m_isNextViewNeedResumeSpeech;
     }
 }
 

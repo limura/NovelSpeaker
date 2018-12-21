@@ -293,6 +293,7 @@
 "BookShelfTableViewController_SearchTitle" = "Search";
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
+"BookShelfTableViewController_Resume:" = "Resume: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.47
 
 - Corresponds to problems that downloading of novel text via Search fails

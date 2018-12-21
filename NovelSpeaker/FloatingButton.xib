@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="FloatingButton" customModule="NovelSpeaker" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Y4P-JJ-iVr">
+                    <rect key="frame" x="16" y="602" width="343" height="45"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="R7q-cv-w4B">
+                            <rect key="frame" x="8" y="8" width="327" height="30"/>
+                            <state key="normal" title="ぼたん"/>
+                            <connections>
+                                <action selector="buttonClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="GcA-cE-dP7"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="bottom" secondItem="R7q-cv-w4B" secondAttribute="bottom" constant="7" id="4Jd-vb-wNa"/>
+                        <constraint firstAttribute="trailing" secondItem="R7q-cv-w4B" secondAttribute="trailing" constant="8" id="CtW-SP-IFh"/>
+                        <constraint firstItem="R7q-cv-w4B" firstAttribute="leading" secondItem="Y4P-JJ-iVr" secondAttribute="leading" constant="8" id="K1z-VJ-4AN"/>
+                        <constraint firstItem="R7q-cv-w4B" firstAttribute="top" secondItem="Y4P-JJ-iVr" secondAttribute="top" constant="8" id="xTO-bk-Zgl"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="Y4P-JJ-iVr" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="16" id="0Cg-oe-Sgn"/>
+                <constraint firstAttribute="bottom" secondItem="Y4P-JJ-iVr" secondAttribute="bottom" constant="20" id="Vlf-OF-q1g"/>
+                <constraint firstAttribute="trailing" secondItem="Y4P-JJ-iVr" secondAttribute="trailing" constant="16" id="ni4-9O-tbu"/>
+            </constraints>
+            <connections>
+                <outlet property="button" destination="R7q-cv-w4B" id="n9S-aD-jU1"/>
+                <outlet property="view" destination="Y4P-JJ-iVr" id="5ns-V3-fqw"/>
+            </connections>
+            <point key="canvasLocation" x="156" y="102.99850074962519"/>
+        </view>
+    </objects>
+</document>
