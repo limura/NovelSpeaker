@@ -114,6 +114,7 @@
 "SettingTableViewController_DummySilentSoundEnable" = "再生中に無音の音を鳴らし続けることでバックグラウンド再生中に再生が停止することがないよう祈る";
 "SettingTableViewController_MixWithOthersIsEnabled" = "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)";
 "SettingTableViewController_DuckOthersIsEnabled" = "他のアプリの音を小さくする";
+"SettingTableViewController_IsOpenRecentBookInStartTime" = "起動時に前回開いていた小説を開く";
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";
 "NovelSpeakerBackup_ExportingNovelText" = "工程 1\r\n小説本文を抽出中";
@@ -290,14 +291,25 @@
 "BookShelfTableViewController_SearchTitle" = "検索";
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
-"BookShelfTableViewController_Resume:" = "再開: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.47
+"BookShelfTableViewController_Resume:" = "再生: %@";
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.48
 
-- なろう検索 経由での小説本文のダウンロードが失敗するようになった問題に対応
+- 読み上げの話者が未設定の場合、標準のもの(kyoko)ではなく利用可能な中でリッチな話者を選択するように
+- iOS 10 以降の対応に変更(以前は iOS 8 以降でした)
+- 設定 -> 起動時に前回開いていた小説を開く のON/OFF設定を追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.48
+
+インタフェースの変更
+
+- 読み上げの話者が未設定の場合、標準のもの(kyoko)ではなく利用可能な中でリッチな話者を選択するように
+- iOS 10 以降の対応に変更(以前は iOS 8 以降でした)
+- 設定 -> 起動時に前回開いていた小説を開く のON/OFF設定を追加
+
+
 # Version 1.1.47
 
 問題の修正

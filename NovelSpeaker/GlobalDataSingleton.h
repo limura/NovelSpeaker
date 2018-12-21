@@ -504,6 +504,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// リピート再生の設定を上書きします。
 - (void)SetRepeatSpeechType:(RepeatSpeechType)type;
 
+/// 起動時に前回開いていた小説を開くか否かの設定を取得します
+- (BOOL)IsOpenRecentNovelInStartTime;
+/// 起動時に前回開いていた小説を開くか否かの設定を設定します
+- (void)SetIsOpenRecentNovelInStartTime:(BOOL)isOpen;
 
 /// 最新のプライバシーポリシーのURLを取得します
 - (NSURL*)GetPrivacyPolicyURL;

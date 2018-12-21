@@ -270,6 +270,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance()?.setIsDuckOthersEnabled(row.value!)
                 })
+            <<< SwitchRow("IsOpenRecentBookInStartTime") {
+                $0.title = NSLocalizedString("SettingTableViewController_IsOpenRecentBookInStartTime", comment: "起動時に前回開いていた小説を開く")
+                $0.value = GlobalDataSingleton.getInstance()?.isOpenRecentNovelInStartTime()
+                $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ (row) in
+                    GlobalDataSingleton.getInstance()?.setIsOpenRecentNovel(inStartTime: row.value!)
+                })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 }.onCellSelection({ (butonCellof, buttonRow) in

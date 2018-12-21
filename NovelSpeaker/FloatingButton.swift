@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FloatingButton: UIView, UIScrollViewDelegate {
+class FloatingButton: UIView {
 
     /*
     // Only override draw() if you perform custom drawing.
@@ -26,7 +26,7 @@ class FloatingButton: UIView, UIScrollViewDelegate {
     // スクロールしていない時の UIScrollbar の場所
     var scrollViewStartPoint:CGPoint = CGPoint(x: -1, y: -1)
     // これ以上のスクロールがなされたら消える
-    let maxScrollHeight = 300.0
+    var maxScrollHeight = 300.0
     
     @objc public static func createNewFloatingButton() -> FloatingButton? {
         let nib = UINib.init(nibName: "FloatingButton", bundle: nil)
@@ -103,19 +103,23 @@ class FloatingButton: UIView, UIScrollViewDelegate {
         }
     }
     
-    @objc public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    @objc public func scrollViewDidScroll(_ scrollView: UIScrollView) -> Bool {
         let scrollHeight = abs(Double(scrollViewStartPoint.y) - Double(scrollView.contentOffset.y))
         if scrollHeight > self.maxScrollHeight {
             if self.view != nil && self.view.superview != nil {
                 self.view.removeFromSuperview()
             }
-            return
+            return true;
         }
         let affineSize = CGFloat(0.3 * scrollHeight / self.maxScrollHeight)
         self.view.transform = CGAffineTransform(scaleX: 1 + affineSize, y: 1 + affineSize)
         let alpha = CGFloat(1 - scrollHeight / self.maxScrollHeight)
         self.view.alpha = alpha
-        print("affineSize:", affineSize)
-        print("alpha:", alpha)
+        return false;
+    }
+    
+    @objc public func initScrollPosition(point:CGPoint, scrollHeight:Double){
+        scrollViewStartPoint = point
+        maxScrollHeight = scrollHeight
     }
 }

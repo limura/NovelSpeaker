@@ -36,7 +36,7 @@
         if(![globalData IsFirstPageShowed])
         {
             NarouContentCacheData* currentContent = [globalData GetCurrentReadingContent];
-            if (currentContent != nil) {
+            if (currentContent != nil && [globalData IsOpenRecentNovelInStartTime]) {
                 [self PushNextView:currentContent isNeedSpeech:false];
             }
         }
@@ -107,7 +107,7 @@
     if(![globalData IsFirstPageShowed])
     {
         NarouContentCacheData* currentContent = [globalData GetCurrentReadingContent];
-        if (currentContent != nil) {
+        if (currentContent != nil && [globalData IsOpenRecentNovelInStartTime]) {
             [self PushNextView:currentContent isNeedSpeech:false];
         }
     }
@@ -131,6 +131,10 @@
 /// 必要なら最後に開いていた小説の読み上げを再開させます
 - (void)addPreviousNovelSpeakButtonIfNeeded{
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    if ([globalData IsOpenRecentNovelInStartTime]) {
+        return;
+    }
+    
     NarouContentCacheData* currentContent = [globalData GetCurrentReadingContent];
     if (currentContent == nil || currentContent.currentReadingStory == nil) {
         return;
@@ -140,11 +144,15 @@
         && ([story.readLocation unsignedIntegerValue] + 5) >= [story.content length]) {
         return;
     }
+    if (m_ResumeSpeechFloatingButton != nil) {
+        [m_ResumeSpeechFloatingButton hide];
+    }
     m_ResumeSpeechFloatingButton = [FloatingButton createNewFloatingButton];
     [m_ResumeSpeechFloatingButton assignToViewWithView:self.tableView text:[[NSString alloc] initWithFormat: NSLocalizedString(@"BookShelfTableViewController_Resume:", @"再開:%@"), currentContent.title] animated:true buttonClicked:^{
         [self PushNextView:currentContent isNeedSpeech:true];
         [m_ResumeSpeechFloatingButton hideAnimate];
     }];
+    [m_ResumeSpeechFloatingButton initScrollPositionWithPoint:self.tableView.contentOffset scrollHeight:100.0];
 }
 
 /// NotificationCenter の受信者の設定をします。
@@ -407,7 +415,10 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if (m_ResumeSpeechFloatingButton != nil) {
-        [m_ResumeSpeechFloatingButton scrollViewDidScroll:scrollView];
+        BOOL isEnd = [m_ResumeSpeechFloatingButton scrollViewDidScroll:scrollView];
+        if (isEnd) {
+            m_ResumeSpeechFloatingButton = nil;
+        }
     }
 }
 
@@ -449,6 +460,8 @@
 /// NavigationController で戻ってきた時とかに呼び出される
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
 	[viewController viewWillAppear:animated];
+    
+    NSLog(@"navigationController:willShowViewController (NavigationController で戻ってきた)");
     
     // 更新フラグとかを更新するために全部リロードしちゃいます
     [self ReloadAllTableViewData];

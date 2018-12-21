@@ -2553,6 +2553,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 #define USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED @"DummySilentSoundEnabled"
 #define USER_DEFAULTS_IS_MIX_WITH_OTHERS_ENABLED @"MixWithOthersEnabled"
 #define USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED @"DuckOthersEnabled"
+#define USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME @"IsOpenRecentNovelInStartTime"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3676,6 +3677,19 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// 起動時に前回開いていた小説を開くか否かの設定を取得します
+- (BOOL)IsOpenRecentNovelInStartTime{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME: @true}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME];
+}
+/// 起動時に前回開いていた小説を開くか否かの設定を設定します
+- (void)SetIsOpenRecentNovelInStartTime:(BOOL)isOpen{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isOpen forKey:USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME];
+    [userDefaults synchronize];
+}
+
 /// 最新のプライバシーポリシーのURLを取得します
 - (NSURL*)GetPrivacyPolicyURL {
     return [[NSURL alloc] initWithString:@"https://raw.githubusercontent.com/limura/NovelSpeaker/master/PrivacyPolicy.txt"];
@@ -3976,6 +3990,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addIntValueForJSONNSDictionary:result key:@"repeat_speech_type" number:[[NSNumber alloc] initWithInteger:[self GetRepeatSpeechType]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_mix_with_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsMixWithOthersEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_duck_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsDuckOthersEnabled]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_open_recent_novel_in_start_time_enabled" number:[[NSNumber alloc] initWithBool:[self IsOpenRecentNovelInStartTime]]];
     NarouContentCacheData* currentReadingContent = [self GetCurrentReadingContent];
     if (currentReadingContent != nil) {
         [NiftyUtility addStringForJSONNSDictionary:result key:@"current_reading_content" string:currentReadingContent.ncode];
@@ -4542,6 +4557,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSNumber* is_duck_others_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_duck_others_enabled"];
     if (is_duck_others_enabled != nil) {
         [self SetIsDuckOthersEnabled:[is_duck_others_enabled boolValue]];
+    }
+    NSNumber* is_open_recent_novel_in_start_time_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_open_recent_novel_in_start_time_enabled"];
+    if (is_open_recent_novel_in_start_time_enabled != nil) {
+        [self SetIsOpenRecentNovelInStartTime:[is_open_recent_novel_in_start_time_enabled boolValue]];
     }
     NSString* current_reading_content = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"current_reading_content"];
     return current_reading_content;

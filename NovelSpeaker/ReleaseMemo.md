@@ -1936,7 +1936,17 @@ Bug fix.
 インタフェースの変更
 
 - 読み上げの話者が未設定の場合、標準のもの(kyoko)ではなく利用可能な中でリッチな話者を選択するように
+- iOS 10 以降の対応に変更(以前は iOS 8 以降でした)
+- 設定 -> 起動時に前回開いていた小説を開く のON/OFF設定を追加
 
+
+# Version 1.1.48
+
+Interface change
+
+- If you do not set speakers to read aloud, select a rich speaker that is available instead of the standard one (kyoko)
+- Changed to support iOS 10 or later (previously iOS 8 or later)
+- Added ON / OFF setting to "Setting -> Open recent book in start time"
 
 
 TODO

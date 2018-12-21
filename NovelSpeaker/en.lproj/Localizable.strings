@@ -114,6 +114,7 @@
 "SettingTableViewController_DummySilentSoundEnable" = "Pray that playback will not stop during background play by keeping silent sounds during playback";
 "SettingTableViewController_MixWithOthersIsEnabled" = "Effort not to stop even if the music sounds in other applications (We will not accept operations from earphones or control center)";
 "SettingTableViewController_DuckOthersIsEnabled" = "Decrease the sound of other applications";
+"SettingTableViewController_IsOpenRecentBookInStartTime" = "Open recent book in start time";
 
 "NovelSpeakerBackup_InitializeBackup" = "Initializing";
 "NovelSpeakerBackup_ExportingNovelText" = "Step 1\r\nExtracting novel texts";
@@ -293,14 +294,25 @@
 "BookShelfTableViewController_SearchTitle" = "Search";
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
-"BookShelfTableViewController_Resume:" = "Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.47
+"BookShelfTableViewController_Resume:" = "Speech: %@";
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.48
 
-- Corresponds to problems that downloading of novel text via Search fails
+- If you do not set speakers to read aloud, select a rich speaker that is available instead of the standard one (kyoko)
+- Changed to support iOS 10 or later (previously iOS 8 or later)
+- Added ON / OFF setting to \"Setting -> Open recent book in start time\"
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.48
+
+Interface change
+
+- If you do not set speakers to read aloud, select a rich speaker that is available instead of the standard one (kyoko)
+- Changed to support iOS 10 or later (previously iOS 8 or later)
+- Added ON / OFF setting to \"Setting -> Open recent book in start time\"
+
+
 # Version 1.1.47
 
 Bug fix.
