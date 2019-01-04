@@ -92,8 +92,6 @@
 		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */; };
-		2173A6B621CAAA68002E9EA8 /* ContinueButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2173A6B421CAAA67002E9EA8 /* ContinueButton.png */; };
-		2173A6B721CAAA68002E9EA8 /* ContinueButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2173A6B521CAAA68002E9EA8 /* ContinueButton@2x.png */; };
 		2173A6BF21CC529F002E9EA8 /* FloatingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */; };
 		2173A6C121CC530E002E9EA8 /* FloatingButton.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2173A6C021CC530E002E9EA8 /* FloatingButton.xib */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
@@ -352,8 +350,6 @@
 		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
 		21724EEE1974163700DF6DC4 /* StoryCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoryCacheData.m; sourceTree = "<group>"; };
 		2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncHttpSession.swift; sourceTree = "<group>"; };
-		2173A6B421CAAA67002E9EA8 /* ContinueButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ContinueButton.png; sourceTree = "<group>"; };
-		2173A6B521CAAA68002E9EA8 /* ContinueButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ContinueButton@2x.png"; sourceTree = "<group>"; };
 		2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingButton.swift; sourceTree = "<group>"; };
 		2173A6C021CC530E002E9EA8 /* FloatingButton.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FloatingButton.xib; sourceTree = "<group>"; };
 		2177634F19756781004F22FD /* GlobalStateCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalStateCacheData.h; sourceTree = "<group>"; };
@@ -678,8 +674,6 @@
 		21B53A1819619BE7009658B7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				2173A6B421CAAA67002E9EA8 /* ContinueButton.png */,
-				2173A6B521CAAA68002E9EA8 /* ContinueButton@2x.png */,
 				2133F28F1E80E175001A0BC5 /* AppIcon-monochrome-reverse */,
 				212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */,
 				21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
@@ -1169,7 +1163,6 @@
 				21F563CA1FD801970037F5D7 /* >@3x.png in Resources */,
 				2133F2A61E80E175001A0BC5 /* Icon-76.png in Resources */,
 				21B53A1C19619C00009658B7 /* sound.png in Resources */,
-				2173A6B721CAAA68002E9EA8 /* ContinueButton@2x.png in Resources */,
 				21D397AC1FC960E10018F883 /* bookmark-true.png in Resources */,
 				210958CB1A0DF55600E9171F /* soundbook.png in Resources */,
 				210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */,
@@ -1198,7 +1191,6 @@
 				213374402013816D0043D995 /* bookmark-false@3x.png in Resources */,
 				21D397A01FC95CBB0018F883 /* earth.png in Resources */,
 				2133F2AD1E80E175001A0BC5 /* Icon-Small.png in Resources */,
-				2173A6B621CAAA68002E9EA8 /* ContinueButton.png in Resources */,
 				21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

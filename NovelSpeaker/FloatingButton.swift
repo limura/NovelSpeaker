@@ -47,11 +47,19 @@ class FloatingButton: UIView {
     }
     
     func layoutBottom(parentView:UIView) {
-        let view = parentView
-        self.view.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, constant: -16.0).isActive = true
-        self.view.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor, constant: 8.0).isActive = true
-        self.view.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor, constant: -8.0).isActive = true
-        self.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 1.0).isActive = true
+        if #available(iOS 11.0, *) {
+            let view = parentView
+            self.view.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, constant: -16.0).isActive = true
+            self.view.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor, constant: 8.0).isActive = true
+            self.view.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor, constant: -8.0).isActive = true
+            self.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 1.0).isActive = true
+        }else{
+            let view = parentView
+            self.view.bottomAnchor.constraint(greaterThanOrEqualTo: view.bottomAnchor, constant: -56.0).isActive = true
+            self.view.leftAnchor.constraint(greaterThanOrEqualTo: view.leftAnchor, constant: 8.0).isActive = true
+            self.view.rightAnchor.constraint(greaterThanOrEqualTo: view.rightAnchor, constant: 8.0).isActive = true
+            self.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 1.0).isActive = true
+        }
     }
     func layoutTop(parentView:UIView) {
         let view = parentView
@@ -62,7 +70,11 @@ class FloatingButton: UIView {
     }
     
     @objc public func assignToView(view:UIView, text:String, animated:Bool, buttonClicked:@escaping () -> Void){
-        view.addSubview(self.view)
+        if #available(iOS 11.0, *) {
+            view.addSubview(self.view)
+        }else{
+            view.superview?.superview?.addSubview(self.view)
+        }
         layoutBottom(parentView: view)
         self.view.backgroundColor = UIColor.init(red: 0.94, green: 0.94, blue: 0.94, alpha: 1)
         self.view.layer.cornerRadius = 5
@@ -74,6 +86,10 @@ class FloatingButton: UIView {
         button.setTitle(text, for: .normal)
         if animated {
             showAnimate()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            print("bounds: origin: ", self.view.bounds.origin.x , ",", self.view.bounds.origin.y, " size: ", self.view.bounds.size.width , ",", self.view.bounds.size.height)
+            print("frame: origin: ", self.view.frame.origin.x , ",", self.view.frame.origin.y, " size: ", self.view.frame.size.width , ",", self.view.frame.size.height)
         }
     }
     
