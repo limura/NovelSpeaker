@@ -9,6 +9,7 @@
 #import "NiftyUtility.h"
 #import "NSDataZlibExtension.h"
 #import <CommonCrypto/CommonHMAC.h>
+#import <UserNotifications/UserNotifications.h>
 #import "UIViewControllerExtension.h"
 
 @implementation NiftyUtility
@@ -166,6 +167,18 @@
 + (NSString*)removeWhiteSpace:(NSString*)str{
     NSRegularExpression* regexp = [[NSRegularExpression alloc] initWithPattern:@"\\s+" options:0 error:nil];
     return [regexp stringByReplacingMatchesInString:str options:0 range:NSMakeRange(0, [str length]) withTemplate:@""];
+}
+
+/// 通知を表示させます
++ (void)InvokeNotificationNow:(NSString*)message {
+    UNMutableNotificationContent* notificationContent = [UNMutableNotificationContent new];
+    notificationContent.body = message;
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"NovelSpeaker_Notification"
+                                                                          content:notificationContent
+                                                                          trigger:nil];
+    [UNUserNotificationCenter.currentNotificationCenter addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        ;
+    }];
 }
 
 @end

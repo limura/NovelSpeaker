@@ -9,6 +9,7 @@
 #import "GlobalDataSingleton.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
+#import <UserNotifications/UserNotifications.h>
 #import "NarouLoader.h"
 #import "NarouDownloadQueue.h"
 #import "NSDataZlibExtension.h"
@@ -2863,12 +2864,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     if (downloadCount > 0) {
         NSInteger appendCount = [self GetBackgroundFetchedNovelCount];
         application.applicationIconBadgeNumber = downloadCount + appendCount;
-        UILocalNotification* notification = [UILocalNotification new];
-        notification.fireDate = [NSDate date];
-        notification.alertBody = [[NSString alloc] initWithFormat:NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertBody", @"%d個の更新があります"), downloadCount];
-        notification.alertAction = NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertAction", @"アプリを開く");
-        notification.applicationIconBadgeNumber = downloadCount + appendCount;
-        [application scheduleLocalNotification:notification];
+        [NiftyUtility InvokeNotificationNow:[[NSString alloc] initWithFormat:NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertBody", @"%d個の更新があります"), downloadCount]];
         [self UpdateBackgroundFetchedNovelCount:downloadCount + appendCount];
         
         completionHandler(UIBackgroundFetchResultNewData);
@@ -3403,10 +3399,12 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 /// 通知をONにしようとします
 - (void)RegisterUserNotification {
-    UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:
-                                                        (UIUserNotificationTypeAlert | UIUserNotificationTypeBadge)
-                                                                                         categories:nil];
-    [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
+    UNUserNotificationCenter* center = UNUserNotificationCenter.currentNotificationCenter;
+    [center requestAuthorizationWithOptions:
+      UNAuthorizationOptionAlert | UNAuthorizationOptionBadge
+      completionHandler:^(BOOL granted, NSError * _Nullable error) {
+          ;
+      }];
 }
 
 /// BackgroundFetch を有効化します

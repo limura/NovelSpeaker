@@ -46,4 +46,7 @@
 /// 空白や改行など表示されない文字を全て排除した文字列を生成する
 + (NSString*)removeWhiteSpace:(NSString*)str;
 
+/// 通知を表示させます
++ (void)InvokeNotificationNow:(NSString*)message;
+
 @end
