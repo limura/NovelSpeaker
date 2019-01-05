@@ -293,25 +293,6 @@
     return NSUTF8StringEncoding;
 }
 
-+ (void)HttpGetAsync:(NSURL*)url successAction:(void(^)(NSData* data, NSHTTPURLResponse* response, NSURL* requestURL))successAction failedAction:(void(^)(NSURL* requestURL))failedAction {
-    NSURLRequest* request = [NSURLRequest requestWithURL:url];
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse * _Nullable response, NSData * _Nullable data, NSError * _Nullable connectionError) {
-        NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-        if (data == nil
-            || httpResponse == nil
-            || ((int)httpResponse.statusCode / 100 ) != 2) {
-            if (failedAction != nil) {
-                failedAction(url);
-                return;
-            }
-        }
-        if (successAction == nil) {
-            return;
-        }
-        successAction(data, httpResponse, url);
-    }];
-}
-
 + (BOOL)CheckContentTypeSame:(NSString*)target httpResponse:(NSHTTPURLResponse*)httpResponse {
     id contentTypeId = [[httpResponse allHeaderFields] objectForKey:@"Content-Type"];
     if ([contentTypeId isKindOfClass:[NSString class]]) {
