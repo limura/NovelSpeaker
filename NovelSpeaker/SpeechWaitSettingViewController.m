@@ -8,7 +8,6 @@
 
 #import "SpeechWaitSettingViewController.h"
 #import "GlobalDataSingleton.h"
-#import "EasyAlert.h"
 #import "NovelSpeaker-Swift.h"
 
 @interface SpeechWaitSettingViewController ()
@@ -20,7 +19,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [BehaviorLogger AddLogWithDescription:@"SpeechWaitSettingViewController viewDidLoad" data:@{}];
-    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     m_NiftySpeaker = [NiftySpeaker new];
     
     // キーボードを閉じるためにシングルタップのイベントを取るようにします
@@ -84,7 +82,7 @@
 
 - (IBAction)commitButtonClicked:(id)sender {
     if ([self.inputTextField.text length] <= 0) {
-        [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SpeechWaitConfigSettingView_PleaseInputText", @"文字列を入力してください。") message:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"SpeechWaitConfigSettingView_PleaseInputText", @"文字列を入力してください。") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
         return;
     }
     
@@ -96,13 +94,11 @@
     {
         [[GlobalDataSingleton GetInstance] saveContext];
         [self announceSpeechWaitConfig];
-        [m_EasyAlert ShowAlertOneButton:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdated", @"読み上げ時の間の設定を追加しました。")
-                                message:nil okButtonText:NSLocalizedString(@"OK_button", nil)
-                        okActionHandler:^(UIAlertAction* action){
-                            [self.navigationController popViewControllerAnimated:YES];
-                        }];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdated", @"読み上げ時の間の設定を追加しました。") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:^{
+            [self.navigationController popViewControllerAnimated:YES];
+        }];
     }else{
-        [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdateFailed", @"読み上げ時の間の設定の追加に失敗しました。") message:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"SpeechWaitConfigSettingView_SettingUpdateFailed", @"読み上げ時の間の設定の追加に失敗しました。") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
     }
 }
 - (IBAction)WaitTimeSliderLeftButtonClicked:(id)sender {
@@ -125,7 +121,7 @@
 
 - (void)TestSpeech:(NSString*)speechString {
     if ([speechString length] <= 0) {
-        [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SpeechWaitConfigSettingView_PleaseSetSpeechText", @"読み上げテスト用の文字列を設定してください") message:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"SpeechWaitConfigSettingView_PleaseSetSpeechText", @"読み上げテスト用の文字列を設定してください") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
         return;
     }
     

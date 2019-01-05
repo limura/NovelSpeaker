@@ -16,7 +16,6 @@
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
 #import "EasyShare.h"
-#import "EasyAlert.h"
 #import "CreateSpeechModSettingViewController.h"
 #import "EditUserBookViewController.h"
 #import "NovelSpeaker-Swift.h"
@@ -39,7 +38,6 @@
     
     [[GlobalDataSingleton GetInstance] AddSpeakRangeDelegate:self];
     
-    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     m_SeekTimer = nil;
     m_bIsSeeking = false;
     
@@ -373,7 +371,6 @@
             }
         }
         //NSLog(@"set currentreading story: %@ (content: %@ %@) location: %lu", story.chapter_number, content.ncode, content.title, [story.readLocation unsignedLongValue]);
-        //EasyAlertActionHolder* holder = [m_EasyAlert ShowAlert:nil message:NSLocalizedString(@"SpeechViewController_loading", @"loading...")];
         [self setSpeechStory:story];
         //[holder CloseAlert:false];
     });
@@ -633,15 +630,16 @@
         // 停止中だったので読み上げを開始します
         if (UIAccessibilityIsVoiceOverRunning()) {
             // VoiceOver が Enable であったので、警告を発します
-            [m_EasyAlert ShowAlertTwoButton:NSLocalizedString(@"SpeechViewController_SpeakAlertVoiceOver", @"VoiceOverが有効になっています。このまま再生しますか？")
-                message:NSLocalizedString(@"SpeechViewController_SpeakAlertVoiceOverMessage", @"そのまま再生すると二重に読み上げが発声する事になります。")
-                firstButtonText:NSLocalizedString(@"Cancel_button", @"Cancel")
-                firstActionHandler:nil
-                secondButtonText:NSLocalizedString(@"OK_button", @"OK")
-                secondActionHandler:^(UIAlertAction *action) {
-                    self->m_bIsSpeaking = YES;
-                    [self startSpeech:YES];
-                }];
+            [NiftyUtilitySwift EasyDialogTwoButtonWithViewController:self
+               title:NSLocalizedString(@"SpeechViewController_SpeakAlertVoiceOver", @"VoiceOverが有効になっています。このまま再生しますか？")
+               message:NSLocalizedString(@"SpeechViewController_SpeakAlertVoiceOverMessage", @"そのまま再生すると二重に読み上げが発声する事になります。")
+               button1Title:NSLocalizedString(@"Cancel_button", @"Cancel")
+               button1Action:nil
+               button2Title:NSLocalizedString(@"OK_button", @"OK")
+               button2Action:^{
+                   self->m_bIsSpeaking = YES;
+                   [self startSpeech:YES];
+               }];
             return;
         }
 
@@ -1194,7 +1192,7 @@
             importFromWebPageViewController.openTargetUrl = url;
             [self.tabBarController setSelectedIndex:targetTabIndex];
         }else if ([UIApplication.sharedApplication canOpenURL:url]) {
-            [UIApplication.sharedApplication openURL:url];
+            [UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
         }
     }
 }

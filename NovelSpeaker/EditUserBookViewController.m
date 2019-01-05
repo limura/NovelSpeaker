@@ -7,7 +7,6 @@
 //
 
 #import "EditUserBookViewController.h"
-#import "EasyAlert.h"
 #import "NovelSpeaker-Swift.h"
 
 @interface EditUserBookViewController ()
@@ -27,7 +26,6 @@
     // Do any additional setup after loading the view.
     [BehaviorLogger AddLogWithDescription:@"EditUserBookViewController viewDidLoad" data:@{}];
     
-    m_pEasyAlert = [[EasyAlert alloc] initWithViewController:self];
     m_CurrentChapterNumber = 0;
 
     // 指定された小説を読み込みます。
@@ -251,7 +249,7 @@
 /// 足りないことがある場合、怪しくダイアログをだします。
 - (BOOL)SaveCurrentContent{
     if (self.TitleTextBox.text == nil || [self.TitleTextBox.text length] <= 0) {
-        [m_pEasyAlert ShowAlertOKButton:NSLocalizedString(@"EditUserBookViewController_PleaseInputTitle", @"タイトルを入力してください") message:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"EditUserBookViewController_PleaseInputTitle", @"タイトルを入力してください") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
         return false;
     }
     self.NarouContentDetail.title = self.TitleTextBox.text;
@@ -262,7 +260,7 @@
 - (BOOL)SaveStoryTo:(int)chapterNumber
 {
     if (self.BookBodyTextBox.text == nil || [self.BookBodyTextBox.text length] <= 0) {
-        [m_pEasyAlert ShowAlertOKButton:NSLocalizedString(@"EditUserBookViewController_PleaseInputBookBody", @"本文を入力してください") message:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"EditUserBookViewController_PleaseInputBookBody", @"本文を入力してください") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
         return false;
     }
     // 保存先が currentReadingStory であればそちらも変更する必要がある
@@ -378,26 +376,26 @@
     }
     StoryCacheData* story = [self AddNewStory];
     if (story == nil) {
-        [m_pEasyAlert ShowAlertOKButton:NSLocalizedString(@"EditUserBookViewController_AddNewStoryFailed", @"新しい章の追加に失敗しました") message:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"EditUserBookViewController_AddNewStoryFailed", @"新しい章の追加に失敗しました") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
         return;
     }
     [self SetChapter:story content:self.NarouContentDetail];
 }
 
 - (IBAction)DelChapterButtonClicked:(id)sender {
-    [m_pEasyAlert ShowAlertTwoButton:NSLocalizedString(@"EditUserBookViewController_ConfirmDeleteThisChapter", @"この章を削除します。よろしいですか？") message:nil firstButtonText:NSLocalizedString(@"Cancel_button", @"Cancel") firstActionHandler:nil secondButtonText:NSLocalizedString(@"OK_button", @"OK") secondActionHandler:^(UIAlertAction *alert) {
-            if (![self DelLastStory]) {
-                [self->m_pEasyAlert ShowAlertOKButton:NSLocalizedString(@"EditUserBookViewController_CanNotDeleteChapter", @"章の削除に失敗しました") message:nil];
-                return;
-            }
-            int last = [self.NarouContentDetail.general_all_no intValue];
-            StoryCacheData* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:last];
-            if (story == nil) {
-                [self LoadContent];
-                return;
-            }
-            [self SetChapter:story content:self.NarouContentDetail];
-        }];
+    [NiftyUtilitySwift EasyDialogTwoButtonWithViewController:self title:NSLocalizedString(@"EditUserBookViewController_ConfirmDeleteThisChapter", @"この章を削除します。よろしいですか？") message:nil button1Title:NSLocalizedString(@"Cancel_button", @"Cancel") button1Action:nil button2Title:NSLocalizedString(@"OK_button", @"OK") button2Action:^{
+        if (![self DelLastStory]) {
+            [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"EditUserBookViewController_CanNotDeleteChapter", @"章の削除に失敗しました") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+            return;
+        }
+        int last = [self.NarouContentDetail.general_all_no intValue];
+        StoryCacheData* story = [[GlobalDataSingleton GetInstance] SearchStory:self.NarouContentDetail.ncode chapter_no:last];
+        if (story == nil) {
+            [self LoadContent];
+            return;
+        }
+        [self SetChapter:story content:self.NarouContentDetail];
+    }];
 }
 
 - (IBAction)uiTextFieldDidEndOnExit:(id)sender {

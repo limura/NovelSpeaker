@@ -18,6 +18,7 @@
 #import "UIViewControllerExtension.h"
 #import "NSDataDetectEncodingExtension.h"
 #import "NovelSpeaker-Swift.h"
+#import "UIImageExtension.h"
 
 #define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
 #define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
@@ -964,7 +965,9 @@ static DummySoundLooper* dummySoundLooper = nil;
         [songInfo setObject:@1.0f forKey:MPNowPlayingInfoPropertyPlaybackRate];
     }
     UIImage* artworkImage = [UIImage imageNamed:@"NovelSpeakerIcon-167px.png"];
-    MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc] initWithImage:artworkImage];
+    MPMediaItemArtwork* artwork = [[MPMediaItemArtwork alloc] initWithBoundsSize:[artworkImage size] requestHandler:^UIImage * _Nonnull(CGSize size) {
+        return [artworkImage resize:size];
+    }];
     [songInfo setObject:artwork forKey:MPMediaItemPropertyArtwork];
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:songInfo];
 }
@@ -3203,8 +3206,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         NSLog(@"url: %@ is already downloaded. skip.", [url absoluteString]);
         if (viewController != nil) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                EasyAlert* alert = [[EasyAlert alloc] initWithViewController:viewController];
-                [alert ShowAlertOKButton:nil message:NSLocalizedString(@"GlobalDataSingleton_URLisAlreadyDownload", @"既に本棚に登録されているURLでした。")];
+                [NiftyUtilitySwift EasyDialogOneButtonWithViewController:viewController title:nil message:NSLocalizedString(@"GlobalDataSingleton_URLisAlreadyDownload", @"既に本棚に登録されているURLでした。") buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
             });
         }
         return;

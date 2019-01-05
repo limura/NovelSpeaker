@@ -291,7 +291,7 @@
 "BookShelfTableViewController_SearchTitle" = "検索";
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
-"BookShelfTableViewController_Resume:" = "再生: %@";
+"BookShelfTableViewController_Resume:" = "▶︎再生: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.48
 
 - 読み上げの話者が未設定の場合、標準のもの(kyoko)ではなく利用可能な中でリッチな話者を選択するように

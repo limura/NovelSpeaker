@@ -8,7 +8,6 @@
 
 #import "CreateSpeechModSettingViewController.h"
 #import "GlobalDataSingleton.h"
-#import "EasyAlert.h"
 #import "NovelSpeaker-Swift.h"
 
 @interface CreateSpeechModSettingViewController ()
@@ -22,7 +21,6 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     }
     return self;
 }
@@ -34,7 +32,6 @@
     [BehaviorLogger AddLogWithDescription:@"CreateSpeechModSettingViewController viewDidLoad" data:@{}];
     
     m_Speaker = [Speaker new];
-    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     m_LoadedSpeechModSetting = nil;
     if (self.targetBeforeString != nil) {
         self.beforeTextField.text = self.targetBeforeString;
@@ -58,7 +55,7 @@
 
 - (void)showAlertView:(NSString*)message
 {
-    [m_EasyAlert ShowAlertOKButton:message message:nil];
+    [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:message message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
 }
 
 - (IBAction)testSpeechButtonClicked:(id)sender {

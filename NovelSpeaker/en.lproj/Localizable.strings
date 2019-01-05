@@ -294,7 +294,7 @@
 "BookShelfTableViewController_SearchTitle" = "Search";
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
-"BookShelfTableViewController_Resume:" = "Speech: %@";
+"BookShelfTableViewController_Resume:" = "▶︎Speech: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.48
 
 - If you do not set speakers to read aloud, select a rich speaker that is available instead of the standard one (kyoko)

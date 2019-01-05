@@ -121,7 +121,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 $0.title = NSLocalizedString("SettingTableViewController_GoToSupportSite", comment: "サポートサイトを開く")
                 }.onCellSelection({ (buttonCellof, buttonRow) in
                     if let url = URL(string: "https://limura.github.io/NovelSpeaker/") {
-                        UIApplication.shared.openURL(url)
+                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
                 }
             })
             <<< TextAreaRow(){

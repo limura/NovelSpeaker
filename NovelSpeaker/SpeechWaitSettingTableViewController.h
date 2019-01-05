@@ -8,10 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "SpeechWaitConfigCacheData.h"
-#import "EasyAlert.h"
 @interface SpeechWaitSettingTableViewController : UITableViewController<UINavigationControllerDelegate>
 {
     SpeechWaitConfigCacheData* m_SelectedWaitConfig;
-    EasyAlert* m_EasyAlert;
 }
 @end

@@ -214,7 +214,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         configuration.userContentController = controller
         configuration.processPool = self.sharedWKProcessPool
         configuration.allowsInlineMediaPlayback = true
-        configuration.mediaPlaybackAllowsAirPlay = true
+        configuration.allowsAirPlayForMediaPlayback = true
         if #available(iOS 9.0, *) {
             configuration.allowsAirPlayForMediaPlayback = true
             configuration.allowsPictureInPictureMediaPlayback = true
@@ -317,7 +317,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     @IBAction func safariButtonClicked(_ sender: Any) {
         if let url = self.wkWebView?.url {
             if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.openURL(url)
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
         }
     }

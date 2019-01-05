@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "Speaker.h"
 #import "CreateNewSpeakPitchSettingViewController.h"
-#import "EasyAlert.h"
 
 @protocol SettingTableViewDelegate <NSObject>
 
@@ -28,7 +27,6 @@
 {
     NSString* testSpeechSampleText;
     Speaker* m_Speaker;
-    EasyAlert* m_EasyAlert;
 }
 
 @end

@@ -8,7 +8,6 @@
 
 #import "CreateNewSpeakPitchSettingViewController.h"
 #import "GlobalDataSingleton.h"
-#import "EasyAlert.h"
 #import "NovelSpeaker-Swift.h"
 
 @interface CreateNewSpeakPitchSettingViewController ()
@@ -27,7 +26,6 @@
         // Custom initialization
         m_isNeedBack = false;
     }
-    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     return self;
 }
 
@@ -37,7 +35,6 @@
     [BehaviorLogger AddLogWithDescription:@"CreateNewSpeakPitchSettingViewController viewDidLoad" data:@{}];
     // Do any additional setup after loading the view.
     m_isNeedBack = false;
-    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
 }
 
 - (void)didReceiveMemoryWarning
@@ -49,13 +46,13 @@
 - (IBAction)createButtonClicked:(id)sender {
     NSString* title = self.titleTextField.text;
     if ([title length] <= 0) {
-        [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SpeakPitchSettingView_NoTitleStringAlert", @"タイトルにする文字列を入れてください。") message:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"SpeakPitchSettingView_NoTitleStringAlert", @"タイトルにする文字列を入れてください。") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
         return;
     }
     
     SpeakPitchConfigCacheData* pitchConfig = [[GlobalDataSingleton GetInstance] GetSpeakPitchConfigWithTitle:title];
     if (pitchConfig != nil) {
-        [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SpeakPitchSettingView_AlreadyExistingSetting", @"既に存在する設定です。") message:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"SpeakPitchSettingView_AlreadyExistingSetting", @"既に存在する設定です。") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
         return;
     }
     pitchConfig = [SpeakPitchConfigCacheData new];
@@ -64,20 +61,16 @@
     pitchConfig.endText = @"』";
     pitchConfig.title = title;
     if (![[GlobalDataSingleton GetInstance] UpdateSpeakPitchConfig:pitchConfig]) {
-        [m_EasyAlert ShowAlertOneButton:NSLocalizedString(@"SpeakPitchSettingView_AppendFailed.", @"音声設定の追加に失敗しました。")
-                        message:nil okButtonText:NSLocalizedString(@"OK_button", nil)
-                        okActionHandler:^(UIAlertAction* action){
-                            [self.createNewSpeakPitchSettingDelegate NewPitchSettingAdded];
-                            [self.navigationController popViewControllerAnimated:YES];
-                        }];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"SpeakPitchSettingView_AppendFailed.", @"音声設定の追加に失敗しました。") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:^{
+            [self.createNewSpeakPitchSettingDelegate NewPitchSettingAdded];
+            [self.navigationController popViewControllerAnimated:YES];
+        }];
         return;
     }
-    [m_EasyAlert ShowAlertOneButton:NSLocalizedString(@"SpeakPitchSettingView_AppendSuccess", @"音声設定を追加しました。")
-                    message:nil okButtonText:NSLocalizedString(@"OK_button", nil)
-                    okActionHandler:^(UIAlertAction* action){
-                        [self.createNewSpeakPitchSettingDelegate NewPitchSettingAdded];
-                        [self.navigationController popViewControllerAnimated:YES];
-                    }];
+    [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"SpeakPitchSettingView_AppendSuccess", @"音声設定を追加しました。") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:^{
+        [self.createNewSpeakPitchSettingDelegate NewPitchSettingAdded];
+        [self.navigationController popViewControllerAnimated:YES];
+    }];
 }
 
 /*

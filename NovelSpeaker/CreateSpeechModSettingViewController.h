@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import "Speaker.h"
-#import "EasyAlert.h"
 #import "SpeechModSettingCacheData.h"
 
 @protocol CreateNewSpeechModSettingDelegate <NSObject>
@@ -20,7 +19,6 @@
 @interface CreateSpeechModSettingViewController : UIViewController
 {
     Speaker* m_Speaker;
-    EasyAlert* m_EasyAlert;
     SpeechModSettingCacheData* m_LoadedSpeechModSetting;
 }
 @property (weak, nonatomic) IBOutlet UITextField *beforeTextField;

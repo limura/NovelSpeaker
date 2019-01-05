@@ -11,7 +11,6 @@
 #import "Speaker.h"
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
-#import "EasyAlert.h"
 #import "NarouDownloadQueue.h"
 #import "NovelSpeaker-Swift.h"
 
@@ -24,7 +23,6 @@
     int m_CurrentChapter;
     StoryCacheData* m_CurrentReadingStory;
     BOOL m_bIsSpeaking;
-    EasyAlert* m_EasyAlert;
     BOOL m_bIsSeeking;
     NSTimer* m_SeekTimer;
     DuplicateSoundPlayer* m_PageTurningSoundPlayer;

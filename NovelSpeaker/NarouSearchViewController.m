@@ -9,7 +9,6 @@
 #import "NarouSearchViewController.h"
 #import "NarouSearchResultTableViewController.h"
 #import "NarouLoader.h"
-#import "EasyAlert.h"
 #import "NovelSpeaker-Swift.h"
 
 #define SEARCH_TEXT_BOX_TAG       (1)
@@ -30,11 +29,9 @@
     m_MainQueue = dispatch_get_main_queue();
     m_SearchQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.search", DISPATCH_QUEUE_SERIAL);
     self.SearchTextBox.delegate = self;
-    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
     
     // キーボードを閉じるためにシングルタップのイベントを取るようにします
     self.singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onSingleTap:)];
-    self.singleTap.delegate = self;
     self.singleTap.numberOfTapsRequired = 1;
     [self.view addGestureRecognizer:self.singleTap];
 
@@ -142,21 +139,30 @@
 
 // 検索ボタンがクリックされた
 - (IBAction)SearchButtonClicked:(id)sender {
-    EasyAlertActionHolder* holder = [m_EasyAlert ShowAlert:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching")
-                   message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching")];
+    EasyDialog* dialog = nil;
+    dialog = [NiftyUtilitySwift EasyDialogNoButtonWithViewController:self
+       title:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching")
+       message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching")];
+    NSString* searchText = self.SearchTextBox.text;
+    BOOL wName = self.WriterSwitch.on;
+    BOOL title = self.TitleSwitch.on;
+    BOOL keyword = self.KeywordSwitch.on;
+    BOOL ex = self.ExSwitch.on;
+    NSString* order = [self GetSearchOrderSystemString:
+                       [self.SearchOrderPickerView selectedRowInComponent:0]];
+    
     dispatch_async(m_SearchQueue, ^{
         NSArray* searchResult = [NarouLoader
-                                 Search:self.SearchTextBox.text
-                                 wname:self.WriterSwitch.on
-                                 title:self.TitleSwitch.on
-                                 keyword:self.KeywordSwitch.on
-                                 ex:self.ExSwitch.on
-                                 order:[self GetSearchOrderSystemString:
-                                        [self.SearchOrderPickerView selectedRowInComponent:0]]
+                                 Search: searchText
+                                 wname: wName
+                                 title: title
+                                 keyword: keyword
+                                 ex: ex
+                                 order: order
                                  ];
         self->m_SearchResult = searchResult;
         dispatch_async(self->m_MainQueue, ^{
-            [holder CloseAlert:false completion:^{
+            [dialog dismissViewControllerAnimated:false completion:^{
                 NSLog(@"search end. count: %lu", (unsigned long)[self->m_SearchResult count]);
                 [self performSegueWithIdentifier:@"searchResultPushSegue" sender:self];
             }];

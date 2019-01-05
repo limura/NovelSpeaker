@@ -64,8 +64,10 @@ class NiftyUtilitySwift: NSObject {
     @objc public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieArray: [String], depth: Int = 0) {
         BehaviorLogger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
-            let easyAlert = EasyAlert(viewController: viewController)
-            let alertActionHolder = easyAlert?.show(NSLocalizedString("ImportFromWebPageViewController_loading", comment: "loading"), message: nil)
+            let builder = EasyDialog.Builder(viewController)
+            .text(content: NSLocalizedString("ImportFromWebPageViewController_loading", comment: "loading"))
+            let dialog = builder.build()
+            dialog.show()
             let uriLoader = UriLoader()
             let customSiteInfoData = GlobalDataSingleton.getInstance().getCachedCustomAutoPagerizeSiteInfoData()
             uriLoader.addCustomSiteInfo(from: customSiteInfoData)
@@ -73,7 +75,7 @@ class NiftyUtilitySwift: NSObject {
             uriLoader.addSiteInfo(from: siteInfoData)
             uriLoader.fetchOneUrl(url, cookieArray: cookieArray, successAction: { (story: HtmlStory?) in
                 DispatchQueue.main.async {
-                    alertActionHolder?.closeAlert(false, completion: {
+                    dialog.dismiss(animated: false, completion: {
                         // firstPageLink があった場合はそっちを読み直します
                         if let firstPageLink = story?.firstPageLink {
                             // ただし、depth が 5 を越えたら読み直さず先に進みます
@@ -150,7 +152,7 @@ class NiftyUtilitySwift: NSObject {
                 }
             }, failedAction: { (url:URL?, error:String?) in
                 DispatchQueue.main.async {
-                    alertActionHolder?.closeAlert(false, completion: {
+                    dialog.dismiss(animated: false, completion: {
                         var errorMessage = NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー")
                         if let err = error {
                             errorMessage = err
@@ -192,7 +194,7 @@ class NiftyUtilitySwift: NSObject {
     
     @objc public static func FileRTFToAttributedString(url: URL) -> NSAttributedString? {
         do {
-            let attributedString = try NSAttributedString(fileURL: url, options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+            let attributedString = try NSAttributedString(url: url, options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
             return attributedString
         }catch let error{
             print("AttributedString from RTF failed. error: ", error)
@@ -201,15 +203,30 @@ class NiftyUtilitySwift: NSObject {
     }
     @objc public static func FileRTFDToAttributedString(url: URL) -> NSAttributedString? {
         do {
-            let attributedString = try NSAttributedString(fileURL: url, options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.rtfd], documentAttributes: nil)
+            let attributedString = try NSAttributedString(url: url, options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.rtfd], documentAttributes: nil)
             return attributedString
         }catch let error{
             print("AttributedString from RTFD failed. error: ", error)
         }
         return nil
     }
+    
+    @discardableResult
+    @objc public static func EasyDialogNoButton(viewController: UIViewController, title: String?, message: String?) -> EasyDialog {
+        var dialog = EasyDialog.Builder(viewController)
+        if let title = title {
+            dialog = dialog.title(title: title)
+        }
+        if let message = message {
+            dialog = dialog.label(text: message, textAlignment: .left)
+        }
+        let builded = dialog.build()
+        builded.show()
+        return builded
+    }
 
-    @objc public static func EasyDialogOneButton(viewController: UIViewController, title: String?, message: String?, buttonTitle: String?, buttonAction:(()->Void)?) {
+    @discardableResult
+    @objc public static func EasyDialogOneButton(viewController: UIViewController, title: String?, message: String?, buttonTitle: String?, buttonAction:(()->Void)?) -> EasyDialog {
         var dialog = EasyDialog.Builder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
@@ -223,7 +240,35 @@ class NiftyUtilitySwift: NSObject {
             }
             dialog.dismiss(animated: false, completion: nil)
         })
-        dialog.build().show()
+        let builded = dialog.build()
+        builded.show()
+        return builded
+    }
+    
+    @discardableResult
+    @objc public static func EasyDialogTwoButton(viewController: UIViewController, title: String?, message: String?, button1Title: String?, button1Action:(()->Void)?, button2Title: String?, button2Action:(()->Void)?) -> EasyDialog {
+        var dialog = EasyDialog.Builder(viewController)
+        if let title = title {
+            dialog = dialog.title(title: title)
+        }
+        if let message = message {
+            dialog = dialog.label(text: message, textAlignment: .left)
+        }
+        dialog = dialog.addButton(title: button1Title != nil ? button1Title! : NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
+            if let button1Action = button1Action {
+                button1Action()
+            }
+            dialog.dismiss(animated: false, completion: nil)
+        })
+        dialog = dialog.addButton(title: button2Title != nil ? button2Title! : NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+            if let button2Action = button2Action {
+                button2Action()
+            }
+            dialog.dismiss(animated: false, completion: nil)
+        })
+        let builded = dialog.build()
+        builded.show()
+        return builded
     }
     
     @objc public static func EasyDialogTextInput(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, action:((String)->Void)?) {

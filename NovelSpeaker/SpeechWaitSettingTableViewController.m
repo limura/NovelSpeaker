@@ -9,7 +9,6 @@
 #import "SpeechWaitSettingTableViewController.h"
 #import "GlobalDataSingleton.h"
 #import "SpeechWaitSettingViewController.h"
-#import "EasyAlert.h"
 #import "NovelSpeaker-Swift.h"
 
 static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSettingTableViewCellDefault";
@@ -34,8 +33,6 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
     UIBarButtonItem* addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addButtonClicked)];
     self.navigationItem.rightBarButtonItems = [[NSArray alloc] initWithObjects:addButton, self.editButtonItem, nil];
     
-    m_EasyAlert = [[EasyAlert alloc] initWithViewController:self];
-
     [self setNotificationReciver];
 }
 - (void)dealloc
@@ -159,11 +156,11 @@ static NSString* const SpeechWaitSettingTableViewDefaultCellID = @"SpeechWaitSet
     if(settingResult != false)
     {
         NSString* title = [[NSString alloc] initWithFormat: NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdated", @"読み上げ設定を%@に更新しました。"), newSetting];
-        [m_EasyAlert ShowAlertOneButton:title message:nil okButtonText:NSLocalizedString(@"OK_button", nil) okActionHandler:^(UIAlertAction* action){
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:title message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:^{
             [self.navigationController popViewControllerAnimated:YES];
         }];
     }else{
-        [m_EasyAlert ShowAlertOKButton:NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed", @"読み上げ設定の変更に失敗しました。") message:nil];
+        [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self title:NSLocalizedString(@"SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingUpdateFailed", @"読み上げ設定の変更に失敗しました。") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
     }
     return settingResult;
 }

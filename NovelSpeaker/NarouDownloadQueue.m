@@ -13,7 +13,6 @@
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
 #import "UriLoader.h"
-#import "EasyAlert.h"
 #import "NovelSpeaker-Swift.h"
 #import "FTLinearActivityIndicator-Swift.h"
 

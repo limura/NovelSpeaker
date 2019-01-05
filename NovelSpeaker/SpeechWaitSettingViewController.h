@@ -8,12 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import "SpeechWaitConfigCacheData.h"
-#import "EasyAlert.h"
 #import "NiftySpeaker.h"
 
 @interface SpeechWaitSettingViewController : UIViewController<UITextFieldDelegate, UIGestureRecognizerDelegate>
 {
-    EasyAlert* m_EasyAlert;
     NiftySpeaker* m_NiftySpeaker;
 }
 // シングルタップを取ってキーボードを閉じます

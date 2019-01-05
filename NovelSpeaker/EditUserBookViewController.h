@@ -8,12 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import "GlobalDataSingleton.h"
-#import "EasyAlert.h"
 #import "SZTextView.h"
 
 @interface EditUserBookViewController : UIViewController<UIGestureRecognizerDelegate, UITextFieldDelegate>
 {
-    EasyAlert* m_pEasyAlert;
     int m_CurrentChapterNumber;
 }
 // シングルタップを取ってキーボードを閉じます

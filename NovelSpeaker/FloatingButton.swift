@@ -87,10 +87,6 @@ class FloatingButton: UIView {
         if animated {
             showAnimate()
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            print("bounds: origin: ", self.view.bounds.origin.x , ",", self.view.bounds.origin.y, " size: ", self.view.bounds.size.width , ",", self.view.bounds.size.height)
-            print("frame: origin: ", self.view.frame.origin.x , ",", self.view.frame.origin.y, " size: ", self.view.frame.size.width , ",", self.view.frame.size.height)
-        }
     }
     
     @objc public func showAnimate(){

@@ -293,7 +293,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_GoToSupportSite", comment: "サポートサイトを開く")
             }.onCellSelection({ (buttonCellof, buttonRow) in
                 if let url = URL(string: "https://limura.github.io/NovelSpeaker/") {
-                    UIApplication.shared.openURL(url)
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
                 }
             })
             <<< ButtonRow() {
@@ -365,7 +365,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: true)
-                                    UIApplication.shared.openURL(privacyPolicyUrl)
+                                    UIApplication.shared.open(privacyPolicyUrl, options: [:], completionHandler: nil)
                                 }
                             })
                             .build().show()

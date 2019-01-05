@@ -14,6 +14,7 @@ class DummySoundLooper: NSObject {
     var mediaFileURL:NSURL? = nil
     let dispatchQueue = DispatchQueue(label: "NovelSpeaker.DummySoundLoader", qos: DispatchQoS.default, attributes: DispatchQueue.Attributes.concurrent, autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.inherit, target: nil)
     
+    @discardableResult
     @objc public func setMediaFile(forResource:String, ofType:String) -> Bool {
         if let path = Bundle.main.path(forResource: forResource, ofType: ofType) {
             let audioURL = NSURL(fileURLWithPath: path)

@@ -12,7 +12,6 @@ import Eureka
 class NarouSearchResultDetailViewControllerSwift: FormViewController {
     
     @objc var NarouContentDetail:NarouContentCacheData? = nil
-    var m_EasyAlert:EasyAlert?
     var m_SearchResult:[Any]?
 
     override func viewDidLoad() {
@@ -20,7 +19,6 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
 
         BehaviorLogger.AddLog(description: "NarouSearchResultDetailViewControllerSwift viewDidLoad", data: [:])
         
-        self.m_EasyAlert = EasyAlert(viewController: self)
         self.m_SearchResult = nil
         
         let downloadButton = UIBarButtonItem.init(title: NSLocalizedString("NarouSearchResultDetailViewControllerSwift_DownloadButton", comment: "Download"), style: .plain, target: self, action: #selector(NarouSearchResultDetailViewControllerSwift.downloadButtonClicked))
@@ -41,15 +39,17 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
                 cell.detailTextLabel?.text = "-"
             }
         }).onCellSelection({ (buttonCellOf, row) in
-            if let easyAlert = self.m_EasyAlert {
-                let holder = easyAlert.show(NSLocalizedString("NarouSearchViewController_SearchTitle_Searching", comment:"Searching"), message: NSLocalizedString("NarouSearchViewController_SearchMessage_NowSearching", comment:"Now searching"))
-                DispatchQueue(label: "com.limuraproducts.novelspeaker.search").async {
-                    self.m_SearchResult = NarouLoader.searchUserID(content.userid)
-                    DispatchQueue.main.async {
-                        holder?.closeAlert(false, completion: {
-                            self.performSegue(withIdentifier: "searchUserIDResultPushSegue", sender: self)
-                        })
-                    }
+            let builder = EasyDialog.Builder(self)
+            .text(content: NSLocalizedString("NarouSearchViewController_SearchTitle_Searching", comment:"Searching"))
+            .text(content: NSLocalizedString("NarouSearchViewController_SearchMessage_NowSearching", comment:"Now searching"))
+            let dialog = builder.build()
+            dialog.show()
+            DispatchQueue(label: "com.limuraproducts.novelspeaker.search").async {
+                self.m_SearchResult = NarouLoader.searchUserID(content.userid)
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        self.performSegue(withIdentifier: "searchUserIDResultPushSegue", sender: self)
+                    })
                 }
             }
         }) <<< LabelRow() {
@@ -205,7 +205,7 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
             dialog.dismiss(animated: false, completion: nil)
         }.addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
             if let url = URL.init(string: String.init(format: "https://mypage.syosetu.com/%@/", userid)) {
-                UIApplication.shared.openURL(url)
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
             dialog.dismiss(animated: false, completion: nil)
         }.build().show()
