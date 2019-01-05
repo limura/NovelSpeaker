@@ -137,7 +137,7 @@
 		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
 		21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */; };
-		21BDC2DF1A2B70A5002804DD /* EasyAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 21BDC2DE1A2B70A5002804DD /* EasyAlert.m */; };
+		21C372DD21DFC41600FB2D52 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
 		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
@@ -434,8 +434,8 @@
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
 		21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaxSpeechTimeTableViewCell.h; sourceTree = "<group>"; };
 		21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MaxSpeechTimeTableViewCell.m; sourceTree = "<group>"; };
-		21BDC2DD1A2B70A5002804DD /* EasyAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EasyAlert.h; sourceTree = "<group>"; };
-		21BDC2DE1A2B70A5002804DD /* EasyAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EasyAlert.m; sourceTree = "<group>"; };
+		21C372DB21DFC41600FB2D52 /* UIImageExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIImageExtension.h; sourceTree = "<group>"; };
+		21C372DC21DFC41600FB2D52 /* UIImageExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIImageExtension.m; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
 		21C74F941964502A0039A706 /* arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@2x.png"; sourceTree = "<group>"; };
 		21C74F99196456490039A706 /* NarouSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchViewController.h; sourceTree = "<group>"; };
@@ -730,8 +730,6 @@
 		21D8FC4C19FC97DB00CCF1B6 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
-				21BDC2DD1A2B70A5002804DD /* EasyAlert.h */,
-				21BDC2DE1A2B70A5002804DD /* EasyAlert.m */,
 				21E76BF81FB487B1003C659F /* EasyDialogs.swift */,
 				2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */,
 				2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */,
@@ -764,6 +762,8 @@
 				21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */,
 				21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */,
 				2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */,
+				21C372DB21DFC41600FB2D52 /* UIImageExtension.h */,
+				21C372DC21DFC41600FB2D52 /* UIImageExtension.m */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1335,7 +1335,6 @@
 				216741A02043D592008A578D /* BehaviorLogger.swift in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
-				21BDC2DF1A2B70A5002804DD /* EasyAlert.m in Sources */,
 				21E704CF1AF741350071F31E /* UpdateLogViewController.m in Sources */,
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
 				21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */,
@@ -1344,6 +1343,7 @@
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
 				21CA0FCB218DE6520059FACB /* DuplicateSoundPlayer.swift in Sources */,
+				21C372DD21DFC41600FB2D52 /* UIImageExtension.m in Sources */,
 				216A545D20EE257000D75458 /* NovelSpeakerBackup.swift in Sources */,
 				2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
