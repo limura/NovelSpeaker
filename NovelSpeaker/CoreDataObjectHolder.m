@@ -151,9 +151,11 @@
     NSError* error = nil;
     
     NSDictionary* sourceMetaData =
-    [NSPersistentStoreCoordinator metadataForPersistentStoreOfType:NSSQLiteStoreType
-                                                               URL:storeURL
-                                                             error:&error];
+    [NSPersistentStoreCoordinator metadataForPersistentStoreOfType:NSSQLiteStoreType URL:storeURL options:
+      @{
+        NSMigratePersistentStoresAutomaticallyOption: @YES,
+        NSInferMappingModelAutomaticallyOption: @YES,
+      } error:&error];
     if (sourceMetaData == nil) {
         return NO;
     } else if (error) {
