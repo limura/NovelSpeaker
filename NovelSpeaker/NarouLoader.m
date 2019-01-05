@@ -148,13 +148,10 @@ static NSURLSession* session = nil;
 /// 文字列をURIエンコードします。
 + (NSString*) URIEncode:(NSString*)str
 {
-    NSString *encodedText = (__bridge_transfer NSString *)
-    CFURLCreateStringByAddingPercentEscapes(NULL,
-                                            (__bridge CFStringRef)str, //元の文字列
-                                            NULL,
-                                            CFSTR("!*'();:@&=+$,/?%#[]"),
-                                            CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
-    return encodedText;
+    if (str == nil) {
+        return nil;
+    }
+    return [str stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.alphanumericCharacterSet];
 }
 
 /// 小説家になろうでtextダウンロードを行うためのURLを取得します。
