@@ -3017,10 +3017,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// URLからダウンロードしたデータを deflate で圧縮して指定されたファイル名でキャッシュフォルダに上書き保存します
 /// これはブロッキングします
 - (BOOL)UpdateCachedAndZipedFileFromURL:(NSURL*)url fileName:(NSString*)fileName {
-    NSURLRequest* request = [NSURLRequest requestWithURL:url];
-    NSError* error;
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error];
-    if (error != nil) {
+    SyncHttpSession* httpSession = [SyncHttpSession new];
+    [httpSession Initialize];
+    NSData* data = [httpSession GetBinaryWithUrlString:[url absoluteString]];
+    if (data == nil) {
         return false;
     }
     NSData* zipedData = [data deflate:9];
@@ -3048,11 +3048,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 内部に保存してある AutoPagerize の SiteInfo を最新版に更新します
 /// これはネットワークアクセスを行う動作になります
 - (BOOL)UpdateCachedAutoPagerizeSiteInfoData {
-    NSURL* url = [[NSURL alloc] initWithString:AUTOPAGERIZE_SITEINFO_URL];
-    NSURLRequest* request = [NSURLRequest requestWithURL:url];
-    NSError* error;
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error];
-    if (error != nil) {
+    SyncHttpSession* httpSession = [SyncHttpSession new];
+    [httpSession Initialize];
+    NSData* data = [httpSession GetBinaryWithUrlString:AUTOPAGERIZE_SITEINFO_URL];
+    if (data == nil) {
         return false;
     }
     NSData* zipedData = [data deflate:9];
@@ -3064,11 +3063,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 内部に保存してある AutoPagerize の カスタムSiteInfo を最新版に更新します
 /// これはネットワークアクセスを行う動作になります
 - (BOOL)UpdateCachedCustomAutoPagerizeSiteInfoData {
-    NSURL* url = [[NSURL alloc] initWithString:CUSTOM_AUTOPAGERIZE_SITEINFO_URL];
-    NSURLRequest* request = [NSURLRequest requestWithURL:url];
-    NSError* error;
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error];
-    if (error != nil) {
+    SyncHttpSession* httpSession = [SyncHttpSession new];
+    [httpSession Initialize];
+    NSData* data = [httpSession GetBinaryWithUrlString:CUSTOM_AUTOPAGERIZE_SITEINFO_URL];
+    if (data == nil) {
         return false;
     }
     NSData* zipedData = [data deflate:9];

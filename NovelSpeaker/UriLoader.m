@@ -133,14 +133,14 @@
 /// SiteInfo をURLから内部データベースに追加します。
 - (void)AddSiteInfoFromURL:(NSURL*)url successAction:(void(^)(void))successAction failedAction:(void(^)(NSURL* url))failedAction{
     dispatch_async(m_WebAccessQueue, ^(){
-        NSURLRequest* request = [NSURLRequest requestWithURL:url];
-        NSError* error;
-        NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error];
+        SyncHttpSession* httpSession = [SyncHttpSession new];
+        [httpSession Initialize];
+        NSData* data = [httpSession GetBinaryWithUrlString:[url absoluteString]];
         if (data == nil) {
             if (failedAction != nil) {
                 failedAction(url);
-                return;
             }
+            return;
         }
         if (![self AddSiteInfoFromData:data]) {
             if (failedAction != nil) {
@@ -326,25 +326,27 @@
 /// ただ、encodingがわからなかった場合は何も変換せず返すので注意してください。
 + (NSData*)GetHtmlDataAboutUTF8Encorded:(NSURL*)targetUrl cookieStorage:(NSHTTPCookieStorage*)cookieStorage out_charSetString:(NSMutableString**)out_charsetString out_charsetValue:(unsigned long*)out_charsetValue out_error:(NSMutableString*)out_errorString
 {
-    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:targetUrl];
-    
+    SyncHttpSession* httpSession = [SyncHttpSession new];
+    [httpSession Initialize];
+    NSMutableDictionary<NSString*, NSString*>* headerDictionary = [NSMutableDictionary<NSString*, NSString*> new];
     if (cookieStorage != nil) {
         NSArray* cookieArray = [cookieStorage cookiesForURL:targetUrl];
-        NSDictionary* header = [NSHTTPCookie requestHeaderFieldsWithCookies:cookieArray];
-        [request setAllHTTPHeaderFields:header];
+        NSDictionary* dictionary = [NSHTTPCookie requestHeaderFieldsWithCookies:cookieArray];
+        for (NSString* key in [dictionary keyEnumerator]) {
+            [headerDictionary setObject:[dictionary objectForKey:key] forKey:key];
+        }
     }
-
-    NSError* error;
-    NSURLResponse* response;
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    NSLog(@"NSURLConnection return: data(%lu bytes), error: %@", (unsigned long)[data length], [error localizedDescription]);
-    if (data == nil) {
+    SyncHTTPSessionResult* result = [httpSession GetBinaryWithUrlString:[targetUrl absoluteString] headerDictionary:headerDictionary];
+    NSLog(@"NSURLConnection return: data(%lu bytes)", (unsigned long)[[result getData] length]);
+    if (result == nil || [result getData] == nil) {
         if (out_errorString != nil) {
             [out_errorString setString:NSLocalizedString(@"UriLoader_NSURLConnectionRequestFailed", @"Webサーバからの取得に失敗しました。(接続失敗？)")];
         }
         return nil;
     }
-    NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+    NSData* data = [result getData];
+
+    NSHTTPURLResponse* httpResponse = [result getResponse];
     if ((int)(httpResponse.statusCode / 100) != 2) {
         NSLog(@"HTTP status code is not 2?? (%ld) url: %@", (long)httpResponse.statusCode, [targetUrl absoluteString]);
         if (out_errorString != nil) {
