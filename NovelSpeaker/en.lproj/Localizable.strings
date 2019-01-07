@@ -42,6 +42,8 @@
 "GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings" = "Step 1\r\nRestoring settings";
 "GlobalDataSingleton_RestoreBackupDataFailed" = "Restore backup data failed.";
 "GlobalDataSingleton_AnnounceStopedByTimer" = "As the maximum continuous playback time was exceeded, reading aloud was stopped.";
+"GlobalDataSingleton_NotificationRequestAuthorizationMessage" = "To display a notification when novels have been updated by automatic updating of novels, permission to issue notification is required.";
+
 
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "Failed in addition to download queue.";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "Title: %@";
@@ -300,6 +302,7 @@
 - If you do not set speakers to read aloud, select a rich speaker that is available instead of the standard one (kyoko)
 - Changed to support iOS 10 or later (previously iOS 8 or later)
 - Added ON / OFF setting to \"Setting -> Open recent book in start time\"
+- Added updated novel name to update notification when setting -> novel automatic update is ON
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -311,6 +314,7 @@ Interface change
 - If you do not set speakers to read aloud, select a rich speaker that is available instead of the standard one (kyoko)
 - Changed to support iOS 10 or later (previously iOS 8 or later)
 - Added ON / OFF setting to \"Setting -> Open recent book in start time\"
+- Added updated novel name to update notification when setting -> novel automatic update is ON
 
 
 # Version 1.1.47

@@ -2714,6 +2714,16 @@ static DummySoundLooper* dummySoundLooper = nil;
     return [m_DownloadQueue GetNewDownloadCount];
 }
 
+/// 現在の新規ダウンロード小説名のリストをクリアします
+- (void)ClearNewDownloadNovelNameArray {
+    [m_DownloadQueue ClearNewDownloadNovelNameArray];
+}
+
+/// 現在の新規ダウンロード小説名のリストを取得します
+- (NSArray*)GetNewDownloadNovelNameArray {
+    return [m_DownloadQueue GetNewDownloadNovelNameArray];
+}
+
 /// BackgroundFetch でダウンロードを行った(過去形)ncode(やURL)のリストを取得します
 - (NSArray*) GetAlreadyFetchedNovelIDList{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
@@ -2804,30 +2814,34 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     
     // ダウンロードが行われた数をクリアしておきます
     [self ClearNewDownloadCount];
+    [self ClearNewDownloadNovelNameArray];
 
     // ダウンロードqueueに追加します。
     for (NSString* novelID in downloadTargetNovelIDArray) {
         // ncode 以外のものでも novelID でqueueに入れます
         NarouContentCacheData* content = [self SearchNarouContentFromNcode:novelID];
         [self PushContentDownloadQueue:content];
-        NSLog(@"add download queue: %@", content.ncode);
+        NSLog(@"Background Fetch: add download queue: %@", content.ncode);
     }
 
     // 30秒以内に終わるようにダウンロードの終了を待ちます
-    [NSThread sleepForTimeInterval:2.0];
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
     while (TRUE) {
         NSArray* downloadInfo = [self GetCurrentDownloadWaitingInfo];
         NarouContentCacheData* content = [self GetCurrentDownloadingInfo];
         if ([downloadInfo count] <= 0 && content == nil) {
+            NSLog(@"Background Fetch: [downloadInfo count] <= 0 && content == nil. break. (%lu, %p)", (unsigned long)[downloadInfo count], content);
             break;
         }
-        [NSThread sleepForTimeInterval:0.1];
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
         NSTimeInterval interval = [startTime timeIntervalSinceNow];
         if (interval < -28.0) {
             // 30秒以上かかりそうならやめます
+            NSLog(@"Background Fetch: interval < -28.0 break.");
             break;
         }
         if ([self isSpeaking]) {
+            NSLog(@"Background Fetch: [self isSpeaking] break.");
             break;
         }
     }
@@ -2861,11 +2875,15 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
 
     int downloadCount = [self GetNewDownloadCount];
+    NSLog(@"Background Fetch DONE: downloadCount: %d", downloadCount);
     if (downloadCount > 0) {
         NSInteger appendCount = [self GetBackgroundFetchedNovelCount];
         application.applicationIconBadgeNumber = downloadCount + appendCount;
-        [NiftyUtility InvokeNotificationNow:[[NSString alloc] initWithFormat:NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertBody", @"%d個の更新があります"), downloadCount]];
+        
+        NSArray* updateNovelNameArray = [self GetNewDownloadNovelNameArray];
+        [NiftyUtility InvokeNotificationNow:[[NSString alloc] initWithFormat:NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertBody", @"%d個の更新があります。"), downloadCount] message:[updateNovelNameArray componentsJoinedByString:@"\n"] badgeNumber:downloadCount + appendCount];
         [self UpdateBackgroundFetchedNovelCount:downloadCount + appendCount];
+        NSLog(@"update alert: %@", [[NSString alloc] initWithFormat:NSLocalizedString(@"GlobalDataSingleton_NovelUpdateAlertBody", @"以下の%d個の更新があります。\n%@"), downloadCount, [updateNovelNameArray componentsJoinedByString:@", "]]);
         
         completionHandler(UIBackgroundFetchResultNewData);
     }else{
@@ -3086,7 +3104,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     if (siteInfoDeflate == nil || infratedSiteInfo == nil) {
         // 読み出しに失敗したらネットワーク経由で取得しようとします。
-        [NSThread sleepForTimeInterval:1.0];
         if ([self UpdateCachedAutoPagerizeSiteInfoData]) {
             return [self GetCachedAutoPagerizeSiteInfoData];
         };

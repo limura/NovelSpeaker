@@ -228,11 +228,13 @@ static NSURLSession* session = nil;
             }
             NSArray* cookies = [NSHTTPCookie cookiesWithResponseHeaderFields:[httpResponse allHeaderFields] forURL:[httpResponse URL]];
             [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookies:cookies forURL:[httpResponse URL] mainDocumentURL:nil];
+            /*
             NSLog(@"Cookies for %@", [[httpResponse URL] absoluteString]);
             for (NSHTTPCookie* cookie in cookies) {
                 NSLog(@"%@", [cookie description]);
             }
             NSLog(@"end Cookies\n\n");
+             */
             result = data;
             dispatch_semaphore_signal(semaphore);
         }

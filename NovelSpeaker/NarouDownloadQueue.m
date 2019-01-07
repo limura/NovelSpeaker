@@ -47,6 +47,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
     
     m_CurrentDownloadContentAllData = nil;
     m_DownloadCount = 0;
+    m_NewDownloadNovelNameArray = [NSMutableArray new];
     m_isDownloadPaused = false;
 
     [self StartDownloadThread];
@@ -302,6 +303,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         NSArray* cookieArray = [localContent.keyword componentsSeparatedByString:@";"];
         
         __block BOOL result = false;
+        __block BOOL isDownloaded = false;
         dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
         [loader LoadURL:targetURL cookieArray:cookieArray startCount:startCount successAction:^BOOL(HtmlStory* story, NSURL* currentURL){
             if (story == nil) {
@@ -313,6 +315,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
                 NSLog(@"already deleted content!!!!!!!!");
                 return false;
             }
+            NSLog(@"Fetch URLDownload fetched: %lu bytes. %@", (unsigned long)[story.content length], [targetURL absoluteString]);
             
             if ([localContent.general_all_no intValue] < story.count) {
                 localContent.general_all_no = [[NSNumber alloc] initWithInt:story.count];
@@ -328,6 +331,11 @@ static float SLEEP_TIME_SECOND = 10.5f;
                 [globalData UpdateStory:story.content chapter_number:story.count parentContent:localContent];
                 localContent.is_new_flug = [[NSNumber alloc] initWithBool:true];
                 localContent.novelupdated_at = [[NSDate alloc] initWithTimeIntervalSinceNow:0];
+                if (!isDownloaded) {
+                    m_NewDownloadCount++;
+                    [m_NewDownloadNovelNameArray addObject:localContent.title];
+                    isDownloaded = TRUE;
+                }
             }
             // さっき現在の NarouContent の状態を読んだので、読み上げ位置的なものはそれで上書きした上で状態を更新する
             localContent.reading_chapter = currentContent.reading_chapter;
@@ -339,6 +347,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
                 [self KickDownloadStatusUpdate:localContent n:story.count maxpos:story.count];
                 self->m_CurrentDownloadContentAllData.current_download_complete_count = story.count;
             });
+            if (m_isNeedQuit) {
+                return false;
+            }
             return true;
         } failedAction:^(NSURL* url){
             NSLog(@"LoadURL failed. %@", [url absoluteString]);
@@ -389,6 +400,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         [BehaviorLogger AddLogWithDescription:@"NarouDownloadQueue ChapterDownload kicked"
             data:@{@"ncode": localContent.ncode == nil ? @"nil" : localContent.ncode}];
         if ([localContent isURLContent]) {
+            NSLog(@"Fetch calling URLDownload.");
             return [self URLDownload:localContent];
         }
         if ([localContent isUserCreatedContent]) {
@@ -433,6 +445,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
                 }
             }
             if (m_DownloadCount >= BULK_DOWNLOAD_COUNT) {
+                NSLog(@"Fetch sleeping download.");
                 //NSLog(@"download sleep.");
                 // 指定回数分までダウンロードされたので、ダウンロードを開始する前に指定の秒数だけ寝ます。
                 // これをしないで連続ダウンロードを行うとゴミデータを掴まされる事になります。
@@ -441,7 +454,13 @@ static float SLEEP_TIME_SECOND = 10.5f;
                     if (m_isNeedQuit) {
                         break;
                     }
-                    [NSThread sleepForTimeInterval:0.1];
+                    NSLog(@"Fetch call NSRunLoop:runMode:beforeDate:");
+                    BOOL result = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+                    if (result == NO) {
+                        NSLog(@"Fetch result == NO. call NSThread sleepForTimeInterval");
+                        [NSThread sleepForTimeInterval:0.5];
+                    }
+                    NSLog(@"Fetch waiting...");
                 }
                 m_DownloadCount = m_DownloadCount % BULK_DOWNLOAD_COUNT;
             }
@@ -453,7 +472,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
             //NSLog(@"download start %d %@", n, downloadURL);
             m_DownloadCount += 1;
             NSMutableString* errorString = [NSMutableString new];
+            NSLog(@"Fetch: calling FetchStoryForURL");
             HtmlStory* htmlStory = [loader FetchStoryForURL:[NarouLoader GetStoryURLForContent:localContent no:n] cookieStorage:nil out_error:errorString];
+            NSLog(@"Fetch: ChapterDownload FetchStoryForURL return: %p", htmlStory);
             if (htmlStory == nil || htmlStory.content == nil) {
                 // 読み込みに失敗したのでここで終了します。
                 NSLog(@"text download failed. ncode: %@, download in %d/%d", localContent.ncode, n, max_content_count);
@@ -485,7 +506,11 @@ static float SLEEP_TIME_SECOND = 10.5f;
             });
             [self announceDownloadStatus:localContent n:n maxPos:max_content_count];
             
-            isDownloaded = TRUE;
+            if (!isDownloaded) {
+                m_NewDownloadCount++;
+                [m_NewDownloadNovelNameArray addObject:localContent.title];
+                isDownloaded = TRUE;
+            }
         }
         // すべてのダウンロードが完了したら、nil で状態を更新します。
         dispatch_async(m_MainDispatchQueue, ^{
@@ -499,11 +524,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
         if (ncodeHandler != nil) {
             [ncodeHandler DownloadEnd];
         }
-        
-        if (isDownloaded) {
-            m_NewDownloadCount++;
-        }
-        
+
         return true;
     }
 }
@@ -584,6 +605,16 @@ static float SLEEP_TIME_SECOND = 10.5f;
 /// 現在の新規ダウンロード数を取得します
 - (int)GetNewDownloadCount {
     return m_NewDownloadCount;
+}
+
+/// 現在の新規ダウンロード小説名のリストをクリアします
+- (void)ClearNewDownloadNovelNameArray {
+    [m_NewDownloadNovelNameArray removeAllObjects];
+}
+
+/// 現在の新規ダウンロード小説名のリストを取得します
+- (NSArray*)GetNewDownloadNovelNameArray {
+    return m_NewDownloadNovelNameArray;
 }
 
 /// ダウンロードを一時停止します

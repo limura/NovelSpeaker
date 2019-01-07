@@ -30,7 +30,7 @@
 "GlobalDataSingleton_Conversation1" = "会話文";
 "GlobalDataSingleton_Conversation2" = "会話文 2";
 "GlobalDataSingleton_NewUserBookTitle" = "新規ユーザ小説";
-"GlobalDataSingleton_NovelUpdateAlertBody" = "%d個の小説が更新されました";
+"GlobalDataSingleton_NovelUpdateAlertBody" = "%d個の小説が更新されました。";
 "GlobalDataSingleton_NovelUpdateAlertAction" = "アプリを開く";
 "GlobalDataSingleton_URLisAlreadyDownload" = "既に本棚に登録されているURLでした";
 "GlobalDataSingleton_PDFToStringFailed_Title" = "PDFのテキスト読み込みに失敗";
@@ -42,6 +42,7 @@
 "GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings" = "工程 1\r\n設定の復元中";
 "GlobalDataSingleton_RestoreBackupDataFailed" = "バックアップデータの読み込みに失敗しました。";
 "GlobalDataSingleton_AnnounceStopedByTimer" = "最大連続再生時間を超えたので、読み上げを停止しました。";
+"GlobalDataSingleton_NotificationRequestAuthorizationMessage" = "小説の自動更新により小説の更新があった場合に通知を表示するため、通知を出す許可が必要です。";
 
 "NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue" = "ダウンロードキューへの追加に失敗";
 "NarouSearchResultDetailViewController_AddSuccess_Title" = "作品名: %@";
@@ -297,6 +298,7 @@
 - 読み上げの話者が未設定の場合、標準のもの(kyoko)ではなく利用可能な中でリッチな話者を選択するように
 - iOS 10 以降の対応に変更(以前は iOS 8 以降でした)
 - 設定 -> 起動時に前回開いていた小説を開く のON/OFF設定を追加
+- 設定 -> 小説の自動更新 が ON になっている時の更新通知に更新された小説名を追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
@@ -308,6 +310,7 @@
 - 読み上げの話者が未設定の場合、標準のもの(kyoko)ではなく利用可能な中でリッチな話者を選択するように
 - iOS 10 以降の対応に変更(以前は iOS 8 以降でした)
 - 設定 -> 起動時に前回開いていた小説を開く のON/OFF設定を追加
+- 設定 -> 小説の自動更新 が ON になっている時の更新通知に更新された小説名を追加
 
 
 # Version 1.1.47

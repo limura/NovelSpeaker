@@ -170,10 +170,17 @@
 }
 
 /// 通知を表示させます
-+ (void)InvokeNotificationNow:(NSString*)message {
++ (void)InvokeNotificationNow:(NSString*)title message:(NSString*)message badgeNumber:(NSInteger)badgeNumber{
     UNMutableNotificationContent* notificationContent = [UNMutableNotificationContent new];
+    notificationContent.title = title;
     notificationContent.body = message;
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"NovelSpeaker_Notification"
+    notificationContent.badge = [[NSNumber alloc] initWithLong:badgeNumber];
+    // Identifirer が同じ通知がある場合はその通知が消されて新しい通知に上書きされるので、個々の通知毎にユニークなIDをつけることにします
+    NSDate* date = [NSDate date];
+    NSDateFormatter* dateFormatter = [NSDateFormatter new];
+    [dateFormatter setDateFormat:@"YYYYMMDDhhmmss"];
+    NSString* uniqueIdentifier = [[NSString alloc] initWithFormat:@"NovelSpeaker_Notification_%@", [dateFormatter stringFromDate:date]];
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:uniqueIdentifier
                                                                           content:notificationContent
                                                                           trigger:nil];
     [UNUserNotificationCenter.currentNotificationCenter addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {

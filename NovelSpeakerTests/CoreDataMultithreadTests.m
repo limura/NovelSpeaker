@@ -91,15 +91,15 @@
     XCTAssertTrue([NSThread isMainThread]);
     for (int i = 0; i < 10; i++) {
         dispatch_async(backgroundQueue1, ^{
-            [NSThread sleepForTimeInterval:1];
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
             XCTAssertTrue(![NSThread isMainThread]);
             dispatch_async(mainQueue, ^{
-                [NSThread sleepForTimeInterval:0.5];
+                [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
                 XCTAssertTrue([NSThread isMainThread]);
             });
         });
     }
-    [NSThread sleepForTimeInterval:3];
+    [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:3.0]];
 }
 
 @end

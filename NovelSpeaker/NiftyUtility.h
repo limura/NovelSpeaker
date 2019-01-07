@@ -47,6 +47,6 @@
 + (NSString*)removeWhiteSpace:(NSString*)str;
 
 /// 通知を表示させます
-+ (void)InvokeNotificationNow:(NSString*)message;
++ (void)InvokeNotificationNow:(NSString*)title message:(NSString*)message badgeNumber:(NSInteger)badgeNumber;
 
 @end

@@ -50,6 +50,9 @@
     /// 小説家になろうから新たにダウンロードした小説の数(バッヂ用)
     int m_NewDownloadCount;
     
+    /// 新たにダウンロードした小説名のリスト(通知用)
+    NSMutableArray* m_NewDownloadNovelNameArray;
+
     /// ダウンロードが停止中か否か
     bool m_isDownloadPaused;
 }
@@ -91,6 +94,11 @@
 
 /// 現在の新規ダウンロード数カウントを取得します
 - (int)GetNewDownloadCount;
+
+/// 現在の新規ダウンロード小説名のリストをクリアします
+- (void)ClearNewDownloadNovelNameArray;
+/// 現在の新規ダウンロード小説名のリストを取得します
+- (NSArray*)GetNewDownloadNovelNameArray;
 
 /// ダウンロードを一時停止します
 - (void)PauseDownload;
