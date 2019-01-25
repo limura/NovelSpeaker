@@ -167,9 +167,23 @@
     return attributedString;
 }
 
+/// 怪しく <ruby>xxx<rp>(</rp><rt>yyy</rt><rp>)</rt></ruby> や、<ruby>xxx<rt>yyy</rt></ruby> という文字列を
+/// <ruby>|xxx<rp>(</rp><rt>yyy</rt><rp>)</rt></ruby> という文字列に変換します。
+/// つまり、xxx(yyy) となるはずのものを、|xxx(yyy) となるように変換するわけです。
++ (NSString*)AddDummyRubyRpVerticalBar:(NSString*)htmlString {
+    NSString* convFrom = @"<ruby>(<rb>)?([^<]+)\\s*(</rb>)?\\s*(<rp>[^<]*</rp>)?\\s*(<rt>[^<]+</rt>)\\s*(<rp>[^<]*</rp>)?</ruby>";
+    NSString* convTo = @"<ruby>|$1$2$3<rp>(</rp>$5<rp>)</rp></ruby>";
+    NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:convFrom options:NSRegularExpressionCaseInsensitive error:nil];
+    
+    return [regexp stringByReplacingMatchesInString:htmlString options:0 range:NSMakeRange(0, htmlString.length) withTemplate:convTo];
+}
+
 /// HTMLの <ruby> 関係のタグを排除します
+/// 怪しく <ruby>xxx<rp>(</rp><rt>yyy</rt><rp>)</rt></ruby> という文字列を
+/// <ruby>|xxx<rp>(</rp><rt>yyy</rt><rp>)</rt></ruby> という文字列に変換してからそれら ruby 周りのHTMLタグを削除します。
+/// つまり、xxx(yyy) となるはずのものを、|xxx(yyy) となるように変換してから ruby 周りのHTMLタグを削除します。
 + (NSString*)RemoveRubyTag:(NSString*)html {
-    NSString* result = html;
+    NSString* result = [SiteInfo AddDummyRubyRpVerticalBar:html];
     //<ruby><rb>黒河</rb><rp>（</rp><rt>くろかわ</rt><rp>）</rp></ruby>
     NSArray* targetArray = @[@"<ruby>", @"</ruby>", @"<rb>", @"</rb>", @"<rp>", @"</rp>", @"<rt>", @"</rt>"];
     for (NSString* target in targetArray) {

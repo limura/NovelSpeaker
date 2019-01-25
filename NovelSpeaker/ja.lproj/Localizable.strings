@@ -293,16 +293,20 @@
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
 "BookShelfTableViewController_Resume:" = "▶︎再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.48
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.49
 
-- 読み上げの話者が未設定の場合、標準のもの(kyoko)ではなく利用可能な中でリッチな話者を選択するように
-- iOS 10 以降の対応に変更(以前は iOS 8 以降でした)
-- 設定 -> 起動時に前回開いていた小説を開く のON/OFF設定を追加
-- 設定 -> 小説の自動更新 が ON になっている時の更新通知に更新された小説名を追加
+HTML上のルビ(rubyタグ)を取り込む時には一律で \"|文字(ルビ)\" の形式で読み込まれるようにすることで、「ルビはルビだけ読む」がより意図通りに動作するように
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.49
+
+インタフェースの変更
+
+- HTML上のルビ(rubyタグ)を取り込む時には一律で \"|文字(ルビ)\" の形式で読み込まれるようにすることで、「ルビはルビだけ読む」がより意図通りに動作するように
+
+
 # Version 1.1.48
 
 インタフェースの変更

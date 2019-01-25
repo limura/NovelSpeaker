@@ -297,16 +297,22 @@
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
 "BookShelfTableViewController_Resume:" = "▶︎Speech: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.48
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.49
 
-- If you do not set speakers to read aloud, select a rich speaker that is available instead of the standard one (kyoko)
-- Changed to support iOS 10 or later (previously iOS 8 or later)
-- Added ON / OFF setting to \"Setting -> Open recent book in start time\"
-- Added updated novel name to update notification when setting -> novel automatic update is ON
+Interface change
+
+- When loading ruby (ruby tag) in HTML, by reading it in the form of \"| character (ruby)\" uniformly, so that \"ruby reads only ruby\" works more as intended
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.49
+
+Interface change
+
+- When loading ruby (ruby tag) in HTML, by reading it in the form of \"| character (ruby)\" uniformly, so that \"ruby reads only ruby\" works more as intended
+
+
 # Version 1.1.48
 
 Interface change
