@@ -18,6 +18,7 @@ class BehaviorLogger: NSObject {
     /// ログには AddLog() を呼び出した時間が追加されます。
     /// 注意：何らかの失敗をした場合でも、特に何もエラーをすることなくこの関数は終了します。
     @objc static public func AddLog(description: String, data: Dictionary<String, Any>) -> Void {
+        GlobalDataSingleton.getInstance()?.addLogString(description)
         if !LOGGER_ENABLED {
             return
         }
