@@ -18,10 +18,6 @@ class BehaviorLogger: NSObject {
     /// ログには AddLog() を呼び出した時間が追加されます。
     /// 注意：何らかの失敗をした場合でも、特に何もエラーをすることなくこの関数は終了します。
     @objc static public func AddLog(description: String, data: Dictionary<String, Any>) -> Void {
-        GlobalDataSingleton.getInstance()?.addLogString(description)
-        if !LOGGER_ENABLED {
-            return
-        }
         var logDictionary = ["description": description,
                              "dateTime": Date().description(with: Locale.init(identifier: "ja_JP"))] as [String : Any];
         if data.count > 0 {
@@ -38,6 +34,11 @@ class BehaviorLogger: NSObject {
         } catch {
             return;
         }
+        GlobalDataSingleton.getInstance()?.addLogString(logJSONString)
+        if !LOGGER_ENABLED {
+            return
+        }
+
         if let userDefaults = UserDefaults.init(suiteName: USERDEFAULTS_NAME) {
             userDefaults.register(defaults: [LOG_KEY: []])
             if var logArray = userDefaults.array(forKey: LOG_KEY) {

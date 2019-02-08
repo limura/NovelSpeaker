@@ -297,7 +297,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
             urlString = localContent.userid;
             startCount = [localContent.general_all_no intValue];
         }
-        NSURL* targetURL = [[NSURL alloc] initWithString:urlString];
+        __block NSURL* targetURL = [[NSURL alloc] initWithString:urlString];
         
         //NSLog(@"URLDownload: keyword(cookie): %@", localContent.keyword);
         NSArray* cookieArray = [localContent.keyword componentsSeparatedByString:@";"];
@@ -324,6 +324,13 @@ static float SLEEP_TIME_SECOND = 10.5f;
             localContent.userid = [currentURL absoluteString];
             if (story.count != startCount
                 || ([globalData SearchStory:localContent.ncode chapter_no:startCount] == nil)) {
+                // 新しい章として読み込んだにもかかわらず、currentURL が変わっていない場合には
+                // 同じものを読み込んでいる事になるので失敗させる必要があります
+                if ([[currentURL absoluteString] compare:[targetURL absoluteString]] == NSOrderedSame) {
+                    NSLog(@"nextUrl is same: %@", [targetURL absoluteString]);
+                    return false;
+                }
+                targetURL = currentURL;
                 // 最初に読んだ count が DB に登録されていないか、
                 // 最初に読んだもの以外のものは内容を更新する。
                 // (最初に読むのは前回最後に読んだものなので、ユーザが内容を更新している可能性があるため更新しないが、

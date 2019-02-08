@@ -2517,11 +2517,13 @@ static DummySoundLooper* dummySoundLooper = nil;
     [formatter setDateFormat:@"HH:mm:ss"];
     [formatter setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
     NSString* logString = [[NSString alloc] initWithFormat:@"%@ %@", [formatter stringFromDate:date], string];
-    [m_LogStringArray addObject:logString];
-    NSLog(@"%@", logString);
-    while ([m_LogStringArray count] > 1024) {
-        [m_LogStringArray removeObjectAtIndex:0];
-    }
+    NSLog(@"%p, %@", m_LogStringArray, logString);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [m_LogStringArray addObject:logString];
+        while ([m_LogStringArray count] > 1024) {
+            [m_LogStringArray removeObjectAtIndex:0];
+        }
+    });
 }
 - (void)ClearLogString{
     m_LogStringArray = [NSMutableArray new];
