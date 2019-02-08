@@ -29,5 +29,7 @@
 @property (nonatomic) UIToolbar* KeyboardToolbar;
 @property (weak, nonatomic) IBOutlet UITextField *SearchOrderTextBox;
 @property (strong, nonatomic) UITapGestureRecognizer *singleTap;
+@property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
+
 
 @end

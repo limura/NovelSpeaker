@@ -297,15 +297,25 @@
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
 "BookShelfTableViewController_Resume:" = "▶︎Speech: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.49
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.50
 
-Interface change
-
-- When loading ruby (ruby tag) in HTML, by reading it in the form of \"| character (ruby)\" uniformly, so that \"ruby reads only ruby\" works more as intended
+- Start announcing on the Search tab according to the deletion policy of the Search tab
+- Fixed a problem that continued loading of the same page in Web capture function
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.50
+
+Interface change
+
+- Start announcing on the Search tab according to the deletion policy of the Search tab
+
+Bug fix
+
+- Fixed a problem that continued loading of the same page in Web capture function
+
+
 # Version 1.1.49
 
 Interface change

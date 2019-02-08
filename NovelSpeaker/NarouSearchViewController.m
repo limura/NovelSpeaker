@@ -51,7 +51,7 @@
     
     self.SearchOrderTextBox.inputAccessoryView = self.KeyboardToolbar;
     self.SearchOrderTextBox.inputView = self.SearchOrderPickerView;
-
+    
     [self SetSearchOrderTextFromPickerView];
 }
 
@@ -168,6 +168,20 @@
             }];
         });
     });
+}
+- (IBAction)NarouSearchTabDeleteAnnounceButtonClicked:(id)sender {
+    NSURL* url = [[NSURL alloc] initWithString:@"https://limura.github.io/NovelSpeaker/QandA.html?utm_source=KotosekaiApp&utm_medium=InAppBrowser&utm_campaign=FromSearchTabDeleteAnnounce#DeleteSearchTab"];
+    if (url != nil) {
+        NSUInteger targetTabIndex = 2; // XXXXX TODO: 謎の数字 2 が確認されている(WKWebViewのタブのindexなんだけれども)
+        id targetViewController = [self.tabBarController.viewControllers objectAtIndex:targetTabIndex];
+        if ([targetViewController isKindOfClass:[ImportFromWebPageViewController class]]) {
+            ImportFromWebPageViewController* importFromWebPageViewController = (ImportFromWebPageViewController*)targetViewController;
+            importFromWebPageViewController.openTargetUrl = url;
+            [self.tabBarController setSelectedIndex:targetTabIndex];
+        }else if ([UIApplication.sharedApplication canOpenURL:url]) {
+            [UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
+        }
+    }
 }
 
 // テキストフィールドでEnterが押された
