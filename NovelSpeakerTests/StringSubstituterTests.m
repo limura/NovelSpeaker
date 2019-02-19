@@ -140,15 +140,24 @@
 
 - (void)testNarouRubyBug
 {
-    NSString* text = @"に|勤《いそ》しんだ。\r\n《セリフ〜》\r\n";
+    NSString* text = @"に|勤《いそ》しんだ。《セリフ〜》\r\n"
+        @"時間の|歪(ゆがー)みすら覚えながら"
+        @"大半を|力場装甲(フォースフィールドアーマー)に割り当てている";
     
     NSDictionary* matchPatterns = @{
                                     @"|勤《いそ》": @"いそ",
                                     @"勤《いそ》": @"いそ",
+                                    @"|歪(ゆがー)": @"ゆがー",
+                                    @"歪(ゆがー)": @"ゆがー",
+                                    @"|力場装甲(フォースフィールドアーマー)": @"フォースフィールドアーマー",
+                                    @"力場装甲(フォースフィールドアーマー)": @"フォースフィールドアーマー",
                                     };
     NSDictionary* resultDictionary = [StringSubstituter FindNarouRubyNotation:text notRubyString:@"・"];
     
     NSLog(@"%@", resultDictionary);
+    for (NSString* resultKey in [resultDictionary keyEnumerator]) {
+        NSLog(@"%@ -> %@", resultKey, [resultDictionary objectForKey:resultKey]);
+    }
     for (NSString* fromAnswer in [matchPatterns keyEnumerator]) {
         NSString* toAnswer = matchPatterns[fromAnswer];
         NSString* to = [resultDictionary objectForKey:fromAnswer];

@@ -2027,6 +2027,15 @@ Bug fix
 - Fixed a problem that continued loading of the same page in Web capture function
 
 
+# Version 1.1.51
+
+インタフェースの変更
+
+- Web取込 機能側での一回で取り込まれる小説の章の数の最大値を100から1000に増加
+- ルビはルビだけ読む 機能でルビとして判断される文字列の扱いを少し変更
+
+
+
 ----
 TestFlight テスト情報
 
