@@ -293,14 +293,22 @@
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
 "BookShelfTableViewController_Resume:" = "▶︎再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.50
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.51
 
-- 「なろう検索」タブの削除方針に則り、「なろう検索」タブにて告知を開始
-- Web取込機能において、同じページを読み込み続けてしまう可能性のある問題を修正
+- Web取込 機能側での一回で取り込まれる小説の章の数の最大値を100から1000に増加
+- ルビはルビだけ読む 機能でルビとして判断される文字列の扱いを少し変更
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.51
+
+インタフェースの変更
+
+- Web取込 機能側での一回で取り込まれる小説の章の数の最大値を100から1000に増加
+- ルビはルビだけ読む 機能でルビとして判断される文字列の扱いを少し変更
+
+
 # Version 1.1.50
 
 インタフェースの変更
