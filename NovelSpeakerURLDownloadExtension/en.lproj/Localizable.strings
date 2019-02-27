@@ -7,3 +7,4 @@
 */
 
 "ActionRequestHandler_CanNotUseThisInformation" = "In NovelSpeaker, this information could not be used.";
+"ActionRequestHandler_CanNotReadText" = "Can not read text";

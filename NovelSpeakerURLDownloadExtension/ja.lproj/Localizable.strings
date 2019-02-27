@@ -7,3 +7,4 @@
 */
 
 "ActionRequestHandler_CanNotUseThisInformation" = "ことせかい で利用可能な情報ではありませんでした。";
+"ActionRequestHandler_CanNotReadText" = "テキストを読み込めませんでした";

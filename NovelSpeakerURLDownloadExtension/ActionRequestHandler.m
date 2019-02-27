@@ -76,7 +76,7 @@
         NSLog(@"isPlainText: %@", item);
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             //[self addTextQueue:item];
-            NSDictionary *resultsDictionary = @{ NSExtensionJavaScriptFinalizeArgumentKey: @{ @"type" : @"PlainText", @"data": item } };
+            NSDictionary *resultsDictionary = @{ NSExtensionJavaScriptFinalizeArgumentKey: @{ @"type" : @"PlainText", @"data": item != nil ? item : NSLocalizedString(@"ActionRequestHandler_CanNotReadText", @"テキストを読み込めませんでした") } };
             NSItemProvider *resultsProvider = [[NSItemProvider alloc] initWithItem:resultsDictionary typeIdentifier:(NSString *)kUTTypePropertyList];
             
             NSExtensionItem *resultsItem = [[NSExtensionItem alloc] init];
