@@ -43,6 +43,11 @@
                                     <action selector="clearButtonClicked:" destination="WI3-lq-RQn" id="2bD-3o-ZES"/>
                                 </connections>
                             </barButtonItem>
+                            <barButtonItem title="Copy" id="Cfl-Pm-T6O">
+                                <connections>
+                                    <action selector="copyButtonClicked:" destination="WI3-lq-RQn" id="iNe-uJ-Pea"/>
+                                </connections>
+                            </barButtonItem>
                             <barButtonItem title="Filter" id="tWi-pl-CUi">
                                 <connections>
                                     <action selector="searchButtonClicked:" destination="WI3-lq-RQn" id="jEc-In-QrM"/>

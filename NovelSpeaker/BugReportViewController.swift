@@ -16,6 +16,7 @@ struct BugReportViewInputData {
     var ProblemOccurenceProcedure = ""
     var IsNeedResponse = NSLocalizedString("BugReportViewController_IsNeedResponse_Maybe", comment: "あっても良い")
     var DescriptionOfNewFeature = ""
+    var IsEnabledLogSend = false
 }
 
 class BugReportViewController: FormViewController, MFMailComposeViewControllerDelegate {
@@ -217,6 +218,35 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     BugReportViewController.value.ProblemOccurenceProcedure = value
                 }
             })
+            <<< SwitchRow("IsEnableLogSend") {
+                $0.title = NSLocalizedString("BugReportViewController_IsEnableLogSend", comment: "内部に保存されている操作ログを添付する")
+                $0.value = BugReportViewController.value.IsEnabledLogSend
+                $0.cell.textLabel?.numberOfLines = 0
+                }.onChange({ (row) in
+                    let judge = row.value
+                    if judge! {
+                        EasyDialog.Builder(self)
+                            .title(title: NSLocalizedString("BugReportViewController_ConfirmEnableLogSend_title", comment:"確認"))
+                            .textView(content: NSLocalizedString("BugReportViewController_ConfirmEnableLogSend", comment:"ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合にはOFFのままにしておく必要があります。\nなお、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), heightMultiplier: 0.6)
+                            .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
+                                row.value = false
+                                BugReportViewController.value.IsEnabledLogSend = false
+                                row.updateCell()
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: true, completion: nil)
+                                }
+                            })
+                            .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
+                                BugReportViewController.value.IsEnabledLogSend = true
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: true)
+                                }
+                            })
+                            .build().show()
+                    }else{
+                        BugReportViewController.value.IsEnabledLogSend = false
+                    }
+                })
             <<< AlertRow<String>() { row in
                 row.title = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
                 row.selectorTitle = NSLocalizedString("BugReportViewController_IsNeedResponse", comment: "報告への返事")
@@ -276,7 +306,11 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                         })
                     .build().show()
                 }else{
-                    self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
+                    if BugReportViewController.value.IsEnabledLogSend {
+                        self.sendBugReportMail(log: NiftyUtilitySwift.getLogText(searchString: nil), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
+                    }else{
+                        self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
+                    }
                 }
                 self.navigationController?.popViewController(animated: true)
             })
@@ -380,7 +414,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             , isHTML: false)
         if let log = log {
             if let data = log.data(using: .utf8) {
-                picker.addAttachmentData(data, mimeType: "application/json", fileName: "operation_log.json")
+                picker.addAttachmentData(data, mimeType: "text/plain", fileName: "operation_log.txt")
             }
         }
         present(picker, animated: true, completion: nil)

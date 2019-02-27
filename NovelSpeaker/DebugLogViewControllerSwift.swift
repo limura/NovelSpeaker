@@ -40,21 +40,12 @@ class DebugLogViewControllerSwift: UIViewController {
     }
     */
     
+    func getLogText() -> String {
+        return NiftyUtilitySwift.getLogText(searchString: m_SearchString)
+    }
+    
     func updateLogText() {
-        let logStringArray = GlobalDataSingleton.getInstance().getLogStringArray()
-        var logResult = ""
-        for logString in logStringArray! {
-            guard let logString = logString as? String else {
-                continue
-            }
-            if self.m_SearchString.count > 0 || false {
-                if !logString.contains(self.m_SearchString) {
-                    continue
-                }
-            }
-            logResult += logString + "\r\n"
-        }
-        self.logTextView.text = logResult
+        self.logTextView.text = getLogText()
     }
     
     @IBAction func clearButtonClicked(_ sender: Any) {
@@ -76,4 +67,13 @@ class DebugLogViewControllerSwift: UIViewController {
         .build().show()
     }
     
+    @IBAction func copyButtonClicked(_ sender: Any) {
+        let pasteBoard = UIPasteboard.general
+        pasteBoard.setValue(getLogText(), forPasteboardType: "public.text")
+        EasyDialog.Builder(self)
+        .label(text: NSLocalizedString("DebugLogViewControllerSwift_Copied", comment: "コピーしました"))
+        .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+            dialog.dismiss(animated: false, completion: nil)
+        }.build().show()
+    }
 }

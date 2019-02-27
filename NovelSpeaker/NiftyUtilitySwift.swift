@@ -537,4 +537,23 @@ class NiftyUtilitySwift: NSObject {
         }
         return appVersionString
     }
+    
+    @objc static public func getLogText(searchString:String?) -> String {
+        let logStringArray = GlobalDataSingleton.getInstance().getLogStringArray()
+        var logResult = ""
+        for logString in logStringArray! {
+            guard let logString = logString as? String else {
+                continue
+            }
+            if let searchString = searchString {
+                if searchString.count > 0 {
+                    if !logString.contains(searchString) {
+                        continue
+                    }
+                }
+            }
+            logResult += logString + "\r\n"
+        }
+        return logResult
+    }
 }
