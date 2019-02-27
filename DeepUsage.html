@@ -40,6 +40,7 @@
 	<li><a href="#RemoteControlFromEarphone">イヤホンについたリモコンからの操作</a></li>
 	<li><a href="#ControlCenterOperation">コントロールセンターでの再生中の再生位置変更</a></li>
 	<li><a href="#SpeechModTips">読み替え辞書登録Tips</a></li>
+	<li><a href="#SpeechDelaySetting">読み上げ時の間の設定について</a></li>
 </ul>
 
 <hr />
@@ -127,6 +128,21 @@
 <p>しばらく前から読み替え辞書の登録時には正規表現での登録ができるようになりました。正規表現での読み替えには <a href="https://developer.apple.com/documentation/foundation/nsregularexpression">NSRegularExpression</a> を使っておりますので <a href="https://developer.apple.com/documentation/foundation/nsregularexpression#1661082">NSRegularExpression で利用できるオペレータ</a> のほとんどが利用可能です。また、読み替え先の文字列に <code>$1</code> や <code>$2</code> といった <a href="https://developer.apple.com/documentation/foundation/nsregularexpression#1661112">Template Matching Format</a> を利用することもできます。
 </p>
 <p>正規表現での読み替え指定がされている場合、読み上げを行う文章全体に対して正規表現マッチを行い、マッチした場合には「マッチした部分」から「読み替え先」への読み替え辞書を一時的に登録する、という事を行っています。そのため、読み替えで似た文字列があった場合は一番長い読み替え元の物が採用されるというルールで適用される「読み替え元」は正規表現でマッチした後のマッチした部分になるため、場合によっては推測しにくい挙動になることがありえますのでご注意下さい。
+</p>
+<hr /><h3 id="SpeechDelaySetting">読み上げ時の間の設定について</h3>
+<p>設定 → 読み上げ時の間の設定 の設定項目について解説しておきます。
+</p>
+<p>読み上げの間の設定は、AVSpeechSynthesizer での読み上げでは「、」や「。」といった部分の間の開け方があまり期待通りな間が開かないというお問い合わせから導入したもので、これらの文字列について、間の開け方をどのくらいにするのか、という事を設定できるようにしたものです。
+この間の開け方は、AVSpeechSynthesizer の機能を使った「標準型」と、AVSpeechSynthesizer の仕様のスキマを突いた「非推奨型」の二種類があります。
+</p>
+<p>「標準型」では、<a href="https://developer.apple.com/documentation/avfoundation/avspeechutterance">AVSpeechUtterance</a> の <a href="https://developer.apple.com/documentation/avfoundation/avspeechutterance/1619694-postutterancedelay">postUtteranceDelay</a> プロパティを使って間を表現しています。
+この postUtteranceDelay は TimeInterval型 で間の時間を指定できるのですが、どうやらある値以下の時間を指定しても、そのある値程度の時間が間として開いてしまうようです。つまり、0.1秒とか0.2秒とかの短い時間は開いてくれるわけですが、0.01秒とかのもっと短い時間の指定をしても0.1秒の間が開いてしまう、という感じです。そのため、ある程度小さい値を指定しようとしても、それ以上の時間の間が開いてしまってあんまり句読点の間に使うには使いにくいのではないか、というものになっています。
+</p>
+<p>これに対して「非推奨型」は、「_。」という文字列を複数回くっつけた文字列を読み上げさせるという手法になっています。AVSpeechSynthesizer では「。」を読み上げるときに、かなり短い時間の間を開けてくれます。これは「標準型」での間の指定よりも短い時間の間を表現できるものです。そこで、「非推奨型」では「。_。_。_。」といった文字列を読み上げさせることで、「標準型」よりも細かい時間単位での間の表現をできるようにしています。ただ、この「_。」を連続して読み上げさせる事で間を開ける時間を制御できるというのはAVSpeechSynthesizerの仕様のスキマを突いた形になっていますので、将来的には使えなくなる可能性が結構あるかなぁと思いまして、「非推奨型」としているという事になります。
+また、「標準型」では単位は秒なのですが、非推奨型では単位が回数、なのでそれぞれ単位が違ってきてしまうため、UI上では単位を表示していません。
+</p>
+<p>次に、間の設定での改行の扱いについて解説しておきます。
+文章中に複数の改行が連続して現れる場合は、だいたいにおいて段落の切り替えなどが行われることになるため、間は結構開いてくれたほうが良い事が多いです。つまり、改行についても間の設定をできるようにしておいたほうが良いということになります。そこで、改行についても設定できるようにしようかなぁと思ったのですが、間を開ける対象を入力する部分に使っている UITextField を1行入力モードで動かしていると、改行文字を入力することができないのでした。そこで、改行については「<改行>」という文字が入力されていたら、それを改行文字に置き換えて解釈するというルールにしています。
 </p>
 	</section>
         <footer>
