@@ -241,6 +241,7 @@ static NSURLSession* session = nil;
     }];
     [dataTask resume];
     while(dispatch_semaphore_wait(semaphore, DISPATCH_TIME_NOW)){
+        // TODO: どうやらこの呼出で 0.01秒 寝てくれずに即座に帰ってきてしまってCPUを食いまくるという症状があるっぽい。要修正。
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.01]];
     }
     return result;

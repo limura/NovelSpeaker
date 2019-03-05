@@ -2058,6 +2058,10 @@ Interface change
 
 
 
+TODO:
+- HTTP GET 周りをイベント駆動型に書き直す
+- Google スプレッドシートで読み替え辞書を扱えるような何かを考える
+
 ----
 TestFlight テスト情報
 
