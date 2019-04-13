@@ -3236,7 +3236,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [self UpdateStory:firstContent chapter_number:1 parentContent:targetContentCacheData];
     
     // 新しいcontentが追加されたのでアナウンスします
-    [self NarouContentListChangedAnnounce:NarouContentListChangedAnnounce_Add ncode:targetContentCacheData.ncode];
+    [self NarouContentListChangedAnnounce];
     
     // download queue に追加します。
     NSLog(@"add download queue: %@", [url absoluteString]);
