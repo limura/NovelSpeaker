@@ -13,6 +13,7 @@ target 'NovelSpeaker' do
   source 'https://github.com/CocoaPods/Specs.git'
   pod 'Zip', '~> 1.1'
   pod 'FTLinearActivityIndicator'
+  pod 'IceCream'
 
   target 'NovelSpeakerTests' do
     inherit! :search_paths
