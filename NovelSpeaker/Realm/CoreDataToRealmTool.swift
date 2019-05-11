@@ -149,9 +149,7 @@ class CoreDataToRealmTool: NSObject {
             story.novelID = novelID
             story.chapterNumber = storyCoreData.chapter_number as! Int
             story.readLocation = storyCoreData.readLocation as! Int
-            if let content = storyCoreData.content {
-                // TODO: content を zip して contentZiped に入れる
-            }
+            story.content = storyCoreData.content
             // TODO: url を生成する。小説家になろうの場合は単発のだと最後が /1/ にならないので注意
             
             realm.add(story)

@@ -257,6 +257,14 @@ class RealmUtil {
             return self.realm?.objects(RealmNovel.self).filter("isDeleted = false AND novelID = %@", self.novelID).first
         }
     }
+    var content : String? {
+        get {
+            return NiftyUtility.stringInflate(self.contentZiped)
+        }
+        set (value) {
+            self.contentZiped = NiftyUtility.stringDeflate(value, level: 9)
+        }
+    }
     
     override class func primaryKey() -> String? {
         return "id"

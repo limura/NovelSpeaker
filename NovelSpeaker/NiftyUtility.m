@@ -188,4 +188,24 @@
     }];
 }
 
+/// NSString を zlib で圧縮して NSData にして返します
++ (NSData*)stringDeflate:(NSString*)string level:(int)level{
+    if (string == nil) {
+        string = @"";
+    }
+    NSData* data = [string dataUsingEncoding:NSUTF8StringEncoding];
+    return [data deflate:9];
+}
+
+/// NSString が圧縮された NSData を NSString に戻します
++ (NSString*)stringInflate:(NSData*)data{
+    NSData* unzipedData = nil;
+    if (data == nil) {
+        return @"";
+    }
+    unzipedData = [data inflate];
+    return [[NSString alloc] initWithData:unzipedData encoding:NSUTF8StringEncoding];
+}
+
+
 @end

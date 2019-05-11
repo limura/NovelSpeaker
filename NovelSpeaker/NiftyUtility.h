@@ -49,4 +49,9 @@
 /// 通知を表示させます
 + (void)InvokeNotificationNow:(NSString*)title message:(NSString*)message badgeNumber:(NSInteger)badgeNumber;
 
+/// NSString を zlib で圧縮して NSData にして返します
++ (NSData*)stringDeflate:(NSString*)string level:(int)level;
+/// NSString が圧縮された NSData を NSString に戻します
++ (NSString*)stringInflate:(NSData*)data;
+
 @end
