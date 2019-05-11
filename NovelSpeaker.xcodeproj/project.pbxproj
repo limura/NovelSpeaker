@@ -145,6 +145,9 @@
 		21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA31967FD390039A706 /* NarouDownloadQueue.m */; };
 		21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD3196831070039A706 /* DownloadStatusViewController.m */; };
 		21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD6196843280039A706 /* BookShelfTableViewController.m */; };
+		21C759FA2287123500956B73 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759F92287123500956B73 /* RealmModels.swift */; };
+		21C759FC2287127800956B73 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21C759FB2287127700956B73 /* CloudKit.framework */; };
+		21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */; };
 		21CA0FCB218DE6520059FACB /* DuplicateSoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */; };
 		21CAC8192125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */; };
 		21CAC81A2125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */; };
@@ -448,6 +451,9 @@
 		21C74FD3196831070039A706 /* DownloadStatusViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadStatusViewController.m; sourceTree = "<group>"; };
 		21C74FD5196843280039A706 /* BookShelfTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewController.h; sourceTree = "<group>"; };
 		21C74FD6196843280039A706 /* BookShelfTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewController.m; sourceTree = "<group>"; };
+		21C759F92287123500956B73 /* RealmModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModels.swift; sourceTree = "<group>"; };
+		21C759FB2287127700956B73 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
+		21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataToRealmTool.swift; sourceTree = "<group>"; };
 		21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSoundPlayer.swift; sourceTree = "<group>"; };
 		21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-monochrome-64x64-reverse.png"; sourceTree = "<group>"; };
 		21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-monochrome-320x320-reverse.png"; sourceTree = "<group>"; };
@@ -548,6 +554,7 @@
 				2126A26D1D9D1B92008E534A /* libxml2.2.tbd in Frameworks */,
 				21890CF51D9309F000869046 /* libz.tbd in Frameworks */,
 				217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */,
+				21C759FC2287127800956B73 /* CloudKit.framework in Frameworks */,
 				21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */,
 				21B539F819603737009658B7 /* CoreData.framework in Frameworks */,
 				21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */,
@@ -591,6 +598,8 @@
 		21260E902261D02B002DD7AE /* Realm */ = {
 			isa = PBXGroup;
 			children = (
+				21C759F92287123500956B73 /* RealmModels.swift */,
+				21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */,
 			);
 			path = Realm;
 			sourceTree = "<group>";
@@ -833,6 +842,7 @@
 		21F054CB1917E0F200CC6BA9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				21C759FB2287127700956B73 /* CloudKit.framework */,
 				21429D85209F45FD001426F5 /* AudioToolbox.framework */,
 				216741A82047714D008A578D /* PDFKit.framework */,
 				215B4DE91FB928A900602DB6 /* WebKit.framework */,
@@ -1068,6 +1078,12 @@
 								enabled = 0;
 							};
 							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 1;
+							};
+							com.apple.iCloud = {
 								enabled = 1;
 							};
 						};
@@ -1363,8 +1379,10 @@
 				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
 				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
 				2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */,
+				21C759FA2287123500956B73 /* RealmModels.swift in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
+				21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */,
 				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
@@ -1727,6 +1745,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
@@ -1761,6 +1780,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
