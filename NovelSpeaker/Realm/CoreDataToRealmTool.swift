@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 
 class CoreDataToRealmTool: NSObject {
-    static func CheckIsLocalRealmCreated() -> Bool {
+    @objc static func CheckIsLocalRealmCreated() -> Bool {
         let filePath = RealmUtil.GetLocalRealmFilePath()
         if let path = filePath?.path {
             return FileManager.default.fileExists(atPath: path)
@@ -19,7 +19,7 @@ class CoreDataToRealmTool: NSObject {
     }
 
     // realm.write {} の中で呼んでください
-    static func CreateRealmGlobalStateFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
+    private static func CreateRealmGlobalStateFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
 
         let realmState = RealmGlobalState()
         let defaultSpeechOverrideSetting = RealmSpeechOverrideSetting()
@@ -28,8 +28,12 @@ class CoreDataToRealmTool: NSObject {
         
         let globalState = globalDataSingleton.getGlobalState()
 
-        realmState.maxSpeechTimeInSec = globalState?.maxSpeechTimeInSec as! Int
-        realmState.isSpeechWaitSettingUseExperimentalWait = globalState?.speechWaitSettingUseExperimentalWait as! Bool
+        if let maxSpeechTimeInSec = globalState?.maxSpeechTimeInSec as? Int {
+            realmState.maxSpeechTimeInSec = maxSpeechTimeInSec
+        }
+        if let isSpeechWaitSettingUseExperimentalWait = globalState?.speechWaitSettingUseExperimentalWait as? Bool {
+            realmState.isSpeechWaitSettingUseExperimentalWait = isSpeechWaitSettingUseExperimentalWait
+        }
         if let bookmarkArray = globalDataSingleton.getWebImportBookmarks() {
             for bookmark in bookmarkArray {
                 if let bookmark = bookmark as? String {
@@ -50,22 +54,32 @@ class CoreDataToRealmTool: NSObject {
         realmState.isForceSiteInfoReloadIsEnabled = globalDataSingleton.getForceSiteInfoReloadIsEnabled()
         realmState.isMenuItemIsAddSpeechModSettingOnly = globalDataSingleton.getMenuItemIsAddSpeechModSettingOnly()
         realmState.isBackgroundNovelFetchEnabled = globalDataSingleton.getBackgroundNovelFetchEnabled()
-        realmState.bookSelfSortType = Int32(globalDataSingleton.getBookSelfSortType().rawValue)
+        realmState.bookShelfSortType = globalDataSingleton.getBookSelfSortType()
 
         defaultDisplaySetting.name = ""
-        defaultDisplaySetting.textSizeValue = globalState?.textSizeValue as! Float
-        defaultDisplaySetting.fontID = globalDataSingleton.getDisplayFontName()
+        if let textSizeValue = globalState?.textSizeValue as? Float {
+            defaultDisplaySetting.textSizeValue = textSizeValue
+        }
+        if let fontID = globalDataSingleton.getDisplayFontName() {
+            defaultDisplaySetting.fontID = fontID
+        }
         defaultDisplaySetting.isVertical = false
         
         defaultSpeaker.name = ""
-        defaultSpeaker.pitch = globalState?.defaultPitch as! Float
-        defaultSpeaker.rate = globalState?.defaultRate as! Float
-        defaultSpeaker.voiceIdentifier = globalDataSingleton.getVoiceIdentifier()
+        if let pitch = globalState?.defaultPitch as? Float {
+            defaultSpeaker.pitch = pitch
+        }
+        if let rate = globalState?.defaultRate as? Float {
+            defaultSpeaker.rate = rate
+        }
+        if let voiceIdentifier = globalDataSingleton.getVoiceIdentifier() {
+            defaultSpeaker.voiceIdentifier = voiceIdentifier
+        }
         defaultSpeaker.type = "AVSpeechThinsesizer"
         defaultSpeaker.locale = "ja-JP"
         
         defaultSpeechOverrideSetting.name = ""
-        defaultSpeechOverrideSetting.repeatSpeechType = Int32(globalDataSingleton.getRepeatSpeechType().rawValue)
+        defaultSpeechOverrideSetting.repeatSpeechType = globalDataSingleton.getRepeatSpeechType()
         defaultSpeechOverrideSetting.isPageTurningSoundEnabled = globalDataSingleton.isPageTurningSoundEnabled()
         defaultSpeechOverrideSetting.isOverrideRubyIsEnabled = globalDataSingleton.getOverrideRubyIsEnabled()
         defaultSpeechOverrideSetting.notRubyCharactorStringArray = globalDataSingleton.getNotRubyCharactorStringArray()
@@ -78,7 +92,7 @@ class CoreDataToRealmTool: NSObject {
         realm.add([defaultSpeechOverrideSetting, defaultSpeaker, defaultDisplaySetting, realmState])
     }
     
-    static func CreateRealmSpeakerSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
+    private static func CreateRealmSpeakerSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
 
         let globalState = globalDataSingleton.getGlobalState()
         if let pitchConfigArray = globalDataSingleton.getAllSpeakPitchConfig() {
@@ -87,17 +101,29 @@ class CoreDataToRealmTool: NSObject {
                     let speaker = RealmSpeakerSetting()
 
                     speaker.name = pitchConfig.title
-                    speaker.pitch = pitchConfig.pitch as! Float
-                    speaker.rate = globalState?.defaultRate as! Float
-                    speaker.voiceIdentifier = globalDataSingleton.getVoiceIdentifier()
+                    if let pitch = pitchConfig.pitch as? Float {
+                        speaker.pitch = pitch
+                    }
+                    if let rate = globalState?.defaultRate as? Float {
+                        speaker.rate = rate
+                    }
+                    if let voiceIdentifier = globalDataSingleton.getVoiceIdentifier() {
+                        speaker.voiceIdentifier = voiceIdentifier
+                    }
                     speaker.type = "AVSpeechThinsesizer"
                     speaker.locale = "ja-JP"
                     
                     let section = RealmSpeechSectionConfig()
                     section.speakerID = speaker.id
-                    section.name = pitchConfig.title
-                    section.startText = pitchConfig.startText
-                    section.endText = pitchConfig.endText
+                    if let name = pitchConfig.title {
+                        section.name = name
+                    }
+                    if let startText = pitchConfig.startText {
+                        section.startText = startText
+                    }
+                    if let endText = pitchConfig.endText {
+                        section.endText = endText
+                    }
 
                     realm.add([speaker, section])
                 }
@@ -105,7 +131,7 @@ class CoreDataToRealmTool: NSObject {
         }
     }
     
-    static func CreateRealmSpeechModSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
+    private static func CreateRealmSpeechModSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
         guard let speechModArray = globalDataSingleton.getAllSpeechModSettings() else {
             return
         }
@@ -113,15 +139,23 @@ class CoreDataToRealmTool: NSObject {
             if let speechMod = speechMod as? SpeechModSettingCacheData {
                 let mod = RealmSpeechModSetting()
 
-                mod.before = speechMod.beforeString
-                mod.after = speechMod.afterString
+                if let before = speechMod.beforeString {
+                    mod.before = before
+                }else{
+                    continue
+                }
+                if let after = speechMod.afterString {
+                    mod.after = after
+                }else{
+                    continue
+                }
 
                 realm.add(mod)
             }
         }
     }
     
-    static func CreateRealmSpeechWaitConfigFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
+    private static func CreateRealmSpeechWaitConfigFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
         guard let speechWaitArray = globalDataSingleton.getAllSpeechWaitConfig() else {
             return
         }
@@ -129,15 +163,27 @@ class CoreDataToRealmTool: NSObject {
             if let speechWait = speechWait as? SpeechWaitConfigCacheData {
                 let wait = RealmSpeechWaitConfig()
                 
-                wait.delayTimeInSec = speechWait.delayTimeInSec as! Float
-                wait.targetText = speechWait.targetText
+                if let delayTimeInSec = speechWait.delayTimeInSec as? Float {
+                    wait.delayTimeInSec = delayTimeInSec
+                }
+                if let targetText = speechWait.targetText {
+                    wait.targetText = targetText
+                }
                 
                 realm.add(wait)
             }
         }
     }
     
-    static func CreateRealmStoryFromCoreDataWithNarouContent(realm: Realm,  globalDataSingleton:GlobalDataSingleton, content: NarouContentCacheData, novelID: String) {
+    private static func NcodeToUrlString(ncode:String, no:Int, end:Bool) -> String {
+        let lcaseNcode = ncode.lowercased()
+        if no == 1 && end == false {
+            return "https://ncode.syosetu.com/\(lcaseNcode)/"
+        }
+        return "https://ncode.syosetu.com/\(lcaseNcode)/\(no)/"
+    }
+    
+    private static func CreateRealmStoryFromCoreDataWithNarouContent(realm: Realm,  globalDataSingleton:GlobalDataSingleton, content: NarouContentCacheData, novelID: String) {
         guard let storyArray = globalDataSingleton.geAllStory(forNcode: content.ncode) else {
             return
         }
@@ -147,28 +193,36 @@ class CoreDataToRealmTool: NSObject {
             }
             let story = RealmStory()
             story.novelID = novelID
-            story.chapterNumber = storyCoreData.chapter_number as! Int
-            story.readLocation = storyCoreData.readLocation as! Int
+            if let chapterNumber = storyCoreData.chapter_number as? Int {
+                story.chapterNumber = chapterNumber
+            }
+            if let readLocation = storyCoreData.readLocation as? Int {
+                story.readLocation = readLocation
+            }
             story.content = storyCoreData.content
-            // TODO: url を生成する。小説家になろうの場合は単発のだと最後が /1/ にならないので注意
+            if let ncode = content.ncode, let end = content.end as? Bool {
+                story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
+            }
+            story.id = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: story.chapterNumber)
             
-            realm.add(story)
+            realm.add(story, update: true)
         }
     }
     
-    static func NarouContentToNovelID(content:NarouContentCacheData) -> String {
+    private static func NarouContentToNovelID(content:NarouContentCacheData) -> String {
         if content.isUserCreatedContent() {
-            return content.ncode
+            // 自作小説については ID を新しい形式に一新します
+            return RealmNovel.CreateUniqueID()
         }else if content.isURLContent() {
             return content.ncode
         }
         guard let ncode = content.ncode else {
             return ""
         }
-        return "https://ncode.syosetu.com/\(ncode)/"
+        return "https://ncode.syosetu.com/\(ncode.lowercased())/"
     }
     
-    static func CreateRealmNovelFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
+    private static func CreateRealmNovelFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
         guard let novelArray = globalDataSingleton.getAllNarouContent(.ncode) else {
             return
         }
@@ -179,13 +233,48 @@ class CoreDataToRealmTool: NSObject {
             let novel = RealmNovel()
             novel.novelID = NarouContentToNovelID(content: novelCoreData)
             CreateRealmStoryFromCoreDataWithNarouContent(realm: realm, globalDataSingleton: globalDataSingleton, content: novelCoreData, novelID: novel.novelID)
-            
-            // TODO: 入れてないものがいっぱいある
+            if novelCoreData.isURLContent() {
+                novel.url = NarouContentToNovelID(content: novelCoreData)
+                if let urlSecret = novelCoreData.keyword {
+                    novel.urlSecret = urlSecret
+                }
+                novel.type = NovelType.URL
+            }else if novelCoreData.isUserCreatedContent() {
+                novel.type = NovelType.UserCreated
+            }else{
+                novel.url = NarouContentToNovelID(content: novelCoreData)
+                novel.type = NovelType.URL
+            }
+            if let writer = novelCoreData.writer {
+                novel.writer = writer
+            }
+            if let title = novelCoreData.title {
+                novel.title = title
+            }
+
+            // 読んでいる章が設定されていたらその章の読んだ日時を新しくすることで最後に読んだ章をそこにする
+            if let currentReadingChapter = novelCoreData.currentReadingStory?.chapter_number as? Int {
+                if let readingStory = novel.linkedStorys?.filter("chapterNumber = %@", currentReadingChapter).first {
+                    readingStory.lastReadDate = Date(timeIntervalSinceNow: 1)
+                    realm.add(readingStory, update: true)
+                }
+            }
+            // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
+            if let newFlug = novelCoreData.is_new_flug as? Bool {
+                if newFlug {
+                    if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
+                        lastStory.downloadDate = Date(timeIntervalSinceNow: 1.1)
+                        realm.add(lastStory, update: true)
+                    }
+                }
+            }
+
+            realm.add(novel, update: true)
         }
     }
     
     //
-    static func ClearLocalRealmDataAndConvertFromCoreaData() throws {
+    @objc public static func ClearLocalRealmDataAndConvertFromCoreaData() throws {
         RealmUtil.RemoveLocalRealmFile()
         guard let globalDataSingleton = GlobalDataSingleton.getInstance() else {
             return
@@ -196,6 +285,7 @@ class CoreDataToRealmTool: NSObject {
             CreateRealmSpeakerSettingFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton)
             CreateRealmSpeechModSettingFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton)
             CreateRealmSpeechWaitConfigFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton)
+            CreateRealmNovelFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton)
         }
     }
 }

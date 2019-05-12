@@ -10,7 +10,7 @@ import RealmSwift
 import IceCream
 import CloudKit
 
-class RealmUtil {
+@objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 0
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
@@ -38,7 +38,7 @@ class RealmUtil {
             return nil
         }
     }
-    static func RemoveLocalRealmFile() {
+    @objc static func RemoveLocalRealmFile() {
         if let path = GetLocalRealmFilePath() {
             let fileManager = FileManager.default
             do {
@@ -232,19 +232,19 @@ class RealmUtil {
 
 // MARK: Model
 @objc final class RealmStory : Object {
-    @objc dynamic var id = NSUUID().uuidString
-    @objc dynamic var isDeleted: Bool = false
+    @objc dynamic var id = "" // primary key は RealmStory.CreateUniqueID() で生成したものを使います。
+    @objc dynamic var novelID = ""
     @objc dynamic var chapterNumber = 0
+    @objc dynamic var isDeleted: Bool = false
     @objc dynamic var contentZiped = Data()
     @objc dynamic var readLocation = 0
     @objc dynamic var url = ""
-    @objc dynamic var downloadDate = Date()
     @objc dynamic var lastReadDate = Date()
+    @objc dynamic var downloadDate = Date()
     @objc dynamic var subtitle = ""
 
-    @objc dynamic var novelID = ""
     let downloadFailedLog = List<Date>()
-
+    
     var linkedQueues : [RealmSpeechQueue]? {
         get {
             return self.realm?.objects(RealmSpeechQueue.self).filter({ (speechQueue) -> Bool in
@@ -265,6 +265,12 @@ class RealmUtil {
             self.contentZiped = NiftyUtility.stringDeflate(value, level: 9)
         }
     }
+    static func CreateUniqueID(novelID:String, chapterNumber:Int) -> String {
+        return "\(chapterNumber):\(novelID)"
+    }
+    static func SearchStory(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStory? {
+        return realm.object(ofType: RealmStory.self, forPrimaryKey: CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber))
+    }
     
     override class func primaryKey() -> String? {
         return "id"
@@ -279,10 +285,15 @@ extension RealmStory: CKRecordConvertible {
 extension RealmStory: CKRecordRecoverable {
 }
 
+@objc enum NovelType: Int {
+    case URL = 1
+    case UserCreated = 2
+}
+
 @objc final class RealmNovel : Object {
     @objc dynamic var novelID : String = "" // novelID は primary key です。
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var type : Int32 = 0
+    @objc dynamic var _type : Int = NovelType.URL.rawValue
     @objc dynamic var writer : String = ""
     @objc dynamic var title : String = ""
     @objc dynamic var url : String = ""
@@ -290,6 +301,15 @@ extension RealmStory: CKRecordRecoverable {
     @objc dynamic var createDate : Date = Date()
     @objc dynamic var likeLevel : Int8 = 0
     @objc dynamic var isNeedSpeechAfterDelete : Bool = false
+    
+    var type : NovelType {
+        get {
+            return NovelType(rawValue: self._type) ?? NovelType.UserCreated
+        }
+        set {
+            self._type = newValue.rawValue
+        }
+    }
     
     // 1対多や1対1といったリレーションシップがあると、IceCream と相性が悪いというか
     // 一つのobjectの書き換えがリレーションがついたobject全ての書き換えイベントになってしまって
@@ -370,6 +390,9 @@ extension RealmStory: CKRecordRecoverable {
             }
             return false
         }
+    }
+    public static func CreateUniqueID() -> String {
+        return "https://example.com/\(NSUUID().uuidString)"
     }
     
     override class func primaryKey() -> String? {
@@ -548,11 +571,20 @@ extension RealmSpeechQueue: CKRecordRecoverable {
     @objc dynamic var isForceSiteInfoReloadIsEnabled = false
     @objc dynamic var isMenuItemIsAddSpeechModSettingOnly = false
     @objc dynamic var isBackgroundNovelFetchEnabled = false
-    @objc dynamic var bookSelfSortType : Int32 = 0
+    @objc dynamic var _bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
     
     @objc dynamic var defaultDisplaySettingID = ""
     @objc dynamic var defaultSpeakerID = ""
     @objc dynamic var defaultSpeechOverrideSettingID = ""
+    
+    var bookShelfSortType : NarouContentSortType {
+        get {
+            return NarouContentSortType(rawValue: UInt(_bookSelfSortType)) ?? NarouContentSortType.ncode
+        }
+        set {
+            _bookSelfSortType = Int(newValue.rawValue)
+        }
+    }
     
     var defaultDisplaySetting : RealmDisplaySetting? {
         get {
@@ -645,13 +677,22 @@ extension RealmNovelTag: CKRecordRecoverable {
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var name = ""
     @objc dynamic var createdDate = Date()
-    @objc dynamic var repeatSpeechType : Int32 = 1
+    @objc dynamic var _repeatSpeechType : Int = Int(RepeatSpeechType.noRepeat.rawValue)
     @objc dynamic var isPageTurningSoundEnabled = false
     @objc dynamic var isOverrideRubyIsEnabled = false
     @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
     @objc dynamic var isIgnoreURIStringSpeechEnabled = false
 
     let targetNovelIDArray = List<String>()
+    
+    var repeatSpeechType : RepeatSpeechType {
+        get {
+            return RepeatSpeechType(rawValue: UInt(_repeatSpeechType)) ?? RepeatSpeechType.noRepeat
+        }
+        set {
+            _repeatSpeechType = Int(newValue.rawValue)
+        }
+    }
     
     var targetNovelArray : [RealmNovel]? {
         get {

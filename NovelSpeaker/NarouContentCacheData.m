@@ -141,12 +141,15 @@
     if (self.ncode == nil) {
         return false;
     }
-    return [self.ncode hasPrefix:@"_u"] || [self isURLContent];
+    return [self.ncode hasPrefix:@"_u"] || [self isURLContent] || [self.ncode hasPrefix:@"https://example.com"];
 }
 
 /// URLで指定されるコンテンツか否かを取得します
 - (BOOL)isURLContent {
     if (self.ncode == nil) {
+        return false;
+    }
+    if([self.ncode hasPrefix:@"https://example.com"]){
         return false;
     }
     if([self.ncode hasPrefix:@"http://"] || [self.ncode hasPrefix:@"https://"]){

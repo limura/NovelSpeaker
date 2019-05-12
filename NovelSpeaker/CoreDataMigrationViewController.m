@@ -27,21 +27,40 @@
     return self;
 }
 
+- (void)goToMainStoryboard {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // 通常の main storyboard に移行します。
+        UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        UIViewController* firstViewController = [storyboard instantiateInitialViewController];
+        [self presentViewController:firstViewController animated:YES completion:NULL];
+    });
+}
+
+- (void)doRealmMigration {
+    dispatch_queue_t queue =
+    dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+    dispatch_async(queue, ^{
+        if ([CoreDataToRealmTool CheckIsLocalRealmCreated] == false) {
+            [CoreDataToRealmTool ClearLocalRealmDataAndConvertFromCoreaDataAndReturnError:nil];
+        }
+        [self goToMainStoryboard];
+    });
+}
+
 - (void)doCoreDataMigration
 {
     dispatch_queue_t queue =
     dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    
+
     dispatch_async(queue, ^{
         GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
         [globalData doCoreDataMigration];
         [globalData InsertDefaultSetting];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            // 通常の main storyboard に移行します。
-            UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-            UIViewController* firstViewController = [storyboard instantiateInitialViewController];
-            [self presentViewController:firstViewController animated:YES completion:NULL];
-        });
+        if ([CoreDataToRealmTool CheckIsLocalRealmCreated] == false) {
+            [CoreDataToRealmTool ClearLocalRealmDataAndConvertFromCoreaDataAndReturnError:nil];
+        }
+        [self goToMainStoryboard];
     });
 }
 
@@ -54,7 +73,14 @@
     [self.navigationItem setHidesBackButton:YES];
     
     // core data のマイグレーションを行う
-    [self doCoreDataMigration];
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    if ([globalData isRequiredCoreDataMigration]) {
+        [self doCoreDataMigration];
+    }else if ([CoreDataToRealmTool CheckIsLocalRealmCreated] == false){
+        [self doRealmMigration];
+    }else{
+        [self goToMainStoryboard];
+    }
 }
 
 - (void)didReceiveMemoryWarning
