@@ -228,6 +228,26 @@ import CloudKit
     static func CloudPush() {
         syncEngine?.pushAll()
     }
+
+    static let UseCloudRealmKey = "RealmUtil_UseCloudRealm"
+    static func IsUseCloudRealm() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [UseCloudRealmKey: false])
+        return defaults.bool(forKey: UseCloudRealmKey)
+    }
+    static func SetIsUseCloudRealm(isUse:Bool) {
+        let defaults = UserDefaults.standard
+        defaults.set(isUse, forKey: UseCloudRealmKey)
+    }
+    static func GetRealm() throws -> Realm {
+        if IsUseCloudRealm() {
+            if syncEngine == nil {
+                try EnableSyncEngine()
+            }
+            return try GetCloudRealm()
+        }
+        return try GetLocalRealm()
+    }
 }
 
 // MARK: Model
@@ -461,16 +481,16 @@ extension RealmSpeechWaitConfig: CKRecordRecoverable {
 @objc final class RealmSpeakerSetting : Object {
     @objc dynamic var id = NSUUID().uuidString
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var name = ""
+    @objc dynamic var name = "新規話者設定"
     @objc dynamic var pitch : Float = 1.0
     @objc dynamic var rate : Float = 1.0
     @objc dynamic var lmd : Float = 1.0
     @objc dynamic var acc : Float = 1.0
     @objc dynamic var base : Int32 = 1
     @objc dynamic var volume : Float = 1.0
-    @objc dynamic var type : String = ""
-    @objc dynamic var voiceIdentifier : String = ""
-    @objc dynamic var locale : String = ""
+    @objc dynamic var type : String = "AVSpeechSynthesizer"
+    @objc dynamic var voiceIdentifier : String = "com.apple.ttsbundle.siri_female_ja-JP_premium"
+    @objc dynamic var locale : String = "ja-JP"
     @objc dynamic var createdDate = Date()
     
     override class func primaryKey() -> String? {
@@ -553,7 +573,8 @@ extension RealmSpeechQueue: CKRecordRecoverable {
 }
 
 @objc final class RealmGlobalState: Object {
-    @objc dynamic var id = "only one object"
+    static public let UniqueID = "only one object"
+    @objc dynamic var id = UniqueID
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var maxSpeechTimeInSec = 60*60*24-60
     @objc dynamic var isSpeechWaitSettingUseExperimentalWait = false

@@ -292,6 +292,18 @@
 
 "FontSelectViewController_DefaultFontTitle" = "DefaultFont";
 
+"SpeakSettingsViewController_SpeakSettingNameTitle" = "Name";
+"SpeakSettingsViewController_PitchTitle" = "Pitch";
+"SpeakSettingsViewController_RateTitle" = "Rate";
+"SpeakSettingsViewController_LangageTitle" = "Language";
+"SpeakSettingsViewController_LanguageDialogTitle" = "Select languate";
+"SpeakSettingsViewController_VoiceIdentifierTitle" = "Speaker";
+"SpeakSettingsViewController_VoiceIdentifierDialogTitle" = "Select Speaker\nSpeakers can also be increased by downloading from Settings app → General → Accessibility → Speech → Voice → [AnyLanguage]";
+"SpeakSettingsViewController_TestSpeechButtonTitle" = "Test Speech";
+"SpeakerSettingsViewController_RemoveButtonRow" = "Remove this speaker setting";
+"SpeakSettingsViewController_ConifirmRemoveTitle" = "Are you sure you want to delete this speaker's settings?";
+"SpeakSettingsViewController_AddNewSettingButtonTitle" = "Add new speaker settings";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";
