@@ -288,17 +288,21 @@
 
 "FontSelectViewController_DefaultFontTitle" = "標準フォント";
 
+"CoreDataToRealmTool_DefaultSpeaker" = "標準";
+
 "SpeakSettingsViewController_SpeakSettingNameTitle" = "名前";
 "SpeakSettingsViewController_PitchTitle" = "高さ";
 "SpeakSettingsViewController_RateTitle" = "速度";
 "SpeakSettingsViewController_LangageTitle" = "言語";
 "SpeakSettingsViewController_LanguageDialogTitle" = "言語を選択してください";
 "SpeakSettingsViewController_VoiceIdentifierTitle" = "話者";
-"SpeakSettingsViewController_VoiceIdentifierDialogTitle" = "話者を選択してください\n話者は 設定アプリ → 一般 → アクセシビリティ → スピーチ → 声 → 日本語 等からダウンロードすることで増やすこともできます";
+"SpeakSettingsViewController_VoiceIdentifierDialogTitle" = "話者を選択してください\n\n話者は 設定アプリ → 一般 → アクセシビリティ → スピーチ → 声 → 日本語 等からダウンロードすることで増やすこともできます";
 "SpeakSettingsViewController_TestSpeechButtonTitle" = "発音テスト";
 "SpeakerSettingsViewController_RemoveButtonRow" = "この話者の設定を削除";
 "SpeakSettingsViewController_ConifirmRemoveTitle" = "この設定を削除しますか？";
 "SpeakSettingsViewController_AddNewSettingButtonTitle" = "新しく話者設定を追加する";
+"SpeakSettingsViewController_SpeakerSettingAdded" = "末尾に話者設定を追加しました。\n(恐らくはスクロールする必要があります)";
+"SpeakSettingsViewController_SyncRateSetting" = "速度設定を同期する";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

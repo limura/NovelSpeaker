@@ -292,17 +292,21 @@
 
 "FontSelectViewController_DefaultFontTitle" = "DefaultFont";
 
+"CoreDataToRealmTool_DefaultSpeaker" = "Default";
+
 "SpeakSettingsViewController_SpeakSettingNameTitle" = "Name";
 "SpeakSettingsViewController_PitchTitle" = "Pitch";
 "SpeakSettingsViewController_RateTitle" = "Rate";
 "SpeakSettingsViewController_LangageTitle" = "Language";
 "SpeakSettingsViewController_LanguageDialogTitle" = "Select languate";
 "SpeakSettingsViewController_VoiceIdentifierTitle" = "Speaker";
-"SpeakSettingsViewController_VoiceIdentifierDialogTitle" = "Select Speaker\nSpeakers can also be increased by downloading from Settings app → General → Accessibility → Speech → Voice → [AnyLanguage]";
+"SpeakSettingsViewController_VoiceIdentifierDialogTitle" = "Select Speaker\n\nSpeakers can also be increased by downloading from Settings app → General → Accessibility → Speech → Voice → [AnyLanguage]";
 "SpeakSettingsViewController_TestSpeechButtonTitle" = "Test Speech";
 "SpeakerSettingsViewController_RemoveButtonRow" = "Remove this speaker setting";
 "SpeakSettingsViewController_ConifirmRemoveTitle" = "Are you sure you want to delete this speaker's settings?";
 "SpeakSettingsViewController_AddNewSettingButtonTitle" = "Add new speaker settings";
+"SpeakSettingsViewController_SpeakerSettingAdded" = "Added speaker settings at the end.\n(Possibly need to scroll)";
+"SpeakSettingsViewController_SyncRateSetting" = "Synchronize rate settings";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

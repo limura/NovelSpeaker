@@ -65,7 +65,7 @@ class CoreDataToRealmTool: NSObject {
         }
         defaultDisplaySetting.isVertical = false
         
-        defaultSpeaker.name = ""
+        defaultSpeaker.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
         if let pitch = globalState?.defaultPitch as? Float {
             defaultSpeaker.pitch = pitch
         }

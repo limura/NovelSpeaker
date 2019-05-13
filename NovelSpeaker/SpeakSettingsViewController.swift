@@ -12,7 +12,7 @@ import Eureka
 class SpeakSettingsViewController: FormViewController {
     let speaker = Speaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
-    
+    var isRateSettingSync = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,14 +30,36 @@ class SpeakSettingsViewController: FormViewController {
         speaker.speech(text)
     }
     
+    // TODO:
+    // 言語設定を選択すると The Realm is already in a write transaction と言われる。
+    //
+    
     func createSpeakSettingRows(currentSetting:RealmSpeakerSetting) -> Section {
         let targetID = currentSetting.id
+        let realm = try! RealmUtil.GetRealm()
+        var isDefaultSpeakerSetting = false
+        if let globalState = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID) {
+            if let defaultSpeakerSetting = globalState.defaultSpeaker {
+                if defaultSpeakerSetting.id == targetID {
+                    isDefaultSpeakerSetting = true
+                }
+            }
+        }
+
         let section = Section()
         <<< TextRow("TitleRow-\(targetID)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_SpeakSettingNameTitle", comment: "名前")
             $0.value = currentSetting.name
+            if isDefaultSpeakerSetting {
+                $0.cell.textField.isUserInteractionEnabled = false
+            }else{
+                $0.cell.textField.borderStyle = .roundedRect
+            }
         }.onChange({ (row) in
             if let value = row.value {
+                if value.count <= 0 {
+                    return
+                }
                 let realm = try! RealmUtil.GetRealm()
                 if let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
                     try! realm.write {
@@ -50,6 +72,8 @@ class SpeakSettingsViewController: FormViewController {
             $0.value = currentSetting.pitch
             $0.cell.slider.minimumValue = 0.5
             $0.cell.slider.maximumValue = 2.0
+            $0.shouldHideValue = true
+            $0.steps = 2501
             $0.title = NSLocalizedString("SpeakSettingsViewController_PitchTitle", comment: "高さ")
         }.onChange({ (row) in
             if let value = row.value {
@@ -65,13 +89,43 @@ class SpeakSettingsViewController: FormViewController {
             $0.value = currentSetting.rate
             $0.cell.slider.minimumValue = AVSpeechUtteranceMinimumSpeechRate
             $0.cell.slider.maximumValue = AVSpeechUtteranceMaximumSpeechRate
+            $0.shouldHideValue = true
+            $0.steps = 1001
             $0.title = NSLocalizedString("SpeakSettingsViewController_RateTitle", comment: "速度")
         }.onChange({ (row) in
-            if let value = row.value {
-                let realm = try! RealmUtil.GetRealm()
+            guard let rate = row.value else{
+                return
+            }
+            let realm = try! RealmUtil.GetRealm()
+            if self.isRateSettingSync {
+                for row in self.form.rows.filter({ (row) -> Bool in
+                    guard let row = row as? SliderRow else {
+                        return false
+                    }
+                    guard let tag = row.tag else {
+                        return false
+                    }
+                    return tag.hasPrefix("RateSliderRow-")
+                }) {
+                    guard let targetRow = row as? SliderRow else {
+                        continue
+                    }
+                    guard let targetTag = targetRow.tag else {
+                        continue
+                    }
+                    let targetID = String(targetTag.suffix(targetTag.count - 14))
+                    targetRow.value = rate
+                    targetRow.updateCell()
+                    if let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
+                        try! realm.write {
+                            setting.rate = rate
+                        }
+                    }
+                }
+            }else{
                 if let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
                     try! realm.write {
-                        setting.pitch = value
+                        setting.rate = rate
                     }
                 }
             }
@@ -80,7 +134,7 @@ class SpeakSettingsViewController: FormViewController {
             $0.title = NSLocalizedString("SpeakSettingsViewController_LangageTitle", comment: "言語")
             $0.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
             $0.selectorTitle = NSLocalizedString("SpeakSettingsViewController_LanguageDialogTitle", comment: "言語を選択してください")
-            let languageCodeArray = AVSpeechSynthesisVoice.speechVoices().map({ $0.language })
+            let languageCodeArray = Array(Set(AVSpeechSynthesisVoice.speechVoices().map({ $0.language }))).sorted()
             $0.options = languageCodeArray
             if languageCodeArray.contains(currentSetting.locale) {
                 $0.value = currentSetting.locale
@@ -97,31 +151,35 @@ class SpeakSettingsViewController: FormViewController {
             guard let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
                 return
             }
+            var voiceNames:[String] = []
+            var voiceName = ""
             try! realm.write {
-                if let voiceIdentifierRow = self.form.rowBy(tag: "VoiceIdentifierAlertRow-\(targetID)") as? AlertRow<String> {
-                    let voices = AVSpeechSynthesisVoice.speechVoices().filter({$0.language == locale})
-                    let voiceNames = voices.map({$0.name})
-                    voiceIdentifierRow.options = voiceNames
-                    voiceIdentifierRow.value = voiceNames.first ?? ""
-                    if let newVoice = voices.filter({$0.name == voiceIdentifierRow.value}).first {
-                        setting.voiceIdentifier = newVoice.identifier
-                    }
+                let voices = AVSpeechSynthesisVoice.speechVoices().filter({$0.language == locale})
+                voiceNames = voices.map({$0.name})
+                voiceName = voiceNames.first ?? ""
+                if let newVoice = voices.filter({$0.name == voiceName}).first {
+                    setting.voiceIdentifier = newVoice.identifier
                 }
                 setting.locale = locale
+            }
+            if let voiceIdentifierRow = self.form.rowBy(tag: "VoiceIdentifierAlertRow-\(targetID)") as? AlertRow<String> {
+                voiceIdentifierRow.options = voiceNames
+                voiceIdentifierRow.value = voiceName
+                voiceIdentifierRow.updateCell()
             }
         })
         <<< AlertRow<String>("VoiceIdentifierAlertRow-\(targetID)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_VoiceIdentifierTitle", comment: "話者")
             $0.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
             $0.selectorTitle = NSLocalizedString("SpeakSettingsViewController_VoiceIdentifierDialogTitle", comment: "話者を選択してください")
-            let voiceIdentifierArray = AVSpeechSynthesisVoice.speechVoices().filter({ $0.language == currentSetting.locale }).map({$0.identifier})
-            $0.options = voiceIdentifierArray
+            let voiceNameArray = AVSpeechSynthesisVoice.speechVoices().filter({ $0.language == currentSetting.locale }).map({$0.name}).sorted()
+            $0.options = voiceNameArray
             let voice = AVSpeechSynthesisVoice(identifier: currentSetting.voiceIdentifier)
             let voiceName = voice?.name ?? ""
-            if voiceIdentifierArray.contains(voiceName) {
+            if voiceNameArray.contains(voiceName) {
                 $0.value = voiceName
             }else{
-                $0.value = voiceIdentifierArray.first ?? ""
+                $0.value = voiceNameArray.first ?? ""
             }
         }.onChange({ (row) in
             guard let voiceName = row.value else {
@@ -147,32 +205,37 @@ class SpeakSettingsViewController: FormViewController {
             }
             self.testSpeech(pitch: setting.pitch, rate: setting.rate, identifier: setting.voiceIdentifier, text: self.testText)
         })
-        let realm = try! RealmUtil.GetRealm()
-        if let defaultSettingID = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID)?.defaultSpeakerID {
-            if targetID != defaultSettingID {
-                section <<< ButtonRow("RemoveButtonRow-\(targetID)") {
-                    $0.title = NSLocalizedString("SpeakerSettingsViewController_RemoveButtonRow", comment: "この話者の設定を削除")
-                }.onCellSelection({ (buttonCellOf, button) in
-                    NiftyUtilitySwift.EasyDialogTwoButton(
-                    viewController: self,
-                    title: NSLocalizedString("SpeakSettingsViewController_ConifirmRemoveTitle", comment: "この設定を削除しますか？"),
-                    message: nil,
-                    button1Title: NSLocalizedString("Cancel_button", comment: "Cancel"),
-                    button1Action: nil,
-                    button2Title: NSLocalizedString("OK_button", comment: "OK"),
-                    button2Action: {
-                        guard let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
-                            return
-                        }
-                        try! realm.write {
-                            setting.isDeleted = true
-                        }
-                        if let index = self.form.index(of: section) {
-                            self.form.remove(at: index)
-                        }
-                    })
+        if !isDefaultSpeakerSetting {
+            section <<< ButtonRow("RemoveButtonRow-\(targetID)") {
+                $0.title = NSLocalizedString("SpeakerSettingsViewController_RemoveButtonRow", comment: "この話者の設定を削除")
+            }.onCellSelection({ (buttonCellOf, button) in
+                var settingName = ""
+                let realm = try! RealmUtil.GetRealm()
+                if let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
+                    settingName = setting.name
+                }
+                NiftyUtilitySwift.EasyDialogTwoButton(
+                viewController: self,
+                title: settingName,
+                message: NSLocalizedString("SpeakSettingsViewController_ConifirmRemoveTitle", comment: "この設定を削除しますか？"),
+                button1Title: NSLocalizedString("Cancel_button", comment: "Cancel"),
+                button1Action: nil,
+                button2Title: NSLocalizedString("OK_button", comment: "OK"),
+                button2Action: {
+                    guard let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
+                        return
+                    }
+                    try! realm.write {
+                        RealmUtil.Delete(realm: realm, model: setting)
+                    }
+                    if let index = self.form.index(of: section) {
+                        print("remove section index: \(index)")
+                        self.form.remove(at: index)
+                    }else{
+                        print("can not remove section because index is nil")
+                    }
                 })
-            }
+            })
         }
 
         return section
@@ -183,6 +246,9 @@ class SpeakSettingsViewController: FormViewController {
         <<< TextAreaRow() {
             $0.placeholder = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
             $0.value = testText
+            $0.cell.textView.layer.borderWidth = 0.2
+            $0.cell.textView.layer.cornerRadius = 10.0
+            $0.cell.textView.layer.masksToBounds = true
         }.onChange({ (row) in
             if let value = row.value {
                 self.testText = value
@@ -196,18 +262,33 @@ class SpeakSettingsViewController: FormViewController {
             try! realm.write {
                 realm.add(newSpeakerSetting)
             }
-            self.form +++ self.createSpeakSettingRows(currentSetting: newSpeakerSetting)
+            self.form.append(self.createSpeakSettingRows(currentSetting: newSpeakerSetting))
+            NiftyUtilitySwift.EasyDialogOneButton(
+                viewController: self,
+                title: NSLocalizedString("SpeakSettingsViewController_SpeakerSettingAdded", comment: "末尾に話者設定を追加しました。\n(恐らくはスクロールする必要があります)"),
+                message: nil,
+                buttonTitle: NSLocalizedString("OK_button", comment: "OK"),
+                buttonAction:nil)
+        })
+        <<< SwitchRow() {
+            $0.title = NSLocalizedString("SpeakSettingsViewController_SyncRateSetting", comment: "速度設定を同期する")
+            $0.value = self.isRateSettingSync
+        }.onChange({ (row) in
+            guard let value = row.value else {
+                return
+            }
+            self.isRateSettingSync = value
         })
         
         let realm = try! RealmUtil.GetRealm()
         let globalState = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID)
         if let defaultSpeaker = globalState?.defaultSpeaker {
             sections = sections +++ createSpeakSettingRows(currentSetting: defaultSpeaker)
-            for speakerSetting in realm.objects(RealmSpeakerSetting.self).filter("id != %@", defaultSpeaker.id) {
+            for speakerSetting in realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id != %@", defaultSpeaker.id) {
                 sections = sections +++ createSpeakSettingRows(currentSetting: speakerSetting)
             }
         }else{
-            for speakerSetting in realm.objects(RealmSpeakerSetting.self) {
+            for speakerSetting in realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false") {
                 sections = sections +++ createSpeakSettingRows(currentSetting: speakerSetting)
             }
         }

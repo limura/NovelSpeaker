@@ -248,6 +248,19 @@ import CloudKit
         }
         return try GetLocalRealm()
     }
+    
+    static func Delete(realm:Realm, model:Object) {
+        if var model = model as? CanWriteIsDeleted {
+            model.isDeleted = true
+        }
+        if !IsUseCloudRealm() {
+            realm.delete(model)
+        }
+    }
+}
+
+protocol CanWriteIsDeleted {
+    var isDeleted: Bool { get set }
 }
 
 // MARK: Model
@@ -303,6 +316,8 @@ import CloudKit
 extension RealmStory: CKRecordConvertible {
 }
 extension RealmStory: CKRecordRecoverable {
+}
+extension RealmStory: CanWriteIsDeleted {
 }
 
 @objc enum NovelType: Int {
@@ -427,6 +442,8 @@ extension RealmNovel: CKRecordConvertible {
 }
 extension RealmNovel: CKRecordRecoverable {
 }
+extension RealmNovel: CanWriteIsDeleted {
+}
 
 @objc final class RealmSpeechModSetting : Object {
     @objc dynamic var id = NSUUID().uuidString
@@ -457,6 +474,8 @@ extension RealmSpeechModSetting: CKRecordConvertible {
 }
 extension RealmSpeechModSetting: CKRecordRecoverable {
 }
+extension RealmSpeechModSetting: CanWriteIsDeleted {
+}
 
 @objc final class RealmSpeechWaitConfig : Object {
     @objc dynamic var id = NSUUID().uuidString
@@ -477,13 +496,15 @@ extension RealmSpeechWaitConfig: CKRecordConvertible {
 }
 extension RealmSpeechWaitConfig: CKRecordRecoverable {
 }
+extension RealmSpeechWaitConfig: CanWriteIsDeleted {
+}
 
 @objc final class RealmSpeakerSetting : Object {
     @objc dynamic var id = NSUUID().uuidString
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var name = "新規話者設定"
     @objc dynamic var pitch : Float = 1.0
-    @objc dynamic var rate : Float = 1.0
+    @objc dynamic var rate : Float = 0.5
     @objc dynamic var lmd : Float = 1.0
     @objc dynamic var acc : Float = 1.0
     @objc dynamic var base : Int32 = 1
@@ -504,6 +525,8 @@ extension RealmSpeechWaitConfig: CKRecordRecoverable {
 extension RealmSpeakerSetting: CKRecordConvertible {
 }
 extension RealmSpeakerSetting: CKRecordRecoverable {
+}
+extension RealmSpeakerSetting: CanWriteIsDeleted {
 }
 
 @objc final class RealmSpeechSectionConfig : Object {
@@ -542,6 +565,8 @@ extension RealmSpeechSectionConfig: CKRecordConvertible {
 }
 extension RealmSpeechSectionConfig: CKRecordRecoverable {
 }
+extension RealmSpeechSectionConfig: CanWriteIsDeleted {
+}
 
 @objc final class RealmSpeechQueue: Object {
     @objc dynamic var id = NSUUID().uuidString
@@ -570,6 +595,8 @@ extension RealmSpeechSectionConfig: CKRecordRecoverable {
 extension RealmSpeechQueue: CKRecordConvertible {
 }
 extension RealmSpeechQueue: CKRecordRecoverable {
+}
+extension RealmSpeechQueue: CanWriteIsDeleted {
 }
 
 @objc final class RealmGlobalState: Object {
@@ -631,6 +658,8 @@ extension RealmGlobalState: CKRecordConvertible {
 }
 extension RealmGlobalState: CKRecordRecoverable {
 }
+extension RealmGlobalState: CanWriteIsDeleted {
+}
 
 @objc final class RealmDisplaySetting: Object {
     @objc dynamic var id = NSUUID().uuidString
@@ -662,6 +691,8 @@ extension RealmDisplaySetting:CKRecordConvertible{
 }
 extension RealmDisplaySetting:CKRecordRecoverable{
 }
+extension RealmDisplaySetting: CanWriteIsDeleted {
+}
 
 @objc final class RealmNovelTag: Object {
     @objc dynamic var id = NSUUID().uuidString
@@ -691,6 +722,8 @@ extension RealmDisplaySetting:CKRecordRecoverable{
 extension RealmNovelTag: CKRecordConvertible {
 }
 extension RealmNovelTag: CKRecordRecoverable {
+}
+extension RealmNovelTag: CanWriteIsDeleted {
 }
 
 @objc final class RealmSpeechOverrideSetting: Object {
@@ -734,5 +767,7 @@ extension RealmNovelTag: CKRecordRecoverable {
 extension RealmSpeechOverrideSetting: CKRecordConvertible {
 }
 extension RealmSpeechOverrideSetting: CKRecordRecoverable {
+}
+extension RealmSpeechOverrideSetting: CanWriteIsDeleted {
 }
 

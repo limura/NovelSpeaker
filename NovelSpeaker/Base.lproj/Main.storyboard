@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -142,6 +142,25 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="flI-io-R6f" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1512" y="832.0839580209896"/>
+        </scene>
+        <!--声質の設定-->
+        <scene sceneID="SLD-Tk-NVe">
+            <objects>
+                <viewController id="Adi-TS-14r" customClass="SpeakSettingsViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="GYs-vh-4DJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="hFb-Mz-3ty"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="KAp-OZ-an5">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="声質の設定" id="Cj6-Nj-GVp"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="32Q-AY-yqR" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1476" y="913"/>
         </scene>
         <!--声質設定範囲の作成-->
         <scene sceneID="N8g-wT-gmr">
@@ -441,7 +460,7 @@
                     </view>
                     <navigationItem key="navigationItem" title="設定" id="IR0-u3-ueb"/>
                     <connections>
-                        <segue destination="0kw-MK-hET" kind="push" identifier="speakSettingsSegue" id="Bx1-dR-JvG"/>
+                        <segue destination="0kw-MK-hET" kind="push" identifier="speakSettingsSegueOld" id="Bx1-dR-JvG"/>
                         <segue destination="DcS-zk-4zM" kind="push" identifier="speechModSettingSegue" id="whQ-HQ-5wp"/>
                         <segue destination="Pb4-1M-Lvn" kind="push" identifier="textSizeSettingSegue" id="VCs-2X-42w"/>
                         <segue destination="dQB-7t-eBi" kind="push" identifier="textDelaySettingSegue" id="6PR-ie-LLy"/>
@@ -450,6 +469,7 @@
                         <segue destination="dCR-kh-Ivz" kind="push" identifier="CreateNewUserTextSegue" id="uw4-9z-dhB"/>
                         <segue destination="NmR-c8-ccH" kind="push" identifier="CreditPageSegue" id="AaG-TX-X4l"/>
                         <segue destination="AU1-Xg-sfF" kind="push" identifier="BugReportViewSegue" id="g4z-6o-Wai"/>
+                        <segue destination="Adi-TS-14r" kind="push" identifier="speakSettingsSegue" id="J5Q-X6-p8c"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="brw-Rq-p2L" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1540,15 +1560,15 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
         </scene>
     </scenes>
     <resources>
-        <image name="&lt;.png" width="24" height="24"/>
-        <image name="&gt;.png" width="24" height="24"/>
-        <image name="bookmark-false.png" width="24" height="24"/>
-        <image name="booksearch.png" width="24" height="24"/>
-        <image name="earth.png" width="24" height="24"/>
-        <image name="gear.png" width="24" height="24"/>
-        <image name="home.png" width="24" height="24"/>
-        <image name="icloud1.png" width="24" height="24"/>
-        <image name="soundbook.png" width="24" height="24"/>
+        <image name="&lt;.png" width="36" height="36"/>
+        <image name="&gt;.png" width="36" height="36"/>
+        <image name="bookmark-false.png" width="36" height="36"/>
+        <image name="booksearch.png" width="9.8742856979370117" height="9.8742856979370117"/>
+        <image name="earth.png" width="36" height="36"/>
+        <image name="gear.png" width="15" height="15"/>
+        <image name="home.png" width="36" height="36"/>
+        <image name="icloud1.png" width="3.5999999046325684" height="3.5999999046325684"/>
+        <image name="soundbook.png" width="9.8742856979370117" height="9.8742856979370117"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="uw4-9z-dhB"/>
