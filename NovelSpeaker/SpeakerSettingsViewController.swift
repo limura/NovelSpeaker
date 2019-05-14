@@ -44,27 +44,50 @@ class SpeakerSettingsViewController: FormViewController {
         }
 
         let section = Section()
-        <<< TextRow("TitleRow-\(targetID)") {
-            $0.title = NSLocalizedString("SpeakSettingsViewController_SpeakSettingNameTitle", comment: "名前")
-            $0.value = currentSetting.name
-            if isDefaultSpeakerSetting {
-                $0.cell.textField.isUserInteractionEnabled = false
-            }else{
-                $0.cell.textField.borderStyle = .roundedRect
+        if isDefaultSpeakerSetting {
+            section <<< LabelRow() {
+                $0.title = NSLocalizedString("SpeakSettingsViewController_SpeakSettingNameTitle", comment: "名前")
+                $0.value = currentSetting.name
             }
-        }.onChange({ (row) in
-            if let value = row.value {
-                if value.count <= 0 {
-                    return
-                }
-                let realm = try! RealmUtil.GetRealm()
-                if let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
-                    try! realm.write {
-                        setting.name = value
+        }else{
+            section
+            <<< TextRow("TitleRow-\(targetID)") {
+                $0.title = NSLocalizedString("SpeakSettingsViewController_SpeakSettingNameTitle", comment: "名前")
+                $0.value = currentSetting.name
+                $0.add(rule: RuleClosure<String>(closure: { (name) -> ValidationError? in
+                    guard let name = name else {
+                        return ValidationError(msg: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorNil", comment: "名前に空文字列は設定できません"))
+                    }
+                    let realm = try! RealmUtil.GetRealm()
+                    if realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id != %@ AND name = %@", targetID, name).first != nil {
+                        return ValidationError(msg: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorAlready", comment: "既に定義済みの名前です"))
+                    }
+                    return nil
+                }))
+                $0.validationOptions = .validatesOnChange
+                //$0.cellStyle = .value1
+                //$0.cell.textField.textAlignment = .left
+                $0.cell.textField.borderStyle = .roundedRect
+            }.onChange({ (row) in
+                if let value = row.value {
+                    if value.count <= 0 || !row.isValid {
+                        return
+                    }
+                    let realm = try! RealmUtil.GetRealm()
+                    if let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
+                        try! realm.write {
+                            setting.name = value
+                        }
                     }
                 }
-            }
-        })
+            }).cellUpdate({ (textCell, textRow) in
+                if !textRow.isValid {
+                    textCell.titleLabel?.textColor = .red
+                    textCell.detailTextLabel?.text = textRow.validationErrors.first?.msg
+                }
+            })
+        }
+        section
         <<< SliderRow("PitchSliderRow-\(targetID)") {
             $0.value = currentSetting.pitch
             $0.cell.slider.minimumValue = 0.5

@@ -226,6 +226,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             label.textAlignment = .center
             label.font = theme.titleFont
             label.textColor = theme.titleColor
+            label.numberOfLines = 0
             views.append(label)
             return self
         }

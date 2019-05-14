@@ -460,6 +460,7 @@ extension RealmNovel: CanWriteIsDeleted {
     @objc dynamic var before : String = ""
     @objc dynamic var after : String = ""
     @objc dynamic var createdDate = Date()
+    @objc dynamic var speakerID : String = ""
     
     let targetNovelIDArray = List<String>()
     
@@ -468,6 +469,12 @@ extension RealmNovel: CanWriteIsDeleted {
             return self.realm?.objects(RealmNovel.self).filter({ (novel) -> Bool in
                 return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
             })
+        }
+    }
+    
+    var speaker : RealmSpeakerSetting? {
+        get {
+            return self.realm?.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: speakerID)
         }
     }
 
@@ -539,8 +546,8 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
 
 @objc final class RealmSpeakerSetting : Object {
     @objc dynamic var id = NSUUID().uuidString
+    @objc dynamic var name = NSLocalizedString("SpeakerSetting_NewSpeakerSetting", comment: "新規話者設定")
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var name = "新規話者設定"
     @objc dynamic var pitch : Float = 1.0
     @objc dynamic var rate : Float = 0.5
     @objc dynamic var lmd : Float = 1.0
@@ -572,7 +579,7 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        return ["id", "name", "createdDate", "isDeleted"]
+        return ["name", "createdDate", "isDeleted"]
     }
 }
 extension RealmSpeakerSetting: CKRecordConvertible {
@@ -585,9 +592,8 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
 @objc final class RealmSpeechSectionConfig : Object {
     @objc dynamic var id = NSUUID().uuidString
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var name = ""
-    @objc dynamic var startText = ""
-    @objc dynamic var endText = ""
+    @objc dynamic var startText = "「"
+    @objc dynamic var endText = "」"
     @objc dynamic var createdDate = Date()
     
     @objc dynamic var speakerID: String = ""

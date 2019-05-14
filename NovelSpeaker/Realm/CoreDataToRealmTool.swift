@@ -100,7 +100,17 @@ class CoreDataToRealmTool: NSObject {
                 if let pitchConfig = pitchConfig as? SpeakPitchConfigCacheData {
                     let speaker = RealmSpeakerSetting()
 
-                    speaker.name = pitchConfig.title
+                    var name = pitchConfig.title ?? NSLocalizedString("SpeakerSetting_NewSpeakerSetting", comment: "新規話者設定")
+                    var n = 0
+                    while(true) {
+                        if realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", name).first != nil {
+                            n += 1
+                            name = "\(pitchConfig.title ?? NSLocalizedString("SpeakerSetting_NewSpeakerSetting", comment: "新規話者設定"))(\(n))"
+                        }else{
+                            break
+                        }
+                    }
+                    speaker.name = name
                     if let pitch = pitchConfig.pitch as? Float {
                         speaker.pitch = pitch
                     }
@@ -115,9 +125,6 @@ class CoreDataToRealmTool: NSObject {
                     
                     let section = RealmSpeechSectionConfig()
                     section.speakerID = speaker.id
-                    if let name = pitchConfig.title {
-                        section.name = name
-                    }
                     if let startText = pitchConfig.startText {
                         section.startText = startText
                     }

@@ -107,6 +107,8 @@
 "SettingsViewController_ChooseCancel" = "バックアップ生成をやめる";
 "SettingsViewController_ChooseFullBackup" = "完全バックアップを生成する(時間がかかります)";
 "SettingsViewController_ChooseSmallBackup" = "軽量バックアップを生成する(時間はかかりません)";
+"SettingsViewController_SpeechModSettingsButtonTitle" = "話者変更設定(会話文等で声質を変えたりする設定)";
+
 "SettingTableViewController_RepeatTypeTitle" = "繰り返し再生";
 "SettingTableViewController_RepeatType_NoRepeat" = "しない";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "最初から";
@@ -289,6 +291,7 @@
 "FontSelectViewController_DefaultFontTitle" = "標準フォント";
 
 "CoreDataToRealmTool_DefaultSpeaker" = "標準";
+"SpeakerSetting_NewSpeakerSetting" = "新規話者設定";
 
 "SpeakSettingsViewController_SpeakSettingNameTitle" = "名前";
 "SpeakSettingsViewController_PitchTitle" = "高さ";
@@ -304,6 +307,8 @@
 "SpeakSettingsViewController_SpeakerSettingAdded" = "末尾に話者設定を追加しました。\n(恐らくはスクロールする必要があります)";
 "SpeakSettingsViewController_SyncRateSetting" = "速度設定を同期する";
 "SpeakerSettingsViewController_TitleText" = "話者・声色設定";
+"SpeakerSettingViewController_NameValidateErrorNil" = "名前に空文字列は設定できません";
+"SpeakerSettingViewController_NameValidateErrorAlready" = "既に定義済みの名前です";
 
 "SpeechWaitSettingViewController_SpeechWaitType" = "読み上げ時の間の仕組み";
 "SpeechWaitSettingViewController_SpeechWaitTypeSelectorTitle" = "読み上げ時の間の仕組みを選択してください。\n\n非推奨型にするとより細かい時間単位での制御ができるようになりますが、iOSのアップデート等で利用できなくなる可能性があるため、非推奨となります。";
@@ -314,6 +319,18 @@
 "SpeechWaitSettingViewController_RemoveButtonRow" = "この間の設定を削除";
 "SpeechWaitSettingViewController_AddNewSettingButtonTitle" = "新しく間の設定を追加する";
 "SpeechWaitSettingViewController_SpeakerSettingAdded" = "末尾に間の設定を追加しました。\n(恐らくはスクロールする必要があります)";
+"SpeechWaitSettingViewController_Usage" = "句読点や空白行を読み上げる時の間を設定します。\n「読み上げ時の間の仕組み」を非推奨型にするとより短い間の設定もできるようになりますが、将来的に動かなくなる可能性があります。改行については「<改行>」という文字列があるとそれを改行として認識するようになっています。";
+
+"SpeechSectionConfigsViewController_Title" = "話者変更設定";
+"SpeechSectionConfigsViewController_SpeakerUnknown" = "不明";
+"SpeechSectionConfigsViewController_BeforeTextTitle" = "開始文字";
+"SpeechSectionConfigsViewController_AfterTextTitle" = "終了文字";
+"SpeechSectionConfigsViewController_SpeakerAlertRowTitle" = "話者";
+"SpeechSectionConfigsViewController_SpeakerSelectorTitle" = "話者を選択してください";
+"SpeechSectionConfigsViewController_RemoveButtonRow" = "この設定を削除";
+"SpeechSectionConfigsViewController_AddNewSettingButtonTitle" = "新しい話者変更設定を追加する";
+"SpeechSectionConfigsViewController_Usage" = "会話文などで読み上げ時の話者設定を変更するための設定です。\nそれぞれの設定をタップすると詳細が設定できます。開始文字と終了文字の間に挟まれた部分を読み上げる話者を選択します。必要のない設定は削除することもできます。";
+"SpeechSectionConfigsViewController_SpeakerSettingAdded" = "末尾に話者変更設定を追加しました。\n(恐らくはスクロールする必要があります)";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

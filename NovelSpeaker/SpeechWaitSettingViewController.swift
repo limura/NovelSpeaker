@@ -13,6 +13,8 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
     final let TestTextAreaTag = "TestTextAreaTag"
     var testText:String = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     let speaker = NiftySpeaker()
+    var hideCache:[String:Bool] = [:]
+    
     func testSpeech(text: String, delaySetting:RealmSpeechWaitConfig) {
         let realm = try! RealmUtil.GetRealm()
         guard let globalState = RealmGlobalState.GetInstance(realm: realm) else {
@@ -51,15 +53,57 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
         testTextArea.value = "\(NSLocalizedString("SpeechWaitSettingViewController_TestText1", comment: "ここに書いた文を"))\(newTargetText)\(NSLocalizedString("SpeechWaitSettingViewController_TestText2", comment:"テストで読み上げます"))"
         testTextArea.updateCell()
     }
+
+    func updateTitleCell(speechWaitConfig:RealmSpeechWaitConfig) {
+        guard let row = self.form.rowBy(tag: "TitleLabelRow-\(speechWaitConfig.id)") as? LabelRow else {
+            return
+        }
+        row.title = speechWaitConfig.targetText.replacingOccurrences(of: "\n", with: NSLocalizedString("SpeechWaitConfigTableView_TargetText_Enter", comment: "<改行>"))
+        row.value = "\(speechWaitConfig.delayTimeInSec)"
+        row.updateCell()
+    }
     
     func createSpeechWaitCells(speechWaitSetting:RealmSpeechWaitConfig) -> Section {
         let id = speechWaitSetting.id
         let section = Section()
-        return section <<< TextRow("SpeechWaitSettingTextRow-\(id)") {
+        return section
+        <<< LabelRow("TitleLabelRow-\(id)") {
+            $0.title = speechWaitSetting.targetText.replacingOccurrences(of: "\n", with: NSLocalizedString("SpeechWaitConfigTableView_TargetText_Enter", comment: "<改行>"))
+            $0.value = "\(speechWaitSetting.delayTimeInSec)"
+        }.onCellSelection({ (_, _) in
+            if let isHide = self.hideCache[id] {
+                self.hideCache[id] = !isHide
+            }else{
+                self.hideCache[id] = false
+            }
+            if self.hideCache[id] == false {
+                let realm = try! RealmUtil.GetRealm()
+                if let setting = realm.object(ofType: RealmSpeechWaitConfig.self, forPrimaryKey: id) {
+                    self.updateTestText(targetString: setting.targetText)
+                }
+            }
+            for tag in [
+                "SpeechWaitSettingTextRow-\(id)",
+                "DelayTimeSliderRow-\(id)",
+                "SpeechTestButtonRow-\(id)",
+                "RemoveButtonRow-\(id)"
+                ] {
+                guard let row = self.form.rowBy(tag: tag) else {
+                    return
+                }
+                row.evaluateHidden()
+                row.updateCell()
+            }
+        })
+        <<< TextRow("SpeechWaitSettingTextRow-\(id)") {
             $0.title = NSLocalizedString("SpeechWaitSettingViewController_TargetStringTitle", comment: "対象文字列")
             $0.value = speechWaitSetting.targetText.replacingOccurrences(of: "\n", with: NSLocalizedString("SpeechWaitConfigTableView_TargetText_Enter", comment: "<改行>"))
+            $0.add(rule: RuleRequired())
+            $0.validationOptions = .validatesOnChange
             $0.cell.textField.borderStyle = .roundedRect
-            $0.cell.textField.textAlignment = .right
+            $0.hidden = Condition.function(["TitleLabelRow-\(id)"], { (form) -> Bool in
+                return self.hideCache[id] ?? true
+            })
         }.onChange({ (row) in
             guard let text = row.value else {
                 return
@@ -73,11 +117,16 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                 waitSetting.targetText = newTargetText
             }
             self.updateTestText(targetString: newTargetText)
+            self.updateTitleCell(speechWaitConfig: waitSetting)
         }).onCellSelection({ (_, row) in
             guard let text = row.value else {
                 return
             }
             self.updateTestText(targetString: text)
+        }).cellUpdate({ (textCell, textRow) in
+            if !textRow.isValid {
+                textCell.titleLabel?.textColor = .red
+            }
         })
         <<< StepperRow("DelayTimeSliderRow-\(id)") {
             $0.value = Double(speechWaitSetting.delayTimeInSec)
@@ -85,6 +134,9 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
             $0.cell.stepper.maximumValue = 5.0
             $0.cell.stepper.stepValue = 0.1
             $0.title = NSLocalizedString("SpeechWaitSettingViewController_DelayTimeTitle", comment: "間の時間")
+            $0.hidden = Condition.function(["TitleLabelRow-\(id)"], { (form) -> Bool in
+                return self.hideCache[id] ?? true
+            })
         }.onChange({ (row) in
             guard let value = row.value else{
                 return
@@ -97,9 +149,13 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                 setting.delayTimeInSec = Float(value)
             }
             self.updateTestText(targetString: setting.targetText)
+            self.updateTitleCell(speechWaitConfig: setting)
         })
         <<< ButtonRow("SpeechTestButtonRow-\(id)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")
+            $0.hidden = Condition.function(["TitleLabelRow-\(id)"], { (form) -> Bool in
+                return self.hideCache[id] ?? true
+            })
         }.onCellSelection({ (buttonCellOf, button) in
             let realm = try! RealmUtil.GetRealm()
             guard let setting = realm.object(ofType: RealmSpeechWaitConfig.self, forPrimaryKey: id) else {
@@ -109,6 +165,9 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
         })
         <<< ButtonRow("RemoveButtonRow-\(id)") {
             $0.title = NSLocalizedString("SpeechWaitSettingViewController_RemoveButtonRow", comment: "この間の設定を削除")
+            $0.hidden = Condition.function(["TitleLabelRow-\(id)"], { (form) -> Bool in
+                return self.hideCache[id] ?? true
+            })
         }.onCellSelection({ (buttonCellOf, button) in
             NiftyUtilitySwift.EasyDialogTwoButton(
                 viewController: self,
@@ -140,6 +199,10 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
         let globalData = RealmGlobalState.GetInstance(realm: realm)
         let isSpeechWaitSettingUseExperimentalWait = globalData?.isSpeechWaitSettingUseExperimentalWait ?? false
         form +++ Section()
+        <<< TextAreaRow() {
+            $0.value = NSLocalizedString("SpeechWaitSettingViewController_Usage", comment: "句読点や空白行を読み上げる時の間を設定します。\n「読み上げ時の間の仕組み」を非推奨型にするとより短い間の設定もできるようになりますが、将来的に動かなくなる可能性があります。改行については「<改行>」という文字列があるとそれを改行として認識するようになっています。")
+            $0.cell.textView.isEditable = false
+        }
         <<< ButtonRow() {
             $0.title = NSLocalizedString("SpeechWaitSettingViewController_AddNewSettingButtonTitle", comment: "新しく間の設定を追加する")
         }.onCellSelection({ (_, button) in
