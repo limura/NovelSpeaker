@@ -143,25 +143,6 @@
             </objects>
             <point key="canvasLocation" x="1512" y="832.0839580209896"/>
         </scene>
-        <!--声質の設定-->
-        <scene sceneID="SLD-Tk-NVe">
-            <objects>
-                <viewController id="Adi-TS-14r" customClass="SpeakSettingsViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="GYs-vh-4DJ"/>
-                        <viewControllerLayoutGuide type="bottom" id="hFb-Mz-3ty"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="KAp-OZ-an5">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                    </view>
-                    <navigationItem key="navigationItem" title="声質の設定" id="Cj6-Nj-GVp"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="32Q-AY-yqR" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1476" y="913"/>
-        </scene>
         <!--声質設定範囲の作成-->
         <scene sceneID="N8g-wT-gmr">
             <objects>
@@ -469,7 +450,6 @@
                         <segue destination="dCR-kh-Ivz" kind="push" identifier="CreateNewUserTextSegue" id="uw4-9z-dhB"/>
                         <segue destination="NmR-c8-ccH" kind="push" identifier="CreditPageSegue" id="AaG-TX-X4l"/>
                         <segue destination="AU1-Xg-sfF" kind="push" identifier="BugReportViewSegue" id="g4z-6o-Wai"/>
-                        <segue destination="Adi-TS-14r" kind="push" identifier="speakSettingsSegue" id="J5Q-X6-p8c"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="brw-Rq-p2L" userLabel="First Responder" sceneMemberID="firstResponder"/>

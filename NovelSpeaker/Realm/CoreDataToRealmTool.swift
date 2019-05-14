@@ -167,7 +167,7 @@ class CoreDataToRealmTool: NSObject {
                     wait.delayTimeInSec = delayTimeInSec
                 }
                 if let targetText = speechWait.targetText {
-                    wait.targetText = targetText
+                    wait.targetText = targetText.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
                 }
                 
                 realm.add(wait)

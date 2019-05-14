@@ -45,6 +45,7 @@ void uncaughtExceptionHandler(NSException *exception)
     }
     
     UIViewController* toplevelViewController = nil;
+    [RealmUtil RemoveLocalRealmFile];
     if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool CheckIsLocalRealmCreated] == false) {
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"coreDataMigration" bundle:nil];
         toplevelViewController = [storyboard instantiateInitialViewController];

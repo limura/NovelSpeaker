@@ -303,6 +303,17 @@
 "SpeakSettingsViewController_AddNewSettingButtonTitle" = "新しく話者設定を追加する";
 "SpeakSettingsViewController_SpeakerSettingAdded" = "末尾に話者設定を追加しました。\n(恐らくはスクロールする必要があります)";
 "SpeakSettingsViewController_SyncRateSetting" = "速度設定を同期する";
+"SpeakerSettingsViewController_TitleText" = "話者・声色設定";
+
+"SpeechWaitSettingViewController_SpeechWaitType" = "読み上げ時の間の仕組み";
+"SpeechWaitSettingViewController_SpeechWaitTypeSelectorTitle" = "読み上げ時の間の仕組みを選択してください。\n\n非推奨型にするとより細かい時間単位での制御ができるようになりますが、iOSのアップデート等で利用できなくなる可能性があるため、非推奨となります。";
+"SpeechWaitSettingViewController_TargetStringTitle" = "対象文字列";
+"SpeechWaitSettingViewController_TestText1" = "ここに書いた文を";
+"SpeechWaitSettingViewController_TestText2" = "テストで読み上げます";
+"SpeechWaitSettingViewController_DelayTimeTitle" = "間の時間";
+"SpeechWaitSettingViewController_RemoveButtonRow" = "この間の設定を削除";
+"SpeechWaitSettingViewController_AddNewSettingButtonTitle" = "新しく間の設定を追加する";
+"SpeechWaitSettingViewController_SpeakerSettingAdded" = "末尾に間の設定を追加しました。\n(恐らくはスクロールする必要があります)";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

@@ -9,7 +9,7 @@
 import UIKit
 import Eureka
 
-class SpeakSettingsViewController: FormViewController {
+class SpeakerSettingsViewController: FormViewController {
     let speaker = Speaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     var isRateSettingSync = true
@@ -19,6 +19,7 @@ class SpeakSettingsViewController: FormViewController {
 
         // Do any additional setup after loading the view.
         BehaviorLogger.AddLog(description: "SettingsViewController viewDidLoad", data: [:])
+        self.title = NSLocalizedString("SpeakerSettingsViewController_TitleText", comment: "話者設定")
         createSettingsTable()
     }
     
@@ -29,10 +30,6 @@ class SpeakSettingsViewController: FormViewController {
         speaker.setVoiceWithIdentifier(identifier)
         speaker.speech(text)
     }
-    
-    // TODO:
-    // 言語設定を選択すると The Realm is already in a write transaction と言われる。
-    //
     
     func createSpeakSettingRows(currentSetting:RealmSpeakerSetting) -> Section {
         let targetID = currentSetting.id

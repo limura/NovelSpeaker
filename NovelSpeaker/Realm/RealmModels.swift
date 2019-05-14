@@ -305,6 +305,11 @@ protocol CanWriteIsDeleted {
         return realm.object(ofType: RealmStory.self, forPrimaryKey: CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber))
     }
     
+    static func GetAllObjects(realm: Realm) -> Results<RealmStory>? {
+        return realm.objects(RealmStory.self).filter("isDeleted = false")
+    }
+
+    
     override class func primaryKey() -> String? {
         return "id"
     }
@@ -430,6 +435,10 @@ extension RealmStory: CanWriteIsDeleted {
         return "https://example.com/\(NSUUID().uuidString)"
     }
     
+    static func GetAllObjects(realm: Realm) -> Results<RealmNovel>? {
+        return realm.objects(RealmNovel.self).filter("isDeleted = false")
+    }
+    
     override class func primaryKey() -> String? {
         return "novelID"
     }
@@ -461,7 +470,11 @@ extension RealmNovel: CanWriteIsDeleted {
             })
         }
     }
-    
+
+    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechModSetting>? {
+        return realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false")
+    }
+
     override class func primaryKey() -> String? {
         return "id"
     }
@@ -483,6 +496,31 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
     @objc dynamic var delayTimeInSec : Float = 0.0
     @objc dynamic var targetText : String = ""
     @objc dynamic var createdDate = Date()
+    
+    func ApplyDelaySettingTo(niftySpeaker:NiftySpeaker) {
+        if realm?.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID)?.isSpeechWaitSettingUseExperimentalWait ?? false {
+            if delayTimeInSec <= 0.0 {
+                return
+            }
+            var waitString = "。"
+            var x : Float = 0.0
+            while x < delayTimeInSec {
+                x += 0.1
+                waitString += "_。"
+            }
+            if targetText.contains("\n") {
+                niftySpeaker.addSpeechModText(targetText.replacingOccurrences(of: "\n", with: "\r"), to: waitString)
+                niftySpeaker.addSpeechModText(targetText.replacingOccurrences(of: "\n", with: "\r\n"), to: waitString)
+            }
+            niftySpeaker.addSpeechModText(targetText, to: waitString)
+        }else{
+            niftySpeaker.addDelayBlockSeparator(targetText, delay: TimeInterval(delayTimeInSec))
+        }
+    }
+    
+    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechWaitConfig>? {
+        return realm.objects(RealmSpeechWaitConfig.self).filter("isDeleted = false")
+    }
     
     override class func primaryKey() -> String? {
         return "id"
@@ -513,6 +551,21 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     @objc dynamic var voiceIdentifier : String = "com.apple.ttsbundle.siri_female_ja-JP_premium"
     @objc dynamic var locale : String = "ja-JP"
     @objc dynamic var createdDate = Date()
+    
+    var speechConfig : SpeechConfig {
+        get {
+            let speechConfig = SpeechConfig()
+            speechConfig.pitch = self.pitch
+            speechConfig.rate = self.rate
+            speechConfig.beforeDelay = 0
+            speechConfig.voiceIdentifier = self.voiceIdentifier
+            return speechConfig
+        }
+    }
+    
+    static func GetAllObjects(realm: Realm) -> Results<RealmSpeakerSetting>? {
+        return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false")
+    }
     
     override class func primaryKey() -> String? {
         return "id"
@@ -553,6 +606,10 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
         }
     }
     
+    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechSectionConfig>? {
+        return realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false")
+    }
+    
     override class func primaryKey() -> String? {
         return "id"
     }
@@ -582,6 +639,10 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
                 return !story.isDeleted && self.targetStoryIDArray.contains(story.id)
             })
         }
+    }
+    
+    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechQueue>? {
+        return realm.objects(RealmSpeechQueue.self).filter("isDeleted = false")
     }
     
     override class func primaryKey() -> String? {
@@ -650,6 +711,10 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
         }
     }
     
+    static public func GetInstance(realm:Realm) -> RealmGlobalState? {
+        return realm.object(ofType: RealmGlobalState.self, forPrimaryKey: UniqueID)
+    }
+
     override class func primaryKey() -> String? {
         return "id"
     }
@@ -678,6 +743,10 @@ extension RealmGlobalState: CanWriteIsDeleted {
                 return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
             })
         }
+    }
+    
+    static func GetAllObjects(realm: Realm) -> Results<RealmDisplaySetting>? {
+        return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false")
     }
     
     override class func primaryKey() -> String? {
@@ -709,6 +778,10 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
                 return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
             })
         }
+    }
+    
+    static func GetAllObjects(realm: Realm) -> Results<RealmNovelTag>? {
+        return realm.objects(RealmNovelTag.self).filter("isDeleted = false")
     }
     
     override class func primaryKey() -> String? {
@@ -754,6 +827,10 @@ extension RealmNovelTag: CanWriteIsDeleted {
                 return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
             })
         }
+    }
+    
+    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechOverrideSetting>? {
+        return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false")
     }
     
     override class func primaryKey() -> String? {

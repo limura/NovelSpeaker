@@ -307,6 +307,17 @@
 "SpeakSettingsViewController_AddNewSettingButtonTitle" = "Add new speaker settings";
 "SpeakSettingsViewController_SpeakerSettingAdded" = "Added speaker settings at the end.\n(Possibly need to scroll)";
 "SpeakSettingsViewController_SyncRateSetting" = "Synchronize rate settings";
+"SpeakerSettingsViewController_TitleText" = "Speaker settings";
+
+"SpeechWaitSettingViewController_SpeechWaitType" = "Speech delay type";
+"SpeechWaitSettingViewController_SpeechWaitTypeSelectorTitle" = "Please select the mechanism during reading.\n\nExperimental types allow you to control in finer units of time, but they are deprecated because they may not be available due to iOS updates.";
+"SpeechWaitSettingViewController_TargetStringTitle" = "Wait target string";
+"SpeechWaitSettingViewController_TestText1" = "ここに書いた文を";
+"SpeechWaitSettingViewController_TestText2" = "テストで読み上げます";
+"SpeechWaitSettingViewController_DelayTimeTitle" = "Wait delay time";
+"SpeechWaitSettingViewController_RemoveButtonRow" = "Delete this delay setting";
+"SpeechWaitSettingViewController_AddNewSettingButtonTitle" = "Add new delay setting";
+"SpeechWaitSettingViewController_SpeakerSettingAdded" = "Added delay settings at the end.\n(Possibly need to scroll)";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

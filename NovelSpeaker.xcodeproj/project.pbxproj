@@ -38,6 +38,8 @@
 		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
 		212972171DA66FDB001ED63D /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 212972141DA66F2C001ED63D /* Info.plist */; };
+		212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */; };
+		212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */; };
 		212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */; };
 		212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F01131D8FDEC5009D69E6 /* NiftyUtility.m */; };
 		212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */; };
@@ -286,6 +288,8 @@
 		212972131DA66F2C001ED63D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = ja; path = ja.lproj/Info.plist; sourceTree = "<group>"; };
 		212972151DA66F2E001ED63D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = en; path = en.lproj/Info.plist; sourceTree = "<group>"; };
 		212972161DA66F97001ED63D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Base; path = Base.lproj/Info.plist; sourceTree = "<group>"; };
+		212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerSettingsViewController.swift; sourceTree = "<group>"; };
+		212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechWaitSettingViewController.swift; sourceTree = "<group>"; };
 		212F00D31D8DD700009D69E6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/DefaultSpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		212F01121D8FDEC5009D69E6 /* NiftyUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftyUtility.h; sourceTree = "<group>"; };
 		212F01131D8FDEC5009D69E6 /* NiftyUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftyUtility.m; sourceTree = "<group>"; };
@@ -948,6 +952,7 @@
 				21C74FD3196831070039A706 /* DownloadStatusViewController.m */,
 				2191635E199E01A6003FF7FC /* SpeakSettingsTableViewController.h */,
 				2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */,
+				212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */,
 				213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */,
 				210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */,
 				210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */,
@@ -971,6 +976,7 @@
 				216741A2204421F1008A578D /* BugReportViewController.swift */,
 				21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */,
 				216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */,
+				212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1352,6 +1358,7 @@
 				217BD9E419CE72BB008A0D9D /* StringSubstituter.m in Sources */,
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
 				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
+				212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */,
 				210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */,
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
@@ -1402,6 +1409,7 @@
 				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
 				214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */,
+				212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
 				21EA62E420554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift in Sources */,
 				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,

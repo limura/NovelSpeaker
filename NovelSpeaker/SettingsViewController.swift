@@ -48,10 +48,29 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     func createSettingsTable(){
         form +++ Section()
             <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingsTableViewController_SettingOfTheQualityOfVoice", comment:"声質の設定")
-                $0.presentationMode = .segueName(segueName: "speakSettingsSegue", onDismiss: nil)
-            }
+                $0.title = NSLocalizedString("SpeakerSettingsViewController_TitleText", comment:"話者・声色設定")
+            }.onCellSelection({ (_, _) in
+                let nextViewController = SpeakerSettingsViewController()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
             
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_SettingOfTheSpeechDelay", comment:"読み上げ時の間の設定")
+            }.onCellSelection({ (_, _) in
+                let nextViewController = SpeechWaitSettingViewControllerSwift()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
+
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_CorrectionOfTheReading", comment:"読みの修正")
                 $0.presentationMode = .segueName(segueName: "speechModSettingSegue", onDismiss: nil)
@@ -60,11 +79,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_SettingOfTheTextSize", comment:"文字サイズの設定")
                 $0.presentationMode = .segueName(segueName: "textSizeSettingSegue", onDismiss: nil)
-            }
-            
-            <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_SettingOfTheSpeechDelay", comment:"読み上げ時の間の設定")
-                $0.presentationMode = .segueName(segueName: "textDelaySettingSegue", onDismiss: nil)
             }
             
             <<< TimeIntervalCountDownRow() {
