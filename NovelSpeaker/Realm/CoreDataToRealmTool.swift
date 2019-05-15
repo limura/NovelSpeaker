@@ -156,6 +156,7 @@ class CoreDataToRealmTool: NSObject {
                 }else{
                     continue
                 }
+                mod.isUseRegularExpression = speechMod.isRegexpType()
 
                 realm.add(mod)
             }

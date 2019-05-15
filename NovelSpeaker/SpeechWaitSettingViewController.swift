@@ -201,7 +201,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
         form +++ Section()
         <<< TextAreaRow() {
             $0.value = NSLocalizedString("SpeechWaitSettingViewController_Usage", comment: "句読点や空白行を読み上げる時の間を設定します。\n「読み上げ時の間の仕組み」を非推奨型にするとより短い間の設定もできるようになりますが、将来的に動かなくなる可能性があります。改行については「<改行>」という文字列があるとそれを改行として認識するようになっています。")
-            $0.cell.textView.isEditable = false
+            $0.textAreaMode = .readOnly
         }
         <<< ButtonRow() {
             $0.title = NSLocalizedString("SpeechWaitSettingViewController_AddNewSettingButtonTitle", comment: "新しく間の設定を追加する")

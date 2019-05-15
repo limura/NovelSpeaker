@@ -330,11 +330,26 @@
 "SpeechSectionConfigsViewController_BeforeTextTitle" = "Start character";
 "SpeechSectionConfigsViewController_AfterTextTitle" = "End character";
 "SpeechSectionConfigsViewController_SpeakerAlertRowTitle" = "Speaker";
-"SpeechSectionConfigsViewController_SpeakerSelectorTitle" = "Select speaker";
+"SpeechSectionConfigsViewController_SpeakerSelectorTitle" = "Select speaker\nIn order to increase the number of speakers, it is necessary to go back and increase the number of speakers by \"Speaker settings\".";
 "SpeechSectionConfigsViewController_RemoveButtonRow" = "Delete this setting";
 "SpeechSectionConfigsViewController_AddNewSettingButtonTitle" = "Add new setting";
 "SpeechSectionConfigsViewController_Usage" = "It is a setting to change the speaker setting at the time of reading by the conversation sentence etc.\nTap each setting to set details. Select the speaker who reads the part between the start character and the end character. You can delete settings that you do not need.";
 "SpeechSectionConfigsViewController_SpeakerSettingAdded" = "Added new settings at the end.\n(Possibly need to scroll)";
+
+"CreateSpeechModSettingViewControllerSwift_Title" = "Correction of the reading";
+"CreateSpeechModSettingViewControllerSwift_BeforeTitle" = "Before";
+"CreateSpeechModSettingViewControllerSwift_BeforeValidateErrorNil" = "Empty string can not be set";
+"CreateSpeechModSettingViewControllerSwift_BeforeValidateErrorRegexp" = "Invalid regular expression";
+"CreateSpeechModSettingViewControllerSwift_AfterTitle" = "After";
+"CreateSpeechModSettingViewControllerSwift_RegularExpressionTitle" = "is use Regular Expression";
+"CreateSpeechModSettingViewControllerSwift_BeforeSampleTitle" = "Test Before";
+"CreateSpeechModSettingViewControllerSwift_AfterSampleTitle" = "Test After";
+"CreateSpeechModSettingViewControllerSwift_TestButtonTitle" = "Test speech";
+"CreateSpeechModSettingViewControllerSwift_ApplyButtonTitle" = "Save";
+"CreateSpeechModSettingViewControllerSwift_ValidateBeforeFailedTitle" = "There is a problem with the string before replacement";
+"CreateSpeechModSettingViewControllerSwift_ValidateBeforeFieldMessage" = "It seems to be an empty string or a defect in the regular expression.";
+"CreateSpeechModSettingViewControllerSwift_ValidateAfterFailedTitle" = "There is a problem with the string after replacement";
+"CreateSpeechModSettingViewControllerSwift_ValidateAfterFieldMessage" = "You can not set an empty string.\nIf you do not want them to speak after reading, you need to change to blank.";
 
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";

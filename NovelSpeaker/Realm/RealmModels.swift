@@ -460,7 +460,7 @@ extension RealmNovel: CanWriteIsDeleted {
     @objc dynamic var before : String = ""
     @objc dynamic var after : String = ""
     @objc dynamic var createdDate = Date()
-    @objc dynamic var speakerID : String = ""
+    @objc dynamic var isUseRegularExpression : Bool = false
     
     let targetNovelIDArray = List<String>()
     
@@ -472,12 +472,6 @@ extension RealmNovel: CanWriteIsDeleted {
         }
     }
     
-    var speaker : RealmSpeakerSetting? {
-        get {
-            return self.realm?.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: speakerID)
-        }
-    }
-
     static func GetAllObjects(realm: Realm) -> Results<RealmSpeechModSetting>? {
         return realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false")
     }
@@ -572,6 +566,12 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     
     static func GetAllObjects(realm: Realm) -> Results<RealmSpeakerSetting>? {
         return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false")
+    }
+    
+    func applyTo(speaker:Speaker) {
+        speaker.setPitch(pitch)
+        speaker.setRate(rate)
+        speaker.setVoiceWithIdentifier(voiceIdentifier)
     }
     
     override class func primaryKey() -> String? {

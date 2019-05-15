@@ -7,12 +7,12 @@
 //
 
 import UIKit
+import RealmSwift
 
 class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNewSpeechModSettingDelegate {
-    let m_Speaker = Speaker()
     static let speechModSettingsTableViewDefaultCellID = "speechModSettingsTableViewDefaultCell"
     var m_FilterString = ""
-    var m_TargetSpeechModSetting:SpeechModSettingCacheData? = nil
+    var speechModSettingObserveToken:NotificationToken? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,12 +23,6 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
-        
-        if let globalState = GlobalDataSingleton.getInstance().getGlobalState() {
-            m_Speaker.setPitch(globalState.defaultPitch.floatValue)
-            m_Speaker.setRate(globalState.defaultRate.floatValue)
-        }
-        m_Speaker.setVoiceWithIdentifier(GlobalDataSingleton.getInstance().getVoiceIdentifier())
         
         // 追加ボタンとEditボタンと検索ボタンをつけます。
         let addButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.add, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.addButtonClicked))
@@ -53,12 +47,20 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
     }
     
     func addNotificationReceiver(){
+        let realm = try! RealmUtil.GetRealm()
+        self.speechModSettingObserveToken = realm.objects(RealmSpeechModSetting.self).observe { (collectionChange) in
+            print("SpeechModSettingsTableViewControllerSwift: reload table by RealmSpeechModSetting ovserve event.")
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "ConfigReloaded_DisplayUpdateNeeded"), object: nil, queue: .main) { (notification) in
             print("ConfigReloaded_DisplayUpdateNeeded got. reloading...")
             self.tableView.reloadData()
         }
     }
     func removeNotificationReceiver(){
+        self.speechModSettingObserveToken = nil
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -86,7 +88,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
         if modSetting == nil {
             cell.textLabel?.text = "-"
         }else{
-            cell.textLabel?.text = String(format: NSLocalizedString("SpeechModSettingsTableViewController_DisplayPattern", comment:"\"%@\" を \"%@\" に"), (modSetting?.beforeString)!, (modSetting?.afterString)!)
+            cell.textLabel?.text = String(format: NSLocalizedString("SpeechModSettingsTableViewController_DisplayPattern", comment:"\"%@\" を \"%@\" に"), (modSetting?.before)!, (modSetting?.after)!)
         }
         return cell
     }
@@ -112,8 +114,13 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
         if editingStyle == .delete {
             // Delete the row from the data source
             let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)
-            if modSetting != nil {
-                GlobalDataSingleton.getInstance().deleteSpeechModSetting(modSetting)
+            if let modSetting = modSetting {
+                let realm = try! RealmUtil.GetRealm()
+                if let targetModSetting = realm.object(ofType: RealmSpeechModSetting.self, forPrimaryKey: modSetting.id) {
+                    try! realm.write {
+                        RealmUtil.Delete(realm: realm, model: targetModSetting)
+                    }
+                }
             }
             tableView.deleteRows(at: [indexPath], with: .fade)
         } else if editingStyle == .insert {
@@ -123,16 +130,9 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
 
     // セルが選択された時
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)
-        if modSetting == nil {
-            return;
+        if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
+            PushToCreateSpeechModSettingViewControllerSwift(modSetting: modSetting)
         }
-        m_TargetSpeechModSetting = modSetting
-        performSegue(withIdentifier: "newSpeechSettingSegue", sender: self)
-        /*
-        let sampleText = String(format: NSLocalizedString("SpeechModSettingsTableViewController_SpeakTestPattern", comment:"%@を%@に"), (modSetting?.beforeString)!, (modSetting?.afterString)!)
-        m_Speaker.speech(sampleText)
-        */
     }
 
     /*
@@ -153,19 +153,13 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    //override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
-        if segue.identifier == "newSpeechSettingSegue" {
-            let controller:CreateSpeechModSettingViewController = segue.destination as! CreateSpeechModSettingViewController
-            controller.createNewSpeechModSettingDelegate = self;
-            controller.targetSpeechModSetting = m_TargetSpeechModSetting
-        }
-    }
+    //}
 
     @objc func addButtonClicked(){
-        m_TargetSpeechModSetting = nil
-        performSegue(withIdentifier: "newSpeechSettingSegue", sender: self)
+        PushToCreateSpeechModSettingViewControllerSwift(modSetting: nil)
     }
     
     @objc func filterButtonClicked(){
@@ -180,23 +174,25 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: true, completion: nil)
                 }
-                })
+            })
             .build().show()
     }
     
-    func GetSpeechModArray() -> [SpeechModSettingCacheData] {
-        let speechModSettingArray = GlobalDataSingleton.getInstance().getAllSpeechModSettings()
-        var result:[SpeechModSettingCacheData] = []
-        for speechMod:SpeechModSettingCacheData in speechModSettingArray! as! [SpeechModSettingCacheData] {
-            if m_FilterString.count > 0 && (!speechMod.beforeString.contains(m_FilterString)) && (!speechMod.afterString.contains(m_FilterString)) {
-                continue
-            }
-            result.append(speechMod)
-        }
-        return result
+    func PushToCreateSpeechModSettingViewControllerSwift(modSetting:RealmSpeechModSetting?) {
+        let nextViewController = CreateSpeechModSettingViewControllerSwift()
+        nextViewController.targetSpeechModSettingID = modSetting?.id
+        self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     
-    func GetSpeechModSettingFromRow(row:Int) -> SpeechModSettingCacheData? {
+    func GetSpeechModArray() -> [RealmSpeechModSetting] {
+        let realm = try! RealmUtil.GetRealm()
+        if m_FilterString.count > 0 {
+            return Array(realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false AND ( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString).sorted(byKeyPath: "before", ascending: false))
+        }
+        return Array(realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false").sorted(byKeyPath: "before", ascending: false))
+    }
+    
+    func GetSpeechModSettingFromRow(row:Int) -> RealmSpeechModSetting? {
         let speechModSettingArray = GetSpeechModArray()
         if speechModSettingArray.count <= row {
             return nil;
