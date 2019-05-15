@@ -86,6 +86,8 @@
 		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
+		21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */; };
+		21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */; };
 		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
@@ -348,6 +350,8 @@
 		2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMultithreadTests.m; sourceTree = "<group>"; };
 		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSizeSettingViewControllerSwift.swift; sourceTree = "<group>"; };
+		21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateSpeechModSettingViewControllerSwift.swift; sourceTree = "<group>"; };
 		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
@@ -958,11 +962,13 @@
 				213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */,
 				210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */,
 				210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */,
+				21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */,
 				21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */,
 				21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */,
 				21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */,
 				2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */,
 				2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */,
+				21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */,
 				2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */,
 				2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */,
 				213A4DCA1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.h */,
@@ -1397,6 +1403,7 @@
 				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
+				21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
@@ -1408,6 +1415,7 @@
 				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
 				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
 				213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */,
+				21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */,
 				211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
 				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,

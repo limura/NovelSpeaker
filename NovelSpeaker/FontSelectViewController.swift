@@ -8,6 +8,7 @@
 
 import UIKit
 import Eureka
+import RealmSwift
 
 class FontSelectViewController: FormViewController {
     let sampleText = "老爺は、あたりをはばかる低声で、わずか答えた。「王様は、人を殺します。」"
@@ -23,10 +24,11 @@ class FontSelectViewController: FormViewController {
             }
             $0.tag = fontName
         }.onCellSelection { (labelCallOf, labelRow) in
-            GlobalDataSingleton.getInstance().setDisplayFontName(labelRow.tag)
-            let notificationCenter = NotificationCenter.default
-            let notification = Notification(name: Notification.Name("FontNameChanged"))
-            notificationCenter.post(notification)
+            if let realm = try? RealmUtil.GetRealm(), let displaySetting = RealmGlobalState.GetInstance(realm: realm)?.defaultDisplaySetting, let fontID = labelRow.tag {
+                try! realm.write {
+                    displaySetting.fontID = fontID
+                }
+            }
             self.navigationController?.popViewController(animated: true)
         }
     }

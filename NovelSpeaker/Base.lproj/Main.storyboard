@@ -66,7 +66,7 @@
         <!--文字の大きさ-->
         <scene sceneID="KxK-FQ-fPF">
             <objects>
-                <viewController id="Pb4-1M-Lvn" customClass="TextSizeSettingViewController" sceneMemberID="viewController">
+                <viewController id="Pb4-1M-Lvn" customClass="TextSizeSettingViewControllerSwift" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="ts7-IY-3VW"/>
                         <viewControllerLayoutGuide type="bottom" id="lDR-Qy-bzc"/>
@@ -78,7 +78,7 @@
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minValue="1" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="Fkj-1l-L3c">
                                 <rect key="frame" x="14" y="72" width="347" height="31"/>
                                 <connections>
-                                    <action selector="textSizeSliderMoved:" destination="Pb4-1M-Lvn" eventType="valueChanged" id="ZWc-fy-GKq"/>
+                                    <action selector="textSizeSliderChanged:" destination="Pb4-1M-Lvn" eventType="valueChanged" id="dUE-qK-TOH"/>
                                 </connections>
                             </slider>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vgK-qt-EeE">
@@ -112,8 +112,8 @@
                     </view>
                     <navigationItem key="navigationItem" title="文字の大きさ" id="PxM-wl-qYW"/>
                     <connections>
-                        <outlet property="sampleTextTextView" destination="vgK-qt-EeE" id="MNB-oz-ONO"/>
-                        <outlet property="textSizeSlider" destination="Fkj-1l-L3c" id="sLT-4G-cJR"/>
+                        <outlet property="sampleTextTextView" destination="vgK-qt-EeE" id="hVV-5j-25g"/>
+                        <outlet property="textSizeSlider" destination="Fkj-1l-L3c" id="Giq-B6-e0p"/>
                         <segue destination="tq7-oK-KKM" kind="push" identifier="FontSelectSegue" id="vDk-Ae-lek"/>
                     </connections>
                 </viewController>
