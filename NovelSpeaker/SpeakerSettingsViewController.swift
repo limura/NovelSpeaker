@@ -85,6 +85,7 @@ class SpeakerSettingsViewController: FormViewController {
                     textCell.titleLabel?.textColor = .red
                     textCell.detailTextLabel?.text = textRow.validationErrors.first?.msg
                 }
+                textCell.textField.clearButtonMode = .always
             })
         }
         section

@@ -84,6 +84,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
                 // detailTextLabel だと書いている正規表現文字と被って表示されてしまうため、外します。
                 // cell.detailTextLabel?.text = row.validationErrors.first?.msg
             }
+            cell.textField.clearButtonMode = .always
         })
         <<< TextRow() {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AfterTitle", comment: "読み替え後")
@@ -104,6 +105,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
             if !row.isValid {
                 cell.titleLabel?.textColor = .red
             }
+            cell.textField.clearButtonMode = .always
         })
         <<< SwitchRow() {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_RegularExpressionTitle", comment: "正規表現マッチ")
@@ -132,6 +134,8 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
                 return
             }
             self.beforeTestText = value
+        }).cellUpdate({ (cell, row) in
+            cell.textField.clearButtonMode = .always
         })
         <<< TextRow("AfterTestTextRow") {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AfterSampleTitle", comment: "読み替え後")

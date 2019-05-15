@@ -98,6 +98,7 @@ class SpeechSectionConfigsViewController: FormViewController {
             if !textRow.isValid {
                 textCell.titleLabel?.textColor = .red
             }
+            textCell.textField.clearButtonMode = .always
         })
         <<< TextRow("EndTextRow-\(id)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_AfterTextTitle", comment: "終了文字")
@@ -128,6 +129,7 @@ class SpeechSectionConfigsViewController: FormViewController {
             if !textRow.isValid {
                 textCell.titleLabel?.textColor = .red
             }
+            textCell.textField.clearButtonMode = .always
         })
         <<< AlertRow<String>("SpeakerAlertRow-\(id)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerAlertRowTitle", comment: "話者")

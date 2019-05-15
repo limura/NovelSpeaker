@@ -127,6 +127,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
             if !textRow.isValid {
                 textCell.titleLabel?.textColor = .red
             }
+            textCell.textField.clearButtonMode = .always
         })
         <<< StepperRow("DelayTimeSliderRow-\(id)") {
             $0.value = Double(speechWaitSetting.delayTimeInSec)
