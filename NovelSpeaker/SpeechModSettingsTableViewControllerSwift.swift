@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNewSpeechModSettingDelegate {
+class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     static let speechModSettingsTableViewDefaultCellID = "speechModSettingsTableViewDefaultCell"
     var m_FilterString = ""
     var speechModSettingObserveToken:NotificationToken? = nil
@@ -54,14 +54,9 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
                 self.tableView.reloadData()
             }
         }
-        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "ConfigReloaded_DisplayUpdateNeeded"), object: nil, queue: .main) { (notification) in
-            print("ConfigReloaded_DisplayUpdateNeeded got. reloading...")
-            self.tableView.reloadData()
-        }
     }
     func removeNotificationReceiver(){
         self.speechModSettingObserveToken = nil
-        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Table view data source
@@ -198,9 +193,5 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
             return nil;
         }
         return speechModSettingArray[row]
-    }
-    
-    @objc func newSpeechModSettingAdded(){
-        tableView.reloadData()
     }
 }

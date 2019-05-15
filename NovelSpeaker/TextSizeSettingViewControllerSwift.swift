@@ -14,7 +14,6 @@ class TextSizeSettingViewControllerSwift: UIViewController {
     @IBOutlet weak var sampleTextTextView: UITextView!
 
     var displaySettingObserbeToken:NotificationToken? = nil
-    var textSizeValue = 0.0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,6 +35,11 @@ class TextSizeSettingViewControllerSwift: UIViewController {
         self.navigationItem.rightBarButtonItems = [
             UIBarButtonItem(title: NSLocalizedString("TextSizeSettingViewController_FontSettingTitle", comment: "字体設定"), style: .plain, target: self, action: #selector(fontSettingButtonClicked(_:)))
         ]
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.displaySettingObserbeToken = nil
     }
     
     func setFontFromRealm() {

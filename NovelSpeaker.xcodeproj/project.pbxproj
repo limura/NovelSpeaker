@@ -975,6 +975,7 @@
 				213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */,
 				213A4DCD1A63FA5100E9EC13 /* SpeechWaitSettingViewController.h */,
 				213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */,
+				212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */,
 				21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */,
 				21E704CD1AF741350071F31E /* UpdateLogViewController.h */,
 				21E704CE1AF741350071F31E /* UpdateLogViewController.m */,
@@ -984,7 +985,6 @@
 				216741A2204421F1008A578D /* BugReportViewController.swift */,
 				21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */,
 				216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */,
-				212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */,
 				212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */,
 			);
 			name = ViewControllers;

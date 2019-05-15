@@ -20,6 +20,7 @@
 #import "NSDataDetectEncodingExtension.h"
 #import "NovelSpeaker-Swift.h"
 #import "UIImageExtension.h"
+#import "UriLoader.h"
 
 #define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
 #define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
