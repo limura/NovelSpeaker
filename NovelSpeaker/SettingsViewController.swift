@@ -328,8 +328,15 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GoToReleaseLog", comment:"更新履歴")
-                $0.presentationMode = .segueName(segueName: "updateLogSegue", onDismiss: nil)
-            }
+            }.onCellSelection({ (buttonCellOf, button) in
+                let nextViewController = UpdateLogViewController()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_RightNotation", comment:"権利表記")

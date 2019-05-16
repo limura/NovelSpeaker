@@ -259,6 +259,17 @@
 - (void) setSpeechModSetting:(id)sender {
     // TODO: あとで復活させる
     //[self performSegueWithIdentifier:@"SpeechViewToSpeechModSetingsSegue" sender:self];
+
+    CreateSpeechModSettingViewControllerSwift* nextViewController = [CreateSpeechModSettingViewControllerSwift new];
+    /* TODO: 本来ならこうやって targetSpeechModSettingID を設定する
+    let before = self.GetCurrentSelectedString
+    let modSetting = realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false AND before = %@", before)?.first
+    try! realm.write {
+        modSetting.before = before
+    }
+    nextViewController.targetSpeechModSettingID = modSetting.id
+     */
+    [self.navigationController pushViewController:nextViewController animated:true];
 }
 
 /// MPRemoteCommandCenter でのイベントを受け取るようにします。
@@ -665,13 +676,13 @@
     // 読み替え辞書登録時の値を放り込みます
     if ([[segue identifier] isEqualToString:@"SpeechViewToSpeechModSetingsSegue"]) {
         /* TODO: あとで復活させる
-        CreateSpeechModSettingViewControllerSwift* nextViewController = [segue destinationViewController];
-        let before = [self GetCurrentSelectedString];
-        let modSetting = realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false AND before = %@", before)?.first
-        try! realm.write {
-            modSetting.before = before
-        }
-        nextViewController.targetSpeechModSettingID = modSetting.id
+         CreateSpeechModSettingViewControllerSwift* nextViewController = [segue destinationViewController];
+         let before = [self GetCurrentSelectedString];
+         let modSetting = realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false AND before = %@", before)?.first
+         try! realm.write {
+         modSetting.before = before
+         }
+         nextViewController.targetSpeechModSettingID = modSetting.id
          */
     }
     
