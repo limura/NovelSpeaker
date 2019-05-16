@@ -10,7 +10,7 @@ import UIKit
 import Eureka
 
 class CreateSpeechModSettingViewControllerSwift: FormViewController {
-    public var targetSpeechModSettingID:String? = nil
+    @objc public var targetSpeechModSettingID:String? = nil
     var currentSetting = RealmSpeechModSetting()
     var beforeTestText = ""
     var afterTestText = ""

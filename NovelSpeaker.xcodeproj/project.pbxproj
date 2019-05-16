@@ -21,10 +21,8 @@
 		210958EB1A0E1C5500E9171F /* NEW!.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958ED1A0E1C5500E9171F /* NEW!.png */; };
 		210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F01A0E1C5C00E9171F /* NEW!@2x.png */; };
 		210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F31A0E1C6100E9171F /* NEW!@3x.png */; };
-		210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
 		2117251019B2064400FB97D2 /* BookShelfTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */; };
-		2117251E19B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117252019B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib */; };
 		211BA5F819973BA500560842 /* SpeechBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5F719973BA500560842 /* SpeechBlock.m */; };
 		211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FA19973CFB00560842 /* SpeechConfig.m */; };
 		211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FD199742CF00560842 /* NiftySpeaker.m */; };
@@ -41,7 +39,6 @@
 		212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */; };
 		212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */; };
 		212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */; };
-		212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */; };
 		212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F01131D8FDEC5009D69E6 /* NiftyUtility.m */; };
 		212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */; };
 		212F011C1D907CF1009D69E6 /* Default568@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F011B1D907CF1009D69E6 /* Default568@2x.png */; };
@@ -73,11 +70,8 @@
 		2133F2B21E80E175001A0BC5 /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A01E80E175001A0BC5 /* iTunesArtwork */; };
 		2133F2B31E80E175001A0BC5 /* iTunesArtwork@2x in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */; };
 		213515FC1F8CC06400F7AAD0 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 213515FB1F8CC06400F7AAD0 /* MessageUI.framework */; };
-		213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */; };
 		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
-		213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */; };
-		213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */; };
 		213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */; };
 		213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */; };
 		214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */; };
@@ -109,16 +103,10 @@
 		21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */; };
 		21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
 		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
-		21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */; };
-		2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191635A199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m */; };
-		21916360199E01A7003FF7FC /* SpeakSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */; };
-		21916364199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916362199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m */; };
 		2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */; };
 		2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */; };
-		21916372199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */; };
 		21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916374199F143E003FF7FC /* SpeechModSetting.m */; };
 		21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
-		2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */; };
 		2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */; };
 		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
 		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
@@ -126,7 +114,6 @@
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
-		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
 		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
 		21AFDF36216CF977002F34D9 /* SpeechBlockTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */; };
@@ -141,14 +128,12 @@
 		21B53A2819619D23009658B7 /* app_globe.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2519619D23009658B7 /* app_globe.png */; };
 		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
-		21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */; };
 		21C372DD21DFC41600FB2D52 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
 		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
 		21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
 		21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA31967FD390039A706 /* NarouDownloadQueue.m */; };
-		21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD3196831070039A706 /* DownloadStatusViewController.m */; };
 		21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD6196843280039A706 /* BookShelfTableViewController.m */; };
 		21C759FA2287123500956B73 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759F92287123500956B73 /* RealmModels.swift */; };
 		21C759FC2287127800956B73 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21C759FB2287127700956B73 /* CloudKit.framework */; };
@@ -260,13 +245,10 @@
 		210958F41A0E1C6400E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!.png"; sourceTree = "<group>"; };
 		210958F51A0E1C6700E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!@2x.png"; sourceTree = "<group>"; };
 		210958F61A0E1C6A00E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!@3x.png"; sourceTree = "<group>"; };
-		210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSizeSettingViewController.h; sourceTree = "<group>"; };
-		210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextSizeSettingViewController.m; sourceTree = "<group>"; };
 		210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 6.xcdatamodel"; sourceTree = "<group>"; };
 		210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
 		2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BookShelfTableViewCell.xib; sourceTree = "<group>"; };
-		2117251F19B2093600FB97D2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/SpeakSettingSampleTextTableViewCell.xib; sourceTree = "<group>"; };
 		211BA5F619973BA500560842 /* SpeechBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechBlock.h; sourceTree = "<group>"; };
 		211BA5F719973BA500560842 /* SpeechBlock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechBlock.m; sourceTree = "<group>"; };
 		211BA5F919973CFB00560842 /* SpeechConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechConfig.h; sourceTree = "<group>"; };
@@ -294,11 +276,8 @@
 		212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerSettingsViewController.swift; sourceTree = "<group>"; };
 		212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechWaitSettingViewController.swift; sourceTree = "<group>"; };
 		212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSectionConfigsViewController.swift; sourceTree = "<group>"; };
-		212F00D31D8DD700009D69E6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/DefaultSpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		212F01121D8FDEC5009D69E6 /* NiftyUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftyUtility.h; sourceTree = "<group>"; };
 		212F01131D8FDEC5009D69E6 /* NiftyUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftyUtility.m; sourceTree = "<group>"; };
-		212F01161D906F4E009D69E6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/DefaultSpeakSettingEditTableViewCell.strings; sourceTree = "<group>"; };
-		212F01181D906F56009D69E6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/DefaultSpeakSettingEditTableViewCell.strings; sourceTree = "<group>"; };
 		212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-167px.png"; sourceTree = "<group>"; };
 		212F011B1D907CF1009D69E6 /* Default568@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default568@2x.png"; sourceTree = "<group>"; };
 		212F359A1A8F8857009D0E60 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
@@ -331,17 +310,10 @@
 		2133F2A01E80E175001A0BC5 /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; path = iTunesArtwork; sourceTree = "<group>"; };
 		2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */ = {isa = PBXFileReference; lastKnownFileType = file; path = "iTunesArtwork@2x"; sourceTree = "<group>"; };
 		213515FB1F8CC06400F7AAD0 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
-		213A4DB01A61749600E9EC13 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
-		213A4DB11A61749B00E9EC13 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MaxSpeechTimeTableViewCell.xib; sourceTree = "<group>"; };
-		213A4DB31A6174AD00E9EC13 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
 		213A4DC41A63CF8B00E9EC13 /* SpeechWaitConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpeechWaitConfig.h; path = DataModelMapping/SpeechWaitConfig.h; sourceTree = "<group>"; };
 		213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SpeechWaitConfig.m; path = DataModelMapping/SpeechWaitConfig.m; sourceTree = "<group>"; };
 		213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitConfigCacheData.h; sourceTree = "<group>"; };
 		213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitConfigCacheData.m; sourceTree = "<group>"; };
-		213A4DCA1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitSettingTableViewController.h; sourceTree = "<group>"; };
-		213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingTableViewController.m; sourceTree = "<group>"; };
-		213A4DCD1A63FA5100E9EC13 /* SpeechWaitSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitSettingViewController.h; sourceTree = "<group>"; };
-		213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingViewController.m; sourceTree = "<group>"; };
 		213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeIntervalCountDownRow.swift; sourceTree = "<group>"; };
 		214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiftyUtilitySwift.swift; sourceTree = "<group>"; };
@@ -383,27 +355,15 @@
 		21890CF11D92F38800869046 /* NSDataZlibExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataZlibExtension.h; sourceTree = "<group>"; };
 		21890CF21D92F38800869046 /* NSDataZlibExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataZlibExtension.m; sourceTree = "<group>"; };
 		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		21916354199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DefaultSpeakSettingEditTableViewCell.h; sourceTree = "<group>"; };
-		21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DefaultSpeakSettingEditTableViewCell.m; sourceTree = "<group>"; };
-		21916359199DFECA003FF7FC /* SpeakSettingEditTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakSettingEditTableViewCell.h; sourceTree = "<group>"; };
-		2191635A199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakSettingEditTableViewCell.m; sourceTree = "<group>"; };
-		2191635E199E01A6003FF7FC /* SpeakSettingsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakSettingsTableViewController.h; sourceTree = "<group>"; };
-		2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakSettingsTableViewController.m; sourceTree = "<group>"; };
-		21916361199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakSettingSampleTextTableViewCell.h; sourceTree = "<group>"; };
-		21916362199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakSettingSampleTextTableViewCell.m; sourceTree = "<group>"; };
 		21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 3.xcdatamodel"; sourceTree = "<group>"; };
 		2191636A199E65B9003FF7FC /* SpeakPitchConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakPitchConfig.h; sourceTree = "<group>"; };
 		2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakPitchConfig.m; sourceTree = "<group>"; };
 		2191636D199E6610003FF7FC /* SpeakPitchConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakPitchConfigCacheData.h; sourceTree = "<group>"; };
 		2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakPitchConfigCacheData.m; sourceTree = "<group>"; };
-		21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateNewSpeakPitchSettingViewController.h; sourceTree = "<group>"; };
-		21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateNewSpeakPitchSettingViewController.m; sourceTree = "<group>"; };
 		21916373199F143E003FF7FC /* SpeechModSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechModSetting.h; sourceTree = "<group>"; };
 		21916374199F143E003FF7FC /* SpeechModSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSetting.m; sourceTree = "<group>"; };
 		21916376199F1463003FF7FC /* SpeechModSettingCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechModSettingCacheData.h; sourceTree = "<group>"; };
 		21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSettingCacheData.m; sourceTree = "<group>"; };
-		2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateSpeechModSettingViewController.h; sourceTree = "<group>"; };
-		2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateSpeechModSettingViewController.m; sourceTree = "<group>"; };
 		2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataMigrationViewController.h; sourceTree = "<group>"; };
 		2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMigrationViewController.m; sourceTree = "<group>"; };
 		2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 4.xcdatamodel"; sourceTree = "<group>"; };
@@ -424,10 +384,7 @@
 		21A4F71C19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
 		21A4F71D19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F71E19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		21A4F73719B1B66E007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/SpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		21A4F74119B1B758007CCD32 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
-		21AED5D119B2142E00CE846D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SpeakSettingSampleTextTableViewCell.xib; sourceTree = "<group>"; };
-		21AED5D219B2146F00CE846D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
 		21AED5D419B335CF00CE846D /* ReleaseMemo.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReleaseMemo.md; sourceTree = "<group>"; };
 		21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummySoundLooper.swift; sourceTree = "<group>"; };
 		21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Silent3sec.mp3; sourceTree = "<group>"; };
@@ -445,8 +402,6 @@
 		21B53A2619619D23009658B7 /* app_globe@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_globe@2x.png"; sourceTree = "<group>"; };
 		21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalDataSingleton.h; sourceTree = "<group>"; };
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
-		21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaxSpeechTimeTableViewCell.h; sourceTree = "<group>"; };
-		21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MaxSpeechTimeTableViewCell.m; sourceTree = "<group>"; };
 		21C372DB21DFC41600FB2D52 /* UIImageExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIImageExtension.h; sourceTree = "<group>"; };
 		21C372DC21DFC41600FB2D52 /* UIImageExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIImageExtension.m; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
@@ -457,8 +412,6 @@
 		21C74F9D1965A5300039A706 /* NarouContentCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContentCacheData.m; sourceTree = "<group>"; };
 		21C74FA21967FD390039A706 /* NarouDownloadQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouDownloadQueue.h; sourceTree = "<group>"; };
 		21C74FA31967FD390039A706 /* NarouDownloadQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouDownloadQueue.m; sourceTree = "<group>"; };
-		21C74FD2196831070039A706 /* DownloadStatusViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadStatusViewController.h; sourceTree = "<group>"; };
-		21C74FD3196831070039A706 /* DownloadStatusViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadStatusViewController.m; sourceTree = "<group>"; };
 		21C74FD5196843280039A706 /* BookShelfTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewController.h; sourceTree = "<group>"; };
 		21C74FD6196843280039A706 /* BookShelfTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewController.m; sourceTree = "<group>"; };
 		21C759F92287123500956B73 /* RealmModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModels.swift; sourceTree = "<group>"; };
@@ -674,18 +627,6 @@
 				21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */,
 				21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */,
 				2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */,
-				21916354199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.h */,
-				21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */,
-				212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */,
-				21916359199DFECA003FF7FC /* SpeakSettingEditTableViewCell.h */,
-				2191635A199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m */,
-				21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */,
-				21916361199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.h */,
-				21916362199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m */,
-				2117252019B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib */,
-				21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */,
-				21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */,
-				213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */,
 				2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */,
 				2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */,
 				2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */,
@@ -954,27 +895,13 @@
 				4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */,
 				21C74F99196456490039A706 /* NarouSearchViewController.h */,
 				21C74F9A196456490039A706 /* NarouSearchViewController.m */,
-				21C74FD2196831070039A706 /* DownloadStatusViewController.h */,
-				21C74FD3196831070039A706 /* DownloadStatusViewController.m */,
-				2191635E199E01A6003FF7FC /* SpeakSettingsTableViewController.h */,
-				2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */,
 				212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */,
 				213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */,
-				210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */,
-				210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */,
 				21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */,
-				21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */,
-				21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */,
 				21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */,
-				2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */,
-				2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */,
 				21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */,
 				2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */,
 				2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */,
-				213A4DCA1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.h */,
-				213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */,
-				213A4DCD1A63FA5100E9EC13 /* SpeechWaitSettingViewController.h */,
-				213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */,
 				212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */,
 				21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */,
 				21E704CD1AF741350071F31E /* UpdateLogViewController.h */,
@@ -1184,7 +1111,6 @@
 				2133F2B01E80E175001A0BC5 /* Icon.png in Resources */,
 				2133F2AE1E80E175001A0BC5 /* Icon-Small@2x.png in Resources */,
 				21CAC81C21273C0A00F74092 /* UpdateMemo.txt in Resources */,
-				213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */,
 				21D397A81FC960E10018F883 /* bookmark-true@2x.png in Resources */,
 				21F563C81FD801970037F5D7 /* >@2x.png in Resources */,
 				212F011C1D907CF1009D69E6 /* Default568@2x.png in Resources */,
@@ -1195,7 +1121,6 @@
 				210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */,
 				213374412013816D0043D995 /* bookmark-false.png in Resources */,
 				210958C81A0DF55600E9171F /* icloud1.png in Resources */,
-				2117251E19B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib in Resources */,
 				21B53A2819619D23009658B7 /* app_globe.png in Resources */,
 				210958C71A0DF55600E9171F /* gear@3x.png in Resources */,
 				219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */,
@@ -1212,7 +1137,6 @@
 				2133F2AB1E80E175001A0BC5 /* Icon-Small-50.png in Resources */,
 				21F054D71917E0F200CC6BA9 /* InfoPlist.strings in Resources */,
 				21F054E01917E0F200CC6BA9 /* Main.storyboard in Resources */,
-				212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */,
 				2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */,
 				21D397B11FC97A380018F883 /* home@3x.png in Resources */,
 				21C74F961964502A0039A706 /* arrow_down.png in Resources */,
@@ -1231,7 +1155,6 @@
 				213374402013816D0043D995 /* bookmark-false@3x.png in Resources */,
 				21D397A01FC95CBB0018F883 /* earth.png in Resources */,
 				2133F2AD1E80E175001A0BC5 /* Icon-Small.png in Resources */,
-				21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1345,20 +1268,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21916360199E01A7003FF7FC /* SpeakSettingsTableViewController.m in Sources */,
 				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
 				213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */,
-				21916372199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m in Sources */,
 				21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */,
 				2173A6BF21CC529F002E9EA8 /* FloatingButton.swift in Sources */,
 				212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */,
-				21916364199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m in Sources */,
 				216741A3204421F1008A578D /* BugReportViewController.swift in Sources */,
-				2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */,
 				212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */,
 				2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */,
 				212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
-				213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
 				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
@@ -1366,9 +1284,7 @@
 				216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */,
 				217BD9E419CE72BB008A0D9D /* StringSubstituter.m in Sources */,
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
-				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
 				212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */,
-				210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */,
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */,
@@ -1384,7 +1300,6 @@
 				21E704CF1AF741350071F31E /* UpdateLogViewController.m in Sources */,
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
 				21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */,
-				21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */,
 				21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */,
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
@@ -1400,12 +1315,10 @@
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
 				21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */,
-				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
 				21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
-				21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
 				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
 				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
@@ -1414,7 +1327,6 @@
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
 				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
 				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
-				213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */,
 				21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */,
 				211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
@@ -1489,15 +1401,6 @@
 			name = "NEW!@3x.png";
 			sourceTree = "<group>";
 		};
-		2117252019B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				2117251F19B2093600FB97D2 /* ja */,
-				21AED5D119B2142E00CE846D /* en */,
-			);
-			name = SpeakSettingSampleTextTableViewCell.xib;
-			sourceTree = "<group>";
-		};
 		212852DE19B1D101001A75DC /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1517,16 +1420,6 @@
 			name = Info.plist;
 			sourceTree = "<group>";
 		};
-		212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				212F00D31D8DD700009D69E6 /* Base */,
-				212F01161D906F4E009D69E6 /* en */,
-				212F01181D906F56009D69E6 /* ja */,
-			);
-			name = DefaultSpeakSettingEditTableViewCell.xib;
-			sourceTree = "<group>";
-		};
 		2133F2211E7FFF0B001A0BC5 /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1534,25 +1427,6 @@
 				2133F2221E7FFF0D001A0BC5 /* en */,
 			);
 			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-		213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				213A4DB01A61749600E9EC13 /* en */,
-				213A4DB11A61749B00E9EC13 /* Base */,
-				213A4DB31A6174AD00E9EC13 /* ja */,
-			);
-			name = MaxSpeechTimeTableViewCell.xib;
-			sourceTree = "<group>";
-		};
-		21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				21A4F73719B1B66E007CCD32 /* ja */,
-				21AED5D219B2146F00CE846D /* en */,
-			);
-			name = SpeakSettingEditTableViewCell.xib;
 			sourceTree = "<group>";
 		};
 		21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */ = {

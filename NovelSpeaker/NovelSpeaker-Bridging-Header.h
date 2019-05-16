@@ -5,8 +5,6 @@
 #import <UIKit/UIKit.h>
 #import "GlobalDataSingleton.h"
 #import "EditUserBookViewController.h"
-#import "MaxSpeechTimeTableViewCell.h"
-#import "CreateSpeechModSettingViewController.h"
 #import "UriLoader.h"
 #import "NarouLoader.h"
 #import "NarouSearchResultTableViewController.h"

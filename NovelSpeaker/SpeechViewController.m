@@ -16,7 +16,6 @@
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
 #import "EasyShare.h"
-#import "CreateSpeechModSettingViewController.h"
 #import "EditUserBookViewController.h"
 #import "NovelSpeaker-Swift.h"
 
@@ -258,7 +257,8 @@
 
 /// 読み替え辞書への登録イベントハンドラ
 - (void) setSpeechModSetting:(id)sender {
-    [self performSegueWithIdentifier:@"SpeechViewToSpeechModSetingsSegue" sender:self];
+    // TODO: あとで復活させる
+    //[self performSegueWithIdentifier:@"SpeechViewToSpeechModSetingsSegue" sender:self];
 }
 
 /// MPRemoteCommandCenter でのイベントを受け取るようにします。
@@ -664,8 +664,15 @@
     
     // 読み替え辞書登録時の値を放り込みます
     if ([[segue identifier] isEqualToString:@"SpeechViewToSpeechModSetingsSegue"]) {
-        CreateSpeechModSettingViewController* nextViewController = [segue destinationViewController];
-        nextViewController.targetBeforeString = [self GetCurrentSelectedString];
+        /* TODO: あとで復活させる
+        CreateSpeechModSettingViewControllerSwift* nextViewController = [segue destinationViewController];
+        let before = [self GetCurrentSelectedString];
+        let modSetting = realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false AND before = %@", before)?.first
+        try! realm.write {
+            modSetting.before = before
+        }
+        nextViewController.targetSpeechModSettingID = modSetting.id
+         */
     }
     
     // ユーザ作成のコンテンツだった場合
