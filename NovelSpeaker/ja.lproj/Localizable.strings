@@ -353,7 +353,15 @@
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFailedTitle" = "読み替え後の文字列に問題があります";
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFieldMessage" = "空文字列は設定できません。\n読み替え後に発話させないようにするには空白に読み替えさせる必要があります。";
 
-"BookShelfTableViewController_SortTypeNcode" = "Ncode順";
+"BookShelfRATreeViewController_UpTo1DayAgo" = "1日前まで";
+"BookShelfRATreeViewController_UpTo7DayAgo" = "7日前まで";
+"BookShelfRATreeViewController_UpTo30DayAgo" = "30日前まで";
+"BookShelfRATreeViewController_UpTo6MonthsAgo" = "6ヶ月前まで";
+"BookShelfRATreeViewController_UpTo1YearAgo" = "1年前まで";
+"BookShelfRATreeViewController_BeforeThat" = "それ以前";
+"BookShelfRATreeViewController_UnknownWriter" = "(作者名不明)";
+
+"BookShelfTableViewController_SortTypeNcode" = "ID順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
 "BookShelfTableViewController_SortTypeNovelName" = "小説名順";
 "BookShelfTableViewController_SortTypeUpdateDate" = "更新順";

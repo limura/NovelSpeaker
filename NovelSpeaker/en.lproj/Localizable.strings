@@ -358,6 +358,14 @@
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFailedTitle" = "There is a problem with the string after replacement";
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFieldMessage" = "You can not set an empty string.\nIf you do not want them to speak after reading, you need to change to blank.";
 
+"BookShelfRATreeViewController_UpTo1DayAgo" = "Up to one day ago";
+"BookShelfRATreeViewController_UpTo7DayAgo" = "Up to 7 days ago";
+"BookShelfRATreeViewController_UpTo30DayAgo" = "Up to 30 days ago";
+"BookShelfRATreeViewController_UpTo6MonthsAgo" = "Up to 6 months ago";
+"BookShelfRATreeViewController_UpTo1YearAgo" = "Up to a year ago";
+"BookShelfRATreeViewController_BeforeThat" = "More than a year ago";
+"BookShelfRATreeViewController_UnknownWriter" = "(Name unknown)";
+
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

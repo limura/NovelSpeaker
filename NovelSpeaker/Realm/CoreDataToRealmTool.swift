@@ -252,6 +252,23 @@ class CoreDataToRealmTool: NSObject {
             }else{
                 novel.url = NarouContentToNovelID(content: novelCoreData)
                 novel.type = NovelType.URL
+                if let keyword = novelCoreData.keyword {
+                    for tag in keyword.components(separatedBy: " ") {
+                        var hit:Bool = false
+                        for realmTag in realm.objects(RealmNovelTag.self).filter("isDeleted = false AND name = %@", tag) {
+                            if !realmTag.targetNovelIDArray.contains(novel.novelID) {
+                                realmTag.targetNovelIDArray.append(novel.novelID)
+                            }
+                            hit = true
+                        }
+                        if !hit {
+                            let realmTag = RealmNovelTag()
+                            realmTag.type = "keyword"
+                            realmTag.name = tag
+                            realm.add(realmTag)
+                        }
+                    }
+                }
             }
             if let writer = novelCoreData.writer {
                 novel.writer = writer

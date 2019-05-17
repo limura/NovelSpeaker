@@ -318,7 +318,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     func getCurrentSortTypeDisplayString() -> String {
         let dic = getDisplayStringToSortTypeDictionary()
-        let sortType = GlobalDataSingleton.getInstance().getBookSelfSortType()
+        guard let sortType = RealmGlobalState.GetInstance()?.bookShelfSortType else { return "-" }
         for (key, type) in dic {
             if type == sortType {
                 return key
@@ -344,7 +344,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             NSLocalizedString("BookShelfTableViewController_SortTypeUpdateDate", comment: "更新順"),
         ], firstSelectedString: getCurrentSortTypeDisplayString(), parentView: targetView) { (selectedText) in
             let sortType = self.convertDisplayStringToSortType(key: selectedText!)
-            GlobalDataSingleton.getInstance().setBookSelfSortType(sortType)
+            if let realm = try? RealmUtil.GetRealm(), let globalState = RealmGlobalState.GetInstance() {
+                try! realm.write {
+                    globalState.bookShelfSortType = sortType
+                }
+            }
             self.reloadAllData()
         }
         dialog?.popup(nil)
@@ -502,15 +506,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }
                     if index >= 0 {
                         self.treeView?.deleteItems(at: IndexSet([index]), inParent: parent, with: RATreeViewRowAnimationFade)
-                        if let realm = try? RealmUtil.GetRealm() {
-                            realm.beginWrite()
-                            content.delete(realm: realm)
-                            if let token = self.novelArrayNotificationToken {
-                                try! realm.commitWrite(withoutNotifying: [token])
-                            }else{
-                                try! realm.commitWrite()
-                            }
-                        }
                         for (idx, cellData) in self.displayDataArray.enumerated() {
                             if let thisContent = cellData.content {
                                 if thisContent == content {
@@ -533,6 +528,17 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                     self.displayDataArray.remove(at: idx)
                                     self.treeView?.deleteItems(at: IndexSet([idx]), inParent: nil, with: RATreeViewRowAnimationFade)
                                 }
+                            }
+                        }
+                        if let realm = try? RealmUtil.GetRealm() {
+                            print("delete: \(content.novelID)")
+                            realm.beginWrite()
+                            content.delete(realm: realm)
+                            print("delete: will commitWrite()")
+                            if let token = self.novelArrayNotificationToken {
+                                try! realm.commitWrite(withoutNotifying: [token])
+                            }else{
+                                try! realm.commitWrite()
                             }
                         }
                     }
@@ -638,6 +644,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
      */
 
     @objc func refreshControlValueChangedEvent(sendor:UIRefreshControl) {
+        // TODO: 再ダウンロード回りをなんとかする
         GlobalDataSingleton.getInstance()?.reDownloadAllContents()
         sendor.endRefreshing()
     }

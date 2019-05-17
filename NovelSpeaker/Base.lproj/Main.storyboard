@@ -778,7 +778,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Gvt-2h-g6g" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-35.200000000000003" y="-508.24587706146929"/>
+            <point key="canvasLocation" x="7" y="-884"/>
         </scene>
         <!--本棚-->
         <scene sceneID="fHI-C2-mKL">
@@ -790,12 +790,31 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
-                        <segue destination="P5f-rJ-SqP" kind="relationship" relationship="rootViewController" id="ANo-Ex-OXJ"/>
+                        <segue destination="qdr-YW-SRT" kind="relationship" relationship="rootViewController" id="lw0-xX-U4f"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Pmo-cD-y4U" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-822.39999999999998" y="-508.24587706146929"/>
+            <point key="canvasLocation" x="-823" y="-645"/>
+        </scene>
+        <!--本棚-->
+        <scene sceneID="68N-Rw-P3B">
+            <objects>
+                <viewController title="本棚" id="qdr-YW-SRT" customClass="BookShelfRATreeViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="lbe-Qa-v0c">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="MCD-xD-iwy"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="BIV-fi-F7U"/>
+                    <connections>
+                        <segue destination="vXZ-lx-hvc" kind="push" identifier="bookShelfToReaderSegue" id="Lgr-sU-NIg"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="s1q-9t-Dmj" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-63" y="-420"/>
         </scene>
         <!--title-->
         <scene sceneID="ufC-wZ-h7g">
@@ -1041,8 +1060,9 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
         <image name="soundbook.png" width="9.8742856979370117" height="9.8742856979370117"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="uw4-9z-dhB"/>
-        <segue reference="Sih-ID-qj2"/>
+        <segue reference="RgY-Zn-l61"/>
+        <segue reference="Lgr-sU-NIg"/>
+        <segue reference="0zP-nv-fmY"/>
         <segue reference="vyW-HX-PLM"/>
     </inferredMetricsTieBreakers>
 </document>
