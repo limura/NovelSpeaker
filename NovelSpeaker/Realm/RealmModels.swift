@@ -9,6 +9,7 @@ import Foundation
 import RealmSwift
 import IceCream
 import CloudKit
+import UIKit
 
 @objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 0
@@ -280,14 +281,16 @@ protocol CanWriteIsDeleted {
     
     var linkedQueues : [RealmSpeechQueue]? {
         get {
-            return self.realm?.objects(RealmSpeechQueue.self).filter({ (speechQueue) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmSpeechQueue.self).filter({ (speechQueue) -> Bool in
                 return !speechQueue.isDeleted && speechQueue.targetStoryIDArray.contains(self.id)
             })
         }
     }
     var owner : RealmNovel? {
         get {
-            return self.realm?.objects(RealmNovel.self).filter("isDeleted = false AND novelID = %@", self.novelID).first
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmNovel.self).filter("isDeleted = false AND novelID = %@", self.novelID).first
         }
     }
     var content : String? {
@@ -305,11 +308,18 @@ protocol CanWriteIsDeleted {
         return realm.object(ofType: RealmStory.self, forPrimaryKey: CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber))
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmStory>? {
+    static func GetAllObjects() -> Results<RealmStory>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmStory.self).filter("isDeleted = false")
     }
+    static func CreateNewStory(novel:RealmNovel, chapterNumber:Int) -> RealmStory {
+        let story = RealmStory()
+        story.id = CreateUniqueID(novelID: novel.novelID, chapterNumber: chapterNumber)
+        story.chapterNumber = chapterNumber
+        story.novelID = novel.novelID
+        return story
+    }
 
-    
     override class func primaryKey() -> String? {
         return "id"
     }
@@ -331,7 +341,7 @@ extension RealmStory: CanWriteIsDeleted {
 }
 
 @objc final class RealmNovel : Object {
-    @objc dynamic var novelID : String = "" // novelID は primary key です。
+    @objc dynamic var novelID : String = RealmNovel.CreateUniqueID() // novelID は primary key です。
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var _type : Int = NovelType.URL.rawValue
     @objc dynamic var writer : String = ""
@@ -358,28 +368,32 @@ extension RealmStory: CanWriteIsDeleted {
     // 何故そうなるのかは詳しくはこの issue を参照。
     // https://github.com/caiyue1993/IceCream/issues/88
     // ということで、以下のような link されているものを検索するようなクエリは遅くなるかもしれん。というか多分遅い。
-    var linkedStorys : Results<RealmStory>? {
+    var linkedStorys: Results<RealmStory>? {
         get {
-            return self.realm?.objects(RealmStory.self).filter("isDeleted = false AND novelID = %@", self.novelID)
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmStory.self).filter("isDeleted = false AND novelID = %@", self.novelID)
         }
     }
     var linkedSpeechModSettings : [RealmSpeechModSetting]? {
         get {
-            return self.realm?.objects(RealmSpeechModSetting.self).filter({ (speechModSetting) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmSpeechModSetting.self).filter({ (speechModSetting) -> Bool in
                 return !speechModSetting.isDeleted && speechModSetting.targetNovelIDArray.contains(self.novelID)
             })
         }
     }
     var linkedSpeechSectionConfigs : [RealmSpeechSectionConfig]? {
         get {
-            return self.realm?.objects(RealmSpeechSectionConfig.self).filter({ (speechSectionConfig) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmSpeechSectionConfig.self).filter({ (speechSectionConfig) -> Bool in
                 return !speechSectionConfig.isDeleted && speechSectionConfig.targetNovelIDArray.contains(self.novelID)
             })
         }
     }
     var linkedDisplaySettings : [RealmDisplaySetting]? {
         get {
-            return self.realm?.objects(RealmDisplaySetting.self).filter({ (displaySetting) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmDisplaySetting.self).filter({ (displaySetting) -> Bool in
                 return !displaySetting.isDeleted && displaySetting.targetNovelIDArray.contains(self.novelID)
             })
         }
@@ -387,7 +401,8 @@ extension RealmStory: CanWriteIsDeleted {
     
     var linkedTags : [RealmNovelTag]? {
         get {
-            return self.realm?.objects(RealmNovelTag.self).filter({ (novelTag) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmNovelTag.self).filter({ (novelTag) -> Bool in
                 return !novelTag.isDeleted && novelTag.targetNovelIDArray.contains(self.novelID)
             })
         }
@@ -395,7 +410,8 @@ extension RealmStory: CanWriteIsDeleted {
     
     var linkedRealmSpeechOverrideSettings : [RealmSpeechOverrideSetting]? {
         get {
-            return self.realm?.objects(RealmSpeechOverrideSetting.self).filter({ (speechOverrideSetting) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmSpeechOverrideSetting.self).filter({ (speechOverrideSetting) -> Bool in
                 return !speechOverrideSetting.isDeleted && speechOverrideSetting.targetNovelIDArray.contains(self.novelID)
             })
         }
@@ -422,20 +438,19 @@ extension RealmStory: CanWriteIsDeleted {
         }
     }
     var isNewFlug: Bool {
-        get {
-            if let dd = lastDownloadDate {
-                if let lr = lastReadDate {
-                    return dd > lr
-                }
+        if let dd = lastDownloadDate {
+            if let lr = lastReadDate {
+                return dd > lr
             }
-            return false
         }
+        return false
     }
     public static func CreateUniqueID() -> String {
         return "https://example.com/\(NSUUID().uuidString)"
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmNovel>? {
+    static func GetAllObjects() -> Results<RealmNovel>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmNovel.self).filter("isDeleted = false")
     }
     
@@ -466,13 +481,15 @@ extension RealmNovel: CanWriteIsDeleted {
     
     var targetNovelArray : [RealmNovel]? {
         get {
-            return self.realm?.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                 return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
             })
         }
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechModSetting>? {
+    static func GetAllObjects() -> Results<RealmSpeechModSetting>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false")
     }
 
@@ -519,7 +536,8 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
         }
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechWaitConfig>? {
+    static func GetAllObjects() -> Results<RealmSpeechWaitConfig>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechWaitConfig.self).filter("isDeleted = false")
     }
     
@@ -564,7 +582,8 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
         }
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmSpeakerSetting>? {
+    static func GetAllObjects() -> Results<RealmSpeakerSetting>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false")
     }
     
@@ -601,18 +620,21 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
     
     var speaker : RealmSpeakerSetting? {
         get {
-            return self.realm?.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id = %@", self.speakerID).first
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id = %@", self.speakerID).first
         }
     }
     var targetNovelArray : [RealmNovel]? {
         get {
-            return self.realm?.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                 return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
             })
         }
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechSectionConfig>? {
+    static func GetAllObjects() -> Results<RealmSpeechSectionConfig>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false")
     }
     
@@ -641,13 +663,15 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     
     var targetStoryArray : [RealmStory]? {
         get {
-            return self.realm?.objects(RealmStory.self).filter({ (story) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmStory.self).filter({ (story) -> Bool in
                 return !story.isDeleted && self.targetStoryIDArray.contains(story.id)
             })
         }
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechQueue>? {
+    static func GetAllObjects() -> Results<RealmSpeechQueue>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechQueue.self).filter("isDeleted = false")
     }
     
@@ -703,18 +727,104 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     
     var defaultDisplaySetting : RealmDisplaySetting? {
         get {
-            return self.realm?.objects(RealmDisplaySetting.self).filter("isDeleted = false AND id = %@", self.defaultDisplaySettingID).first
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false AND id = %@", self.defaultDisplaySettingID).first
         }
     }
     var defaultSpeaker : RealmSpeakerSetting? {
         get {
-            return self.realm?.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id = %@", self.defaultSpeakerID).first
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id = %@", self.defaultSpeakerID).first
         }
     }
     var defaultSpeechOverrideSetting : RealmSpeechOverrideSetting? {
         get {
-            return self.realm?.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false AND id = %@", self.defaultSpeechOverrideSettingID).first
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false AND id = %@", self.defaultSpeechOverrideSettingID).first
         }
+    }
+    var backgroundColor:UIColor {
+        get {
+            if isDarkThemeEnabled {
+                return UIColor.black
+            }
+            return UIColor.white
+        }
+    }
+    var tintColor:UIColor {
+        get {
+            if isDarkThemeEnabled {
+                return UIColor.white
+            }
+            return UIColor.black
+        }
+    }
+    var scrollviewIndicatorStyle:UIScrollView.IndicatorStyle {
+        get {
+            if isDarkThemeEnabled {
+                return .white
+            }
+            return .black
+        }
+    }
+    var uibarStyle:UIBarStyle{
+        get {
+            if isDarkThemeEnabled {
+                return .black
+            }
+            return .default
+        }
+    }
+    // TODO: UIAppearance でテーマできちゃうぜやったーと思ったけど全然駄目だったのでとりあえず放置(´・ω・`)
+    func ApplyThemaToAppearance() {
+        let backgroundColor:UIColor
+        if isDarkThemeEnabled{
+            backgroundColor = UIColor.black
+        }else{
+            backgroundColor = UIColor.white
+        }
+        let tintColor:UIColor
+        if isDarkThemeEnabled{
+            tintColor = UIColor.white
+        }else{
+            tintColor = UIColor.black
+        }
+        let buttonTextColor:UIColor
+        if isDarkThemeEnabled{
+            buttonTextColor = UIColor.white
+        }else{
+            buttonTextColor = UIColor.blue
+        }
+        let barStyle:UIBarStyle
+        if isDarkThemeEnabled{
+            barStyle = .black
+        }else{
+            barStyle = .default
+        }
+        let indicatorStyle:UIScrollView.IndicatorStyle
+        if isDarkThemeEnabled{
+            indicatorStyle = .white
+        }else{
+            indicatorStyle = .black
+        }
+        UIView.appearance().backgroundColor = backgroundColor
+        UIView.appearance().tintColor = tintColor
+        UITextView.appearance().textColor = tintColor
+        UITabBar.appearance().barTintColor = backgroundColor
+        UINavigationBar.appearance().barTintColor = backgroundColor
+        UIButton.appearance().setTitleColor(buttonTextColor, for: .normal)
+        UINavigationBar.appearance().barStyle = barStyle
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: tintColor]
+        UIScrollView.appearance().indicatorStyle = indicatorStyle
+    }
+    static func FallbackApplyAppearance() {
+        UIView.appearance().backgroundColor = UIColor.white
+        UIView.appearance().tintColor = UIColor.black
+        UITextView.appearance().textColor = UIColor.black
+        UITabBar.appearance().barTintColor = UIColor.white
+        UINavigationBar.appearance().barStyle = UIBarStyle.default
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
+        UIScrollView.appearance().indicatorStyle = UIScrollView.IndicatorStyle.black
     }
     
     static public func GetInstance(realm:Realm) -> RealmGlobalState? {
@@ -745,14 +855,27 @@ extension RealmGlobalState: CanWriteIsDeleted {
     
     var targetNovelArray : [RealmNovel]? {
         get {
-            return self.realm?.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                 return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
             })
         }
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmDisplaySetting>? {
+    static func GetAllObjects() -> Results<RealmDisplaySetting>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false")
+    }
+    
+    var font : UIFont {
+        get {
+            let fontSize = GlobalDataSingleton.convertFontSizeValue(toFontSize: self.textSizeValue)
+            let fontName = self.fontID
+            if fontName.count > 0, let font = UIFont(name: fontName, size: CGFloat(fontSize)) {
+                return font
+            }
+            return UIFont.systemFont(ofSize: CGFloat(fontSize))
+        }
     }
     
     override class func primaryKey() -> String? {
@@ -780,13 +903,15 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     
     var targetNovelArray : [RealmNovel]? {
         get {
-            return self.realm?.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                 return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
             })
         }
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmNovelTag>? {
+    static func GetAllObjects() -> Results<RealmNovelTag>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmNovelTag.self).filter("isDeleted = false")
     }
     
@@ -829,13 +954,15 @@ extension RealmNovelTag: CanWriteIsDeleted {
     
     var targetNovelArray : [RealmNovel]? {
         get {
-            return self.realm?.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                 return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
             })
         }
     }
     
-    static func GetAllObjects(realm: Realm) -> Results<RealmSpeechOverrideSetting>? {
+    static func GetAllObjects() -> Results<RealmSpeechOverrideSetting>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false")
     }
     

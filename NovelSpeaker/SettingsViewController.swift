@@ -108,9 +108,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_CreateNewUserText", comment:"新規自作本の追加")
-                }.onCellSelection({ (butonCellof, buttonRow) in
-                    self.CreateNewUserText()
-                })
+            }.onCellSelection({ (butonCellof, buttonRow) in
+                self.CreateNewUserText()
+            })
             
             <<< SwitchRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_BackgroundFetch", comment:"小説の自動更新")
@@ -465,8 +465,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     // 新規のユーザ本を追加して、編集ページに遷移する
     func CreateNewUserText(){
-        m_NarouContentCacheData = GlobalDataSingleton.getInstance().createNewUserBookWithSaved()
         performSegue(withIdentifier: "CreateNewUserTextSegue", sender: self)
+        /* TODO: 自前でWidgetを配置することができればこういう感じで segue を使わずに画面遷移しようと思っています。
+        let novel = RealmNovel()
+        let nextViewController = EditBookViewController()
+        nextViewController.targetNovel = novel
+        self.navigationController?.pushViewController(nextViewController, animated: true)
+         */
     }
     /// 標準で用意された読み上げ辞書を上書き追加します。
     func AddDefaultSpeechModSetting(){
@@ -630,8 +635,16 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         if let identifier = segue.identifier {
             switch identifier {
             case "CreateNewUserTextSegue":
-                if let userBookViewController:EditUserBookViewController = segue.destination as? EditUserBookViewController {
-                    userBookViewController.narouContentDetail = self.m_NarouContentCacheData
+                if let nextViewController:EditBookViewController = segue.destination as? EditBookViewController {
+                    let novel = RealmNovel()
+                    let story = RealmStory.CreateNewStory(novel: novel, chapterNumber: 1)
+                    if let realm = try? RealmUtil.GetRealm() {
+                        try! realm.write {
+                            realm.add(novel, update: true)
+                            realm.add(story, update: true)
+                        }
+                    }
+                    nextViewController.targetNovel = novel
                 }
                 break
             default:

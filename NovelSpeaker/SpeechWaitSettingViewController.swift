@@ -248,7 +248,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
             }
         })
         
-        if let configArray = RealmSpeechWaitConfig.GetAllObjects(realm: realm) {
+        if let configArray = RealmSpeechWaitConfig.GetAllObjects() {
             for config in configArray {
                 form.append(createSpeechWaitCells(speechWaitSetting: config))
             }

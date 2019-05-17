@@ -204,7 +204,7 @@ class SpeechSectionConfigsViewController: FormViewController {
     
     func createCells() {
         let realm = try! RealmUtil.GetRealm()
-        let speechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects(realm: realm)?.sorted(byKeyPath: "createdDate")
+        let speechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects()?.sorted(byKeyPath: "createdDate")
         let section = Section()
         <<< TextAreaRow() {
             $0.value = NSLocalizedString("SpeechSectionConfigsViewController_Usage", comment: "会話文などで声質や話者を変更するための設定です。\nそれぞれの設定をタップすると詳細が設定できます。開始文字と終了文字の間に挟まれた部分を読み上げる話者を選択します。必要のない設定は削除することもできます。")

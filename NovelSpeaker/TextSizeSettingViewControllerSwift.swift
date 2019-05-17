@@ -51,13 +51,7 @@ class TextSizeSettingViewControllerSwift: UIViewController {
     func setFont(displaySetting:RealmDisplaySetting) {
         DispatchQueue.main.async {
             self.textSizeSlider.value = displaySetting.textSizeValue
-            let fontSize = GlobalDataSingleton.convertFontSizeValue(toFontSize: displaySetting.textSizeValue)
-            let fontName = displaySetting.fontID
-            if fontName.count > 0, let font = UIFont(name: fontName, size: CGFloat(fontSize)) {
-                self.sampleTextTextView.font = font
-            }else{
-                self.sampleTextTextView.font = UIFont.systemFont(ofSize: CGFloat(fontSize))
-            }
+            self.sampleTextTextView.font = displaySetting.font
         }
     }
     

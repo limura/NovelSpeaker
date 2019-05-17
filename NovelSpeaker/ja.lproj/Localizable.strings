@@ -197,6 +197,12 @@
 "EditUserBookViewController_AddNewStoryFailed" = "新しい章の追加に失敗しました";
 "EditUserBookViewController_ConfirmDeleteThisChapter" = "この章を削除します。よろしいですか？";
 
+"EditBookViewController_TitleText" = "小説名";
+"EditBookViewController_EntryButtonTitle" = "登録";
+"EditBookViewController_AddNewChapterButtonTitle" = "新しく章を追加";
+"EditBookViewController_DeleteChapterButtonTitle" = "この章を削除";
+"EditBookViewController_StoryPlaceholderText" = "ここに本文を入力します。";
+
 "NarouDownloadQueue_URLDownloadTitleFixed" = "ダウンロードしたものを「%@」の名前で本棚に登録します";
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "ダウンロードしたもののタイトルを取得できなかったので、以下のURLのまま本棚に登録します。\n%@";
 "NarouDownloadQueue_URLDownloadFailedWithException" = "URLの取得に失敗しました。\n%@";

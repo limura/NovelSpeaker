@@ -134,6 +134,13 @@
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
 "EditUserBookViewController_ConfirmDeleteThisChapter" = "Delete this chapter. Will that be all right?";
 
+"EditBookViewController_TitleText" = "Name";
+"EditBookViewController_EntryButtonTitle" = "Register";
+"EditBookViewController_AddNewChapterButtonTitle" = "Add new chapter";
+"EditBookViewController_DeleteChapterButtonTitle" = "Delete this chapter";
+"EditBookViewController_StoryPlaceholderText" = "Enter the text here.";
+
+
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "Can not select speaker data";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "Please change the version of the OS to the latest thing.";
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotSelectSpeaker_title" = "Can not select speaker data";
