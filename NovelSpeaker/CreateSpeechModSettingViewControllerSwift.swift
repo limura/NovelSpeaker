@@ -48,9 +48,8 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
     }
     
     func createCells() {
-        let realm = try! RealmUtil.GetRealm()
         if let targetID = targetSpeechModSettingID {
-            if let targetSetting = realm.object(ofType: RealmSpeechModSetting.self, forPrimaryKey: targetID) {
+            if let realm = try? RealmUtil.GetRealm(), let targetSetting = realm.object(ofType: RealmSpeechModSetting.self, forPrimaryKey: targetID) {
                 self.currentSetting = targetSetting
             }
         }
@@ -153,7 +152,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
             if !self.validateDataAndAlert(before: self.beforeText, after: self.afterText, isUseRegexp: self.isUseRegexp) {
                 return
             }
-            let realm = try! RealmUtil.GetRealm()
+            guard let realm = try? RealmUtil.GetRealm() else { return }
             try! realm.write {
                 self.currentSetting.before = self.beforeText
                 self.currentSetting.after = self.afterText

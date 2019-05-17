@@ -47,7 +47,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     }
     
     func addNotificationReceiver(){
-        let realm = try! RealmUtil.GetRealm()
+        guard let realm = try? RealmUtil.GetRealm() else { return }
         self.speechModSettingObserveToken = realm.objects(RealmSpeechModSetting.self).observe { (collectionChange) in
             print("SpeechModSettingsTableViewControllerSwift: reload table by RealmSpeechModSetting ovserve event.")
             DispatchQueue.main.async {
@@ -110,10 +110,10 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
             // Delete the row from the data source
             let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)
             if let modSetting = modSetting {
-                let realm = try! RealmUtil.GetRealm()
+                guard let realm = try? RealmUtil.GetRealm() else { return }
                 if let targetModSetting = realm.object(ofType: RealmSpeechModSetting.self, forPrimaryKey: modSetting.id) {
                     try! realm.write {
-                        RealmUtil.Delete(realm: realm, model: targetModSetting)
+                        targetModSetting.delete(realm: realm)
                     }
                 }
             }
@@ -180,7 +180,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     }
     
     func GetSpeechModArray() -> [RealmSpeechModSetting] {
-        let realm = try! RealmUtil.GetRealm()
+        guard let realm = try? RealmUtil.GetRealm() else { return [] }
         if m_FilterString.count > 0 {
             return Array(realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false AND ( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString).sorted(byKeyPath: "before", ascending: false))
         }

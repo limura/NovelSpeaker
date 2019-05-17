@@ -319,6 +319,14 @@ protocol CanWriteIsDeleted {
         story.novelID = novel.novelID
         return story
     }
+    func delete(realm:Realm) {
+        if let queueArray = linkedQueues {
+            for queue in queueArray {
+                queue.unref(realm:realm, story: self)
+            }
+        }
+        RealmUtil.Delete(realm: realm, model: self)
+    }
 
     override class func primaryKey() -> String? {
         return "id"
@@ -417,6 +425,11 @@ extension RealmStory: CanWriteIsDeleted {
         }
     }
     
+    var lastChapterNumber : Int? {
+        get {
+            return linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last?.chapterNumber
+        }
+    }
     var lastDownloadURL : String? {
         get {
             return linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last?.url
@@ -454,6 +467,40 @@ extension RealmStory: CanWriteIsDeleted {
         return realm.objects(RealmNovel.self).filter("isDeleted = false")
     }
     
+    func delete(realm:Realm) {
+        if let storyArray = linkedStorys {
+            for story in storyArray {
+                story.delete(realm: realm)
+            }
+        }
+        if let speechModSettingArray = linkedSpeechModSettings {
+            for speechModSetting in speechModSettingArray {
+                speechModSetting.unref(realm:realm, novel: self)
+            }
+        }
+        if let speechSectionConfigArray = linkedSpeechSectionConfigs {
+            for speechSectionConfig in speechSectionConfigArray {
+                speechSectionConfig.unref(realm:realm, novel: self)
+            }
+        }
+        if let displaySettingArray = linkedDisplaySettings {
+            for displaySetting in displaySettingArray {
+                displaySetting.unref(realm:realm, novel: self)
+            }
+        }
+        if let tagArray = linkedTags {
+            for tag in tagArray {
+                tag.unref(realm:realm, novel: self)
+            }
+        }
+        if let realmSpeechOverrideSettingArray = linkedRealmSpeechOverrideSettings {
+            for realmSpeechOverrideSetting in realmSpeechOverrideSettingArray {
+                realmSpeechOverrideSetting.unref(realm:realm, novel: self)
+            }
+        }
+        RealmUtil.Delete(realm: realm, model: self)
+    }
+    
     override class func primaryKey() -> String? {
         return "novelID"
     }
@@ -467,6 +514,9 @@ extension RealmNovel: CKRecordConvertible {
 extension RealmNovel: CKRecordRecoverable {
 }
 extension RealmNovel: CanWriteIsDeleted {
+}
+func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
+    return lhs.novelID == rhs.novelID
 }
 
 @objc final class RealmSpeechModSetting : Object {
@@ -491,6 +541,18 @@ extension RealmNovel: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmSpeechModSetting>? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false")
+    }
+
+    func unref(realm:Realm, novel:RealmNovel) {
+        if let index = targetNovelIDArray.index(of: novel.novelID) {
+            targetNovelIDArray.remove(at: index)
+            if targetNovelIDArray.count <= 0 {
+                delete(realm: realm)
+            }
+        }
+    }
+    func delete(realm:Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
     }
 
     override class func primaryKey() -> String? {
@@ -539,6 +601,10 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmSpeechWaitConfig>? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechWaitConfig.self).filter("isDeleted = false")
+    }
+    
+    func delete(realm:Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
     }
     
     override class func primaryKey() -> String? {
@@ -593,6 +659,10 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
         speaker.setVoiceWithIdentifier(voiceIdentifier)
     }
     
+    func delete(realm:Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
+    }
+    
     override class func primaryKey() -> String? {
         return "id"
     }
@@ -638,6 +708,18 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
         return realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false")
     }
     
+    func unref(realm: Realm, novel: RealmNovel) {
+        if let index = targetNovelIDArray.index(of: novel.novelID) {
+            targetNovelIDArray.remove(at: index)
+            if targetNovelIDArray.count <= 0 {
+                delete(realm: realm)
+            }
+        }
+    }
+    func delete(realm: Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
+    }
+    
     override class func primaryKey() -> String? {
         return "id"
     }
@@ -673,6 +755,18 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmSpeechQueue>? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechQueue.self).filter("isDeleted = false")
+    }
+    
+    func unref(realm:Realm, story:RealmStory) {
+        if let index = targetStoryIDArray.index(of: story.id) {
+            targetStoryIDArray.remove(at: index)
+            if targetStoryIDArray.count <= 0 {
+                delete(realm: realm)
+            }
+        }
+    }
+    func delete(realm:Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
     }
     
     override class func primaryKey() -> String? {
@@ -826,8 +920,17 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
         UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
         UIScrollView.appearance().indicatorStyle = UIScrollView.IndicatorStyle.black
     }
-    
-    static public func GetInstance(realm:Realm) -> RealmGlobalState? {
+    static func GetLastReadStory() -> RealmStory? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        return realm.objects(RealmStory.self).sorted(byKeyPath: "lastReadDate", ascending: true).last
+    }
+    static func GetLastReadNovel() -> RealmNovel? {
+        guard let realm = try? RealmUtil.GetRealm(), let lastReadStory = GetLastReadStory() else { return nil }
+        return realm.object(ofType: RealmNovel.self, forPrimaryKey: lastReadStory.novelID)
+    }
+
+    static public func GetInstance() -> RealmGlobalState? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.object(ofType: RealmGlobalState.self, forPrimaryKey: UniqueID)
     }
 
@@ -877,6 +980,18 @@ extension RealmGlobalState: CanWriteIsDeleted {
             return UIFont.systemFont(ofSize: CGFloat(fontSize))
         }
     }
+
+    func unref(realm: Realm, novel: RealmNovel) {
+        if let index = targetNovelIDArray.index(of: novel.novelID) {
+            targetNovelIDArray.remove(at: index)
+            if targetNovelIDArray.count <= 0 {
+                delete(realm: realm)
+            }
+        }
+    }
+    func delete(realm:Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
+    }
     
     override class func primaryKey() -> String? {
         return "id"
@@ -913,6 +1028,18 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmNovelTag>? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmNovelTag.self).filter("isDeleted = false")
+    }
+
+    func unref(realm:Realm, novel:RealmNovel) {
+        if let index = targetNovelIDArray.index(of: novel.novelID) {
+            targetNovelIDArray.remove(at: index)
+            if targetNovelIDArray.count <= 0 {
+                delete(realm: realm)
+            }
+        }
+    }
+    func delete(realm:Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
     }
     
     override class func primaryKey() -> String? {
@@ -964,6 +1091,17 @@ extension RealmNovelTag: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmSpeechOverrideSetting>? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false")
+    }
+    func unref(realm:Realm, novel:RealmNovel) {
+        if let index = targetNovelIDArray.index(of: novel.novelID) {
+            targetNovelIDArray.remove(at: index)
+            if targetNovelIDArray.count <= 0 {
+                delete(realm: realm)
+            }
+        }
+    }
+    func delete(realm:Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
     }
     
     override class func primaryKey() -> String? {

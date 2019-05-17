@@ -44,7 +44,7 @@ class EditBookViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let realm = try? RealmUtil.GetRealm(), let displaySetting = RealmGlobalState.GetInstance(realm: realm)?.defaultDisplaySetting {
+        if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
             storyTextView.font = displaySetting.font
         }
         storyTextView.placeholder = NSLocalizedString("EditBookViewController_StoryPlaceholderText", comment: "ここに本文を入力します。")
@@ -119,7 +119,7 @@ class EditBookViewController: UIViewController {
         moveNextButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
         moveNextButton.titleLabel?.adjustsFontForContentSizeCategory = true
         // storyTextView は自前のフォント設定を使います
-        if let realm = try? RealmUtil.GetRealm(), let displaySetting = RealmGlobalState.GetInstance(realm: realm)?.defaultDisplaySetting {
+        if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
             storyTextView.font = displaySetting.font
         }
         addChapterButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
@@ -133,7 +133,7 @@ class EditBookViewController: UIViewController {
         entryButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
         entryButton.titleLabel?.adjustsFontForContentSizeCategory = true
 
-        if let realm = try? RealmUtil.GetRealm(), let globalState = RealmGlobalState.GetInstance(realm: realm) {
+        if let realm = try? RealmUtil.GetRealm(), let globalState = RealmGlobalState.GetInstance() {
             try! realm.write {
                 globalState.isDarkThemeEnabled = true
             }
@@ -232,11 +232,11 @@ class EditBookViewController: UIViewController {
         center.addObserver(self, selector: #selector(willHideKeyboardEventHandler(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
         // storyTextView は自前のフォント設定を使うので、それが更新されるのを監視しておきます
-        if let realm = try? RealmUtil.GetRealm(), let displaySetting = RealmGlobalState.GetInstance(realm: realm)?.defaultDisplaySetting {
+        if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
             fontSizeObserveToken = displaySetting.observe({ (change) in
                 switch change {
                 case .change(_):
-                    if let realm = try? RealmUtil.GetRealm(), let displaySetting = RealmGlobalState.GetInstance(realm: realm)?.defaultDisplaySetting {
+                    if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
                         self.storyTextView.font = displaySetting.font
                     }
                 case .error(_):

@@ -24,7 +24,8 @@ class FontSelectViewController: FormViewController {
             }
             $0.tag = fontName
         }.onCellSelection { (labelCallOf, labelRow) in
-            if let realm = try? RealmUtil.GetRealm(), let displaySetting = RealmGlobalState.GetInstance(realm: realm)?.defaultDisplaySetting, let fontID = labelRow.tag {
+            if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting, let fontID = labelRow.tag {
+                guard let realm = try? RealmUtil.GetRealm() else { return }
                 try! realm.write {
                     displaySetting.fontID = fontID
                 }

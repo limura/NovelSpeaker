@@ -33,9 +33,8 @@ class SpeakerSettingsViewController: FormViewController {
     
     func createSpeakSettingRows(currentSetting:RealmSpeakerSetting) -> Section {
         let targetID = currentSetting.id
-        let realm = try! RealmUtil.GetRealm()
         var isDefaultSpeakerSetting = false
-        if let globalState = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID) {
+        if let globalState = RealmGlobalState.GetInstance() {
             if let defaultSpeakerSetting = globalState.defaultSpeaker {
                 if defaultSpeakerSetting.id == targetID {
                     isDefaultSpeakerSetting = true
@@ -58,7 +57,7 @@ class SpeakerSettingsViewController: FormViewController {
                     guard let name = name else {
                         return ValidationError(msg: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorNil", comment: "名前に空文字列は設定できません"))
                     }
-                    let realm = try! RealmUtil.GetRealm()
+                    guard let realm = try? RealmUtil.GetRealm() else { return nil }
                     if realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id != %@ AND name = %@", targetID, name).first != nil {
                         return ValidationError(msg: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorAlready", comment: "既に定義済みの名前です"))
                     }
@@ -73,7 +72,7 @@ class SpeakerSettingsViewController: FormViewController {
                     if value.count <= 0 || !row.isValid {
                         return
                     }
-                    let realm = try! RealmUtil.GetRealm()
+                    guard let realm = try? RealmUtil.GetRealm() else { return }
                     if let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
                         try! realm.write {
                             setting.name = value
@@ -98,7 +97,7 @@ class SpeakerSettingsViewController: FormViewController {
             $0.title = NSLocalizedString("SpeakSettingsViewController_PitchTitle", comment: "高さ")
         }.onChange({ (row) in
             if let value = row.value {
-                let realm = try! RealmUtil.GetRealm()
+                guard let realm = try? RealmUtil.GetRealm() else { return }
                 if let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
                     try! realm.write {
                         setting.pitch = value
@@ -117,7 +116,7 @@ class SpeakerSettingsViewController: FormViewController {
             guard let rate = row.value else{
                 return
             }
-            let realm = try! RealmUtil.GetRealm()
+            guard let realm = try? RealmUtil.GetRealm() else { return }
             if self.isRateSettingSync {
                 for row in self.form.rows.filter({ (row) -> Bool in
                     guard let row = row as? SliderRow else {
@@ -168,8 +167,7 @@ class SpeakerSettingsViewController: FormViewController {
             guard let locale = row.value else {
                 return
             }
-            let realm = try! RealmUtil.GetRealm()
-            guard let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
+            guard let realm = try? RealmUtil.GetRealm(), let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
                 return
             }
             var voiceNames:[String] = []
@@ -209,8 +207,7 @@ class SpeakerSettingsViewController: FormViewController {
             guard let voice = AVSpeechSynthesisVoice.speechVoices().filter({$0.name == voiceName}).first else {
                 return
             }
-            let realm = try! RealmUtil.GetRealm()
-            guard let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
+            guard  let realm = try? RealmUtil.GetRealm(), let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
                 return
             }
             try! realm.write {
@@ -220,8 +217,7 @@ class SpeakerSettingsViewController: FormViewController {
         <<< ButtonRow("TestSpeechButtonRow-\(targetID)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")
         }.onCellSelection({ (buttonCellOf, button) in
-            let realm = try! RealmUtil.GetRealm()
-            guard let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
+            guard let realm = try? RealmUtil.GetRealm(), let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
                 return
             }
             self.testSpeech(pitch: setting.pitch, rate: setting.rate, identifier: setting.voiceIdentifier, text: self.testText)
@@ -231,8 +227,7 @@ class SpeakerSettingsViewController: FormViewController {
                 $0.title = NSLocalizedString("SpeakerSettingsViewController_RemoveButtonRow", comment: "この話者の設定を削除")
             }.onCellSelection({ (buttonCellOf, button) in
                 var settingName = ""
-                let realm = try! RealmUtil.GetRealm()
-                if let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
+                if let realm = try? RealmUtil.GetRealm(), let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) {
                     settingName = setting.name
                 }
                 NiftyUtilitySwift.EasyDialogTwoButton(
@@ -243,11 +238,11 @@ class SpeakerSettingsViewController: FormViewController {
                 button1Action: nil,
                 button2Title: NSLocalizedString("OK_button", comment: "OK"),
                 button2Action: {
-                    guard let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
+                    guard let realm = try? RealmUtil.GetRealm(), let setting = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: targetID) else {
                         return
                     }
                     try! realm.write {
-                        RealmUtil.Delete(realm: realm, model: setting)
+                        setting.delete(realm: realm)
                     }
                     if let index = self.form.index(of: section) {
                         print("remove section index: \(index)")
@@ -279,7 +274,7 @@ class SpeakerSettingsViewController: FormViewController {
             $0.title = NSLocalizedString("SpeakSettingsViewController_AddNewSettingButtonTitle", comment: "新しく話者設定を追加する")
         }.onCellSelection({ (_, button) in
             let newSpeakerSetting = RealmSpeakerSetting()
-            let realm = try! RealmUtil.GetRealm()
+            guard let realm = try? RealmUtil.GetRealm() else { return }
             try! realm.write {
                 realm.add(newSpeakerSetting)
             }
@@ -301,9 +296,10 @@ class SpeakerSettingsViewController: FormViewController {
             self.isRateSettingSync = value
         })
         
-        let realm = try! RealmUtil.GetRealm()
-        let globalState = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID)
-        if let defaultSpeaker = globalState?.defaultSpeaker {
+        guard let realm = try? RealmUtil.GetRealm(), let globalState = RealmGlobalState.GetInstance() else {
+            return
+        }
+        if let defaultSpeaker = globalState.defaultSpeaker {
             sections = sections +++ createSpeakSettingRows(currentSetting: defaultSpeaker)
             for speakerSetting in realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id != %@", defaultSpeaker.id) {
                 sections = sections +++ createSpeakSettingRows(currentSetting: speakerSetting)
