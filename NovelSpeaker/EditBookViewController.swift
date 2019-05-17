@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import SZTextView
 
 class EditBookViewController: UIViewController {
     public var targetNovel:RealmNovel? = nil

@@ -16,7 +16,6 @@
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
 #import "EasyShare.h"
-#import "EditUserBookViewController.h"
 #import "NovelSpeaker-Swift.h"
 
 @interface SpeechViewController ()
@@ -688,8 +687,11 @@
     
     // ユーザ作成のコンテンツだった場合
     if ([[segue identifier] isEqualToString:@"EditUserTextSegue"]) {
+        /* // TODO: EditUserBookViewController はなくなりました。
+         // これからはEditBookViewController.swift を使います。
         EditUserBookViewController* nextViewController = [segue destinationViewController];
         nextViewController.NarouContentDetail = self.NarouContentDetail;
+         */
     }
 
 }

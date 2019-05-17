@@ -83,6 +83,7 @@
 		21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */; };
 		21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */; };
 		21647FFC228CF44900A183DF /* UpdateLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FFB228CF44900A183DF /* UpdateLogViewController.swift */; };
+		21648000228D5EE000A183DF /* EditBookViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FFF228D5EE000A183DF /* EditBookViewController.swift */; };
 		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
@@ -143,7 +144,6 @@
 		21CAC8192125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */; };
 		21CAC81A2125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */; };
 		21CAC81C21273C0A00F74092 /* UpdateMemo.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC81B21273C0A00F74092 /* UpdateMemo.txt */; };
-		21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */; };
 		21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */; };
 		21D3979E1FC95CBB0018F883 /* earth@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D3979B1FC95CB90018F883 /* earth@2x.png */; };
 		21D3979F1FC95CBB0018F883 /* earth@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D3979C1FC95CBA0018F883 /* earth@3x.png */; };
@@ -325,6 +325,7 @@
 		21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSizeSettingViewControllerSwift.swift; sourceTree = "<group>"; };
 		21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateSpeechModSettingViewControllerSwift.swift; sourceTree = "<group>"; };
 		21647FFB228CF44900A183DF /* UpdateLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateLogViewController.swift; sourceTree = "<group>"; };
+		21647FFF228D5EE000A183DF /* EditBookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBookViewController.swift; sourceTree = "<group>"; };
 		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
@@ -422,8 +423,6 @@
 		21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-monochrome-64x64-reverse.png"; sourceTree = "<group>"; };
 		21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-monochrome-320x320-reverse.png"; sourceTree = "<group>"; };
 		21CAC81B21273C0A00F74092 /* UpdateMemo.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UpdateMemo.txt; sourceTree = "<group>"; };
-		21D317E51B6BBF3600023B3B /* EditUserBookViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditUserBookViewController.h; sourceTree = "<group>"; };
-		21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditUserBookViewController.m; sourceTree = "<group>"; };
 		21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogViewControllerSwift.swift; sourceTree = "<group>"; };
 		21D3979B1FC95CB90018F883 /* earth@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "earth@2x.png"; sourceTree = "<group>"; };
 		21D3979C1FC95CBA0018F883 /* earth@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "earth@3x.png"; sourceTree = "<group>"; };
@@ -904,8 +903,7 @@
 				212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */,
 				21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */,
 				21647FFB228CF44900A183DF /* UpdateLogViewController.swift */,
-				21D317E51B6BBF3600023B3B /* EditUserBookViewController.h */,
-				21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */,
+				21647FFF228D5EE000A183DF /* EditBookViewController.swift */,
 				215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */,
 				216741A2204421F1008A578D /* BugReportViewController.swift */,
 				21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */,
@@ -1298,7 +1296,6 @@
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
 				21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */,
 				21647FFC228CF44900A183DF /* UpdateLogViewController.swift in Sources */,
-				21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */,
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
 				21CA0FCB218DE6520059FACB /* DuplicateSoundPlayer.swift in Sources */,
@@ -1309,6 +1306,7 @@
 				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
 				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
 				2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */,
+				21648000228D5EE000A183DF /* EditBookViewController.swift in Sources */,
 				21C759FA2287123500956B73 /* RealmModels.swift in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
