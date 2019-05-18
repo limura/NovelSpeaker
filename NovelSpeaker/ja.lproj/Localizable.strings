@@ -370,7 +370,7 @@
 "BookShelfTableViewController_SearchTitle" = "検索";
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
-"BookShelfTableViewController_Resume:" = "▶︎再生: %@";
+"BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.51
 
 - Web取込 機能側での一回で取り込まれる小説の章の数の最大値を100から1000に増加

@@ -21,6 +21,7 @@ class EditBookViewController: UIViewController {
     @IBOutlet weak var addChapterButton: UIButton!
     @IBOutlet weak var deleteChapterButton: UIButton!
     @IBOutlet weak var chapterNumberIndicatorLabel: UILabel!
+    @IBOutlet weak var entryButton: UIButton!
     /* TODO: 自前で配置すると色がおかしくなるので当面は封印します(´・ω・`)
     let titleTextField: UITextField = UITextField(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
     let movePreviousButton: UIButton = UIButton(type: .system)
@@ -44,10 +45,7 @@ class EditBookViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
-            storyTextView.font = displaySetting.font
-        }
-        storyTextView.placeholder = NSLocalizedString("EditBookViewController_StoryPlaceholderText", comment: "ここに本文を入力します。")
+        initWidgets()
         if let novel = targetNovel {
             applyNovel(novel: novel)
         }else{
@@ -65,6 +63,20 @@ class EditBookViewController: UIViewController {
         endObserve()
         saveCurrentStory()
         saveCurrentNovel()
+    }
+    
+    func initWidgets() {
+        if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
+            storyTextView.font = displaySetting.font
+        }
+        
+        storyTextView.placeholder = NSLocalizedString("EditBookViewController_StoryPlaceholderText", comment: "ここに本文を入力します。")
+
+        // ボタンは内部の titleLabel の Dynamic Type 対応を storyboard 側でできないぽいので自前で指定します。(´・ω・`)
+        for button in [movePreviousButton, moveNextButton, addChapterButton, deleteChapterButton, entryButton] {
+            button?.titleLabel?.numberOfLines = 0
+            button?.titleLabel?.adjustsFontForContentSizeCategory = true
+        }
     }
     
     func applyNovel(novel:RealmNovel) {

@@ -910,22 +910,23 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7U0-Lh-pyC">
-                                <rect key="frame" x="57.5" y="77" width="252.5" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" adjustsFontForContentSizeCategory="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7U0-Lh-pyC">
+                                <rect key="frame" x="57.5" y="76.5" width="252.5" height="30"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hYi-6O-tpR">
-                                <rect key="frame" x="16" y="81" width="33.5" height="22"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hYi-6O-tpR">
+                                <rect key="frame" x="16" y="81" width="33.5" height="20.5"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wMt-h0-xpF">
-                                <rect key="frame" x="318" y="77" width="52" height="30"/>
+                                <rect key="frame" x="318" y="77" width="52" height="33"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="52" id="IPa-mV-vhY"/>
                                 </constraints>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <state key="normal" title="Entry">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
@@ -934,11 +935,11 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cM0-Wf-FN8">
-                                <rect key="frame" x="0.0" y="153" width="55" height="41"/>
+                                <rect key="frame" x="0.0" y="159" width="55" height="44"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="55" id="a61-DH-2Zr"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                 <state key="normal" title="＜">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
@@ -947,28 +948,29 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                                 </connections>
                             </button>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="1" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="ZfF-jG-c09">
-                                <rect key="frame" x="56" y="158.5" width="210" height="31"/>
+                                <rect key="frame" x="56" y="166" width="210" height="31"/>
                                 <connections>
                                     <action selector="chapterSliderChanged:" destination="dCR-kh-Ivz" eventType="valueChanged" id="OvC-GN-7NX"/>
                                 </connections>
                             </slider>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1/1" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LN3-sB-fzm">
-                                <rect key="frame" x="269" y="163.5" width="52" height="20.5"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1/1" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LN3-sB-fzm">
+                                <rect key="frame" x="269" y="171" width="52" height="20.5"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="52" id="asR-5m-zfM"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XX2-ka-OrJ" customClass="SZTextView">
-                                <rect key="frame" x="0.0" y="196.5" width="375" height="421.5"/>
+                                <rect key="frame" x="0.0" y="204" width="375" height="414"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="E2C-GJ-Of6">
-                                <rect key="frame" x="180" y="115" width="87" height="30"/>
+                                <rect key="frame" x="160" y="118" width="97" height="33"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <state key="normal" title="Add Chapter">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
@@ -977,7 +979,8 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KLa-F4-FYq">
-                                <rect key="frame" x="277" y="115" width="82" height="30"/>
+                                <rect key="frame" x="267" y="118" width="92" height="33"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <state key="normal" title="Del Chapter">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
@@ -986,11 +989,11 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Dd3-il-QVF">
-                                <rect key="frame" x="319" y="153" width="51" height="41"/>
+                                <rect key="frame" x="319" y="159" width="51" height="44"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="51" id="tck-oG-aNy"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                 <state key="normal" title="＞">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
@@ -1009,7 +1012,6 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                             <constraint firstItem="wMt-h0-xpF" firstAttribute="leading" secondItem="7U0-Lh-pyC" secondAttribute="trailing" constant="8" id="DKa-lg-HMm"/>
                             <constraint firstItem="KLa-F4-FYq" firstAttribute="leading" secondItem="E2C-GJ-Of6" secondAttribute="trailing" constant="10" id="DjF-IM-hK3"/>
                             <constraint firstItem="ZfF-jG-c09" firstAttribute="centerY" secondItem="Dd3-il-QVF" secondAttribute="centerY" id="H9Y-xn-LSX"/>
-                            <constraint firstItem="7U0-Lh-pyC" firstAttribute="centerY" secondItem="wMt-h0-xpF" secondAttribute="centerY" id="JQr-tD-HNt"/>
                             <constraint firstItem="7U0-Lh-pyC" firstAttribute="leading" secondItem="hYi-6O-tpR" secondAttribute="trailing" constant="8" id="KsZ-Qh-R0H"/>
                             <constraint firstItem="KLa-F4-FYq" firstAttribute="top" secondItem="wMt-h0-xpF" secondAttribute="bottom" constant="8" id="M7d-Ov-obG"/>
                             <constraint firstItem="E2C-GJ-Of6" firstAttribute="centerY" secondItem="KLa-F4-FYq" secondAttribute="centerY" id="PF8-TQ-Vth"/>
@@ -1036,6 +1038,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                         <outlet property="chapterNumberIndicatorLabelWidthConstraint" destination="asR-5m-zfM" id="jpf-PN-Ehk"/>
                         <outlet property="chapterSlider" destination="ZfF-jG-c09" id="Gw2-h9-Zd2"/>
                         <outlet property="deleteChapterButton" destination="KLa-F4-FYq" id="wo7-O1-2l0"/>
+                        <outlet property="entryButton" destination="wMt-h0-xpF" id="pSK-oX-hrW"/>
                         <outlet property="moveNextButton" destination="Dd3-il-QVF" id="wor-OF-Mli"/>
                         <outlet property="movePreviousButton" destination="cM0-Wf-FN8" id="1Re-ZR-OF9"/>
                         <outlet property="storyTextView" destination="XX2-ka-OrJ" id="bao-dY-cSZ"/>

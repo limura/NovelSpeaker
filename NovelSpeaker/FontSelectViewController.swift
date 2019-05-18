@@ -12,15 +12,17 @@ import RealmSwift
 
 class FontSelectViewController: FormViewController {
     let sampleText = "老爺は、あたりをはばかる低声で、わずか答えた。「王様は、人を殺します。」"
+    let fontSizeFont = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.title2)
     
     func CreateFontSelectRow(fontTitle:String, fontName:String, sampleText:String) -> LabelRow {
         return LabelRow("") {
             $0.title = String.init(format: "%@\n%@", fontTitle, sampleText)
             $0.cell.textLabel?.numberOfLines = 0
+            
             if fontName.count > 0 {
-                $0.cell.textLabel?.font = UIFont(name: fontName, size: 24)
+                $0.cell.textLabel?.font = UIFont(name: fontName, size: fontSizeFont.pointSize)
             }else{
-                $0.cell.textLabel?.font = UIFont.systemFont(ofSize: 24)
+                $0.cell.textLabel?.font = UIFont.systemFont(ofSize: fontSizeFont.pointSize)
             }
             $0.tag = fontName
         }.onCellSelection { (labelCallOf, labelRow) in

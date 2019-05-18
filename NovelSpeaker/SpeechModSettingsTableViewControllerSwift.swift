@@ -79,6 +79,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
             cell = UITableViewCell.init(style: UITableViewCell.CellStyle.default, reuseIdentifier: SpeechModSettingsTableViewControllerSwift.speechModSettingsTableViewDefaultCellID)
         }
 
+        cell.textLabel?.adjustsFontForContentSizeCategory = true
+        cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .body)
         let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)
         if modSetting == nil {
             cell.textLabel?.text = "-"
@@ -128,6 +130,13 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
         if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
             PushToCreateSpeechModSettingViewControllerSwift(modSetting: modSetting)
         }
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+    override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
     }
 
     /*

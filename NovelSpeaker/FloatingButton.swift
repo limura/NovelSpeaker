@@ -84,6 +84,8 @@ class FloatingButton: UIView {
         self.view.layer.shadowRadius = 5
         buttonClickedFunc = buttonClicked
         button.setTitle(text, for: .normal)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
+        button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
         if animated {
             showAnimate()
         }

@@ -27,6 +27,27 @@ void uncaughtExceptionHandler(NSException *exception)
        }];
 }
 
+- (void)setPreferredFontForTextStyleByAppearance{
+    // from http://koze.hatenablog.jp/entry/2015/06/03/000000
+    // UINavigationBar title
+    [[UINavigationBar appearance] setTitleTextAttributes:@{NSFontAttributeName: [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline]}];
+    // UIBarButtonItem title
+    [[UIBarButtonItem appearance] setTitleTextAttributes:
+     @{NSFontAttributeName: [UIFont preferredFontForTextStyle:UIFontTextStyleBody]}
+     forState:UIControlStateNormal];
+    [[UIBarButtonItem appearance] setTitleTextAttributes:
+     @{NSFontAttributeName: [UIFont preferredFontForTextStyle:UIFontTextStyleBody]}
+        forState:UIControlStateHighlighted];
+    // UITabBarItem title
+    [[UITabBarItem appearance] setTitleTextAttributes:@{NSFontAttributeName: [UIFont preferredFontForTextStyle:UIFontTextStyleBody]}
+                                             forState:UIControlStateNormal];
+    // UISegmentedControl title
+    [[UISegmentedControl appearance] setTitleTextAttributes:@{NSFontAttributeName: [UIFont preferredFontForTextStyle:UIFontTextStyleBody]}
+                                                   forState:UIControlStateNormal];
+    // UISearchBar text and placeholder
+    //[[UITextField appearanceWhenContainedInInstancesOfClasses:[UISearchBar class]] setFont:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]];
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     NSSetUncaughtExceptionHandler(&uncaughtExceptionHandler);
@@ -68,6 +89,9 @@ void uncaughtExceptionHandler(NSException *exception)
     
     // for FTLinearActivityIndicator enable (iPhone X とかのノッチのあるタイプでの network activity indicator を上書きしてくれる奴を enable にする)
     [UIApplication configureLinearNetworkActivityIndicatorIfNeeded];
+
+    // DynamicType 対応
+    [self setPreferredFontForTextStyleByAppearance];
     
     return YES;
 }

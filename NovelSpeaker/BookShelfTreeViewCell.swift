@@ -120,4 +120,10 @@ class BookShelfTreeViewCell: UITableViewCell {
         registerStoryObserver(novelIDArray: watchNovelIDArray)
     }
     
+    public var height : CGFloat {
+        get {
+            return CGFloat(self.titleLabel.bounds.height) + CGFloat(12) + CGFloat(10.5)
+        }
+    }
+    
 }

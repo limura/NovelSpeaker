@@ -138,7 +138,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
         let destructiveButton: Button
         let regularButton: Button
         
-        public init(textColor: UIColor = UIColor.black, textFont: UIFont = UIFont.systemFont(ofSize: 16.0), titleColor: UIColor = UIColor.black, titleFont: UIFont = UIFont.boldSystemFont(ofSize: 18.0), alertBackgroudColor: UIColor = UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0), cornerRadius: CGFloat = 15.0, maskViewAlpha: CGFloat = 0.6, separatorColor: UIColor = UIColor.lightGray) {
+        public init(textColor: UIColor = UIColor.black, textFont: UIFont = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body), titleColor: UIColor = UIColor.black, titleFont: UIFont = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.title3), alertBackgroudColor: UIColor = UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0), cornerRadius: CGFloat = 15.0, maskViewAlpha: CGFloat = 0.6, separatorColor: UIColor = UIColor.lightGray) {
             
             self.textColor = textColor
             self.titleColor = titleColor
@@ -159,18 +159,18 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             let textColor: UIColor
             let font: UIFont
             
-            public init(backgroundColor: UIColor = UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0), selectedBackgroundColor: UIColor = UIColor(red: 230 / 255.0, green: 230 / 255.0, blue: 230 / 255.0, alpha: 1.0), textColor: UIColor = UIColor(red: 19 / 255.0, green: 144 / 255.0, blue: 255 / 255.0, alpha: 1.0), font: UIFont = UIFont.boldSystemFont(ofSize: 16.0)) {
+            public init(backgroundColor: UIColor = UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0), selectedBackgroundColor: UIColor = UIColor(red: 230 / 255.0, green: 230 / 255.0, blue: 230 / 255.0, alpha: 1.0), textColor: UIColor = UIColor(red: 19 / 255.0, green: 144 / 255.0, blue: 255 / 255.0, alpha: 1.0), font: UIFont = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body)) {
                 self.backgroundColor = backgroundColor
                 self.selectedBackgroundColor = selectedBackgroundColor
                 self.textColor = textColor
                 self.font = font
             }
             
-            static let positive = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(19, green: 144, blue: 255), font: UIFont.boldSystemFont(ofSize: 16.0))
+            static let positive = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(19, green: 144, blue: 255), font: UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body))
             
-            static let destructive = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(255, green: 59, blue: 48), font: UIFont.systemFont(ofSize: 16.0))
+            static let destructive = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(255, green: 59, blue: 48), font: UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body))
             
-            static let regular = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(19, green: 144, blue: 255), font: UIFont.systemFont(ofSize: 16.0))
+            static let regular = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(19, green: 144, blue: 255), font: UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body))
             
         }
     }

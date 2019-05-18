@@ -82,6 +82,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshControlValueChangedEvent), for: .valueChanged)
         treeView.scrollView.addSubview(refreshControl)
+        
+        view.layoutIfNeeded()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -573,6 +575,22 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             print("editingStyle == .insert")
         }
     }
+    
+    // cell の高さを求められる時に呼ばれる
+    // TODO: 怪しく固定値を返しています。
+    // この値は BookShelfTreeViewCell の高さを返すべきなのですが、実際固定値なので固定値で返してしまって良いような気がします。
+    let fontForFontSize = UIFont.preferredFont(forTextStyle: .body)
+    func treeView(_ treeView: RATreeView, heightForRowForItem item: Any) -> CGFloat {
+        //print("heightForRowForItem called.")
+        return self.fontForFontSize.pointSize + 10.5 + 12
+        //return UITableView.automaticDimension
+    }
+    func treeView(_ treeView: RATreeView, estimatedHeightForRowForItem item: Any) -> CGFloat {
+        //print("estimatedHeightForRowForItem called.")
+        return self.fontForFontSize.pointSize + 10.5 + 12
+        //return UITableView.automaticDimension
+    }
+
 
     // TODO: なにやら昔色々やっていたものを今でも使えるようにできるといいね(´・ω・`)
     // ncodeのものが追加されたと仮定して RATreeView の状態を更新する
@@ -676,6 +694,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return
         }
         
+        print("floatingButton assign to view")
         floatingButton.assignToView(view: (self.treeView?.scrollView)!, text: String(format: NSLocalizedString("BookShelfTableViewController_Resume:", comment: "再生:%@"), lastReadNovel.title), animated: true) {
             self.pushNextView(novelID: lastReadNovel.novelID, isNeedSpeech: true)
             floatingButton.hideAnimate()

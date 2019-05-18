@@ -376,7 +376,7 @@
 "BookShelfTableViewController_SearchTitle" = "Search";
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
-"BookShelfTableViewController_Resume:" = "▶︎Speech: %@";
+"BookShelfTableViewController_Resume:" = "▶︎ Speech: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.51
 
 - Increase the maximum number of novel chapters captured at one time on the web capture side from 100 to 1000
