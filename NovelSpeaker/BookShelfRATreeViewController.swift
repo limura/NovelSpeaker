@@ -32,10 +32,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     var displayDataArray : [BookShelfRATreeViewCellData] = [];
     var treeView:RATreeView?
-    var m_NextViewDetail: RealmNovel?
     var searchText:String? = nil
     var searchButton:UIBarButtonItem = UIBarButtonItem()
     var resumeSpeechFloatingButton:FloatingButton? = nil
+    var nextViewNovelID: String?
     var isNextViewNeedResumeSpeech:Bool = false
     
     var novelArrayNotificationToken : NotificationToken? = nil
@@ -49,7 +49,18 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         treeView.dataSource = self
         treeView.delegate = self
         treeView.scrollView.delegate = self
-        treeView.register(UINib(nibName: BookShelfTableViewCellID, bundle: nil), forCellReuseIdentifier: String(describing: BookShelfTableViewCell.self))
+        treeView.register(UINib(nibName: BookShelfTreeViewCell.id, bundle: nil), forCellReuseIdentifier: String(describing: BookShelfTreeViewCell.self))
+        let guide:UILayoutGuide
+        if #available(iOS 11.0, *) {
+            guide = self.view.safeAreaLayoutGuide
+        } else {
+            guide = self.view.layoutMarginsGuide
+        }
+        treeView.topAnchor.constraint(equalTo: guide.topAnchor, constant: 8).isActive = true
+        treeView.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 8).isActive = true
+        treeView.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: 8).isActive = true
+        treeView.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: 8).isActive = true
+        treeView.translatesAutoresizingMaskIntoConstraints = false
         self.treeView = treeView
         
         // 編集ボタン等を配置
@@ -64,7 +75,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             showVersionUpNotice()
         }
         if let globalState = RealmGlobalState.GetInstance(), let novel = RealmGlobalState.GetLastReadNovel(), globalState.isOpenRecentNovelInStartTime {
-            self.pushNextView(novel: novel, isNeedSpeech: false)
+            self.pushNextView(novelID: novel.novelID, isNeedSpeech: false)
         }
         reloadAllDataAndScrollToCurrentReadingContent()
         
@@ -148,7 +159,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             let date:Date
         }
         let filterList = [
-            // TODO: localize
             filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo1DayAgo", comment: "1日前まで"), date: Date(timeIntervalSinceNow: -60*60*24)),
             filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo7DayAgo", comment: "7日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*7)),
             filterStruct(title: NSLocalizedString("BookShelfRATreeViewController_UpTo30DayAgo", comment: "30日前まで"), date: Date(timeIntervalSinceNow: -60*60*24*30)),
@@ -295,7 +305,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 guard let globalState = RealmGlobalState.GetInstance() else { return }
                 if globalState.isOpenRecentNovelInStartTime {
                     if let lastReadNovel = RealmGlobalState.GetLastReadNovel() {
-                        self.pushNextView(novel: lastReadNovel, isNeedSpeech: false)
+                        self.pushNextView(novelID: lastReadNovel.novelID, isNeedSpeech: false)
                     }
                 }
             })
@@ -403,8 +413,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
     // 次のビューに飛ばします。
-    func pushNextView(novel:RealmNovel, isNeedSpeech: Bool){
-        m_NextViewDetail = novel
+    func pushNextView(novelID:String, isNeedSpeech: Bool){
+        nextViewNovelID = novelID
         self.isNextViewNeedResumeSpeech = isNeedSpeech
         self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
     }
@@ -422,7 +432,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     func treeView(_ treeView: RATreeView, cellForItem item: Any?) -> UITableViewCell {
-        guard let cell = treeView.dequeueReusableCell(withIdentifier: String(describing: BookShelfTableViewCell.self)) as? BookShelfTableViewCell,
+        guard let cell = treeView.dequeueReusableCell(withIdentifier: String(describing: BookShelfTreeViewCell.self)) as? BookShelfTreeViewCell,
             let item = item as? BookShelfRATreeViewCellData else {
                 fatalError()
         }
@@ -436,12 +446,26 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
 
         if let content = item.content {
-            // TODO: cell の扱いをRealm側に変えたい……('A`)
-            //print("cellForItem: \(content.title) ncode:\(content.ncode) level: \(level)")
-            cell.setTitleLabel(headSpace + content.title, ncode: content.novelID)
+            cell.cellSetup(title: content.title, treeLevel: level, watchNovelIDArray: [content.novelID])
         }else if let title = item.title {
-            //print("cellForItem: \(title) level: \(level)")
-            cell.setTitleLabel(headSpace + title, ncode: nil)
+            func getChildNovelIDs(itemArray:[BookShelfRATreeViewCellData]) -> [String] {
+                var childrenArray:[String] = []
+                for child in itemArray {
+                    if let novel = child.content {
+                        childrenArray.append(novel.novelID)
+                    }else if let childrens = child.childrens{
+                        childrenArray.append(contentsOf: getChildNovelIDs(itemArray: childrens))
+                    }
+                }
+                return childrenArray
+            }
+            let childrenIDArray:[String]
+            if let childrens = item.childrens {
+                childrenIDArray = getChildNovelIDs(itemArray: childrens)
+            }else{
+                childrenIDArray = []
+            }
+            cell.cellSetup(title: title, treeLevel: level, watchNovelIDArray: childrenIDArray)
         }
         
         return cell
@@ -465,7 +489,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func treeView(_ treeView: RATreeView, didSelectRowForItem item: Any) {
         if let data = item as? BookShelfRATreeViewCellData {
             if let content = data.content {
-                pushNextView(novel: content, isNeedSpeech: false)
+                pushNextView(novelID: content.novelID, isNeedSpeech: false)
             }
         }
     }
@@ -550,6 +574,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
 
+    // TODO: なにやら昔色々やっていたものを今でも使えるようにできるといいね(´・ω・`)
     // ncodeのものが追加されたと仮定して RATreeView の状態を更新する
     func handleAddContent(novel:RealmNovel) {
         func dumpCurrentTree(head:[BookShelfRATreeViewCellData], level: Int){
@@ -618,30 +643,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         print("handleAddContent nothing to do...")
     }
-    /* TODO: 小説が追加されたり削除されたイベントを受け取るのを作る
-    @objc func narouContentListChanged(notification:NSNotification){
-        guard let how = notification.userInfo!["how"] as? String, let ncode = notification.userInfo!["ncode"] as? String else {
-            print("narouContentListChanged. but unknown userInfo")
-            return
-        }
-        print("narouContentListChanged: \(how)")
-        switch how {
-        case NarouContentListChangedAnnounce_Add:
-            // add は適切に処理してやらないといけない
-            handleAddContent(ncode: ncode)
-            break
-        case NarouContentListChangedAnnounce_Change:
-            // change は何もしなくて良い
-            break
-        case NarouContentListChangedAnnounce_Delete:
-            // delete が呼ばれるパスは無いと信じたい(自前のdeleteの時はNotificationを切ってるので来ないはず)けどあったら寂しいのでreloadしておく
-            reloadAllData()
-            break
-        default:
-            break
-        }
-    }
-     */
 
     @objc func refreshControlValueChangedEvent(sendor:UIRefreshControl) {
         // TODO: 再ダウンロード回りをなんとかする
@@ -676,7 +677,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         
         floatingButton.assignToView(view: (self.treeView?.scrollView)!, text: String(format: NSLocalizedString("BookShelfTableViewController_Resume:", comment: "再生:%@"), lastReadNovel.title), animated: true) {
-            self.pushNextView(novel: lastReadNovel, isNeedSpeech: true)
+            self.pushNextView(novelID: lastReadNovel.novelID, isNeedSpeech: true)
             floatingButton.hideAnimate()
         }
     }

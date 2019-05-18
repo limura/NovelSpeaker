@@ -85,6 +85,8 @@
 		21647FFC228CF44900A183DF /* UpdateLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FFB228CF44900A183DF /* UpdateLogViewController.swift */; };
 		21648000228D5EE000A183DF /* EditBookViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FFF228D5EE000A183DF /* EditBookViewController.swift */; };
 		21648002228F180E00A183DF /* BookShelfRATreeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */; };
+		21648007229003E100A183DF /* BookShelfTreeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648005229003E100A183DF /* BookShelfTreeViewCell.swift */; };
+		21648008229003E200A183DF /* BookShelfTreeViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21648006229003E100A183DF /* BookShelfTreeViewCell.xib */; };
 		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
@@ -328,6 +330,8 @@
 		21647FFB228CF44900A183DF /* UpdateLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateLogViewController.swift; sourceTree = "<group>"; };
 		21647FFF228D5EE000A183DF /* EditBookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBookViewController.swift; sourceTree = "<group>"; };
 		21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookShelfRATreeViewController.swift; sourceTree = "<group>"; };
+		21648005229003E100A183DF /* BookShelfTreeViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookShelfTreeViewCell.swift; sourceTree = "<group>"; };
+		21648006229003E100A183DF /* BookShelfTreeViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BookShelfTreeViewCell.xib; sourceTree = "<group>"; };
 		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
@@ -634,6 +638,8 @@
 				21EA62E5205560B80084B366 /* EurekaCustomRows.swift */,
 				2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */,
 				2173A6C021CC530E002E9EA8 /* FloatingButton.xib */,
+				21648005229003E100A183DF /* BookShelfTreeViewCell.swift */,
+				21648006229003E100A183DF /* BookShelfTreeViewCell.xib */,
 			);
 			name = CustomViews;
 			sourceTree = "<group>";
@@ -1105,6 +1111,7 @@
 				21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */,
 				210958EB1A0E1C5500E9171F /* NEW!.png in Resources */,
 				21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */,
+				21648008229003E200A183DF /* BookShelfTreeViewCell.xib in Resources */,
 				21D397B21FC97A380018F883 /* home.png in Resources */,
 				2133F2AF1E80E175001A0BC5 /* Icon-Small@3x.png in Resources */,
 				2133F2B01E80E175001A0BC5 /* Icon.png in Resources */,
@@ -1340,6 +1347,7 @@
 				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
 				215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */,
 				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
+				21648007229003E100A183DF /* BookShelfTreeViewCell.swift in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
 				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,
 				217F6E1C1942F14B008E432E /* Speaker.m in Sources */,

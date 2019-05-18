@@ -356,7 +356,6 @@ class EditBookViewController: UIViewController {
                 currentStory.content = storyTextView.text
                 realm.add(currentStory, update: true)
             }
-            print("story saved: \(currentStory.chapterNumber), \(currentStory.content ?? "nil"), \(currentStory.id)")
         }
     }
     func saveCurrentNovel() {

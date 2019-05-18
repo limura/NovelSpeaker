@@ -466,6 +466,11 @@ extension RealmStory: CanWriteIsDeleted {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmNovel.self).filter("isDeleted = false")
     }
+
+    static func SearchNovelFrom(novelID:String) -> RealmNovel? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        return realm.object(ofType: RealmNovel.self, forPrimaryKey: novelID)
+    }
     
     func delete(realm:Realm) {
         if let storyArray = linkedStorys {
