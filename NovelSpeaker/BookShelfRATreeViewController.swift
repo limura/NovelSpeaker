@@ -678,6 +678,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     func addPreviousNovelSpeakButtonIfNeeded(){
+        guard let globalState = RealmGlobalState.GetInstance() else {
+            return
+        }
+        if globalState.isOpenRecentNovelInStartTime {
+            return
+        }
         guard let realm = try? RealmUtil.GetRealm(), let lastReadStory = RealmGlobalState.GetLastReadStory(), let lastReadNovel = realm.object(ofType: RealmNovel.self, forPrimaryKey: lastReadStory.novelID) else {
             return
         }
