@@ -1,42 +1,51 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14A389" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="acp-rQ-wMB">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="acp-rQ-wMB">
+    <device id="retina6_1" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--Core Data Migration View Controller-->
         <scene sceneID="1ee-fZ-yTs">
             <objects>
                 <viewController id="acp-rQ-wMB" customClass="CoreDataMigrationViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="4Jb-bw-0aA"/>
-                        <viewControllerLayoutGuide type="bottom" id="guj-fx-fAt"/>
-                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="uNP-bg-euR">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="新規データ形式への移行を 行っています。 しばらくお待ちください。" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="280" translatesAutoresizingMaskIntoConstraints="NO" id="zwb-YK-bEt">
-                                <rect key="frame" x="20" y="27" width="280" height="173"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="giL-Nh-v8j">
+                                <rect key="frame" x="197" y="438" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="20" id="BPn-eJ-BHN"/>
+                                    <constraint firstAttribute="width" constant="20" id="OMl-l6-LG2"/>
+                                </constraints>
+                            </activityIndicatorView>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="新規データ形式への移行を 行っています。 しばらくお待ちください。" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="280" translatesAutoresizingMaskIntoConstraints="NO" id="zwb-YK-bEt">
+                                <rect key="frame" x="20" y="52" width="374" height="365"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="giL-Nh-v8j">
-                                <rect key="frame" x="150" y="274" width="20" height="20"/>
-                            </activityIndicatorView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="zwb-YK-bEt" firstAttribute="trailing" secondItem="uNP-bg-euR" secondAttribute="trailingMargin" id="5yO-ly-7DB"/>
+                            <constraint firstItem="zwb-YK-bEt" firstAttribute="top" secondItem="20o-L3-tNV" secondAttribute="top" constant="8" id="Nsj-4L-ov3"/>
+                            <constraint firstItem="zwb-YK-bEt" firstAttribute="leading" secondItem="uNP-bg-euR" secondAttribute="leadingMargin" id="NyY-Oe-SKO"/>
+                            <constraint firstItem="giL-Nh-v8j" firstAttribute="centerX" secondItem="20o-L3-tNV" secondAttribute="centerX" id="O6A-9c-jyB"/>
+                            <constraint firstItem="giL-Nh-v8j" firstAttribute="top" secondItem="zwb-YK-bEt" secondAttribute="bottom" constant="21" id="fBr-qL-d46"/>
+                            <constraint firstItem="giL-Nh-v8j" firstAttribute="centerY" secondItem="uNP-bg-euR" secondAttribute="centerY" id="ifb-ri-Eft"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="20o-L3-tNV"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="evD-Rz-DLF" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="352" y="78"/>
+            <point key="canvasLocation" x="510.14492753623193" y="52.232142857142854"/>
         </scene>
     </scenes>
-    <simulatedMetricsContainer key="defaultSimulatedMetrics">
-        <simulatedStatusBarMetrics key="statusBar"/>
-        <simulatedOrientationMetrics key="orientation"/>
-        <simulatedScreenMetrics key="destination" type="retina4"/>
-    </simulatedMetricsContainer>
 </document>
