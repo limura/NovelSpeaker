@@ -172,7 +172,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_OnlyDisplayAddSpeechModSettings", comment: "本文中の長押しメニューを読み替え辞書へ登録のみにする")
                 $0.value = GlobalDataSingleton.getInstance().getMenuItemIsAddSpeechModSettingOnly()
                 $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance().setMenuItemIsAddSpeechModSettingOnly(row.value!)
                 })
@@ -180,7 +180,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_ShortSkipIsEnabled", comment: "コントロールセンターの前後の章(トラック)への移動ボタンを、少し前/少し後の文への移動にする")
                 $0.value = GlobalDataSingleton.getInstance().isShortSkipEnabled()
                 $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance().setShortSkipEnabled(row.value!)
                 })
@@ -188,7 +188,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_PlaybackDurationIsEnabled", comment: "コントロールセンターの再生時間ゲージを有効にする(表示される時間は概算で、正確な値にはなりません)")
                 $0.value = GlobalDataSingleton.getInstance().isPlaybackDurationEnabled()
                 $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance().setPlaybackDurationIsEnabled(row.value!)
                 })
@@ -248,7 +248,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
                 $0.value = GlobalDataSingleton.getInstance()?.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled()
                 $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 }.onChange({ (row) in
                     let judge = row.value
                     if judge! {
@@ -280,7 +280,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)")
                 $0.value = GlobalDataSingleton.getInstance()?.isMixWithOthersEnabled()
                 $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 }.onChange({ (row) in
                     GlobalDataSingleton.getInstance()?.setIsMix(withOthersEnabled: row.value!)
                 })
@@ -387,7 +387,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< ButtonRow() {
             $0.title = NSLocalizedString("SettingTableViewController_PrivacyPolicy", comment: "ことせかい のプライバシーポリシーを確認する")
             $0.cell.textLabel?.numberOfLines = 0
-            $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+            $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
             }.onCellSelection({ (buttonCellOf, buttonRow) in
                 if let privacyPolicyUrl = GlobalDataSingleton.getInstance().getPrivacyPolicyURL() {
                     func privacyPolycyLoadFailed(){
@@ -445,7 +445,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow("IsDummySilentSoundEnabled") {
                 $0.title = NSLocalizedString("SettingTableViewController_DummySilentSoundEnable", comment:"再生中に無音の音を鳴らしてバックグラウンド再生中に再生が停止しないように祈る")
                 $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
                     return self.m_RubySwitchToggleHitCount < 10
                 })

@@ -40,11 +40,22 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
             textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
         }
     }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
+
+    // 表示される直前に呼ばれる
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        removeObserveGlobalState()
+        if let globalState = RealmGlobalState.GetInstance(), globalState.isDarkThemeEnabled {
+            applyDarkTheme()
+        }else{
+            applyBrightTheme()
+        }
+    }
+    
+    // 非表示になる直前に呼ばれる
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        applyBrightTheme()
     }
     
     func initWidgets() {
@@ -62,6 +73,8 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(rightSwipe(_:)))
         rightSwipe.direction = .right
         view.addGestureRecognizer(rightSwipe)
+        
+        textView.delegate = self
     }
     
     func loadNovel(novel:RealmNovel) {
@@ -157,7 +170,7 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
         let maxLineCount = 5
         let minAppendLength = 15
         let maxAppendLength = 120
-        var appendLength = 0
+        var appendLength = location
         var lineCount = 0
         var index = text.index(text.startIndex, offsetBy: location)
         while index < text.endIndex {
@@ -175,8 +188,9 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
             }
             index = text.index(index, offsetBy: 1)
         }
-        range.length = appendLength;
+        range.location = appendLength;
         self.textView.scrollRangeToVisible(range)
+        print("scrollRangeToVisible:(\(range.location), \(range.length), textLength: \(textLength)), readLocation: \(readLocation), appendLength: \(appendLength)")
     }
     
     func textViewDidChange(_ textView: UITextView) {
@@ -184,12 +198,54 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
         if storySpeaker.isSeeking {
             return
         }
+        print("update readLocation: \(self.textView.selectedRange.location)")
         storySpeaker.readLocation = self.textView.selectedRange.location
     }
     
     func pushEditStory() {
         
     }
+    
+    func applyDarkTheme() {
+        let backgroundColor = UIColor.black
+        let foregroundColor = UIColor.white
+        
+        self.view.backgroundColor = backgroundColor;
+        self.textView.textColor = foregroundColor;
+        self.textView.backgroundColor = backgroundColor;
+        self.textView.indicatorStyle = UIScrollView.IndicatorStyle.white
+        self.nextChapterButton.backgroundColor = backgroundColor
+        self.previousChapterButton.backgroundColor = backgroundColor
+        self.chapterSlider.backgroundColor = backgroundColor
+        self.chapterPositionLabel.backgroundColor = backgroundColor
+        self.chapterPositionLabel.textColor = foregroundColor
+        self.tabBarController?.tabBar.barTintColor = backgroundColor
+        self.navigationController?.navigationBar.barTintColor = backgroundColor
+        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
+        // ステータスバーの色を指定する
+        self.navigationController?.navigationBar.barStyle = UIBarStyle.black
+    }
+    
+    func applyBrightTheme() {
+        let backgroundColor = UIColor.white
+        let foregroundColor = UIColor.black
+        
+        self.view.backgroundColor = backgroundColor;
+        self.textView.textColor = foregroundColor;
+        self.textView.backgroundColor = backgroundColor;
+        self.textView.indicatorStyle = UIScrollView.IndicatorStyle.black
+        self.nextChapterButton.backgroundColor = backgroundColor
+        self.previousChapterButton.backgroundColor = backgroundColor
+        self.chapterSlider.backgroundColor = backgroundColor
+        self.chapterPositionLabel.backgroundColor = backgroundColor
+        self.chapterPositionLabel.textColor = foregroundColor
+        self.tabBarController?.tabBar.barTintColor = backgroundColor
+        self.navigationController?.navigationBar.barTintColor = backgroundColor
+        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
+        // ステータスバーの色を指定する
+        self.navigationController?.navigationBar.barStyle = UIBarStyle.default
+    }
+    
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destination.

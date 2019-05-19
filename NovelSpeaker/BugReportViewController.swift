@@ -115,7 +115,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             }
             <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_InformationForNewFeatureSending", comment: "ことせかい は個人開発のアプリになりますので、開発力はとても低いです。提案された機能で簡単に実装できるものは実装されることが多いですが、実装しないと判断されるものも多くあります。それらについては以下のURL(サポートサイトの下部にリンクがあります)にて解説しておりますので、新機能をご提案なされる前に一度目を通しておいていただければ幸いです。")
-                $0.cell.textLabel?.font = .preferredFont(forTextStyle: UIFont.TextStyle.caption1)
+                $0.cell.textLabel?.font = .preferredFont(forTextStyle: UIFont.TextStyle.subheadline)
                 $0.cell.textLabel?.numberOfLines = 0
             }
             <<< ButtonRow() {
