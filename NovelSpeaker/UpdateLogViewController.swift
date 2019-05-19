@@ -16,6 +16,7 @@ class UpdateLogViewController: UIViewController {
         self.title = NSLocalizedString("UpdateLogViewController_Title", comment: "更新履歴")
         let logTextView = UITextView(frame: self.view.frame)
         self.view.addSubview(logTextView)
+        logTextView.font = UIFont.preferredFont(forTextStyle: .body)
         logTextView.translatesAutoresizingMaskIntoConstraints = false
         logTextView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
         logTextView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
