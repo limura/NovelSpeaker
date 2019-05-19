@@ -300,8 +300,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="685"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
+                                <rect key="frame" x="0.0" y="64" width="375" height="554"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
@@ -404,10 +404,10 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="em1-qg-D62" secondAttribute="bottom" id="QxM-km-37w"/>
-                            <constraint firstItem="em1-qg-D62" firstAttribute="leading" secondItem="Kai-Tt-fHY" secondAttribute="leading" id="Qzn-jJ-KbR"/>
-                            <constraint firstItem="em1-qg-D62" firstAttribute="top" secondItem="HG2-YY-ylY" secondAttribute="top" id="YJ7-iQ-KDS"/>
-                            <constraint firstItem="Kai-Tt-fHY" firstAttribute="trailing" secondItem="em1-qg-D62" secondAttribute="trailing" id="bYb-gy-ySw"/>
+                            <constraint firstItem="em1-qg-D62" firstAttribute="top" secondItem="Kai-Tt-fHY" secondAttribute="top" id="AgH-9b-pNs"/>
+                            <constraint firstItem="em1-qg-D62" firstAttribute="bottom" secondItem="Kai-Tt-fHY" secondAttribute="bottom" id="WVw-cq-ie2"/>
+                            <constraint firstItem="em1-qg-D62" firstAttribute="leading" secondItem="Kai-Tt-fHY" secondAttribute="leading" id="lWh-td-Hf2"/>
+                            <constraint firstItem="em1-qg-D62" firstAttribute="trailing" secondItem="Kai-Tt-fHY" secondAttribute="trailing" id="xzt-me-K9N"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Kai-Tt-fHY"/>
                     </view>
@@ -415,7 +415,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bLn-TN-oKG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-36" y="1592"/>
+            <point key="canvasLocation" x="-36" y="1591.7541229385308"/>
         </scene>
         <!--設定-->
         <scene sceneID="jLN-GL-WMq">
@@ -839,7 +839,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                                     <constraint firstAttribute="width" constant="55" id="a61-DH-2Zr"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
-                                <state key="normal" title="＜">
+                                <state key="normal" title="◀">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <connections>
@@ -893,7 +893,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                                     <constraint firstAttribute="width" constant="51" id="tck-oG-aNy"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
-                                <state key="normal" title="＞">
+                                <state key="normal" title="▶">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <connections>
@@ -961,7 +961,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
         <image name="soundbook.png" width="9.8742856979370117" height="9.8742856979370117"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="uw4-9z-dhB"/>
+        <segue reference="FvL-jm-emj"/>
         <segue reference="vyW-HX-PLM"/>
     </inferredMetricsTieBreakers>
 </document>
