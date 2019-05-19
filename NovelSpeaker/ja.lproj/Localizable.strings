@@ -141,7 +141,7 @@
 "SpeechViewController_Speak" = "Speak";
 "SpeechViewController_Detail" = "詳細";
 "SpeechViewController_Edit" = "編集";
-"SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。「詳細」→「Download」を選択して再ダウンロードすることで解消するかもしれません。";
+"SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。";
 "SpeechViewController_Stop" = "Stop";
 "SpeechViewController_SpeechStopedByEnd" = "読み上げが最後に達しました。";
 "SpeechViewController_TweetMessage" = "%@ %@ #narou #ことせかい %@ %@";

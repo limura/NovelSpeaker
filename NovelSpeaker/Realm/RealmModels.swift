@@ -304,6 +304,20 @@ protocol CanWriteIsDeleted {
     static func CreateUniqueID(novelID:String, chapterNumber:Int) -> String {
         return "\(chapterNumber):\(novelID)"
     }
+    static func StoryIDToNovelID(storyID:String) -> String {
+        if let colonIndex = storyID.index(of: ":") {
+            let index = storyID.index(colonIndex, offsetBy: 1)
+            return String(storyID[index...])
+        }
+        return ""
+    }
+    static func StoryIDToChapterNumber(storyID:String) -> Int {
+        if let index = storyID.index(of: ":") {
+            let numString = String(storyID[..<index])
+            return Int(string: numString) ?? 0
+        }
+        return 0
+    }
     static func SearchStory(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStory? {
         return realm.object(ofType: RealmStory.self, forPrimaryKey: CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber))
     }
@@ -319,6 +333,12 @@ protocol CanWriteIsDeleted {
         story.novelID = novel.novelID
         return story
     }
+
+    static func SearchStoryFrom(storyID:String) -> RealmStory? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        return realm.object(ofType: RealmStory.self, forPrimaryKey: storyID)
+    }
+
     func delete(realm:Realm) {
         if let queueArray = linkedQueues {
             for queue in queueArray {
@@ -1096,6 +1116,12 @@ extension RealmNovelTag: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmSpeechOverrideSetting>? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false")
+    }
+    static func SearchObjectFrom(novelID:String) -> LazyFilterSequence<Results<RealmSpeechOverrideSetting>>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false").filter({ (setting) -> Bool in
+            return setting.targetNovelIDArray.contains(novelID)
+        })
     }
     func unref(realm:Realm, novel:RealmNovel) {
         if let index = targetNovelIDArray.index(of: novel.novelID) {

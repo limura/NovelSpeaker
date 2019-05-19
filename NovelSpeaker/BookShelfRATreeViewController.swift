@@ -35,7 +35,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     var searchText:String? = nil
     var searchButton:UIBarButtonItem = UIBarButtonItem()
     var resumeSpeechFloatingButton:FloatingButton? = nil
-    var nextViewNovelID: String?
+    var nextViewStoryID: String?
     var isNextViewNeedResumeSpeech:Bool = false
     
     var novelArrayNotificationToken : NotificationToken? = nil
@@ -407,16 +407,17 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
         if segue.identifier == "bookShelfToReaderSegue" {
-            /* TODO: これを設定しないとどの小説を読んでよいのかわからんはず
             if let nextViewController = segue.destination as? SpeechViewController {
-                nextViewController.targetStory = story
+                nextViewController.targetStoryID = nextViewStoryID
             }
-             */
         }
     }
     // 次のビューに飛ばします。
     func pushNextView(novelID:String, isNeedSpeech: Bool){
-        nextViewNovelID = novelID
+        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let story = novel.readingChapter else {
+            return
+        }
+        nextViewStoryID = story.id
         self.isNextViewNeedResumeSpeech = isNeedSpeech
         self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
     }
@@ -700,7 +701,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return
         }
         
-        print("floatingButton assign to view")
         floatingButton.assignToView(view: (self.treeView?.scrollView)!, text: String(format: NSLocalizedString("BookShelfTableViewController_Resume:", comment: "再生:%@"), lastReadNovel.title), animated: true) {
             self.pushNextView(novelID: lastReadNovel.novelID, isNeedSpeech: true)
             floatingButton.hideAnimate()

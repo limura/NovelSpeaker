@@ -14,7 +14,7 @@
 #import "NarouDownloadQueue.h"
 #import "NovelSpeaker-Swift.h"
 
-@interface SpeechViewController : UIViewController<SpeakRangeDelegate, UITextViewDelegate, NarouDownloadQueueDelegate>
+@interface SpeechViewControllerObjc : UIViewController<SpeakRangeDelegate, UITextViewDelegate, NarouDownloadQueueDelegate>
 {
     NSInteger m_SpeechStartPosition;
     UIBarButtonItem* startStopButton;

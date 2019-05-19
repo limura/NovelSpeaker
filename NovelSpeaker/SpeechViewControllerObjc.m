@@ -11,18 +11,18 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import <UIKit/NSAttributedString.h>
 #import <AudioToolbox/AudioToolbox.h>
-#import "SpeechViewController.h"
+#import "SpeechViewControllerObjc.h"
 #import "Story.h"
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
 #import "EasyShare.h"
 #import "NovelSpeaker-Swift.h"
 
-@interface SpeechViewController ()
+@interface SpeechViewControllerObjc ()
 
 @end
 
-@implementation SpeechViewController
+@implementation SpeechViewControllerObjc
 
 - (void)viewDidLoad
 {

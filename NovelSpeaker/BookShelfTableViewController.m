@@ -9,7 +9,6 @@
 #import "BookShelfTableViewController.h"
 #import "NarouContent.h"
 #import "GlobalDataSingleton.h"
-#import "SpeechViewController.h"
 #import <AVFoundation/AVFoundation.h>
 #import "BookShelfTableViewCell.h"
 #import "PickerViewDialog.h"
@@ -480,9 +479,9 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([[segue identifier] isEqualToString:@"bookShelfToReaderSegue"]) {
-        SpeechViewController* nextViewController = [segue destinationViewController];
-        nextViewController.NarouContentDetail = m_NextViewDetail;
-        nextViewController.NeedResumeSpeech = m_isNextViewNeedResumeSpeech;
+        //SpeechViewController* nextViewController = [segue destinationViewController];
+        //nextViewController.NarouContentDetail = m_NextViewDetail;
+        //nextViewController.NeedResumeSpeech = m_isNextViewNeedResumeSpeech;
     }
 }
 

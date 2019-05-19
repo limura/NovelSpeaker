@@ -87,6 +87,9 @@
 		21648002228F180E00A183DF /* BookShelfRATreeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */; };
 		21648007229003E100A183DF /* BookShelfTreeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648005229003E100A183DF /* BookShelfTreeViewCell.swift */; };
 		21648008229003E200A183DF /* BookShelfTreeViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21648006229003E100A183DF /* BookShelfTreeViewCell.xib */; };
+		2164800A229092A200A183DF /* SpeechViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648009229092A200A183DF /* SpeechViewController.swift */; };
+		2164800C2290F3F900A183DF /* StorySpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800B2290F3F900A183DF /* StorySpeaker.swift */; };
+		2164800E22910E6300A183DF /* UIImageExtensionSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */; };
 		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
@@ -174,7 +177,7 @@
 		21F054D91917E0F200CC6BA9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054D81917E0F200CC6BA9 /* main.m */; };
 		21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054DC1917E0F200CC6BA9 /* AppDelegate.m */; };
 		21F054E01917E0F200CC6BA9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21F054DE1917E0F200CC6BA9 /* Main.storyboard */; };
-		21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054E21917E0F200CC6BA9 /* SpeechViewController.m */; };
+		21F054E31917E0F200CC6BA9 /* SpeechViewControllerObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054E21917E0F200CC6BA9 /* SpeechViewControllerObjc.m */; };
 		21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F054E41917E0F200CC6BA9 /* Images.xcassets */; };
 		21F054EC1917E0F200CC6BA9 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054EB1917E0F200CC6BA9 /* XCTest.framework */; };
 		21F054ED1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
@@ -332,6 +335,9 @@
 		21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookShelfRATreeViewController.swift; sourceTree = "<group>"; };
 		21648005229003E100A183DF /* BookShelfTreeViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookShelfTreeViewCell.swift; sourceTree = "<group>"; };
 		21648006229003E100A183DF /* BookShelfTreeViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BookShelfTreeViewCell.xib; sourceTree = "<group>"; };
+		21648009229092A200A183DF /* SpeechViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechViewController.swift; sourceTree = "<group>"; };
+		2164800B2290F3F900A183DF /* StorySpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorySpeaker.swift; sourceTree = "<group>"; };
+		2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensionSwift.swift; sourceTree = "<group>"; };
 		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
@@ -466,8 +472,8 @@
 		21F054DB1917E0F200CC6BA9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		21F054DC1917E0F200CC6BA9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		21F054DF1917E0F200CC6BA9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		21F054E11917E0F200CC6BA9 /* SpeechViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpeechViewController.h; sourceTree = "<group>"; };
-		21F054E21917E0F200CC6BA9 /* SpeechViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechViewController.m; sourceTree = "<group>"; };
+		21F054E11917E0F200CC6BA9 /* SpeechViewControllerObjc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpeechViewControllerObjc.h; sourceTree = "<group>"; };
+		21F054E21917E0F200CC6BA9 /* SpeechViewControllerObjc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechViewControllerObjc.m; sourceTree = "<group>"; };
 		21F054E41917E0F200CC6BA9 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NovelSpeakerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		21F054EB1917E0F200CC6BA9 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -737,6 +743,8 @@
 				2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */,
 				21C372DB21DFC41600FB2D52 /* UIImageExtension.h */,
 				21C372DC21DFC41600FB2D52 /* UIImageExtension.m */,
+				2164800B2290F3F900A183DF /* StorySpeaker.swift */,
+				2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -896,8 +904,9 @@
 				21C74FD5196843280039A706 /* BookShelfTableViewController.h */,
 				21C74FD6196843280039A706 /* BookShelfTableViewController.m */,
 				21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */,
-				21F054E11917E0F200CC6BA9 /* SpeechViewController.h */,
-				21F054E21917E0F200CC6BA9 /* SpeechViewController.m */,
+				21F054E11917E0F200CC6BA9 /* SpeechViewControllerObjc.h */,
+				21F054E21917E0F200CC6BA9 /* SpeechViewControllerObjc.m */,
+				21648009229092A200A183DF /* SpeechViewController.swift */,
 				4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */,
 				4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */,
 				21C74F99196456490039A706 /* NarouSearchViewController.h */,
@@ -1274,7 +1283,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
+				21F054E31917E0F200CC6BA9 /* SpeechViewControllerObjc.m in Sources */,
+				2164800E22910E6300A183DF /* UIImageExtensionSwift.swift in Sources */,
 				213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */,
 				21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */,
 				2173A6BF21CC529F002E9EA8 /* FloatingButton.swift in Sources */,
@@ -1287,6 +1297,7 @@
 				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
 				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
 				21E46D431A94B7F400CE39B0 /* EasyShare.m in Sources */,
+				2164800C2290F3F900A183DF /* StorySpeaker.swift in Sources */,
 				216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */,
 				217BD9E419CE72BB008A0D9D /* StringSubstituter.m in Sources */,
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
@@ -1326,6 +1337,7 @@
 				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
 				21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */,
 				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
+				2164800A229092A200A183DF /* SpeechViewController.swift in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
 				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
 				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
