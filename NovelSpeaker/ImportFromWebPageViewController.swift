@@ -248,25 +248,52 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     // よりSwiftらしいBookmarkの形式([[String:URL]])のブックマークリストとしてブックマークリストを読み出します。
     func getBookmark() -> ([[String:URL]]) {
         var resultArray = [[String:URL]]()
-        if let globalData = GlobalDataSingleton.getInstance() {
-            if let bookmarks = globalData.getWebImportBookmarks() {
-                for bookmarkString in bookmarks {
-                    if let bookmarkString:String = bookmarkString as? String {
-                        let nameAndURL = bookmarkString.components(separatedBy: "\n")
-                        if nameAndURL.count != 2 {
-                            continue
-                        }
-                        let name = nameAndURL[0]
-                        let urlString = nameAndURL[1]
-                        let url = URL(string: urlString)
-                        if let url = url {
-                            resultArray.append([name:url])
-                        }
-                    }
-                }
+        guard let bookmarks = RealmGlobalState.GetInstance()?.webImportBookmarkArray else {
+            return resultArray
+        }
+        for bookmarkString in bookmarks {
+            let nameAndURL = bookmarkString.components(separatedBy: "\n")
+            if nameAndURL.count != 2 {
+                continue
+            }
+            let name = nameAndURL[0]
+            let urlString = nameAndURL[1]
+            let url = URL(string: urlString)
+            if let url = url {
+                resultArray.append([name:url])
             }
         }
         return resultArray
+    }
+    func delBookmark(url:URL) {
+        guard let globalState = RealmGlobalState.GetInstance() else {
+            return
+        }
+        var dic:[String:Int] = [:]
+        var i:Int = -1
+        for bookmarkString in globalState.webImportBookmarkArray {
+            i += 1
+            let nameAndURL = bookmarkString.components(separatedBy: "\n")
+            if nameAndURL.count != 2 {
+                continue
+            }
+            let urlString = nameAndURL[1]
+            dic[urlString] = i
+        }
+        if let index = dic[url.absoluteString], let realm = try? RealmUtil.GetRealm() {
+            try! realm.write {
+                globalState.webImportBookmarkArray.remove(at: index)
+            }
+        }
+    }
+    func addBookmark(url:URL, name:String) {
+        guard let globalState = RealmGlobalState.GetInstance(), let realm = try? RealmUtil.GetRealm() else {
+            return
+        }
+        try! realm.write {
+            let saveName = name.replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "\r", with: "")
+            globalState.webImportBookmarkArray.append("\(saveName)\n\(url.absoluteString)")
+        }
     }
 
     func loadHomePage(){
@@ -350,7 +377,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
                     dialog.dismiss(animated: false, completion: nil)
                 }
             }.addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
-                GlobalDataSingleton.getInstance().delURL(fromWebImportBookmark: url)
+                self.delBookmark(url: url)
                 self.updateBookmarkButtonState(url: url)
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
@@ -369,7 +396,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
                 .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                     let nameTextField = dialog.view.viewWithTag(100) as! UITextField
                     let nameString = nameTextField.text ?? url.absoluteString
-                    GlobalDataSingleton.getInstance().addWebImportBookmark(forName: nameString, url: url)
+                    self.addBookmark(url: url, name: nameString)
                     self.updateBookmarkButtonState(url: url)
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: nil)

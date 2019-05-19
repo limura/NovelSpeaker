@@ -55,6 +55,7 @@ class CoreDataToRealmTool: NSObject {
         realmState.isMenuItemIsAddSpeechModSettingOnly = globalDataSingleton.getMenuItemIsAddSpeechModSettingOnly()
         realmState.isBackgroundNovelFetchEnabled = globalDataSingleton.getBackgroundNovelFetchEnabled()
         realmState.bookShelfSortType = globalDataSingleton.getBookSelfSortType()
+        realmState.isPageTurningSoundEnabled = globalDataSingleton.isPageTurningSoundEnabled()
 
         defaultDisplaySetting.name = ""
         if let textSizeValue = globalState?.textSizeValue as? Float {
@@ -80,7 +81,6 @@ class CoreDataToRealmTool: NSObject {
         
         defaultSpeechOverrideSetting.name = ""
         defaultSpeechOverrideSetting.repeatSpeechType = globalDataSingleton.getRepeatSpeechType()
-        defaultSpeechOverrideSetting.isPageTurningSoundEnabled = globalDataSingleton.isPageTurningSoundEnabled()
         defaultSpeechOverrideSetting.isOverrideRubyIsEnabled = globalDataSingleton.getOverrideRubyIsEnabled()
         defaultSpeechOverrideSetting.notRubyCharactorStringArray = globalDataSingleton.getNotRubyCharactorStringArray()
         defaultSpeechOverrideSetting.isIgnoreURIStringSpeechEnabled = globalDataSingleton.getIsIgnoreURIStringSpeechEnabled()

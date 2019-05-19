@@ -829,6 +829,7 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     @objc dynamic var isForceSiteInfoReloadIsEnabled = false
     @objc dynamic var isMenuItemIsAddSpeechModSettingOnly = false
     @objc dynamic var isBackgroundNovelFetchEnabled = false
+    @objc dynamic var isPageTurningSoundEnabled = false
     @objc dynamic var _bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
     
     @objc dynamic var defaultDisplaySettingID = ""
@@ -1088,7 +1089,6 @@ extension RealmNovelTag: CanWriteIsDeleted {
     @objc dynamic var name = ""
     @objc dynamic var createdDate = Date()
     @objc dynamic var _repeatSpeechType : Int = Int(RepeatSpeechType.noRepeat.rawValue)
-    @objc dynamic var isPageTurningSoundEnabled = false
     @objc dynamic var isOverrideRubyIsEnabled = false
     @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
     @objc dynamic var isIgnoreURIStringSpeechEnabled = false

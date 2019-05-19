@@ -36,7 +36,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     var delegateArray = NSHashTable<AnyObject>.weakObjects()
 
     var storyID:String = ""
-    var isPageTurningSoundEnabled = true
+    
     
     override init() {
         super.init()
@@ -57,12 +57,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         speaker.clearSpeakSettings()
         applySpeechConfig(novelID: story.novelID)
         applySpeechModSetting(novelID: story.novelID, targetText: content)
-        speaker.setText(content)
+        speaker.setText(ForceOverrideHungSpeakString(text: content))
         speaker.updateCurrentReadingPoint(NSRange(location: story.readLocation, length: 0))
         updatePlayngInfo(story: story)
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerStoryChanged(story: story)
         }
+    }
+    
+    func ForceOverrideHungSpeakString(text:String) -> String {
+        return text.replacingOccurrences(of: "*", with: " ")
     }
     
     func AddDelegate(delegate:StorySpeakerDeletgate) {
@@ -93,14 +97,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func applySpeechModSetting(novelID:String, targetText:String) {
-        var isPageTurningSoundEnabled = false
         var isOverrideRubyEnabled = false
         var notRubyCharactorStringArray = ""
         var isIgnoreURIStringSpeechEnabled = false
         
         if let globalState = RealmGlobalState.GetInstance() {
             if let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
-                isPageTurningSoundEnabled = speechOverrideSetting.isPageTurningSoundEnabled
                 isOverrideRubyEnabled = speechOverrideSetting.isOverrideRubyIsEnabled
                 notRubyCharactorStringArray = speechOverrideSetting.notRubyCharactorStringArray
                 isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
@@ -108,14 +110,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         if let settingArray = RealmSpeechOverrideSetting.SearchObjectFrom(novelID: novelID) {
             for speechOverrideSetting in settingArray {
-                isPageTurningSoundEnabled = speechOverrideSetting.isPageTurningSoundEnabled
                 isOverrideRubyEnabled = speechOverrideSetting.isOverrideRubyIsEnabled
                 notRubyCharactorStringArray = speechOverrideSetting.notRubyCharactorStringArray
                 isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
             }
         }
         
-        self.isPageTurningSoundEnabled = isPageTurningSoundEnabled
         if isOverrideRubyEnabled {
             if let rubyDictionary = StringSubstituter.findNarouRubyNotation(targetText, notRubyString: notRubyCharactorStringArray) {
                 for key in rubyDictionary.keys {
