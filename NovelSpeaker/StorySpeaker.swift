@@ -13,7 +13,7 @@ import MediaPlayer
 protocol StorySpeakerDeletgate {
     func storySpeakerStartSpeechEvent(storyID:String)
     func storySpeakerStopSpeechEvent(storyID:String)
-    func storySpeakerUpdateReadingPoint(storyID:String, location:Int)
+    func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange)
     func storySpeakerStoryChanged(story:RealmStory)
 }
 
@@ -41,6 +41,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     override init() {
         super.init()
         EnableMPRemoteCommandCenterEvents()
+        speaker.add(self)
     }
     
     deinit {
@@ -501,12 +502,36 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     // MARK: SpeakRangeDeleate implement
     func willSpeak(_ range: NSRange, speakText text: String!) {
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
-            delegate.storySpeakerUpdateReadingPoint(storyID: self.storyID, location: range.location)
+            delegate.storySpeakerUpdateReadingPoint(storyID: self.storyID, range: range)
         }
     }
     
     func finishSpeak() {
         self.readLocation = speaker.getCurrentReadingPoint().location
+        guard let globalState = RealmGlobalState.GetInstance(), let speechOverrideSetting = globalState.defaultSpeechOverrideSetting else {
+            return
+        }
+        switch speechOverrideSetting.repeatSpeechType {
+        case .rewindToFirstStory:
+            let novelID = RealmStory.StoryIDToNovelID(storyID: self.storyID)
+            if let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let lastChapterNumber = novel.lastChapterNumber, let currentChapterNumber = RealmStory.SearchStoryFrom(storyID: self.storyID)?.chapterNumber, lastChapterNumber == currentChapterNumber, let targetStory = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
+                self.SetStory(story: targetStory)
+                self.StartSpeech()
+                return
+            }
+        case .rewindToThisStory:
+            self.readLocation = 0
+            self.StartSpeech()
+            return
+        case .noRepeat:
+            break
+        @unknown default:
+            break
+        }
+        if let nextStory = SearchNextChapter(storyID: self.storyID) {
+            self.SetStory(story: nextStory)
+            self.StartSpeech()
+        }
     }
     
     var isPlayng : Bool {

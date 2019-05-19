@@ -144,7 +144,7 @@
 "SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。";
 "SpeechViewController_Stop" = "Stop";
 "SpeechViewController_SpeechStopedByEnd" = "読み上げが最後に達しました。";
-"SpeechViewController_TweetMessage" = "%@ %@ #narou #ことせかい %@ %@";
+"SpeechViewController_TweetMessage" = "%@ %@ #ことせかい %@ %@";
 "SpeechViewController_NoTwitterAccount_Title" = "Twitterアカウントが設定されていません";
 "SpeechViewController_NoTwitterAccount_Message" = "Twitterアカウントが設定されていません。設定ページでTwitterアカウントを設定か作成することができます。";
 "SpeechViewController_AddSpeechModSettings" = "読み替え辞書へ登録";
@@ -153,6 +153,8 @@
 "SpeechViewController_loading" = "loading...";
 "SpeechViewController_AnnounceSeekForward" = "早送り";
 "SpeechViewController_AnnounceSeekBackward" = "巻き戻し";
+"SpeechViewController_UnknownErrorForShare" = "不明なエラーでシェアできませんでした。";
+
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
 "SpeechWaitConfigSettingView_PleaseSetSpeechText" = "読み上げテスト用の文字列を設定してください";

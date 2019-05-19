@@ -249,7 +249,9 @@ class EditBookViewController: UIViewController {
                 switch change {
                 case .change(_):
                     if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
-                        self.storyTextView.font = displaySetting.font
+                        DispatchQueue.main.async {
+                            self.storyTextView.font = displaySetting.font
+                        }
                     }
                 case .error(_):
                     break
@@ -312,10 +314,6 @@ class EditBookViewController: UIViewController {
     func setStory(story:RealmStory, novel:RealmNovel) {
         DispatchQueue.main.async {
             if let linkedStoryArray = novel.linkedStorys {
-                print("linkedStoryArray.count: \(linkedStoryArray.count)")
-                for story in linkedStoryArray {
-                    print("story[\(story.chapterNumber)]: \(story.content ?? "nil"), \(story.id), \(story.novelID)")
-                }
                 let maxChapterNumber = linkedStoryArray.count
                 self.chapterNumberIndicatorLabel.text = "\(story.chapterNumber)/\(maxChapterNumber)"
                 self.chapterNumberIndicatorLabel.removeConstraint(self.chapterNumberIndicatorLabelWidthConstraint)

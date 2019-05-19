@@ -21,7 +21,9 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
     @IBOutlet weak var chapterPositionLabelWidthConstraint : NSLayoutConstraint!
     
     var startStopButtonItem:UIBarButtonItem? = nil
+    var shareButtonItem:UIBarButtonItem? = nil
     var defaultDisplaySettingObserverToken : NotificationToken? = nil
+    var storyObserverToken: NotificationToken? = nil
     
     let storySpeaker = StorySpeaker()
     
@@ -84,7 +86,9 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
             UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Edit", comment: "編集"), style: .plain, target: self, action: #selector(detailButtonClicked(_:)))
         ]
         if novel.type == .URL {
-            barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareButtonClicked(_:))))
+            let buttonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action:   #selector(shareButtonClicked(_:)))
+            self.shareButtonItem = buttonItem
+            barButtonArray.append(buttonItem)
             barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(urlRefreshButtonClicked(_:))))
             barButtonArray.append(UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(safariButtonClicked(_:))))
         }
@@ -93,6 +97,7 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
     }
     
     func setStoryWithoutSetToStorySpeaker(story:RealmStory) {
+        observeStory()
         DispatchQueue.main.async {
             guard let novel = RealmNovel.SearchNovelFrom(novelID: story.novelID), let lastChapterNumber = novel.lastChapterNumber else {
                 return
@@ -124,6 +129,7 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
             let storyID = story.id
             DispatchQueue.main.asyncAfter(deadline: DispatchTime(uptimeNanoseconds: 3000)) {
                 guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else { return }
+                self.textView.select(self)
                 self.textView.selectedRange = NSRange(location: story.readLocation, length: 1)
                 self.textViewScrollTo(readLocation: story.readLocation)
             }
@@ -148,8 +154,20 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
             }
         })
     }
-    func removeObserveGlobalState() {
-        self.defaultDisplaySettingObserverToken = nil
+    func observeStory() {
+        guard let storyID = self.targetStoryID, let story = RealmStory.SearchStoryFrom(storyID: storyID) else {
+            return
+        }
+        self.storyObserverToken = story.observe({ (change) in
+            if self.storySpeaker.isPlayng { return } // 読み上げ中は無視します
+            guard let storyID = self.targetStoryID, let story = RealmStory.SearchStoryFrom(storyID: storyID) else {
+                return
+            }
+            // observe の中で Realm に書きこんじゃ駄目
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime(uptimeNanoseconds: 100), execute: {
+                self.storySpeaker.SetStory(story: story)
+            })
+        })
     }
     
     func textViewScrollTo(readLocation:Int) {
@@ -169,7 +187,7 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
         let maxLineCount = 5
         let minAppendLength = 15
         let maxAppendLength = 120
-        var appendLength = location
+        var appendLength = 0
         var lineCount = 0
         var index = text.index(text.startIndex, offsetBy: location)
         while index < text.endIndex {
@@ -187,7 +205,8 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
             }
             index = text.index(index, offsetBy: 1)
         }
-        range.location = appendLength;
+        range.location = location;
+        range.length = appendLength
         self.textView.scrollRangeToVisible(range)
     }
     
@@ -200,10 +219,18 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
         storySpeaker.readLocation = self.textView.selectedRange.location
     }
     
-    func pushEditStory() {
-        
+    func pushToEditStory() {
+        performSegue(withIdentifier: "EditUserTextSegue", sender: self)
     }
-    
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "EditUserTextSegue" {
+            if let nextViewController = segue.destination as? EditBookViewController, let storyID = self.targetStoryID, let novel = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID)) {
+                nextViewController.targetNovel = novel
+            }
+        }
+    }
+
     func applyDarkTheme() {
         let backgroundColor = UIColor.black
         let foregroundColor = UIColor.white
@@ -245,20 +272,35 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
     }
     
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    @objc func detailButtonClicked(_ sender: UIBarButtonItem) {
+        pushToEditStory()
     }
     
-    @objc func detailButtonClicked(_ sender: UIBarButtonItem) {
-    }
     @objc func shareButtonClicked(_ sender: UIBarButtonItem) {
+        guard let storyID = self.targetStoryID, let novel = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID)) else {
+            NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechViewController_UnknownErrorForShare", comment: "不明なエラーでシェアできませんでした。"), message: nil, buttonTitle: NSLocalizedString("OK_button", comment: "OK"), buttonAction: nil)
+            return
+        }
+        let urlString:String
+        if novel.type == .URL {
+            urlString = novel.url
+        }else{
+            urlString = ""
+        }
+        let message = String(format: NSLocalizedString("SpeechViewController_TweetMessage", comment: "%@ %@ #narou #ことせかい %@ %@"), novel.title, novel.writer, urlString, "https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185")
+        NiftyUtilitySwift.Share(message: message, viewController: self, barButton: self.shareButtonItem)
     }
+    
     @objc func urlRefreshButtonClicked(_ sender: UIBarButtonItem) {
     }
     @objc func safariButtonClicked(_ sender: UIBarButtonItem) {
     }
     @objc func startStopButtonClicked(_ sender: UIBarButtonItem) {
+        if self.storySpeaker.isPlayng {
+            self.storySpeaker.StopSpeech()
+        }else{
+            self.storySpeaker.StartSpeech()
+        }
     }
     @objc func leftSwipe(_ sender: UISwipeGestureRecognizer) {
         self.storySpeaker.LoadNextChapter()
@@ -269,16 +311,23 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
     
     // MARK: StorySpeakerDelegate
     func storySpeakerStartSpeechEvent(storyID:String){
+        DispatchQueue.main.async {
+            self.startStopButtonItem?.title = NSLocalizedString("SpeechViewController_Stop", comment: "Stop")
+        }
     }
     func storySpeakerStopSpeechEvent(storyID:String){
+        DispatchQueue.main.async {
+            self.startStopButtonItem?.title = NSLocalizedString("SpeechViewController_Speak", comment: "Speak")
+        }
     }
-    func storySpeakerUpdateReadingPoint(storyID:String, location:Int){
+    func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange){
         DispatchQueue.main.async {
             let contentLength = self.textView.text.count
-            if contentLength <= location {
-                self.textView.selectedRange = NSRange(location: location, length: 1)
+            if contentLength >= (range.location + range.length) {
+                self.textView.select(self)
+                self.textView.selectedRange = range
             }
-            self.textViewScrollTo(readLocation: location)
+            self.textViewScrollTo(readLocation: range.location)
         }
     }
     func storySpeakerStoryChanged(story:RealmStory){

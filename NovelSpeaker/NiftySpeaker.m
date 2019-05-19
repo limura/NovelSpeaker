@@ -255,6 +255,9 @@ typedef enum {
             startSetting.type &= ~SPEECH_SETTING_TYPE_TONE_CHANGE_OUT;
             startSetting.config.pitch = blockSeparator.speechConfig.pitch;
             startSetting.config.rate = blockSeparator.speechConfig.rate;
+            if(blockSeparator.speechConfig.voiceIdentifier != nil) {
+                startSetting.config.voiceIdentifier = blockSeparator.speechConfig.voiceIdentifier;
+            }
             [speechSettingMap setObject:startSetting forKey:startKey];
             //NSLog(@"set start: %lu -> delay: %.2f, pitch: %.2f, rate: %.2f", [startKey unsignedLongValue], startSetting.config.beforeDelay, startSetting.config.pitch, startSetting.config.rate);
             
@@ -328,6 +331,9 @@ typedef enum {
         if (setting.type & SPEECH_SETTING_TYPE_TONE_CHANGE_IN) {
             nextConfig.pitch = setting.config.pitch;
             nextConfig.rate = setting.config.rate;
+            if (setting.config.voiceIdentifier != nil) {
+                nextConfig.voiceIdentifier = setting.config.voiceIdentifier;
+            }
             [configStack addObject:nextConfig];
         }
         if (setting.type & SPEECH_SETTING_TYPE_TONE_CHANGE_OUT) {

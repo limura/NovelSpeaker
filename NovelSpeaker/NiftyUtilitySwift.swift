@@ -556,4 +556,17 @@ class NiftyUtilitySwift: NSObject {
         }
         return logResult
     }
+    
+    static public func Share(message:String, viewController:UIViewController, barButton:UIBarButtonItem?) {
+        let activityViewController = UIActivityViewController.init(activityItems: [message], applicationActivities: nil)
+        
+        if let barButton = barButton {
+            activityViewController.popoverPresentationController?.barButtonItem = barButton;
+        }else{
+            let frame = UIScreen.main.bounds
+            activityViewController.popoverPresentationController?.sourceView = viewController.view
+            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.midX - 60, y: frame.size.height - 50, width: 120, height: 50)
+        }
+        viewController.present(activityViewController, animated: true, completion: nil)
+    }
 }
