@@ -47,15 +47,15 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
         
         if let globalState = RealmGlobalState.GetInstance(), globalState.isDarkThemeEnabled {
             applyDarkTheme()
-        }else{
-            applyBrightTheme()
         }
     }
     
     // 非表示になる直前に呼ばれる
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        applyBrightTheme()
+        if let globalState = RealmGlobalState.GetInstance(), globalState.isDarkThemeEnabled {
+            applyBrightTheme()
+        }
     }
     
     func initWidgets() {
@@ -135,7 +135,6 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
             return
         }
         self.defaultDisplaySettingObserverToken = displaySetting.observe({ (change) in
-            print("defaultDisplaySetting update?")
             switch change {
             case .change(_):
                 if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
@@ -190,7 +189,6 @@ class SpeechViewController: UIViewController, UITextViewDelegate, StorySpeakerDe
         }
         range.location = appendLength;
         self.textView.scrollRangeToVisible(range)
-        print("scrollRangeToVisible:(\(range.location), \(range.length), textLength: \(textLength)), readLocation: \(readLocation), appendLength: \(appendLength)")
     }
     
     func textViewDidChange(_ textView: UITextView) {

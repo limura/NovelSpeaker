@@ -212,7 +212,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
 
         speaker.stopSpeech()
         speaker.clearSpeakSettings()
-        if let speechConfig = try? RealmUtil.GetRealm().object(ofType: RealmGlobalState.self,   forPrimaryKey: RealmGlobalState.UniqueID)?.defaultSpeaker?.speechConfig {
+        if let speechConfig = ((try? RealmUtil.GetRealm().object(ofType: RealmGlobalState.self,   forPrimaryKey: RealmGlobalState.UniqueID)?.defaultSpeaker?.speechConfig) as SpeechConfig??) {
             speaker.setDefaultSpeechConfig(speechConfig)
         }
         if isUseRegexp {

@@ -262,8 +262,6 @@ class EditBookViewController: UIViewController {
     func endObserve() {
         let center = NotificationCenter.default
         center.removeObserver(self)
-        
-        fontSizeObserveToken = nil
     }
 
     @objc func willShowKeyboardEventHandler(notification:Notification) {

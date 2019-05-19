@@ -174,7 +174,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                     try! realm.write {
                         setting.delete(realm: realm)
                     }
-                    if let index = self.form.index(of: section) {
+                    if let index = self.form.firstIndex(of: section) {
                         print("remove section index: \(index)")
                         self.form.remove(at: index)
                     }else{

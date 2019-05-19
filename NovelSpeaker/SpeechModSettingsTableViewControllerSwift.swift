@@ -38,7 +38,6 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        removeNotificationReceiver()
     }
 
     override func didReceiveMemoryWarning() {

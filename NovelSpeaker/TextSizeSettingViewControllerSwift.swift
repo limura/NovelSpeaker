@@ -39,7 +39,6 @@ class TextSizeSettingViewControllerSwift: UIViewController {
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        self.displaySettingObserbeToken = nil
     }
     
     func setFontFromRealm() {

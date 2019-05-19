@@ -305,14 +305,14 @@ protocol CanWriteIsDeleted {
         return "\(chapterNumber):\(novelID)"
     }
     static func StoryIDToNovelID(storyID:String) -> String {
-        if let colonIndex = storyID.index(of: ":") {
+        if let colonIndex = storyID.firstIndex(of: ":") {
             let index = storyID.index(colonIndex, offsetBy: 1)
             return String(storyID[index...])
         }
         return ""
     }
     static func StoryIDToChapterNumber(storyID:String) -> Int {
-        if let index = storyID.index(of: ":") {
+        if let index = storyID.firstIndex(of: ":") {
             let numString = String(storyID[..<index])
             return Int(string: numString) ?? 0
         }

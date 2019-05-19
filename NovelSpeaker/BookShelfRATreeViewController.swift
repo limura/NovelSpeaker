@@ -97,7 +97,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             floatingButton.hide()
             self.resumeSpeechFloatingButton = nil
         }
-        unregistObserver()
     }
 
     override func didReceiveMemoryWarning() {
