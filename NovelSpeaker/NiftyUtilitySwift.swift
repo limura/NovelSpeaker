@@ -8,6 +8,7 @@
 
 import UIKit
 import PDFKit
+import RealmSwift
 
 class NiftyUtilitySwift: NSObject {
     @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
@@ -415,7 +416,7 @@ class NiftyUtilitySwift: NSObject {
             return
         }
         let dispatchSemaphore = DispatchSemaphore(value: 0)
-        NiftyUtilitySwift.backgroundQueue.asyncAfter(deadline: .init(uptimeNanoseconds: 1000*50)) {
+        NiftyUtilitySwift.backgroundQueue.asyncAfter(deadline: .now() + 0.05) {
             block()
             dispatchSemaphore.signal()
         }
@@ -568,5 +569,12 @@ class NiftyUtilitySwift: NSObject {
             activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.midX - 60, y: frame.size.height - 50, width: 120, height: 50)
         }
         viewController.present(activityViewController, animated: true, completion: nil)
+    }
+    
+    @objc static public func IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled() -> Bool {
+        guard let globalState = RealmGlobalState.GetInstance() else {
+            return false
+        }
+        return globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
     }
 }

@@ -63,6 +63,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         treeView.translatesAutoresizingMaskIntoConstraints = false
         self.treeView = treeView
         
+        self.title = NSLocalizedString("BookShelfRATreeViewController_Title", comment: "本棚")
+        
         // 編集ボタン等を配置
         let refreshButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.refresh, target: self, action: #selector(refreshButtonClicked))
         let sortTypeSelectButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"), style: UIBarButtonItem.Style.done, target: self, action: #selector(sortTypeSelectButtonClicked))
@@ -407,7 +409,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         // Pass the selected object to the new view controller.
         if segue.identifier == "bookShelfToReaderSegue" {
             if let nextViewController = segue.destination as? SpeechViewController {
-                nextViewController.targetStoryID = nextViewStoryID
+                nextViewController.storyID = nextViewStoryID
+                nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
             }
         }
     }

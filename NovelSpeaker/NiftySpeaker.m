@@ -539,7 +539,7 @@ typedef enum {
     [m_Speaker SetDelay:currentBlock.speechConfig.beforeDelay];
     //[m_Speaker Speech:speakText];
     NSString* dummySpeakText = speakText;
-    if ([[GlobalDataSingleton GetInstance] IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled]) {
+    if ([NiftyUtilitySwift IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled]) {
         dummySpeakText = [m_RegexpForSpeechRecognizerBug stringByReplacingMatchesInString:speakText options:0 range:NSMakeRange(0, [speakText length]) withTemplate:iOS12WillSpeakRangeBugConvertToString];
         if (dummySpeakText == nil) {
             dummySpeakText = speakText;
