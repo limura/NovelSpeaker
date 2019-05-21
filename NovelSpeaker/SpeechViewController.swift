@@ -224,14 +224,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         if let modSetting = RealmSpeechModSetting.GetAllObjects()?.filter("before = %@", text).first {
             nextViewController.targetSpeechModSettingID = modSetting.id
         }else{
-            let modSetting = RealmSpeechModSetting()
-            modSetting.before = text
-            if let realm = try? RealmUtil.GetRealm() {
-                try! realm.write {
-                    realm.add(modSetting, update: true)
-                }
-            }
-            nextViewController.targetSpeechModSettingID = modSetting.id
+            nextViewController.targetSpeechModSettingID = nil
+            nextViewController.targetBeforeString = text
         }
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
@@ -365,8 +359,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         if self.storySpeaker.isPlayng {
             self.storySpeaker.StopSpeech()
         }else{
-            let range = self.textView.selectedRange
-            storySpeaker.readLocation = range.location
+            storySpeaker.readLocation = self.textView.selectedRange.location
             self.storySpeaker.StartSpeech(withMaxSpeechTimeReset: true)
         }
     }

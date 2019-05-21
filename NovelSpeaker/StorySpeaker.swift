@@ -838,7 +838,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             return speaker.getCurrentReadingPoint().location
         }
         set {
-            if let realm = try? RealmUtil.GetRealm(), let story = RealmStory.SearchStoryFrom(storyID: self.storyID), let contentLength = story.content?.count, contentLength >= newValue && newValue > 0 {
+            if let realm = try? RealmUtil.GetRealm(), let story = RealmStory.SearchStoryFrom(storyID: self.storyID), let contentLength = story.content?.count, contentLength > newValue && newValue >= 0 {
                 speaker.updateCurrentReadingPoint(NSRange(location: newValue, length: 0))
                 try! realm.write {
                     story.readLocation = newValue

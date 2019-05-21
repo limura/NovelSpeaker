@@ -567,6 +567,12 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false")
     }
+    static func SearchFrom(id:String) -> RealmSpeechModSetting? {
+        return GetAllObjects()?.filter("id = %@", id).first
+    }
+    static func SearchFrom(beforeString:String) -> RealmSpeechModSetting? {
+        return GetAllObjects()?.filter("before = %@", beforeString).first
+    }
 
     func unref(realm:Realm, novel:RealmNovel) {
         if let index = targetNovelIDArray.index(of: novel.novelID) {

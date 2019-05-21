@@ -21,6 +21,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     @IBOutlet weak var treeDepthImageViewWidthConstraint: NSLayoutConstraint!
     
     var storyObserveToken: NotificationToken? = nil
+    var storyForNovelArrayObserveToken: NotificationToken? = nil
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -80,27 +81,70 @@ class BookShelfTreeViewCell: UITableViewCell {
         // TODO: あとでダウンロード回りが決まったら作る
         self.downloadingActivityIndicator.isHidden = true
     }
-    func registerStoryObserver(novelIDArray:[String]) {
-        if novelIDArray.count == 1 {
-            guard let realm = try? RealmUtil.GetRealm() else {
+
+    func registerStoryObserver(novelID:String) {
+        self.storyObserveToken = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID).observe({ (change) in
+            switch (change) {
+            case .initial(_):
+                break
+            case .update(_, _, let insertions, let modifications):
+                // 「更新有」の反映
+                if insertions.count > 0 {
+                    DispatchQueue.main.async {
+                        self.activateNewImageView()
+                    }
+                }else if modifications.count > 0{
+                    DispatchQueue.main.async {
+                        self.checkAndUpdateNewImage(novelIDArray: [novelID])
+                    }
+                }
+                // 読んだ位置の更新
+                DispatchQueue.main.async {
+                    self.applyCurrentReadingPointToIndicator(novelID: novelID)
+                }
+            case .error(_):
+                break
+            }
+        })
+    }
+    func checkAndUpdateNewImage(novelIDArray:[String]) {
+        guard let novelArray = RealmNovel.GetAllObjects()?.filter("novelID IN %@", novelIDArray) else { return }
+        for novel in novelArray {
+            if novel.isNewFlug {
+                activateNewImageView()
                 return
             }
-            let novelID = novelIDArray[0]
-            self.storyObserveToken = realm.objects(RealmStory.self).filter("isDeleted = false AND novelID = %@", novelID).observe({ (change) in
-                switch (change) {
-                case .initial(_):
-                    break
-                case .update(_, _, _, let modifications):
-                    if modifications.count > 0 {
-                        DispatchQueue.main.async {
-                            self.applyCurrentReadingPointToIndicator(novelID: novelID)
+        }
+        deactivateNewImageView()
+    }
+    // TODO: StoryObserver といいつつ、New フラグしか見張ってない
+    func registerStoryForNovelArrayObserver(novelIDArray:[String]) {
+        self.storyForNovelArrayObserveToken = RealmStory.GetAllObjects()?.filter("novelID IN %@", novelIDArray).observe({ (change) in
+            switch (change) {
+            case .initial(_):
+                break
+            case .update(let objs, _, let insertions, let modifications):
+                // New! の 表示/非表示 周り
+                if insertions.count > 0 {
+                    DispatchQueue.main.async {
+                        self.activateNewImageView()
+                    }
+                }else if modifications.count > 0 {
+                    var novelIDSet = Set<String>()
+                    for index in modifications {
+                        if objs.count > index {
+                            let story = objs[index]
+                            novelIDSet.insert(story.novelID)
                         }
                     }
-                case .error(_):
-                    break
+                    DispatchQueue.main.async {
+                        self.checkAndUpdateNewImage(novelIDArray: Array(novelIDSet))
+                    }
                 }
-            })
-        }
+            case .error(_):
+                break
+            }
+        })
     }
     func unregistStoryObserver() {
         self.storyObserveToken = nil
@@ -109,15 +153,19 @@ class BookShelfTreeViewCell: UITableViewCell {
     func cellSetup(title:String, treeLevel: Int, watchNovelIDArray: [String]) {
         applyDepth(treeLevel: treeLevel)
         titleLabel.text = title
+        self.checkAndUpdateNewImage(novelIDArray: watchNovelIDArray)
         if watchNovelIDArray.count == 1 {
             let novelID = watchNovelIDArray[0]
             self.readProgressView.isHidden = false
             applyCurrentReadingPointToIndicator(novelID: novelID)
+            registerStoryObserver(novelID: novelID)
+            self.storyForNovelArrayObserveToken = nil
         }else{
             self.readProgressView.isHidden = true
+            registerStoryForNovelArrayObserver(novelIDArray: watchNovelIDArray)
+            self.storyObserveToken = nil
         }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
-        registerStoryObserver(novelIDArray: watchNovelIDArray)
     }
     
     public var height : CGFloat {

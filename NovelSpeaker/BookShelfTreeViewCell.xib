@@ -38,10 +38,7 @@
                         </constraints>
                     </activityIndicatorView>
                     <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="NEW!.png" translatesAutoresizingMaskIntoConstraints="NO" id="Rsq-pE-Xp7">
-                        <rect key="frame" x="276" y="0.0" width="44" height="43.5"/>
-                        <constraints>
-                            <constraint firstAttribute="width" constant="44" id="iQ5-Rt-xEW"/>
-                        </constraints>
+                        <rect key="frame" x="269" y="0.0" width="43" height="43.5"/>
                     </imageView>
                     <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="E7x-yC-sPR">
                         <rect key="frame" x="52" y="37" width="252" height="2"/>
@@ -67,7 +64,7 @@
                     <constraint firstAttribute="bottom" secondItem="aG3-qg-zYJ" secondAttribute="bottom" id="wwa-pA-K3K"/>
                     <constraint firstItem="aG3-qg-zYJ" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="xW7-mI-gI0"/>
                     <constraint firstItem="aG3-qg-zYJ" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="xlh-Ai-gbf"/>
-                    <constraint firstAttribute="trailing" secondItem="Rsq-pE-Xp7" secondAttribute="trailing" id="yME-Rp-PBM"/>
+                    <constraint firstAttribute="trailing" secondItem="Rsq-pE-Xp7" secondAttribute="trailing" constant="8" id="yME-Rp-PBM"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>

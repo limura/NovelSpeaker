@@ -8,9 +8,11 @@
 
 import UIKit
 import Eureka
+import RealmSwift
 
 class CreateSpeechModSettingViewControllerSwift: FormViewController {
     @objc public var targetSpeechModSettingID:String? = nil
+    public var targetBeforeString = ""
     var currentSetting = RealmSpeechModSetting()
     var beforeTestText = ""
     var afterTestText = ""
@@ -48,10 +50,13 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
     }
     
     func createCells() {
-        if let targetID = targetSpeechModSettingID {
-            if let realm = try? RealmUtil.GetRealm(), let targetSetting = realm.object(ofType: RealmSpeechModSetting.self, forPrimaryKey: targetID) {
-                self.currentSetting = targetSetting
-            }
+        if let targetID = targetSpeechModSettingID, let targetSetting = RealmSpeechModSetting.SearchFrom(id: targetID) {
+            self.currentSetting = targetSetting
+        }else if let targetSetting = RealmSpeechModSetting.SearchFrom(beforeString: targetBeforeString) {
+            self.currentSetting = targetSetting
+        }else{
+            self.currentSetting = RealmSpeechModSetting()
+            self.currentSetting.before = targetBeforeString
         }
         self.beforeText = currentSetting.before
         self.afterText = currentSetting.after
@@ -59,7 +64,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
         self.form +++ Section()
         <<< TextRow() {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_BeforeTitle", comment: "読み替え前")
-            $0.value = currentSetting.before
+            $0.value = self.beforeText
             $0.add(rule: RuleRequired())
             $0.validationOptions = .validatesOnChange
             $0.cell.textField.clearButtonMode = .always
@@ -87,7 +92,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
         })
         <<< TextRow() {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AfterTitle", comment: "読み替え後")
-            $0.value = currentSetting.after
+            $0.value = self.afterText
             $0.add(rule: RuleRequired())
             $0.validationOptions = .validatesOnChange
             $0.cell.textField.clearButtonMode = .always
@@ -108,7 +113,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
         })
         <<< SwitchRow() {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_RegularExpressionTitle", comment: "正規表現マッチ")
-            $0.value = currentSetting.isUseRegularExpression
+            $0.value = self.isUseRegexp
         }.onChange({ (row) in
             guard let value = row.value else {
                 return
@@ -117,10 +122,10 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
         })
         <<< TextRow("BeforeTestTextRow") {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_BeforeSampleTitle", comment: "読み替え前")
-            if currentSetting.isUseRegularExpression {
+            if self.isUseRegexp {
                 $0.value = "メロスは激怒した"
             }else{
-                $0.value = currentSetting.before
+                $0.value = self.beforeText
             }
             beforeTestText = $0.value ?? "メロスは激怒した"
             $0.cell.textField.clearButtonMode = .always
