@@ -31,11 +31,9 @@
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="5lT-a7-cAi">
-                        <rect key="frame" x="291" y="12" width="20" height="20"/>
-                        <constraints>
-                            <constraint firstAttribute="width" constant="20" id="XOW-si-qkt"/>
-                        </constraints>
+                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="5lT-a7-cAi">
+                        <rect key="frame" x="267" y="3.5" width="37" height="37"/>
+                        <color key="color" cocoaTouchSystemColor="darkTextColor"/>
                     </activityIndicatorView>
                     <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="NEW!.png" translatesAutoresizingMaskIntoConstraints="NO" id="Rsq-pE-Xp7">
                         <rect key="frame" x="269" y="0.0" width="43" height="43.5"/>
@@ -49,18 +47,18 @@
                     </progressView>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="5lT-a7-cAi" secondAttribute="trailing" constant="9" id="1sU-qD-t0u"/>
-                    <constraint firstAttribute="bottom" secondItem="5lT-a7-cAi" secondAttribute="bottom" constant="11.5" id="3CR-0e-CA7"/>
+                    <constraint firstAttribute="trailing" secondItem="5lT-a7-cAi" secondAttribute="trailing" constant="16" id="1sU-qD-t0u"/>
                     <constraint firstAttribute="trailing" secondItem="NDu-xh-oRj" secondAttribute="trailing" constant="16" id="5Mc-Kd-2KC"/>
                     <constraint firstItem="NDu-xh-oRj" firstAttribute="leading" secondItem="aG3-qg-zYJ" secondAttribute="trailing" constant="8" id="6zA-8S-mAo"/>
                     <constraint firstItem="Rsq-pE-Xp7" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="7qG-pB-xSe"/>
                     <constraint firstAttribute="bottom" secondItem="NDu-xh-oRj" secondAttribute="bottom" constant="10.5" id="A1E-xr-V2O"/>
                     <constraint firstAttribute="bottom" secondItem="Rsq-pE-Xp7" secondAttribute="bottom" id="DR2-G7-vZj"/>
+                    <constraint firstItem="5lT-a7-cAi" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="3.5" id="FiV-JY-Ubt"/>
                     <constraint firstItem="NDu-xh-oRj" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="12" id="Rwm-Yf-pMI"/>
                     <constraint firstAttribute="trailing" secondItem="E7x-yC-sPR" secondAttribute="trailing" constant="16" id="UBQ-c2-YPe"/>
                     <constraint firstAttribute="bottom" secondItem="E7x-yC-sPR" secondAttribute="bottom" constant="4.5" id="ZXG-Dj-xt3"/>
+                    <constraint firstAttribute="bottom" secondItem="5lT-a7-cAi" secondAttribute="bottom" constant="3" id="ckF-co-zeF"/>
                     <constraint firstItem="E7x-yC-sPR" firstAttribute="leading" secondItem="NDu-xh-oRj" secondAttribute="leading" id="m7E-ua-Qng"/>
-                    <constraint firstItem="5lT-a7-cAi" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="12" id="uON-Gj-iBy"/>
                     <constraint firstAttribute="bottom" secondItem="aG3-qg-zYJ" secondAttribute="bottom" id="wwa-pA-K3K"/>
                     <constraint firstItem="aG3-qg-zYJ" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="xW7-mI-gI0"/>
                     <constraint firstItem="aG3-qg-zYJ" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="xlh-Ai-gbf"/>

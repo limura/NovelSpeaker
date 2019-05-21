@@ -42,6 +42,9 @@ class BookShelfTreeViewCell: UITableViewCell {
     func activateDownloadIndicator() {
         if self.downloadingActivityIndicator.isHidden {
             self.downloadingActivityIndicator.isHidden = false
+            if !self.downloadingActivityIndicator.isAnimating {
+                self.downloadingActivityIndicator.startAnimating()
+            }
         }
     }
     func deactivateDownloadIndicator() {
