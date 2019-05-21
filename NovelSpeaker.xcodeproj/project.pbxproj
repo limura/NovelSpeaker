@@ -566,6 +566,7 @@
 				211BA5FD199742CF00560842 /* NiftySpeaker.m */,
 				217BD9E219CE72BB008A0D9D /* StringSubstituter.h */,
 				217BD9E319CE72BB008A0D9D /* StringSubstituter.m */,
+				2164800B2290F3F900A183DF /* StorySpeaker.swift */,
 			);
 			name = TextSpeech;
 			sourceTree = "<group>";
@@ -745,7 +746,6 @@
 				2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */,
 				21C372DB21DFC41600FB2D52 /* UIImageExtension.h */,
 				21C372DC21DFC41600FB2D52 /* UIImageExtension.m */,
-				2164800B2290F3F900A183DF /* StorySpeaker.swift */,
 				2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */,
 				21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */,
 			);

@@ -62,7 +62,6 @@ class DuplicateSoundPlayer: NSObject, AVAudioPlayerDelegate {
         dispatchQueue.async {
             for player in self.getPlayerArray() {
                 if !player.isPlaying {
-                    print("play")
                     player.numberOfLoops = 0
                     player.play()
                     return

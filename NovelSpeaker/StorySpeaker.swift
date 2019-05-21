@@ -421,7 +421,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }catch{
             print("audioSession.setActive(false) failed.")
         }
-        self.readLocation = speaker.getCurrentReadingPoint().location
+        // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
+        if let token = self.storyObserverToken {
+            if let realm = try? RealmUtil.GetRealm(), let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
+                realm.beginWrite()
+                story.readLocation = speaker.getCurrentReadingPoint().location
+                try! realm.commitWrite(withoutNotifying: [token])
+            }
+        }else{
+            self.readLocation = speaker.getCurrentReadingPoint().location
+        }
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerStopSpeechEvent(storyID: self.storyID)
         }
@@ -435,7 +444,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         let nextReadingPoint = readingPoint + length
         let contentLength = story.content?.count ?? 0
         if nextReadingPoint > contentLength {
-            LoadNextChapter()
+            if !LoadNextChapter() {
+                if let realm = try? RealmUtil.GetRealm() {
+                    try! realm.write {
+                        story.readLocation = contentLength
+                    }
+                }
+            }
         }else{
             speaker.updateCurrentReadingPoint(NSRange(location: nextReadingPoint, length: 0))
         }
@@ -443,7 +458,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     func SkipBackward(length:Int){
         let readingPoint = speaker.getCurrentReadingPoint().location
         if readingPoint >= length {
-            speaker.updateCurrentReadingPoint(NSRange(location: length - readingPoint, length: 0))
+            speaker.updateCurrentReadingPoint(NSRange(location: readingPoint - length, length: 0))
             return
         }
         var targetLength = length - readingPoint
@@ -456,6 +471,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                         story.readLocation = contentLength - targetLength
                     }
                 }
+                ringPageTurningSound()
                 SetStory(story: story)
                 return
             }
@@ -463,11 +479,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             targetLength -= contentLength
         }
         // 抜けてきたということは先頭まで行ってしまった。
-        if let firstStory = RealmStory.GetAllObjects()?.filter("chapterNumber = 1 AND novelID = %@", RealmStory.StoryIDToNovelID(storyID: self.storyID)).first {
+        if let firstStory = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
             if let realm = try? RealmUtil.GetRealm() {
                 try! realm.write {
                     firstStory.readLocation = 0
                 }
+            }
+            if firstStory.id != self.storyID {
+                ringPageTurningSound()
             }
             SetStory(story: firstStory)
         }
@@ -690,6 +709,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     @objc func togglePlayPauseEvent(_ sendor:MPRemoteCommandCenter) {
         print("MPCommandCenter: togglePlayPauseEvent")
         if speaker.isSpeaking() {
+            print("togglePlayPause stopSpeech")
             StopSpeech()
         }else{
             StartSpeech(withMaxSpeechTimeReset: true)
@@ -742,7 +762,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 }
                 self.StopSpeech()
                 self.SkipForward(length: 50)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: {
                     self.StartSpeech(withMaxSpeechTimeReset: true)
                 })
             }
@@ -763,7 +783,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 }
                 self.StopSpeech()
                 self.SkipBackward(length: 50)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: {
                     self.StartSpeech(withMaxSpeechTimeReset: true)
                 })
             }
@@ -822,8 +842,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             break
         }
         if let nextStory = SearchNextChapter(storyID: self.storyID) {
+            self.ringPageTurningSound()
+            if let realm = try? RealmUtil.GetRealm() {
+                try! realm.write {
+                    nextStory.readLocation = 0
+                }
+            }
             self.SetStory(story: nextStory)
             self.StartSpeech(withMaxSpeechTimeReset: false)
+        }else{
+            self.StopSpeech()
+            self.announceSpeakerHolder.Speech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
         }
     }
     
