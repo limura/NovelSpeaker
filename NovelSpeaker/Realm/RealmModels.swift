@@ -375,7 +375,7 @@ extension RealmStory: CanWriteIsDeleted {
     @objc dynamic var writer : String = ""
     @objc dynamic var title : String = ""
     @objc dynamic var url : String = ""
-    @objc dynamic var urlSecret : String = ""
+    @objc dynamic var _urlSecret : String = ""
     @objc dynamic var createDate : Date = Date()
     @objc dynamic var likeLevel : Int8 = 0
     @objc dynamic var isNeedSpeechAfterDelete : Bool = false
@@ -445,14 +445,19 @@ extension RealmStory: CanWriteIsDeleted {
         }
     }
     
+    var lastChapter : RealmStory? {
+        get {
+            return linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last
+        }
+    }
     var lastChapterNumber : Int? {
         get {
-            return linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last?.chapterNumber
+            return lastChapter?.chapterNumber
         }
     }
     var lastDownloadURL : String? {
         get {
-            return linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last?.url
+            return lastChapter?.url
         }
     }
     var lastDownloadDate: Date? {
@@ -477,6 +482,12 @@ extension RealmStory: CanWriteIsDeleted {
             }
         }
         return false
+    }
+    
+    var urlSecret: [String] {
+        get {
+            return _urlSecret.components(separatedBy: ";")
+        }
     }
     
     // 推測によるアップデート頻度。単位は1日に何度更新されるのか(1日に1度なら1、10日に1度なら0.1、1日に3度なら3)。
@@ -1069,9 +1080,8 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
 }
 
 @objc final class RealmNovelTag: Object {
-    @objc dynamic var id = NSUUID().uuidString
+    @objc dynamic var name = "" // name を primaryKey にします。
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var name = ""
     @objc dynamic var type : String = ""
     @objc dynamic var createdDate = Date()
     
@@ -1090,7 +1100,30 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         return realm.objects(RealmNovelTag.self).filter("isDeleted = false")
     }
-
+    
+    static func SearchWith(tagName:String) -> RealmNovelTag? {
+        return GetAllObjects()?.filter("name = %@", tagName).first
+    }
+    
+    static func AddTag(tagName:String, novelID: String, type: String) {
+        if tagName.count <= 0 || novelID.count <= 0 {
+            return
+        }
+        if let tag = SearchWith(tagName: tagName) {
+            if !tag.targetNovelIDArray.contains(novelID) {
+                tag.targetNovelIDArray.append(novelID)
+            }
+        }else{
+            let tag = RealmNovelTag()
+            tag.name = tagName
+            tag.targetNovelIDArray.append(novelID)
+            tag.type = type
+            if let realm = try? RealmUtil.GetRealm() {
+                realm.add(tag, update: true)
+            }
+        }
+    }
+    
     func unref(realm:Realm, novel:RealmNovel) {
         if let index = targetNovelIDArray.index(of: novel.novelID) {
             targetNovelIDArray.remove(at: index)
@@ -1104,7 +1137,7 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     }
     
     override class func primaryKey() -> String? {
-        return "id"
+        return "name"
     }
     
     override static func indexedProperties() -> [String] {

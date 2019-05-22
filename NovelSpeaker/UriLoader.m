@@ -77,6 +77,10 @@
         if (author == nil) {
             author = @"";
         }
+        NSString* subtitle = [NiftyUtility validateNSDictionaryForString:secondObject key:@"subtitle"];
+        if (subtitle == nil) {
+            subtitle = @"";
+        }
         NSString* firstPageLink = [NiftyUtility validateNSDictionaryForString:secondObject key:@"firstPageLink"];
         if (firstPageLink == nil) {
             firstPageLink = @"";
@@ -85,7 +89,7 @@
         if (tag == nil) {
             tag = @"";
         }
-        SiteInfo* siteInfo = [[SiteInfo alloc] initWithParams:urlPattern nextLink:nextLink pageElement:pageElement title:title author:author firstPageLink:firstPageLink tag:tag];
+        SiteInfo* siteInfo = [[SiteInfo alloc] initWithParams:urlPattern nextLink:nextLink pageElement:pageElement title:title author:author firstPageLink:firstPageLink tag:tag subtitle:subtitle];
         if (siteInfo == nil) {
             NSLog(@"AddSiteInfoFromJsonArray: siteInfo == nil");
             continue;
@@ -188,9 +192,9 @@
         }
     }
 
-    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]" pageElement:@"//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]" title:@"//title" author:@"" firstPageLink:@"" tag:@""];
+    SiteInfo* defaultSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]" pageElement:@"//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]" title:@"//title" author:@"" firstPageLink:@"" tag:@"" subtitle:@""];
     [resultArray addObject:defaultSiteInfo];
-    SiteInfo* fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//body" title:@"//title" author:@"" firstPageLink:@"" tag:@""];
+    SiteInfo* fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//body" title:@"//title" author:@"" firstPageLink:@"" tag:@"" subtitle:@""];
     [resultArray addObject:fallbackSiteInfo];
     /*
     fallbackSiteInfo = [[SiteInfo alloc] initWithParams:@".*" nextLink:@"" pageElement:@"//\*" title:@"//title" author:@""];
@@ -512,7 +516,9 @@
         story.title = [siteInfo GetTitle:document context:context documentEncoding:charsetValue];
         story.author = [siteInfo GetAuthor:document context:context documentEncoding:charsetValue];
         story.nextUrl = [siteInfo GetNextURL:document context:context currentURL:targetUrl documentEncoding:charsetValue];
+        story.subtitle = [siteInfo GetSubtitle:document context:context documentEncoding:charsetValue];
         story.firstPageLink = firstPageLink;
+        story.keyword = [siteInfo GetTagArray:document context:context documentEncoding:charsetValue];
         [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SiteInfo hit: %@ on %@", [siteInfo GetDescription], [targetUrl absoluteString]]];
         break;
     }

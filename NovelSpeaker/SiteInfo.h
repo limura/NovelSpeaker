@@ -20,9 +20,10 @@
     NSString* m_Author;
     NSString* m_FirstPageLink;
     NSString* m_Tag;
+    NSString* m_Subtitle;
 }
 
-- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString*)author firstPageLink:(NSString*)firstPageLink tag:(NSString*)tag;
+- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString *)author firstPageLink:(NSString *)firstPageLink tag:(NSString*)tag subtitle:(NSString*)subtitle;
 
 /// 指定された url がこの SiteInfo の示すURLであるか否かを判定します
 - (BOOL)isTargetUrl:(NSURL*)url;
@@ -36,6 +37,8 @@
 - (NSString*)GetTitle:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding;
 /// 著者を抽出します
 - (NSString*)GetAuthor:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding;
+/// サブタイトルを抽出します
+- (NSString*)GetSubtitle:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding;
 
 /// タグのリストを抽出します
 /// 注意：

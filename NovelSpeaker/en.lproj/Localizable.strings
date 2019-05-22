@@ -362,6 +362,12 @@
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFailedTitle" = "There is a problem with the string after replacement";
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFieldMessage" = "You can not set an empty string.\nIf you do not want them to speak after reading, you need to change to blank.";
 
+"NovelDownloader_htmlStoryIsNil" = "Novel download failed.";
+"NovelDownloader_FailedByNoContent" = "Novel download failed. This nove has no content.";
+"NovelDownloader_FailedByNoRealmNovel" = "Novel download aborted. This novel was not registered on the bookshelf.";
+"NovelDownloader_InvalidNovelID" = "Novel  download failed. Could not start the download without getting the data (URL etc.) to download. It seems that there are problems with novel data not stored or deleted.";
+
+
 "BookShelfRATreeViewController_Title" = "Bookshelf";
 "BookShelfRATreeViewController_UpTo1DayAgo" = "Up to one day ago";
 "BookShelfRATreeViewController_UpTo7DayAgo" = "Up to 7 days ago";

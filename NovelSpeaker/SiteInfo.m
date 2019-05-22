@@ -10,7 +10,7 @@
 #import "NovelSpeaker-Swift.h"
 
 @implementation SiteInfo
-- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString *)author firstPageLink:(NSString *)firstPageLink tag:(NSString*)tag{
+- (id)initWithParams:(NSString*)urlPattern nextLink:(NSString*)nextLink pageElement:(NSString*)pageElement title:(NSString*)title author:(NSString *)author firstPageLink:(NSString *)firstPageLink tag:(NSString*)tag subtitle:(NSString*)subtitle {
     self = [super init];
     if (self == nil) {
         NSLog(@"super init return nil");
@@ -28,6 +28,7 @@
     m_Author = author == nil ? @"" : author;
     m_FirstPageLink = firstPageLink == nil ? @"" : firstPageLink;
     m_Tag = tag == nil ? @"" : tag;
+    m_Subtitle = subtitle == nil ? @"" : subtitle;
     
     return self;
 }
@@ -95,12 +96,21 @@
     return [[NSString alloc] initWithFormat:@"%@", [SiteInfo RemoveHtmlTag:authorString]];
 }
 
+/// サブタイトルを抽出します
+- (NSString*)GetSubtitle:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding {
+    NSString* subtitleString = [self ExecuteXpathToString:m_Subtitle document:document context:context documentEncoding:documentEncoding];
+    if (subtitleString == nil) {
+        return nil;
+    }
+    return [[NSString alloc] initWithFormat:@"%@", [SiteInfo RemoveHtmlTag:subtitleString]];
+}
+
 /// タグのリストを抽出します
 /// 注意：
 /// タグはリストに分かれている場合、タグ毎にNSArrayの1要素になっているはずです
 /// NSArray の中身は NSString* ですが、HTMLを含む文字列なので、HtmlStringToAttributedString を呼ぶ必要があるかもしれません。
 - (NSArray*)GetTagArray:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding {
-    NSArray* tagArray = [self ExecuteXpathToStringArray:m_Author document:document context:context documentEncoding:documentEncoding];
+    NSArray* tagArray = [self ExecuteXpathToStringArray:m_Tag document:document context:context documentEncoding:documentEncoding];
     return tagArray;
 }
 

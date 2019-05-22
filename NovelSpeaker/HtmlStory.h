@@ -17,5 +17,7 @@
 @property (nonatomic) NSString* title;
 @property (nonatomic) NSString* author;
 @property (nonatomic) int count;
+@property (nonatomic) NSString* subtitle;
+@property (nonatomic) NSArray* keyword;
 
 @end

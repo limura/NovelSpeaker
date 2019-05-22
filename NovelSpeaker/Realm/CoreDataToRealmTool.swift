@@ -244,7 +244,7 @@ class CoreDataToRealmTool: NSObject {
             if novelCoreData.isURLContent() {
                 novel.url = NarouContentToNovelID(content: novelCoreData)
                 if let urlSecret = novelCoreData.keyword {
-                    novel.urlSecret = urlSecret
+                    novel._urlSecret = urlSecret
                 }
                 novel.type = NovelType.URL
             }else if novelCoreData.isUserCreatedContent() {
@@ -254,19 +254,7 @@ class CoreDataToRealmTool: NSObject {
                 novel.type = NovelType.URL
                 if let keyword = novelCoreData.keyword {
                     for tag in keyword.components(separatedBy: " ") {
-                        var hit:Bool = false
-                        for realmTag in realm.objects(RealmNovelTag.self).filter("isDeleted = false AND name = %@", tag) {
-                            if !realmTag.targetNovelIDArray.contains(novel.novelID) {
-                                realmTag.targetNovelIDArray.append(novel.novelID)
-                            }
-                            hit = true
-                        }
-                        if !hit {
-                            let realmTag = RealmNovelTag()
-                            realmTag.type = "keyword"
-                            realmTag.name = tag
-                            realm.add(realmTag)
-                        }
+                        RealmNovelTag.AddTag(tagName: tag, novelID: novel.novelID, type: "keyword")
                     }
                 }
             }
