@@ -154,6 +154,8 @@
 "SpeechViewController_AnnounceSeekForward" = "早送り";
 "SpeechViewController_AnnounceSeekBackward" = "巻き戻し";
 "SpeechViewController_UnknownErrorForShare" = "不明なエラーでシェアできませんでした。";
+"SpeechViewController_CheckSpeechTextDialogTitle" = "読み上げに使われる文字列は以下のようになります。";
+"SpeechViewController_AddCheckSpeechText" = "読み替え後の文字列を確認する";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";

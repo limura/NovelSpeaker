@@ -166,6 +166,9 @@
 "SpeechViewController_AnnounceSeekForward" = "Fast forward";
 "SpeechViewController_AnnounceSeekBackward" = "Rewind";
 "SpeechViewController_UnknownErrorForShare" = "Could not share due to an unknown error.";
+"SpeechViewController_CheckSpeechTextDialogTitle" = "The string used for reading is as follows.";
+"SpeechViewController_AddCheckSpeechText" = "Check the translated text used for speech";
+
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";

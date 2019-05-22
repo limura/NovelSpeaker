@@ -478,6 +478,35 @@ extension RealmStory: CanWriteIsDeleted {
         }
         return false
     }
+    
+    // 推測によるアップデート頻度。単位は1日に何度更新されるのか(1日に1度なら1、10日に1度なら0.1、1日に3度なら3)。
+    // 計算としては 章数 / (現在 - 直近から数えて10個前のものがダウンロードされた日付)[日] なので、最後にダウンロードされた日付が古くても評価は下がる。
+    // 最初に1000件とかダウンロードされた小説が既に更新終了していたとしても、10件分しか効果がないので10日経つと1に、100日経てば0.1になる。
+    var updateFrequency: Double {
+        get {
+            guard let storys = linkedStorys?.sorted(byKeyPath: "downloadDate", ascending: true) else {
+                return 1.0 / 30.0 // 未ダウンロードのものは30日に1度の頻度とする。
+            }
+            let count:Double
+            let targetStory:RealmStory?
+            if storys.count >= 10 {
+                count = 10.0
+                targetStory = storys[storys.count - 10]
+            }else{
+                count = Double(storys.count)
+                targetStory = storys.first
+            }
+            let targetDownloadDate:Date
+            if let story = targetStory {
+                targetDownloadDate = story.downloadDate
+            }else{
+                targetDownloadDate = Date(timeIntervalSinceNow: -60*60*24*30)
+            }
+            let diffTimeInSec = Date().timeIntervalSince1970 - targetDownloadDate.timeIntervalSince1970
+            return Double(count) / (diffTimeInSec / (60.0*60.0*24))
+        }
+    }
+    
     public static func CreateUniqueID() -> String {
         return "https://example.com/\(NSUUID().uuidString)"
     }

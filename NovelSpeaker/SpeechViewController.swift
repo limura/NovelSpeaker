@@ -28,7 +28,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     var storyObserverToken:NotificationToken? = nil
     var storyArrayObserverToken:NotificationToken? = nil
     
-    let storySpeaker = StorySpeaker.instance
+    let storySpeaker = StorySpeaker.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -84,7 +84,14 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
 
         let menuController = UIMenuController.shared
         let speechModMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), action: #selector(setSpeechModSetting(sender:)))
-        menuController.menuItems = [speechModMenuItem]
+        let checkSpeechTextMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), action: #selector(checkSpeechText(sender:)))
+        let menuItems:[UIMenuItem]
+        if RealmGlobalState.GetInstance()?.isMenuItemIsAddSpeechModSettingOnly ?? false {
+            menuItems = [speechModMenuItem]
+        }else{
+            menuItems = [speechModMenuItem, checkSpeechTextMenuItem]
+        }
+        menuController.menuItems = menuItems
     }
     
     func loadNovel(novel:RealmNovel) {
@@ -228,6 +235,19 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             nextViewController.targetBeforeString = text
         }
         self.navigationController?.pushViewController(nextViewController, animated: true)
+    }
+    
+    @objc func checkSpeechText(sender: UIMenuItem) {
+        guard let range = self.textView.selectedTextRange, let text = self.textView.text(in: range), let storyID = self.storyID else { return }
+        let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+        let dummySpeaker = NiftySpeaker()
+        dummySpeaker.clearSpeakSettings()
+        self.storySpeaker.applySpeechConfig(novelID: novelID, speaker: dummySpeaker)
+        self.storySpeaker.applySpeechModSetting(novelID: novelID, targetText: text, speaker: dummySpeaker)
+        dummySpeaker.setText(text)
+        if let speechText = dummySpeaker.getSpeechText() {
+            NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechViewController_CheckSpeechTextDialogTitle", comment: "読み上げに使われる文字列は以下のようになります。"), message: speechText, buttonTitle: nil, buttonAction: nil)
+        }
     }
 
     func textViewScrollTo(readLocation:Int) {

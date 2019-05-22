@@ -30,7 +30,7 @@ class AnnounceSpeakerHolder: NSObject {
 }
 
 class StorySpeaker: NSObject, SpeakRangeDelegate {
-    static let instance = StorySpeaker()
+    static let shared = StorySpeaker()
     
     let speaker = NiftySpeaker()
     let dummySoundLooper = DummySoundLooper()
@@ -69,8 +69,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     
     func ApplySpeakConfigs(novelID:String, content:String, location:Int) {
         speaker.clearSpeakSettings()
-        applySpeechConfig(novelID: novelID)
-        applySpeechModSetting(novelID: novelID, targetText: content)
+        applySpeechConfig(novelID: novelID, speaker: self.speaker)
+        observeSpeechConfig(novelID: novelID)
+        applySpeechModSetting(novelID: novelID, targetText: content, speaker: self.speaker)
+        observeSpeechModSetting(novelID: novelID)
         speaker.setText(ForceOverrideHungSpeakString(text: content))
         speaker.updateCurrentReadingPoint(NSRange(location: location, length: 0))
         self.isNeedApplySpeechConfigs = false
@@ -204,7 +206,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
     }
     
-    func applySpeechConfig(novelID:String) {
+    func applySpeechConfig(novelID:String, speaker:NiftySpeaker) {
         guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
         speaker.setDefaultSpeechConfig(defaultSpeakerSetting.speechConfig)
         guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
@@ -215,10 +217,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             guard let speakerSetting = sectionConfig.speaker else { continue }
             speaker.addBlockStartSeparator(sectionConfig.startText, end: sectionConfig.endText, speechConfig: speakerSetting.speechConfig)
         }
-        
+    }
+    
+    func observeSpeechConfig(novelID:String) {
+        guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
         self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { (change) in
             self.isNeedApplySpeechConfigs = true
         }
+        guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
         self.speechSectionConfigArrayObserverToken = allSpeechSectionConfigArray.observe({ (change) in
             switch change {
             case .initial(_):
@@ -240,7 +246,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         })
     }
     
-    func applySpeechModSetting(novelID:String, targetText:String) {
+    func applySpeechModSetting(novelID:String, targetText:String, speaker:NiftySpeaker) {
         var isOverrideRubyEnabled = false
         var notRubyCharactorStringArray = ""
         var isIgnoreURIStringSpeechEnabled = false
@@ -250,21 +256,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 isOverrideRubyEnabled = speechOverrideSetting.isOverrideRubyIsEnabled
                 notRubyCharactorStringArray = speechOverrideSetting.notRubyCharactorStringArray
                 isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
-                self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ (change) in
-                    switch change {
-                    case .error(_):
-                        break
-                    case .change(let properties):
-                        for property in properties {
-                            if ["isOverrideRubyIsEnabled", "notRubyCharactorStringArray", "isIgnoreURIStringSpeechEnabled"].contains(property.name) {
-                                self.isNeedApplySpeechConfigs = true
-                                return
-                            }
-                        }
-                    case .deleted:
-                        break
-                    }
-                })
             }
         }
         if let settingArray = RealmSpeechOverrideSetting.SearchObjectFrom(novelID: novelID) {
@@ -274,25 +265,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
             }
         }
-        self.novelIDSpeechOverrideSettingArrayObserverToken = RealmSpeechOverrideSetting.GetAllObjects()?.observe({ (change) in
-            switch change {
-            case .initial(_):
-                break
-            case .update(let speechOverrideSettingArray, let deletions, _, _):
-                if deletions.count > 0 {
-                    self.isNeedApplySpeechConfigs = true
-                    return
-                }
-                for setting in speechOverrideSettingArray {
-                    if setting.targetNovelIDArray.contains(novelID) {
-                        self.isNeedApplySpeechConfigs = true
-                        return
-                    }
-                }
-            case .error(_):
-                break
-            }
-        })
 
         if isOverrideRubyEnabled {
             if let rubyDictionary = StringSubstituter.findNarouRubyNotation(targetText, notRubyString: notRubyCharactorStringArray) {
@@ -348,6 +320,46 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 break
             }
         })
+    }
+    
+    func observeSpeechModSetting(novelID:String) {
+        if let globalState = RealmGlobalState.GetInstance(), let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
+            self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ (change) in
+                switch change {
+                case .error(_):
+                    break
+                case .change(let properties):
+                    for property in properties {
+                        if ["isOverrideRubyIsEnabled", "notRubyCharactorStringArray", "isIgnoreURIStringSpeechEnabled"].contains(property.name) {
+                            self.isNeedApplySpeechConfigs = true
+                            return
+                        }
+                    }
+                case .deleted:
+                    break
+                }
+            })
+        }
+        self.novelIDSpeechOverrideSettingArrayObserverToken = RealmSpeechOverrideSetting.GetAllObjects()?.observe({ (change) in
+            switch change {
+            case .initial(_):
+                break
+            case .update(let speechOverrideSettingArray, let deletions, _, _):
+                if deletions.count > 0 {
+                    self.isNeedApplySpeechConfigs = true
+                    return
+                }
+                for setting in speechOverrideSettingArray {
+                    if setting.targetNovelIDArray.contains(novelID) {
+                        self.isNeedApplySpeechConfigs = true
+                        return
+                    }
+                }
+            case .error(_):
+                break
+            }
+        })
+
     }
     
     func audioSessionInit(isActive:Bool) {
