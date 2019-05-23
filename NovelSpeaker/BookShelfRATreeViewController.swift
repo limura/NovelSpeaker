@@ -84,13 +84,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshControlValueChangedEvent), for: .valueChanged)
         treeView.scrollView.addSubview(refreshControl)
-        
+        registObserver()
+
         view.layoutIfNeeded()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        registObserver()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -112,10 +112,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             self.reloadAllData()
         }
     }
-    func unregistObserver() {
-        novelArrayNotificationToken = nil
-    }
-    
+
     // 検索条件やソート条件を考慮した上での NarouContent の Array を返します
     func getNovelArray(sortType:NarouContentSortType) -> [RealmNovel]? {
         guard var allNovels = RealmNovel.GetAllObjects() else { return nil }

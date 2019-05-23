@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import FTLinearActivityIndicator
 
 fileprivate class QueueItem {
     let novelID:String
@@ -306,7 +307,7 @@ class NovelDownloadQueue : NSObject {
             if self.queueHolder.GetCurrentDownloadingNovelIDArray().count > 0 {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }else{
-                UIApplication.shared.isNetworkActivityIndicatorVisible = true
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
             }
         }
     }
