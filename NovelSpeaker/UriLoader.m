@@ -91,7 +91,7 @@
         }
         SiteInfo* siteInfo = [[SiteInfo alloc] initWithParams:urlPattern nextLink:nextLink pageElement:pageElement title:title author:author firstPageLink:firstPageLink tag:tag subtitle:subtitle];
         if (siteInfo == nil) {
-            NSLog(@"AddSiteInfoFromJsonArray: siteInfo == nil");
+            //NSLog(@"AddSiteInfoFromJsonArray: siteInfo == nil");
             continue;
         }
         //NSLog(@"AddSiteInfoFromJsonArray: addObject: %@", [siteInfo GetDescription]);
@@ -180,14 +180,14 @@
     for (SiteInfo* siteInfo in m_CustomSiteInfoArray) {
         //NSLog(@"check: %@", [siteInfo GetDescription]);
         if ([siteInfo isTargetUrl:url]) {
-            [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"ことせかい用SiteInfoの一つを採用します: %@", [siteInfo GetDescription]]];
+            //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"ことせかい用SiteInfoの一つを採用します: %@", [siteInfo GetDescription]]];
             [resultArray addObject:siteInfo];
         }
     }
 
     for (SiteInfo* siteInfo in m_SiteInfoArray) {
         if ([siteInfo isTargetUrl:url]) {
-            [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"Autopagerize用SiteInfoの一つを採用します: %@", [siteInfo GetDescription]]];
+            //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"Autopagerize用SiteInfoの一つを採用します: %@", [siteInfo GetDescription]]];
             [resultArray addObject:siteInfo];
         }
     }
@@ -216,11 +216,11 @@
     NSRegularExpression* regexp = [[NSRegularExpression alloc] initWithPattern:@"; *charset=([^ ]*)" options:0 error:nil];
     NSTextCheckingResult* result = [regexp firstMatchInString:contentType options:0 range:NSMakeRange(0, contentType.length)];
     if (result == nil) {
-        NSLog(@"header: charset unknwon. %@", contentType);
+        //NSLog(@"header: charset unknwon. %@", contentType);
         return nil;
     }
     if (result.numberOfRanges <= 0) {
-        NSLog(@"header: charset unknown numberOfRanges <= 0: %@", contentType);
+        //NSLog(@"header: charset unknown numberOfRanges <= 0: %@", contentType);
         return nil;
     }
     NSRange range = [result rangeAtIndex:1];
@@ -265,13 +265,13 @@
         if (match.numberOfRanges >= 2) {
             NSString* charset = [tmpString substringWithRange:[match rangeAtIndex:1]];
             if (charset != nil && charset.length > 0) {
-                NSLog(@"charset found: %@", charset);
+                //NSLog(@"charset found: %@", charset);
                 return charset;
             }
         }
     }
     if (guessEncoding != nil) {
-        NSLog(@"charset not found. return guess: %@", guessEncoding);
+        //NSLog(@"charset not found. return guess: %@", guessEncoding);
         return guessEncoding;
     }
     return faileoverCherset;
@@ -322,7 +322,7 @@
         }
     }
     SyncHTTPSessionResult* result = [httpSession GetBinaryWithUrlString:[targetUrl absoluteString] headerDictionary:headerDictionary];
-    NSLog(@"NSURLConnection return: data(%lu bytes)", (unsigned long)[[result getData] length]);
+    //NSLog(@"NSURLConnection return: data(%lu bytes)", (unsigned long)[[result getData] length]);
     if (result == nil || [result getData] == nil) {
         if (out_errorString != nil) {
             [out_errorString setString:NSLocalizedString(@"UriLoader_NSURLConnectionRequestFailed", @"Webサーバからの取得に失敗しました。(接続失敗？)")];
@@ -375,7 +375,7 @@
             data = decodedData;
             encoding = @"utf-8";
             charsetValue = NSUTF8StringEncoding;
-            NSLog(@"data override to utf8");
+            //NSLog(@"data override to utf8");
         }
     }
     if (out_charsetString != nil) {
@@ -486,19 +486,19 @@
     HtmlStory* story = [HtmlStory new];
     NSArray* siteInfoArray = [self searchSiteInfoForURL:targetUrl];
     NSURL* firstPageLink = nil;
-    [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"URL %@ に対して SiteInfo のマッチングを開始します。", [targetUrl absoluteString]]];
+    //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"URL %@ に対して SiteInfo のマッチングを開始します。", [targetUrl absoluteString]]];
     for (SiteInfo* siteInfo in siteInfoArray) {
         // firstPageLink の中身がなければ検索しておきます。
         if (firstPageLink == nil) {
             firstPageLink = [siteInfo GetFirstPageURL:document context:context currentURL:targetUrl documentEncoding:charsetValue];
             if (firstPageLink != nil) {
-                [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"firstPageLink に hit しました。firstPageURL: %@, siteInfo: %@", [firstPageLink absoluteString], [siteInfo GetDescription]]];
+                //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"firstPageLink に hit しました。firstPageURL: %@, siteInfo: %@", [firstPageLink absoluteString], [siteInfo GetDescription]]];
             }
         }
         NSString* pageHtml = [siteInfo GetPageElement:document context:context documentEncoding:charsetValue];
         // pageHtml がみつからないで、かつ、firstPageLink がみつかっていない場合は次の siteInfo を検索します
         if ((pageHtml == nil || [pageHtml length] <= 0) && firstPageLink == nil) {
-            [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"pageElement と firstPageLink のどちらもヒットしませんでした。siteInfo: %@", [siteInfo GetDescription]]];
+            //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"%@: pageElement と firstPageLink のどちらもヒットしませんでした。siteInfo: %@", [targetUrl absoluteString], [siteInfo GetDescription]]];
             continue;
         }
         if (pageHtml == nil) {
@@ -508,7 +508,7 @@
         NSString* replaceLonlyTagString = [SiteInfo ReplaceXhtmlLonlyTag:removeRubyString];
         NSString* tmpString = [replaceLonlyTagString stringByReplacingOccurrencesOfString:@"&#13;" withString:@""];
         if (tmpString == nil || [tmpString length] <= 0) {
-            NSLog(@"tmpString == nil || tmpString.length <= 0");
+            //NSLog(@"tmpString == nil || tmpString.length <= 0");
             continue;
         }
         NSAttributedString* textAttributedString = [SiteInfo HtmlStringToAttributedString:tmpString];
@@ -519,7 +519,7 @@
         story.subtitle = [siteInfo GetSubtitle:document context:context documentEncoding:charsetValue];
         story.firstPageLink = firstPageLink;
         story.keyword = [siteInfo GetTagArray:document context:context documentEncoding:charsetValue];
-        [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SiteInfo hit: %@ on %@", [siteInfo GetDescription], [targetUrl absoluteString]]];
+        //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"%@ の読み込みを完了しました。 %@", [targetUrl absoluteString], [siteInfo GetDescription]]];
         break;
     }
     xmlXPathFreeContext(context);

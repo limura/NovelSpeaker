@@ -130,20 +130,6 @@ class NiftyUtilitySwift: NSObject {
                                     DispatchQueue.main.async {
                                         dialog.dismiss(animated: false, completion: nil)
                                     }
-                                    guard let globalData = GlobalDataSingleton.getInstance() else {
-                                        DispatchQueue.main.async {
-                                            EasyDialog.Builder(viewController)
-                                                .title(title: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー"))
-                                                .label(text: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfBody", comment: "本棚への追加に失敗しました。"))
-                                                .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                                                    DispatchQueue.main.async {
-                                                        dialog.dismiss(animated: false, completion: nil)
-                                                    }
-                                                })
-                                                .build().show()
-                                        }
-                                        return
-                                    }
                                     let cookieParameter = cookieArray.joined(separator: ";")
                                     if let story = story {
                                         if !RealmNovel.AddNewNovelWithFirstStory(url: url, htmlStory: story, cookieParameter: cookieParameter, title: titleString, author: story.author, tag: story.keyword, firstContent: content){
@@ -153,6 +139,9 @@ class NiftyUtilitySwift: NSObject {
                                         }else{
                                             // XXXXX: novelID が url.absoluteString であることを期待している。
                                             NovelDownloadQueue.shared.addQueue(novelID: url.absoluteString)
+                                            DispatchQueue.main.async {
+                                                NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), message: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfMessage", comment: "続く章があればダウンロードを続けます。"), buttonTitle: nil, buttonAction: nil)
+                                            }
                                         }
                                     }
                                 })

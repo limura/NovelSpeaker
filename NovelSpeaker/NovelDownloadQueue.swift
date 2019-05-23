@@ -106,6 +106,21 @@ class DownloadQueueHolder: NSObject {
     }
 }
 
+// 読み込みを何秒に一回にするのかの値[秒]
+fileprivate var queueDelayTime = 1.5
+// 一定時間に一回しか動かさないようにする。
+fileprivate func delayQueue(queuedDate: Date, block:@escaping ()->Void) {
+    let now = Date()
+    let diffTime = queuedDate.timeIntervalSince1970 - now.timeIntervalSince1970 + queueDelayTime
+    if diffTime < 0 {
+        block()
+    }else{
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + diffTime) {
+            block()
+        }
+    }
+}
+
 // 一つの小説をダウンロードしようとします。
 // startDownload() を呼び出す事でダウンロードを開始します。
 // ダウンロードが正常に終了したら successAction を、何らかの問題で失敗終了したら failedAction が呼び出されます。
@@ -115,20 +130,6 @@ class NovelDownloader : NSObject {
     static var maxCount = 1000
     // ダウンロードを止めたい時に true を入れます。
     static var isDownloadStop = false
-    // 読み込みを何秒に一回にするのかの値[秒]
-    static var queueDelayTime = 1.5
-    
-    private static func delayQueue(queuedDate: Date, block:@escaping ()->Void) {
-        let now = Date()
-        let diffTime = queuedDate.timeIntervalSince1970 - now.timeIntervalSince1970 + queueDelayTime
-        if diffTime < 0 {
-            block()
-        }else{
-            DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + diffTime) {
-                block()
-            }
-        }
-    }
     
     // 指定された URL を読み込んで、内容があるようであれば指定された chapterNumber のものとして(上書き)保存します。
     // maxCount を超えておらず、次のURLが取得できたのならそのURLを chapterNumber + 1 のものとして再度 downloadOnce() を呼び出します。
@@ -190,12 +191,14 @@ class NovelDownloader : NSObject {
                      */
                     realm.add(story, update: true)
                 })
+                print("add new story: \(novelID), chapterNumber: \(chapterNumber), url: \(targetURL.absoluteString)")
                 if let nextUrl = htmlStory.nextUrl {
                     delayQueue(queuedDate: queuedDate, block: {
                         downloadOnce(novelID: novelID, uriLoader: uriLoader, count: count + 1, downloadCount: downloadCount + 1, chapterNumber: chapterNumber + 1, targetURL: nextUrl, urlSecret: urlSecret, successAction: successAction, failedAction: failedAction)
                     })
                     return
                 }else{
+                    print("download done: \(novelID), downloadCount: \(downloadCount + 1)")
                     successAction(novelID, downloadCount + 1)
                     return
                 }
@@ -303,44 +306,53 @@ class NovelDownloadQueue : NSObject {
             if self.queueHolder.GetCurrentDownloadingNovelIDArray().count > 0 {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }else{
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }
         }
+    }
+    
+    func dispatch() {
+        var tmpUriLoader:UriLoader? = nil
+        while self.isDownloadStop == false, self.queueHolder.GetCurrentDownloadingNovelIDArray().count < self.maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
+            autoreleasepool {
+                let uriLoader:UriLoader
+                if tmpUriLoader != nil {
+                    uriLoader = tmpUriLoader!
+                }else{
+                    uriLoader = self.createUriLoader()
+                    tmpUriLoader = uriLoader
+                }
+                let queuedDate = Date()
+                print("startDownload: \(nextTargetNovelID)")
+                NovelDownloader.startDownload(novelID: nextTargetNovelID, uriLoader: uriLoader, successAction: { (novelID, downloadCount) in
+                    self.queueHolder.downloadDone(novelID: nextTargetNovelID)
+                    self.lock.lock()
+                    defer { self.lock.unlock() }
+                    self.downloadSuccessNovelIDArray.append(nextTargetNovelID)
+                    self.updateNetworkActivityIndicatorStatus()
+                    NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+                    delayQueue(queuedDate: queuedDate, block: {
+                        self.semaphore.signal()
+                    })
+                }, failedAction: { (novelID, downloadCount, errorMessage) in
+                    self.queueHolder.downloadDone(novelID: nextTargetNovelID)
+                    self.updateNetworkActivityIndicatorStatus()
+                    NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+                    delayQueue(queuedDate: queuedDate, block: {
+                        self.semaphore.signal()
+                    })
+                })
+            }
+        }
+        self.updateNetworkActivityIndicatorStatus()
+        NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
     }
     
     func startQueueWatcher() {
         DispatchQueue.global(qos: .utility).async {
             while true {
                 self.semaphore.wait()
-                var tmpUriLoader:UriLoader? = nil
-                while self.isDownloadStop == false, self.queueHolder.GetCurrentDownloadingNovelIDArray().count < self.maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
-                    autoreleasepool {
-                        let uriLoader:UriLoader
-                        if tmpUriLoader != nil {
-                            uriLoader = tmpUriLoader!
-                        }else{
-                            uriLoader = self.createUriLoader()
-                            tmpUriLoader = uriLoader
-                        }
-                        print("startDownload: \(nextTargetNovelID)")
-                        NovelDownloader.startDownload(novelID: nextTargetNovelID, uriLoader: uriLoader, successAction: { (novelID, downloadCount) in
-                            self.queueHolder.downloadDone(novelID: nextTargetNovelID)
-                            self.lock.lock()
-                            defer { self.lock.unlock() }
-                            self.downloadSuccessNovelIDArray.append(nextTargetNovelID)
-                            self.updateNetworkActivityIndicatorStatus()
-                            NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
-                            self.semaphore.signal()
-                        }, failedAction: { (novelID, downloadCount, errorMessage) in
-                            self.queueHolder.downloadDone(novelID: nextTargetNovelID)
-                            self.updateNetworkActivityIndicatorStatus()
-                            NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
-                            self.semaphore.signal()
-                        })
-                    }
-                }
-                self.updateNetworkActivityIndicatorStatus()
-                NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+                self.dispatch()
             }
         }
     }

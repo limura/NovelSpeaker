@@ -239,6 +239,8 @@
 "NiftyUtilitySwift_ImportedButNoTextFound" = "取り込みは完了しましたが、内容が空でした。全ての内容がJavaScriptで生成されるHTML文書の場合などに起こることがあるかもしれません。ことせかい の開発側でできることはあまりないかもしれませんが、一応、ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません";
 "NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryTitle" = "小説の本棚への追加に失敗しました。";
 "NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryMessage" = "既に登録されている小説などの原因が考えられます。";
+"NiftyUtilitySwift_AddNewNovelToBookshelfTitle" = "本棚に小説を追加しました";
+"NiftyUtilitySwift_AddNewNovelToBookshelfMessage" = "続く章があればダウンロードを続けます。";
 
 "BugReportViewController_SectionHeader" = "不都合の報告";
 "BugReportViewController_BugReportTitle" = "不都合がある場合にはこのフォームで不都合報告ができます。";

@@ -19,7 +19,7 @@
     NSError* error;
     m_UrlPattern = [NSRegularExpression regularExpressionWithPattern:urlPattern options:0 error:&error];
     if (m_UrlPattern == nil) {
-        NSLog(@"SiteInfo initWithParams: regex failed: %@", urlPattern);
+        //NSLog(@"SiteInfo initWithParams: regex failed: %@", urlPattern);
         return nil;
     }
     m_PageElement = pageElement;
@@ -280,7 +280,7 @@
 
 /// 概要を文字列で返します
 - (NSString*)GetDescription {
-    return [[NSString alloc] initWithFormat:@"nextLink: %@, pageElement: %@, title: %@, author: %@, firstPageLink: %@, urlPattern: %@", m_NextLink, m_PageElement, m_Title, m_Author, m_FirstPageLink, [m_UrlPattern pattern]];
+    return [[NSString alloc] initWithFormat:@"SiteInfo\n  nextLink: %@,\n  pageElement: %@,\n  title: %@,\n  author: %@,\n  firstPageLink: %@,\n  urlPattern: %@", m_NextLink, m_PageElement, m_Title, m_Author, m_FirstPageLink, [m_UrlPattern pattern]];
 }
 
 /// SiteInfo の sort用のヒント(UrlPattern の文字数)を返します
