@@ -172,6 +172,7 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
     }
 
     @objc func downloadButtonClicked(){
+        /*
         if let errString = GlobalDataSingleton.getInstance().addDownloadQueue(forNarou: self.NarouContentDetail) {
             EasyDialog.Builder(self)
             .label(text: NSLocalizedString("NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue", comment:"ダウンロードキューへの追加に失敗"))
@@ -192,6 +193,7 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
                 })
             }).build().show()
         }
+         */
     }
     
     @objc func shareButtonClicked(){

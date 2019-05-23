@@ -12,7 +12,7 @@
 #import "NarouContent.h"
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
-#import "NarouDownloadQueue.h"
+//#import "NarouDownloadQueue.h"
 #import "GlobalStateCacheData.h"
 #import "NiftySpeaker.h"
 #import "SpeakPitchConfigCacheData.h"
@@ -52,7 +52,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
     CoreDataObjectHolder* m_CoreDataObjectHolder;
     
     // ダウンロードキュー
-    NarouDownloadQueue* m_DownloadQueue;
+    //NarouDownloadQueue* m_DownloadQueue;
     // コンテンツダウンロードを終了するべきかどうかのbool値
     //bool m_isNeedQuit;
     
@@ -138,17 +138,17 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
-- (NSString*) AddDownloadQueueForNarou:(NarouContentCacheData*) content;
+//- (NSString*) AddDownloadQueueForNarou:(NarouContentCacheData*) content;
 
 /// Ncode の指定でダウンロードqueueに追加します。
 /// 追加できなかった場合はエラーメッセージを返します。
-- (BOOL) AddDownloadQueueForNarouNcode:(NSString*)ncode;
+//- (BOOL) AddDownloadQueueForNarouNcode:(NSString*)ncode;
 
 /// 現在ダウンロード中のコンテンツ情報を取得します。
-- (NarouContentCacheData*)GetCurrentDownloadingInfo;
+//- (NarouContentCacheData*)GetCurrentDownloadingInfo;
 
 /// 現在ダウンロード待ち中のNarouContentCacheDataのリストを取得します。
-- (NSArray*) GetCurrentDownloadWaitingInfo;
+//- (NSArray*) GetCurrentDownloadWaitingInfo;
 
 /// CoreData で保存している Story のうち、Ncode と chapter_number で検索した結果
 /// 得られた Story を取得します。
@@ -185,20 +185,20 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 - (NSUInteger)CountContentChapter:(NarouContentCacheData*)content;
 
 /// ダウンロードイベントハンドラを設定します。
-- (BOOL)AddDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
+//- (BOOL)AddDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
 
 /// ダウンロードイベントハンドラから削除します。
-- (BOOL)DeleteDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
+//- (BOOL)DeleteDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate;
 
 /// ダウンロード周りのイベントハンドラ用のdelegateに追加します。(ncode で絞り込む版)
-- (BOOL)AddDownloadEventHandlerWithNcode:(NSString*)string handler:(id<NarouDownloadQueueDelegate>)handler;
+//- (BOOL)AddDownloadEventHandlerWithNcode:(NSString*)string handler:(id<NarouDownloadQueueDelegate>)handler;
 
 /// ダウンロード周りのイベントハンドラ用のdelegateから削除します。(ncode で絞り込む版)
-- (BOOL)DeleteDownloadEventHandlerWithNcode:(NSString*)string;
+//- (BOOL)DeleteDownloadEventHandlerWithNcode:(NSString*)string;
 
 
 /// 現在ダウンロード待ち中のものから、ncode を持つものをリストから外します。
-- (BOOL)DeleteDownloadQueue:(NSString*)ncode;
+//- (BOOL)DeleteDownloadQueue:(NSString*)ncode;
 
 /// 最後に読んでいた小説を取得します
 - (NarouContentCacheData*)GetCurrentReadingContent;
@@ -355,16 +355,16 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 - (NSDictionary*)GetDefaultSpeechModConfig;
 
 /// 全てのコンテンツを再度ダウンロードしようとします。
-- (void)ReDownloadAllContents;
+//- (void)ReDownloadAllContents;
 
 /// 現在の Download queue を全て削除します
-- (void)ClearDownloadQueue;
+//- (void)ClearDownloadQueue;
 
 /// 現在の新規ダウンロード数をクリアします
-- (void)ClearNewDownloadCount;
+//- (void)ClearNewDownloadCount;
 
 /// 現在の新規ダウンロード数を取得します
-- (int)GetNewDownloadCount;
+//- (int)GetNewDownloadCount;
 
 // Background fetch イベントを処理します
 - (void)HandleBackgroundFetch:(UIApplication *)application
@@ -405,7 +405,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (NSString*) AddDownloadQueueForURL:(NSString*)urlString cookieParameter:(NSString*)cookieParameter;
 
 /// 始めの章の内容やタイトルが確定しているURLについて、新規登録をしてダウンロードqueueに追加しようとします
-- (void)AddNewContentForURL:(NSURL*)url nextUrl:(NSURL*)nextUrl cookieParameter:(NSString*)cookieParameter title:(NSString*)title author:(NSString*)author firstContent:(NSString*)firstContent viewController:(UIViewController*)viewController;
+//- (void)AddNewContentForURL:(NSURL*)url nextUrl:(NSURL*)nextUrl cookieParameter:(NSString*)cookieParameter title:(NSString*)title author:(NSString*)author firstContent:(NSString*)firstContent viewController:(UIViewController*)viewController;
 
 /// 小説内部での範囲選択時に出てくるメニューを「読み替え辞書に登録」だけにする(YES)か否(NO)かの設定値を取り出します
 - (BOOL)GetMenuItemIsAddSpeechModSettingOnly;
@@ -543,7 +543,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (void)UpdateBackgroundFetchedNovelCount:(NSInteger)count;
 
 /// download queue の最後に対象の content を追加します。(与えられるNarouContentは既にCoreDataに登録されている物である必要があります)
-- (void)PushContentDownloadQueue:(NarouContentCacheData*)content;
+//- (void)PushContentDownloadQueue:(NarouContentCacheData*)content;
 
 /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
 - (void)ForceOverrideHungSpeakStringToSpeechModSettings;

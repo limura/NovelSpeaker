@@ -101,7 +101,6 @@ class NiftyUtilitySwift: NSObject {
                         }
                         DispatchQueue.main.async {
                             var multiPageString = NSLocalizedString("NiftyUtilitySwift_FollowingPageAreNotAvailable", comment: "続ページ：無し")
-                            let nextUrl:URL? = story?.nextUrl ?? nil
                             if (story?.nextUrl) != nil {
                                 multiPageString = NSLocalizedString("NiftyUtilitySwift_FollowingPageAreAvailable", comment: "続ページ：有り")
                             }

@@ -383,7 +383,7 @@
     //[context setParentContext:m_MainManagedObjectContext];
     [context performBlockAndWait:^{
         [context setPersistentStoreCoordinator:coordinator];
-        [context setMergePolicy:m_MergePolicy];
+        [context setMergePolicy:self->m_MergePolicy];
     }];
     
     // 他のthread の context で書き換えが起きた時の Notification ハンドラを登録します。

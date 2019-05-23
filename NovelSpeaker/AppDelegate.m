@@ -154,8 +154,9 @@ void uncaughtExceptionHandler(NSException *exception)
 // for background fetch
 - (void)application:(UIApplication *)application
 performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler{
-    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    [globalData HandleBackgroundFetch:application performFetchWithCompletionHandler:completionHandler];
+    //GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    //[globalData HandleBackgroundFetch:application performFetchWithCompletionHandler:completionHandler];
+    [[NovelDownloadQueue shared] HandleBackgroundFetchWithApplication:application performFetchWithCompletionHandler:completionHandler];
 }
 
 

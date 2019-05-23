@@ -11,7 +11,7 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import <UserNotifications/UserNotifications.h>
 #import "NarouLoader.h"
-#import "NarouDownloadQueue.h"
+//#import "NarouDownloadQueue.h"
 #import "NSDataZlibExtension.h"
 #import "NSStringExtension.h"
 #import "NiftyUtility.h"
@@ -55,7 +55,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     // CoreDataアクセス用の直列queueを作ります。
     m_CoreDataAccessQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.coredataaccess", DISPATCH_QUEUE_SERIAL);
 
-    m_DownloadQueue = [NarouDownloadQueue new];
+    //m_DownloadQueue = [NarouDownloadQueue new];
     
     m_isNeedReloadSpeakSetting = false;
     
@@ -444,6 +444,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return resultArray;
 }
 
+/*
 /// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
@@ -491,19 +492,15 @@ static DummySoundLooper* dummySoundLooper = nil;
         }
     }
     
-    /*
-    if (targetContentCacheData != nil && ([targetContentCacheData.general_all_no intValue] <= [self CountContentChapter:targetContentCacheData]) ) {
-        return NSLocalizedString(@"GlobalDataSingleton_AlreadyDownloaded", @"既にダウンロード済です。");
-    }
-     */
-    
     // download queue に追加します。
     NSLog(@"add download queue.");
     [self PushContentDownloadQueue:content];
     
     return nil;
 }
+ */
 
+/*
 /// Ncode の指定でダウンロードqueueに追加します。
 /// 追加できなかった場合はエラーメッセージを返します。
 - (BOOL) AddDownloadQueueForNarouNcode:(NSString*)ncode
@@ -523,13 +520,13 @@ static DummySoundLooper* dummySoundLooper = nil;
     return [m_DownloadQueue GetCurrentDownloadingInfo];
 }
 
-/// 現在ダウンロード待ち中のコンテンツ情報のリストを取得します。
+ /// 現在ダウンロード待ち中のコンテンツ情報のリストを取得します。
 - (NSArray*) GetCurrentDownloadWaitingInfo
 {
     return [m_DownloadQueue GetCurrentWaitingList];
 }
 
-/// ダウンロードイベントハンドラを設定します
+ /// ダウンロードイベントハンドラを設定します
 - (BOOL)AddDownloadEventHandler:(id<NarouDownloadQueueDelegate>)delegate
 {
     [m_DownloadQueue AddDownloadEventHandler:delegate];
@@ -549,7 +546,8 @@ static DummySoundLooper* dummySoundLooper = nil;
 {
     return [m_DownloadQueue AddDownloadEventHandlerWithNcode:string handler:handler];
 }
-/// ダウンロード周りのイベントハンドラ用のdelegateから削除します。(ncode で絞り込む版)
+
+ /// ダウンロード周りのイベントハンドラ用のdelegateから削除します。(ncode で絞り込む版)
 - (BOOL)DeleteDownloadEventHandlerWithNcode:(NSString*)string
 {
     return [m_DownloadQueue DelDownloadEventHandlerWithNcode:string];
@@ -561,6 +559,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 {
     return [m_DownloadQueue DeleteDownloadQueue:ncode];
 }
+ */
 
 /// CoreData で保存している Story のうち、Ncode と chapter_no で検索した結果
 /// 得られた Story を取得します。
@@ -2442,7 +2441,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     if (targetListString == nil) {
         return false;
     }
-    return [m_DownloadQueue AddDownloadQueueForNcodeList:targetListString];
+    // TODO: 消せてない
+    //return [m_DownloadQueue AddDownloadQueueForNcodeList:targetListString];
+    return false;
 }
 
 /// URLで呼び出された時の反応をします。
@@ -2667,7 +2668,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     return result;
 }
 
-/// 全てのコンテンツを再度ダウンロードしようとします。
+/*
+
+ /// 全てのコンテンツを再度ダウンロードしようとします。
 - (void)ReDownloadAllContents{
     NSArray* contentList = [self GetAllNarouContent:NarouContentSortType_NovelUpdatedAt];
     if (contentList == nil) {
@@ -2726,6 +2729,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 - (NSArray*)GetNewDownloadNovelNameArray {
     return [m_DownloadQueue GetNewDownloadNovelNameArray];
 }
+ */
 
 /// BackgroundFetch でダウンロードを行った(過去形)ncode(やURL)のリストを取得します
 - (NSArray*) GetAlreadyFetchedNovelIDList{
@@ -2754,6 +2758,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 // Background fetch イベントを処理します
 - (void)HandleBackgroundFetch:(UIApplication *)application
 performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler{
+    /*
     // 30秒以内に終了しないと怒られるので時間を測ります
     NSDate* startTime = [NSDate date];
 
@@ -2892,6 +2897,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }else{
         completionHandler(UIBackgroundFetchResultNoData);
     }
+     */
 }
 
 // 設定されている読み上げに使う音声の identifier を取得します
@@ -3171,6 +3177,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return nil;
 }
 
+/*
 - (void)AddDirectoryDownloadQueueForURL:(NSString *)urlString cookieParameter:(NSString *)cookieParameter author:(NSString*)author title:(NSString*)title {
     NarouContentCacheData* targetContentCacheData = [self SearchNarouContentFromNcode:urlString];
     if (targetContentCacheData != nil) {
@@ -3204,7 +3211,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }];
     [uriLoader ClearSiteInfoCache];
 }
+ */
 
+/*
 /// 始めの章の内容やタイトルが確定しているURLについて、新規登録をしてダウンロードqueueに追加しようとします
 - (void)AddNewContentForURL:(NSURL*)url nextUrl:(NSURL*)nextUrl cookieParameter:(NSString*)cookieParameter title:(NSString*)title author:(NSString*)author firstContent:(NSString*)firstContent viewController:(UIViewController*)viewController {
     [BehaviorLogger AddLogWithDescription:@"GlobalDataSingleton AddNewContentForURL called" data:@{
@@ -3243,6 +3252,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSLog(@"add download queue: %@", [url absoluteString]);
     [self PushContentDownloadQueue:targetContentCacheData];
 }
+ */
 
 /// オーディオのルートが変わったよイベントのイベントハンドラ
 /// from: http://qiita.com/naonya3/items/433b3daaad75accf156b
@@ -4189,8 +4199,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     // テキストファイルからの復元はされなかったようなのでダウンロードキューに入れる
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
-        //[self AddDirectoryDownloadQueueForURL:url cookieParameter:cookie author:author title:title];
-        [self AddDownloadQueueForNarou:content];
+        //[self AddDownloadQueueForNarou:content];
     }];
 
     return true;
@@ -4272,7 +4281,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
-        [self AddDownloadQueueForNarouNcode:ncode];
+        //[self AddDownloadQueueForNarouNcode:ncode];
     }];
     
     return true;
@@ -4280,7 +4289,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 
 - (void)RestoreBackupFromBookshelfDataArray_V1_0_0:(NSArray*)bookshelfDataArray dataDirectory:(NSURL*)dataDirectory progress:(void (^)(NSString*))progress{
     // 一時的に小説のダウンロードを止めておきます
-    [m_DownloadQueue PauseDownload];
+    //[m_DownloadQueue PauseDownload];
     NSMutableDictionary* requestedURLHosts = [NSMutableDictionary new];
     int n = 0;
     for (id obj in bookshelfDataArray) {
@@ -4337,7 +4346,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         }
     }
     // 停止していたダウンロードを再開させます
-    [m_DownloadQueue ResumeDownload];
+    //[m_DownloadQueue ResumeDownload];
 }
 
 - (void)RestoreBackupFromSpeechModDictionary_V1_0_0:speechModDictionary{

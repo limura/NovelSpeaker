@@ -603,7 +603,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     print("\(spacer)\(cell.title ?? "??")")
                     dumpCurrentTree(head: childrens, level: level + 1)
                 }else if let content = cell.content{
-                    print("\(spacer)\(content.title ?? "??")")
+                    print("\(spacer)\(content.title)")
                 }else{
                     print("\(spacer)\(cell.title ?? "??")")
                 }

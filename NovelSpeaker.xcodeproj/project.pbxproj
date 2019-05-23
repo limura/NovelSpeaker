@@ -22,7 +22,6 @@
 		210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F01A0E1C5C00E9171F /* NEW!@2x.png */; };
 		210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F31A0E1C6100E9171F /* NEW!@3x.png */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
-		2117251019B2064400FB97D2 /* BookShelfTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */; };
 		211BA5F819973BA500560842 /* SpeechBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5F719973BA500560842 /* SpeechBlock.m */; };
 		211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FA19973CFB00560842 /* SpeechConfig.m */; };
 		211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FD199742CF00560842 /* NiftySpeaker.m */; };
@@ -96,7 +95,6 @@
 		216741A92047714D008A578D /* PDFKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 216741A82047714D008A578D /* PDFKit.framework */; };
 		216A545D20EE257000D75458 /* NovelSpeakerBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216A545C20EE257000D75458 /* NovelSpeakerBackup.swift */; };
 		216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */; };
-		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */; };
 		2173A6BF21CC529F002E9EA8 /* FloatingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */; };
@@ -143,8 +141,6 @@
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
 		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
 		21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
-		21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA31967FD390039A706 /* NarouDownloadQueue.m */; };
-		21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD6196843280039A706 /* BookShelfTableViewController.m */; };
 		21C759FA2287123500956B73 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759F92287123500956B73 /* RealmModels.swift */; };
 		21C759FC2287127800956B73 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21C759FB2287127700956B73 /* CloudKit.framework */; };
 		21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */; };
@@ -179,7 +175,6 @@
 		21F054D91917E0F200CC6BA9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054D81917E0F200CC6BA9 /* main.m */; };
 		21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054DC1917E0F200CC6BA9 /* AppDelegate.m */; };
 		21F054E01917E0F200CC6BA9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21F054DE1917E0F200CC6BA9 /* Main.storyboard */; };
-		21F054E31917E0F200CC6BA9 /* SpeechViewControllerObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054E21917E0F200CC6BA9 /* SpeechViewControllerObjc.m */; };
 		21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F054E41917E0F200CC6BA9 /* Images.xcassets */; };
 		21F054EC1917E0F200CC6BA9 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054EB1917E0F200CC6BA9 /* XCTest.framework */; };
 		21F054ED1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
@@ -256,7 +251,6 @@
 		210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 6.xcdatamodel"; sourceTree = "<group>"; };
 		210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
-		2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BookShelfTableViewCell.xib; sourceTree = "<group>"; };
 		211BA5F619973BA500560842 /* SpeechBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechBlock.h; sourceTree = "<group>"; };
 		211BA5F719973BA500560842 /* SpeechBlock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechBlock.m; sourceTree = "<group>"; };
 		211BA5F919973CFB00560842 /* SpeechConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechConfig.h; sourceTree = "<group>"; };
@@ -346,8 +340,6 @@
 		216741A82047714D008A578D /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = System/Library/Frameworks/PDFKit.framework; sourceTree = SDKROOT; };
 		216A545C20EE257000D75458 /* NovelSpeakerBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSpeakerBackup.swift; sourceTree = "<group>"; };
 		216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSelectViewController.swift; sourceTree = "<group>"; };
-		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
-		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
 		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
 		21724EEE1974163700DF6DC4 /* StoryCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoryCacheData.m; sourceTree = "<group>"; };
 		2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncHttpSession.swift; sourceTree = "<group>"; };
@@ -428,10 +420,6 @@
 		21C74F9A196456490039A706 /* NarouSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchViewController.m; sourceTree = "<group>"; };
 		21C74F9C1965A5300039A706 /* NarouContentCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContentCacheData.h; sourceTree = "<group>"; };
 		21C74F9D1965A5300039A706 /* NarouContentCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContentCacheData.m; sourceTree = "<group>"; };
-		21C74FA21967FD390039A706 /* NarouDownloadQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouDownloadQueue.h; sourceTree = "<group>"; };
-		21C74FA31967FD390039A706 /* NarouDownloadQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouDownloadQueue.m; sourceTree = "<group>"; };
-		21C74FD5196843280039A706 /* BookShelfTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewController.h; sourceTree = "<group>"; };
-		21C74FD6196843280039A706 /* BookShelfTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewController.m; sourceTree = "<group>"; };
 		21C759F92287123500956B73 /* RealmModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModels.swift; sourceTree = "<group>"; };
 		21C759FB2287127700956B73 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataToRealmTool.swift; sourceTree = "<group>"; };
@@ -476,8 +464,6 @@
 		21F054DB1917E0F200CC6BA9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		21F054DC1917E0F200CC6BA9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		21F054DF1917E0F200CC6BA9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		21F054E11917E0F200CC6BA9 /* SpeechViewControllerObjc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpeechViewControllerObjc.h; sourceTree = "<group>"; };
-		21F054E21917E0F200CC6BA9 /* SpeechViewControllerObjc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechViewControllerObjc.m; sourceTree = "<group>"; };
 		21F054E41917E0F200CC6BA9 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NovelSpeakerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		21F054EB1917E0F200CC6BA9 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -639,9 +625,6 @@
 		21724EE51972C7B400DF6DC4 /* CustomViews */ = {
 			isa = PBXGroup;
 			children = (
-				21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */,
-				21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */,
-				2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */,
 				2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */,
 				2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */,
 				2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */,
@@ -845,8 +828,6 @@
 				21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */,
 				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
-				21C74FA21967FD390039A706 /* NarouDownloadQueue.h */,
-				21C74FA31967FD390039A706 /* NarouDownloadQueue.m */,
 				4E776B18196247FB00C36AD1 /* NarouLoader.h */,
 				4E776B19196247FB00C36AD1 /* NarouLoader.m */,
 				21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */,
@@ -907,11 +888,7 @@
 			isa = PBXGroup;
 			children = (
 				21724EE51972C7B400DF6DC4 /* CustomViews */,
-				21C74FD5196843280039A706 /* BookShelfTableViewController.h */,
-				21C74FD6196843280039A706 /* BookShelfTableViewController.m */,
 				21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */,
-				21F054E11917E0F200CC6BA9 /* SpeechViewControllerObjc.h */,
-				21F054E21917E0F200CC6BA9 /* SpeechViewControllerObjc.m */,
 				21648009229092A200A183DF /* SpeechViewController.swift */,
 				4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */,
 				4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */,
@@ -1163,7 +1140,6 @@
 				2133F21C1E7D5674001A0BC5 /* CustomAutopagerizeItems.json in Resources */,
 				2133F2AA1E80E175001A0BC5 /* Icon-Small-40@2x.png in Resources */,
 				21CAC81A2125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png in Resources */,
-				2117251019B2064400FB97D2 /* BookShelfTableViewCell.xib in Resources */,
 				210958CD1A0DF55600E9171F /* soundbook@3x.png in Resources */,
 				21D397A71FC960E10018F883 /* bookmark-true@3x.png in Resources */,
 				21B53A1D19619C00009658B7 /* sound@2x.png in Resources */,
@@ -1288,7 +1264,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21F054E31917E0F200CC6BA9 /* SpeechViewControllerObjc.m in Sources */,
 				2164800E22910E6300A183DF /* UIImageExtensionSwift.swift in Sources */,
 				213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */,
 				21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */,
@@ -1299,7 +1274,6 @@
 				2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */,
 				212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
-				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
 				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
 				21E46D431A94B7F400CE39B0 /* EasyShare.m in Sources */,
 				2164800C2290F3F900A183DF /* StorySpeaker.swift in Sources */,
@@ -1316,7 +1290,6 @@
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
-				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
 				216741A02043D592008A578D /* BehaviorLogger.swift in Sources */,
 				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21A2CDBB2292FD6E0080AEE6 /* LocalNotifications.swift in Sources */,
@@ -1332,7 +1305,6 @@
 				2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
 				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
-				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
 				2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */,
 				21648000228D5EE000A183DF /* EditBookViewController.swift in Sources */,
 				21C759FA2287123500956B73 /* RealmModels.swift in Sources */,

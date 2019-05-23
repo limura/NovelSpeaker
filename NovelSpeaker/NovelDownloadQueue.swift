@@ -251,7 +251,7 @@ class NovelDownloader : NSObject {
 }
 
 class NovelDownloadQueue : NSObject {
-    static let shared = NovelDownloadQueue()
+    @objc static let shared = NovelDownloadQueue()
     private let queueHolder = DownloadQueueHolder()
     var maxSimultaneousDownloadCount = 5
     let lock = NSLock()
@@ -380,4 +380,12 @@ class NovelDownloadQueue : NSObject {
     func GetCurrentQueuedNovelIDArray() -> [String] {
         return self.queueHolder.GetCurrentQueuedNovelIDArray()
     }
+    
+    @objc func HandleBackgroundFetch(application:UIApplication, performFetchWithCompletionHandler:@escaping (UIBackgroundFetchResult) -> Void) {
+        if GetCurrentQueuedNovelIDArray().count > 0 || StorySpeaker.shared.isPlayng {
+            performFetchWithCompletionHandler(.noData)
+            return
+        }
+    }
+
 }
