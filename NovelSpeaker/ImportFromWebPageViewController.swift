@@ -280,17 +280,17 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
             let urlString = nameAndURL[1]
             dic[urlString] = i
         }
-        if let index = dic[url.absoluteString], let realm = try? RealmUtil.GetRealm() {
-            try! realm.write {
+        if let index = dic[url.absoluteString] {
+            RealmUtil.Write { (realm) in
                 globalState.webImportBookmarkArray.remove(at: index)
             }
         }
     }
     func addBookmark(url:URL, name:String) {
-        guard let globalState = RealmGlobalState.GetInstance(), let realm = try? RealmUtil.GetRealm() else {
+        guard let globalState = RealmGlobalState.GetInstance() else {
             return
         }
-        try! realm.write {
+        RealmUtil.Write { (realm) in
             let saveName = name.replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "\r", with: "")
             globalState.webImportBookmarkArray.append("\(saveName)\n\(url.absoluteString)")
         }

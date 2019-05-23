@@ -107,8 +107,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     func registObserver() {
-        guard let realm = try? RealmUtil.GetRealm() else { return }
-        novelArrayNotificationToken = realm.objects(RealmNovel.self).observe { (change) in
+        guard let novelArray = RealmNovel.GetAllObjects() else { return }
+        novelArrayNotificationToken = novelArray.observe { (change) in
             self.reloadAllData()
         }
     }
@@ -316,8 +316,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
 
     @objc func refreshButtonClicked(sender: Any) {
-        // TODO: 再ダウンロード回りを書き直す
-        GlobalDataSingleton.getInstance().reDownloadAllContents()
+        guard let novels = RealmNovel.GetAllObjects() else { return }
+        for novel in novels {
+            if novel.type == .URL {
+                NovelDownloadQueue.shared.addQueue(novelID: novel.novelID)
+            }
+        }
     }
 
     func getDisplayStringToSortTypeDictionary() -> [String:NarouContentSortType]{
@@ -357,8 +361,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             NSLocalizedString("BookShelfTableViewController_SortTypeUpdateDate", comment: "更新順"),
         ], firstSelectedString: getCurrentSortTypeDisplayString(), parentView: targetView) { (selectedText) in
             let sortType = self.convertDisplayStringToSortType(key: selectedText!)
-            if let realm = try? RealmUtil.GetRealm(), let globalState = RealmGlobalState.GetInstance() {
-                try! realm.write {
+            if let globalState = RealmGlobalState.GetInstance() {
+                RealmUtil.Write { (realm) in
                     globalState.bookShelfSortType = sortType
                 }
             }
@@ -559,16 +563,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                 }
                             }
                         }
-                        if let realm = try? RealmUtil.GetRealm() {
+                        RealmUtil.Write(withoutNotifying: [self.novelArrayNotificationToken]) { (realm) in
                             print("delete: \(content.novelID)")
-                            realm.beginWrite()
                             content.delete(realm: realm)
                             print("delete: will commitWrite()")
-                            if let token = self.novelArrayNotificationToken {
-                                try! realm.commitWrite(withoutNotifying: [token])
-                            }else{
-                                try! realm.commitWrite()
-                            }
                         }
                     }
                 }
@@ -666,9 +664,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
 
     @objc func refreshControlValueChangedEvent(sendor:UIRefreshControl) {
-        // TODO: 再ダウンロード回りをなんとかする
-        GlobalDataSingleton.getInstance()?.reDownloadAllContents()
         sendor.endRefreshing()
+        guard let novels = RealmNovel.GetAllObjects() else { return }
+        for novel in novels {
+            if novel.type == .URL {
+                NovelDownloadQueue.shared.addQueue(novelID: novel.novelID)
+            }
+        }
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -687,7 +689,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         if globalState.isOpenRecentNovelInStartTime {
             return
         }
-        guard let realm = try? RealmUtil.GetRealm(), let lastReadStory = RealmGlobalState.GetLastReadStory(), let lastReadNovel = realm.object(ofType: RealmNovel.self, forPrimaryKey: lastReadStory.novelID) else {
+        guard let lastReadStory = RealmGlobalState.GetLastReadStory(), let lastReadNovel = RealmNovel.SearchNovelFrom(novelID: lastReadStory.novelID) else {
             return
         }
         if let storyCount = lastReadNovel.linkedStorys?.count, lastReadStory.chapterNumber >= storyCount && (lastReadStory.readLocation + 5) >= lastReadStory.content?.lengthOfBytes(using: .utf8) ?? 0 {

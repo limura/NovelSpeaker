@@ -43,6 +43,11 @@ class DownloadQueueHolder: NSObject {
         let item = QueueItem(novelID: novelID, updateFrequency: novel.updateFrequency)
         let hostName = item.hostName
         if var queueList = queue[hostName] {
+            for queue in queueList {
+                if queue.novelID == item.novelID {
+                    return
+                }
+            }
             queueList.append(item)
             queue[hostName] = queueList.sorted(by: { (a, b) -> Bool in
                 a.updateFrequency < b.updateFrequency
@@ -76,6 +81,7 @@ class DownloadQueueHolder: NSObject {
         }
         if var itemList = queue[item.hostName] {
             itemList.removeFirst()
+            queue[item.hostName] = itemList
         }
         nowDownloading[item.hostName] = item.novelID
         
@@ -146,7 +152,7 @@ class NovelDownloader : NSObject {
                     failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_htmlStoryIsNil", comment: "小説のダウンロードに失敗しました。") + "(novelID: \(novelID))")
                     return
                 }
-                guard let content = htmlStory.content, content.count > 0 else {
+                guard let content = htmlStory.content, content.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 else {
                     if let nextUrl = htmlStory.nextUrl {
                         print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: htmlStory.content の中身がありませんでしたが、nextUrl は取得できたのでそのまま読み込みを続けます。\(novelID)")
                         // chapterNumber は増やしませんが、施行回数は増やします
@@ -159,31 +165,31 @@ class NovelDownloader : NSObject {
                     }
                     return
                 }
-                guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
-                    print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: 小説の読み込みには成功しましたが、RealmNovel 自体が存在しなくなっていたので読み込みを終了します。\(novelID)")
+                guard RealmNovel.SearchNovelFrom(novelID: novelID) != nil else {
+                    print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: 読み込みには成功したのですが、RealmNovel を検索したところ存在が確認できませんでした。ダウンロード中に本棚から削除された可能性があります。ダウンロードを停止します。(\(novelID))")
                     failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_FailedByNoRealmNovel", comment: "小説が本棚に登録されていなかったため、ダウンロードを終了します。") + "(novelID: \(novelID))")
                     return
                 }
-                let story = RealmStory.CreateNewStory(novel: novel, chapterNumber: chapterNumber)
+                let story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber)
                 story.url = targetURL.absoluteString
                 story.content = content
                 story.downloadDate = queuedDate
+                // 新しく読み込まれた小説の最後に読んだ時間を過去にしておかないと、それが最後の読んだ小説にされてしまう。
+                story.lastReadDate = Date(timeIntervalSince1970: 0)
                 if let subtitle = htmlStory.subtitle {
                     story.subtitle = subtitle
                 }
-                if let realm = try? RealmUtil.GetRealm() {
-                    try! realm.write {
-                        /* // 通常の更新時にはタグの更新はしないでおきます
-                        if let keywordArray = htmlStory.keyword {
-                            for keyword in keywordArray {
-                                guard let keyword = keyword as? String else { continue }
-                                RealmNovelTag.AddTag(tagName: keyword, novelID: novelID, type: "keyword")
-                            }
-                        }
-                         */
-                        realm.add(story, update: true)
-                    }
-                }
+                RealmUtil.Write(block: { (realm) in
+                    /* // 通常の更新時にはタグの更新はしないでおきます
+                     if let keywordArray = htmlStory.keyword {
+                     for keyword in keywordArray {
+                     guard let keyword = keyword as? String else { continue }
+                     RealmNovelTag.AddTag(tagName: keyword, novelID: novelID, type: "keyword")
+                     }
+                     }
+                     */
+                    realm.add(story, update: true)
+                })
                 if let nextUrl = htmlStory.nextUrl {
                     delayQueue(queuedDate: queuedDate, block: {
                         downloadOnce(novelID: novelID, uriLoader: uriLoader, count: count + 1, downloadCount: downloadCount + 1, chapterNumber: chapterNumber + 1, targetURL: nextUrl, urlSecret: urlSecret, successAction: successAction, failedAction: failedAction)
@@ -209,9 +215,11 @@ class NovelDownloader : NSObject {
         }
         guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let lastChapter = novel.lastChapter, let lastDownloadURLString = novel.lastDownloadURL, let lastDownloadURL = URL(string: lastDownloadURLString) else {
             print("NovelDownloader.startDownload(): novel \(novelID) has invalid condition. download aborted.")
-            failedAction(novelID, 0, NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "(novelID: \"\(novelID)\")")
+         failedAction(novelID, 0, NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "(novelID: \"\(novelID)\")")
             return
         }
+        let urlSecret = novel.urlSecret
+        let chapterNumber = lastChapter.chapterNumber
         let queuedDate = Date()
         uriLoader.fetchOneUrl(
             lastDownloadURL,
@@ -228,7 +236,7 @@ class NovelDownloader : NSObject {
                     return
                 }
                 delayQueue(queuedDate: queuedDate, block: {
-                    downloadOnce(novelID: novelID, uriLoader: uriLoader, count: 0, downloadCount: 0, chapterNumber: lastChapter.chapterNumber + 1, targetURL: targetURL, urlSecret: novel.urlSecret, successAction: successAction, failedAction: failedAction)
+                    downloadOnce(novelID: novelID, uriLoader: uriLoader, count: 0, downloadCount: 0, chapterNumber: chapterNumber + 1, targetURL: targetURL, urlSecret: urlSecret, successAction: successAction, failedAction: failedAction)
                 })
             },
             failedAction: { (url, errString) in
@@ -238,13 +246,125 @@ class NovelDownloader : NSObject {
     }
 }
 
-class WebDownloadQueue : NSObject {
-    static let shared = WebDownloadQueue()
-    let queueHolder = DownloadQueueHolder()
+class NovelDownloadQueue : NSObject {
+    static let shared = NovelDownloadQueue()
+    private let queueHolder = DownloadQueueHolder()
+    var maxSimultaneousDownloadCount = 5
+    let lock = NSLock()
+    var downloadSuccessNovelIDArray:[String] = []
+    private var isDownloadStop = true
+    let semaphore = DispatchSemaphore(value: 0)
+    
+    let cacheFileExpireTimeinterval:Double = 60*60*24
+    let novelSpeakerSiteInfoUrl = "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
+    let novelSpeakerSiteInfoCacheFileName = "NovelSpeakerSiteInfoCache"
+    let autopagerizeSiteInfoUrl = "http://wedata.net/databases/AutoPagerize/items.json"
+    let autopagerizeSiteInfoCacheFileName = "AutopagerizeSiteInfoCache"
     
     private override init() {
         super.init()
+        startQueueWatcher()
     }
     
+    func createUriLoader() -> UriLoader {
+        let newUriLoader = UriLoader()
+        let semaphore = DispatchSemaphore(value: 0)
+        var novelSpeakerSiteInfoData:Data? = nil
+        var autopagerizeSiteInfoData:Data? = nil
+        if let url = URL(string: novelSpeakerSiteInfoUrl) {
+            NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: novelSpeakerSiteInfoCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: { (data) in
+                novelSpeakerSiteInfoData = data
+                semaphore.signal()
+            }) { (err) in
+                semaphore.signal()
+            }
+        }
+        if let url = URL(string: autopagerizeSiteInfoUrl) {
+            NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: autopagerizeSiteInfoCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: { (data) in
+                autopagerizeSiteInfoData = data
+                semaphore.signal()
+            }) { (err) in
+                semaphore.signal()
+            }
+        }
+        semaphore.wait() // for novelSpeakerCacheData
+        semaphore.wait() // for autopagerizeCacheData
+        if let data = novelSpeakerSiteInfoData {
+            newUriLoader.addCustomSiteInfo(from: data)
+        }
+        if let data = autopagerizeSiteInfoData {
+            newUriLoader.addSiteInfo(from: data)
+        }
+        return newUriLoader
+    }
     
+    func updateNetworkActivityIndicatorStatus(){
+        DispatchQueue.main.async {
+            if self.queueHolder.GetCurrentDownloadingNovelIDArray().count > 0 {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            }else{
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            }
+        }
+    }
+    
+    func startQueueWatcher() {
+        DispatchQueue.global(qos: .utility).async {
+            while true {
+                self.semaphore.wait()
+                var tmpUriLoader:UriLoader? = nil
+                while self.isDownloadStop == false, self.queueHolder.GetCurrentDownloadingNovelIDArray().count < self.maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
+                    autoreleasepool {
+                        let uriLoader:UriLoader
+                        if tmpUriLoader != nil {
+                            uriLoader = tmpUriLoader!
+                        }else{
+                            uriLoader = self.createUriLoader()
+                            tmpUriLoader = uriLoader
+                        }
+                        print("startDownload: \(nextTargetNovelID)")
+                        NovelDownloader.startDownload(novelID: nextTargetNovelID, uriLoader: uriLoader, successAction: { (novelID, downloadCount) in
+                            self.queueHolder.downloadDone(novelID: nextTargetNovelID)
+                            self.lock.lock()
+                            defer { self.lock.unlock() }
+                            self.downloadSuccessNovelIDArray.append(nextTargetNovelID)
+                            self.updateNetworkActivityIndicatorStatus()
+                            NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+                            self.semaphore.signal()
+                        }, failedAction: { (novelID, downloadCount, errorMessage) in
+                            self.queueHolder.downloadDone(novelID: nextTargetNovelID)
+                            self.updateNetworkActivityIndicatorStatus()
+                            NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+                            self.semaphore.signal()
+                        })
+                    }
+                }
+                self.updateNetworkActivityIndicatorStatus()
+                NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+            }
+        }
+    }
+    
+    func addQueue(novelID:String) {
+        self.queueHolder.addQueue(novelID: novelID)
+        self.isDownloadStop = false
+        semaphore.signal()
+    }
+
+    // ダウンロードを再開します。(semaphore.signal() を呼ぶ事で強制的に一回 queue の確認を走らせます)
+    func downloadStart() {
+        self.isDownloadStop = false
+        semaphore.signal()
+    }
+    
+    func downloadStop() {
+        self.isDownloadStop = true
+    }
+    
+    func GetCurrentDownloadingNovelIDArray() -> [String] {
+        return self.queueHolder.GetCurrentDownloadingNovelIDArray()
+    }
+    func GetCurrentQueuedNovelIDArray() -> [String] {
+        return self.queueHolder.GetCurrentQueuedNovelIDArray()
+    }
 }

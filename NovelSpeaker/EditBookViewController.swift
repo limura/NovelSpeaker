@@ -87,7 +87,7 @@ class EditBookViewController: UIViewController {
             print("load chapter: \(story.chapterNumber)")
             setStory(story: story, novel: novel)
         }else{
-            let story = RealmStory.CreateNewStory(novel: novel, chapterNumber: 1)
+            let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
             currentStory = story
             print("create new chapter: 1, \(story.id)")
             saveCurrentStory()
@@ -145,8 +145,8 @@ class EditBookViewController: UIViewController {
         entryButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
         entryButton.titleLabel?.adjustsFontForContentSizeCategory = true
 
-        if let realm = try? RealmUtil.GetRealm(), let globalState = RealmGlobalState.GetInstance() {
-            try! realm.write {
+        if let globalState = RealmGlobalState.GetInstance() {
+            RealmUtil.Write { (realm) in
                 globalState.isDarkThemeEnabled = true
             }
             globalState.ApplyThemaToAppearance()
@@ -359,22 +359,18 @@ class EditBookViewController: UIViewController {
     }
     
     func saveCurrentStory() {
-        if let realm = try? RealmUtil.GetRealm() {
-            try! realm.write {
-                currentStory.content = storyTextView.text
-                realm.add(currentStory, update: true)
-            }
+        RealmUtil.Write { (realm) in
+            currentStory.content = storyTextView.text
+            realm.add(currentStory, update: true)
         }
     }
     func saveCurrentNovel() {
-        if let realm = try? RealmUtil.GetRealm() {
-            if let novel = targetNovel {
-                try! realm.write {
-                    if let title = titleTextField.text, title.count > 0 {
-                        novel.title = title
-                    }
-                    realm.add(novel, update: true)
+        if let novel = targetNovel {
+            RealmUtil.Write { (realm) in
+                if let title = titleTextField.text, title.count > 0 {
+                    novel.title = title
                 }
+                realm.add(novel, update: true)
             }
         }
     }
@@ -415,16 +411,13 @@ class EditBookViewController: UIViewController {
         saveCurrentStory()
 
         if let novel = targetNovel, let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
-            let newStory = RealmStory.CreateNewStory(novel: novel, chapterNumber: lastStory.chapterNumber + 1)
+            let newStory = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: lastStory.chapterNumber + 1)
             setStory(story: newStory, novel: novel)
         }
     }
     @IBAction func deleteChapterButtonClicked(_ sender: Any) {
         // memo: 削除できるのは最後の章だけ(のはず)です。
-        guard let realm = try? RealmUtil.GetRealm() else {
-            return
-        }
-        try! realm.write {
+        RealmUtil.Write { (realm) in
             realm.delete(currentStory)
         }
         if let novel = targetNovel, let story = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {

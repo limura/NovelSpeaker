@@ -157,8 +157,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
             if !self.validateDataAndAlert(before: self.beforeText, after: self.afterText, isUseRegexp: self.isUseRegexp) {
                 return
             }
-            guard let realm = try? RealmUtil.GetRealm() else { return }
-            try! realm.write {
+            RealmUtil.Write { (realm) in
                 self.currentSetting.before = self.beforeText
                 self.currentSetting.after = self.afterText
                 self.currentSetting.isUseRegularExpression = self.isUseRegexp
@@ -217,8 +216,8 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
 
         speaker.stopSpeech()
         speaker.clearSpeakSettings()
-        if let speechConfig = ((try? RealmUtil.GetRealm().object(ofType: RealmGlobalState.self,   forPrimaryKey: RealmGlobalState.UniqueID)?.defaultSpeaker?.speechConfig) as SpeechConfig??) {
-            speaker.setDefaultSpeechConfig(speechConfig)
+        if let globalState = RealmGlobalState.GetInstance(), let defaultSpeaker = globalState.defaultSpeaker {
+            speaker.setDefaultSpeechConfig(defaultSpeaker.speechConfig)
         }
         if isUseRegexp {
             if let modArray = StringSubstituter.findRegexpSpeechModConfigs(testText, pattern: before, to: after) {

@@ -218,11 +218,11 @@ class CoreDataToRealmTool: NSObject {
     }
     
     private static func NarouContentToNovelID(content:NarouContentCacheData) -> String {
-        if content.isUserCreatedContent() {
+        if content.isURLContent() {
+            return content.ncode
+        }else if content.isUserCreatedContent() {
             // 自作小説については ID を新しい形式に一新します
             return RealmNovel.CreateUniqueID()
-        }else if content.isURLContent() {
-            return content.ncode
         }
         guard let ncode = content.ncode else {
             return ""
@@ -272,15 +272,20 @@ class CoreDataToRealmTool: NSObject {
                     realm.add(readingStory, update: true)
                 }
             }
-            // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
-            if let newFlug = novelCoreData.is_new_flug as? Bool {
-                if newFlug {
-                    if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
+
+            if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
+                if novelCoreData.isURLContent(), let lastDownloadURL = novelCoreData.userid {
+                    lastStory.url = lastDownloadURL
+                }
+                // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
+                if let newFlug = novelCoreData.is_new_flug as? Bool {
+                    if newFlug {
                         lastStory.downloadDate = Date(timeIntervalSinceNow: 1.1)
                         realm.add(lastStory, update: true)
                     }
                 }
             }
+            //print("novel add: novelID: \(novel.novelID), url: \(novel.url), coredata.ncode: \(novelCoreData.ncode ?? "unknown"), coredata.userid: \(novelCoreData.userid ?? "unknown"), isURLContent: \(novelCoreData.isURLContent() ? "true" : "false"), isUserCreatedContent: \(novelCoreData.isUserCreatedContent() ? "true" : "false")")
 
             realm.add(novel, update: true)
         }

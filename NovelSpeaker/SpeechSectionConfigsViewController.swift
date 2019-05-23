@@ -86,10 +86,10 @@ class SpeechSectionConfigsViewController: FormViewController {
             if text.count <= 0 {
                 return
             }
-            guard let realm = try? RealmUtil.GetRealm(), let speechSectionConfig = realm.object(ofType: RealmSpeechSectionConfig.self, forPrimaryKey: id) else {
+            guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(id: id) else {
                 return
             }
-            try! realm.write {
+            RealmUtil.Write { (realm) in
                 speechSectionConfig.startText = text
             }
             self.updateTitleCell(speechSectionConfig: speechSectionConfig)
@@ -116,10 +116,10 @@ class SpeechSectionConfigsViewController: FormViewController {
             if text.count <= 0 {
                 return
             }
-            guard let realm = try? RealmUtil.GetRealm(), let speechSectionConfig = realm.object(ofType: RealmSpeechSectionConfig.self, forPrimaryKey: id) else {
+            guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(id: id) else {
                 return
             }
-            try! realm.write {
+            RealmUtil.Write { (realm) in
                 speechSectionConfig.endText = text
             }
             self.updateTitleCell(speechSectionConfig: speechSectionConfig)
@@ -136,18 +136,15 @@ class SpeechSectionConfigsViewController: FormViewController {
                 return self.hideCache[id] ?? true
             })
             $0.selectorTitle = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSelectorTitle", comment: "話者を選択してください")
-            guard let realm = try? RealmUtil.GetRealm() else { return }
-            let speakerSettingArray = realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false").sorted(byKeyPath: "createdDate", ascending: true)
+            guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjects()?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
             $0.options = speakerSettingArray.map({$0.name})
             $0.value = speechSectionConfig.speaker?.name ?? NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
         }.onChange({ (row) in
-            guard let name = row.value, let realm = try? RealmUtil.GetRealm(), let sectionConfig = realm.object(ofType: RealmSpeechSectionConfig.self, forPrimaryKey: id) else {
+            guard let name = row.value, let sectionConfig = RealmSpeechSectionConfig.SearchFrom(id: id), let speaker = RealmSpeakerSetting.GetAllObjects()?.filter("name = %@", name).first else {
                 return
             }
-            try! realm.write {
-                if let speaker = realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", name).first {
-                    sectionConfig.speakerID = speaker.id
-                }
+            RealmUtil.Write { (realm) in
+                sectionConfig.speakerID = speaker.id
             }
             self.updateTitleCell(speechSectionConfig: sectionConfig)
         })
@@ -157,7 +154,7 @@ class SpeechSectionConfigsViewController: FormViewController {
                 return self.hideCache[id] ?? true
             })
         }.onCellSelection({ (buttonCellOf, button) in
-            guard let realm = try? RealmUtil.GetRealm(), let speaker = realm.object(ofType: RealmSpeechSectionConfig.self, forPrimaryKey: id)?.speaker else {
+            guard let speaker = RealmSpeechSectionConfig.SearchFrom(id: id)?.speaker else {
                 return
             }
             self.testSpeech(text: self.testText, speakerSetting: speaker)
@@ -176,10 +173,10 @@ class SpeechSectionConfigsViewController: FormViewController {
                 button1Action: nil,
                 button2Title: NSLocalizedString("OK_button", comment: "OK"),
                 button2Action: {
-                    guard let realm = try? RealmUtil.GetRealm(), let setting = realm.object(ofType: RealmSpeechSectionConfig.self, forPrimaryKey: id) else {
+                    guard let setting = RealmSpeechSectionConfig.SearchFrom(id: id) else {
                         return
                     }
-                    try! realm.write {
+                    RealmUtil.Write { (realm) in
                         setting.delete(realm: realm)
                     }
                     if let index = self.form.firstIndex(of: section) {
@@ -205,11 +202,10 @@ class SpeechSectionConfigsViewController: FormViewController {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_AddNewSettingButtonTitle", comment: "新しい話者変更設定を追加する")
         }.onCellSelection({ (_, button) in
             let newSpeechSectionConfig = RealmSpeechSectionConfig()
-            guard let realm = try? RealmUtil.GetRealm() else { return }
             if let defaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker {
                 newSpeechSectionConfig.speakerID = defaultSpeaker.name
             }
-            try! realm.write {
+            RealmUtil.Write { (realm) in
                 realm.add(newSpeechSectionConfig)
             }
             self.form.append(self.createSpeechSectionConfigCells(speechSectionConfig: newSpeechSectionConfig))

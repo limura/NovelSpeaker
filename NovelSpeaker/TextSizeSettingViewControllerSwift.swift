@@ -70,10 +70,10 @@ class TextSizeSettingViewControllerSwift: UIViewController {
     */
 
     @IBAction func textSizeSliderChanged(_ sender: Any) {
-        if let realm = try? RealmUtil.GetRealm(), let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting, let token = self.displaySettingObserbeToken {
-            realm.beginWrite()
-            displaySetting.textSizeValue = self.textSizeSlider.value
-            try! realm.commitWrite(withoutNotifying: [token])
+        if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
+            RealmUtil.Write(withoutNotifying: [self.displaySettingObserbeToken]) { (realm) in
+                displaySetting.textSizeValue = self.textSizeSlider.value
+            }
             self.setFont(displaySetting: displaySetting)
         }
     }

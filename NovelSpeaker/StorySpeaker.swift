@@ -84,7 +84,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         speaker.stopSpeech()
         guard let content = story.content else { return }
         self.storyID = story.id
-        updateReadDate(story: story)
+        updateReadDate(storyID: storyID)
         ApplySpeakConfigs(novelID: story.novelID, content: content, location: story.readLocation)
         updatePlayngInfo(story: story)
         observeStory(storyID: self.storyID)
@@ -198,9 +198,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
     }
     
-    func updateReadDate(story:RealmStory) {
-        if let realm = try? RealmUtil.GetRealm(), let story = realm.object(ofType: RealmStory.self, forPrimaryKey: story.id) {
-            try! realm.write {
+    func updateReadDate(storyID:String) {
+        if let story = RealmStory.SearchStoryFrom(storyID: storyID) {
+            RealmUtil.Write { (realm) in
                 story.lastReadDate = Date()
             }
         }
@@ -434,14 +434,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             print("audioSession.setActive(false) failed.")
         }
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
-        if let token = self.storyObserverToken {
-            if let realm = try? RealmUtil.GetRealm(), let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
-                realm.beginWrite()
+        if let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
+            RealmUtil.Write(withoutNotifying: [self.storyObserverToken]) { (realm) in
                 story.readLocation = speaker.getCurrentReadingPoint().location
-                try! realm.commitWrite(withoutNotifying: [token])
             }
-        }else{
-            self.readLocation = speaker.getCurrentReadingPoint().location
         }
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerStopSpeechEvent(storyID: self.storyID)
@@ -457,10 +453,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         let contentLength = story.content?.count ?? 0
         if nextReadingPoint > contentLength {
             if !LoadNextChapter() {
-                if let realm = try? RealmUtil.GetRealm() {
-                    try! realm.write {
-                        story.readLocation = contentLength
-                    }
+                RealmUtil.Write { (realm) in
+                    story.readLocation = contentLength
                 }
             }
         }else{
@@ -478,10 +472,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         while let story = targetStory {
             let contentLength = story.content?.count ?? 0
             if targetLength <= contentLength {
-                if let realm = try? RealmUtil.GetRealm() {
-                    try! realm.write {
-                        story.readLocation = contentLength - targetLength
-                    }
+                RealmUtil.Write { (realm) in
+                    story.readLocation = contentLength - targetLength
                 }
                 ringPageTurningSound()
                 SetStory(story: story)
@@ -492,10 +484,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         // 抜けてきたということは先頭まで行ってしまった。
         if let firstStory = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
-            if let realm = try? RealmUtil.GetRealm() {
-                try! realm.write {
-                    firstStory.readLocation = 0
-                }
+            RealmUtil.Write { (realm) in
+                firstStory.readLocation = 0
             }
             if firstStory.id != self.storyID {
                 ringPageTurningSound()
@@ -517,10 +507,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     @discardableResult
     func LoadNextChapter() -> Bool{
         if let nextStory = SearchNextChapter(storyID: self.storyID) {
-            if let realm = try? RealmUtil.GetRealm() {
-                try! realm.write {
-                    nextStory.readLocation = 0
-                }
+            RealmUtil.Write { (realm) in
+                nextStory.readLocation = 0
             }
             ringPageTurningSound()
             SetStory(story: nextStory)
@@ -545,10 +533,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     @discardableResult
     func LoadPreviousChapter() -> Bool{
         if let previousStory = SearchPreviousChapter(storyID: storyID) {
-            if let realm = try? RealmUtil.GetRealm() {
-                try! realm.write {
-                    previousStory.readLocation = 0
-                }
+            RealmUtil.Write { (realm) in
+                previousStory.readLocation = 0
             }
             ringPageTurningSound()
             SetStory(story: previousStory)
@@ -855,10 +841,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         if let nextStory = SearchNextChapter(storyID: self.storyID) {
             self.ringPageTurningSound()
-            if let realm = try? RealmUtil.GetRealm() {
-                try! realm.write {
-                    nextStory.readLocation = 0
-                }
+            RealmUtil.Write { (realm) in
+                nextStory.readLocation = 0
             }
             self.SetStory(story: nextStory)
             self.StartSpeech(withMaxSpeechTimeReset: false)
@@ -879,9 +863,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             return speaker.getCurrentReadingPoint().location
         }
         set {
-            if let realm = try? RealmUtil.GetRealm(), let story = RealmStory.SearchStoryFrom(storyID: self.storyID), let contentLength = story.content?.count, contentLength > newValue && newValue >= 0 {
+            if let story = RealmStory.SearchStoryFrom(storyID: self.storyID), let contentLength = story.content?.count, contentLength > newValue && newValue >= 0 {
                 speaker.updateCurrentReadingPoint(NSRange(location: newValue, length: 0))
-                try! realm.write {
+                RealmUtil.Write { (realm) in
                     story.readLocation = newValue
                 }
             }

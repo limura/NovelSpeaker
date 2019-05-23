@@ -12,9 +12,11 @@ import RealmSwift
 extension Notification.Name {
     struct NovelSpeaker {
         // フォントサイズが変わった時
-        static let FontSizeChanged = Notification.Name("NovelSpeaker_Notification_FontSizeChanged")
+        //static let FontSizeChanged = Notification.Name("NovelSpeaker_Notification_FontSizeChanged")
         // 特定の Story (userInfo["storyID"]: String) の content が変更された時
-        static let StoryContentChanged = Notification.Name("NovelSpeaker_Notification_StoryContentChanged")
+        //static let StoryContentChanged = Notification.Name("NovelSpeaker_Notification_StoryContentChanged")
+        // ダウンロード状態が変わった時
+        static let DownloadStatusChanged = Notification.Name("NovelSpeaker_Notification_DownloadStatusChanged")
     }
 }
 extension Notification {
@@ -24,6 +26,7 @@ extension Notification {
 }
 
 class NovelSpeakerNotificationTool {
+    /*
     static func AnnounceFontSizeChanged() {
         let notificationCenter = NotificationCenter.default
         let notification = Notification(name: Notification.Name.NovelSpeaker.FontSizeChanged)
@@ -32,6 +35,12 @@ class NovelSpeakerNotificationTool {
     static func AnnounceStoryContentChanged(storyID: String) {
         let notificationCenter = NotificationCenter.default
         let notification = Notification(name: Notification.Name.NovelSpeaker.StoryContentChanged, object: nil, userInfo: [Notification.NovelSpeakerUserInfoKey.StoryID: storyID])
+        notificationCenter.post(notification)
+    }
+     */
+    static func AnnounceDownloadStatusChanged() {
+        let notificationCenter = NotificationCenter.default
+        let notification = Notification(name: Notification.Name.NovelSpeaker.DownloadStatusChanged)
         notificationCenter.post(notification)
     }
 }

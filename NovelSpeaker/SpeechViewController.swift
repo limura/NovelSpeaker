@@ -363,7 +363,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
     
     @objc func urlRefreshButtonClicked(_ sender: UIBarButtonItem) {
-        // TODO: not implemented yet.
+        guard let storyID = self.storyID else { return }
+        NovelDownloadQueue.shared.addQueue(novelID: RealmStory.StoryIDToNovelID(storyID: storyID))
     }
     @objc func safariButtonClicked(_ sender: UIBarButtonItem) {
         guard let storyID = self.storyID, let urlString = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID))?.url else {

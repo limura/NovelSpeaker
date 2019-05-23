@@ -22,6 +22,11 @@ class BookShelfTreeViewCell: UITableViewCell {
     
     var storyObserveToken: NotificationToken? = nil
     var storyForNovelArrayObserveToken: NotificationToken? = nil
+    var watchNovelIDArray:[String] = []
+    
+    deinit {
+        self.unregistDownloadStatusNotification()
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -39,19 +44,6 @@ class BookShelfTreeViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
-    func activateDownloadIndicator() {
-        if self.downloadingActivityIndicator.isHidden {
-            self.downloadingActivityIndicator.isHidden = false
-            if !self.downloadingActivityIndicator.isAnimating {
-                self.downloadingActivityIndicator.startAnimating()
-            }
-        }
-    }
-    func deactivateDownloadIndicator() {
-        if !self.downloadingActivityIndicator.isHidden {
-            self.downloadingActivityIndicator.isHidden = true
-        }
-    }
     func activateNewImageView() {
         if self.newImageView.isHidden {
             self.newImageView.isHidden = false
@@ -81,8 +73,48 @@ class BookShelfTreeViewCell: UITableViewCell {
         self.readProgressView.progress = progress
     }
     func applyCurrentDownloadIndicatorVisibleStatus(novelIDArray:[String]) {
-        // TODO: あとでダウンロード回りが決まったら作る
-        self.downloadingActivityIndicator.isHidden = true
+        let downloadQueued = NovelDownloadQueue.shared.GetCurrentQueuedNovelIDArray()
+        let nowDownloading = NovelDownloadQueue.shared.GetCurrentDownloadingNovelIDArray()
+
+        var isQueued = false
+        var isNowDownloading = false
+        for novelID in novelIDArray {
+            if downloadQueued.contains(novelID) {
+                isQueued = true
+            }
+            if nowDownloading.contains(novelID) {
+                isNowDownloading = true
+            }
+        }
+
+        DispatchQueue.main.async {
+            var isModeChanged = false
+            if isQueued || isNowDownloading {
+                if self.downloadingActivityIndicator.isHidden {
+                    self.downloadingActivityIndicator.isHidden = false
+                    isModeChanged = true
+                }
+            }else{
+                if !self.downloadingActivityIndicator.isHidden {
+                    self.downloadingActivityIndicator.isHidden = true
+                    isModeChanged = true
+                }
+            }
+            if isNowDownloading {
+                if !self.downloadingActivityIndicator.isAnimating {
+                    self.downloadingActivityIndicator.startAnimating()
+                    isModeChanged = true
+                }
+            }else{
+                if self.downloadingActivityIndicator.isAnimating {
+                    self.downloadingActivityIndicator.stopAnimating()
+                    isModeChanged = true
+                }
+            }
+            if isModeChanged {
+                self.downloadingActivityIndicator.layoutIfNeeded()
+            }
+        }
     }
 
     func registerStoryObserver(novelID:String) {
@@ -152,6 +184,16 @@ class BookShelfTreeViewCell: UITableViewCell {
     func unregistStoryObserver() {
         self.storyObserveToken = nil
     }
+    
+    func registerDownloadStatusNotification(){
+        NotificationCenter.default.addObserver(self, selector: #selector(downloadStatusChanged(notification:)), name: Notification.Name.NovelSpeaker.DownloadStatusChanged, object: nil)
+    }
+    func unregistDownloadStatusNotification(){
+        NotificationCenter.default.removeObserver(self)
+    }
+    @objc func downloadStatusChanged(notification:Notification) {
+        applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: self.watchNovelIDArray)
+    }
 
     func cellSetup(title:String, treeLevel: Int, watchNovelIDArray: [String]) {
         applyDepth(treeLevel: treeLevel)
@@ -169,6 +211,7 @@ class BookShelfTreeViewCell: UITableViewCell {
             self.storyObserveToken = nil
         }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
+        self.watchNovelIDArray = watchNovelIDArray
     }
     
     public var height : CGFloat {

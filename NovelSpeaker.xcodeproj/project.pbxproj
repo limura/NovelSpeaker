@@ -123,7 +123,7 @@
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A2CDBB2292FD6E0080AEE6 /* LocalNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */; };
-		21A2CDC022947D140080AEE6 /* DownloadQueueHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* DownloadQueueHolder.swift */; };
+		21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
 		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
 		21AFDF36216CF977002F34D9 /* SpeechBlockTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */; };
@@ -397,7 +397,7 @@
 		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotifications.swift; sourceTree = "<group>"; };
-		21A2CDBF22947D140080AEE6 /* DownloadQueueHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadQueueHolder.swift; sourceTree = "<group>"; };
+		21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDownloadQueue.swift; sourceTree = "<group>"; };
 		21A4F6DA19B1B30C007CCD32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F71C19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
 		21A4F71D19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -750,7 +750,7 @@
 				21C372DC21DFC41600FB2D52 /* UIImageExtension.m */,
 				2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */,
 				21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */,
-				21A2CDBF22947D140080AEE6 /* DownloadQueueHolder.swift */,
+				21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1309,7 +1309,7 @@
 				212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */,
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
-				21A2CDC022947D140080AEE6 /* DownloadQueueHolder.swift in Sources */,
+				21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */,
 				21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */,

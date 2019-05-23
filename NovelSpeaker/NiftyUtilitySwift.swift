@@ -85,7 +85,7 @@ class NiftyUtilitySwift: NSObject {
                                 return
                             }
                         }
-                        guard let content = story?.content else {
+                        guard let content = story?.content, content.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 else {
                             DispatchQueue.main.async {
                                 EasyDialog.Builder(viewController)
                                     .title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
@@ -145,7 +145,16 @@ class NiftyUtilitySwift: NSObject {
                                         return
                                     }
                                     let cookieParameter = cookieArray.joined(separator: ";")
-                                    globalData.addNewContent(for: url, nextUrl:nextUrl, cookieParameter: cookieParameter, title: titleString, author: story?.author, firstContent: content, viewController: viewController)
+                                    if let story = story {
+                                        if !RealmNovel.AddNewNovelWithFirstStory(url: url, htmlStory: story, cookieParameter: cookieParameter, title: titleString, author: story.author, tag: story.keyword, firstContent: content){
+                                            DispatchQueue.main.async {
+                                                NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"), message: NSLocalizedString("NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryMessage", comment: "既に登録されている小説などの原因が考えられます。"), buttonTitle: nil, buttonAction: nil)
+                                            }
+                                        }else{
+                                            // XXXXX: novelID が url.absoluteString であることを期待している。
+                                            NovelDownloadQueue.shared.addQueue(novelID: url.absoluteString)
+                                        }
+                                    }
                                 })
                                 .build().show()
                         }
@@ -334,15 +343,11 @@ class NiftyUtilitySwift: NSObject {
 
     @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
         let session: URLSession = URLSession.shared
-        DispatchQueue.global(qos: DispatchQoS.QoSClass.background).async {
+        DispatchQueue.global(qos: .utility).async {
             session.dataTask(with: url) { data, response, error in
-                if let data = data, let response = response as? HTTPURLResponse {
-                    if Int(response.statusCode / 100) % 10 == 2 {
-                        if let successAction = successAction {
-                            successAction(data)
-                            return
-                        }
-                    }
+                if let data = data, let response = response as? HTTPURLResponse, Int(response.statusCode / 100) % 10 == 2, let successAction = successAction {
+                    successAction(data)
+                    return
                 }
                 if let failedAction = failedAction {
                     failedAction(error)
@@ -576,5 +581,41 @@ class NiftyUtilitySwift: NSObject {
             return false
         }
         return globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
+    }
+    
+    static public func GetCacheFilePath(fileName:String) -> URL? {
+        guard let path = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first else { return nil }
+        var urlPath = URL(fileURLWithPath: path)
+        urlPath.appendPathComponent(fileName)
+        return urlPath
+    }
+    
+    static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?) {
+        if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName),
+            FileManager.default.fileExists(atPath: cacheFilePath.path),
+            let attribute = try? FileManager.default.attributesOfItem(atPath: cacheFilePath.path),
+            let modificationDate = attribute[FileAttributeKey.modificationDate] as? Date,
+            (Date().timeIntervalSince1970 - modificationDate.timeIntervalSince1970) < expireTimeinterval,
+            let successAction = successAction,
+            let dataZiped = try? Data(contentsOf: cacheFilePath),
+            let data = NiftyUtility.dataInflate(dataZiped) {
+            successAction(data)
+            return
+        }
+        httpGet(url: url, successAction: { (data) in
+            if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName), let dataZiped = NiftyUtility.dataDeflate(data, level: 9) {
+                do {
+                    try dataZiped.write(to: cacheFilePath, options: Data.WritingOptions.atomic)
+                }catch{
+                    print("cache file write error. for url: \(url.absoluteString)")
+                }
+            }
+            if let successAction = successAction {
+                successAction(data)
+            }
+        }) { (err) in
+            guard let failedAction = failedAction else { return }
+            failedAction(err)
+        }
     }
 }

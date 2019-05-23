@@ -46,8 +46,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     }
     
     func addNotificationReceiver(){
-        guard let realm = try? RealmUtil.GetRealm() else { return }
-        self.speechModSettingObserveToken = realm.objects(RealmSpeechModSetting.self).observe { (collectionChange) in
+        self.speechModSettingObserveToken = RealmSpeechModSetting.GetAllObjects()?.observe { (collectionChange) in
             print("SpeechModSettingsTableViewControllerSwift: reload table by RealmSpeechModSetting ovserve event.")
             DispatchQueue.main.async {
                 self.tableView.reloadData()
@@ -109,11 +108,9 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
-            let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)
-            if let modSetting = modSetting {
-                guard let realm = try? RealmUtil.GetRealm() else { return }
-                if let targetModSetting = realm.object(ofType: RealmSpeechModSetting.self, forPrimaryKey: modSetting.id) {
-                    try! realm.write {
+            if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
+                if let targetModSetting = RealmSpeechModSetting.SearchFrom(id: modSetting.id) {
+                    RealmUtil.Write { (realm)  in
                         targetModSetting.delete(realm: realm)
                     }
                 }
@@ -188,11 +185,13 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     }
     
     func GetSpeechModArray() -> [RealmSpeechModSetting] {
-        guard let realm = try? RealmUtil.GetRealm() else { return [] }
-        if m_FilterString.count > 0 {
-            return Array(realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false AND ( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString).sorted(byKeyPath: "before", ascending: false))
+        guard let speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else {
+            return []
         }
-        return Array(realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false").sorted(byKeyPath: "before", ascending: false))
+        if m_FilterString.count > 0 {
+            return Array(speechModSettingArray.filter("( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString).sorted(byKeyPath: "before", ascending: false))
+        }
+        return Array(speechModSettingArray.sorted(byKeyPath: "before", ascending: false))
     }
     
     func GetSpeechModSettingFromRow(row:Int) -> RealmSpeechModSetting? {

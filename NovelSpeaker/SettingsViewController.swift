@@ -637,12 +637,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             case "CreateNewUserTextSegue":
                 if let nextViewController:EditBookViewController = segue.destination as? EditBookViewController {
                     let novel = RealmNovel()
-                    let story = RealmStory.CreateNewStory(novel: novel, chapterNumber: 1)
-                    if let realm = try? RealmUtil.GetRealm() {
-                        try! realm.write {
-                            realm.add(novel, update: true)
-                            realm.add(story, update: true)
-                        }
+                    novel.type = .UserCreated
+                    let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
+                    RealmUtil.Write { (realm) in
+                        realm.add(novel, update: true)
+                        realm.add(story, update: true)
                     }
                     nextViewController.targetNovel = novel
                 }
