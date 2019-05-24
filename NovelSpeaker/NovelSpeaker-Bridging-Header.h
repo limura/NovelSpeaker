@@ -5,7 +5,5 @@
 #import <UIKit/UIKit.h>
 #import "GlobalDataSingleton.h"
 #import "UriLoader.h"
-#import "NarouLoader.h"
-#import "NarouSearchResultTableViewController.h"
 #import "NiftyUtility.h"
 #import "PickerViewDialog.h"

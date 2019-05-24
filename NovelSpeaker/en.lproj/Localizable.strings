@@ -51,6 +51,8 @@
 "NarouSearchResultTableViewController_SearchResult" = "Search result";
 "NarouSearchViewController_SearchTitle_Searching" = "Searching";
 "NarouSearchViewController_SearchMessage_NowSearching" = "Now searching";
+"NarouSearchViewController_NarouSearchTabDeletedAnnounceText" = "Notice of the end of the \"Search\" tab.\n\nAs notified from before, the \"Search\" tab related functions have been removed. Please use \"Web import\" function from now on. Please use the search page on the side where \"let's become a novelist\". The novel imported by the \"Web import\" function is almost as easy to use as the novel imported via \"Search\". How to import a novel on the \"Web import\" tab is roughly.\n\n Set the text of the novel you want to import displayed, and then press the \"Import\" button on the lower right.\n\nIt can be done by things. Please refer to the \"Web取込機能について\" page at the bottom of the support site for details on how to import novels using the \"Web Import\" function.";
+
 
 "PickerViewDialog_DoneKeyboardBarItem" = "done";
 

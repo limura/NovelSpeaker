@@ -170,7 +170,7 @@ MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of 
 "yWP-hK-Eyd.text" = "-";
 
 /* Class = "IBUINavigationItem"; title = "小説家になろうで検索"; ObjectID = "z7j-iL-mrn"; */
-"z7j-iL-mrn.title" = "Search in Narou";
+"aTj-OP-UCn.title" = "Search in Narou";
 
 "r1G-Sf-NLc.text" = "Speech wait setting";
 "jA6-Pi-jzs.text" = "Speech wait setting";
@@ -205,4 +205,7 @@ MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of 
 
 "qdr-YW-SRT.title" = "Bookshelf";
 
+"7aO-uI-UZW.text" = "Notice of the end of the \"Search\" tab.\n\nAs notified from before, the \"Search\" tab related functions have been removed. Please use \"Web import\" function from now on. Please use the search page on the side where \"let's become a novelist\". The novel imported by the \"Web import\" function is almost as easy to use as the novel imported via \"Search\". How to import a novel on the \"Web import\" tab is roughly.\n\n Set the text of the novel you want to import displayed, and then press the \"Import\" button on the lower right.\n\nIt can be done by things. Please refer to the \"Web取込機能について\" page at the bottom of the support site for details on how to import novels using the \"Web Import\" function.";
+"8Uc-qt-6vk.normalTitle" = "Go to the search page for the let's become a novelist";
+"Uo9-50-Oxt.normalTitle" = "Go to Web取込機能について page";
 

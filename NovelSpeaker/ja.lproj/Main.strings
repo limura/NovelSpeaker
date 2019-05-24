@@ -170,7 +170,7 @@ MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of 
 "yWP-hK-Eyd.text" = "-";
 
 /* Class = "IBUINavigationItem"; title = "小説家になろうで検索"; ObjectID = "z7j-iL-mrn"; */
-"z7j-iL-mrn.title" = "小説家になろうで検索";
+"aTj-OP-UCn.title" = "小説家になろうで検索";
 
 "r1G-Sf-NLc.text" = "読み上げ時の間の設定";
 "jA6-Pi-jzs.text" = "読み上げ時の間の詳細設定";
@@ -196,6 +196,8 @@ MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of 
 "izM-Ul-u8s.normalTitle" = "更新";
 "MsP-9f-hgj.normalTitle" = "なろう検索タブ削除(予定)のお知らせ";
 
-"qdr-YW-SRT.title" = "本棚！！！！！！";
+"qdr-YW-SRT.title" = "本棚";
 
-
+"7aO-uI-UZW.text" = "「なろう検索」タブ終了のお知らせ\n\n以前からお知らせしておりました通り、「なろう検索」タブ関連の機能は削除されました。今後は「Web取込」機能をご活用ください。\n「なろう検索」と同様の検索機能は 小説家になろう様 側にあります検索ページをご利用ください。「Web取込」機能で取り込まれた小説は概ね「なろう検索」経由で取り込んだ小説と同様の使い勝手になっています。「Web取込」タブでの小説の取り込み方は、概ね\n\n『取り込みたい小説の本文が表示されている状態にした上で、右下の「取り込み」ボタンを押す』\n\n事で行えます。「Web取込」機能による小説の取り込み方の詳しい使い方につきましてはサポートサイト下部にあります「Web取込機能について」のページをご参照ください。";
+"8Uc-qt-6vk.normalTitle" = "小説家になろう様 の検索ページへ";
+"Uo9-50-Oxt.normalTitle" = "Web取込機能について ページへ";

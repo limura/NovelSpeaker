@@ -122,6 +122,7 @@
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A2CDBB2292FD6E0080AEE6 /* LocalNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */; };
 		21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
+		21A2CDC42297D3A50080AEE6 /* NarouSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDC32297D3A50080AEE6 /* NarouSearchViewController.swift */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
 		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
 		21AFDF36216CF977002F34D9 /* SpeechBlockTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */; };
@@ -139,7 +140,6 @@
 		21C372DD21DFC41600FB2D52 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
-		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
 		21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
 		21C759FA2287123500956B73 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759F92287123500956B73 /* RealmModels.swift */; };
 		21C759FC2287127800956B73 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21C759FB2287127700956B73 /* CloudKit.framework */; };
@@ -165,7 +165,6 @@
 		21E46D431A94B7F400CE39B0 /* EasyShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E46D421A94B7F400CE39B0 /* EasyShare.m */; };
 		21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BF81FB487B1003C659F /* EasyDialogs.swift */; };
 		21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */; };
-		21EA62E420554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */; };
 		21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EA62E5205560B80084B366 /* EurekaCustomRows.swift */; };
 		21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
@@ -192,8 +191,6 @@
 		21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */; };
 		21FDF5642043CDB200DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */; };
 		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
-		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
-		4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */; };
 		9051B983E846E56867906F94 /* Pods_NovelSpeakerURLDownloadExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */; };
 		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
 /* End PBXBuildFile section */
@@ -390,6 +387,7 @@
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotifications.swift; sourceTree = "<group>"; };
 		21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDownloadQueue.swift; sourceTree = "<group>"; };
+		21A2CDC32297D3A50080AEE6 /* NarouSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NarouSearchViewController.swift; path = /Users/limura/Desktop/sources/NovelSpeaker/NovelSpeaker/NarouSearchViewController.swift; sourceTree = "<absolute>"; };
 		21A4F6DA19B1B30C007CCD32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F71C19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
 		21A4F71D19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -416,8 +414,6 @@
 		21C372DC21DFC41600FB2D52 /* UIImageExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIImageExtension.m; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
 		21C74F941964502A0039A706 /* arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@2x.png"; sourceTree = "<group>"; };
-		21C74F99196456490039A706 /* NarouSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchViewController.h; sourceTree = "<group>"; };
-		21C74F9A196456490039A706 /* NarouSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchViewController.m; sourceTree = "<group>"; };
 		21C74F9C1965A5300039A706 /* NarouContentCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContentCacheData.h; sourceTree = "<group>"; };
 		21C74F9D1965A5300039A706 /* NarouContentCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContentCacheData.m; sourceTree = "<group>"; };
 		21C759F92287123500956B73 /* RealmModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmModels.swift; sourceTree = "<group>"; };
@@ -449,7 +445,6 @@
 		21E46D421A94B7F400CE39B0 /* EasyShare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EasyShare.m; sourceTree = "<group>"; };
 		21E76BF81FB487B1003C659F /* EasyDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EasyDialogs.swift; sourceTree = "<group>"; };
 		21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModSettingsTableViewControllerSwift.swift; sourceTree = "<group>"; };
-		21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarouSearchResultDetailViewControllerSwift.swift; sourceTree = "<group>"; };
 		21EA62E5205560B80084B366 /* EurekaCustomRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EurekaCustomRows.swift; sourceTree = "<group>"; };
 		21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
 		21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIViewControllerExtension.m; sourceTree = "<group>"; };
@@ -484,10 +479,6 @@
 		21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSDataDetectEncodingExtension.m; sourceTree = "<group>"; };
 		21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
 		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
-		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
-		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
-		4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultTableViewController.h; sourceTree = "<group>"; };
-		4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchResultTableViewController.m; sourceTree = "<group>"; };
 		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerURLDownloadExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -828,8 +819,6 @@
 				21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */,
 				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
 				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
-				4E776B18196247FB00C36AD1 /* NarouLoader.h */,
-				4E776B19196247FB00C36AD1 /* NarouLoader.m */,
 				21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */,
 				21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */,
 				21F054DB1917E0F200CC6BA9 /* AppDelegate.h */,
@@ -890,10 +879,6 @@
 				21724EE51972C7B400DF6DC4 /* CustomViews */,
 				21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */,
 				21648009229092A200A183DF /* SpeechViewController.swift */,
-				4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */,
-				4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */,
-				21C74F99196456490039A706 /* NarouSearchViewController.h */,
-				21C74F9A196456490039A706 /* NarouSearchViewController.m */,
 				212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */,
 				213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */,
 				21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */,
@@ -907,9 +892,9 @@
 				21647FFF228D5EE000A183DF /* EditBookViewController.swift */,
 				215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */,
 				216741A2204421F1008A578D /* BugReportViewController.swift */,
-				21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */,
 				216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */,
 				212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */,
+				21A2CDC32297D3A50080AEE6 /* NarouSearchViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1291,7 +1276,6 @@
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
 				216741A02043D592008A578D /* BehaviorLogger.swift in Sources */,
-				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
 				21A2CDBB2292FD6E0080AEE6 /* LocalNotifications.swift in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
@@ -1315,11 +1299,9 @@
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
 				21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */,
-				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
 				2164800A229092A200A183DF /* SpeechViewController.swift in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
 				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
-				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
 				21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */,
 				21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
@@ -1332,8 +1314,8 @@
 				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
 				214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */,
 				212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */,
+				21A2CDC42297D3A50080AEE6 /* NarouSearchViewController.swift in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
-				21EA62E420554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift in Sources */,
 				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
 				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
 				215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */,
