@@ -93,6 +93,9 @@ void uncaughtExceptionHandler(NSException *exception)
     // DynamicType 対応
     [self setPreferredFontForTextStyleByAppearance];
     
+    [[NovelDownloadQueue shared] StartBackgroundFetchIfNeeded];
+    [[NovelDownloadQueue shared] ClearDownloadCountBadge];
+
     return YES;
 }
 
@@ -115,20 +118,15 @@ void uncaughtExceptionHandler(NSException *exception)
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
     NSLog(@"application will enter foreground.");
     // badge clear.
-    application.applicationIconBadgeNumber = -1;
-    [[GlobalDataSingleton GetInstance] UpdateBackgroundFetchedNovelCount:0];
+    [[NovelDownloadQueue shared] ClearDownloadCountBadge];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     //NSLog(@"application did become active.");
-    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    [globalData HandleAppGroupQueue];
-    // BackgroundFetchが有効な設定であれば起動時に有効化します。
-    if ([globalData GetBackgroundNovelFetchEnabled] == true) {
-        [globalData StartBackgroundFetch];
-    }
+    // BackgroundFetchが有効な設定であれば有効化します。
+    [[NovelDownloadQueue shared] StartBackgroundFetchIfNeeded];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

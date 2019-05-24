@@ -575,18 +575,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     // cell の高さを求められる時に呼ばれる
-    // TODO: 怪しく固定値を返しています。
-    // この値は BookShelfTreeViewCell の高さを返すべきなのですが、実際固定値なので固定値で返してしまって良いような気がします。
     let fontForFontSize = UIFont.preferredFont(forTextStyle: .body)
     func treeView(_ treeView: RATreeView, heightForRowForItem item: Any) -> CGFloat {
-        //print("heightForRowForItem called.")
         return self.fontForFontSize.pointSize + 10.5 + 12
-        //return UITableView.automaticDimension
     }
     func treeView(_ treeView: RATreeView, estimatedHeightForRowForItem item: Any) -> CGFloat {
-        //print("estimatedHeightForRowForItem called.")
         return self.fontForFontSize.pointSize + 10.5 + 12
-        //return UITableView.automaticDimension
     }
 
 
@@ -638,9 +632,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                 // ので、このまま reloadAllData() して終わりとする。
                                 self.reloadAllData()
                                 return
-                                print("displayDataArray.insert(\(cellData.title ?? "??"), at: \(idx))")
+                                //print("displayDataArray.insert(\(cellData.title ?? "??"), at: \(idx))")
                                 //dumpCurrentTree(head: self.displayDataArray, level: 0)
-                                self.treeView?.insertItems(at: [idx], inParent: nil, with: RATreeViewRowAnimationFade)
+                                //self.treeView?.insertItems(at: [idx], inParent: nil, with: RATreeViewRowAnimationFade)
                             }else{
                                 // childrens.count が 1 でないのなら、oldDisplayDataArray[idx] に parent が居るはず
                                 self.displayDataArray[idx].childrens?.insert(childCellData, at: childIdx)

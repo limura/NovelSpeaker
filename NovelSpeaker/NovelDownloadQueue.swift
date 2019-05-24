@@ -255,7 +255,8 @@ class NovelDownloadQueue : NSObject {
     private let queueHolder = DownloadQueueHolder()
     var maxSimultaneousDownloadCount = 5
     let lock = NSLock()
-    var downloadSuccessNovelIDArray:[String] = []
+    var downloadSuccessNovelIDSet = Set<String>()
+    var downloadEndedNovelIDSet = Set<String>()
     private var isDownloadStop = true
     let semaphore = DispatchSemaphore(value: 0)
     
@@ -264,7 +265,10 @@ class NovelDownloadQueue : NSObject {
     let novelSpeakerSiteInfoCacheFileName = "NovelSpeakerSiteInfoCache"
     let autopagerizeSiteInfoUrl = "http://wedata.net/databases/AutoPagerize/items.json"
     let autopagerizeSiteInfoCacheFileName = "AutopagerizeSiteInfoCache"
-    
+    let DownloadCountKey = "NovelDownloadQueue_DownloadCount"
+    let AlreadyBackgroundFetchedNovelIDListKey = "NovelDownloadQueue_AlreadyBackgroundFetchedNovelIDList"
+    let backgroundFetchDeadlineTimeInSec:Double = 25.0
+
     private override init() {
         super.init()
         startQueueWatcher()
@@ -329,7 +333,10 @@ class NovelDownloadQueue : NSObject {
                     self.queueHolder.downloadDone(novelID: nextTargetNovelID)
                     self.lock.lock()
                     defer { self.lock.unlock() }
-                    self.downloadSuccessNovelIDArray.append(nextTargetNovelID)
+                    if downloadCount > 0 {
+                        self.downloadSuccessNovelIDSet.insert(nextTargetNovelID)
+                    }
+                    self.downloadEndedNovelIDSet.insert(nextTargetNovelID)
                     self.updateNetworkActivityIndicatorStatus()
                     NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
                     delayQueue(queuedDate: queuedDate, block: {
@@ -337,6 +344,9 @@ class NovelDownloadQueue : NSObject {
                     })
                 }, failedAction: { (novelID, downloadCount, errorMessage) in
                     self.queueHolder.downloadDone(novelID: nextTargetNovelID)
+                    self.lock.lock()
+                    defer { self.lock.unlock() }
+                    self.downloadEndedNovelIDSet.insert(nextTargetNovelID)
                     self.updateNetworkActivityIndicatorStatus()
                     NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
                     delayQueue(queuedDate: queuedDate, block: {
@@ -380,11 +390,117 @@ class NovelDownloadQueue : NSObject {
     func GetCurrentQueuedNovelIDArray() -> [String] {
         return self.queueHolder.GetCurrentQueuedNovelIDArray()
     }
+
+    @objc func StartBackgroundFetchIfNeeded() {
+        guard let globalState = RealmGlobalState.GetInstance() else { return }
+        if !globalState.isBackgroundNovelFetchEnabled {
+            DispatchQueue.main.async {
+                UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplication.backgroundFetchIntervalNever)
+            }
+            return
+        }
+        var hour:TimeInterval = 60*60
+        if hour < UIApplication.backgroundFetchIntervalMinimum {
+            hour = UIApplication.backgroundFetchIntervalMinimum
+        }
+        DispatchQueue.main.async {
+            UIApplication.shared.setMinimumBackgroundFetchInterval(hour)
+        }
+    }
+    func GetCurrentDownloadCount() -> Int {
+        let userDefaults = UserDefaults.standard
+        userDefaults.register(defaults: [DownloadCountKey : Int(0)])
+        return userDefaults.integer(forKey: DownloadCountKey)
+    }
+    func SetCurrentDownloadCount(count:Int) {
+        UserDefaults.standard.set(count, forKey: DownloadCountKey)
+        DispatchQueue.main.async {
+            if count <= 0 {
+                UIApplication.shared.applicationIconBadgeNumber = -1
+            }else{
+                UIApplication.shared.applicationIconBadgeNumber = count
+            }
+        }
+    }
+    @objc func ClearDownloadCountBadge() {
+        SetCurrentDownloadCount(count: 0)
+    }
+    func GetAlreadyBackgroundFetchedNovelIDList() -> [String] {
+        let userDefaults = UserDefaults.standard
+        userDefaults.register(defaults: [AlreadyBackgroundFetchedNovelIDListKey: []])
+        return userDefaults.stringArray(forKey: AlreadyBackgroundFetchedNovelIDListKey) ?? []
+    }
+    func AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray:[String]) {
+        var fetchedList = GetAlreadyBackgroundFetchedNovelIDList()
+        for novelID in novelIDArray {
+            if !fetchedList.contains(novelID) {
+                fetchedList.append(novelID)
+            }
+        }
+        UserDefaults.standard.setValue(fetchedList, forKey: AlreadyBackgroundFetchedNovelIDListKey)
+    }
+    func ClearAlreadyBackgroundFetchedNovelIDListKey() {
+        UserDefaults.standard.setValue([] as [String], forKey: AlreadyBackgroundFetchedNovelIDListKey)
+    }
     
     @objc func HandleBackgroundFetch(application:UIApplication, performFetchWithCompletionHandler:@escaping (UIBackgroundFetchResult) -> Void) {
+        let startTime = Date()
         if GetCurrentQueuedNovelIDArray().count > 0 || StorySpeaker.shared.isPlayng {
             performFetchWithCompletionHandler(.noData)
             return
+        }
+        let fetchedNovelIDList = GetAlreadyBackgroundFetchedNovelIDList()
+        guard let novelArray = RealmNovel.GetAllObjects() else {
+            performFetchWithCompletionHandler(.noData)
+            return
+        }
+        var targetNovelIDList:[String] = []
+        for novel in novelArray {
+            if novel.type == .URL && !fetchedNovelIDList.contains(novel.novelID) {
+                targetNovelIDList.append(novel.novelID)
+            }
+        }
+        if targetNovelIDList.count <= 0 {
+            ClearAlreadyBackgroundFetchedNovelIDListKey()
+            performFetchWithCompletionHandler(.noData)
+            return
+        }
+        
+        self.downloadSuccessNovelIDSet.removeAll()
+        self.downloadEndedNovelIDSet.removeAll()
+        // 一旦ダウンロードを止めて、queueにリストを全部入れてから再開させることで、更新頻度の高いものから順にダウンロードさせます
+        self.isDownloadStop = true
+        for novelID in targetNovelIDList {
+            addQueue(novelID: novelID)
+        }
+        self.isDownloadStop = false
+        self.downloadStart()
+        
+        // 30秒で処理を終わらねばならないのでタイマを使います
+        let deadlineTimeInterval = backgroundFetchDeadlineTimeInSec - (Date().timeIntervalSince1970 - startTime.timeIntervalSince1970)
+        Timer.scheduledTimer(withTimeInterval: deadlineTimeInterval, repeats: false) { (timer) in
+            self.downloadStop()
+            let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
+            self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
+            self.downloadEndedNovelIDSet.removeAll()
+            
+            let novelIDArray = self.downloadSuccessNovelIDSet
+            if novelIDArray.count <= 0 {
+                performFetchWithCompletionHandler(.noData)
+                return
+            }
+            let downloadSuccessTitle = String(format: NSLocalizedString("GlobalDataSingleton_NovelUpdateAlertBody", comment: "%d個の更新があります。"), novelIDArray.count)
+            var novelTitleArray:[String] = []
+            for novelID in novelIDArray {
+                guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { continue }
+                novelTitleArray.append(novel.title)
+            }
+            let displayDownloadCount = self.GetCurrentDownloadCount() + novelIDArray.count
+            self.SetCurrentDownloadCount(count: displayDownloadCount)
+            DispatchQueue.main.async {
+                NiftyUtility.invokeNotificationNow(downloadSuccessTitle, message: novelTitleArray.joined(separator: "\n"), badgeNumber: displayDownloadCount)
+            }
+            performFetchWithCompletionHandler(.newData)
         }
     }
 

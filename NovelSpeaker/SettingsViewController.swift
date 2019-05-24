@@ -129,15 +129,24 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 }
                             })
                             .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
-                                let globalData = GlobalDataSingleton.getInstance()
-                                globalData?.updateBackgroundNovelFetchMode(true)
+                                if let globalState = RealmGlobalState.GetInstance() {
+                                    RealmUtil.Write(block: { (realm) in
+                                        globalState.isBackgroundNovelFetchEnabled = true
+                                    })
+                                    NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
+                                }
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: true)
                                 }
                             })
                             .build().show()
                     }else{
-                        GlobalDataSingleton.getInstance().updateBackgroundNovelFetchMode(false)
+                        if let globalState = RealmGlobalState.GetInstance() {
+                            RealmUtil.Write(block: { (realm) in
+                                globalState.isBackgroundNovelFetchEnabled = false
+                            })
+                            NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
+                        }
                     }
                 })
             

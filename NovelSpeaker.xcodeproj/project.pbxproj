@@ -697,6 +697,7 @@
 		21D8FC4C19FC97DB00CCF1B6 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
+				21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */,
 				21E76BF81FB487B1003C659F /* EasyDialogs.swift */,
 				2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */,
 				2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */,
@@ -720,7 +721,6 @@
 				21814C5A1E8D68A90096CB42 /* NSStringExtension.h */,
 				21814C5B1E8D68A90096CB42 /* NSStringExtension.m */,
 				21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */,
-				21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */,
 				21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */,
 				21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */,
 				2167419F2043D592008A578D /* BehaviorLogger.swift */,
