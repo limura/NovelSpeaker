@@ -54,7 +54,8 @@
     if (content == nil) {
         return false;
     }
-    return [globalData UpdateReadingPoint:content story:self.currentReadingStory];
+//    return [globalData UpdateReadingPoint:content story:self.currentReadingStory];
+    return false;
 }
 
 @end

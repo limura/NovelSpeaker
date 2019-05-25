@@ -60,11 +60,6 @@ void uncaughtExceptionHandler(NSException *exception)
         }
     }
     
-    // background fetch activate
-    if ([globalData GetBackgroundNovelFetchEnabled] == true) {
-        [globalData StartBackgroundFetch];
-    }
-    
     UIViewController* toplevelViewController = nil;
     [RealmUtil RemoveLocalRealmFile];
     if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool CheckIsLocalRealmCreated] == false) {
@@ -85,7 +80,7 @@ void uncaughtExceptionHandler(NSException *exception)
     [globalData ForceOverrideHungSpeakStringToSpeechModSettings];
     
     // ルビとして判断されない文字列が初期値のままの人のものを最新のものに変更します(´・ω・`)
-    [globalData UpdateNotRubyChacactorStringArrayFromOldDefaultSetting];
+    //[globalData UpdateNotRubyChacactorStringArrayFromOldDefaultSetting];
     
     // for FTLinearActivityIndicator enable (iPhone X とかのノッチのあるタイプでの network activity indicator を上書きしてくれる奴を enable にする)
     [UIApplication configureLinearNetworkActivityIndicatorIfNeeded];

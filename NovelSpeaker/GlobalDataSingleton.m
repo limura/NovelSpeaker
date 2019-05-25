@@ -302,7 +302,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return result;
 }
 
-
+/*
 /// 指定されたNarouContentの情報を更新します。
 /// CoreData側に登録されていなければ新規に作成し、
 /// 既に登録済みであれば情報を更新します。
@@ -331,7 +331,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return result;
 }
-
+*/
 
 /// 新しい NarouContent を生成して返します。
 - (NarouContent*) CreateNewNarouContentThreadUnsafe
@@ -1771,6 +1771,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return [self UnescapeHTMLEntities:story.content];
 }
 
+/*
 /// 読み上げる文書を設定します。
 - (BOOL)SetSpeechStory:(StoryCacheData *)story
 {
@@ -1802,6 +1803,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     NSRange range = NSMakeRange([story.readLocation unsignedLongValue], 0);
     return [m_NiftySpeaker UpdateCurrentReadingPoint:range];
 }
+ */
 
 /// 読み上げ位置を設定します。
 - (BOOL)SetSpeechRange:(NSRange)range
@@ -1859,6 +1861,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
 }
 
+/*
 /// 読み上げを開始します。
 - (BOOL)StartSpeech:(BOOL)withMaxSpeechTimeReset
 {
@@ -1899,6 +1902,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [BehaviorLogger AddLogWithDescription:@"StartSpeech" data:@{}];
     return [m_NiftySpeaker StartSpeech];
 }
+ */
 
 /// 読み上げを「バックグラウンド再生としては止めずに」読み上げ部分だけ停止します
 - (BOOL)StopSpeechWithoutDiactivate
@@ -2640,6 +2644,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return content;
 }
 
+/*
 /// 新しくユーザ定義の本を追加します。基本的には CreateNewUserBook と同じですが、NarouContent は保存され、さらに空の章を追加されている所が違います。
 - (NarouContentCacheData*)CreateNewUserBookWithSaved{
     NarouContentCacheData* content = [self CreateNewUserBook];
@@ -2649,7 +2654,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     
     return content;
 }
-
+*/
 
 /// NarouContentCacheData の中から、ncode(小説家になろうのncode)のものだけを取り出して、その ncode を ncode-ncode-ncode... の形式の文字列にして返します。
 - (NSString*)createNcodeListString:(NSArray*)contentArray {
@@ -3403,7 +3408,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         content.title = firstLine;
     }
     content.general_all_no = [[NSNumber alloc] initWithInt:1];
-    [self UpdateNarouContent:content];
+    //[self UpdateNarouContent:content];
     NSLog(@"addContent: %@\n-> %@", content.title, text);
     [self UpdateStory:text chapter_number:1 parentContent:content];
     [self saveContext];
@@ -4106,7 +4111,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         fileNum += 1;
     }
     content.general_all_no = [[NSNumber alloc] initWithLong:maxStoryNum];
-    [self UpdateNarouContent:content];
+    //[self UpdateNarouContent:content];
     
     StoryCacheData* storyCacheData = [self SearchStory:content.ncode chapter_no:[current_reading_chapter_number intValue]];
     if (storyCacheData != nil) {
@@ -4183,7 +4188,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         content.userid = targetContentCacheData.userid;
     }
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
-        [self UpdateNarouContent:content];
+        //[self UpdateNarouContent:content];
     }];
     
     // dataDirectory が指定されていて、content_directory に値が入っているならば、
@@ -4258,7 +4263,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
 
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
-        [self UpdateNarouContent:content];
+        // [self UpdateNarouContent:content];
     }];
     
     NSNumber* current_reading_chapter_number = [NiftyUtility validateNSDictionaryForNumber:bookshelfDictionary key:@"current_reading_chapter_number"];
@@ -4272,7 +4277,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         (general_all_no = [self LoadStoryText:content dataDirectory:[dataDirectory URLByAppendingPathComponent:contentDirectory isDirectory:true] current_reading_chapter_number:current_reading_chapter_number current_reading_chapter_read_location:current_reading_chapter_read_location]) > 0){
         [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
             content.general_all_no = [[NSNumber alloc] initWithLong:general_all_no];
-            [self UpdateNarouContent:content];
+            //[self UpdateNarouContent:content];
         }];
         // それで正しく復元できたのであればダウンロードキューに入れることはせずに終了
         return true;
@@ -4328,7 +4333,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             content.title = title;
             content.general_all_no = [[NSNumber alloc] initWithUnsignedInteger:[storyArray count]];
             [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
-                [self UpdateNarouContent:content];
+                //[self UpdateNarouContent:content];
             }];
             int chapterNumber = 1;
             for (id storyObj in storyArray) {
@@ -4723,11 +4728,13 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     __block BOOL result = false;
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
         toplevelViewController = [UIViewController toplevelViewController];
+        /*
         result = [NovelSpeakerBackup parseBackupFileWithUrl:filePath toplevelViewController:toplevelViewController finally:^(BOOL finalResult) {
             if (finally != nil) {
                 finally(finalResult);
             }
         }];
+         */
     }];
     return result;
 }

@@ -273,7 +273,9 @@ class CoreDataToRealmTool: NSObject {
                 }
             }
 
+            // chapterNumber が最後の章に関しては、
             if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
+                // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する
                 if novelCoreData.isURLContent(), let lastDownloadURL = novelCoreData.userid {
                     lastStory.url = lastDownloadURL
                 }

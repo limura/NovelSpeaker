@@ -9,6 +9,7 @@
 import UIKit
 import PDFKit
 import RealmSwift
+import UserNotifications
 
 class NiftyUtilitySwift: NSObject {
     @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
@@ -36,26 +37,7 @@ class NiftyUtilitySwift: NSObject {
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
                 }
-                if let globalData = GlobalDataSingleton.getInstance() {
-                    if let newUserBook = globalData.createNewUserBook() {
-                        newUserBook.title = title
-                        newUserBook.general_all_no = NSNumber.init(value: 1)
-                        globalData.updateNarouContent(newUserBook)
-                        globalData.updateStory(content, chapter_number: 1, parentContent:   newUserBook)
-                        return
-                    }
-                }
-                DispatchQueue.main.async {
-                    EasyDialog.Builder(viewController)
-                        .title(title: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー"))
-                        .label(text: NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfBody", comment: "本棚への追加に失敗しました。"))
-                        .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: false, completion: nil)
-                            }
-                        })
-                        .build().show()
-                }
+                RealmNovel.AddNewNovelOnlyText(content: content, title: title)
             })
             .build().show()
         }
@@ -69,11 +51,7 @@ class NiftyUtilitySwift: NSObject {
             .text(content: NSLocalizedString("ImportFromWebPageViewController_loading", comment: "loading"))
             let dialog = builder.build()
             dialog.show()
-            let uriLoader = UriLoader()
-            let customSiteInfoData = GlobalDataSingleton.getInstance().getCachedCustomAutoPagerizeSiteInfoData()
-            uriLoader.addCustomSiteInfo(from: customSiteInfoData)
-            let siteInfoData = GlobalDataSingleton.getInstance().getCachedAutoPagerizeSiteInfoData()
-            uriLoader.addSiteInfo(from: siteInfoData)
+            let uriLoader = NovelDownloadQueue.shared.createUriLoader()
             uriLoader.fetchOneUrl(url, cookieArray: cookieArray, successAction: { (story: HtmlStory?) in
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: {
@@ -577,6 +555,39 @@ class NiftyUtilitySwift: NSObject {
         urlPath.appendPathComponent(fileName)
         return urlPath
     }
+    static public func GetTemporaryFilePath(fileName:String) -> URL {
+        return URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true).appendingPathComponent(fileName)
+    }
+    static public func CreateTemporaryDirectory(directoryName:String) -> URL? {
+        let tmpDir = NSTemporaryDirectory()
+        let result = URL(fileURLWithPath: tmpDir).appendingPathComponent(directoryName, isDirectory: true)
+        let fileManager = FileManager.default
+        do {
+            try fileManager.createDirectory(atPath: result.path, withIntermediateDirectories: true, attributes: nil)
+        }catch{
+            print("can not create directory: \(result.path)")
+            return nil
+        }
+        return result
+    }
+    static public func CreateDirectoryFor(path:URL, directoryName:String) -> URL? {
+        let result = path.appendingPathComponent(directoryName, isDirectory: true)
+        let fileManager = FileManager.default
+        do {
+            try fileManager.createDirectory(atPath: result.path, withIntermediateDirectories: true, attributes: nil)
+        }catch{
+            print("can not create directory: \(result.path)")
+            return nil
+        }
+        return result
+    }
+    static public func RemoveDirectory(directoryPath:URL) {
+        do {
+            try FileManager.default.removeItem(at: directoryPath)
+        }catch{
+            // nothing to do!
+        }
+    }
     
     static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?) {
         if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName),
@@ -604,6 +615,30 @@ class NiftyUtilitySwift: NSObject {
         }) { (err) in
             guard let failedAction = failedAction else { return }
             failedAction(err)
+        }
+    }
+    
+    static let PreviousTimeVersionKey = "NovelSpeaker_PreviousTimeVersion"
+    // 前回実行時とくらべてビルド番号が変わっているか否かを取得します
+    static func IsVersionUped() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [PreviousTimeVersionKey : "unknown"])
+        let currentVersion = GetAppVersionString()
+        guard let previousVersion = defaults.string(forKey: PreviousTimeVersionKey) else { return true }
+        return currentVersion != previousVersion
+    }
+    // 保存されている「前回起動時のバージョン番号」を現在のバージョン番号に更新します
+    static func UpdateCurrentVersionSaveData() {
+        let defaults = UserDefaults.standard
+        let currentVersion = GetAppVersionString()
+        defaults.set(currentVersion, forKey: PreviousTimeVersionKey)
+    }
+    
+    // 通知の許可をユーザに願い出る
+    static func RegisterUserNotification() {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.badge, .alert]) { (granted, err) in
+            //
         }
     }
 }

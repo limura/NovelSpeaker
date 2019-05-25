@@ -420,7 +420,7 @@ extension RealmStory: CanWriteIsDeleted {
     @objc dynamic var title : String = ""
     @objc dynamic var url : String = ""
     @objc dynamic var _urlSecret : String = ""
-    @objc dynamic var createDate : Date = Date()
+    @objc dynamic var createdDate : Date = Date()
     @objc dynamic var likeLevel : Int8 = 0
     @objc dynamic var isNeedSpeechAfterDelete : Bool = false
     
@@ -582,6 +582,20 @@ extension RealmStory: CanWriteIsDeleted {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
         return realm.object(ofType: RealmNovel.self, forPrimaryKey: novelID)
+    }
+    
+    static func AddNewNovelOnlyText(content:String, title:String) {
+        let novel = RealmNovel()
+        novel.type = .UserCreated
+        novel.title = title
+        RealmUtil.Write { (realm) in
+            realm.add(novel, update: true)
+        }
+        let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
+        story.content = content
+        RealmUtil.Write { (realm) in
+            realm.add(story, update: true)
+        }
     }
     
     static func AddNewNovelWithFirstStory(url:URL, htmlStory:HtmlStory, cookieParameter:String, title:String, author:String?, tag:[Any]?, firstContent:String) -> Bool {
@@ -1185,10 +1199,21 @@ extension RealmGlobalState: CanWriteIsDeleted {
         realm.refresh()
         return realm.object(ofType: RealmDisplaySetting.self, forPrimaryKey: id)
     }
+    
+    static func convertFontSizeValue(textSizeValue:Float) -> Float {
+        var value = textSizeValue
+        if value < 1.0 {
+            value = 50.0;
+        }else if value > 100.0 {
+            value = 100.0;
+        }
+        let num = pow(1.05, value) + 1.0;
+        return num;
+    }
 
     var font : UIFont {
         get {
-            let fontSize = GlobalDataSingleton.convertFontSizeValue(toFontSize: self.textSizeValue)
+            let fontSize = RealmDisplaySetting.convertFontSizeValue(textSizeValue: self.textSizeValue)
             let fontName = self.fontID
             if fontName.count > 0, let font = UIFont(name: fontName, size: CGFloat(fontSize)) {
                 return font

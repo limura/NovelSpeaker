@@ -110,6 +110,13 @@
 "SettingsViewController_ChooseFullBackup" = "完全バックアップを生成する(時間がかかります)";
 "SettingsViewController_ChooseSmallBackup" = "軽量バックアップを生成する(時間はかかりません)";
 "SettingsViewController_SpeechModSettingsButtonTitle" = "話者変更設定(会話文等で声質を変えたりする設定)";
+"SettingsViewController_RemoveDefaultSpeechModSettings" = "標準の読みの修正と同じものを読み替え辞書登録から削除";
+"SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmTitle" = "確認";
+"SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmMessage" = "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除します。よろしいですか？";
+"SettingsViewController_RemoveDefaultSpeechModSettings_DeletedMessage" = "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除しました。";
+
+"NovelSpeakerUtility_ExportingNovelData" = "小説を抽出中";
+"NovelSpeakerUtility_ExportOtherSettings" = "設定情報の抽出中";
 
 "SettingTableViewController_RepeatTypeTitle" = "繰り返し再生";
 "SettingTableViewController_RepeatType_NoRepeat" = "しない";

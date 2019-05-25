@@ -16,7 +16,7 @@
 - (id)initWithCoreData: (GlobalState*)coreDataStory;
 
 /// 自分の持つ情報を CoreData側 に書き込みます。
-- (BOOL)AssignToCoreData: (GlobalState*)coreDataStory;
+//- (BOOL)AssignToCoreData: (GlobalState*)coreDataStory;
 
 @property (nonatomic) NSNumber * defaultPitch;
 @property (nonatomic) NSNumber * defaultRate;

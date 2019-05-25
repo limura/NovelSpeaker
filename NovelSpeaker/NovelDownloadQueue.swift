@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import UserNotifications
 import FTLinearActivityIndicator
 
 fileprivate class QueueItem {

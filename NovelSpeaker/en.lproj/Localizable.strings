@@ -111,6 +111,14 @@
 "SettingsViewController_ChooseFullBackup" = "Generate a full backup (it will take time)";
 "SettingsViewController_ChooseSmallBackup" = "Generate a lightweight backup (it will not take time)";
 "SettingsViewController_SpeechModSettingsButtonTitle" = "Speaker change setting (setting to change voice quality with conversational text etc)";
+"SettingsViewController_RemoveDefaultSpeechModSettings" = "The same as the standard reading correction is deleted from the dictionary replacement registration";
+"SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmTitle" = "Confirm";
+"SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmMessage" = "Among the corrections of readings, delete the same one as the correction of standard readings. Is it OK?";
+"SettingsViewController_RemoveDefaultSpeechModSettings_DeletedMessage" = "Of the registration of the correction of reading, the same one as the correction of standard reading was deleted.";
+
+"NovelSpeakerUtility_ExportingNovelData" = "Exporting novel";
+"NovelSpeakerUtility_ExportOtherSettings" = "Exporting settings";
+
 
 "SettingTableViewController_RepeatTypeTitle" = "Repeat type";
 "SettingTableViewController_RepeatType_NoRepeat" = "none";

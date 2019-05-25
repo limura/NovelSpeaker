@@ -24,12 +24,12 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     
     /// 最新のプライバシーポリシーを読んだことがあるか否かを判定して、読んだことがなければ表示して同意を求めます
     func CheckAndDisplayPrivacyPolicy(){
-        if let privacyPolicyUrl = GlobalDataSingleton.getInstance().getPrivacyPolicyURL() {
+        if let privacyPolicyUrl = NovelSpeakerUtility.privacyPolicyURL {
             NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data) in
                 guard let currentPrivacyPolicy = String(data: data, encoding: .utf8) else {
                     return
                 }
-                let readedPrivacyPolicy = GlobalDataSingleton.getInstance().getReadedPrivacyPolicy()
+                let readedPrivacyPolicy = NovelSpeakerUtility.GetReadedPrivacyPolicy()
                 if currentPrivacyPolicy == readedPrivacyPolicy {
                     return
                 }
@@ -45,7 +45,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     })
                     .addButton(title: NSLocalizedString("Agree_Button", comment:"同意する"), callback: {dialog in
                         DispatchQueue.main.async {
-                            GlobalDataSingleton.getInstance().setPrivacyPolicyIsReaded(currentPrivacyPolicy)
+                            NovelSpeakerUtility.SetPrivacyPolicyIsReaded(readedText: currentPrivacyPolicy)
                             dialog.dismiss(animated: true, completion: nil)
                         }
                     })

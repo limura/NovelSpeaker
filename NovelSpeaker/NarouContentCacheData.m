@@ -128,7 +128,7 @@
     if (self.currentReadingStory == nil) {
         content.currentReadingStory = nil;
     }else{
-        [[GlobalDataSingleton GetInstance] UpdateStoryThreadUnsafe:self.currentReadingStory.content chapter_number:[self.currentReadingStory.chapter_number intValue] parentContent:self];
+        //[[GlobalDataSingleton GetInstance] UpdateStoryThreadUnsafe:self.currentReadingStory.content chapter_number:[self.currentReadingStory.chapter_number intValue] parentContent:self];
     }
     
     return true;

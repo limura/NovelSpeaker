@@ -17,7 +17,7 @@
 /// CoreData のデータから初期化します。
 - (id)initWithCoreData: (NarouContent*)coreDatacontent;
 /// 自分の持つ情報を CoreData側 に書き込みます。
-- (BOOL)AssignToCoreData: (NarouContent*)content;
+//- (BOOL)AssignToCoreData: (NarouContent*)content;
 
 @property (nonatomic) NSString* title;
 @property (nonatomic) NSString* ncode;

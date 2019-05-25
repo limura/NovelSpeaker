@@ -72,9 +72,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         self.searchButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .done, target: self, action: #selector(searchButtonClicked))
         self.navigationItem.leftBarButtonItems = [self.searchButton]
 
-        // TODO: バージョンアップNoticeを出す
-        if (GlobalDataSingleton.getInstance()?.isVersionUped())! {
+        if NiftyUtilitySwift.IsVersionUped() {
             showVersionUpNotice()
+            NiftyUtilitySwift.UpdateCurrentVersionSaveData()
         }
         if let globalState = RealmGlobalState.GetInstance(), let novel = RealmGlobalState.GetLastReadNovel(), globalState.isOpenRecentNovelInStartTime {
             self.pushNextView(novelID: novel.novelID, isNeedSpeech: false)
