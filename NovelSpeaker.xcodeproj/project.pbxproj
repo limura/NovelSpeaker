@@ -163,6 +163,7 @@
 		21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BF81FB487B1003C659F /* EasyDialogs.swift */; };
 		21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */; };
 		21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */; };
+		21E975B8229A8C8C0027A0A0 /* DefaultSpeechModList.json in Resources */ = {isa = PBXBuildFile; fileRef = 21E975B7229A8C8C0027A0A0 /* DefaultSpeechModList.json */; };
 		21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EA62E5205560B80084B366 /* EurekaCustomRows.swift */; };
 		21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
@@ -439,6 +440,7 @@
 		21E76BF81FB487B1003C659F /* EasyDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EasyDialogs.swift; sourceTree = "<group>"; };
 		21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModSettingsTableViewControllerSwift.swift; sourceTree = "<group>"; };
 		21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSpeakerUtility.swift; sourceTree = "<group>"; };
+		21E975B7229A8C8C0027A0A0 /* DefaultSpeechModList.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = DefaultSpeechModList.json; sourceTree = "<group>"; };
 		21EA62E5205560B80084B366 /* EurekaCustomRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EurekaCustomRows.swift; sourceTree = "<group>"; };
 		21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
 		21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIViewControllerExtension.m; sourceTree = "<group>"; };
@@ -675,6 +677,7 @@
 				21429D82209F4516001426F5 /* nc48625.m4a */,
 				21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */,
 				21DD0BF420B595F500DC3C39 /* LICENSE.txt */,
+				21E975B7229A8C8C0027A0A0 /* DefaultSpeechModList.json */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1057,6 +1060,7 @@
 				21D397B01FC97A380018F883 /* home@2x.png in Resources */,
 				21F563D11FD802400037F5D7 /* <@3x.png in Resources */,
 				2133F2A71E80E175001A0BC5 /* Icon-76@2x.png in Resources */,
+				21E975B8229A8C8C0027A0A0 /* DefaultSpeechModList.json in Resources */,
 				210958C31A0DF55600E9171F /* arrow_down@3x.png in Resources */,
 				2133F2A91E80E175001A0BC5 /* Icon-Small-40.png in Resources */,
 				210958CC1A0DF55600E9171F /* soundbook@2x.png in Resources */,

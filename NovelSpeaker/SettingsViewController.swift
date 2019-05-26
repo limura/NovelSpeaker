@@ -663,6 +663,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             }) else {
                 DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
                     NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
                 }
                 return
@@ -673,6 +674,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             let dateString = dateFormatter.string(from: Date())
             let fileName = String.init(format: "%@.novelspeaker-backup+zip", dateString)
             DispatchQueue.main.async {
+                dialog.dismiss(animated: false, completion: nil)
                 self.sendMailWithBinary(data: backupData, fileName: fileName, mimeType: "application/octet-stream")
             }
         }
@@ -680,7 +682,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     // MFMailComposeViewController でmailアプリ終了時に呼び出されるのでこのタイミングで viewController を取り戻します
     func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-        dismiss(animated: true, completion: nil)
+        controller.dismiss(animated: true, completion: nil)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
