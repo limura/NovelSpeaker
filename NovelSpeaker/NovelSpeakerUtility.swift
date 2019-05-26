@@ -40,6 +40,31 @@ class NovelSpeakerUtility: NSObject {
         "([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)\\s*話": "$1は"
     ]
 
+    /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
+    @objc static func ForceOverrideHungSpeakStringToSpeechModSettings() {
+        let targets = ["*": " "]
+        guard let speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else { return }
+        RealmUtil.Write { (realm) in
+            for (before, after) in targets {
+                var isHit = false
+                for setting in speechModSettingArray {
+                    if setting.before == before {
+                        isHit = true
+                        setting.after = after
+                        setting.isUseRegularExpression = false
+                        break
+                    }
+                }
+                if isHit { continue }
+                let speechModSetting = RealmSpeechModSetting()
+                speechModSetting.before = before
+                speechModSetting.after = after
+                speechModSetting.isUseRegularExpression = false
+                realm.add(speechModSetting, update: true)
+            }
+        }
+    }
+
     // 標準の読み替え辞書を上書き登録します。
     static func OverrideDefaultSpeechModSettings() {
         guard let speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else { return }
@@ -116,6 +141,64 @@ class NovelSpeakerUtility: NSObject {
             for targetSpeechModSetting in allSpeechModSettings {
                 targetSpeechModSetting.delete(realm: realm)
             }
+        }
+    }
+    
+    // 標準設定を入れます。結構時間かかるのでバックグラウンドで行われます
+    @objc static func InsertDefaultSettingsIfNeeded() {
+        DispatchQueue.global(qos: .utility).async {
+            if RealmGlobalState.GetInstance() != nil {
+                return
+            }
+            RealmUtil.Write(block: { (realm) in
+                let globalState = RealmGlobalState()
+                let defaultSpeaker = RealmSpeakerSetting()
+                let defaultDisplaySetting = RealmDisplaySetting()
+                let defaultSpeechOverrideSetting = RealmSpeechOverrideSetting()
+                globalState.defaultSpeakerID = defaultSpeaker.id
+                globalState.defaultDisplaySettingID = defaultDisplaySetting.id
+                globalState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.id
+                realm.add(globalState, update: true)
+                realm.add(defaultSpeaker, update: true)
+                realm.add(defaultDisplaySetting, update: true)
+                realm.add(defaultSpeechOverrideSetting, update: true)
+            })
+            RealmUtil.Write(block: { (realm) in
+                let talk1Speaker = RealmSpeakerSetting()
+                let talk2Speaker = RealmSpeakerSetting()
+                let talk1SectionConfig = RealmSpeechSectionConfig()
+                let talk2SectionConfig = RealmSpeechSectionConfig()
+                
+                talk1Speaker.pitch = 1.5
+                talk1Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation1", comment: "会話文")
+                talk1SectionConfig.startText = "「"
+                talk1SectionConfig.endText = "」"
+                talk1SectionConfig.speakerID = talk1Speaker.id
+                
+                talk2Speaker.pitch = 1.2
+                talk2Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation2", comment: "会話文2")
+                talk2SectionConfig.startText = "『"
+                talk2SectionConfig.endText = "』"
+                talk2SectionConfig.speakerID = talk2Speaker.id
+                
+                realm.add(talk1Speaker, update: true)
+                realm.add(talk2Speaker, update: true)
+                realm.add(talk1SectionConfig, update: true)
+                realm.add(talk2SectionConfig, update: true)
+            })
+            RealmUtil.Write(block: { (realm) in
+                let waitConfig1 = RealmSpeechWaitConfig()
+                waitConfig1.targetText = "\n\n"
+                waitConfig1.delayTimeInSec = 0.5
+                realm.add(waitConfig1, update: true)
+                for target in ["……", "。", "、", "・"] {
+                    let waitConfig = RealmSpeechWaitConfig()
+                    waitConfig.targetText = target
+                    waitConfig.delayTimeInSec = 0.0
+                    realm.add(waitConfig, update: true)
+                }
+            })
+            OverrideDefaultSpeechModSettings()
         }
     }
     

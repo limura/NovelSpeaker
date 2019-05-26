@@ -1170,7 +1170,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
 @objc final class RealmDisplaySetting: Object {
     @objc dynamic var id = NSUUID().uuidString
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var textSizeValue: Float = 160.0
+    @objc dynamic var textSizeValue: Float = 40.0
     @objc dynamic var fontID = ""
     @objc dynamic var name : String = ""
     @objc dynamic var isVertical: Bool = false

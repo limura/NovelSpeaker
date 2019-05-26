@@ -56,7 +56,7 @@
     dispatch_async(queue, ^{
         GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
         [globalData doCoreDataMigration];
-        [globalData InsertDefaultSetting];
+        //[globalData InsertDefaultSetting];
         if ([CoreDataToRealmTool CheckIsLocalRealmCreated] == false) {
             [CoreDataToRealmTool ClearLocalRealmDataAndConvertFromCoreaDataAndReturnError:nil];
         }

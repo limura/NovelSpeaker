@@ -17,7 +17,7 @@ class CoreDataToRealmTool: NSObject {
         }
         return false
     }
-
+    
     // realm.write {} の中で呼んでください
     private static func CreateRealmGlobalStateFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
 

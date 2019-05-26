@@ -217,10 +217,10 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 //- (StoryCacheData*)GetPreviousChapter:(StoryCacheData*)story;
 
 /// 何も設定されていなければ標準のデータを追加します。
-- (void)InsertDefaultSetting;
+//- (void)InsertDefaultSetting;
 
 /// 読み上げ設定を読み直します。
-- (BOOL)ReloadSpeechSetting;
+//- (BOOL)ReloadSpeechSetting;
 
 /// story の文章を表示用の文字列に変換します。
 //- (NSString*)ConvertStoryContentToDisplayText:(StoryCacheData*)story;

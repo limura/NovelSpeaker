@@ -22,7 +22,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        GlobalDataSingleton.getInstance().reloadSpeechSetting()
         addNotificationCenter()
     }
     
@@ -31,6 +30,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         removeNotificationCenter()
     }
     
+    // TODO: バックアップファイルからのデータ読み込み完了後にこの Notification を呼ぶ
     func addNotificationCenter(){
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(forName: NSNotification.Name(rawValue: "ConfigReloaded_DisplayUpdateNeeded"), object: nil, queue: .main) { (notification) in

@@ -53,15 +53,12 @@ void uncaughtExceptionHandler(NSException *exception)
     NSSetUncaughtExceptionHandler(&uncaughtExceptionHandler);
     
     // Override point for customization after application launch.
-    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    if ([globalData isAliveCoreDataSaveFile] == false) {
-        if (![globalData isAliveOLDSaveDataFile] || ![globalData moveOLDSaveDataFileToNewLocation]){
-            [globalData InsertDefaultSetting];
-        }
-    }
+    //TODO: ここに入れるとマイグレーション時に酷いことになるけどここにあるべき。
+    // [NovelSpeakerUtility InsertDefaultSettingsIfNeeded];
     
     UIViewController* toplevelViewController = nil;
     [RealmUtil RemoveLocalRealmFile];
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool CheckIsLocalRealmCreated] == false) {
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"coreDataMigration" bundle:nil];
         toplevelViewController = [storyboard instantiateInitialViewController];
@@ -77,7 +74,7 @@ void uncaughtExceptionHandler(NSException *exception)
     [UriLoader RemoveInvalidKeyDataFromCookieStorage:[NSHTTPCookieStorage sharedHTTPCookieStorage]];
     
     // "************" でハングするようなので強制的に読み替え辞書に登録して安全な文字に読み変えるようにします(´・ω・`)
-    [globalData ForceOverrideHungSpeakStringToSpeechModSettings];
+    [NovelSpeakerUtility ForceOverrideHungSpeakStringToSpeechModSettings];
     
     // ルビとして判断されない文字列が初期値のままの人のものを最新のものに変更します(´・ω・`)
     //[globalData UpdateNotRubyChacactorStringArrayFromOldDefaultSetting];
