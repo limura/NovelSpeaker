@@ -12,6 +12,19 @@ import RealmSwift
 import UserNotifications
 
 class NiftyUtilitySwift: NSObject {
+    static let textCountSeparatorArray:[String] = ["[[改ページ]]", "[改ページ]", "\n\n", "\r\n\r\n", "\r\r"]
+    
+    // 分割すべき大きさで、分割できそうな文字列であれば分割して返します
+    static func CheckShouldSeparate(text:String) -> [String]? {
+        for separator in textCountSeparatorArray {
+            let separated = text.components(separatedBy: separator)
+            if separated.count > 1 {
+                return separated
+            }
+        }
+        return nil
+    }
+    
     @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
         DispatchQueue.main.async {
             var easyDialog = EasyDialog.Builder(viewController)
@@ -26,12 +39,12 @@ class NiftyUtilitySwift: NSObject {
             if let hintString = hintString {
                 easyDialog = easyDialog.label(text: hintString)
             }
-            easyDialog.addButton(title: NSLocalizedString("NiftyUtilitySwift_CancelImport", comment: "取り込まない"), callback: { (dialog) in
+            easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtilitySwift_CancelImport", comment: "取り込まない"), callback: { (dialog) in
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
                 }
             })
-            .addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
+            easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
                 let titleTextField = dialog.view.viewWithTag(100) as! UITextField
                 let title = titleTextField.text ?? title
                 DispatchQueue.main.async {
@@ -39,7 +52,17 @@ class NiftyUtilitySwift: NSObject {
                 }
                 RealmNovel.AddNewNovelOnlyText(content: content, title: title)
             })
-            .build().show()
+            if let separatedText = CheckShouldSeparate(text: content), separatedText.reduce(0, { (result, body) -> Int in
+                return result + (body.count > 0 ? 1 : 0)
+            }) > 1 {
+                easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportSeparatedContent", comment: "テキトーに分割して取り込む"), callback: { (dialog) in
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false, completion: nil)
+                    }
+                    RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: title)
+                })
+            }
+            easyDialog.build().show()
         }
 
     }
@@ -640,5 +663,51 @@ class NiftyUtilitySwift: NSObject {
         center.requestAuthorization(options: [.badge, .alert]) { (granted, err) in
             //
         }
+    }
+    
+    static func GetToplevelViewController(controller:UIViewController?) -> UIViewController? {
+        guard let view = controller else {
+            return UIApplication.shared.keyWindow?.rootViewController
+        }
+        if let tabBarController = view as? UITabBarController {
+            return GetToplevelViewController(controller: tabBarController.selectedViewController)
+        }
+        if let navigationController = view as? UINavigationController {
+            return GetToplevelViewController(controller: navigationController.visibleViewController)
+        }
+        if let presentedViewController = view.presentedViewController {
+            return GetToplevelViewController(controller: presentedViewController)
+        }
+        return view;
+    }
+    
+    // https://qiita.com/mosson/items/c4c329d433d99e3583ec
+    static func DetectEncoding(data:Data) -> String.Encoding {
+        let encoding:String.Encoding = .utf8
+        let targetEncodings:[String.Encoding] = [
+            .utf8,
+            .nonLossyASCII,
+            .japaneseEUC,
+            .macOSRoman,
+            .windowsCP1251,
+            .windowsCP1252,
+            .windowsCP1253,
+            .windowsCP1254,
+            .windowsCP1250,
+            .isoLatin1,
+            .unicode
+        ]
+        
+        if data.contains(0x1b) {
+            if String(data: data, encoding: .iso2022JP) != nil {
+                return .iso2022JP
+            }
+        }
+        for targetEncoding in targetEncodings {
+            if String(data: data, encoding: targetEncoding) != nil {
+                return targetEncoding
+            }
+        }
+        return encoding
     }
 }

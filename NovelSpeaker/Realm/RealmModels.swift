@@ -597,6 +597,27 @@ extension RealmStory: CanWriteIsDeleted {
             realm.add(story, update: true)
         }
     }
+    static func AddNewNovelWithMultiplText(contents:[String], title:String) {
+        let novel = RealmNovel()
+        novel.type = .UserCreated
+        novel.title = title
+        RealmUtil.Write { (realm) in
+            realm.add(novel, update: true)
+        }
+        var chapterNumber = 1
+        for content in contents {
+            if content.count <= 0 { continue }
+            let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: chapterNumber)
+            story.content = content
+            if chapterNumber != 1 {
+                story.lastReadDate = Date(timeIntervalSinceNow: -60*60)
+            }
+            RealmUtil.Write { (realm) in
+                realm.add(story, update: true)
+            }
+            chapterNumber += 1
+        }
+    }
     
     static func AddNewNovelWithFirstStory(url:URL, htmlStory:HtmlStory, cookieParameter:String, title:String, author:String?, tag:[Any]?, firstContent:String) -> Bool {
         let novelID = url.absoluteString

@@ -202,6 +202,134 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
+    static func ProcessNovelSpeakerURLScheme(url:URL) -> Bool {
+        guard let host = url.host else { return false }
+        var cookieArray:[String]? = nil
+        let targetUrlString:String
+        if host == "downloadncode" {
+            // TODO: downloadncode は ncode-ncode-ncode-... と ncode を沢山列記できるので、個別に checkUrlAndConifirmToUser() で取り込み確認をしてもらう事ができない。従って、確実に download できる URL を生成する必要があるが、将来に渡ってそれが生成できるかはよくわからんし、そもそも download queue に入れられるのは RealmNovel と 1章目 の RealmStory が揃っているもののみであり、これを実現するには「1章分だけダウンロードして RealmNovel と RealmStory を作って NovelDownloadQueue に突っ込み直す」という謎の process を入れる必要があり、それをやるとなると NovelDownloadQueue とその process の間で1.5秒間隔のアクセス制限を同期？しないと駄目になってあばばばばばばば…… と思ったので当面は対応しないことにします。
+            DispatchQueue.main.async {
+                guard let toplevelViewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else {return}
+                NiftyUtilitySwift.EasyDialogOneButton(viewController: toplevelViewController, title: nil, message: NSLocalizedString("NovelSpeakerUtility_downloadncodeSchemeIsNotImplementedYet", comment: "novelspeaker://downloadncode/ のサポートは一時的に非サポートになっています。使えるようにするのも吝かではないのですが、多分あまり使っている人が居ないのではないかという気がすごくしますので、開発が後回しになっています。早めの実装をお望みであればその旨をサポートサイト等からお問い合わせください。"), buttonTitle: nil, buttonAction: nil)
+            }
+            return false
+        }else if host == "downloadurl" {
+            guard let absoluteString = url.absoluteString.removingPercentEncoding else { return false }
+            guard let regex = try? NSRegularExpression(pattern: "^novelspeaker://downloadurl/([^#]*)#?(.*)$", options: []) else { return false }
+            let matches = regex.matches(in: absoluteString, options: [], range: NSRange(location: 0, length: absoluteString.count))
+            guard matches.count >= 1 else { return false }
+            let match = matches[0]
+            guard let urlRange = Range(match.range(at: 1), in: absoluteString) else { return false }
+            targetUrlString = String(absoluteString[urlRange])
+            if let cookieRange = Range(match.range(at: 2), in: absoluteString), let cookieString =    String(absoluteString[cookieRange]).removingPercentEncoding {
+                cookieArray = cookieString.components(separatedBy: ";")
+            }
+        }else{
+            return false
+        }
+        DispatchQueue.main.async {
+            guard let targetURL = URL(string: targetUrlString), let rootViewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: rootViewController, url: targetURL, cookieArray: cookieArray ?? [])
+        }
+        return true
+    }
+    
+    static func ProcessPDFFile(url:URL) -> Bool {
+        guard let text = NiftyUtilitySwift.FilePDFToString(url: url) else {
+            DispatchQueue.main.async {
+                guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
+                NiftyUtilitySwift.EasyDialogOneButton(
+                    viewController: viewController,
+                    title: NSLocalizedString("GlobalDataSingleton_PDFToStringFailed_Title", comment: "PDFのテキスト読み込みに失敗"),
+                    message: NSLocalizedString("GlobalDataSingleton_PDFToStringFailed_Body", comment: "PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPDF読み込み機能は動作しません。"),
+                    buttonTitle: nil, buttonAction: nil)
+            }
+            return false
+        }
+        let fileName = url.deletingPathExtension().lastPathComponent
+        DispatchQueue.main.async {
+            guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtilitySwift.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+        }
+        return true
+    }
+    static func ProcessRTFFile(url:URL) -> Bool {
+        guard let text = NiftyUtilitySwift.FileRTFToAttributedString(url: url)?.string else {
+            DispatchQueue.main.async {
+                guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
+                NiftyUtilitySwift.EasyDialogOneButton(
+                    viewController: viewController,
+                    title: nil,
+                    message: NSLocalizedString("GlobalDataSingleton_RTFToStringFailed_Title", comment: "RTFのテキスト読み込みに失敗"),
+                    buttonTitle: nil, buttonAction: nil)
+            }
+            return false
+        }
+        let fileName = url.deletingPathExtension().lastPathComponent
+        DispatchQueue.main.async {
+            guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtilitySwift.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+        }
+        return true
+    }
+    static func ProcessRTFDFile(url:URL) -> Bool {
+        guard let text = NiftyUtilitySwift.FileRTFDToAttributedString(url: url)?.string else {
+            DispatchQueue.main.async {
+                guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
+                NiftyUtilitySwift.EasyDialogOneButton(
+                    viewController: viewController,
+                    title: nil,
+                    message: NSLocalizedString("GlobalDataSingleton_RTFToStringFailed_Title", comment: "RTFのテキスト読み込みに失敗"),
+                    buttonTitle: nil, buttonAction: nil)
+            }
+            return false
+        }
+        let fileName = url.deletingPathExtension().lastPathComponent
+        DispatchQueue.main.async {
+            guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtilitySwift.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+        }
+        return true
+    }
+    static func ProcessTextFile(url:URL) -> Bool {
+        guard let data = try? Data(contentsOf: url), let text = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data)) else { return false }
+        let fileName = url.deletingPathExtension().lastPathComponent
+        DispatchQueue.main.async {
+            guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtilitySwift.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+        }
+        return true
+    }
+
+    @objc public static func ProcessURL(url:URL?) -> Bool {
+        guard let url = url else { return false }
+        let isSecurityScopedURL = url.startAccessingSecurityScopedResource()
+        defer { url.stopAccessingSecurityScopedResource()}
+
+        if let scheme = url.scheme, scheme == "novelspeaker" || scheme == "limuraproducts.novelspeaker" {
+            return ProcessNovelSpeakerURLScheme(url: url)
+        }
+        if ["novelspeaker-backup-json", "novelspeaker-backup+json", "novelspeaker-backup+zip"].contains(url.pathExtension) {
+            return ProcessNovelSpeakerBackupFile(url:url)
+        }
+        if url.pathExtension == "pdf" {
+            return ProcessPDFFile(url:url)
+        }
+        if url.pathExtension == "rtf" {
+            return ProcessRTFFile(url:url)
+        }
+        if url.pathExtension == "rtfd" {
+            return ProcessRTFDFile(url:url)
+        }
+        return ProcessTextFile(url:url)
+    }
+
+    // MARK: バックアップファイルからの書き戻し
+    static func ProcessNovelSpeakerBackupFile(url:URL) -> Bool {
+        return false
+    }
+
+    // MARK: バックアップデータ生成
     fileprivate static func CreateBackupDataDictionary_Story(novelID:String, contentWriteTo:URL?) -> [[String:Any]] {
         var result:[[String:Any]] = []
         guard let storyArray = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true) else { return result }

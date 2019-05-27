@@ -118,6 +118,7 @@
 
 "NovelSpeakerUtility_ExportingNovelData" = "Exporting novel";
 "NovelSpeakerUtility_ExportOtherSettings" = "Exporting settings";
+"NovelSpeakerUtility_downloadncodeSchemeIsNotImplementedYet" = "The format of novelspeaker://downloadncode/ is temporarily unsupported. It is not a good idea to make it usable, but I think that there is a feeling that there may be no one who uses it so much, so development has been delayed. Please contact us from the support site if you want early implementation.";
 
 
 "SettingTableViewController_RepeatTypeTitle" = "Repeat type";
@@ -256,6 +257,7 @@
 "NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryMessage" = "Possible causes such as the already registered novel.";
 "NiftyUtilitySwift_AddNewNovelToBookshelfTitle" = "Add new novel to bookshelf";
 "NiftyUtilitySwift_AddNewNovelToBookshelfMessage" = "Continue downloading if there is a chapter that follows.";
+"NiftyUtilitySwift_ImportSeparatedContent" = "Split the text and import";
 
 
 "BugReportViewController_SectionHeader" = "Problem report";
