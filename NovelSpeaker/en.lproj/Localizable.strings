@@ -119,6 +119,7 @@
 "NovelSpeakerUtility_ExportingNovelData" = "Exporting novel";
 "NovelSpeakerUtility_ExportOtherSettings" = "Exporting settings";
 "NovelSpeakerUtility_downloadncodeSchemeIsNotImplementedYet" = "The format of novelspeaker://downloadncode/ is temporarily unsupported. It is not a good idea to make it usable, but I think that there is a feeling that there may be no one who uses it so much, so development has been delayed. Please contact us from the support site if you want early implementation.";
+"NovelSpeakerUtility_RestoreingJSONType" = "Loading settings from backup file.";
 
 
 "SettingTableViewController_RepeatTypeTitle" = "Repeat type";

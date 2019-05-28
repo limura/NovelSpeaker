@@ -1386,6 +1386,9 @@ extension RealmNovelTag: CanWriteIsDeleted {
             return setting.targetNovelIDArray.contains(novelID)
         })
     }
+    static func SearchObjectFrom(id:String) -> RealmSpeechOverrideSetting? {
+        return GetAllObjects()?.filter("id = %@", id).first
+    }
     func unref(realm:Realm, novel:RealmNovel) {
         if let index = targetNovelIDArray.index(of: novel.novelID) {
             targetNovelIDArray.remove(at: index)

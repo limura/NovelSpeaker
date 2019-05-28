@@ -183,7 +183,7 @@ class CoreDataToRealmTool: NSObject {
         }
     }
     
-    private static func NcodeToUrlString(ncode:String, no:Int, end:Bool) -> String {
+    static func NcodeToUrlString(ncode:String, no:Int, end:Bool) -> String {
         let lcaseNcode = ncode.lowercased()
         if no == 1 && end == false {
             return "https://ncode.syosetu.com/\(lcaseNcode)/"
@@ -221,8 +221,10 @@ class CoreDataToRealmTool: NSObject {
         if content.isURLContent() {
             return content.ncode
         }else if content.isUserCreatedContent() {
-            // 自作小説については ID を新しい形式に一新します
-            return RealmNovel.CreateUniqueID()
+            // 自作小説については ID を新しい形式に一新します。
+            // ただし、過去のバックアップファイルからの書き戻しが発生した時にその ID を追跡できるようにするために
+            // 謎の ID 埋め込みを行います
+            return "https://example.com/" + (content.ncode ?? "\(NSUUID().uuidString)")
         }
         guard let ncode = content.ncode else {
             return ""
