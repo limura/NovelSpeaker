@@ -212,18 +212,22 @@ class NovelSpeakerUtility: NSObject {
         var cookieArray:[String]? = nil
         let targetUrlString:String
         if host == "downloadncode" {
-            let ncodeArray = url.path.components(separatedBy: "-")
-            for ncode in ncodeArray {
-                guard let targetURL = URL(string: "https://ncode.syosetu.com/\(ncode.lowercased())/") else { continue }
-                let novelID = targetURL.absoluteString
-                let novel = RealmNovel.SearchNovelFrom(novelID: novelID) ?? RealmNovel()
-                if novel.novelID != novelID {
-                    novel.novelID = novelID
-                    RealmUtil.Write { (realm) in
-                        realm.add(novel, update: true)
+            DispatchQueue.global(qos: .utility).async {
+                let ncodeArray = url.path.components(separatedBy: "-")
+                for ncode in ncodeArray {
+                    guard let targetURL = URL(string: "https://ncode.syosetu.com/\(ncode.lowercased())/") else { continue }
+                    let novelID = targetURL.absoluteString
+                    let novel = RealmNovel.SearchNovelFrom(novelID: novelID) ?? RealmNovel()
+                    if novel.novelID != novelID {
+                        novel.novelID = novelID
+                        novel.url = novelID
+                        novel.type = .URL
+                        RealmUtil.Write { (realm) in
+                            realm.add(novel, update: true)
+                        }
                     }
+                    NovelDownloadQueue.shared.addQueue(novelID: novelID)
                 }
-                NovelDownloadQueue.shared.addQueue(novelID: novelID)
             }
             return true
         }else if host == "downloadurl" {
@@ -602,7 +606,7 @@ class NovelSpeakerUtility: NSObject {
                         story.lastReadDate = Date()
                         story.readLocation = current_reading_chapter_read_location.intValue
                     }else{
-                        story.lastReadDate = Date(timeIntervalSinceNow: -60)
+                        story.lastReadDate = Date(timeIntervalSince1970: 0)
                     }
                     if is_new_flug.boolValue {
                         story.downloadDate = Date(timeIntervalSinceNow: 60)
@@ -657,7 +661,7 @@ class NovelSpeakerUtility: NSObject {
                             story.url = last_download_url
                         }
                     }else{
-                        story.lastReadDate = Date(timeIntervalSinceNow: -60)
+                        story.lastReadDate = Date(timeIntervalSince1970: 0)
                     }
                     if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let novelUpdatedAt = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
                         story.downloadDate = novelUpdatedAt
@@ -743,7 +747,7 @@ class NovelSpeakerUtility: NSObject {
         }
         if let targetNovelID = currentReadingNovelID, let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let readingChapter = novel.readingChapter {
             RealmUtil.Write { (realm) in
-                readingChapter.lastReadDate = Date(timeIntervalSinceNow: +200)
+                readingChapter.lastReadDate = Date(timeIntervalSinceNow: +60)
             }
         }
         return true
@@ -772,7 +776,7 @@ class NovelSpeakerUtility: NSObject {
         }
         if let targetNovelID = currentReadingNovelID, let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let readingChapter = novel.readingChapter {
             RealmUtil.Write { (realm) in
-                readingChapter.lastReadDate = Date(timeIntervalSinceNow: +200)
+                readingChapter.lastReadDate = Date(timeIntervalSinceNow: +60)
             }
         }
         return true

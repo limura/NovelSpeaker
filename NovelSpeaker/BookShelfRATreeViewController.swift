@@ -11,13 +11,13 @@ import RATreeView
 import RealmSwift
 
 class BookShelfRATreeViewCellData {
-    public var content:RealmNovel?
+    public var novel:RealmNovel?
     public var childrens:[BookShelfRATreeViewCellData]?
     public var title:String?
 }
 
 func == (lhs: BookShelfRATreeViewCellData, rhs: BookShelfRATreeViewCellData) -> Bool {
-    if lhs.content === rhs.content && lhs.title == rhs.title {
+    if lhs.novel === rhs.novel && lhs.title == rhs.title {
         if let lhsc = lhs.childrens, let rhsc = rhs.childrens {
             if lhsc == rhsc {
                 return true
@@ -144,7 +144,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         for novel in novels {
             let data = BookShelfRATreeViewCellData()
             data.childrens = nil
-            data.content = novel
+            data.novel = novel
             data.title = nil
             result.append(data)
         }
@@ -153,7 +153,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     
     // 更新日時でフォルダ分けします(フォルダ分けする版)
     func createUpdateDateBookShelfRATreeViewCellDataTreeWithFolder() -> [BookShelfRATreeViewCellData] {
-        guard let contents = getNovelArray(sortType: NarouContentSortType.novelUpdatedAt) else { return [] }
+        guard let novels = getNovelArray(sortType: NarouContentSortType.novelUpdatedAt) else { return [] }
         struct filterStruct {
             let title:String
             let date:Date
@@ -172,11 +172,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             let folder = BookShelfRATreeViewCellData()
             folder.title = filter.title
             folder.childrens = []
-            for content in contents {
-                if let lastDownloadDate = content.lastDownloadDate {
+            for novel in novels {
+                if let lastDownloadDate = novel.lastDownloadDate {
                     if lastDownloadDate <= prevDate && lastDownloadDate > filter.date {
                         let data = BookShelfRATreeViewCellData()
-                        data.content = content
+                        data.novel = novel
                         folder.childrens?.append(data)
                     }
                 }
@@ -189,12 +189,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     // 更新日時でフォルダ分けします(フォルダ分けしない版)
     func createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> [BookShelfRATreeViewCellData] {
-        guard let contents = getNovelArray(sortType: NarouContentSortType.novelUpdatedAt) else { return [] }
+        guard let novels = getNovelArray(sortType: NarouContentSortType.novelUpdatedAt) else { return [] }
         var result = [] as [BookShelfRATreeViewCellData]
-        for content in contents {
+        for novel in novels {
             let data = BookShelfRATreeViewCellData()
             data.childrens = nil
-            data.content = content
+            data.novel = novel
             data.title = nil
             result.append(data)
         }
@@ -203,16 +203,16 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     // 作者名でフォルダ分けします
     func createWriterBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
-        guard let contents = getNovelArray(sortType: NarouContentSortType.writer) else { return [] }
+        guard let novels = getNovelArray(sortType: NarouContentSortType.writer) else { return [] }
         var dic = [String:Any]()
-        for content in contents {
-            if var array = dic[content.writer] as? [RealmNovel]{
-                array.append(content)
-                dic[content.writer] = array
+        for novel in novels {
+            if var array = dic[novel.writer] as? [RealmNovel]{
+                array.append(novel)
+                dic[novel.writer] = array
             }else{
                 var array = [RealmNovel]()
-                array.append(content)
-                dic[content.writer] = array
+                array.append(novel)
+                dic[novel.writer] = array
             }
         }
         var targets = [String]()
@@ -226,10 +226,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             let folder = BookShelfRATreeViewCellData()
             folder.childrens = [BookShelfRATreeViewCellData]()
             folder.title = target == "" ? NSLocalizedString("BookShelfRATreeViewController_UnknownWriter", comment: "(作者名不明)") : target
-            if let contents = dic[target] as? [RealmNovel] {
-                for content in contents {
+            if let novels = dic[target] as? [RealmNovel] {
+                for novel in novels {
                     let data = BookShelfRATreeViewCellData()
-                    data.content = content
+                    data.novel = novel
                     folder.childrens?.append(data)
                 }
             }
@@ -266,14 +266,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                         // tree が展開されるのは一段目までです(´・ω・`)
                         if let childrens = cellItem.childrens {
                             for cellItemChild in childrens {
-                                if cellItemChild.content == lastReadNovel {
+                                if cellItemChild.novel == lastReadNovel {
                                     self.treeView?.expandRow(forItem: cellItem)
                                     self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
                                     return
                                 }
                             }
                         }
-                        if cellItem.content == lastReadNovel {
+                        if cellItem.novel == lastReadNovel {
                             self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
                             return
                         }
@@ -451,13 +451,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }
         }
 
-        if let content = item.content {
-            cell.cellSetup(title: content.title, treeLevel: level, watchNovelIDArray: [content.novelID])
+        if let novel = item.novel {
+            cell.cellSetup(title: novel.title, treeLevel: level, watchNovelIDArray: [novel.novelID])
         }else if let title = item.title {
             func getChildNovelIDs(itemArray:[BookShelfRATreeViewCellData]) -> [String] {
                 var childrenArray:[String] = []
                 for child in itemArray {
-                    if let novel = child.content {
+                    if let novel = child.novel {
                         childrenArray.append(novel.novelID)
                     }else if let childrens = child.childrens{
                         childrenArray.append(contentsOf: getChildNovelIDs(itemArray: childrens))
@@ -494,15 +494,15 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     /// セルが選択された時
     func treeView(_ treeView: RATreeView, didSelectRowForItem item: Any) {
         if let data = item as? BookShelfRATreeViewCellData {
-            if let content = data.content {
-                pushNextView(novelID: content.novelID, isNeedSpeech: false)
+            if let novel = data.novel {
+                pushNextView(novelID: novel.novelID, isNeedSpeech: false)
             }
         }
     }
 
     func treeView(_ treeView: RATreeView, canEditRowForItem item: Any) -> Bool {
         if let data = item as? BookShelfRATreeViewCellData {
-            if data.content != nil {
+            if data.novel != nil {
                 return true
             }
         }
@@ -513,13 +513,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func treeView(_ treeView: RATreeView, commit editingStyle: UITableViewCell.EditingStyle, forRowForItem item: Any) {
         if editingStyle == UITableViewCell.EditingStyle.delete {
             if let data = item as? BookShelfRATreeViewCellData {
-                if let content = data.content {
+                if let novel = data.novel {
                     let parent = self.treeView?.parent(forItem: item)
                     var index:Int = -1
                     if parent == nil {
                         for (idx, cellData) in self.displayDataArray.enumerated() {
-                            if let thisContent = cellData.content {
-                                if thisContent == content {
+                            if let thisNovel = cellData.novel {
+                                if thisNovel == novel {
                                     index = idx
                                     break
                                 }
@@ -528,7 +528,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }else if let parent = parent as? BookShelfRATreeViewCellData{
                         if let childrens = parent.childrens {
                             for (idx, child) in childrens.enumerated() {
-                                if child.content == content {
+                                if child.novel == novel {
                                     index = idx
                                 }
                             }
@@ -537,16 +537,16 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     if index >= 0 {
                         self.treeView?.deleteItems(at: IndexSet([index]), inParent: parent, with: RATreeViewRowAnimationFade)
                         for (idx, cellData) in self.displayDataArray.enumerated() {
-                            if let thisContent = cellData.content {
-                                if thisContent == content {
-                                    // 一段目に content があったということは階層は無いので単に一つ消すだけで良い
+                            if let thisNovel = cellData.novel {
+                                if thisNovel == novel {
+                                    // 一段目に novel があったということは階層は無いので単に一つ消すだけで良い
                                     self.displayDataArray.remove(at: idx)
                                     break
                                 }
                             }else if var childrens = cellData.childrens {
                                 for (childIdx, childCellData) in childrens.enumerated() {
-                                    if let thisContent = childCellData.content {
-                                        if thisContent == content {
+                                    if let thisNovel = childCellData.novel {
+                                        if thisNovel == novel {
                                             childrens.remove(at: childIdx)
                                             cellData.childrens = childrens
                                             self.displayDataArray[idx].childrens = childrens
@@ -561,8 +561,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                             }
                         }
                         RealmUtil.Write(withoutNotifying: [self.novelArrayNotificationToken]) { (realm) in
-                            print("delete: \(content.novelID)")
-                            content.delete(realm: realm)
+                            print("delete: \(novel.novelID)")
+                            novel.delete(realm: realm)
                             print("delete: will commitWrite()")
                         }
                     }
@@ -586,7 +586,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     // TODO: なにやら昔色々やっていたものを今でも使えるようにできるといいね(´・ω・`)
     // ncodeのものが追加されたと仮定して RATreeView の状態を更新する
-    func handleAddContent(novel:RealmNovel) {
+    func handleAddNovel(novel:RealmNovel) {
         func dumpCurrentTree(head:[BookShelfRATreeViewCellData], level: Int){
             var spacer = ""
             for _ in 0...level{
@@ -596,8 +596,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 if let childrens = cell.childrens {
                     print("\(spacer)\(cell.title ?? "??")")
                     dumpCurrentTree(head: childrens, level: level + 1)
-                }else if let content = cell.content{
-                    print("\(spacer)\(content.title)")
+                }else if let novel = cell.novel{
+                    print("\(spacer)\(novel.title)")
                 }else{
                     print("\(spacer)\(cell.title ?? "??")")
                 }
@@ -608,8 +608,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         //dumpCurrentTree(head: self.displayDataArray, level: 0)
         let newDisplayDataArray = getBookShelfRATreeViewCellDataTree()
         for (idx, cellData) in newDisplayDataArray.enumerated() {
-            if let content = cellData.content {
-                if content == novel {
+            if let thisNovel = cellData.novel {
+                if thisNovel == novel {
                     // toplevel なら単にその新しく出来た cellData を insert するだけで良い
                     self.displayDataArray.insert(cellData, at: idx)
                     self.treeView?.insertItems(at: [idx], inParent: nil, with: RATreeViewRowAnimationFade)
@@ -618,8 +618,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 }
             }else if let childrens = cellData.childrens {
                 for (childIdx, childCellData) in childrens.enumerated() {
-                    if let content = childCellData.content {
-                        if content == novel {
+                    if let thisNovel = childCellData.novel {
+                        if thisNovel == novel {
                             //self.treeView?.beginUpdates()
                             var parent = cellData
                             // toplevel ではない場合、もしかするとtoplevelのcellDataもinsertする必要があるかもしれないので、childrens.count が 1 であることでそれを確認する
@@ -651,7 +651,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 }
             }
         }
-        print("handleAddContent nothing to do...")
+        print("handleAddNovel nothing to do...")
     }
 
     @objc func refreshControlValueChangedEvent(sendor:UIRefreshControl) {

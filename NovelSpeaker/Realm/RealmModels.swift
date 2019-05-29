@@ -313,7 +313,7 @@ protocol CanWriteIsDeleted {
     @objc dynamic var contentZiped = Data()
     @objc dynamic var readLocation = 0
     @objc dynamic var url = ""
-    @objc dynamic var lastReadDate = Date(timeIntervalSinceNow: -60*60*24)
+    @objc dynamic var lastReadDate = Date(timeIntervalSince1970: 0)
     @objc dynamic var downloadDate = Date()
     @objc dynamic var subtitle = ""
 
@@ -611,7 +611,7 @@ extension RealmStory: CanWriteIsDeleted {
             let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: chapterNumber)
             story.content = content
             if chapterNumber != 1 {
-                story.lastReadDate = Date(timeIntervalSinceNow: -60*60)
+                story.lastReadDate = Date(timeIntervalSinceNow: -60)
             }
             RealmUtil.Write { (realm) in
                 realm.add(story, update: true)
@@ -650,6 +650,7 @@ extension RealmStory: CanWriteIsDeleted {
             story.url = storyUrl
         }
         try! realm.write {
+            story.lastReadDate = Date(timeIntervalSinceNow: -60)
             realm.add(story, update: true)
         }
         if let tagArray = tag {
@@ -1192,7 +1193,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
 @objc final class RealmDisplaySetting: Object {
     @objc dynamic var id = NSUUID().uuidString
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var textSizeValue: Float = 40.0
+    @objc dynamic var textSizeValue: Float = 58.0
     @objc dynamic var fontID = ""
     @objc dynamic var name : String = ""
     @objc dynamic var isVertical: Bool = false
@@ -1225,7 +1226,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
     static func convertFontSizeValue(textSizeValue:Float) -> Float {
         var value = textSizeValue
         if value < 1.0 {
-            value = 50.0;
+            value = 1.0;
         }else if value > 100.0 {
             value = 100.0;
         }

@@ -177,10 +177,11 @@ class NovelDownloader : NSObject {
                 story.url = targetURL.absoluteString
                 story.content = content
                 story.downloadDate = queuedDate
-                // 新しく読み込まれた小説の最後に読んだ時間を過去にしておかないと、それが最後の読んだ小説にされてしまう。
-                story.lastReadDate = Date(timeIntervalSince1970: 0)
                 if let subtitle = htmlStory.subtitle {
                     story.subtitle = subtitle
+                }
+                if chapterNumber == 1 {
+                    story.lastReadDate = Date(timeIntervalSinceNow: -60)
                 }
                 RealmUtil.Write(block: { (realm) in
                     /* // 通常の更新時にはタグの更新はしないでおきます
@@ -384,6 +385,7 @@ class NovelDownloadQueue : NSObject {
                 }
                 let queuedDate = Date()
                 print("startDownload: \(nextTargetNovelID)")
+                NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
                 NovelDownloader.startDownload(novelID: nextTargetNovelID, uriLoader: uriLoader, successAction: { (novelID, downloadCount) in
                     self.queueHolder.downloadDone(novelID: nextTargetNovelID)
                     self.lock.lock()

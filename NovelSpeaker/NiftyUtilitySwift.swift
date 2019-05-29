@@ -31,6 +31,14 @@ class NiftyUtilitySwift: NSObject {
         return nil
     }
     
+    static var toplevelViewController:UIViewController? = nil
+    @objc static func RegisterToplevelViewController(viewController:UIViewController?) {
+        toplevelViewController = viewController
+    }
+    @objc static func GetRegisterdToplevelViewController() -> UIViewController? {
+        return toplevelViewController
+    }
+    
     @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
         DispatchQueue.main.async {
             var easyDialog = EasyDialog.Builder(viewController)
@@ -685,6 +693,9 @@ class NiftyUtilitySwift: NSObject {
     
     static func GetToplevelViewController(controller:UIViewController?) -> UIViewController? {
         guard let view = controller else {
+            if let viewController = GetRegisterdToplevelViewController() {
+                return viewController
+            }
             return UIApplication.shared.keyWindow?.rootViewController
         }
         if let tabBarController = view as? UITabBarController {

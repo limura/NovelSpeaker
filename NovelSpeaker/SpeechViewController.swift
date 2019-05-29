@@ -27,6 +27,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     var novelObserverToken:NotificationToken? = nil
     var storyObserverToken:NotificationToken? = nil
     var storyArrayObserverToken:NotificationToken? = nil
+    var displaySettingObserverToken:NotificationToken? = nil
     
     let storySpeaker = StorySpeaker.shared
     
@@ -44,6 +45,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         }else{
             textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
         }
+        observeDispaySetting()
     }
 
     // 表示される直前に呼ばれる
@@ -223,6 +225,27 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             }
         })
     }
+    func observeDispaySetting() {
+        guard let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { return }
+        displaySettingObserverToken = displaySetting.observe({ (change) in
+            switch change {
+            case .change(let properties):
+                for propaty in properties {
+                    if propaty.name == "textSizeValue" {
+                        DispatchQueue.main.async {
+                            guard let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { return }
+                            self.textView.font = displaySetting.font
+                        }
+                    }
+                }
+            case .error(_):
+                break
+            case .deleted:
+                break
+            }
+        })
+    }
+    
     
     @objc func setSpeechModSetting(sender: UIMenuItem){
         guard let range = self.textView.selectedTextRange, let text = self.textView.text(in: range) else { return }

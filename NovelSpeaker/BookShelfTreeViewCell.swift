@@ -32,6 +32,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+        registerDownloadStatusNotification()
     }
     
     override func prepareForReuse() {
@@ -113,6 +114,7 @@ class BookShelfTreeViewCell: UITableViewCell {
                 }
             }
             if isModeChanged {
+                print("isModeChanged.\(self.watchNovelIDArray.first ?? "unknown")")
                 self.downloadingActivityIndicator.layoutIfNeeded()
             }
         }
@@ -227,6 +229,7 @@ class BookShelfTreeViewCell: UITableViewCell {
         NotificationCenter.default.removeObserver(self)
     }
     @objc func downloadStatusChanged(notification:Notification) {
+        print("downloadStatusChanged() called. \(self.watchNovelIDArray.first ?? "unknown")")
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: self.watchNovelIDArray)
     }
 
