@@ -158,6 +158,20 @@ class NovelSpeakerUtility: NSObject {
                 globalState.defaultSpeakerID = defaultSpeaker.id
                 globalState.defaultDisplaySettingID = defaultDisplaySetting.id
                 globalState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.id
+                let defaultBookmarks = [
+                    "小説家になろう\nhttps://syosetu.com/",
+                    "青空文庫\nhttp://www.aozora.gr.jp/",
+                    "ハーメルン\nhttps://syosetu.org/",
+                    "暁\nhttps://www.akatsuki-novels.com/",
+                    "カクヨム\nhttps://kakuyomu.jp/",
+                    //"アルファポリス\nhttps://www.alphapolis.co.jp/novel/",
+                    //"pixiv/ノベル\nhttps://www.pixiv.net/novel/",
+                    "星空文庫\nhttps://slib.net/",
+                    "ノベルアップ＋\nhttps://novelup.plus/"
+                ]
+                for bookmark in defaultBookmarks {
+                    globalState.webImportBookmarkArray.append(bookmark)
+                }
                 realm.add(globalState, update: true)
                 realm.add(defaultSpeaker, update: true)
                 realm.add(defaultDisplaySetting, update: true)
@@ -401,8 +415,13 @@ class NovelSpeakerUtility: NSObject {
         guard let globalStatus = RealmGlobalState.GetInstance() else { return }
         RealmUtil.Write { (realm) in
             for target in array {
-                guard let target = target as? String, !globalStatus.webImportBookmarkArray.contains(target) else { continue }
-                globalStatus.webImportBookmarkArray.append(target)
+                guard let target = target as? NSDictionary else { continue }
+                for (key, value) in target {
+                    guard let name = key as? String, let url = value as? String else { continue }
+                    let bookmark = "\(name)\n\(url)"
+                    if globalStatus.webImportBookmarkArray.contains(bookmark) { continue }
+                    globalStatus.webImportBookmarkArray.append(bookmark)
+                }
             }
         }
     }
@@ -477,14 +496,16 @@ class NovelSpeakerUtility: NSObject {
         for dic in waitArray {
             if let dic = dic as? NSDictionary, let target_text = dic.object(forKey: "target_text") as? String, let delay_time_in_sec = dic.object(forKey: "delay_time_in_sec") as? NSNumber, target_text.count > 0 && delay_time_in_sec.floatValue >= 0 {
                 let delayTimeInSec = delay_time_in_sec.floatValue
-                if let speechWaitConfig = RealmSpeechWaitConfig.GetAllObjects()?.filter("targetText = %@", target_text).first {
+                // 改行の保存形式は \r\n から \n に変更されました。
+                let targetText = target_text.replacingOccurrences(of: "\r", with: "")
+                if let speechWaitConfig = RealmSpeechWaitConfig.GetAllObjects()?.filter("targetText = %@", targetText).first {
                     RealmUtil.Write { (realm) in
                         speechWaitConfig.delayTimeInSec = delayTimeInSec
                     }
                 }else{
                     let speechWaitConfig = RealmSpeechWaitConfig()
                     speechWaitConfig.delayTimeInSec = delayTimeInSec
-                    speechWaitConfig.targetText = target_text
+                    speechWaitConfig.targetText = targetText
                     RealmUtil.Write { (realm) in
                         realm.add(speechWaitConfig)
                     }
@@ -501,7 +522,10 @@ class NovelSpeakerUtility: NSObject {
                 globalState.maxSpeechTimeInSec = max_speech_time_in_sec.intValue
             }
             if let text_size_value = dic.value(forKey: "text_size_value") as? NSNumber {
-                defaultDisplaySetting.textSizeValue = text_size_value.floatValue
+                let value = text_size_value.floatValue
+                if value >= 1.0 || value <= 100 {
+                    defaultDisplaySetting.textSizeValue = value
+                }
             }
             if let speech_wait_setting_use_experimental_wait = dic.value(forKey: "speech_wait_setting_use_experimental_wait") as? NSNumber {
                 globalState.isSpeechWaitSettingUseExperimentalWait = speech_wait_setting_use_experimental_wait.boolValue

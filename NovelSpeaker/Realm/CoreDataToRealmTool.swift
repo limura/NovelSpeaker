@@ -17,6 +17,13 @@ class CoreDataToRealmTool: NSObject {
         }
         return false
     }
+    @objc static func CheckIsCloudRealmCreated() -> Bool {
+        let filePath = RealmUtil.GetCloudRealmFilePath()
+        if let path = filePath?.path {
+            return FileManager.default.fileExists(atPath: path)
+        }
+        return false
+    }
     
     // realm.write {} の中で呼んでください
     private static func CreateRealmGlobalStateFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {

@@ -231,7 +231,7 @@ import UIKit
     }
 
     static let UseCloudRealmKey = "RealmUtil_UseCloudRealm"
-    static func IsUseCloudRealm() -> Bool {
+    @objc static func IsUseCloudRealm() -> Bool {
         let defaults = UserDefaults.standard
         defaults.register(defaults: [UseCloudRealmKey: false])
         return defaults.bool(forKey: UseCloudRealmKey)

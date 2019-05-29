@@ -119,7 +119,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             guard let novel = RealmNovel.SearchNovelFrom(novelID: story.novelID), let lastChapterNumber = novel.lastChapterNumber else {
                 return
             }
-            let storyID = story.id
 
             if story.chapterNumber <= 1 {
                 self.previousChapterButton.isEnabled = false
@@ -143,17 +142,18 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             self.chapterPositionLabelWidthConstraint = self.chapterPositionLabel.widthAnchor.constraint(equalToConstant: self.chapterPositionLabel.frame.width)
             self.chapterPositionLabelWidthConstraint.isActive = true
             
-            if let content = story.content {
-                self.textView.text = content
-            }else{
-                self.textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
+            if let textViewText = self.textView.text, textViewText != story.content {
+                if let content = story.content {
+                    self.textView.text = content
+                }else{
+                    self.textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
+                }
+                self.textView.select(self)
+                self.textView.selectedRange = NSRange(location: story.readLocation, length: 1)
+                self.textViewScrollTo(readLocation: story.readLocation)
             }
-            
-            self.textView.select(self)
-            self.textView.selectedRange = NSRange(location: story.readLocation, length: 1)
-            self.textViewScrollTo(readLocation: story.readLocation)
-            self.storyID = storyID
-            self.observeStory(storyID: storyID)
+            self.storyID = story.id
+            self.observeStory(storyID: story.id)
             self.observeStoryArray(story: story)
         }
     }
