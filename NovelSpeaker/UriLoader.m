@@ -539,6 +539,7 @@
 
 /// テスト用に一つのURLを取得します。
 - (void)FetchOneUrl:(NSURL*)url cookieArray:(NSArray*)cookieArray successAction:(void(^)(HtmlStory* story))successAction failedAction:(void(^)(NSURL* url, NSString* errorString))failedAction {
+    NSLog(@"FetchOneUrl: %@", [url absoluteString]);
     dispatch_async(m_WebAccessQueue, ^{
         NSHTTPCookieStorage* cookieStorage = [self createCookieStorage:cookieArray url:url];
         NSMutableString* errorMutableString = [NSMutableString new];

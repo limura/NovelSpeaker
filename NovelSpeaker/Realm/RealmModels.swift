@@ -313,7 +313,7 @@ protocol CanWriteIsDeleted {
     @objc dynamic var contentZiped = Data()
     @objc dynamic var readLocation = 0
     @objc dynamic var url = ""
-    @objc dynamic var lastReadDate = Date()
+    @objc dynamic var lastReadDate = Date(timeIntervalSinceNow: -60*60*24)
     @objc dynamic var downloadDate = Date()
     @objc dynamic var subtitle = ""
 
@@ -593,6 +593,7 @@ extension RealmStory: CanWriteIsDeleted {
         }
         let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
         story.content = content
+        story.lastReadDate = Date(timeIntervalSinceNow: -60)
         RealmUtil.Write { (realm) in
             realm.add(story, update: true)
         }

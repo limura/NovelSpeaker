@@ -22,6 +22,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     
     var storyObserveToken: NotificationToken? = nil
     var storyForNovelArrayObserveToken: NotificationToken? = nil
+    var globalStateObserveToken: NotificationToken? = nil
     var watchNovelIDArray:[String] = []
     
     deinit {
@@ -184,6 +185,40 @@ class BookShelfTreeViewCell: UITableViewCell {
     func unregistStoryObserver() {
         self.storyObserveToken = nil
     }
+    func registerGlobalStateObserver() {
+        guard let globalState = RealmGlobalState.GetInstance() else { return }
+        let isDisplay = globalState.isReadingProgressDisplayEnabled
+        DispatchQueue.main.async {
+            if isDisplay {
+                self.readProgressView.isHidden = false
+            }else{
+                self.readProgressView.isHidden = true
+            }
+        }
+        self.globalStateObserveToken = globalState.observe { (changes) in
+            switch changes {
+            case .error(_):
+                break
+            case .change(let properties):
+                for property in properties {
+                    if property.name == "isReadingProgressDisplayEnabled" {
+                        if let isDisplayEnabled = property.newValue as? Bool {
+                            DispatchQueue.main.async {
+                                if isDisplayEnabled {
+                                    self.readProgressView.isHidden = false
+                                }else{
+                                    self.readProgressView.isHidden = true
+                                }
+                            }
+                        }
+                        break
+                    }
+                }
+            case .deleted:
+                break
+            }
+        }
+    }
     
     func registerDownloadStatusNotification(){
         NotificationCenter.default.addObserver(self, selector: #selector(downloadStatusChanged(notification:)), name: Notification.Name.NovelSpeaker.DownloadStatusChanged, object: nil)
@@ -199,6 +234,7 @@ class BookShelfTreeViewCell: UITableViewCell {
         applyDepth(treeLevel: treeLevel)
         titleLabel.text = title
         self.checkAndUpdateNewImage(novelIDArray: watchNovelIDArray)
+        registerGlobalStateObserver()
         if watchNovelIDArray.count == 1 {
             let novelID = watchNovelIDArray[0]
             self.readProgressView.isHidden = false

@@ -33,7 +33,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     // TODO: バックアップファイルからのデータ読み込み完了後にこの Notification を呼ぶ
     func addNotificationCenter(){
         let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(forName: NSNotification.Name(rawValue: "ConfigReloaded_DisplayUpdateNeeded"), object: nil, queue: .main) { (notification) in
+        notificationCenter.addObserver(forName: Notification.Name.NovelSpeaker.GlobalStateChanged, object: nil, queue: .main) { (notification) in
             DispatchQueue.main.async {
                 self.form.removeAll()
                 self.createSettingsTable()

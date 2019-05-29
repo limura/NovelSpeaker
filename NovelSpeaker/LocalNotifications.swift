@@ -17,6 +17,8 @@ extension Notification.Name {
         //static let StoryContentChanged = Notification.Name("NovelSpeaker_Notification_StoryContentChanged")
         // ダウンロード状態が変わった時
         static let DownloadStatusChanged = Notification.Name("NovelSpeaker_Notification_DownloadStatusChanged")
+        // 設定がいろいろ変わって設定ページをリロードした方が良い時
+        static let GlobalStateChanged = Notification.Name("NovelSpeaker_Notification_GlobalStateChanged")
     }
 }
 extension Notification {
@@ -41,6 +43,12 @@ class NovelSpeakerNotificationTool {
     static func AnnounceDownloadStatusChanged() {
         let notificationCenter = NotificationCenter.default
         let notification = Notification(name: Notification.Name.NovelSpeaker.DownloadStatusChanged)
+        notificationCenter.post(notification)
+    }
+    
+    static func AnnounceGlobalStateChanged() {
+        let notificationCenter = NotificationCenter.default
+        let notification = Notification(name: Notification.Name.NovelSpeaker.GlobalStateChanged)
         notificationCenter.post(notification)
     }
 }

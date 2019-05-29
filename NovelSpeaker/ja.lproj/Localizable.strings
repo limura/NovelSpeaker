@@ -119,6 +119,9 @@
 "NovelSpeakerUtility_ExportOtherSettings" = "設定情報の抽出中";
 "NovelSpeakerUtility_downloadncodeSchemeIsNotImplementedYet" = "novelspeaker://downloadncode/ の形式は一時的に非サポートになっています。使えるようにするのも吝かではないのですが、多分あまり使っている人が居ないのではないかという気がすごくしますので、開発が後回しになっています。早めの実装をお望みであればその旨をサポートサイト等からお問い合わせください。";
 "NovelSpeakerUtility_RestoreingJSONType" = "バックアップファイルから設定を読み込んでいます。";
+"NovelSpeakerUtility_UnzipProgress" = "バックアップファイルを解凍しています";
+"NovelSpeakerUtility_RestoreBackupTitle" = "バックアップデータを読み込んでいます";
+"NovelSpeakerUtility_RestoreBackupMessage" = "-";
 
 "SettingTableViewController_RepeatTypeTitle" = "繰り返し再生";
 "SettingTableViewController_RepeatType_NoRepeat" = "しない";

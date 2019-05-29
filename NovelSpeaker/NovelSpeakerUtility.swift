@@ -212,12 +212,20 @@ class NovelSpeakerUtility: NSObject {
         var cookieArray:[String]? = nil
         let targetUrlString:String
         if host == "downloadncode" {
-            // TODO: downloadncode は ncode-ncode-ncode-... と ncode を沢山列記できるので、個別に checkUrlAndConifirmToUser() で取り込み確認をしてもらう事ができない。従って、確実に download できる URL を生成する必要があるが、将来に渡ってそれが生成できるかはよくわからんし、そもそも download queue に入れられるのは RealmNovel と 1章目 の RealmStory が揃っているもののみであり、これを実現するには「1章分だけダウンロードして RealmNovel と RealmStory を作って NovelDownloadQueue に突っ込み直す」という謎の process を入れる必要があり、それをやるとなると NovelDownloadQueue とその process の間で1.5秒間隔のアクセス制限を同期？しないと駄目になってあばばばばばばば…… と思ったので当面は対応しないことにします。
-            DispatchQueue.main.async {
-                guard let toplevelViewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else {return}
-                NiftyUtilitySwift.EasyDialogOneButton(viewController: toplevelViewController, title: nil, message: NSLocalizedString("NovelSpeakerUtility_downloadncodeSchemeIsNotImplementedYet", comment: "novelspeaker://downloadncode/ のサポートは一時的に非サポートになっています。使えるようにするのも吝かではないのですが、多分あまり使っている人が居ないのではないかという気がすごくしますので、開発が後回しになっています。早めの実装をお望みであればその旨をサポートサイト等からお問い合わせください。"), buttonTitle: nil, buttonAction: nil)
+            let ncodeArray = url.path.components(separatedBy: "-")
+            for ncode in ncodeArray {
+                guard let targetURL = URL(string: "https://ncode.syosetu.com/\(ncode.lowercased())/") else { continue }
+                let novelID = targetURL.absoluteString
+                let novel = RealmNovel.SearchNovelFrom(novelID: novelID) ?? RealmNovel()
+                if novel.novelID != novelID {
+                    novel.novelID = novelID
+                    RealmUtil.Write { (realm) in
+                        realm.add(novel, update: true)
+                    }
+                }
+                NovelDownloadQueue.shared.addQueue(novelID: novelID)
             }
-            return false
+            return true
         }else if host == "downloadurl" {
             guard let absoluteString = url.absoluteString.removingPercentEncoding else { return false }
             guard let regex = try? NSRegularExpression(pattern: "^novelspeaker://downloadurl/([^#]*)#?(.*)$", options: []) else { return false }
@@ -556,7 +564,7 @@ class NovelSpeakerUtility: NSObject {
     }
     
     static func RestoreBookshelf_ncode_V_1_0_0(novel:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
-        guard let ncode = novel.object(forKey: "ncode") as? String, let is_new_flug = novel.object(forKey: "is_new_flug") as? NSNumber, let end = novel.object(forKey: "end") as? NSNumber, let keyword = novel.object(forKey: "keyword") as? String, let title = novel.object(forKey: "title") as? String, let writer = novel.object(forKey: "writer") as? String, let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let current_reading_chapter_number = novel.object(forKey: "current_reading_chapter_number") as? NSNumber, let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber else { return }
+        guard let ncode = novel.object(forKey: "ncode") as? String else { return }
         let urlString = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: 1, end: false)
         let realmNovel = RealmNovel.SearchNovelFrom(novelID: urlString) ?? RealmNovel()
         if realmNovel.novelID != urlString {
@@ -566,15 +574,21 @@ class NovelSpeakerUtility: NSObject {
         RealmUtil.Write { (realm) in
             realmNovel.url = urlString
             realmNovel.type = .URL
-            realmNovel.writer = writer
-            realmNovel.title = title
+            if let writer = novel.object(forKey: "writer") as? String {
+                realmNovel.writer = writer
+            }
+            if let title = novel.object(forKey: "title") as? String {
+                realmNovel.title = title
+            }
             realm.add(realmNovel, update: true)
-            for tag in keyword.components(separatedBy: CharacterSet.whitespacesAndNewlines) {
-                let tagName = CleanTagString(tag: tag)
-                RealmNovelTag.AddTag(tagName: tagName, novelID: novelID, type: "keyword")
+            if let keyword = novel.object(forKey: "keyword") as? String {
+                for tag in keyword.components(separatedBy: CharacterSet.whitespacesAndNewlines) {
+                    let tagName = CleanTagString(tag: tag)
+                    RealmNovelTag.AddTag(tagName: tagName, novelID: novelID, type: "keyword")
+                }
             }
         }
-        if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true) {
+        if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true), let is_new_flug = novel.object(forKey: "is_new_flug") as? NSNumber, let end = novel.object(forKey: "end") as? NSNumber, let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let current_reading_chapter_number = novel.object(forKey: "current_reading_chapter_number") as? NSNumber, let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
             var no = 0
             repeat {
                 no += 1
@@ -598,11 +612,13 @@ class NovelSpeakerUtility: NSObject {
                     realm.add(story, update: true)
                 }
             }while(true)
+        }else{
+            NovelDownloadQueue.shared.addQueue(novelID: novelID)
         }
     }
 
     static func RestoreBookshelf_url_V_1_0_0(novel:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
-        guard let url = novel.object(forKey: "url") as? String, let title = novel.object(forKey: "title") as? String else { return }
+        guard let url = novel.object(forKey: "url") as? String else { return }
         let realmNovel = RealmNovel.SearchNovelFrom(novelID: url) ?? RealmNovel()
         if realmNovel.novelID != url {
             realmNovel.novelID = url
@@ -611,7 +627,9 @@ class NovelSpeakerUtility: NSObject {
         }
         let novelID = realmNovel.novelID
         RealmUtil.Write { (realm) in
-            realmNovel.title = title
+            if let title = novel.object(forKey: "title") as? String {
+                realmNovel.title = title
+            }
             if let secret = novel.object(forKey: "secret") as? String {
                 realmNovel._urlSecret = secret
             }
@@ -647,6 +665,8 @@ class NovelSpeakerUtility: NSObject {
                     realm.add(story, update: true)
                 }
             }while(true)
+        }else{
+            NovelDownloadQueue.shared.addQueue(novelID: novelID)
         }
     }
 
@@ -1075,6 +1095,8 @@ class NovelSpeakerUtility: NSObject {
                         realm.add(story, update: true)
                     }
                 }
+            }else{
+                NovelDownloadQueue.shared.addQueue(novelID: novelID)
             }
         }
     }
@@ -1114,6 +1136,7 @@ class NovelSpeakerUtility: NSObject {
     }
 
     // MARK: バックアップファイルからの書き戻し
+    @discardableResult
     static func ProcessNovelSpeakerBackupFile_JSONType(url:URL, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> Bool {
         progressUpdate(NSLocalizedString("NovelSpeakerUtility_RestoreingJSONType", comment: "バックアップファイルから設定を読み込んでいます。"))
         guard let data = try? Data(contentsOf: url), let jsonObj = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? NSDictionary, let dataVersion = jsonObj["data_version"] as? String else { return false }
@@ -1127,6 +1150,7 @@ class NovelSpeakerUtility: NSObject {
             return false
         }
     }
+    @discardableResult
     static func ProcessNovelSpeakerBackupFile_ZIPType(url:URL, progressUpdate:@escaping (String)->Void) -> Bool {
         let temporaryDirectoryName = "NovelSpeakerBackup"
         if let temporaryDirectory = NiftyUtilitySwift.CreateTemporaryDirectory(directoryName: temporaryDirectoryName) {
@@ -1172,16 +1196,21 @@ class NovelSpeakerUtility: NSObject {
                 messageLabel.text = text
             }
         }
-        defer {
-            DispatchQueue.main.async {
-                dialog.dismiss(animated: false, completion: nil)
+        DispatchQueue.global(qos: .utility).async {
+            defer {
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
+                }
+                NovelSpeakerNotificationTool.AnnounceGlobalStateChanged()
             }
-            // TODO: 設定が色々書き換わったという Notification を飛ばす
+            if url.pathExtension == "novelspeaker-backup+zip" {
+                ProcessNovelSpeakerBackupFile_ZIPType(url: url, progressUpdate: applyProgress(text:))
+                return
+            }else{
+                ProcessNovelSpeakerBackupFile_JSONType(url: url, progressUpdate: applyProgress(text:), extractedDirectory: nil)
+            }
         }
-        if url.pathExtension == "novelspeaker-backup+zip" {
-            return ProcessNovelSpeakerBackupFile_ZIPType(url: url, progressUpdate: applyProgress(text:))
-        }
-        return ProcessNovelSpeakerBackupFile_JSONType(url: url, progressUpdate: applyProgress(text:), extractedDirectory: nil)
+        return true
     }
 
     // MARK: バックアップデータ生成
