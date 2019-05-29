@@ -12,15 +12,21 @@ import RealmSwift
 import UserNotifications
 
 class NiftyUtilitySwift: NSObject {
-    static let textCountSeparatorArray:[String] = ["[[改ページ]]", "[改ページ]", "\n\n", "\r\n\r\n", "\r\r"]
+    static let textCountSeparatorArray:[String] = ["[[改ページ]]", "[改ページ]", "［＃改ページ］", "［＃改丁］", "\n\n", "\r\n\r\n", "\r\r"]
     
     // 分割すべき大きさで、分割できそうな文字列であれば分割して返します
     static func CheckShouldSeparate(text:String) -> [String]? {
+        var separated:[String] = [text]
         for separator in textCountSeparatorArray {
-            let separated = text.components(separatedBy: separator)
-            if separated.count > 1 {
-                return separated
+            var newSeparated:[String] = []
+            for text in separated {
+                newSeparated.append(contentsOf: text.components(separatedBy: separator))
             }
+            separated = newSeparated
+        }
+        print("separated.count: \(separated.count)")
+        if separated.count > 1 {
+            return separated
         }
         return nil
     }
@@ -109,8 +115,8 @@ class NiftyUtilitySwift: NSObject {
                             if let title = story?.title {
                                 titleString = title
                             }
-                            EasyDialog.Builder(viewController)
-                                .textField(tag: 100, placeholder: titleString, content: titleString, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
+                            var builder = EasyDialog.Builder(viewController)
+                            builder = builder.textField(tag: 100, placeholder: titleString, content: titleString, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
                                 //.title(title: titleString)
                                 // TODO: 怪しくheightを画面の縦方向からの比率で指定している。
                                 // ここに 1.0 とか書くと他のViewの分の高さが入って全体は画面の縦幅よりも高くなるので全部が表示されない。
@@ -124,7 +130,7 @@ class NiftyUtilitySwift: NSObject {
                                         dialog.dismiss(animated: false, completion: nil)
                                     }
                                 })
-                                .addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
+                            builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
                                     let titleTextField = dialog.view.viewWithTag(100) as! UITextField
                                     let titleString = titleTextField.text ?? titleString
                                     DispatchQueue.main.async {
@@ -145,7 +151,19 @@ class NiftyUtilitySwift: NSObject {
                                         }
                                     }
                                 })
-                                .build().show()
+                            if story?.nextUrl == nil, let separatedText = CheckShouldSeparate(text: content), separatedText.reduce(0, { (result, body) -> Int in
+                                return result + (body.count > 0 ? 1 : 0)
+                            }) > 1 {
+                                builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportSeparatedContent", comment: "テキトーに分割して取り込む"), callback: { (dialog) in
+                                    let titleTextField = dialog.view.viewWithTag(100) as! UITextField
+                                    let titleString = titleTextField.text ?? titleString
+                                    DispatchQueue.main.async {
+                                        dialog.dismiss(animated: false, completion: nil)
+                                    }
+                                    RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: titleString)
+                                })
+                            }
+                            builder.build().show()
                         }
                     })
                 }
