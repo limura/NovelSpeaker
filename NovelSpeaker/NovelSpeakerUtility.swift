@@ -172,6 +172,7 @@ class NovelSpeakerUtility: NSObject {
                 for bookmark in defaultBookmarks {
                     globalState.webImportBookmarkArray.append(bookmark)
                 }
+                defaultSpeaker.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
                 realm.add(globalState, update: true)
                 realm.add(defaultSpeaker, update: true)
                 realm.add(defaultDisplaySetting, update: true)
@@ -1100,28 +1101,32 @@ class NovelSpeakerUtility: NSObject {
             if let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
                 let extractedDirectory = extractedDirectory, let storys = novelDic.object(forKey: "storys") as? NSArray {
                 let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
-                for storyDic in storys {
-                    guard let storyDic = storyDic as? NSDictionary,
-                        let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber,
-                        let readLocation = storyDic.object(forKey: "readLocation") as? NSNumber,
-                        let url = storyDic.object(forKey: "url") as? String,
-                        let lastReadDateString = storyDic.object(forKey: "lastReadDate") as? String,
-                        let lastReadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: lastReadDateString),
-                        let downloadDateString = storyDic.object(forKey: "downloadDate") as? String,
-                        let downloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: downloadDateString),
-                        let subtitle = storyDic.object(forKey: "subtitle") as? String else { continue }
-                    let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
-                    guard let data = try? Data(contentsOf: contentFilePath) else { continue }
-                    let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: chapterNumber.intValue) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber.intValue)
-                    RealmUtil.Write { (realm) in
-                        story.readLocation = readLocation.intValue
-                        story.url = url
-                        story.lastReadDate = lastReadDate
-                        story.downloadDate = downloadDate
-                        story.subtitle = subtitle
-                        story.contentZiped = data
-                        realm.add(story, update: true)
+                if FileManager.default.fileExists(atPath: contentDirectory.path) {
+                    for storyDic in storys {
+                        guard let storyDic = storyDic as? NSDictionary,
+                            let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber,
+                            let readLocation = storyDic.object(forKey: "readLocation") as? NSNumber,
+                            let url = storyDic.object(forKey: "url") as? String,
+                            let lastReadDateString = storyDic.object(forKey: "lastReadDate") as? String,
+                            let lastReadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: lastReadDateString),
+                            let downloadDateString = storyDic.object(forKey: "downloadDate") as? String,
+                            let downloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: downloadDateString),
+                            let subtitle = storyDic.object(forKey: "subtitle") as? String else { continue }
+                        let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
+                        guard let data = try? Data(contentsOf: contentFilePath) else { continue }
+                        let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: chapterNumber.intValue) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber.intValue)
+                        RealmUtil.Write { (realm) in
+                            story.readLocation = readLocation.intValue
+                            story.url = url
+                            story.lastReadDate = lastReadDate
+                            story.downloadDate = downloadDate
+                            story.subtitle = subtitle
+                            story.contentZiped = data
+                            realm.add(story, update: true)
+                        }
                     }
+                }else{
+                    NovelDownloadQueue.shared.addQueue(novelID: novelID)
                 }
             }else{
                 NovelDownloadQueue.shared.addQueue(novelID: novelID)

@@ -67,12 +67,19 @@ class BookShelfTreeViewCell: UITableViewCell {
             self.readProgressView.progress = 0.0
             return
         }
-        let chapterNumber = Float(story.chapterNumber)
+        let chapterNumber = story.chapterNumber
         let readLocation = Float(story.readLocation)
         let contentCount = Float(story.content?.count ?? story.readLocation)
-        let lastChapterNumber = Float(novel.lastChapterNumber ?? 1)
-        let progress = ((chapterNumber - 1.0) + readLocation / contentCount) / lastChapterNumber
-        self.readProgressView.progress = progress
+        let lastChapterNumber = novel.lastChapterNumber ?? 1
+        let progress = ((Float(chapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
+        DispatchQueue.main.async {
+            if chapterNumber == lastChapterNumber && contentCount <= (readLocation + 10) {
+                self.readProgressView.tintColor = UIColor(displayP3Red: 0.6, green: 0.3, blue: 0.9, alpha: 1.0)
+            }else{
+                self.readProgressView.tintColor = UIColor(displayP3Red: 255/256.0, green: 188/256.0, blue: 2/256.0, alpha: 1.0)
+            }
+            self.readProgressView.progress = progress
+        }
     }
     func applyCurrentDownloadIndicatorVisibleStatus(novelIDArray:[String]) {
         let downloadQueued = NovelDownloadQueue.shared.GetCurrentQueuedNovelIDArray()
@@ -114,7 +121,6 @@ class BookShelfTreeViewCell: UITableViewCell {
                 }
             }
             if isModeChanged {
-                print("isModeChanged.\(self.watchNovelIDArray.first ?? "unknown")")
                 self.downloadingActivityIndicator.layoutIfNeeded()
             }
         }
@@ -229,7 +235,6 @@ class BookShelfTreeViewCell: UITableViewCell {
         NotificationCenter.default.removeObserver(self)
     }
     @objc func downloadStatusChanged(notification:Notification) {
-        print("downloadStatusChanged() called. \(self.watchNovelIDArray.first ?? "unknown")")
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: self.watchNovelIDArray)
     }
 

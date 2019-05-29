@@ -231,7 +231,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             switch change {
             case .change(let properties):
                 for propaty in properties {
-                    if propaty.name == "textSizeValue" {
+                    if propaty.name == "textSizeValue" || propaty.name == "fontID" {
                         DispatchQueue.main.async {
                             guard let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { return }
                             self.textView.font = displaySetting.font
