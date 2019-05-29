@@ -349,6 +349,9 @@
 "SpeechWaitSettingViewController_AddNewSettingButtonTitle" = "新しく間の設定を追加する";
 "SpeechWaitSettingViewController_SpeakerSettingAdded" = "末尾に間の設定を追加しました。\n(恐らくはスクロールする必要があります)";
 "SpeechWaitSettingViewController_Usage" = "句読点や空白行を読み上げる時の間を設定します。\n「読み上げ時の間の仕組み」を非推奨型にするとより短い間の設定もできるようになりますが、将来的に動かなくなる可能性があります。改行については「<改行>」という文字列があるとそれを改行として認識するようになっています。";
+"SpeechWaitSettingViewController_CreateNewSettingTitle" = "間の設定対象となる文字列を指定してください";
+"SpeechWaitSettingViewController_CreateNewSettingPlaceholder" = "改行を含めたい場合は「<改行>」と入力してください。";
+"SpeechWaitSettingViewController_IsAlreadyDefined" = "既に定義されている文字列です。";
 
 "SpeechSectionConfigsViewController_Title" = "話者変更設定";
 "SpeechSectionConfigsViewController_SpeakerUnknown" = "不明";

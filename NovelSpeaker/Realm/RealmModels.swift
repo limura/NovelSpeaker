@@ -249,6 +249,9 @@ import UIKit
         }
         return try GetLocalRealm()
     }
+    @objc static func IsValidRealmData() -> Bool {
+        return RealmGlobalState.GetInstance() != nil
+    }
     @discardableResult
     static func refresh() -> Bool {
         guard let realm = try? GetRealm() else {
@@ -777,10 +780,10 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
 }
 
 @objc final class RealmSpeechWaitConfig : Object {
-    @objc dynamic var id = NSUUID().uuidString
+    //@objc dynamic var id = NSUUID().uuidString
+    @objc dynamic var targetText : String = "" // primary key
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var delayTimeInSec : Float = 0.0
-    @objc dynamic var targetText : String = ""
     @objc dynamic var createdDate = Date()
     
     func ApplyDelaySettingTo(niftySpeaker:NiftySpeaker) {
@@ -811,10 +814,10 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
         return realm.objects(RealmSpeechWaitConfig.self).filter("isDeleted = false")
     }
 
-    static func SearchFrom(id:String) -> RealmSpeechWaitConfig? {
+    static func SearchFrom(targetText:String) -> RealmSpeechWaitConfig? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
-        return realm.object(ofType: RealmSpeechWaitConfig.self, forPrimaryKey: id)
+        return realm.object(ofType: RealmSpeechWaitConfig.self, forPrimaryKey: targetText)
     }
     
     func delete(realm:Realm) {
@@ -822,7 +825,7 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
     }
     
     override class func primaryKey() -> String? {
-        return "id"
+        return "targetText"
     }
     
     override static func indexedProperties() -> [String] {

@@ -356,6 +356,9 @@
 "SpeechWaitSettingViewController_AddNewSettingButtonTitle" = "Add new delay setting";
 "SpeechWaitSettingViewController_SpeakerSettingAdded" = "Added delay settings at the end.\n(Possibly need to scroll)";
 "SpeechWaitSettingViewController_Usage" = "Set the time between reading punctuation marks and blank lines.\nIf \"Speech delay type\" is set to Experimental, you can also set for a shorter period, but it may stop working in the future. As for line feed, if there is a string \"<改行>\", it will be recognized as line feed.";
+"SpeechWaitSettingViewController_CreateNewSettingTitle" = "Please specify the target string for Speech delay";
+"SpeechWaitSettingViewController_CreateNewSettingPlaceholder" = "If you want to include a line feed, please enter \"<改行>\".";
+"SpeechWaitSettingViewController_IsAlreadyDefined" = "It is a string that has already been defined.";
 
 "SpeechSectionConfigsViewController_Title" = "Speaker change setting";
 "SpeechSectionConfigsViewController_SpeakerUnknown" = "Unknown";

@@ -63,6 +63,7 @@ void uncaughtExceptionHandler(NSException *exception)
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"coreDataMigration" bundle:nil];
         toplevelViewController = [storyboard instantiateInitialViewController];
     }else{
+        [NovelSpeakerUtility InsertDefaultSettingsIfNeeded];
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
         toplevelViewController = [storyboard instantiateInitialViewController];
     }

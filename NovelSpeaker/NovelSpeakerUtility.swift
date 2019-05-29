@@ -838,19 +838,18 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreSpeechWaitConfig_V_2_0_0(waitArray:NSArray) {
         for speechWaitDic in waitArray {
             guard let speechWait = speechWaitDic as? NSDictionary,
-                let id = speechWait.object(forKey: "id") as? String,
                 let delayTimeInSec = speechWait.object(forKey: "delayTimeInSec") as? NSNumber,
                 let targetText = speechWait.object(forKey: "targetText") as? String,
                 let createdDateString = speechWait.object(forKey: "createdDate") as? String,
                 let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) else { return }
-            let speechWaitConfig = RealmSpeechWaitConfig.SearchFrom(id: id) ?? RealmSpeechWaitConfig()
-            if speechWaitConfig.id != id {
-                speechWaitConfig.id = id
+            let speechWaitConfig = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) ?? RealmSpeechWaitConfig()
+            if speechWaitConfig.targetText != targetText {
+                speechWaitConfig.targetText = targetText
             }
             RealmUtil.Write { (realm) in
                 speechWaitConfig.delayTimeInSec = delayTimeInSec.floatValue
-                speechWaitConfig.targetText = targetText
                 speechWaitConfig.createdDate = createdDate
+                realm.add(speechWaitConfig, update: true)
             }
         }
     }
@@ -1334,9 +1333,8 @@ class NovelSpeakerUtility: NSObject {
         guard let targetArray = RealmSpeechWaitConfig.GetAllObjects() else { return result }
         for setting in targetArray {
             result.append([
-                "id": setting.id,
-                "delayTimeInSec": setting.delayTimeInSec,
                 "targetText": setting.targetText,
+                "delayTimeInSec": setting.delayTimeInSec,
                 "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate)
             ])
         }
