@@ -164,7 +164,6 @@
 		21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */; };
 		21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */; };
 		21E975B8229A8C8C0027A0A0 /* DefaultSpeechModList.json in Resources */ = {isa = PBXBuildFile; fileRef = 21E975B7229A8C8C0027A0A0 /* DefaultSpeechModList.json */; };
-		21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EA62E5205560B80084B366 /* EurekaCustomRows.swift */; };
 		21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
 		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
@@ -441,7 +440,6 @@
 		21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModSettingsTableViewControllerSwift.swift; sourceTree = "<group>"; };
 		21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSpeakerUtility.swift; sourceTree = "<group>"; };
 		21E975B7229A8C8C0027A0A0 /* DefaultSpeechModList.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = DefaultSpeechModList.json; sourceTree = "<group>"; };
-		21EA62E5205560B80084B366 /* EurekaCustomRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EurekaCustomRows.swift; sourceTree = "<group>"; };
 		21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
 		21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIViewControllerExtension.m; sourceTree = "<group>"; };
 		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -616,7 +614,6 @@
 				2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */,
 				2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */,
 				213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */,
-				21EA62E5205560B80084B366 /* EurekaCustomRows.swift */,
 				2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */,
 				2173A6C021CC530E002E9EA8 /* FloatingButton.xib */,
 				21648005229003E100A183DF /* BookShelfTreeViewCell.swift */,
@@ -1262,7 +1259,6 @@
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */,
-				21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
