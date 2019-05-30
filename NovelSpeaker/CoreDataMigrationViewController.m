@@ -29,6 +29,7 @@
 
 - (void)goToMainStoryboard {
     dispatch_async(dispatch_get_main_queue(), ^{
+        [NovelSpeakerUtility InsertDefaultSettingsIfNeeded];
         // 通常の main storyboard に移行します。
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
         UIViewController* firstViewController = [storyboard instantiateInitialViewController];

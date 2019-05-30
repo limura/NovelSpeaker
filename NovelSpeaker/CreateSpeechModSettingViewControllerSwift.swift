@@ -11,9 +11,7 @@ import Eureka
 import RealmSwift
 
 class CreateSpeechModSettingViewControllerSwift: FormViewController {
-    @objc public var targetSpeechModSettingID:String? = nil
-    public var targetBeforeString = ""
-    var currentSetting = RealmSpeechModSetting()
+    @objc public var targetSpeechModSettingBeforeString:String? = nil
     var beforeTestText = ""
     var afterTestText = ""
     var beforeText = ""
@@ -50,17 +48,21 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
     }
     
     func createCells() {
-        if let targetID = targetSpeechModSettingID, let targetSetting = RealmSpeechModSetting.SearchFrom(id: targetID) {
-            self.currentSetting = targetSetting
-        }else if let targetSetting = RealmSpeechModSetting.SearchFrom(beforeString: targetBeforeString) {
-            self.currentSetting = targetSetting
+        let before:String
+        let after:String
+        let isUseRegularExpression:Bool
+        if let targetID = targetSpeechModSettingBeforeString, let targetSetting = RealmSpeechModSetting.SearchFrom(beforeString: targetID) {
+            before = targetSetting.before
+            after = targetSetting.after
+            isUseRegularExpression = targetSetting.isUseRegularExpression
         }else{
-            self.currentSetting = RealmSpeechModSetting()
-            self.currentSetting.before = targetBeforeString
+            before = targetSpeechModSettingBeforeString ?? ""
+            after = ""
+            isUseRegularExpression = false
         }
-        self.beforeText = currentSetting.before
-        self.afterText = currentSetting.after
-        self.isUseRegexp = currentSetting.isUseRegularExpression
+        self.beforeText = before
+        self.afterText = after
+        self.isUseRegexp = isUseRegularExpression
         self.form +++ Section()
         <<< TextRow() {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_BeforeTitle", comment: "読み替え前")
@@ -158,10 +160,21 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
                 return
             }
             RealmUtil.Write { (realm) in
-                self.currentSetting.before = self.beforeText
-                self.currentSetting.after = self.afterText
-                self.currentSetting.isUseRegularExpression = self.isUseRegexp
-                realm.add(self.currentSetting, update: true)
+                let setting:RealmSpeechModSetting
+                if let targetBeforeString = self.targetSpeechModSettingBeforeString, let originalSetting = RealmSpeechModSetting.SearchFrom(beforeString: targetBeforeString) {
+                    if targetBeforeString != self.beforeText {
+                        originalSetting.delete(realm: realm)
+                        setting = RealmSpeechModSetting()
+                    }else{
+                        setting = originalSetting
+                    }
+                }else{
+                    setting = RealmSpeechModSetting()
+                }
+                setting.before = self.beforeText
+                setting.after = self.afterText
+                setting.isUseRegularExpression = self.isUseRegexp
+                realm.add(setting, update: true)
             }
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)

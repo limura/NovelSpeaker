@@ -574,32 +574,36 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     /// 標準で用意された読み上げ辞書を上書き追加します。
     func AddDefaultSpeechModSetting(){
         NovelSpeakerUtility.OverrideDefaultSpeechModSettings()
-        EasyDialog.Builder(self)
-            .label(text: NSLocalizedString("SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary", comment: "標準の読み替え辞書を上書き追加しました。"))
-            .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: {dialog in
-                DispatchQueue.main.async {
-                    dialog.dismiss(animated: true)
-                }
-            })
-            .build().show()
+        DispatchQueue.main.async {
+            EasyDialog.Builder(self)
+                .label(text: NSLocalizedString("SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary", comment: "標準の読み替え辞書を上書き追加しました。"))
+                .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: {dialog in
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false)
+                    }
+                })
+                .build().show()
+        }
     }
     /// 標準で用意された読み上げ辞書で上書きして良いか確認した上で、上書き追加します。
     func ConfirmAddDefaultSpeechModSetting(){
-        EasyDialog.Builder(self)
-            .title(title: NSLocalizedString("SettingTableViewController_ConfirmAddDefaultSpeechModSetting", comment:"確認"))
-            .label(text: NSLocalizedString("SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage", comment:"用意された読み替え辞書を追加・上書きします。よろしいですか？"))
-            .addButton(title: NSLocalizedString("Cancel_button", comment:"Cancel"), callback: { dialog in
-                DispatchQueue.main.async {
-                    dialog.dismiss(animated: true)
-                }
-            })
-            .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
-                DispatchQueue.main.async {
-                    dialog.dismiss(animated: true, completion: nil)
-                }
-                self.AddDefaultSpeechModSetting()
-            })
-            .build().show()
+        DispatchQueue.main.async {
+            EasyDialog.Builder(self)
+                .title(title: NSLocalizedString("SettingTableViewController_ConfirmAddDefaultSpeechModSetting", comment:"確認"))
+                .label(text: NSLocalizedString("SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage", comment:"用意された読み替え辞書を追加・上書きします。よろしいですか？"))
+                .addButton(title: NSLocalizedString("Cancel_button", comment:"Cancel"), callback: { dialog in
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: true)
+                    }
+                })
+                .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false, completion: nil)
+                    }
+                    self.AddDefaultSpeechModSetting()
+                })
+                .build().show()
+        }
     }
 
     @discardableResult

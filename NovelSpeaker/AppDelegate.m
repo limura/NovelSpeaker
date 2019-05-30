@@ -64,6 +64,7 @@ void uncaughtExceptionHandler(NSException *exception)
         toplevelViewController = [storyboard instantiateInitialViewController];
     }else{
         [NovelSpeakerUtility InsertDefaultSettingsIfNeeded];
+        [NovelSpeakerUtility ForceOverrideHungSpeakStringToSpeechModSettings];
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
         toplevelViewController = [storyboard instantiateInitialViewController];
     }
@@ -75,7 +76,6 @@ void uncaughtExceptionHandler(NSException *exception)
     [UriLoader RemoveInvalidKeyDataFromCookieStorage:[NSHTTPCookieStorage sharedHTTPCookieStorage]];
     
     // "************" でハングするようなので強制的に読み替え辞書に登録して安全な文字に読み変えるようにします(´・ω・`)
-    [NovelSpeakerUtility ForceOverrideHungSpeakStringToSpeechModSettings];
     
     // ルビとして判断されない文字列が初期値のままの人のものを最新のものに変更します(´・ω・`)
     //[globalData UpdateNotRubyChacactorStringArrayFromOldDefaultSetting];

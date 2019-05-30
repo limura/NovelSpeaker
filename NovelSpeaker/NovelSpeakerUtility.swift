@@ -43,19 +43,13 @@ class NovelSpeakerUtility: NSObject {
     /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
     @objc static func ForceOverrideHungSpeakStringToSpeechModSettings() {
         let targets = ["*": " "]
-        guard let speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else { return }
         RealmUtil.Write { (realm) in
             for (before, after) in targets {
-                var isHit = false
-                for setting in speechModSettingArray {
-                    if setting.before == before {
-                        isHit = true
-                        setting.after = after
-                        setting.isUseRegularExpression = false
-                        break
-                    }
+                if let setting = RealmSpeechModSetting.SearchFrom(beforeString: before) {
+                    setting.after = after
+                    setting.isUseRegularExpression = false
+                    continue
                 }
-                if isHit { continue }
                 let speechModSetting = RealmSpeechModSetting()
                 speechModSetting.before = before
                 speechModSetting.after = after
@@ -67,19 +61,13 @@ class NovelSpeakerUtility: NSObject {
 
     // 標準の読み替え辞書を上書き登録します。
     static func OverrideDefaultSpeechModSettings() {
-        guard let speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else { return }
         RealmUtil.Write { (realm) in
             for (before, after) in defaultSpeechModSettings() {
-                var isHit = false
-                for setting in speechModSettingArray {
-                    if setting.before == before {
-                        isHit = true
-                        setting.after = after
-                        setting.isUseRegularExpression = false
-                        break
-                    }
+                if let setting = RealmSpeechModSetting.SearchFrom(beforeString: before) {
+                    setting.after = after
+                    setting.isUseRegularExpression = false
+                    continue
                 }
-                if isHit { continue }
                 let speechModSetting = RealmSpeechModSetting()
                 speechModSetting.before = before
                 speechModSetting.after = after
@@ -87,16 +75,11 @@ class NovelSpeakerUtility: NSObject {
                 realm.add(speechModSetting, update: true)
             }
             for (before, after) in defaultRegexpSpeechModSettings {
-                var isHit = false
-                for setting in speechModSettingArray {
-                    if setting.before == before {
-                        isHit = true
-                        setting.after = after
-                        setting.isUseRegularExpression = true
-                        break
-                    }
+                if let setting = RealmSpeechModSetting.SearchFrom(beforeString: before) {
+                    setting.after = after
+                    setting.isUseRegularExpression = true
+                    continue
                 }
-                if isHit { continue }
                 let speechModSetting = RealmSpeechModSetting()
                 speechModSetting.before = before
                 speechModSetting.after = after
@@ -147,73 +130,91 @@ class NovelSpeakerUtility: NSObject {
     // 標準設定を入れます。結構時間かかるのでバックグラウンドで行われます
     @objc static func InsertDefaultSettingsIfNeeded() {
         DispatchQueue.global(qos: .utility).async {
-            if RealmGlobalState.GetInstance() != nil {
-                return
+            let globalState:RealmGlobalState
+            if let tmpGlobalState = RealmGlobalState.GetInstance() {
+                globalState = tmpGlobalState
+            }else{
+                globalState = RealmGlobalState()
+                RealmUtil.Write(block: { (realm) in
+                    realm.add(globalState, update: true)
+                })
             }
             RealmUtil.Write(block: { (realm) in
-                let globalState = RealmGlobalState()
-                let defaultSpeaker = RealmSpeakerSetting()
-                let defaultDisplaySetting = RealmDisplaySetting()
-                let defaultSpeechOverrideSetting = RealmSpeechOverrideSetting()
-                globalState.defaultSpeakerID = defaultSpeaker.id
-                globalState.defaultDisplaySettingID = defaultDisplaySetting.id
-                globalState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.id
-                let defaultBookmarks = [
-                    "小説家になろう\nhttps://syosetu.com/",
-                    "青空文庫\nhttp://www.aozora.gr.jp/",
-                    "ハーメルン\nhttps://syosetu.org/",
-                    "暁\nhttps://www.akatsuki-novels.com/",
-                    "カクヨム\nhttps://kakuyomu.jp/",
-                    //"アルファポリス\nhttps://www.alphapolis.co.jp/novel/",
-                    //"pixiv/ノベル\nhttps://www.pixiv.net/novel/",
-                    "星空文庫\nhttps://slib.net/",
-                    "ノベルアップ＋\nhttps://novelup.plus/"
-                ]
-                for bookmark in defaultBookmarks {
-                    globalState.webImportBookmarkArray.append(bookmark)
+                if globalState.defaultDisplaySetting == nil {
+                    let defaultDisplaySetting = RealmDisplaySetting()
+                    globalState.defaultDisplaySettingID = defaultDisplaySetting.id
+                    realm.add(defaultDisplaySetting, update: true)
                 }
-                defaultSpeaker.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
-                realm.add(globalState, update: true)
-                realm.add(defaultSpeaker, update: true)
-                realm.add(defaultDisplaySetting, update: true)
-                realm.add(defaultSpeechOverrideSetting, update: true)
-            })
-            RealmUtil.Write(block: { (realm) in
-                let talk1Speaker = RealmSpeakerSetting()
-                let talk2Speaker = RealmSpeakerSetting()
-                let talk1SectionConfig = RealmSpeechSectionConfig()
-                let talk2SectionConfig = RealmSpeechSectionConfig()
-                
-                talk1Speaker.pitch = 1.5
-                talk1Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation1", comment: "会話文")
-                talk1SectionConfig.startText = "「"
-                talk1SectionConfig.endText = "」"
-                talk1SectionConfig.speakerID = talk1Speaker.id
-                
-                talk2Speaker.pitch = 1.2
-                talk2Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation2", comment: "会話文2")
-                talk2SectionConfig.startText = "『"
-                talk2SectionConfig.endText = "』"
-                talk2SectionConfig.speakerID = talk2Speaker.id
-                
-                realm.add(talk1Speaker, update: true)
-                realm.add(talk2Speaker, update: true)
-                realm.add(talk1SectionConfig, update: true)
-                realm.add(talk2SectionConfig, update: true)
-            })
-            RealmUtil.Write(block: { (realm) in
-                let waitConfig1 = RealmSpeechWaitConfig()
-                waitConfig1.targetText = "\n\n"
-                waitConfig1.delayTimeInSec = 0.5
-                realm.add(waitConfig1, update: true)
-                for target in ["……", "。", "、", "・"] {
-                    let waitConfig = RealmSpeechWaitConfig()
-                    waitConfig.targetText = target
-                    waitConfig.delayTimeInSec = 0.0
-                    realm.add(waitConfig, update: true)
+                if globalState.defaultSpeaker == nil {
+                    let defaultSpeaker = RealmSpeakerSetting()
+                    defaultSpeaker.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
+                    globalState.defaultSpeakerID = defaultSpeaker.id
+                    realm.add(defaultSpeaker, update: true)
+                }
+                if globalState.defaultSpeechOverrideSetting == nil {
+                    let defaultSpeechOverrideSetting = RealmSpeechOverrideSetting()
+                    globalState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.id
+                    realm.add(defaultSpeechOverrideSetting, update: true)
+                }
+                if globalState.webImportBookmarkArray.count <= 0 {
+                    let defaultBookmarks = [
+                        "小説家になろう\nhttps://syosetu.com/",
+                        "青空文庫\nhttp://www.aozora.gr.jp/",
+                        "ハーメルン\nhttps://syosetu.org/",
+                        "暁\nhttps://www.akatsuki-novels.com/",
+                        "カクヨム\nhttps://kakuyomu.jp/",
+                        //"アルファポリス\nhttps://www.alphapolis.co.jp/novel/",
+                        //"pixiv/ノベル\nhttps://www.pixiv.net/novel/",
+                        "星空文庫\nhttps://slib.net/",
+                        "ノベルアップ＋\nhttps://novelup.plus/"
+                    ]
+                    for bookmark in defaultBookmarks {
+                        globalState.webImportBookmarkArray.append(bookmark)
+                    }
                 }
             })
-            OverrideDefaultSpeechModSettings()
+            if RealmSpeechSectionConfig.GetAllObjects()?.count ?? 0 <= 0 {
+                RealmUtil.Write(block: { (realm) in
+                    let talk1Speaker = RealmSpeakerSetting()
+                    let talk2Speaker = RealmSpeakerSetting()
+                    let talk1SectionConfig = RealmSpeechSectionConfig()
+                    let talk2SectionConfig = RealmSpeechSectionConfig()
+                    
+                    talk1Speaker.pitch = 1.5
+                    talk1Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation1", comment: "会話文")
+                    talk1SectionConfig.startText = "「"
+                    talk1SectionConfig.endText = "」"
+                    talk1SectionConfig.speakerID = talk1Speaker.id
+                    
+                    talk2Speaker.pitch = 1.2
+                    talk2Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation2", comment: "会話文2")
+                    talk2SectionConfig.startText = "『"
+                    talk2SectionConfig.endText = "』"
+                    talk2SectionConfig.speakerID = talk2Speaker.id
+                    
+                    realm.add(talk1Speaker, update: true)
+                    realm.add(talk2Speaker, update: true)
+                    realm.add(talk1SectionConfig, update: true)
+                    realm.add(talk2SectionConfig, update: true)
+                })
+            }
+            if RealmSpeechWaitConfig.GetAllObjects()?.count ?? 0 <= 0 {
+                RealmUtil.Write(block: { (realm) in
+                    let waitConfig1 = RealmSpeechWaitConfig()
+                    waitConfig1.targetText = "\n\n"
+                    waitConfig1.delayTimeInSec = 0.5
+                    realm.add(waitConfig1, update: true)
+                    for target in ["……", "。", "、", "・"] {
+                        let waitConfig = RealmSpeechWaitConfig()
+                        waitConfig.targetText = target
+                        waitConfig.delayTimeInSec = 0.0
+                        realm.add(waitConfig, update: true)
+                    }
+                })
+            }
+            if RealmSpeechModSetting.GetAllObjects()?.count ?? 0 <= 0 {
+                OverrideDefaultSpeechModSettings()
+            }
         }
     }
     
@@ -809,19 +810,17 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreSpeechMod_V_2_0_0(array:NSArray){
         for speechModDic in array {
             guard let speechMod = speechModDic as? NSDictionary,
-                let id = speechMod.object(forKey: "id") as? String,
                 let before = speechMod.object(forKey: "before") as? String,
                 let after = speechMod.object(forKey: "after") as? String,
                 let createdDateString = speechMod.object(forKey: "createdDate") as? String,
                 let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
                 let isUseRegularExpression = speechMod.object(forKey: "isUseRegularExpression") as? NSNumber,
                 let targetNovelIDArray = speechMod.object(forKey: "targetNovelIDArray") as? NSArray else { continue }
-            let mod = RealmSpeechModSetting.SearchFrom(id: id) ?? RealmSpeechModSetting()
-            if mod.id != id {
-                mod.id = id
+            let mod = RealmSpeechModSetting.SearchFrom(beforeString: before) ?? RealmSpeechModSetting()
+            if mod.before != before {
+                mod.before = before
             }
             RealmUtil.Write { (realm) in
-                mod.before = before
                 mod.after = after
                 mod.createdDate = createdDate
                 mod.isUseRegularExpression = isUseRegularExpression.boolValue
@@ -1318,7 +1317,6 @@ class NovelSpeakerUtility: NSObject {
         guard let targetArray = RealmSpeechModSetting.GetAllObjects() else { return result }
         for setting in targetArray {
             result.append([
-                "id": setting.id,
                 "before": setting.before,
                 "after": setting.after,
                 "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),

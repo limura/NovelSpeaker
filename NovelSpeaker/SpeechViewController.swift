@@ -251,12 +251,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         guard let range = self.textView.selectedTextRange, let text = self.textView.text(in: range) else { return }
         if text.count <= 0 { return }
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
-        if let modSetting = RealmSpeechModSetting.GetAllObjects()?.filter("before = %@", text).first {
-            nextViewController.targetSpeechModSettingID = modSetting.id
-        }else{
-            nextViewController.targetSpeechModSettingID = nil
-            nextViewController.targetBeforeString = text
-        }
+        nextViewController.targetSpeechModSettingBeforeString = text
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     

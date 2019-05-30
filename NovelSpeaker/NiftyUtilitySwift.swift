@@ -694,9 +694,12 @@ class NiftyUtilitySwift: NSObject {
     static func GetToplevelViewController(controller:UIViewController?) -> UIViewController? {
         guard let view = controller else {
             if let viewController = GetRegisterdToplevelViewController() {
-                return viewController
+                return GetToplevelViewController(controller: viewController)
             }
-            return UIApplication.shared.keyWindow?.rootViewController
+            if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                return GetToplevelViewController(controller: viewController)
+            }
+            return nil
         }
         if let tabBarController = view as? UITabBarController {
             return GetToplevelViewController(controller: tabBarController.selectedViewController)
@@ -704,7 +707,7 @@ class NiftyUtilitySwift: NSObject {
         if let navigationController = view as? UINavigationController {
             return GetToplevelViewController(controller: navigationController.visibleViewController)
         }
-        if let presentedViewController = view.presentedViewController {
+        if let presentedViewController = view.presentedViewController, presentedViewController.isBeingDismissed == false {
             return GetToplevelViewController(controller: presentedViewController)
         }
         return view;

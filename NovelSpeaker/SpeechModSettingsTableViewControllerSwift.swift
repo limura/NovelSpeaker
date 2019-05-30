@@ -109,7 +109,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
         if editingStyle == .delete {
             // Delete the row from the data source
             if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
-                if let targetModSetting = RealmSpeechModSetting.SearchFrom(id: modSetting.id) {
+                if let targetModSetting = RealmSpeechModSetting.SearchFrom(beforeString: modSetting.before) {
                     RealmUtil.Write { (realm)  in
                         targetModSetting.delete(realm: realm)
                     }
@@ -180,14 +180,16 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     
     func PushToCreateSpeechModSettingViewControllerSwift(modSetting:RealmSpeechModSetting?) {
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
-        nextViewController.targetSpeechModSettingID = modSetting?.id
+        nextViewController.targetSpeechModSettingBeforeString = modSetting?.before
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     
     func GetSpeechModArray() -> [RealmSpeechModSetting] {
         guard let speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else {
+            print("GetSpeechModArray() return []")
             return []
         }
+        print("GetSpeechModArray() count: \(speechModSettingArray.count)")
         if m_FilterString.count > 0 {
             return Array(speechModSettingArray.filter("( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString).sorted(byKeyPath: "before", ascending: false))
         }
