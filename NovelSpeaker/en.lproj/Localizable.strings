@@ -403,7 +403,9 @@
 "BookShelfRATreeViewController_UpTo6MonthsAgo" = "Up to 6 months ago";
 "BookShelfRATreeViewController_UpTo1YearAgo" = "Up to a year ago";
 "BookShelfRATreeViewController_BeforeThat" = "More than a year ago";
-"BookShelfRATreeViewController_UnknownWriter" = "(Name unknown)";
+"BookShelfRATreeViewController_UnknownWriter" = "(unknown name)";
+
+"BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
 
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";

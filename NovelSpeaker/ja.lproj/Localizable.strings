@@ -398,6 +398,8 @@
 "BookShelfRATreeViewController_BeforeThat" = "それ以前";
 "BookShelfRATreeViewController_UnknownWriter" = "(作者名不明)";
 
+"BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
+
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
 "BookShelfTableViewController_SortTypeNovelName" = "小説名順";

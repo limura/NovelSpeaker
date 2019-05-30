@@ -689,9 +689,6 @@ class NovelSpeakerUtility: NSObject {
                         if let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
                             story.readLocation = current_reading_chapter_read_location.intValue
                         }
-                        if let last_download_url = novel.object(forKey: "last_download_url") as? String {
-                            story.url = last_download_url
-                        }
                     }else{
                         story.lastReadDate = Date(timeIntervalSince1970: 0)
                     }
@@ -701,6 +698,12 @@ class NovelSpeakerUtility: NSObject {
                     realm.add(story, update: true)
                 }
             }while(true)
+            no -= 1
+            if no > 0, let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: no), let last_download_url = novel.object(forKey: "last_download_url") as? String {
+                RealmUtil.Write { (realm) in
+                    story.url = last_download_url
+                }
+            }
         }else{
             NovelDownloadQueue.shared.addQueue(novelID: novelID)
         }
@@ -885,7 +888,6 @@ class NovelSpeakerUtility: NSObject {
                 }
             }
             RealmUtil.Write { (realm) in
-                speakerSetting.name = name
                 speakerSetting.pitch = pitch.floatValue
                 speakerSetting.rate = rate.floatValue
                 speakerSetting.lmd = lmd.floatValue

@@ -240,7 +240,11 @@ class BookShelfTreeViewCell: UITableViewCell {
 
     func cellSetup(title:String, treeLevel: Int, watchNovelIDArray: [String]) {
         applyDepth(treeLevel: treeLevel)
-        titleLabel.text = title
+        if title.count <= 0 {
+            titleLabel.text = NSLocalizedString("BookShelfTreeViewCell_UnknownTitle", comment: "(小説名未設定)")
+        }else{
+            titleLabel.text = title
+        }
         self.checkAndUpdateNewImage(novelIDArray: watchNovelIDArray)
         registerGlobalStateObserver()
         if watchNovelIDArray.count == 1 {
