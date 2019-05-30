@@ -244,6 +244,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
             speaker.addSpeechModText(before, to: after)
         }
         speaker.setText(testText)
+        speaker.updateCurrentReadingPoint(NSRange(location: 0, length: 0))
         if let displayText = speaker.getSpeechText(), let row = self.form.rowBy(tag: "AfterTestTextRow") {
             if let textRow = row as? TextRow {
                 textRow.value = displayText
