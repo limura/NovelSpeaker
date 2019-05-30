@@ -988,9 +988,8 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
 }
 
 @objc final class RealmSpeechQueue: Object {
-    @objc dynamic var id = NSUUID().uuidString
+    @objc dynamic var name = "" // primary key
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var name = ""
     @objc dynamic var createdDate = Date()
     
     let targetStoryIDArray = List<String>()
@@ -1011,10 +1010,10 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
         return realm.objects(RealmSpeechQueue.self).filter("isDeleted = false")
     }
 
-    static func SearchFrom(id:String) -> RealmSpeechQueue? {
+    static func SearchFrom(name:String) -> RealmSpeechQueue? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
-        if let result = realm.object(ofType: RealmSpeechQueue.self, forPrimaryKey: id), result.isDeleted == false {
+        if let result = realm.object(ofType: RealmSpeechQueue.self, forPrimaryKey: name), result.isDeleted == false {
             return result
         }
         return nil
@@ -1033,7 +1032,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     }
     
     override class func primaryKey() -> String? {
-        return "id"
+        return "name"
     }
     
     override static func indexedProperties() -> [String] {
@@ -1432,7 +1431,7 @@ extension RealmNovelTag: CanWriteIsDeleted {
     }
     
     override class func primaryKey() -> String? {
-        return "id"
+        return "name"
     }
     
     override static func indexedProperties() -> [String] {
