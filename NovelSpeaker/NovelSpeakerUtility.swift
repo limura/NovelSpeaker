@@ -142,7 +142,8 @@ class NovelSpeakerUtility: NSObject {
             RealmUtil.Write(block: { (realm) in
                 if globalState.defaultDisplaySetting == nil {
                     let defaultDisplaySetting = RealmDisplaySetting()
-                    globalState.defaultDisplaySettingID = defaultDisplaySetting.id
+                    defaultDisplaySetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
+                    globalState.defaultDisplaySettingID = defaultDisplaySetting.name
                     realm.add(defaultDisplaySetting, update: true)
                 }
                 if globalState.defaultSpeaker == nil {
@@ -153,7 +154,8 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if globalState.defaultSpeechOverrideSetting == nil {
                     let defaultSpeechOverrideSetting = RealmSpeechOverrideSetting()
-                    globalState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.id
+                    defaultSpeechOverrideSetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
+                    globalState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.name
                     realm.add(defaultSpeechOverrideSetting, update: true)
                 }
                 if globalState.webImportBookmarkArray.count <= 0 {
@@ -926,7 +928,6 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreDisplaySettings_V_2_0_0(displaySettingArray:NSArray,  defaultSpeakerSettingID:String) {
         for displaySettingObj in displaySettingArray {
             guard let displaySettingDic = displaySettingObj as? NSDictionary,
-                let id = displaySettingDic.object(forKey: "id") as? String,
                 let textSizeValue = displaySettingDic.object(forKey: "textSizeValue") as? NSNumber,
                 let fontID = displaySettingDic.object(forKey: "fontID") as? String,
                 let name = displaySettingDic.object(forKey: "name") as? String,
@@ -935,19 +936,18 @@ class NovelSpeakerUtility: NSObject {
                 let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
                 let targetNovelIDArray = displaySettingDic.object(forKey: "targetNovelIDArray") as? NSArray else { continue }
             let setting:RealmDisplaySetting
-            if id == defaultSpeakerSettingID {
+            if name == defaultSpeakerSettingID {
                 guard let defaultSetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { continue }
                 setting = defaultSetting
             }else{
-                setting = RealmDisplaySetting.SearchFrom(id: id) ?? RealmDisplaySetting()
-                if setting.id != id {
-                    setting.id = id
+                setting = RealmDisplaySetting.SearchFrom(name: name) ?? RealmDisplaySetting()
+                if setting.name != name {
+                    setting.name = name
                 }
             }
             RealmUtil.Write { (realm) in
                 setting.textSizeValue = textSizeValue.floatValue
                 setting.fontID = fontID
-                setting.name = name
                 setting.isVertical = isVertical.boolValue
                 setting.createdDate = createdDate
                 setting.targetNovelIDArray.removeAll()
@@ -987,7 +987,6 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreSpeechOverrideSettings_V_2_0_0(speechOverrideSettingArray:NSArray, defaultSpeechOverrideSettingID:String) {
         for overrideSettingDic in speechOverrideSettingArray {
             guard let overrideSettingDic = overrideSettingDic as? NSDictionary,
-                let id = overrideSettingDic.object(forKey: "id") as? String,
                 let name = overrideSettingDic.object(forKey: "name") as? String,
                 let createdDateString = overrideSettingDic.object(forKey: "createdDate") as? String,
                 let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
@@ -996,12 +995,11 @@ class NovelSpeakerUtility: NSObject {
                 let notRubyCharactorStringArray = overrideSettingDic.object(forKey: "notRubyCharactorStringArray") as? String,
                 let isIgnoreURIStringSpeechEnabled = overrideSettingDic.object(forKey: "isIgnoreURIStringSpeechEnabled") as? NSNumber,
                 let targetNovelIDArray = overrideSettingDic.object(forKey: "targetNovelIDArray") as? NSArray else { continue }
-            let setting = RealmSpeechOverrideSetting.SearchObjectFrom(id: id) ?? RealmSpeechOverrideSetting()
-            if setting.id != id {
-                setting.id = id
+            let setting = RealmSpeechOverrideSetting.SearchObjectFrom(name: name) ?? RealmSpeechOverrideSetting()
+            if setting.name != name {
+                setting.name = name
             }
             RealmUtil.Write { (realm) in
-                setting.name = name
                 setting.createdDate = createdDate
                 setting.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.uintValue) ?? RepeatSpeechType.noRepeat
                 setting.isOverrideRubyIsEnabled = isOverrideRubyIsEnabled.boolValue
@@ -1403,7 +1401,6 @@ class NovelSpeakerUtility: NSObject {
         guard let targetArray = RealmDisplaySetting.GetAllObjects() else { return result }
         for setting in targetArray {
             result.append([
-                "id": setting.id,
                 "textSizeValue": setting.textSizeValue,
                 "fontID": setting.fontID,
                 "name": setting.name,
@@ -1432,7 +1429,6 @@ class NovelSpeakerUtility: NSObject {
         guard let targetArray = RealmSpeechOverrideSetting.GetAllObjects() else { return result }
         for setting in targetArray {
             result.append([
-                "id": setting.id,
                 "name": setting.name,
                 "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),
                 "repeatSpeechType": setting._repeatSpeechType,

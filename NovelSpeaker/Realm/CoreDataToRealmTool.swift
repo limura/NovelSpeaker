@@ -64,7 +64,7 @@ class CoreDataToRealmTool: NSObject {
         realmState.bookShelfSortType = globalDataSingleton.getBookSelfSortType()
         realmState.isPageTurningSoundEnabled = globalDataSingleton.isPageTurningSoundEnabled()
 
-        defaultDisplaySetting.name = ""
+        defaultDisplaySetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
         if let textSizeValue = globalState?.textSizeValue as? Float {
             defaultDisplaySetting.textSizeValue = textSizeValue
         }
@@ -86,17 +86,17 @@ class CoreDataToRealmTool: NSObject {
         defaultSpeaker.type = "AVSpeechThinsesizer"
         defaultSpeaker.locale = "ja-JP"
         
-        defaultSpeechOverrideSetting.name = ""
+        defaultSpeechOverrideSetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
         defaultSpeechOverrideSetting.repeatSpeechType = globalDataSingleton.getRepeatSpeechType()
         defaultSpeechOverrideSetting.isOverrideRubyIsEnabled = globalDataSingleton.getOverrideRubyIsEnabled()
         defaultSpeechOverrideSetting.notRubyCharactorStringArray = globalDataSingleton.getNotRubyCharactorStringArray()
         defaultSpeechOverrideSetting.isIgnoreURIStringSpeechEnabled = globalDataSingleton.getIsIgnoreURIStringSpeechEnabled()
         
-        realmState.defaultDisplaySettingID = defaultDisplaySetting.id
+        realmState.defaultDisplaySettingID = defaultDisplaySetting.name
         realmState.defaultSpeakerID = defaultSpeaker.name
-        realmState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.id
+        realmState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.name
 
-        realm.add([defaultSpeechOverrideSetting, defaultSpeaker, defaultDisplaySetting, realmState])
+        realm.add([defaultSpeechOverrideSetting, defaultSpeaker, defaultDisplaySetting, realmState], update: true)
     }
     
     private static func CreateRealmSpeakerSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {

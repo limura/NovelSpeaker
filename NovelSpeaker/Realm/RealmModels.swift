@@ -1087,7 +1087,7 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
         get {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
             realm.refresh()
-            return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false AND id = %@", self.defaultDisplaySettingID).first
+            return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false AND name = %@", self.defaultDisplaySettingID).first
         }
     }
     var defaultSpeaker : RealmSpeakerSetting? {
@@ -1101,7 +1101,7 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
         get {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
             realm.refresh()
-            return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false AND id = %@", self.defaultSpeechOverrideSettingID).first
+            return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeechOverrideSettingID).first
         }
     }
     var backgroundColor:UIColor {
@@ -1216,11 +1216,10 @@ extension RealmGlobalState: CanWriteIsDeleted {
 }
 
 @objc final class RealmDisplaySetting: Object {
-    @objc dynamic var id = NSUUID().uuidString
+    @objc dynamic var name : String = "" // primary key
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var textSizeValue: Float = 58.0
     @objc dynamic var fontID = ""
-    @objc dynamic var name : String = ""
     @objc dynamic var isVertical: Bool = false
     @objc dynamic var createdDate = Date()
     
@@ -1242,10 +1241,10 @@ extension RealmGlobalState: CanWriteIsDeleted {
         return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false")
     }
 
-    static func SearchFrom(id:String) -> RealmDisplaySetting? {
+    static func SearchFrom(name:String) -> RealmDisplaySetting? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
-        if let result = realm.object(ofType: RealmDisplaySetting.self, forPrimaryKey: id), result.isDeleted == false {
+        if let result = realm.object(ofType: RealmDisplaySetting.self, forPrimaryKey: name), result.isDeleted == false {
             return result
         }
         return nil
@@ -1286,10 +1285,10 @@ extension RealmGlobalState: CanWriteIsDeleted {
     }
     
     override class func primaryKey() -> String? {
-        return "id"
+        return "name"
     }
     override static func indexedProperties() -> [String] {
-        return ["id", "name", "createdDate", "isDeleted"]
+        return ["name", "createdDate", "isDeleted"]
     }
 }
 extension RealmDisplaySetting:CKRecordConvertible{
@@ -1374,9 +1373,8 @@ extension RealmNovelTag: CanWriteIsDeleted {
 }
 
 @objc final class RealmSpeechOverrideSetting: Object {
-    @objc dynamic var id = NSUUID().uuidString
+    @objc dynamic var name = "" // primary key
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var name = ""
     @objc dynamic var createdDate = Date()
     @objc dynamic var _repeatSpeechType : Int = Int(RepeatSpeechType.noRepeat.rawValue)
     @objc dynamic var isOverrideRubyIsEnabled = false
@@ -1416,8 +1414,10 @@ extension RealmNovelTag: CanWriteIsDeleted {
             return setting.targetNovelIDArray.contains(novelID)
         })
     }
-    static func SearchObjectFrom(id:String) -> RealmSpeechOverrideSetting? {
-        return GetAllObjects()?.filter("id = %@", id).first
+    static func SearchObjectFrom(name:String) -> RealmSpeechOverrideSetting? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        realm.refresh()
+        return realm.object(ofType: RealmSpeechOverrideSetting.self, forPrimaryKey: name)
     }
     func unref(realm:Realm, novel:RealmNovel) {
         if let index = targetNovelIDArray.index(of: novel.novelID) {
