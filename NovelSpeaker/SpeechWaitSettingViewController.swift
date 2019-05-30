@@ -14,7 +14,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
     var testText:String = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     let speaker = NiftySpeaker()
     var hideCache:[String:Bool] = [:]
-    
+
     func testSpeech(text: String, delaySetting:RealmSpeechWaitConfig) {
         guard let globalState = RealmGlobalState.GetInstance() else {
             print("can not get globalState")

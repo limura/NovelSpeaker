@@ -93,7 +93,7 @@ class CoreDataToRealmTool: NSObject {
         defaultSpeechOverrideSetting.isIgnoreURIStringSpeechEnabled = globalDataSingleton.getIsIgnoreURIStringSpeechEnabled()
         
         realmState.defaultDisplaySettingID = defaultDisplaySetting.id
-        realmState.defaultSpeakerID = defaultSpeaker.id
+        realmState.defaultSpeakerID = defaultSpeaker.name
         realmState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.id
 
         realm.add([defaultSpeechOverrideSetting, defaultSpeaker, defaultDisplaySetting, realmState])
@@ -110,7 +110,7 @@ class CoreDataToRealmTool: NSObject {
                     var name = pitchConfig.title ?? NSLocalizedString("SpeakerSetting_NewSpeakerSetting", comment: "新規話者設定")
                     var n = 0
                     while(true) {
-                        if realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", name).first != nil {
+                        if RealmSpeakerSetting.SearchFrom(name: name) != nil {
                             n += 1
                             name = "\(pitchConfig.title ?? NSLocalizedString("SpeakerSetting_NewSpeakerSetting", comment: "新規話者設定"))(\(n))"
                         }else{
@@ -131,7 +131,7 @@ class CoreDataToRealmTool: NSObject {
                     speaker.locale = "ja-JP"
                     
                     let section = RealmSpeechSectionConfig()
-                    section.speakerID = speaker.id
+                    section.speakerID = speaker.name
                     if let startText = pitchConfig.startText {
                         section.startText = startText
                     }

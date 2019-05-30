@@ -791,7 +791,6 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
 }
 
 @objc final class RealmSpeechWaitConfig : Object {
-    //@objc dynamic var id = NSUUID().uuidString
     @objc dynamic var targetText : String = "" // primary key
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var delayTimeInSec : Float = 0.0
@@ -854,7 +853,7 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
 }
 
 @objc final class RealmSpeakerSetting : Object {
-    @objc dynamic var id = NSUUID().uuidString
+    // name が primary key です
     @objc dynamic var name = NSLocalizedString("SpeakerSetting_NewSpeakerSetting", comment: "新規話者設定")
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var pitch : Float = 1.0
@@ -885,10 +884,10 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
         return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false")
     }
     
-    static func SearchFrom(id:String) -> RealmSpeakerSetting? {
+    static func SearchFrom(name:String) -> RealmSpeakerSetting? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
-        if let result = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: id), result.isDeleted == false {
+        if let result = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: name), result.isDeleted == false {
             return result
         }
         return nil
@@ -905,7 +904,7 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     }
 
     override class func primaryKey() -> String? {
-        return "id"
+        return "name"
     }
     
     override static func indexedProperties() -> [String] {
@@ -933,7 +932,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
         get {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
             realm.refresh()
-            return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id = %@", self.speakerID).first
+            return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.speakerID).first
         }
     }
     var targetNovelArray : [RealmNovel]? {
@@ -1095,7 +1094,7 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
         get {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
             realm.refresh()
-            return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND id = %@", self.defaultSpeakerID).first
+            return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeakerID).first
         }
     }
     var defaultSpeechOverrideSetting : RealmSpeechOverrideSetting? {

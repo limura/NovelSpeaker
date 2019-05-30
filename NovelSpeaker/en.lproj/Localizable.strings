@@ -345,6 +345,7 @@
 "SpeakerSettingsViewController_TitleText" = "Speaker settings";
 "SpeakerSettingViewController_NameValidateErrorNil" = "Name can not be empty string";
 "SpeakerSettingViewController_NameValidateErrorAlready" = "Already defined name";
+"SpeakerSettingsViewController_AddNewSpeakerTitle" = "Enter the name of the speaker to be added";
 
 "SpeechWaitSettingViewController_SpeechWaitType" = "Speech delay type";
 "SpeechWaitSettingViewController_SpeechWaitTypeSelectorTitle" = "Please select the mechanism during reading.\n\nExperimental types allow you to control in finer units of time, but they are deprecated because they may not be available due to iOS updates.";

@@ -148,7 +148,7 @@ class NovelSpeakerUtility: NSObject {
                 if globalState.defaultSpeaker == nil {
                     let defaultSpeaker = RealmSpeakerSetting()
                     defaultSpeaker.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
-                    globalState.defaultSpeakerID = defaultSpeaker.id
+                    globalState.defaultSpeakerID = defaultSpeaker.name
                     realm.add(defaultSpeaker, update: true)
                 }
                 if globalState.defaultSpeechOverrideSetting == nil {
@@ -184,13 +184,13 @@ class NovelSpeakerUtility: NSObject {
                     talk1Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation1", comment: "会話文")
                     talk1SectionConfig.startText = "「"
                     talk1SectionConfig.endText = "」"
-                    talk1SectionConfig.speakerID = talk1Speaker.id
+                    talk1SectionConfig.speakerID = talk1Speaker.name
                     
                     talk2Speaker.pitch = 1.2
                     talk2Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation2", comment: "会話文2")
                     talk2SectionConfig.startText = "『"
                     talk2SectionConfig.endText = "』"
-                    talk2SectionConfig.speakerID = talk2Speaker.id
+                    talk2SectionConfig.speakerID = talk2Speaker.name
                     
                     realm.add(talk1Speaker, update: true)
                     realm.add(talk2Speaker, update: true)
@@ -442,7 +442,7 @@ class NovelSpeakerUtility: NSObject {
                 }
             }
         }
-        guard let othersArray = dic.object(forKey: "others") as? NSArray, let speakerArray = RealmSpeakerSetting.GetAllObjects()?.filter("id != %@", defaultSpeaker.id), let speechSectionArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
+        guard let othersArray = dic.object(forKey: "others") as? NSArray, let speechSectionArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
         for obj in othersArray {
             guard let dic = obj as? NSDictionary,
                 let title = dic.object(forKey: "title") as? String,
@@ -451,18 +451,18 @@ class NovelSpeakerUtility: NSObject {
                 let pitch = dic.object(forKey: "pitch") as? NSNumber else { continue }
             let pitchValue = pitch.floatValue
             if pitchValue < 0.5 || pitchValue > 2.0 { continue }
-            if let speaker = speakerArray.filter("name = %@", title).first {
+            if let speaker = RealmSpeakerSetting.SearchFrom(name: title) {
                 RealmUtil.Write { (realm) in
                     speaker.pitch = pitchValue
                 }
                 if let section = speechSectionArray.filter("startText = %@ AND endText = %@", start_text, end_text).first {
                     RealmUtil.Write { (realm) in
-                        section.speakerID = speaker.id
+                        section.speakerID = speaker.name
                     }
                 }else{
                     RealmUtil.Write { (realm) in
                         let section = RealmSpeechSectionConfig()
-                        section.speakerID = speaker.id
+                        section.speakerID = speaker.name
                         section.startText = start_text
                         section.endText = end_text
                         realm.add(section)
@@ -479,12 +479,12 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if let section = speechSectionArray.filter("startText = %@ AND endText = %@", start_text, end_text).first {
                     RealmUtil.Write { (realm) in
-                        section.speakerID = speaker.id
+                        section.speakerID = speaker.name
                     }
                 }else{
                     RealmUtil.Write { (realm) in
                         let section = RealmSpeechSectionConfig()
-                        section.speakerID = speaker.id
+                        section.speakerID = speaker.name
                         section.startText = start_text
                         section.endText = end_text
                         realm.add(section)
@@ -856,7 +856,6 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreSpeakerSettings_V_2_0_0(speakerArray:NSArray, defaultSpeakerSettingID:String) {
         for speaker in speakerArray {
             guard let speaker = speaker as? NSDictionary,
-                let id = speaker.object(forKey: "id") as? String,
                 let name = speaker.object(forKey: "name") as? String,
                 let pitch = speaker.object(forKey: "pitch") as? NSNumber,
                 let rate = speaker.object(forKey: "rate") as? NSNumber,
@@ -870,13 +869,13 @@ class NovelSpeakerUtility: NSObject {
                 let createdDateString = speaker.object(forKey: "createdDate") as? String,
                 let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) else { continue }
             let speakerSetting:RealmSpeakerSetting
-            if id == defaultSpeakerSettingID {
+            if name == defaultSpeakerSettingID {
                 guard let defaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker else { continue }
                 speakerSetting = defaultSpeaker
             }else{
-                speakerSetting = RealmSpeakerSetting.SearchFrom(id: id) ?? RealmSpeakerSetting()
-                if speakerSetting.id != id {
-                    speakerSetting.id = id
+                speakerSetting = RealmSpeakerSetting.SearchFrom(name: name) ?? RealmSpeakerSetting()
+                if speakerSetting.name != name {
+                    speakerSetting.name = name
                 }
             }
             RealmUtil.Write { (realm) in
@@ -1343,7 +1342,6 @@ class NovelSpeakerUtility: NSObject {
         guard let targetArray = RealmSpeakerSetting.GetAllObjects() else { return result }
         for setting in targetArray {
             result.append([
-                "id": setting.id,
                 "name": setting.name,
                 "pitch": setting.pitch,
                 "rate": setting.rate,

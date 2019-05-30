@@ -140,11 +140,11 @@ class SpeechSectionConfigsViewController: FormViewController {
             $0.options = speakerSettingArray.map({$0.name})
             $0.value = speechSectionConfig.speaker?.name ?? NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
         }.onChange({ (row) in
-            guard let name = row.value, let sectionConfig = RealmSpeechSectionConfig.SearchFrom(id: id), let speaker = RealmSpeakerSetting.GetAllObjects()?.filter("name = %@", name).first else {
+            guard let name = row.value, let sectionConfig = RealmSpeechSectionConfig.SearchFrom(id: id), let speaker = RealmSpeakerSetting.SearchFrom(name: name) else {
                 return
             }
             RealmUtil.Write { (realm) in
-                sectionConfig.speakerID = speaker.id
+                sectionConfig.speakerID = speaker.name
             }
             self.updateTitleCell(speechSectionConfig: sectionConfig)
         })

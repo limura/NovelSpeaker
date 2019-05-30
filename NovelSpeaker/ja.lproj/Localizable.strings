@@ -338,6 +338,7 @@
 "SpeakerSettingsViewController_TitleText" = "話者・声色設定";
 "SpeakerSettingViewController_NameValidateErrorNil" = "名前に空文字列は設定できません";
 "SpeakerSettingViewController_NameValidateErrorAlready" = "既に定義済みの名前です";
+"SpeakerSettingsViewController_AddNewSpeakerTitle" = "追加される話者の名前を入力してください";
 
 "SpeechWaitSettingViewController_SpeechWaitType" = "読み上げ時の間の仕組み";
 "SpeechWaitSettingViewController_SpeechWaitTypeSelectorTitle" = "読み上げ時の間の仕組みを選択してください。\n\n非推奨型にするとより細かい時間単位での制御ができるようになりますが、iOSのアップデート等で利用できなくなる可能性があるため、非推奨となります。";

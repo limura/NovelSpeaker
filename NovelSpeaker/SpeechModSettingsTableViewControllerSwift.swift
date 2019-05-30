@@ -47,7 +47,6 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     
     func addNotificationReceiver(){
         self.speechModSettingObserveToken = RealmSpeechModSetting.GetAllObjects()?.observe { (collectionChange) in
-            print("SpeechModSettingsTableViewControllerSwift: reload table by RealmSpeechModSetting ovserve event.")
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
@@ -186,10 +185,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     
     func GetSpeechModArray() -> [RealmSpeechModSetting] {
         guard let speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else {
-            print("GetSpeechModArray() return []")
             return []
         }
-        print("GetSpeechModArray() count: \(speechModSettingArray.count)")
         if m_FilterString.count > 0 {
             return Array(speechModSettingArray.filter("( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString).sorted(byKeyPath: "before", ascending: false))
         }
