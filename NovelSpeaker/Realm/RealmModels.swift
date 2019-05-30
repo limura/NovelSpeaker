@@ -919,7 +919,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
 }
 
 @objc final class RealmSpeechSectionConfig : Object {
-    @objc dynamic var id = NSUUID().uuidString
+    @objc dynamic var name = "" // primary key
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var startText = "「"
     @objc dynamic var endText = "」"
@@ -951,10 +951,10 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
         return realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false")
     }
 
-    static func SearchFrom(id:String) -> RealmSpeechSectionConfig? {
+    static func SearchFrom(name:String) -> RealmSpeechSectionConfig? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
-        if let result = realm.object(ofType: RealmSpeechSectionConfig.self, forPrimaryKey: id), result.isDeleted == false {
+        if let result = realm.object(ofType: RealmSpeechSectionConfig.self, forPrimaryKey: name), result.isDeleted == false {
             return result
         }
         return nil
@@ -973,7 +973,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
     }
     
     override class func primaryKey() -> String? {
-        return "id"
+        return "name"
     }
     
     override static func indexedProperties() -> [String] {

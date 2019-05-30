@@ -132,6 +132,7 @@ class CoreDataToRealmTool: NSObject {
                     
                     let section = RealmSpeechSectionConfig()
                     section.speakerID = speaker.name
+                    section.name = speaker.name
                     if let startText = pitchConfig.startText {
                         section.startText = startText
                     }

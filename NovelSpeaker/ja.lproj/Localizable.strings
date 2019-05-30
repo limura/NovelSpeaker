@@ -364,6 +364,9 @@
 "SpeechSectionConfigsViewController_AddNewSettingButtonTitle" = "新しい話者変更設定を追加する";
 "SpeechSectionConfigsViewController_Usage" = "会話文などで読み上げ時の話者設定を変更するための設定です。\nそれぞれの設定をタップすると詳細が設定できます。開始文字と終了文字の間に挟まれた部分を読み上げる話者を選択します。必要のない設定は削除することもできます。";
 "SpeechSectionConfigsViewController_SpeakerSettingAdded" = "末尾に話者変更設定を追加しました。\n(恐らくはスクロールする必要があります)";
+"SpeechSectionConfigsViewController_AddNewSettingDialogTitle" = "話者設定の名前を指定してください";
+"SpeechSectionConfigsViewController_AddNewSettingDialogPlaceHolder" = "空文字列は指定できません";
+"SpeechSectionConfigsViewController_AddNewSettingDialogAlreadyDefined" = "既に存在する名前は指定できません";
 
 "CreateSpeechModSettingViewControllerSwift_Title" = "読みの修正詳細";
 "CreateSpeechModSettingViewControllerSwift_BeforeTitle" = "読み替え前";

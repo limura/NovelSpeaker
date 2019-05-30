@@ -184,12 +184,14 @@ class NovelSpeakerUtility: NSObject {
                     
                     talk1Speaker.pitch = 1.5
                     talk1Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation1", comment: "会話文")
+                    talk1SectionConfig.name = NSLocalizedString("GlobalDataSingleton_Conversation1", comment: "会話文")
                     talk1SectionConfig.startText = "「"
                     talk1SectionConfig.endText = "」"
                     talk1SectionConfig.speakerID = talk1Speaker.name
                     
                     talk2Speaker.pitch = 1.2
                     talk2Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation2", comment: "会話文2")
+                    talk2SectionConfig.name = NSLocalizedString("GlobalDataSingleton_Conversation2", comment: "会話文2")
                     talk2SectionConfig.startText = "『"
                     talk2SectionConfig.endText = "』"
                     talk2SectionConfig.speakerID = talk2Speaker.name
@@ -465,9 +467,10 @@ class NovelSpeakerUtility: NSObject {
                     RealmUtil.Write { (realm) in
                         let section = RealmSpeechSectionConfig()
                         section.speakerID = speaker.name
+                        section.name = speaker.name
                         section.startText = start_text
                         section.endText = end_text
-                        realm.add(section)
+                        realm.add(section, update: true)
                     }
                 }
             }else{
@@ -487,9 +490,10 @@ class NovelSpeakerUtility: NSObject {
                     RealmUtil.Write { (realm) in
                         let section = RealmSpeechSectionConfig()
                         section.speakerID = speaker.name
+                        section.name = speaker.name
                         section.startText = start_text
                         section.endText = end_text
-                        realm.add(section)
+                        realm.add(section, update: true)
                     }
                 }
             }
@@ -900,7 +904,7 @@ class NovelSpeakerUtility: NSObject {
         for sectionConfig in sectionConfigArray {
             guard
                 let sectionConfigDic = sectionConfig as? NSDictionary,
-                let id = sectionConfigDic.object(forKey: "id") as? String,
+                let name = sectionConfigDic.object(forKey: "name") as? String,
                 let startText = sectionConfigDic.object(forKey: "startText") as? String,
                 let endText = sectionConfigDic.object(forKey: "endText") as? String,
                 let createdDateString = sectionConfigDic.object(forKey: "createdDate") as? String,
@@ -908,9 +912,9 @@ class NovelSpeakerUtility: NSObject {
                 let speakerID = sectionConfigDic.object(forKey: "speakerID") as? String,
                 let targetNovelIDArray = sectionConfigDic.object(forKey: "targetNovelIDArray") as? NSArray
                 else { continue }
-            let sectionConfig = RealmSpeechSectionConfig.SearchFrom(id: id) ?? RealmSpeechSectionConfig()
-            if sectionConfig.id != id {
-                sectionConfig.id = id
+            let sectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) ?? RealmSpeechSectionConfig()
+            if sectionConfig.name != name {
+                sectionConfig.name = name
             }
             RealmUtil.Write { (realm) in
                 sectionConfig.startText = startText
@@ -1360,7 +1364,7 @@ class NovelSpeakerUtility: NSObject {
         guard let targetArray = RealmSpeechSectionConfig.GetAllObjects() else { return result }
         for setting in targetArray {
             result.append([
-                "id": setting.id,
+                "name": setting.name,
                 "startText": setting.startText,
                 "endText": setting.endText,
                 "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),

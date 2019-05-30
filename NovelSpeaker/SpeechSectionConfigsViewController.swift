@@ -29,38 +29,41 @@ class SpeechSectionConfigsViewController: FormViewController {
         speaker.speech(text)
     }
     func updateTitleCell(speechSectionConfig:RealmSpeechSectionConfig) {
-        guard let row = self.form.rowBy(tag: "TitleLabelRow-\(speechSectionConfig.id)") as? LabelRow else {
-            return
+        DispatchQueue.main.async {
+            guard let row = self.form.rowBy(tag: "TitleLabelRow-\(speechSectionConfig.name)") as? LabelRow else {
+                return
+            }
+            row.title = "\(speechSectionConfig.name): \(speechSectionConfig.startText) …… \(speechSectionConfig.endText)"
+            if let speaker = speechSectionConfig.speaker {
+                row.value = speaker.name
+            }
+            row.updateCell()
         }
-        row.title = "\(speechSectionConfig.startText) …… \(speechSectionConfig.endText)"
-        if let speaker = speechSectionConfig.speaker {
-            row.value = speaker.name
-        }
-        row.updateCell()
     }
     
     func createSpeechSectionConfigCells(speechSectionConfig:RealmSpeechSectionConfig) -> Section {
-        let id = speechSectionConfig.id
+        let name = speechSectionConfig.name
         var speakerName = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
         if let speaker = speechSectionConfig.speaker {
             speakerName = speaker.name
         }
+        
         let section = Section()
-        section <<< LabelRow("TitleLabelRow-\(id)") {
-            $0.title = "\(speechSectionConfig.startText) …… \(speechSectionConfig.endText)"
+        section <<< LabelRow("TitleLabelRow-\(name)") {
+            $0.title = "\(name): \(speechSectionConfig.startText) …… \(speechSectionConfig.endText)"
             $0.value = speakerName
         }.onCellSelection({ (_, _) in
-            if let isHide = self.hideCache[id] {
-                self.hideCache[id] = !isHide
+            if let isHide = self.hideCache[name] {
+                self.hideCache[name] = !isHide
             }else{
-                self.hideCache[id] = false
+                self.hideCache[name] = false
             }
             for tag in [
-                "StartTextRow-\(id)",
-                "EndTextRow-\(id)",
-                "SpeakerAlertRow-\(id)",
-                "SpeechTestButtonRow-\(id)",
-                "RemoveButtonRow-\(id)"
+                "StartTextRow-\(name)",
+                "EndTextRow-\(name)",
+                "SpeakerAlertRow-\(name)",
+                "SpeechTestButtonRow-\(name)",
+                "RemoveButtonRow-\(name)"
                 ] {
                 guard let row = self.form.rowBy(tag: tag) else {
                     return
@@ -69,12 +72,12 @@ class SpeechSectionConfigsViewController: FormViewController {
                 row.updateCell()
             }
         })
-        <<< TextRow("StartTextRow-\(id)") {
+        <<< TextRow("StartTextRow-\(name)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_BeforeTextTitle", comment: "開始文字")
             $0.add(rule: RuleRequired())
             $0.validationOptions = .validatesOnChange
-            $0.hidden = Condition.function(["TitleLabelRow-\(id)"], { (form) -> Bool in
-                return self.hideCache[id] ?? true
+            $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
+                return self.hideCache[name] ?? true
             })
             $0.value = speechSectionConfig.startText
             $0.add(rule: RuleRequired())
@@ -86,7 +89,7 @@ class SpeechSectionConfigsViewController: FormViewController {
             if text.count <= 0 {
                 return
             }
-            guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(id: id) else {
+            guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) else {
                 return
             }
             RealmUtil.Write { (realm) in
@@ -99,12 +102,12 @@ class SpeechSectionConfigsViewController: FormViewController {
             }
             textCell.textField.clearButtonMode = .always
         })
-        <<< TextRow("EndTextRow-\(id)") {
+        <<< TextRow("EndTextRow-\(name)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_AfterTextTitle", comment: "終了文字")
             $0.add(rule: RuleRequired())
             $0.validationOptions = .validatesOnChange
-            $0.hidden = Condition.function(["TitleLabelRow-\(id)"], { (form) -> Bool in
-                return self.hideCache[id] ?? true
+            $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
+                return self.hideCache[name] ?? true
             })
             $0.value = speechSectionConfig.endText
             $0.add(rule: RuleRequired())
@@ -116,7 +119,7 @@ class SpeechSectionConfigsViewController: FormViewController {
             if text.count <= 0 {
                 return
             }
-            guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(id: id) else {
+            guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) else {
                 return
             }
             RealmUtil.Write { (realm) in
@@ -129,18 +132,18 @@ class SpeechSectionConfigsViewController: FormViewController {
             }
             textCell.textField.clearButtonMode = .always
         })
-        <<< AlertRow<String>("SpeakerAlertRow-\(id)") {
+        <<< AlertRow<String>("SpeakerAlertRow-\(name)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerAlertRowTitle", comment: "話者")
             $0.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
-            $0.hidden = Condition.function(["TitleLabelRow-\(id)"], { (form) -> Bool in
-                return self.hideCache[id] ?? true
+            $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
+                return self.hideCache[name] ?? true
             })
             $0.selectorTitle = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSelectorTitle", comment: "話者を選択してください")
             guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjects()?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
             $0.options = speakerSettingArray.map({$0.name})
             $0.value = speechSectionConfig.speaker?.name ?? NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
         }.onChange({ (row) in
-            guard let name = row.value, let sectionConfig = RealmSpeechSectionConfig.SearchFrom(id: id), let speaker = RealmSpeakerSetting.SearchFrom(name: name) else {
+            guard let targetName = row.value, let sectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name), let speaker = RealmSpeakerSetting.SearchFrom(name: targetName) else {
                 return
             }
             RealmUtil.Write { (realm) in
@@ -148,21 +151,21 @@ class SpeechSectionConfigsViewController: FormViewController {
             }
             self.updateTitleCell(speechSectionConfig: sectionConfig)
         })
-        <<< ButtonRow("SpeechTestButtonRow-\(id)") {
+        <<< ButtonRow("SpeechTestButtonRow-\(name)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")
-            $0.hidden = Condition.function(["TitleLabelRow-\(id)"], { (form) -> Bool in
-                return self.hideCache[id] ?? true
+            $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
+                return self.hideCache[name] ?? true
             })
         }.onCellSelection({ (buttonCellOf, button) in
-            guard let speaker = RealmSpeechSectionConfig.SearchFrom(id: id)?.speaker else {
+            guard let speaker = RealmSpeechSectionConfig.SearchFrom(name: name)?.speaker else {
                 return
             }
             self.testSpeech(text: self.testText, speakerSetting: speaker)
         })
-        <<< ButtonRow("RemoveButtonRow-\(id)") {
+        <<< ButtonRow("RemoveButtonRow-\(name)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_RemoveButtonRow", comment: "この設定を削除")
-            $0.hidden = Condition.function(["TitleLabelRow-\(id)"], { (form) -> Bool in
-                return self.hideCache[id] ?? true
+            $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
+                return self.hideCache[name] ?? true
             })
         }.onCellSelection({ (buttonCellOf, button) in
             NiftyUtilitySwift.EasyDialogTwoButton(
@@ -173,7 +176,7 @@ class SpeechSectionConfigsViewController: FormViewController {
                 button1Action: nil,
                 button2Title: NSLocalizedString("OK_button", comment: "OK"),
                 button2Action: {
-                    guard let setting = RealmSpeechSectionConfig.SearchFrom(id: id) else {
+                    guard let setting = RealmSpeechSectionConfig.SearchFrom(name: name) else {
                         return
                     }
                     RealmUtil.Write { (realm) in
@@ -185,7 +188,7 @@ class SpeechSectionConfigsViewController: FormViewController {
                     }else{
                         print("can not remove section because index is nil")
                     }
-                    self.hideCache.removeValue(forKey: id)
+                    self.hideCache.removeValue(forKey: name)
             })
         })
         return section
@@ -201,20 +204,59 @@ class SpeechSectionConfigsViewController: FormViewController {
         <<< ButtonRow() {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_AddNewSettingButtonTitle", comment: "新しい話者変更設定を追加する")
         }.onCellSelection({ (_, button) in
-            let newSpeechSectionConfig = RealmSpeechSectionConfig()
-            if let defaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker {
-                newSpeechSectionConfig.speakerID = defaultSpeaker.name
+            DispatchQueue.main.async {
+                NiftyUtilitySwift.EasyDialogTextInput2Button(
+                    viewController: self,
+                    title: NSLocalizedString("SpeechSectionConfigsViewController_AddNewSettingDialogTitle", comment: "話者設定の名前を指定してください"),
+                    message: nil,
+                    textFieldText: "",
+                    placeHolder: NSLocalizedString("SpeechSectionConfigsViewController_AddNewSettingDialogPlaceHolder", comment: "空文字列は指定できません"),
+                    leftButtonText: NSLocalizedString("Cancel_button", comment: "Cancel"),
+                    rightButtonText: NSLocalizedString("OK_button", comment: "OK"),
+                    leftButtonAction: nil,
+                    rightButtonAction: { (name) in
+                        if name.count <= 0 {
+                            DispatchQueue.main.async {
+                                NiftyUtilitySwift.EasyDialogOneButton(
+                                    viewController: self,
+                                    title: NSLocalizedString("SpeechSectionConfigsViewController_AddNewSettingDialogPlaceHolder", comment: "空文字列は指定できません"),
+                                    message: nil,
+                                    buttonTitle: nil,
+                                    buttonAction: nil)
+                            }
+                            return
+                        }
+                        if RealmSpeechSectionConfig.SearchFrom(name: name) != nil {
+                            DispatchQueue.main.async {
+                                NiftyUtilitySwift.EasyDialogOneButton(
+                                    viewController: self,
+                                    title: NSLocalizedString("SpeechSectionConfigsViewController_AddNewSettingDialogAlreadyDefined", comment: "既に存在する名前は指定できません"),
+                                    message: nil,
+                                    buttonTitle: nil,
+                                    buttonAction: nil)
+                            }
+                            return
+                        }
+                        let newSpeechSectionConfig = RealmSpeechSectionConfig()
+                        newSpeechSectionConfig.name = name
+                        if let defaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker {
+                            newSpeechSectionConfig.speakerID = defaultSpeaker.name
+                        }
+                        RealmUtil.Write { (realm) in
+                            realm.add(newSpeechSectionConfig, update: true)
+                        }
+                        self.form.append(self.createSpeechSectionConfigCells(speechSectionConfig: newSpeechSectionConfig))
+                        DispatchQueue.main.async {
+                            NiftyUtilitySwift.EasyDialogOneButton(
+                                viewController: self,
+                                title: NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSettingAdded", comment: "末尾に話者変更設定を追加しました。\n(恐らくはスクロールする必要があります)"),
+                                message: nil,
+                                buttonTitle: NSLocalizedString("OK_button", comment: "OK"),
+                                buttonAction:nil)
+                        }
+                    },
+                    shouldReturnIsRightButtonClicked: true)
             }
-            RealmUtil.Write { (realm) in
-                realm.add(newSpeechSectionConfig)
-            }
-            self.form.append(self.createSpeechSectionConfigCells(speechSectionConfig: newSpeechSectionConfig))
-            NiftyUtilitySwift.EasyDialogOneButton(
-                viewController: self,
-                title: NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSettingAdded", comment: "末尾に話者変更設定を追加しました。\n(恐らくはスクロールする必要があります)"),
-                message: nil,
-                buttonTitle: NSLocalizedString("OK_button", comment: "OK"),
-                buttonAction:nil)
         })
         <<< TextAreaRow() {
             $0.placeholder = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")

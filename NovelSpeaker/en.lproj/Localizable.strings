@@ -371,6 +371,9 @@
 "SpeechSectionConfigsViewController_AddNewSettingButtonTitle" = "Add new setting";
 "SpeechSectionConfigsViewController_Usage" = "It is a setting to change the speaker setting at the time of reading by the conversation sentence etc.\nTap each setting to set details. Select the speaker who reads the part between the start character and the end character. You can delete settings that you do not need.";
 "SpeechSectionConfigsViewController_SpeakerSettingAdded" = "Added new settings at the end.\n(Possibly need to scroll)";
+"SpeechSectionConfigsViewController_AddNewSettingDialogTitle" = "Please specify the name of the Speaker change setting";
+"SpeechSectionConfigsViewController_AddNewSettingDialogPlaceHolder" = "Empty string can not be specified";
+"SpeechSectionConfigsViewController_AddNewSettingDialogAlreadyDefined" = "You can not specify a name that already exists";
 
 "CreateSpeechModSettingViewControllerSwift_Title" = "Correction of the reading";
 "CreateSpeechModSettingViewControllerSwift_BeforeTitle" = "Before";
