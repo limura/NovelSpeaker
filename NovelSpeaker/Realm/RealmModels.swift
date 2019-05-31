@@ -52,9 +52,6 @@ import UIKit
         defer {
             lock.unlock()
         }
-        realmLocalCache.values.forEach { (realm) in
-            realm.invalidate()
-        }
         realmLocalCache.removeAll()
     }
     static func GetLocalRealm() throws -> Realm {
@@ -105,10 +102,6 @@ import UIKit
         lock.lock()
         defer {
             lock.unlock()
-        }
-        // cache を削除する
-        realmCloudCache.values.forEach { (realm) in
-            realm.invalidate()
         }
         realmCloudCache.removeAll()
     }
@@ -213,6 +206,9 @@ import UIKit
             ], container: container, in: realm)
     }
     static func EnableSyncEngine() throws {
+        lock.lock()
+        defer { lock.unlock() }
+        if syncEngine != nil { return }
         syncEngine = try CreateSyncEngine()
     }
     static func CloudSync() {
@@ -228,6 +224,15 @@ import UIKit
     }
     static func CloudPush() {
         syncEngine?.pushAll()
+    }
+    
+    // iCloud 上の全てのデータを消します
+    static func ClearCloudData() throws {
+        try EnableSyncEngine()
+        CloudPull()
+        ClearCloudRealmModels()
+        CloudPush()
+        CloudPull()
     }
 
     static let UseCloudRealmKey = "RealmUtil_UseCloudRealm"
@@ -304,6 +309,22 @@ import UIKit
             realm.delete(model)
         }
     }
+    
+    static func CheckIsLocalRealmCreated() -> Bool {
+        let filePath = GetLocalRealmFilePath()
+        if let path = filePath?.path {
+            return FileManager.default.fileExists(atPath: path)
+        }
+        return false
+    }
+    static func CheckIsCloudRealmCreated() -> Bool {
+        let filePath = GetCloudRealmFilePath()
+        if let path = filePath?.path {
+            return FileManager.default.fileExists(atPath: path)
+        }
+        return false
+    }
+
 }
 
 protocol CanWriteIsDeleted {
@@ -1065,7 +1086,6 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     @objc dynamic var isReadingProgressDisplayEnabled = false
     @objc dynamic var isForceSiteInfoReloadIsEnabled = false
     @objc dynamic var isMenuItemIsAddSpeechModSettingOnly = false
-    @objc dynamic var isBackgroundNovelFetchEnabled = false
     @objc dynamic var isPageTurningSoundEnabled = false
     @objc dynamic var _bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
     
@@ -1101,6 +1121,19 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
             realm.refresh()
             return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeechOverrideSettingID).first
+        }
+    }
+    // background fetch の設定は その端末 だけに依存するようにしないとおかしなことになるので、UserDefaults.standard を使います
+    static let isBackgroundNovelFetchEnabledKey = "NovelSpeaker_RealmModels_IsBackgroundNovelFetchEnabled"
+    var isBackgroundNovelFetchEnabled : Bool {
+        get {
+            let userDefaults = UserDefaults.standard
+            userDefaults.register(defaults: [RealmGlobalState.isBackgroundNovelFetchEnabledKey : false])
+            return userDefaults.bool(forKey: RealmGlobalState.isBackgroundNovelFetchEnabledKey)
+        }
+        set {
+            let userDefaults = UserDefaults.standard
+            userDefaults.set(newValue, forKey: RealmGlobalState.isBackgroundNovelFetchEnabledKey)
         }
     }
     var backgroundColor:UIColor {

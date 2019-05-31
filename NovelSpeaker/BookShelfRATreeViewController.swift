@@ -131,9 +131,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 }
             })
         case .title:
-            return Array(allNovels.sorted(byKeyPath: "title", ascending: true))
+            return Array(allNovels.sorted(byKeyPath: "title", ascending: false))
         case .writer:
-            return Array(allNovels.sorted(byKeyPath: "writer", ascending: true))
+            return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
         }
     }
     

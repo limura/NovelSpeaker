@@ -327,6 +327,12 @@
 "FontSelectViewController_DefaultFontTitle" = "DefaultFont";
 
 "CoreDataToRealmTool_DefaultSpeaker" = "Default";
+"CoreDataToRealmTool_ProgressNovel" = "Converting novel data";
+"CoreDataToRealmTool_ProgressGLobalState" = "Converting setting items";
+"CoreDataToRealmTool_ProgressSpeechMod" = "Converting correction of the reading settings";
+
+"MigrationViewController_DoingCoreDataMigration" = "Updating the old database.";
+
 "SpeakerSetting_NewSpeakerSetting" = "New speaker";
 
 "SpeakSettingsViewController_SpeakSettingNameTitle" = "Name";

@@ -112,13 +112,13 @@
 		2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */; };
 		21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916374199F143E003FF7FC /* SpeechModSetting.m */; };
 		21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
-		2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */; };
 		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
 		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
 		2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */; };
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
+		21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */; };
 		21A2CDBB2292FD6E0080AEE6 /* LocalNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */; };
 		21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
 		21A2CDC42297D3A50080AEE6 /* NarouSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDC32297D3A50080AEE6 /* NarouSearchViewController.swift */; };
@@ -164,6 +164,7 @@
 		21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */; };
 		21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */; };
 		21E975B8229A8C8C0027A0A0 /* DefaultSpeechModList.json in Resources */ = {isa = PBXBuildFile; fileRef = 21E975B7229A8C8C0027A0A0 /* DefaultSpeechModList.json */; };
+		21E975BA22A06CC60027A0A0 /* MigrationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B922A06CC60027A0A0 /* MigrationViewController.swift */; };
 		21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
 		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
@@ -366,8 +367,6 @@
 		21916374199F143E003FF7FC /* SpeechModSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSetting.m; sourceTree = "<group>"; };
 		21916376199F1463003FF7FC /* SpeechModSettingCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechModSettingCacheData.h; sourceTree = "<group>"; };
 		21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSettingCacheData.m; sourceTree = "<group>"; };
-		2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataMigrationViewController.h; sourceTree = "<group>"; };
-		2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMigrationViewController.m; sourceTree = "<group>"; };
 		2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 4.xcdatamodel"; sourceTree = "<group>"; };
 		2191639819A38414003FF7FC /* NarouContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NarouContent.h; path = DataModelMapping/NarouContent.h; sourceTree = "<group>"; };
 		2191639919A38414003FF7FC /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
@@ -382,6 +381,7 @@
 		2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 8.xcdatamodel"; sourceTree = "<group>"; };
 		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmToRealmCopyTool.swift; sourceTree = "<group>"; };
 		21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotifications.swift; sourceTree = "<group>"; };
 		21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDownloadQueue.swift; sourceTree = "<group>"; };
 		21A2CDC32297D3A50080AEE6 /* NarouSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NarouSearchViewController.swift; path = /Users/limura/Desktop/sources/NovelSpeaker/NovelSpeaker/NarouSearchViewController.swift; sourceTree = "<absolute>"; };
@@ -440,6 +440,7 @@
 		21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModSettingsTableViewControllerSwift.swift; sourceTree = "<group>"; };
 		21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSpeakerUtility.swift; sourceTree = "<group>"; };
 		21E975B7229A8C8C0027A0A0 /* DefaultSpeechModList.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = DefaultSpeechModList.json; sourceTree = "<group>"; };
+		21E975B922A06CC60027A0A0 /* MigrationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationViewController.swift; sourceTree = "<group>"; };
 		21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
 		21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIViewControllerExtension.m; sourceTree = "<group>"; };
 		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -549,6 +550,7 @@
 			children = (
 				21C759F92287123500956B73 /* RealmModels.swift */,
 				21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */,
+				21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */,
 			);
 			path = Realm;
 			sourceTree = "<group>";
@@ -874,8 +876,7 @@
 				21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */,
 				21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */,
 				21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */,
-				2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */,
-				2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */,
+				21E975B922A06CC60027A0A0 /* MigrationViewController.swift */,
 				212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */,
 				21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */,
 				21647FFB228CF44900A183DF /* UpdateLogViewController.swift */,
@@ -1278,10 +1279,12 @@
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
 				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
 				2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */,
+				21E975BA22A06CC60027A0A0 /* MigrationViewController.swift in Sources */,
 				21648000228D5EE000A183DF /* EditBookViewController.swift in Sources */,
 				21C759FA2287123500956B73 /* RealmModels.swift in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				21648002228F180E00A183DF /* BookShelfRATreeViewController.swift in Sources */,
+				21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */,
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
 				21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
@@ -1310,7 +1313,6 @@
 				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
 				21648007229003E100A183DF /* BookShelfTreeViewCell.swift in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
-				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,
 				217F6E1C1942F14B008E432E /* Speaker.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

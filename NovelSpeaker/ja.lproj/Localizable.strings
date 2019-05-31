@@ -51,7 +51,7 @@
 "NarouSearchViewController_SearchTitle_Searching" = "Searching";
 "NarouSearchViewController_SearchMessage_NowSearching" = "Now searching";
 
-"NarouSearchViewController_NarouSearchTabDeletedAnnounceText" = "「なろう検索」タブ終了のお知らせ\n\n以前からお知らせしておりました通り、「なろう検索」タブ関連の機能は削除されました。今後は「Web取込」機能をご活用ください。\n「なろう検索」と同様の検索機能は 小説家になろう様 側にあります検索ページをご利用ください。「Web取込」機能で取り込まれた小説は「なろう検索」経由で取り込んだ小説と同様の使い勝手になっています。「Web取込」タブでの小説の取り込み方は、概ね\n\n『「Web取込」タブにて、取り込みたい小説の\"本文が表示されている状態\"にした上で、右下の「取り込む」ボタンを押す』\n\n事で行えます。「Web取込」機能による小説の取り込み方の詳しい使い方につきましてはサポートサイト下部にあります「Web取込機能について」のページをご参照ください。\nなお、この「なろう検索」タブはしばらく後のアップデート時にタブごと削除される予定ですので、小説家になろう様の検索ページを「Web取込」機能側でブックマークしておく事をおすすめしておきます。";
+"NarouSearchViewController_NarouSearchTabDeletedAnnounceText" = "「なろう検索」機能提供終了のお知らせ\n\n以前からお知らせしておりました通り、「なろう検索」タブ関連の機能は削除されました。今後は「Web取込」機能をご活用ください。\n「なろう検索」と同様の検索機能は 小説家になろう様 側にあります検索ページをご利用ください。「Web取込」機能で取り込まれた小説は「なろう検索」経由で取り込んだ小説と同様の使い勝手になっています。「Web取込」タブでの小説の取り込み方は、概ね\n\n『「Web取込」タブにて、取り込みたい小説の \"本文が表示されている状態\" にした上で、右下の「取り込む」ボタンを押す』\n\n事で行えます。「Web取込」機能による小説の取り込み方の詳しい使い方につきましてはサポートサイト下部にあります「Web取込機能について」のページをご参照ください。\nなお、この「なろう検索」タブはしばらく後のアップデート時にタブごと削除される予定ですので、今後も検索ページを使いたいという場合には、小説家になろう様の検索ページを「Web取込」機能側でブックマークしておく事をおすすめしておきます。";
 
 "PickerViewDialog_DoneKeyboardBarItem" = "決定";
 
@@ -320,6 +320,12 @@
 "FontSelectViewController_DefaultFontTitle" = "標準フォント";
 
 "CoreDataToRealmTool_DefaultSpeaker" = "標準";
+"CoreDataToRealmTool_ProgressNovel" = "小説データを変換中";
+"CoreDataToRealmTool_ProgressGLobalState" = "設定項目を変換中";
+"CoreDataToRealmTool_ProgressSpeechMod" = "読み替え辞書を変換中";
+
+"MigrationViewController_DoingCoreDataMigration" = "旧データベースの更新を行っています。";
+
 "SpeakerSetting_NewSpeakerSetting" = "新規話者設定";
 
 "SpeakSettingsViewController_SpeakSettingNameTitle" = "名前";

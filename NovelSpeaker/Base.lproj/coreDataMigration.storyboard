@@ -10,10 +10,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Core Data Migration View Controller-->
+        <!--Migration View Controller-->
         <scene sceneID="1ee-fZ-yTs">
             <objects>
-                <viewController id="acp-rQ-wMB" customClass="CoreDataMigrationViewController" sceneMemberID="viewController">
+                <viewController id="acp-rQ-wMB" customClass="MigrationViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="uNP-bg-euR">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -30,18 +30,31 @@
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NdX-pP-Flq">
+                                <rect key="frame" x="20" y="481" width="374" height="381"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="zwb-YK-bEt" firstAttribute="trailing" secondItem="uNP-bg-euR" secondAttribute="trailingMargin" id="5yO-ly-7DB"/>
+                            <constraint firstItem="20o-L3-tNV" firstAttribute="trailing" secondItem="NdX-pP-Flq" secondAttribute="trailing" constant="20" id="Gf0-0s-naR"/>
                             <constraint firstItem="zwb-YK-bEt" firstAttribute="top" secondItem="20o-L3-tNV" secondAttribute="top" constant="8" id="Nsj-4L-ov3"/>
                             <constraint firstItem="zwb-YK-bEt" firstAttribute="leading" secondItem="uNP-bg-euR" secondAttribute="leadingMargin" id="NyY-Oe-SKO"/>
                             <constraint firstItem="giL-Nh-v8j" firstAttribute="centerX" secondItem="20o-L3-tNV" secondAttribute="centerX" id="O6A-9c-jyB"/>
+                            <constraint firstItem="NdX-pP-Flq" firstAttribute="bottom" secondItem="20o-L3-tNV" secondAttribute="bottom" id="UmG-2H-1Qw"/>
                             <constraint firstItem="giL-Nh-v8j" firstAttribute="top" secondItem="zwb-YK-bEt" secondAttribute="bottom" constant="21" id="fBr-qL-d46"/>
                             <constraint firstItem="giL-Nh-v8j" firstAttribute="centerY" secondItem="uNP-bg-euR" secondAttribute="centerY" id="ifb-ri-Eft"/>
+                            <constraint firstItem="NdX-pP-Flq" firstAttribute="leading" secondItem="20o-L3-tNV" secondAttribute="leading" constant="20" id="nee-Up-ZLi"/>
+                            <constraint firstItem="NdX-pP-Flq" firstAttribute="top" secondItem="giL-Nh-v8j" secondAttribute="bottom" constant="23" id="yBd-SI-gCw"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="20o-L3-tNV"/>
                     </view>
+                    <connections>
+                        <outlet property="progressLabel" destination="NdX-pP-Flq" id="fRT-yE-t51"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="evD-Rz-DLF" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

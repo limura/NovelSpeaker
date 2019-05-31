@@ -26,8 +26,8 @@ class CoreDataToRealmTool: NSObject {
     }
     
     // realm.write {} の中で呼んでください
-    private static func CreateRealmGlobalStateFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
-
+    private static func CreateRealmGlobalStateFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) {
+        progress(NSLocalizedString("CoreDataToRealmTool_ProgressGLobalState", comment: "設定項目を変換中"))
         let realmState = RealmGlobalState()
         let defaultSpeechOverrideSetting = RealmSpeechOverrideSetting()
         let defaultSpeaker = RealmSpeakerSetting()
@@ -60,7 +60,7 @@ class CoreDataToRealmTool: NSObject {
         realmState.isReadingProgressDisplayEnabled = globalDataSingleton.isReadingProgressDisplayEnabled()
         realmState.isForceSiteInfoReloadIsEnabled = globalDataSingleton.getForceSiteInfoReloadIsEnabled()
         realmState.isMenuItemIsAddSpeechModSettingOnly = globalDataSingleton.getMenuItemIsAddSpeechModSettingOnly()
-        realmState.isBackgroundNovelFetchEnabled = globalDataSingleton.getBackgroundNovelFetchEnabled()
+        //realmState.isBackgroundNovelFetchEnabled = globalDataSingleton.getBackgroundNovelFetchEnabled()
         realmState.bookShelfSortType = globalDataSingleton.getBookSelfSortType()
         realmState.isPageTurningSoundEnabled = globalDataSingleton.isPageTurningSoundEnabled()
 
@@ -99,7 +99,7 @@ class CoreDataToRealmTool: NSObject {
         realm.add([defaultSpeechOverrideSetting, defaultSpeaker, defaultDisplaySetting, realmState], update: true)
     }
     
-    private static func CreateRealmSpeakerSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
+    private static func CreateRealmSpeakerSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) {
 
         let globalState = globalDataSingleton.getGlobalState()
         if let pitchConfigArray = globalDataSingleton.getAllSpeakPitchConfig() {
@@ -146,11 +146,14 @@ class CoreDataToRealmTool: NSObject {
         }
     }
     
-    private static func CreateRealmSpeechModSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
+    private static func CreateRealmSpeechModSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) {
         guard let speechModArray = globalDataSingleton.getAllSpeechModSettings() else {
             return
         }
+        var count = 0
         for speechMod in speechModArray {
+            count += 1
+            progress(NSLocalizedString("CoreDataToRealmTool_ProgressSpeechMod", comment: "読み替え辞書を変換中") + " (\(count)/\(speechModArray.count))")
             if let speechMod = speechMod as? SpeechModSettingCacheData {
                 let mod = RealmSpeechModSetting()
 
@@ -166,12 +169,12 @@ class CoreDataToRealmTool: NSObject {
                 }
                 mod.isUseRegularExpression = speechMod.isRegexpType()
 
-                realm.add(mod)
+                realm.add(mod, update: true)
             }
         }
     }
     
-    private static func CreateRealmSpeechWaitConfigFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
+    private static func CreateRealmSpeechWaitConfigFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) {
         guard let speechWaitArray = globalDataSingleton.getAllSpeechWaitConfig() else {
             return
         }
@@ -240,11 +243,14 @@ class CoreDataToRealmTool: NSObject {
         return "https://ncode.syosetu.com/\(ncode.lowercased())/"
     }
     
-    private static func CreateRealmNovelFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton) {
+    private static func CreateRealmNovelFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) {
         guard let novelArray = globalDataSingleton.getAllNarouContent(.ncode) else {
             return
         }
+        var count = 0
         for novelObj in novelArray {
+            count += 1
+            progress(NSLocalizedString("CoreDataToRealmTool_ProgressNovel", comment: "小説データを変換中") + " (\(count)/\(novelArray.count))")
             guard let novelCoreData = novelObj as? NarouContentCacheData else {
                 continue
             }
@@ -304,18 +310,33 @@ class CoreDataToRealmTool: NSObject {
     }
     
     //
-    @objc public static func ClearLocalRealmDataAndConvertFromCoreaData() throws {
-        RealmUtil.RemoveLocalRealmFile()
+    @objc public static func ConvertFromCoreaData(progress:(String)->Void) {
         guard let globalDataSingleton = GlobalDataSingleton.getInstance() else {
             return
         }
-        let realm = try RealmUtil.GetLocalRealm()
-        try realm.write {
-            CreateRealmGlobalStateFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton)
-            CreateRealmSpeakerSettingFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton)
-            CreateRealmSpeechModSettingFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton)
-            CreateRealmSpeechWaitConfigFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton)
-            CreateRealmNovelFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton)
+        UnregisterConvertFromCoreDataFinished()
+        RealmUtil.Write { (realm) in
+            CreateRealmGlobalStateFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
+            CreateRealmSpeakerSettingFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
+            CreateRealmSpeechModSettingFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
+            CreateRealmSpeechWaitConfigFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
+            CreateRealmNovelFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
         }
+        RegisterConvertFromCoreDataFinished()
+    }
+    
+    static let IsConvertFromCoreDataFinishedKey = "NovelSpeaker_CoreDataToRealmTool_IsConvertFromCoreDataFinished"
+    static func IsConvertFromCoreDataFinished() -> Bool {
+        let userDefaults = UserDefaults.standard
+        userDefaults.register(defaults: [IsConvertFromCoreDataFinishedKey: false])
+        return userDefaults.bool(forKey: IsConvertFromCoreDataFinishedKey)
+    }
+    static func UnregisterConvertFromCoreDataFinished() {
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(false, forKey: IsConvertFromCoreDataFinishedKey)
+    }
+    static func RegisterConvertFromCoreDataFinished() {
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(true, forKey: IsConvertFromCoreDataFinishedKey)
     }
 }
