@@ -699,7 +699,7 @@ extension RealmStory: CanWriteIsDeleted {
             story.url = storyUrl
         }
         try! realm.write {
-            story.lastReadDate = Date(timeIntervalSinceNow: -60)
+            story.lastReadDate = Date(timeIntervalSince1970: 60)
             realm.add(story, update: true)
         }
         if let tagArray = tag {
