@@ -46,6 +46,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.createdDate = obj.createdDate
             newObj.likeLevel = obj.likeLevel
             newObj.isNeedSpeechAfterDelete = obj.isNeedSpeechAfterDelete
+            newObj.defaultSpeakerID = obj.defaultSpeakerID
             to.add(newObj, update: true)
         }
         do {

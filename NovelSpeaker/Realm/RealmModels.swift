@@ -13,7 +13,7 @@ import UIKit
 
 @objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 0
-    static let deleteRealmIfMigrationNeeded: Bool = true
+    static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     
     static var syncEngine: SyncEngine? = nil
@@ -456,7 +456,8 @@ extension RealmStory: CanWriteIsDeleted {
     @objc dynamic var createdDate : Date = Date()
     @objc dynamic var likeLevel : Int8 = 0
     @objc dynamic var isNeedSpeechAfterDelete : Bool = false
-    
+    @objc dynamic var defaultSpeakerID : String = ""
+
     var type : NovelType {
         get {
             return NovelType(rawValue: self._type) ?? NovelType.UserCreated
@@ -570,6 +571,17 @@ extension RealmStory: CanWriteIsDeleted {
     var urlSecret: [String] {
         get {
             return _urlSecret.components(separatedBy: ";")
+        }
+    }
+    
+    var defaultSpeaker : RealmSpeakerSetting? {
+        get {
+            if self.defaultSpeakerID.count <= 0 {
+                return RealmGlobalState.GetInstance()?.defaultSpeaker
+            }
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            realm.refresh()
+            return realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: self.defaultSpeakerID)
         }
     }
     
@@ -978,7 +990,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
         return realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false").filter({ (setting) -> Bool in
-            return setting.targetNovelIDArray.contains(anyTarget) || setting.targetNovelIDArray.contains(novelID)
+            return setting.targetNovelIDArray.contains(novelID)
         })
     }
 

@@ -825,11 +825,11 @@ class NovelSpeakerUtility: NSObject {
         }
         return true
     }
-    static func RestoreSpeechMod_V_2_0_0(array:NSArray){
-        for speechModDic in array {
+    static func RestoreSpeechMod_V_2_0_0(dic:NSDictionary){
+        for (before, speechModDic) in dic {
             guard let speechMod = speechModDic as? NSDictionary,
-                let before = speechMod.object(forKey: "before") as? String,
-                let after = speechMod.object(forKey: "after") as? String,
+                let before = before as? String,
+                let after = speechMod.object(forKey: "afterString") as? String,
                 let createdDateString = speechMod.object(forKey: "createdDate") as? String,
                 let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
                 let isUseRegularExpression = speechMod.object(forKey: "isUseRegularExpression") as? NSNumber,
@@ -1091,7 +1091,8 @@ class NovelSpeakerUtility: NSObject {
                 let createdDateString = novelDic.object(forKey: "createdDate") as? String,
                 let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
                 let likeLevel = novelDic.object(forKey: "likeLevel") as? NSNumber,
-                let isNeedSpeechAfterDelete = novelDic.object(forKey: "isNeedSpeechAfterDelete") as? NSNumber
+                let isNeedSpeechAfterDelete = novelDic.object(forKey: "isNeedSpeechAfterDelete") as? NSNumber,
+                let defaultSpeakerID = novelDic.object(forKey: "defaultSpeakerID") as? String
                 else { continue }
             let novel = RealmNovel.SearchNovelFrom(novelID: novelID) ?? RealmNovel()
             if novel.novelID != novelID {
@@ -1106,6 +1107,7 @@ class NovelSpeakerUtility: NSObject {
                 novel.createdDate = createdDate
                 novel.likeLevel = likeLevel.int8Value
                 novel.isNeedSpeechAfterDelete = isNeedSpeechAfterDelete.boolValue
+                novel.defaultSpeakerID = defaultSpeakerID
                 realm.add(novel, update: true)
             }
             if let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
@@ -1145,8 +1147,8 @@ class NovelSpeakerUtility: NSObject {
     }
 
     static func ProcessNovelSpeakerBackupJSONData_V_2_0_0(toplevelDictionary:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> Bool {
-        if let word_replacement_dictionary = toplevelDictionary.object(forKey: "word_replacement_dictionary") as? NSArray {
-            RestoreSpeechMod_V_2_0_0(array: word_replacement_dictionary)
+        if let word_replacement_dictionary = toplevelDictionary.object(forKey: "word_replacement_dictionary") as? NSDictionary {
+            RestoreSpeechMod_V_2_0_0(dic: word_replacement_dictionary)
         }
         if let speech_wait_config = toplevelDictionary.object(forKey: "speech_wait_config") as? NSArray {
             RestoreSpeechWaitConfig_V_2_0_0(waitArray: speech_wait_config)
@@ -1303,6 +1305,7 @@ class NovelSpeakerUtility: NSObject {
                 "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: novel.createdDate),
                 "likeLevel": novel.likeLevel,
                 "isNeedSpeechAfterDelete": novel.isNeedSpeechAfterDelete,
+                "defaultSpeakerID": novel.defaultSpeakerID,
                 "contentDirectory": "\(novelCount)"
             ]
             let contentDirectory = NiftyUtilitySwift.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
@@ -1324,17 +1327,16 @@ class NovelSpeakerUtility: NSObject {
         }
         return (result, fileArray)
     }
-    fileprivate static func CreateBackupDataDictionary_SpeechModSetting() -> [[String:Any]] {
-        var result:[[String:Any]] = []
+    fileprivate static func CreateBackupDataDictionary_SpeechModSetting() -> [String:[String:Any]] {
+        var result:[String:[String:Any]] = [:]
         guard let targetArray = RealmSpeechModSetting.GetAllObjects() else { return result }
         for setting in targetArray {
-            result.append([
-                "before": setting.before,
-                "after": setting.after,
+            result[setting.before] = [
+                "afterString": setting.after,
                 "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),
                 "isUseRegularExpression": setting.isUseRegularExpression,
                 "targetNovelIDArray": Array(setting.targetNovelIDArray)
-            ])
+            ]
         }
         return result
     }

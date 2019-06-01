@@ -207,18 +207,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func applySpeechConfig(novelID:String, speaker:NiftySpeaker) {
-        guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
+        guard let defaultSpeakerSetting = RealmNovel.SearchNovelFrom(novelID: novelID)?.defaultSpeaker else { return }
         speaker.setDefaultSpeechConfig(defaultSpeakerSetting.speechConfig)
         guard let speechSectionConfigArray = RealmSpeechSectionConfig.SearchSettingsFor(novelID: novelID) else { return }
         for sectionConfig in speechSectionConfigArray {
             guard let speakerSetting = sectionConfig.speaker else { continue }
-            if sectionConfig.startText.count <= 0 {
-                if let speechConfig = sectionConfig.speaker?.speechConfig {
-                    speaker.setDefaultSpeechConfig(speechConfig)
-                }
-            }else{
-                speaker.addBlockStartSeparator(sectionConfig.startText, end: sectionConfig.endText, speechConfig: speakerSetting.speechConfig)
-            }
+            speaker.addBlockStartSeparator(sectionConfig.startText, end: sectionConfig.endText, speechConfig: speakerSetting.speechConfig)
         }
     }
     
