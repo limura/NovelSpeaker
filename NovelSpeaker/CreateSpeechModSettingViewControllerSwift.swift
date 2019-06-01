@@ -12,6 +12,7 @@ import RealmSwift
 
 class CreateSpeechModSettingViewControllerSwift: FormViewController {
     @objc public var targetSpeechModSettingBeforeString:String? = nil
+    public var targetNovelID = ""
     var beforeTestText = ""
     var afterTestText = ""
     var beforeText = ""
@@ -51,14 +52,31 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
         let before:String
         let after:String
         let isUseRegularExpression:Bool
+        var targetNovelNameArray:[String] = []
         if let targetID = targetSpeechModSettingBeforeString, let targetSetting = RealmSpeechModSetting.SearchFrom(beforeString: targetID) {
             before = targetSetting.before
             after = targetSetting.after
             isUseRegularExpression = targetSetting.isUseRegularExpression
+            if targetNovelID == RealmSpeechModSetting.anyTarget || targetSetting.targetNovelIDArray.contains(RealmSpeechModSetting.anyTarget) {
+                targetNovelNameArray.append(NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AnyTargetName", comment: "全ての小説"))
+            }
+            if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID) {
+                targetNovelNameArray.append(novel.title)
+            }
+            for novelID in targetSetting.targetNovelIDArray {
+                if novelID == RealmSpeechModSetting.anyTarget || novelID == targetNovelID { continue }
+                guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { continue }
+                targetNovelNameArray.append(novel.title)
+            }
         }else{
             before = targetSpeechModSettingBeforeString ?? ""
             after = ""
             isUseRegularExpression = false
+            if targetNovelID == RealmSpeechModSetting.anyTarget {
+                targetNovelNameArray = [NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AnyTargetName", comment: "全ての小説")]
+            }else if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID) {
+                targetNovelNameArray = [novel.title]
+            }
         }
         self.beforeText = before
         self.afterText = after
@@ -122,6 +140,10 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
             }
             self.isUseRegexp = value
         })
+        <<< LabelRow("TargetNovelIDLabelRow") {
+            $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TargetNovelIDLabelTitle", comment: "適用対象")
+            $0.value = targetNovelNameArray.joined(separator: ", ")
+        }
         <<< TextRow("BeforeTestTextRow") {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_BeforeSampleTitle", comment: "読み替え前")
             if self.isUseRegexp {
@@ -165,15 +187,18 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController {
                     if targetBeforeString != self.beforeText {
                         originalSetting.delete(realm: realm)
                         setting = RealmSpeechModSetting()
+                        setting.before = self.beforeText
                     }else{
                         setting = originalSetting
                     }
                 }else{
                     setting = RealmSpeechModSetting()
                 }
-                setting.before = self.beforeText
                 setting.after = self.afterText
                 setting.isUseRegularExpression = self.isUseRegexp
+                if !setting.targetNovelIDArray.contains(self.targetNovelID){
+                    setting.targetNovelIDArray.append(self.targetNovelID)
+                }
                 realm.add(setting, update: true)
             }
             DispatchQueue.main.async {

@@ -57,9 +57,11 @@ void uncaughtExceptionHandler(NSException *exception)
     // [NovelSpeakerUtility InsertDefaultSettingsIfNeeded];
     
     UIViewController* toplevelViewController = nil;
+    // 強制的に localRealm を消す場合はこうします
+    //[CoreDataToRealmTool UnregisterConvertFromCoreDataFinished];
     //[RealmUtil RemoveLocalRealmFile];
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool CheckIsLocalRealmCreated] == false) {
+    if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool IsNeedMigration]) {
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"coreDataMigration" bundle:nil];
         toplevelViewController = [storyboard instantiateInitialViewController];
     }else{

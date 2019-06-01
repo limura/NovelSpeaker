@@ -13,6 +13,7 @@ class SpeechSectionConfigsViewController: FormViewController {
     let speaker = Speaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     var hideCache:[String:Bool] = [:]
+    public var targetNovelID = RealmSpeechSectionConfig.anyTarget
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -180,7 +181,7 @@ class SpeechSectionConfigsViewController: FormViewController {
                         return
                     }
                     RealmUtil.Write { (realm) in
-                        setting.delete(realm: realm)
+                        setting.unref(realm: realm, novelID: self.targetNovelID)
                     }
                     if let index = self.form.firstIndex(of: section) {
                         print("remove section index: \(index)")
@@ -195,7 +196,6 @@ class SpeechSectionConfigsViewController: FormViewController {
     }
     
     func createCells() {
-        let speechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects()?.sorted(byKeyPath: "createdDate")
         let section = Section()
         <<< TextAreaRow() {
             $0.value = NSLocalizedString("SpeechSectionConfigsViewController_Usage", comment: "会話文などで声質や話者を変更するための設定です。\nそれぞれの設定をタップすると詳細が設定できます。開始文字と終了文字の間に挟まれた部分を読み上げる話者を選択します。必要のない設定は削除することもできます。")
@@ -271,7 +271,9 @@ class SpeechSectionConfigsViewController: FormViewController {
         })
         form +++ section
 
-        if let speechSectionConfigArray = speechSectionConfigArray {
+        if let speechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects()?.sorted(byKeyPath: "createdDate").filter({ (setting) -> Bool in
+            return setting.targetNovelIDArray.contains(self.targetNovelID)
+        }) {
             for speechSectionConfig in speechSectionConfigArray {
                 form.append(self.createSpeechSectionConfigCells(speechSectionConfig: speechSectionConfig))
             }

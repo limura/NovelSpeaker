@@ -86,13 +86,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
 
         let menuController = UIMenuController.shared
         let speechModMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), action: #selector(setSpeechModSetting(sender:)))
+        let speechModForThisNovelMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettingsForThisNovel", comment: "この小説用の読み替え辞書へ登録"), action: #selector(setSpeechModForThisNovelSetting(sender:)))
         let checkSpeechTextMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), action: #selector(checkSpeechText(sender:)))
-        let menuItems:[UIMenuItem]
-        if RealmGlobalState.GetInstance()?.isMenuItemIsAddSpeechModSettingOnly ?? false {
-            menuItems = [speechModMenuItem]
-        }else{
-            menuItems = [speechModMenuItem, checkSpeechTextMenuItem]
-        }
+        let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem]
         menuController.menuItems = menuItems
     }
     
@@ -252,9 +248,23 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         if text.count <= 0 { return }
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
         nextViewController.targetSpeechModSettingBeforeString = text
+        nextViewController.targetNovelID = RealmSpeechModSetting.anyTarget
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
-    
+    @objc func setSpeechModForThisNovelSetting(sender: UIMenuItem){
+        guard let range = self.textView.selectedTextRange, let text = self.textView.text(in: range) else { return }
+        if text.count <= 0 { return }
+        let nextViewController = CreateSpeechModSettingViewControllerSwift()
+        nextViewController.targetSpeechModSettingBeforeString = text
+        if let storyID = storyID {
+            nextViewController.targetNovelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+        }else{
+            // 不測の事態だ……('A`)
+            return
+        }
+        self.navigationController?.pushViewController(nextViewController, animated: true)
+    }
+
     @objc func checkSpeechText(sender: UIMenuItem) {
         guard let range = self.textView.selectedTextRange, let text = self.textView.text(in: range), let storyID = self.storyID else { return }
         let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)

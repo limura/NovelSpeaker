@@ -209,13 +209,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     func applySpeechConfig(novelID:String, speaker:NiftySpeaker) {
         guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
         speaker.setDefaultSpeechConfig(defaultSpeakerSetting.speechConfig)
-        guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
-        let speechSectionConfigArray = allSpeechSectionConfigArray.filter({ (sectionConfig) -> Bool in
-            return sectionConfig.targetNovelIDArray.count <= 0 || sectionConfig.targetNovelIDArray.contains(novelID)
-        })
+        guard let speechSectionConfigArray = RealmSpeechSectionConfig.SearchSettingsFor(novelID: novelID) else { return }
         for sectionConfig in speechSectionConfigArray {
             guard let speakerSetting = sectionConfig.speaker else { continue }
-            speaker.addBlockStartSeparator(sectionConfig.startText, end: sectionConfig.endText, speechConfig: speakerSetting.speechConfig)
+            if sectionConfig.startText.count <= 0 {
+                if let speechConfig = sectionConfig.speaker?.speechConfig {
+                    speaker.setDefaultSpeechConfig(speechConfig)
+                }
+            }else{
+                speaker.addBlockStartSeparator(sectionConfig.startText, end: sectionConfig.endText, speechConfig: speakerSetting.speechConfig)
+            }
         }
     }
     
@@ -286,9 +289,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             }
         }
         
-        if let speechModSettingArray = RealmSpeechModSetting.GetAllObjects()?.filter({ (setting) -> Bool in
-            return setting.targetNovelIDArray.count <= 0 || setting.targetNovelIDArray.contains(novelID)
-        }) {
+        if let speechModSettingArray = RealmSpeechModSetting.SearchSettingsFor(novelID: novelID) {
             for setting in speechModSettingArray {
                 if setting.isUseRegularExpression {
                     guard let modSettingArray = StringSubstituter.findRegexpSpeechModConfigs(targetText, pattern: setting.before, to: setting.after) else { continue }

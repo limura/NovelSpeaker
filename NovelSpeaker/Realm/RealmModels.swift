@@ -419,7 +419,7 @@ protocol CanWriteIsDeleted {
     func delete(realm:Realm) {
         if let queueArray = linkedQueues {
             for queue in queueArray {
-                queue.unref(realm:realm, story: self)
+                queue.unref(realm:realm, storyID: self.id)
             }
         }
         RealmUtil.Delete(realm: realm, model: self)
@@ -707,27 +707,27 @@ extension RealmStory: CanWriteIsDeleted {
         }
         if let speechModSettingArray = linkedSpeechModSettings {
             for speechModSetting in speechModSettingArray {
-                speechModSetting.unref(realm:realm, novel: self)
+                speechModSetting.unref(realm:realm, novelID: self.novelID)
             }
         }
         if let speechSectionConfigArray = linkedSpeechSectionConfigs {
             for speechSectionConfig in speechSectionConfigArray {
-                speechSectionConfig.unref(realm:realm, novel: self)
+                speechSectionConfig.unref(realm:realm, novelID: self.novelID)
             }
         }
         if let displaySettingArray = linkedDisplaySettings {
             for displaySetting in displaySettingArray {
-                displaySetting.unref(realm:realm, novel: self)
+                displaySetting.unref(realm:realm, novelID: self.novelID)
             }
         }
         if let tagArray = linkedTags {
             for tag in tagArray {
-                tag.unref(realm:realm, novel: self)
+                tag.unref(realm:realm, novelID: self.novelID)
             }
         }
         if let realmSpeechOverrideSettingArray = linkedRealmSpeechOverrideSettings {
             for realmSpeechOverrideSetting in realmSpeechOverrideSettingArray {
-                realmSpeechOverrideSetting.unref(realm:realm, novel: self)
+                realmSpeechOverrideSetting.unref(realm:realm, novelID: self.novelID)
             }
         }
         RealmUtil.Delete(realm: realm, model: self)
@@ -758,6 +758,7 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
     @objc dynamic var createdDate = Date()
     @objc dynamic var isUseRegularExpression : Bool = false
     
+    static let anyTarget = "novelspeakerdata://any"
     let targetNovelIDArray = List<String>()
     
     var targetNovelArray : [RealmNovel]? {
@@ -783,9 +784,16 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
         }
         return nil
     }
+    static func SearchSettingsFor(novelID:String) -> LazyFilterSequence<Results<RealmSpeechModSetting>>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        realm.refresh()
+        return realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false").filter({ (setting) -> Bool in
+            return setting.targetNovelIDArray.contains(anyTarget) || setting.targetNovelIDArray.contains(novelID)
+        })
+    }
 
-    func unref(realm:Realm, novel:RealmNovel) {
-        if let index = targetNovelIDArray.index(of: novel.novelID) {
+    func unref(realm:Realm, novelID:String) {
+        if let index = targetNovelIDArray.index(of: novelID) {
             targetNovelIDArray.remove(at: index)
             if targetNovelIDArray.count <= 0 {
                 delete(realm: realm)
@@ -945,8 +953,9 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
     @objc dynamic var startText = "「"
     @objc dynamic var endText = "」"
     @objc dynamic var createdDate = Date()
-    
     @objc dynamic var speakerID: String = ""
+    
+    static let anyTarget = "novelspeakerdata://any"
     let targetNovelIDArray = List<String>()
     
     var speaker : RealmSpeakerSetting? {
@@ -965,7 +974,14 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
             })
         }
     }
-    
+    static func SearchSettingsFor(novelID:String) -> LazyFilterSequence<Results<RealmSpeechSectionConfig>>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        realm.refresh()
+        return realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false").filter({ (setting) -> Bool in
+            return setting.targetNovelIDArray.contains(anyTarget) || setting.targetNovelIDArray.contains(novelID)
+        })
+    }
+
     static func GetAllObjects() -> Results<RealmSpeechSectionConfig>? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
@@ -981,8 +997,8 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
         return nil
     }
 
-    func unref(realm: Realm, novel: RealmNovel) {
-        if let index = targetNovelIDArray.index(of: novel.novelID) {
+    func unref(realm: Realm, novelID: String) {
+        if let index = targetNovelIDArray.index(of: novelID) {
             targetNovelIDArray.remove(at: index)
             if targetNovelIDArray.count <= 0 {
                 delete(realm: realm)
@@ -1040,8 +1056,8 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
         return nil
     }
 
-    func unref(realm:Realm, story:RealmStory) {
-        if let index = targetStoryIDArray.index(of: story.id) {
+    func unref(realm:Realm, storyID:String) {
+        if let index = targetStoryIDArray.index(of: storyID) {
             targetStoryIDArray.remove(at: index)
             if targetStoryIDArray.count <= 0 {
                 delete(realm: realm)
@@ -1285,7 +1301,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
     static func convertFontSizeValue(textSizeValue:Float) -> Float {
         var value = textSizeValue
         if value < 1.0 {
-            value = 1.0;
+            value = 50.0;
         }else if value > 100.0 {
             value = 100.0;
         }
@@ -1304,8 +1320,8 @@ extension RealmGlobalState: CanWriteIsDeleted {
         }
     }
 
-    func unref(realm: Realm, novel: RealmNovel) {
-        if let index = targetNovelIDArray.index(of: novel.novelID) {
+    func unref(realm: Realm, novelID: String) {
+        if let index = targetNovelIDArray.index(of: novelID) {
             targetNovelIDArray.remove(at: index)
             if targetNovelIDArray.count <= 0 {
                 delete(realm: realm)
@@ -1377,8 +1393,8 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
         }
     }
     
-    func unref(realm:Realm, novel:RealmNovel) {
-        if let index = targetNovelIDArray.index(of: novel.novelID) {
+    func unref(realm:Realm, novelID:String) {
+        if let index = targetNovelIDArray.index(of: novelID) {
             targetNovelIDArray.remove(at: index)
             if targetNovelIDArray.count <= 0 {
                 delete(realm: realm)
@@ -1451,8 +1467,8 @@ extension RealmNovelTag: CanWriteIsDeleted {
         realm.refresh()
         return realm.object(ofType: RealmSpeechOverrideSetting.self, forPrimaryKey: name)
     }
-    func unref(realm:Realm, novel:RealmNovel) {
-        if let index = targetNovelIDArray.index(of: novel.novelID) {
+    func unref(realm:Realm, novelID:String) {
+        if let index = targetNovelIDArray.index(of: novelID) {
             targetNovelIDArray.remove(at: index)
             if targetNovelIDArray.count <= 0 {
                 delete(realm: realm)

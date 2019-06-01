@@ -54,6 +54,7 @@ class NovelSpeakerUtility: NSObject {
                 speechModSetting.before = before
                 speechModSetting.after = after
                 speechModSetting.isUseRegularExpression = false
+                speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
                 realm.add(speechModSetting, update: true)
             }
         }
@@ -72,6 +73,7 @@ class NovelSpeakerUtility: NSObject {
                 speechModSetting.before = before
                 speechModSetting.after = after
                 speechModSetting.isUseRegularExpression = false
+                speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
                 realm.add(speechModSetting, update: true)
             }
             for (before, after) in defaultRegexpSpeechModSettings {
@@ -84,6 +86,7 @@ class NovelSpeakerUtility: NSObject {
                 speechModSetting.before = before
                 speechModSetting.after = after
                 speechModSetting.isUseRegularExpression = true
+                speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
                 realm.add(speechModSetting, update: true)
             }
         }
@@ -188,14 +191,16 @@ class NovelSpeakerUtility: NSObject {
                     talk1SectionConfig.startText = "「"
                     talk1SectionConfig.endText = "」"
                     talk1SectionConfig.speakerID = talk1Speaker.name
-                    
+                    talk1SectionConfig.targetNovelIDArray.append(RealmSpeechSectionConfig.anyTarget)
+
                     talk2Speaker.pitch = 1.2
                     talk2Speaker.name = NSLocalizedString("GlobalDataSingleton_Conversation2", comment: "会話文2")
                     talk2SectionConfig.name = NSLocalizedString("GlobalDataSingleton_Conversation2", comment: "会話文2")
                     talk2SectionConfig.startText = "『"
                     talk2SectionConfig.endText = "』"
                     talk2SectionConfig.speakerID = talk2Speaker.name
-                    
+                    talk2SectionConfig.targetNovelIDArray.append(RealmSpeechSectionConfig.anyTarget)
+
                     realm.add(talk1Speaker, update: true)
                     realm.add(talk2Speaker, update: true)
                     realm.add(talk1SectionConfig, update: true)
@@ -383,6 +388,7 @@ class NovelSpeakerUtility: NSObject {
                     speechMod.before = before
                     speechMod.after = after
                     speechMod.isUseRegularExpression = false
+                    speechMod.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
                     realm.add(speechMod)
                 }
             }
@@ -411,6 +417,7 @@ class NovelSpeakerUtility: NSObject {
                     speechMod.before = before
                     speechMod.after = after
                     speechMod.isUseRegularExpression = type == Int(SpeechModSettingConvertType.regexp.rawValue)
+                    speechMod.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
                     realm.add(speechMod, update: true)
                 }
             }
@@ -470,6 +477,7 @@ class NovelSpeakerUtility: NSObject {
                         section.name = speaker.name
                         section.startText = start_text
                         section.endText = end_text
+                        section.targetNovelIDArray.append(RealmSpeechSectionConfig.anyTarget)
                         realm.add(section, update: true)
                     }
                 }
@@ -493,6 +501,7 @@ class NovelSpeakerUtility: NSObject {
                         section.name = speaker.name
                         section.startText = start_text
                         section.endText = end_text
+                        section.targetNovelIDArray.append(RealmSpeechSectionConfig.anyTarget)
                         realm.add(section, update: true)
                     }
                 }

@@ -92,7 +92,7 @@
 "SettingTableViewController_GoToSupportSite" = "Open NovelSpeaker support site";
 "SettingTableViewController_SendBugReport" = "Send inquiries to developers by e-mail";
 "SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "Display bookmark position on Bookshelf";
-"SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "Only display add correction of the reading at long press menu";
+"SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "Make long press menu in the text only from NovelSpeaker";
 "SettingTableViewController_ShortSkipIsEnabled" = "Change rewind button on Control Center to skip a little button";
 "SettingTableViewController_PlaybackDurationIsEnabled" = "Display the playing time on the control center (the displayed time is approximate, it will not be an accurate value)";
 "SettingTableViewController_DarkThemeIsEnabled" = "Darken the background when reading a novel";
@@ -183,6 +183,7 @@
 "SpeechViewController_UnknownErrorForShare" = "Could not share due to an unknown error.";
 "SpeechViewController_CheckSpeechTextDialogTitle" = "The string used for reading is as follows.";
 "SpeechViewController_AddCheckSpeechText" = "Check the translated text used for speech";
+"SpeechViewController_AddSpeechModSettingsForThisNovel" = "Add to speech mod settings for this novel";
 
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
@@ -395,6 +396,9 @@
 "CreateSpeechModSettingViewControllerSwift_ValidateBeforeFieldMessage" = "It seems to be an empty string or a defect in the regular expression.";
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFailedTitle" = "There is a problem with the string after replacement";
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFieldMessage" = "You can not set an empty string.\nIf you do not want them to speak after reading, you need to change to blank.";
+"CreateSpeechModSettingViewControllerSwift_AnyTargetName" = "\"Any novel\"";
+"CreateSpeechModSettingViewControllerSwift_TargetNovelIDLabelTitle" = "Applicable object";
+
 
 "NovelDownloader_htmlStoryIsNil" = "Novel download failed.";
 "NovelDownloader_FailedByNoContent" = "Novel download failed. This nove has no content.";

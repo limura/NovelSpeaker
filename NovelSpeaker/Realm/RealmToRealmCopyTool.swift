@@ -64,6 +64,8 @@ class RealmToRealmCopyTool: NSObject {
             newObj.after = obj.after
             newObj.createdDate = obj.createdDate
             newObj.isUseRegularExpression = obj.isUseRegularExpression
+            newObj.targetNovelIDArray.removeAll()
+            newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
             to.add(newObj, update: true)
         }
         do {

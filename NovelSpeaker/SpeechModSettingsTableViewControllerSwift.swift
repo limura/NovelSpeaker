@@ -13,6 +13,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     static let speechModSettingsTableViewDefaultCellID = "speechModSettingsTableViewDefaultCell"
     var m_FilterString = ""
     var speechModSettingObserveToken:NotificationToken? = nil
+    public var targetNovelID = RealmSpeechModSetting.anyTarget
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,8 +66,10 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        let speechModSettingArray = GetSpeechModArray()
-        return (speechModSettingArray.count);
+        if let speechModSettingArray = GetSpeechModArray() {
+            return (speechModSettingArray.count);
+        }
+        return 0
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -110,7 +113,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
             if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
                 if let targetModSetting = RealmSpeechModSetting.SearchFrom(beforeString: modSetting.before) {
                     RealmUtil.Write { (realm)  in
-                        targetModSetting.delete(realm: realm)
+                        targetModSetting.unref(realm: realm, novelID: self.targetNovelID)
                     }
                 }
             }
@@ -180,21 +183,22 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     func PushToCreateSpeechModSettingViewControllerSwift(modSetting:RealmSpeechModSetting?) {
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
         nextViewController.targetSpeechModSettingBeforeString = modSetting?.before
+        nextViewController.targetNovelID = self.targetNovelID
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     
-    func GetSpeechModArray() -> [RealmSpeechModSetting] {
+    func GetSpeechModArray() -> Results<RealmSpeechModSetting>? {
         guard let speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else {
-            return []
+            return nil
         }
         if m_FilterString.count > 0 {
-            return Array(speechModSettingArray.filter("( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString).sorted(byKeyPath: "before", ascending: false))
+            return speechModSettingArray.filter("( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString).sorted(byKeyPath: "before", ascending: false)
         }
-        return Array(speechModSettingArray.sorted(byKeyPath: "before", ascending: false))
+        return speechModSettingArray.sorted(byKeyPath: "before", ascending: false)
     }
     
     func GetSpeechModSettingFromRow(row:Int) -> RealmSpeechModSetting? {
-        let speechModSettingArray = GetSpeechModArray()
+        guard let speechModSettingArray = GetSpeechModArray() else { return nil }
         if speechModSettingArray.count <= row {
             return nil;
         }

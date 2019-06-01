@@ -139,6 +139,7 @@ class CoreDataToRealmTool: NSObject {
                     if let endText = pitchConfig.endText {
                         section.endText = endText
                     }
+                    section.targetNovelIDArray.append(RealmSpeechSectionConfig.anyTarget)
 
                     realm.add([speaker, section])
                 }
@@ -168,6 +169,7 @@ class CoreDataToRealmTool: NSObject {
                     continue
                 }
                 mod.isUseRegularExpression = speechMod.isRegexpType()
+                mod.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
 
                 realm.add(mod, update: true)
             }
@@ -331,12 +333,33 @@ class CoreDataToRealmTool: NSObject {
         userDefaults.register(defaults: [IsConvertFromCoreDataFinishedKey: false])
         return userDefaults.bool(forKey: IsConvertFromCoreDataFinishedKey)
     }
-    static func UnregisterConvertFromCoreDataFinished() {
+    @objc static func UnregisterConvertFromCoreDataFinished() {
         let userDefaults = UserDefaults.standard
         userDefaults.set(false, forKey: IsConvertFromCoreDataFinishedKey)
     }
     static func RegisterConvertFromCoreDataFinished() {
         let userDefaults = UserDefaults.standard
         userDefaults.set(true, forKey: IsConvertFromCoreDataFinishedKey)
+    }
+    
+    @objc static func IsNeedMigration() -> Bool {
+        if RealmUtil.IsUseCloudRealm() {
+            if RealmUtil.CheckIsCloudRealmCreated() {
+                return false
+            }
+            if RealmUtil.CheckIsLocalRealmCreated() {
+                return true
+            }
+            if GlobalDataSingleton.getInstance()?.isAliveCoreDataSaveFile() ?? false {
+                return true
+            }
+        }else{
+            if RealmUtil.CheckIsLocalRealmCreated() {
+                if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {
+                    return false
+                }
+            }
+        }
+        return true
     }
 }

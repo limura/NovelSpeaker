@@ -62,6 +62,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingsViewController_SpeechModSettingsButtonTitle", comment:"話者変更設定(会話文等で声質を変えたりする設定)")
             }.onCellSelection({ (_, _) in
                 let nextViewController = SpeechSectionConfigsViewController()
+                nextViewController.targetNovelID = RealmSpeechSectionConfig.anyTarget
                 self.navigationController?.pushViewController(nextViewController, animated: true)
             }).cellUpdate({ (cell, button) in
                 cell.textLabel?.textAlignment = .left
