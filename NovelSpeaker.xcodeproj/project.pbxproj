@@ -119,6 +119,7 @@
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */; };
+		21A291F622A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F522A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift */; };
 		21A2CDBB2292FD6E0080AEE6 /* LocalNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */; };
 		21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
 		21A2CDC42297D3A50080AEE6 /* NarouSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDC32297D3A50080AEE6 /* NarouSearchViewController.swift */; };
@@ -382,6 +383,7 @@
 		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmToRealmCopyTool.swift; sourceTree = "<group>"; };
+		21A291F522A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleNovelIDSelectorViewController.swift; sourceTree = "<group>"; };
 		21A2CDBA2292FD6E0080AEE6 /* LocalNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalNotifications.swift; sourceTree = "<group>"; };
 		21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDownloadQueue.swift; sourceTree = "<group>"; };
 		21A2CDC32297D3A50080AEE6 /* NarouSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NarouSearchViewController.swift; path = /Users/limura/Desktop/sources/NovelSpeaker/NovelSpeaker/NarouSearchViewController.swift; sourceTree = "<absolute>"; };
@@ -886,6 +888,7 @@
 				216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */,
 				212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */,
 				21A2CDC32297D3A50080AEE6 /* NarouSearchViewController.swift */,
+				21A291F522A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1258,6 +1261,7 @@
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
 				212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */,
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
+				21A291F622A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,

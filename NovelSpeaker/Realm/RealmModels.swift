@@ -986,12 +986,25 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
             })
         }
     }
-    static func SearchSettingsFor(novelID:String) -> LazyFilterSequence<Results<RealmSpeechSectionConfig>>? {
+    // 指定された NovelID に対する default設定以外 の section config をリストにして返します。
+    // 複雑なクエリになるので何度も呼び出すような使い方はしないほうが良いです。
+    static func SearchSettingsFor(novelID:String) -> Dictionary<String, RealmSpeechSectionConfig>.Values? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
-        return realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false").filter({ (setting) -> Bool in
+        var result:[String:RealmSpeechSectionConfig] = [:]
+        // anyTarget の物を一旦設定して
+        for target in realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false").filter({ (setting) -> Bool in
+            return setting.targetNovelIDArray.contains(anyTarget)
+        }) {
+            result[target.startText] = target
+        }
+        // novelID の物で上書きしたものが目標の設定
+        for target in realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false").filter({ (setting) -> Bool in
             return setting.targetNovelIDArray.contains(novelID)
-        })
+        }) {
+            result[target.startText] = target
+        }
+        return result.values
     }
 
     static func GetAllObjects() -> Results<RealmSpeechSectionConfig>? {

@@ -397,7 +397,10 @@
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFailedTitle" = "There is a problem with the string after replacement";
 "CreateSpeechModSettingViewControllerSwift_ValidateAfterFieldMessage" = "You can not set an empty string.\nIf you do not want them to speak after reading, you need to change to blank.";
 "CreateSpeechModSettingViewControllerSwift_AnyTargetName" = "\"Any novel\"";
-"CreateSpeechModSettingViewControllerSwift_TargetNovelIDLabelTitle" = "Applicable object";
+"CreateSpeechModSettingViewControllerSwift_TargetNovelIDLabelTitle" = "Applicable novel";
+"CreateSpeechModSettingViewControllerSwift_ConifirmDeleteSettingBecauseNoTargetNovelID" = "There are no novel in Applicable novel.\nAre you sure you want to delete this setting?";
+
+"MultipleNovelIDSelectorViewController_Title" = "Select novel";
 
 
 "NovelDownloader_htmlStoryIsNil" = "Novel download failed.";

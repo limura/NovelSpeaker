@@ -113,7 +113,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
             if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
                 if let targetModSetting = RealmSpeechModSetting.SearchFrom(beforeString: modSetting.before) {
                     RealmUtil.Write { (realm)  in
-                        targetModSetting.unref(realm: realm, novelID: self.targetNovelID)
+                        targetModSetting.delete(realm: realm)
                     }
                 }
             }
