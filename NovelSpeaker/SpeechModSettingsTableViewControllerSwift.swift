@@ -183,18 +183,25 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     func PushToCreateSpeechModSettingViewControllerSwift(modSetting:RealmSpeechModSetting?) {
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
         nextViewController.targetSpeechModSettingBeforeString = modSetting?.before
-        nextViewController.targetNovelID = self.targetNovelID
+        nextViewController.isUseAnyNovelID = true
+        nextViewController.targetNovelID = ""
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     
-    func GetSpeechModArray() -> Results<RealmSpeechModSetting>? {
-        guard let speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else {
-            return nil
-        }
+    func GetSpeechModArray() -> LazyFilterSequence<Results<RealmSpeechModSetting>>? {
+        guard var speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else { return nil }
         if m_FilterString.count > 0 {
-            return speechModSettingArray.filter("( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString).sorted(byKeyPath: "before", ascending: false)
+            speechModSettingArray = speechModSettingArray.filter("( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString)
         }
-        return speechModSettingArray.sorted(byKeyPath: "before", ascending: false)
+        speechModSettingArray = speechModSettingArray.sorted(byKeyPath: "before", ascending: false)
+        if self.targetNovelID == RealmSpeechModSetting.anyTarget || self.targetNovelID.count <= 0  {
+            return speechModSettingArray.filter({ (setting) -> Bool in
+                return true
+            })
+        }
+        return speechModSettingArray.filter({ (setting) -> Bool in
+            return setting.targetNovelIDArray.contains(RealmSpeechModSetting.anyTarget) || setting.targetNovelIDArray.contains(self.targetNovelID)
+        })
     }
     
     func GetSpeechModSettingFromRow(row:Int) -> RealmSpeechModSetting? {

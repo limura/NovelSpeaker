@@ -13,6 +13,7 @@ import RealmSwift
 class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNovelIDSelectorDelegate {
     @objc public var targetSpeechModSettingBeforeString:String? = nil
     public var targetNovelID = ""
+    public var isUseAnyNovelID = true
     var beforeTestText = ""
     var afterTestText = ""
     var beforeText = ""
@@ -140,7 +141,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             let nextViewController = MultipleNovelIDSelectorViewController()
             nextViewController.delegate = self
             nextViewController.SelectedNovelIDSet = self.targetNovelIDSet
-            nextViewController.IsUseAnyNovelID = self.targetNovelID == RealmSpeechModSetting.anyTarget
+            nextViewController.IsUseAnyNovelID = self.isUseAnyNovelID
             self.navigationController?.pushViewController(nextViewController, animated: true)
         })
         <<< TextRow("BeforeTestTextRow") {
@@ -189,7 +190,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                     button1Action: nil,
                     button2Title: nil,
                     button2Action: {
-                    if let targetBeforeString = self.targetSpeechModSettingBeforeString, let setting = RealmSpeechModSetting.SearchFrom(beforeString: targetBeforeString) {
+                    if let setting = RealmSpeechModSetting.SearchFrom(beforeString: self.beforeText) {
                         RealmUtil.Write(block: { (realm) in
                             setting.delete(realm: realm)
                         })
@@ -211,6 +212,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                     }
                 }else{
                     setting = RealmSpeechModSetting()
+                    setting.before = self.beforeText
                 }
                 setting.after = self.afterText
                 setting.isUseRegularExpression = self.isUseRegexp

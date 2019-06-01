@@ -249,6 +249,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
         nextViewController.targetSpeechModSettingBeforeString = text
         nextViewController.targetNovelID = RealmSpeechModSetting.anyTarget
+        nextViewController.isUseAnyNovelID = true
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     @objc func setSpeechModForThisNovelSetting(sender: UIMenuItem){
@@ -256,6 +257,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         if text.count <= 0 { return }
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
         nextViewController.targetSpeechModSettingBeforeString = text
+        nextViewController.isUseAnyNovelID = true
         if let storyID = storyID {
             nextViewController.targetNovelID = RealmStory.StoryIDToNovelID(storyID: storyID)
         }else{
