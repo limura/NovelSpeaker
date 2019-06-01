@@ -1273,7 +1273,7 @@ class NovelSpeakerUtility: NSObject {
             }
             result.append([
                 //"id": story.id,
-                "novelID": story.novelID,
+                //"novelID": story.novelID,
                 "chapterNumber": story.chapterNumber,
                 //"contentZiped": story.contentZiped,
                 "readLocation": story.readLocation,

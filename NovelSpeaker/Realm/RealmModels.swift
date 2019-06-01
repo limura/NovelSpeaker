@@ -679,6 +679,7 @@ extension RealmStory: CanWriteIsDeleted {
         }
         let novel = RealmNovel()
         novel.novelID = novelID
+        novel.url = novelID
         novel._urlSecret = cookieParameter
         novel.title = title
         if let author = author {
