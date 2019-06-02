@@ -629,7 +629,7 @@ class NovelSpeakerUtility: NSObject {
             if let keyword = novel.object(forKey: "keyword") as? String {
                 for tag in keyword.components(separatedBy: CharacterSet.whitespacesAndNewlines) {
                     let tagName = CleanTagString(tag: tag)
-                    RealmNovelTag.AddTag(tagName: tagName, novelID: novelID, type: "keyword")
+                    RealmNovelTag.AddTag(name: tagName, novelID: novelID, type: "keyword")
                 }
             }
         }
@@ -979,17 +979,15 @@ class NovelSpeakerUtility: NSObject {
             guard let tagDic = tagDic as? NSDictionary,
                 let name = tagDic.object(forKey: "name") as? String,
                 let type = tagDic.object(forKey: "type") as? String,
+                let hint = tagDic.object(forKey: "hint") as? String,
                 let createdDateString = tagDic.object(forKey: "createdDate") as? String,
                 let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
                 let targetNovelIDArray = tagDic.object(forKey: "targetNovelIDArray") as? NSArray else { continue }
-            let tag = RealmNovelTag.SearchWith(tagName: name) ?? RealmNovelTag()
-            if tag.name != name {
-                tag.name = name
-            }
+            let tag = RealmNovelTag.SearchWith(name: name, type: type) ?? RealmNovelTag.CreateNewTag(name: name, type: type)
             RealmUtil.Write { (realm) in
-                tag.type = type
                 tag.createdDate = createdDate
                 tag.targetNovelIDArray.removeAll()
+                tag.hint = hint
                 for novelID in targetNovelIDArray {
                     guard let novelID = novelID as? String else { continue }
                     tag.targetNovelIDArray.append(novelID)
@@ -1435,6 +1433,7 @@ class NovelSpeakerUtility: NSObject {
             result.append([
                 "name": setting.name,
                 "type": setting.type,
+                "hint": setting.hint,
                 "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),
                 "targetNovelIDArray": Array(setting.targetNovelIDArray)
             ])

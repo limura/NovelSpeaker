@@ -705,7 +705,7 @@ extension RealmStory: CanWriteIsDeleted {
         if let tagArray = tag {
             for tagName in tagArray {
                 if let tagName = tagName as? String {
-                    RealmNovelTag.AddTag(tagName: tagName, novelID: novelID, type: "keyword")
+                    RealmNovelTag.AddTag(name: tagName, novelID: novelID, type: "keyword")
                 }
             }
         }
@@ -1373,9 +1373,12 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
 }
 
 @objc final class RealmNovelTag: Object {
-    @objc dynamic var name = "" // name を primaryKey にします。
-    @objc dynamic var isDeleted: Bool = false
+    // type+name を primaryKey にします。
+    @objc dynamic var id: String = ""
     @objc dynamic var type : String = ""
+    @objc dynamic var name : String = ""
+    @objc dynamic var isDeleted: Bool = false
+    @objc dynamic var hint : String = ""
     @objc dynamic var createdDate = Date()
     
     let targetNovelIDArray = List<String>()
@@ -1390,33 +1393,62 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
         }
     }
     
+    static func CreateNewTag(name:String, type:String) -> RealmNovelTag {
+        let tag = RealmNovelTag()
+        tag.id = CreateUniqueID(name: name, type: type)
+        tag.name = name
+        tag.type = type
+        return tag
+    }
+    
     static func GetAllObjects() -> Results<RealmNovelTag>? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         realm.refresh()
         return realm.objects(RealmNovelTag.self).filter("isDeleted = false")
     }
-    
-    static func SearchWith(tagName:String) -> RealmNovelTag? {
-        return GetAllObjects()?.filter("name = %@", tagName).first
+    static func GetObjectsFor(type:String) -> Results<RealmNovelTag>? {
+        return GetAllObjects()?.filter("type = %@", type)
     }
     
-    static func AddTag(tagName:String, novelID: String, type: String) {
-        if tagName.count <= 0 || novelID.count <= 0 {
+    static func SearchWith(name:String, type:String) -> RealmNovelTag? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        realm.refresh()
+        return realm.object(ofType: RealmNovelTag.self, forPrimaryKey: RealmNovelTag.CreateUniqueID(name: name, type: type))
+    }
+    
+    // RealmWrite の中で呼んでください
+    static func AddTag(name:String, novelID: String, type: String) {
+        if name.count <= 0 || novelID.count <= 0 {
             return
         }
-        if let tag = SearchWith(tagName: tagName) {
+        if let tag = SearchWith(name: name, type: type) {
             if !tag.targetNovelIDArray.contains(novelID) {
                 tag.targetNovelIDArray.append(novelID)
             }
         }else{
-            let tag = RealmNovelTag()
-            tag.name = tagName
+            let tag = CreateNewTag(name: name, type: type)
             tag.targetNovelIDArray.append(novelID)
-            tag.type = type
             if let realm = try? RealmUtil.GetRealm() {
                 realm.add(tag, update: true)
             }
         }
+    }
+    
+    static func CreateUniqueID(name:String, type:String) -> String {
+        return "\(type)\n\(name)"
+    }
+    static func TagIDToName(tagID:String) -> String {
+        if let colonIndex = tagID.firstIndex(of: "\n") {
+            let index = tagID.index(colonIndex, offsetBy: 1)
+            return String(tagID[index...])
+        }
+        return ""
+    }
+    static func TagIDToType(tagID:String) -> String {
+        if let index = tagID.firstIndex(of: "\n") {
+            return String(tagID[..<index])
+        }
+        return ""
     }
     
     func unref(realm:Realm, novelID:String) {
@@ -1432,11 +1464,11 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     }
     
     override class func primaryKey() -> String? {
-        return "name"
+        return "id"
     }
     
     override static func indexedProperties() -> [String] {
-        return ["name", "targetNovelArray", "type", "createdDate", "isDeleted"]
+        return ["id", "name", "type", "createdDate", "isDeleted", "hint"]
     }
 }
 extension RealmNovelTag: CKRecordConvertible {

@@ -217,11 +217,10 @@ class RealmToRealmCopyTool: NSObject {
     static func CopyNovelTag(from:Realm, to:Realm) {
         to.beginWrite()
         for obj in from.objects(RealmNovelTag.self) {
-            let newObj = RealmNovelTag()
+            let newObj = RealmNovelTag.CreateNewTag(name: obj.name, type: obj.type)
             newObj.isDeleted = obj.isDeleted
-            newObj.name = obj.name
-            newObj.type = obj.type
             newObj.createdDate = obj.createdDate
+            newObj.hint = obj.hint
             newObj.targetNovelIDArray.removeAll()
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
             to.add(newObj, update: true)
