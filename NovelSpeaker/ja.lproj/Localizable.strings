@@ -152,6 +152,10 @@
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";
 "SpeechModSettingsTableView_SearchTitle" = "検索";
 "SpeechModSettingsTableView_SearchPlaceholder" = "検索対象の文字列を入力します";
+"SpeechModSettingsTableViewControllerSwift_ThisNovelOnly" = "読みの修正(小説専用設定)";
+"SpeechSectionConfigsViewController_ConifirmDeleteSettingBecauseNoTargetNovelID" = "適用対象の小説が何もない状態になっています。\nこの話者変更設定を削除してもよろしいですか？";
+"SpeechSectionConfigsViewController_TitleOnlyThisNovel" = "話者変更設定(小説専用設定)";
+
 "SpeechViewController_Speak" = "Speak";
 "SpeechViewController_Detail" = "詳細";
 "SpeechViewController_Edit" = "編集";
@@ -206,6 +210,16 @@
 "NarouSearchResultDetailViewController_GoToMyPageMessage" = "作者のマイページをSafariで表示します。よろしいですか？";
 
 "NarouSearchViewController_DoneKeyboardBarItem" = "決定";
+
+"NovelDetailViewController_PageTitle" ="小説の詳細・小説専用設定";
+"NovelDetailViewController_NovelLoadFailed" = "小説情報の取得に失敗しました。";
+"NovelDetailViewController_Title" = "小説名";
+"NovelDetailViewController_Writer" = "著者";
+"NovelDetailViewController_Writer" ="著者";
+"NovelDetailViewController_URL" = "URL";
+"NovelDetailViewController_SpeakerAlertRowTitle" = "標準の話者";
+"NovelDetailViewController_DetailSectionTitle" = "概要";
+"NovelDetailViewController_SettingSectionTitle" = "この小説専用の設定";
 
 "EditUserBookViewController_PleaseInputTitle" = "タイトルを入力してください";
 "EditUserBookViewController_PleaseInputBookBody" = "本文を入力してください";
@@ -422,14 +436,34 @@
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.51
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.9
 
-- Web取込 機能側での一回で取り込まれる小説の章の数の最大値を100から1000に増加
-- ルビはルビだけ読む 機能でルビとして判断される文字列の扱いを少し変更
+- 内部データベースを CoreData から Realm に変更
+- ほぼ全てのViewController(画面)をObjective-CからSwiftに書き換え
+- なろう検索 タブの機能を削除
+- 色々な所で Dynamic Type に対応しようとした
+- 本文中の長押しメニューに「読み替え後の文字列を確認する」と「この小説用の読み替え辞書へ登録」を追加
+- ダウンロード周りの動作を変更
+- 話者関係の設定項目を変更
+- テキストファイル等の取込時にテキトーに章を分ける機能を追加
+- 小説毎の専用設定の概念を追加(小説本文表示部右上に「詳細」メニューを追加)
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.9
+
+- 内部データベースを CoreData から Realm に変更
+- ほぼ全てのViewController(画面)をObjective-CからSwiftに書き換え
+- なろう検索 タブの機能を削除
+- 色々な所で Dynamic Type に対応しようとした
+- 本文中の長押しメニューに「読み替え後の文字列を確認する」と「この小説用の読み替え辞書へ登録」を追加
+- ダウンロード周りの動作を変更
+- 話者関係の設定項目を変更
+- テキストファイル等の取込時にテキトーに章を分ける機能を追加
+- 小説毎の専用設定の概念を追加
+
+
 # Version 1.1.51
 
 インタフェースの変更

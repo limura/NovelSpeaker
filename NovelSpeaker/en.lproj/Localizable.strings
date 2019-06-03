@@ -165,6 +165,10 @@
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@ to %@";
 "SpeechModSettingsTableView_SearchTitle" = "Search";
 "SpeechModSettingsTableView_SearchPlaceholder" = "Enter the character string to be searched";
+"SpeechModSettingsTableViewControllerSwift_ThisNovelOnly" = "Speech mod settings (for this novel only)";
+"SpeechSectionConfigsViewController_ConifirmDeleteSettingBecauseNoTargetNovelID" = "There are no applicable novels.\nAre you sure you want to delete this speaker change setting?";
+"SpeechSectionConfigsViewController_TitleOnlyThisNovel" = "Speaker change setting (for this novel only)";
+
 "SpeechViewController_Speak" = "Speak";
 "SpeechViewController_Detail" = "Detail";
 "SpeechViewController_Edit" = "Edit";
@@ -227,6 +231,16 @@
 "EditUserBookViewContoller_InputTextHeare" = "Input text here";
 "EditUserBookViewController_AddNewStoryFailed" = "Chapter add failed.";
 "NarouSearchViewController_DoneKeyboardBarItem" = "done";
+
+"NovelDetailViewController_PageTitle" ="Novel detail";
+"NovelDetailViewController_NovelLoadFailed" = "Failed to get novel information.";
+"NovelDetailViewController_Title" = "Novel name";
+"NovelDetailViewController_Writer" = "Writer";
+"NovelDetailViewController_URL" = "URL";
+"NovelDetailViewController_SpeakerAlertRowTitle" = "Standard speaker";
+"NovelDetailViewController_DetailSectionTitle" = "Detail";
+"NovelDetailViewController_SettingSectionTitle" = "Setting dedicated to this novel";
+
 
 "NarouDownloadQueue_URLDownloadTitleFixed" = "downloading \"%@\" ";
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "Could not get the title of the downloaded thing, will leave it as URL.\n%@";
@@ -431,14 +445,34 @@
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
 "BookShelfTableViewController_Resume:" = "▶︎ Speech: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.51
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.9
 
-- Increase the maximum number of novel chapters captured at one time on the web capture side from 100 to 1000
-- Ruby changes ruby string handling judged as ruby with ruby only reading function slightly
+-Change internal database from CoreData to Realm
+-Rewrite almost all ViewController (screen) from Objective-C to Swift
+-Remove the function of search search tab
+-I tried to support Dynamic Type in various places
+-Added \"Check the translated text used for speech\" and \"Add to speech mod settings for this novel\" in the long press menu in the text.
+-Change the behavior around download
+-Change speaker setting items
+-Added a function to separate chapters into text files when importing text files etc.
+-Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.9
+
+-Change internal database from CoreData to Realm
+-Rewrite almost all ViewController (screen) from Objective-C to Swift
+-Remove the function of search search tab
+-I tried to support Dynamic Type in various places
+-Added \"Check the translated text used for speech\" and \"Add to speech mod settings for this novel\" in the long press menu in the text.
+-Change the behavior around download
+-Change speaker setting items
+-Added a function to separate chapters into text files when importing text files etc.
+-Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
+
+
 # Version 1.1.51
 
 Interface change

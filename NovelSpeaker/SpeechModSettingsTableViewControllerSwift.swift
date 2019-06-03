@@ -25,6 +25,10 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
         
+        if self.targetNovelID != RealmSpeechModSetting.anyTarget {
+            self.title = NSLocalizedString("SpeechModSettingsTableViewControllerSwift_ThisNovelOnly", comment: "読みの修正(小説専用設定)")
+        }
+        
         // 追加ボタンとEditボタンと検索ボタンをつけます。
         let addButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.add, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.addButtonClicked))
         let filterButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.search, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.filterButtonClicked))
@@ -183,8 +187,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     func PushToCreateSpeechModSettingViewControllerSwift(modSetting:RealmSpeechModSetting?) {
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
         nextViewController.targetSpeechModSettingBeforeString = modSetting?.before
-        nextViewController.isUseAnyNovelID = true
-        nextViewController.targetNovelID = ""
+        nextViewController.isUseAnyNovelID = self.targetNovelID == RealmSpeechModSetting.anyTarget ? true : false
+        nextViewController.targetNovelID = self.targetNovelID == RealmSpeechModSetting.anyTarget ? "" : self.targetNovelID
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     
@@ -200,15 +204,16 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
             })
         }
         return speechModSettingArray.filter({ (setting) -> Bool in
-            return setting.targetNovelIDArray.contains(RealmSpeechModSetting.anyTarget) || setting.targetNovelIDArray.contains(self.targetNovelID)
+            return setting.targetNovelIDArray.contains(self.targetNovelID)
         })
     }
     
     func GetSpeechModSettingFromRow(row:Int) -> RealmSpeechModSetting? {
         guard let speechModSettingArray = GetSpeechModArray() else { return nil }
-        if speechModSettingArray.count <= row {
+        let array = Array(speechModSettingArray)
+        if array.count <= row {
             return nil;
         }
-        return speechModSettingArray[row]
+        return array[row]
     }
 }

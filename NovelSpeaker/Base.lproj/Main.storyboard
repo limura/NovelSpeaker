@@ -520,7 +520,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GIB-KR-GU5" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="117.59999999999999" y="97.601199400299862"/>
+            <point key="canvasLocation" x="-36" y="98"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="764-8b-jS0">
@@ -653,11 +653,31 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                         <outlet property="previousChapterButton" destination="RsE-pW-sT4" id="ngv-rr-TVz"/>
                         <outlet property="textView" destination="OiG-7z-gqj" id="518-jx-H0s"/>
                         <segue destination="dCR-kh-Ivz" kind="push" identifier="EditUserTextSegue" id="FvL-jm-emj"/>
+                        <segue destination="QLu-9c-OBu" kind="push" identifier="NovelDetailViewPushSegue" id="wOu-8d-Sto"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="k1r-z4-J82" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="718" y="-645"/>
+        </scene>
+        <!--Novel Detail View Controller-->
+        <scene sceneID="O3Q-XY-oAW">
+            <objects>
+                <viewController id="QLu-9c-OBu" customClass="NovelDetailViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Wuf-KC-jPq">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="0I4-IU-VQJ"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="U6G-A9-LTB"/>
+                    <connections>
+                        <segue destination="DcS-zk-4zM" kind="push" identifier="speechModSettingSegue" id="DiM-k6-LVA"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="qnL-F1-ydf" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="718" y="98"/>
         </scene>
         <!--UserText-->
         <scene sceneID="izP-cz-ef9">
@@ -820,5 +840,6 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="FvL-jm-emj"/>
+        <segue reference="DiM-k6-LVA"/>
     </inferredMetricsTieBreakers>
 </document>

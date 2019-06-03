@@ -96,8 +96,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         startStopButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"), style: .plain, target: self, action: #selector(startStopButtonClicked(_:)))
         var barButtonArray:[UIBarButtonItem] = [
             startStopButtonItem!,
-            UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Edit", comment: "編集"), style: .plain, target: self, action: #selector(detailButtonClicked(_:)))
+            UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Edit", comment: "編集"), style: .plain, target: self, action: #selector(editButtonClicked(_:)))
         ]
+        barButtonArray.append(
+            UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Detail", comment: "詳細"), style: .plain, target: self, action: #selector(detailButtonClicked(_:))))
         if novel.type == .URL {
             let buttonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action:   #selector(shareButtonClicked(_:)))
             self.shareButtonItem = buttonItem
@@ -329,6 +331,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             if let nextViewController = segue.destination as? EditBookViewController, let storyID = self.storyID, let novel = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID)) {
                 nextViewController.targetNovel = novel
             }
+        }else if segue.identifier == "NovelDetailViewPushSegue" {
+            guard let nextViewController = segue.destination as? NovelDetailViewController, let storyID = self.storyID else { return }
+            nextViewController.novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
         }
     }
 
@@ -373,10 +378,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
     
 
-    @objc func detailButtonClicked(_ sender: UIBarButtonItem) {
+    @objc func editButtonClicked(_ sender: UIBarButtonItem) {
         pushToEditStory()
     }
-    
+    @objc func detailButtonClicked(_ sender: UIBarButtonItem) {
+        performSegue(withIdentifier: "NovelDetailViewPushSegue", sender: self)
+    }
+
     @objc func shareButtonClicked(_ sender: UIBarButtonItem) {
         guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID)) else {
             NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechViewController_UnknownErrorForShare", comment: "不明なエラーでシェアできませんでした。"), message: nil, buttonTitle: NSLocalizedString("OK_button", comment: "OK"), buttonAction: nil)

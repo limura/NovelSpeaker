@@ -313,7 +313,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         return selectedNovelNameArray.joined(separator: ", ")
     }
     
-    func MultipleNovelIDSelectorSelected(selectedNovelIDSet: Set<String>) {
+    func MultipleNovelIDSelectorSelected(selectedNovelIDSet: Set<String>, hint: String) {
         DispatchQueue.main.async {
             self.targetNovelIDSet = selectedNovelIDSet
             guard let row = self.form.rowBy(tag: "TargetNovelIDLabelRow") as? LabelRow else { return }

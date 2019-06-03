@@ -13,12 +13,13 @@ import Eureka
 import RealmSwift
 
 protocol MultipleNovelIDSelectorDelegate : class {
-    func MultipleNovelIDSelectorSelected(selectedNovelIDSet:Set<String>)
+    func MultipleNovelIDSelectorSelected(selectedNovelIDSet:Set<String>, hint:String)
 }
 
 class MultipleNovelIDSelectorViewController: FormViewController {
     public var SelectedNovelIDSet:Set<String> = Set<String>()
     public var IsUseAnyNovelID = true
+    public var Hint = ""
     public weak var delegate:MultipleNovelIDSelectorDelegate?
     
     static let AnyTypeTag = RealmSpeechModSetting.anyTarget
@@ -38,8 +39,9 @@ class MultipleNovelIDSelectorViewController: FormViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        print("MultipleNovelIDSelectorViewController.viewWillDisappear()")
         guard let delegate = self.delegate else { return }
-        delegate.MultipleNovelIDSelectorSelected(selectedNovelIDSet: self.SelectedNovelIDSet)
+        delegate.MultipleNovelIDSelectorSelected(selectedNovelIDSet: self.SelectedNovelIDSet, hint: self.Hint)
     }
     
     func observeNovelArray() {

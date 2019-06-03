@@ -1035,6 +1035,16 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
         RealmUtil.Delete(realm: realm, model: self)
     }
     
+    func AddTargetNovelID(novelID: String) {
+        if novelID.count <= 0 {
+            return
+        }
+        if targetNovelIDArray.contains(novelID) { return }
+        RealmUtil.Write { (realm) in
+            self.targetNovelIDArray.append(novelID)
+        }
+    }
+    
     override class func primaryKey() -> String? {
         return "name"
     }

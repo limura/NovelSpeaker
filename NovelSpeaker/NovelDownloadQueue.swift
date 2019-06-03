@@ -377,7 +377,7 @@ class NovelDownloadQueue : NSObject {
         while self.isDownloadStop == false && self.queueHolder.GetCurrentDownloadingNovelIDArray().count < self.maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
             autoreleasepool {
                 let uriLoader:UriLoader
-                if tmpUriLoader != nil {
+                if tmpUriLoader != nil && !(RealmGlobalState.GetInstance()?.isForceSiteInfoReloadIsEnabled ?? false) {
                     uriLoader = tmpUriLoader!
                 }else{
                     uriLoader = self.createUriLoader()
