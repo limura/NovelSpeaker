@@ -333,10 +333,16 @@ class NovelDownloadQueue : NSObject {
     func createUriLoader() -> UriLoader {
         let newUriLoader = UriLoader()
         let semaphore = DispatchSemaphore(value: 0)
+        let cacheExpireTimeinterval:Double
+        if let instance = RealmGlobalState.GetInstance(), instance.isForceSiteInfoReloadIsEnabled {
+            cacheExpireTimeinterval = 0
+        }else{
+            cacheExpireTimeinterval = cacheFileExpireTimeinterval
+        }
         var novelSpeakerSiteInfoData:Data? = nil
         var autopagerizeSiteInfoData:Data? = nil
         if let url = URL(string: novelSpeakerSiteInfoUrl) {
-            NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: novelSpeakerSiteInfoCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: { (data) in
+            NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: novelSpeakerSiteInfoCacheFileName, expireTimeinterval: cacheExpireTimeinterval, successAction: { (data) in
                 novelSpeakerSiteInfoData = data
                 semaphore.signal()
             }) { (err) in
@@ -344,7 +350,7 @@ class NovelDownloadQueue : NSObject {
             }
         }
         if let url = URL(string: autopagerizeSiteInfoUrl) {
-            NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: autopagerizeSiteInfoCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: { (data) in
+            NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: autopagerizeSiteInfoCacheFileName, expireTimeinterval: cacheExpireTimeinterval, successAction: { (data) in
                 autopagerizeSiteInfoData = data
                 semaphore.signal()
             }) { (err) in
@@ -374,13 +380,21 @@ class NovelDownloadQueue : NSObject {
     
     func dispatch() {
         var tmpUriLoader:UriLoader? = nil
+        var tmpUriLoaderLoadDate = Date()
         while self.isDownloadStop == false && self.queueHolder.GetCurrentDownloadingNovelIDArray().count < self.maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
             autoreleasepool {
+                let cacheExpireTimeinterval:Double
+                if let instance = RealmGlobalState.GetInstance(), instance.isForceSiteInfoReloadIsEnabled {
+                    cacheExpireTimeinterval = 0
+                }else{
+                    cacheExpireTimeinterval = cacheFileExpireTimeinterval
+                }
                 let uriLoader:UriLoader
-                if tmpUriLoader != nil && !(RealmGlobalState.GetInstance()?.isForceSiteInfoReloadIsEnabled ?? false) {
-                    uriLoader = tmpUriLoader!
+                if let aliveUriLoader = tmpUriLoader, !(RealmGlobalState.GetInstance()?.isForceSiteInfoReloadIsEnabled ?? false) && (Date().timeIntervalSince1970 - tmpUriLoaderLoadDate.timeIntervalSince1970) < cacheExpireTimeinterval {
+                    uriLoader = aliveUriLoader
                 }else{
                     uriLoader = self.createUriLoader()
+                    tmpUriLoaderLoadDate = Date()
                     tmpUriLoader = uriLoader
                 }
                 let queuedDate = Date()
