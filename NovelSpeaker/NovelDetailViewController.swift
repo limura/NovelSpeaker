@@ -14,14 +14,40 @@ class NovelDetailViewController: FormViewController {
     public var novelID = ""
     var speakerSettingObserverToken:NotificationToken? = nil
     var speechSectionConfigObserverToken:NotificationToken? = nil
+    var novelObserverToken:NotificationToken? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.title = NSLocalizedString("NovelDetailViewController_PageTitle", comment: "小説の詳細")
         createCells()
+        observeNovel()
         observeSpeakerSetting()
         observeSpeechSectionConfig()
+    }
+    
+    func observeNovel() {
+        guard let novel = RealmNovel.SearchNovelFrom(novelID: self.novelID) else { return }
+        self.novelObserverToken = novel.observe({ (change) in
+            switch change {
+            case .error(_):
+                break
+            case .change(let properties):
+                for property in properties {
+                    if property.name == "defaultSpeakerID" {
+                        DispatchQueue.main.async {
+                            print("observeNovel() reload all.")
+                            self.form.removeAll()
+                            self.createCells()
+                        }
+                    }
+                }
+            case .deleted:
+                DispatchQueue.main.async {
+                    self.navigationController?.popViewController(animated: true)
+                }
+            }
+        })
     }
 
     func observeSpeakerSetting() {
@@ -32,6 +58,7 @@ class NovelDetailViewController: FormViewController {
                 break
             case .update(_, _, _, _):
                 DispatchQueue.main.async {
+                    print("observeSpeakerSetting() reload all.")
                     self.form.removeAll()
                     self.createCells()
                 }
@@ -48,6 +75,7 @@ class NovelDetailViewController: FormViewController {
                 break
             case .update(_, _, _, _):
                 DispatchQueue.main.async {
+                    print("observeSpeechSectionConfig() reload all.")
                     self.form.removeAll()
                     self.createCells()
                 }
@@ -106,7 +134,7 @@ class NovelDetailViewController: FormViewController {
                 guard let targetName = row.value, let speaker = RealmSpeakerSetting.SearchFrom(name: targetName), let novel = RealmNovel.SearchNovelFrom(novelID: self.novelID) else {
                     return
                 }
-                RealmUtil.Write(withoutNotifying: [self.speakerSettingObserverToken, self.speechSectionConfigObserverToken]) { (realm) in
+                RealmUtil.Write(withoutNotifying: [self.speakerSettingObserverToken, self.speechSectionConfigObserverToken, self.novelObserverToken]) { (realm) in
                     novel.defaultSpeakerID = speaker.name
                 }
             })

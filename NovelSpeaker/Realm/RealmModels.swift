@@ -942,6 +942,16 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     }
     
     func delete(realm:Realm) {
+        if let sectionConfigArray = RealmSpeechSectionConfig.GetAllObjects()?.filter("speakerID = %@", self.name) {
+            for sectionConfig in sectionConfigArray {
+                sectionConfig.unref(realm: realm, speakerID: self.name)
+            }
+        }
+        if let novelArray = RealmNovel.GetAllObjects()?.filter("defaultSpeakerID = %@", self.name), let defaultSpeakerID = RealmGlobalState.GetInstance()?.defaultSpeaker?.name {
+            for novel in novelArray {
+                novel.defaultSpeakerID = defaultSpeakerID
+            }
+        }
         RealmUtil.Delete(realm: realm, model: self)
     }
 
@@ -1029,6 +1039,11 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
             if targetNovelIDArray.count <= 0 {
                 delete(realm: realm)
             }
+        }
+    }
+    func unref(realm: Realm, speakerID: String) {
+        if self.speakerID == speakerID {
+            delete(realm: realm)
         }
     }
     func delete(realm: Realm) {

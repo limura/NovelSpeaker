@@ -131,7 +131,11 @@ class NovelDownloader : NSObject {
     // 一度にダウンロードされる章の最大数
     static var maxCount = 1000
     // ダウンロードを止めたい時に true を入れます。
-    static var isDownloadStop = false
+    static var isDownloadStop : Bool {
+        get {
+            return NovelDownloadQueue.shared.isDownloadStop
+        }
+    }
     
     // 指定された URL を読み込んで、内容があるようであれば指定された chapterNumber のものとして(上書き)保存します。
     // maxCount を超えておらず、次のURLが取得できたのならそのURLを chapterNumber + 1 のものとして再度 downloadOnce() を呼び出します。
@@ -313,7 +317,7 @@ class NovelDownloadQueue : NSObject {
     let lock = NSLock()
     var downloadSuccessNovelIDSet = Set<String>()
     var downloadEndedNovelIDSet = Set<String>()
-    private var isDownloadStop = true
+    public var isDownloadStop = true
     let semaphore = DispatchSemaphore(value: 0)
     
     let cacheFileExpireTimeinterval:Double = 60*60*24
@@ -551,27 +555,30 @@ class NovelDownloadQueue : NSObject {
         let deadlineTimeInterval = backgroundFetchDeadlineTimeInSec - (Date().timeIntervalSince1970 - startTime.timeIntervalSince1970)
         Timer.scheduledTimer(withTimeInterval: deadlineTimeInterval, repeats: false) { (timer) in
             self.downloadStop()
-            let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
-            self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
-            self.downloadEndedNovelIDSet.removeAll()
-            
-            let novelIDArray = self.downloadSuccessNovelIDSet
-            if novelIDArray.count <= 0 {
-                performFetchWithCompletionHandler(.noData)
-                return
+            // downloadStop() した後、ダウンロードが終了するまで4秒待ちます。
+            Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false){ (timer) in
+                let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
+                self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
+                self.downloadEndedNovelIDSet.removeAll()
+                
+                let novelIDArray = self.downloadSuccessNovelIDSet
+                if novelIDArray.count <= 0 {
+                    performFetchWithCompletionHandler(.noData)
+                    return
+                }
+                let downloadSuccessTitle = String(format: NSLocalizedString("GlobalDataSingleton_NovelUpdateAlertBody", comment: "%d個の更新があります。"), novelIDArray.count)
+                var novelTitleArray:[String] = []
+                for novelID in novelIDArray {
+                    guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { continue }
+                    novelTitleArray.append(novel.title)
+                }
+                let displayDownloadCount = self.GetCurrentDownloadCount() + novelIDArray.count
+                self.SetCurrentDownloadCount(count: displayDownloadCount)
+                DispatchQueue.main.async {
+                    NiftyUtility.invokeNotificationNow(downloadSuccessTitle, message: novelTitleArray.joined(separator: "\n"), badgeNumber: displayDownloadCount)
+                }
+                performFetchWithCompletionHandler(.newData)
             }
-            let downloadSuccessTitle = String(format: NSLocalizedString("GlobalDataSingleton_NovelUpdateAlertBody", comment: "%d個の更新があります。"), novelIDArray.count)
-            var novelTitleArray:[String] = []
-            for novelID in novelIDArray {
-                guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { continue }
-                novelTitleArray.append(novel.title)
-            }
-            let displayDownloadCount = self.GetCurrentDownloadCount() + novelIDArray.count
-            self.SetCurrentDownloadCount(count: displayDownloadCount)
-            DispatchQueue.main.async {
-                NiftyUtility.invokeNotificationNow(downloadSuccessTitle, message: novelTitleArray.joined(separator: "\n"), badgeNumber: displayDownloadCount)
-            }
-            performFetchWithCompletionHandler(.newData)
         }
     }
 
