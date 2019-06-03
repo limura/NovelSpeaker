@@ -429,7 +429,7 @@
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
 "BookShelfTableViewController_SortTypeNovelName" = "小説名順";
-"BookShelfTableViewController_SortTypeUpdateDate" = "更新順";
+"BookShelfTableViewController_SortTypeUpdateDate" = "最終ダウンロード日時順";
 "BookShelfTableViewController_SortTypeSelectButton" = "順番";
 "BookShelfTableViewController_AnnounceNewViersion" = "ことせかい は アップデートされました";
 "BookShelfTableViewController_SearchTitle" = "検索";

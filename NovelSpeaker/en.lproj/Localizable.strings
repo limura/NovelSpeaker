@@ -438,7 +438,7 @@
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";
-"BookShelfTableViewController_SortTypeUpdateDate" = "Update date";
+"BookShelfTableViewController_SortTypeUpdateDate" = "Last download date";
 "BookShelfTableViewController_SortTypeSelectButton" = "Sort";
 "BookShelfTableViewController_AnnounceNewViersion" = "NovelSpeaker is now updated.";
 "BookShelfTableViewController_SearchTitle" = "Search";

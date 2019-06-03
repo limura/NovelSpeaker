@@ -20,6 +20,8 @@ class NovelDetailViewController: FormViewController {
 
         self.title = NSLocalizedString("NovelDetailViewController_PageTitle", comment: "小説の詳細")
         createCells()
+        observeSpeakerSetting()
+        observeSpeechSectionConfig()
     }
 
     func observeSpeakerSetting() {
