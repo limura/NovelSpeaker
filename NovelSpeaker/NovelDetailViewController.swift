@@ -12,12 +12,48 @@ import RealmSwift
 
 class NovelDetailViewController: FormViewController {
     public var novelID = ""
+    var speakerSettingObserverToken:NotificationToken? = nil
+    var speechSectionConfigObserverToken:NotificationToken? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         self.title = NSLocalizedString("NovelDetailViewController_PageTitle", comment: "小説の詳細")
         createCells()
+    }
+
+    func observeSpeakerSetting() {
+        guard let speakerSettingList = RealmSpeakerSetting.GetAllObjects() else { return }
+        self.speakerSettingObserverToken = speakerSettingList.observe({ (change) in
+            switch change {
+            case .initial(_):
+                break
+            case .update(_, _, _, _):
+                DispatchQueue.main.async {
+                    self.form.removeAll()
+                    self.createCells()
+                }
+            case .error(_):
+                break
+            }
+        })
+    }
+    func observeSpeechSectionConfig() {
+        guard let sectionConfigList = RealmSpeechSectionConfig.GetAllObjects() else { return }
+        self.speakerSettingObserverToken = sectionConfigList.observe({ (change) in
+            switch change {
+            case .initial(_):
+                break
+            case .update(_, _, _, _):
+                DispatchQueue.main.async {
+                    self.form.removeAll()
+                    self.createCells()
+                }
+            case .error(_):
+                break
+            }
+        })
+
     }
     
     func createCells() {
@@ -68,7 +104,7 @@ class NovelDetailViewController: FormViewController {
                 guard let targetName = row.value, let speaker = RealmSpeakerSetting.SearchFrom(name: targetName), let novel = RealmNovel.SearchNovelFrom(novelID: self.novelID) else {
                     return
                 }
-                RealmUtil.Write { (realm) in
+                RealmUtil.Write(withoutNotifying: [self.speakerSettingObserverToken, self.speechSectionConfigObserverToken]) { (realm) in
                     novel.defaultSpeakerID = speaker.name
                 }
             })
