@@ -41,6 +41,11 @@ class MigrationViewController: UIViewController {
 
     func CheckAndDoCoreDataToRealmMigration() {
         if RealmUtil.IsUseCloudRealm() {
+            do {
+                try RealmUtil.EnableSyncEngine()
+            }catch{
+                // TODO: exception を握りつぶしている
+            }
             // iCloud を使う場合で、
             if RealmUtil.CheckIsCloudRealmCreated() {
                 // iCloud の データがあるならそれを使う
@@ -50,7 +55,7 @@ class MigrationViewController: UIViewController {
                 // local のがあるならそこからコピーする
                 guard let localRealm = try? RealmUtil.GetLocalRealm(), let cloudRealm = try? RealmUtil.GetCloudRealm() else { return }
                 // TODO: ここで localRealm から cloudRealm に上書きコピーをして良いのかの確認プロセスが無い
-                RealmToRealmCopyTool.DoCopy(from: localRealm, to: cloudRealm) { (text) in
+                try! RealmToRealmCopyTool.DoCopy(from: localRealm, to: cloudRealm) { (text) in
                     DispatchQueue.main.async {
                         self.progressLabel.text = text
                     }

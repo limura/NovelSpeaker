@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 
 class RealmToRealmCopyTool: NSObject {
-    static func CopyStorys(from:Realm, to:Realm) {
+    static func CopyStorys(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmStory.self) {
             let newObj = RealmStory()
@@ -26,13 +26,9 @@ class RealmToRealmCopyTool: NSObject {
             newObj.subtitle = obj.subtitle
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
-    static func CopyNovels(from:Realm, to:Realm) {
+    static func CopyNovels(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmNovel.self) {
             let newObj = RealmNovel()
@@ -49,14 +45,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.defaultSpeakerID = obj.defaultSpeakerID
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
 
-    static func CopySpeechModSetting(from:Realm, to:Realm) {
+    static func CopySpeechModSetting(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmSpeechModSetting.self) {
             let newObj = RealmSpeechModSetting()
@@ -69,14 +61,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
 
-    static func CopySpeechWaitConfig(from:Realm, to:Realm) {
+    static func CopySpeechWaitConfig(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmSpeechWaitConfig.self) {
             let newObj = RealmSpeechWaitConfig()
@@ -86,14 +74,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.createdDate = obj.createdDate
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
 
-    static func CopySpeakerSetting(from:Realm, to:Realm) {
+    static func CopySpeakerSetting(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmSpeakerSetting.self) {
             let newObj = RealmSpeakerSetting()
@@ -111,14 +95,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.createdDate = obj.createdDate
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
 
-    static func CopySpeechSectionConfig(from:Realm, to:Realm) {
+    static func CopySpeechSectionConfig(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmSpeechSectionConfig.self) {
             let newObj = RealmSpeechSectionConfig()
@@ -132,14 +112,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
 
-    static func CopySpeechQueue(from:Realm, to:Realm) {
+    static func CopySpeechQueue(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmSpeechQueue.self) {
             let newObj = RealmSpeechQueue()
@@ -150,14 +126,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.targetStoryIDArray.append(objectsIn: obj.targetStoryIDArray)
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
 
-    static func CopyGlobalState(from:Realm, to:Realm) {
+    static func CopyGlobalState(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmGlobalState.self) {
             let newObj = RealmGlobalState()
@@ -186,14 +158,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.defaultSpeechOverrideSettingID = obj.defaultSpeechOverrideSettingID
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
 
-    static func CopyDisplaySetting(from:Realm, to:Realm) {
+    static func CopyDisplaySetting(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmDisplaySetting.self) {
             let newObj = RealmDisplaySetting()
@@ -207,14 +175,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
     
-    static func CopyNovelTag(from:Realm, to:Realm) {
+    static func CopyNovelTag(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmNovelTag.self) {
             let newObj = RealmNovelTag.CreateNewTag(name: obj.name, type: obj.type)
@@ -225,14 +189,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
 
-    static func CopySpeechOverrideSetting(from:Realm, to:Realm) {
+    static func CopySpeechOverrideSetting(from:Realm, to:Realm) throws {
         to.beginWrite()
         for obj in from.objects(RealmSpeechOverrideSetting.self) {
             let newObj = RealmSpeechOverrideSetting()
@@ -247,24 +207,20 @@ class RealmToRealmCopyTool: NSObject {
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
             to.add(newObj, update: true)
         }
-        do {
-            try to.commitWrite()
-        }catch{
-            // write error を握りつぶしている('A`)
-        }
+        try to.commitWrite()
     }
     
-    static func DoCopy(from:Realm, to:Realm, progress:(String)->Void) {
-        CopySpeechModSetting(from: from, to: to)
-        CopySpeechWaitConfig(from: from, to: to)
-        CopySpeakerSetting(from: from, to: to)
-        CopySpeechSectionConfig(from: from, to: to)
-        CopySpeechQueue(from: from, to: to)
-        CopyGlobalState(from: from, to: to)
-        CopyDisplaySetting(from: from, to: to)
-        CopyNovelTag(from: from, to: to)
-        CopySpeechOverrideSetting(from: from, to: to)
-        CopyNovels(from: from, to: to)
-        CopyStorys(from: from, to: to)
+    static func DoCopy(from:Realm, to:Realm, progress:(String)->Void) throws {
+        try CopySpeechModSetting(from: from, to: to)
+        try CopySpeechWaitConfig(from: from, to: to)
+        try CopySpeakerSetting(from: from, to: to)
+        try CopySpeechSectionConfig(from: from, to: to)
+        try CopySpeechQueue(from: from, to: to)
+        try CopyGlobalState(from: from, to: to)
+        try CopyDisplaySetting(from: from, to: to)
+        try CopyNovelTag(from: from, to: to)
+        try CopySpeechOverrideSetting(from: from, to: to)
+        try CopyNovels(from: from, to: to)
+        try CopyStorys(from: from, to: to)
     }
 }

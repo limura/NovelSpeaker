@@ -114,6 +114,28 @@
 "SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmTitle" = "確認";
 "SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmMessage" = "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除します。よろしいですか？";
 "SettingsViewController_RemoveDefaultSpeechModSettings_DeletedMessage" = "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除しました。";
+"SettingsViewController_IsUseiCloud_Title" = "iCloud 同期を使用する";
+"SettingsViewController_IsUseiCloud_ConifirmTitle" = "iCloud 同期を有効にしますか？";
+"SettingsViewController_IsUseiCloud_ConifirmMessage" = "iCloud 同期を有効にすると、ことせかい 内のデータを書き換えるたびに iCloud による通信が試みるようになります。例えば小説を開いたり、読み上げを行ったりしただけでもデータが書き換わりますので、頻繁に通信が発生する事になります。";
+"SettingsViewController_IsUseiCloud_EnabledButNextStart" = "iCloud 同期を開始しました。一旦アプリを終了します。";
+"SettingsViewController_IsUseiCloud_ConifirmTitle_disable" = "iCloud 同期を無効にしますか？";
+"SettingsViewController_IsUseiCloud_DisabledButNextStart" = "iCloud 同期を停止しました。一旦アプリを終了します。";
+"SettingsViewController_IsUseiCloud_SyncProgress" = "iCloud 側にデータを登録しています";
+"SettingsViewController_IsUseiCloud_SyncProgress_Push" = "データが登録されるのを待っています";
+"SettingsViewController_IsUseiCloud_CopyFailed" = "データの登録に失敗しました。";
+"SettingsViewController_IsUseiCloud_DisableSyncProgress" = "iCloud 側からデータを取り出しています";
+
+"SettingsViewController_CopyingCloudToLocal" = "iCloud側のデータを取得中";
+"SettingsViewController_CopyCloudToLocalFailed" = "iCloudのデータの取得に失敗しました。";
+"SettingsViewController_iCloudDisable_done" = "iCloud同期を停止しました";
+"SettingsViewController_CopyingLocalToCloud" = "現在のデータをiCloud側に登録中";
+"SettingsViewController_CopyLocalToCloudFailed" = "現在のデータのiCloud側への登録に失敗しました。";
+"SettingsViewController_iCloudEnable_done" = "iCloud同期を開始しました";
+"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData" = "iCloud側に利用可能なデータが存在するようです。iCloud側のデータをそのまま利用するか、現在のデータでiCloud上のデータを上書きするかを選択してください。";
+"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud" = "iCloudのデータをそのまま利用する";
+"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal" = "現在のデータでiCloud上のデータを上書きする";
+"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "iCloud側のデータを確認しています";
+"SettingsViewController_IsUseiCloud_FailedSyncEngineStart" = "iCloud への接続に失敗しました。";
 
 "NovelSpeakerUtility_ExportingNovelData" = "小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "設定情報の抽出中";

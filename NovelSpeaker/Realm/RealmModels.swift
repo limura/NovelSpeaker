@@ -14,8 +14,9 @@ import UIKit
 @objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 0
     static let deleteRealmIfMigrationNeeded: Bool = false
-    static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
-    
+    //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
+    static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
+
     static var syncEngine: SyncEngine? = nil
     static let lock = NSLock()
     static var realmLocalCache:[String:Realm] = [:]
@@ -156,22 +157,15 @@ import UIKit
         defer {
             lock.unlock()
         }
-        // cache を削除する
+        // cache を削除する (これをやると別threadからの呼び出しになっちゃうのでできません)
+        /*
         for r in realmCloudCache.values {
             r.invalidate()
         }
+        */
         realmCloudCache.removeAll()
     }
-    static func GetCloudRealm() throws -> Realm {
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
-        let threadID = "\(Thread.current)"
-        if let realm = realmCloudCache[threadID] {
-            return realm
-        }
-        
+    fileprivate static func GetCloudRealmWithoutLock() throws -> Realm {
         let config = Realm.Configuration(
             fileURL: GetCloudRealmFilePath(),
             schemaVersion: currentSchemaVersion,
@@ -182,15 +176,28 @@ import UIKit
         })
         let realm = try Realm(configuration: config)
         realm.autorefresh = true
+        return realm
+    }
+    
+    static func GetCloudRealm() throws -> Realm {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        let threadID = "\(Thread.current)"
+        if let realm = realmCloudCache[threadID] {
+            return realm
+        }
+        let realm = try GetCloudRealmWithoutLock()
         realmCloudCache[threadID] = realm
         return realm
     }
     static func GetContainer() -> CKContainer {
         return CKContainer(identifier: CKContainerIdentifier)
     }
-    static func CreateSyncEngine() throws -> SyncEngine {
+    fileprivate static func CreateSyncEngine() throws -> SyncEngine {
         let container = GetContainer()
-        let realm = try RealmUtil.GetCloudRealm()
+        let realm = try RealmUtil.GetCloudRealmWithoutLock()
         return SyncEngine(objects: [
             SyncObject<RealmStory>(realm: realm),
             SyncObject<RealmNovel>(realm: realm),
@@ -248,7 +255,18 @@ import UIKit
     static func GetRealm() throws -> Realm {
         if IsUseCloudRealm() {
             if syncEngine == nil {
-                try EnableSyncEngine()
+                // SyncEngine を作るときは main thread でないと駄目ぽい。
+                if Thread.isMainThread {
+                    try EnableSyncEngine()
+                }else{
+                    DispatchQueue.main.sync {
+                        do {
+                            try EnableSyncEngine()
+                        }catch{
+                            // TODO: exception を握りつぶしている
+                        }
+                    }
+                }
             }
             return try GetCloudRealm()
         }

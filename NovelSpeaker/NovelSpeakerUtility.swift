@@ -8,6 +8,7 @@
 
 import UIKit
 import Zip
+import RealmSwift
 
 class NovelSpeakerUtility: NSObject {
     static let privacyPolicyURL = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/master/PrivacyPolicy.txt")
@@ -130,6 +131,21 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
+    // 指定された realm に、必須データが入っているか否かを判定します。
+    static func CheckDefaultSettingsAlive(realm:Realm) -> Bool {
+        guard let globalState = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID) else { return false }
+        if globalState.defaultSpeakerID.count <= 0
+            || globalState.defaultDisplaySettingID.count <= 0
+            || globalState.defaultSpeechOverrideSettingID.count <= 0
+            || globalState.webImportBookmarkArray.count <= 0 {
+            return false
+        }
+        if realm.objects(RealmSpeakerSetting.self).count <= 0 { return false }
+        if realm.objects(RealmSpeechSectionConfig.self).count <= 0 { return false }
+        if realm.objects(RealmSpeechWaitConfig.self).count <= 0 { return false }
+        if realm.objects(RealmSpeechModSetting.self).count <= 0 { return false }
+        return true
+    }
     // 標準設定を入れます。結構時間かかるのでバックグラウンドで行われます
     @objc static func InsertDefaultSettingsIfNeeded() {
         DispatchQueue.global(qos: .utility).async {

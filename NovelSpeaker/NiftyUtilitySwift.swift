@@ -243,7 +243,7 @@ class NiftyUtilitySwift: NSObject {
             dialog = dialog.title(title: title)
         }
         if let message = message {
-            dialog = dialog.label(text: message, textAlignment: .left)
+            dialog = dialog.label(text: message, textAlignment: .left, tag: 100)
         }
         let builded = dialog.build()
         builded.show()

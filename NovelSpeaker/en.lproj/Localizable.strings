@@ -115,6 +115,29 @@
 "SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmTitle" = "Confirm";
 "SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmMessage" = "Among the corrections of readings, delete the same one as the correction of standard readings. Is it OK?";
 "SettingsViewController_RemoveDefaultSpeechModSettings_DeletedMessage" = "Of the registration of the correction of reading, the same one as the correction of standard reading was deleted.";
+"SettingsViewController_IsUseiCloud_Title" = "Use iCloud sync";
+"SettingsViewController_IsUseiCloud_ConifirmTitle" = "Do you want to enable iCloud sync?";
+"SettingsViewController_IsUseiCloud_ConifirmMessage" = "When iCloud Sync is enabled, iCloud will try to communicate each time you rewrite data in the area. For example, opening a novel or reading aloud will rewrite the data, so communication will occur frequently.";
+"SettingsViewController_IsUseiCloud_EnabledButNextStart" = "iCloud Sync has started. Once you quit the app.";
+"SettingsViewController_IsUseiCloud_ConifirmTitle_disable" = "Do you want to disable iCloud sync?";
+"SettingsViewController_IsUseiCloud_DisabledButNextStart" = "iCloud Sync has stopped. Once you quit the app.";
+"SettingsViewController_IsUseiCloud_SyncProgress" = "Data is registered on iCloud side";
+"SettingsViewController_IsUseiCloud_SyncProgress_Push" = "Waiting for data to be registered";
+"SettingsViewController_IsUseiCloud_CopyFailed" = "Failed to register data.";
+"SettingsViewController_IsUseiCloud_DisableSyncProgress" = "Fetching data from iCloud side";
+
+"SettingsViewController_CopyingCloudToLocal" = "Acquisition of iCloud side data";
+"SettingsViewController_CopyCloudToLocalFailed" = "Failed to get iCloud data.";
+"SettingsViewController_iCloudDisable_done" = "iCloud sync has stopped";
+"SettingsViewController_CopyingLocalToCloud" = "Registering current data with iCloud";
+"SettingsViewController_CopyLocalToCloudFailed" = "Registration of current data to iCloud has failed.";
+"SettingsViewController_iCloudEnable_done" = "iCloud Sync has started";
+"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData" = "There seems to be data available on the iCloud side. Select whether to use the iCloud data as it is or overwrite the data on iCloud with the current data.";
+"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud" = "Use iCloud data as it is";
+"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal" = "Overwrite data on iCloud with current data";
+"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "Checking iCloud data";
+"SettingsViewController_IsUseiCloud_FailedSyncEngineStart" = "Failed to connect to iCloud.";
+
 
 "NovelSpeakerUtility_ExportingNovelData" = "Exporting novel";
 "NovelSpeakerUtility_ExportOtherSettings" = "Exporting settings";

@@ -345,7 +345,17 @@ class CoreDataToRealmTool: NSObject {
     @objc static func IsNeedMigration() -> Bool {
         if RealmUtil.IsUseCloudRealm() {
             if RealmUtil.CheckIsCloudRealmCreated() {
+                do {
+                    try RealmUtil.EnableSyncEngine()
+                }catch{
+                    // TODO: exception を握りつぶしている
+                }
                 return false
+            }
+            do {
+                try RealmUtil.EnableSyncEngine()
+            }catch{
+                // TODO: exception を握りつぶしている
             }
             if RealmUtil.CheckIsLocalRealmCreated() {
                 return true
