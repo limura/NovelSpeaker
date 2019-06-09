@@ -85,8 +85,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         refreshControl.addTarget(self, action: #selector(refreshControlValueChangedEvent), for: .valueChanged)
         treeView.scrollView.addSubview(refreshControl)
         registObserver()
+        registNotificationCenter()
 
         view.layoutIfNeeded()
+    }
+    
+    deinit {
+        self.unregistNotificationCenter()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -104,6 +109,19 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.reloadAllDataAndScrollToCurrentReadingContent()
+                self.registObserver()
+            }
+        }
+    }
+    
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
     func registObserver() {
@@ -419,7 +437,25 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     // 次のビューに飛ばします。
     func pushNextView(novelID:String, isNeedSpeech: Bool){
-        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let story = novel.readingChapter else {
+        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+        guard let story = novel.readingChapter else {
+            guard let novelList = novel.linkedStorys, novelList.count > 0 else {
+                if novel.type == .URL {
+                    DispatchQueue.main.async {
+                        NiftyUtilitySwift.EasyDialogTwoButton(
+                            viewController: self,
+                            title: nil,
+                            message: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseNoStory", comment: "本文が何も読み込まれていないようです。この小説の再ダウンロードを試みますか？"),
+                            button1Title: nil, // Cancel
+                            button1Action: nil,
+                            button2Title: nil, // OK
+                            button2Action: {
+                                NovelDownloadQueue.shared.addQueue(novelID: novelID)
+                        })
+                    }
+                }
+                return
+            }
             return
         }
         nextViewStoryID = story.id

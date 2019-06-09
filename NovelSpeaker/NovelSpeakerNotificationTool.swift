@@ -19,6 +19,8 @@ extension Notification.Name {
         static let DownloadStatusChanged = Notification.Name("NovelSpeaker_Notification_DownloadStatusChanged")
         // 設定がいろいろ変わって設定ページをリロードした方が良い時
         static let GlobalStateChanged = Notification.Name("NovelSpeaker_Notification_GlobalStateChanged")
+        // 利用する Realm の設定等が変わった時(localRelam から cloud realm になった等)
+        static let RealmSettingChanged = Notification.Name("NovelSpeaker_Notification_RealmSettingChanged")
     }
 }
 extension Notification {
@@ -28,6 +30,32 @@ extension Notification {
 }
 
 class NovelSpeakerNotificationTool {
+    static let lock = NSLock()
+    static var notificationTokenHolder:[ObjectIdentifier:[NSObjectProtocol]] = [:]
+    
+    static func addObserver(selfObject:ObjectIdentifier, name: Notification.Name, queue: OperationQueue?, using: @escaping (Notification)->Void) {
+        let token = NotificationCenter.default.addObserver(forName: name, object: nil, queue: queue, using: using)
+        lock.lock()
+        defer { lock.unlock() }
+        if var holder = self.notificationTokenHolder[selfObject] {
+            holder.append(token)
+            self.notificationTokenHolder[selfObject] = holder
+        }else{
+            let holder = [token]
+            self.notificationTokenHolder[selfObject] = holder
+        }
+    }
+    static func removeObserver(selfObject:ObjectIdentifier) {
+        guard let holder = self.notificationTokenHolder[selfObject] else { return }
+        let notificationCenter = NotificationCenter.default
+        lock.lock()
+        defer { lock.unlock() }
+        for token in holder {
+            notificationCenter.removeObserver(token)
+        }
+        self.notificationTokenHolder.removeValue(forKey: selfObject)
+    }
+    
     /*
     static func AnnounceFontSizeChanged() {
         let notificationCenter = NotificationCenter.default
@@ -49,6 +77,12 @@ class NovelSpeakerNotificationTool {
     static func AnnounceGlobalStateChanged() {
         let notificationCenter = NotificationCenter.default
         let notification = Notification(name: Notification.Name.NovelSpeaker.GlobalStateChanged)
+        notificationCenter.post(notification)
+    }
+
+    static func AnnounceRealmSettingChanged() {
+        let notificationCenter = NotificationCenter.default
+        let notification = Notification(name: Notification.Name.NovelSpeaker.RealmSettingChanged)
         notificationCenter.post(notification)
     }
 }

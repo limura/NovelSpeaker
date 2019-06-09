@@ -200,7 +200,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     
     func updateReadDate(storyID:String) {
         if let story = RealmStory.SearchStoryFrom(storyID: storyID) {
-            RealmUtil.Write { (realm) in
+            RealmUtil.LocalOnlyWrite { (realm) in
                 story.lastReadDate = Date()
             }
         }
@@ -430,7 +430,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
         if let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
-            RealmUtil.Write(withoutNotifying: [self.storyObserverToken]) { (realm) in
+            RealmUtil.LocalOnlyWrite(withoutNotifying: [self.storyObserverToken]) { (realm) in
                 story.readLocation = speaker.getCurrentReadingPoint().location
             }
         }
@@ -448,7 +448,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         let contentLength = story.content?.count ?? 0
         if nextReadingPoint > contentLength {
             if !LoadNextChapter() {
-                RealmUtil.Write { (realm) in
+                RealmUtil.LocalOnlyWrite { (realm) in
                     story.readLocation = contentLength
                 }
             }
@@ -467,7 +467,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         while let story = targetStory {
             let contentLength = story.content?.count ?? 0
             if targetLength <= contentLength {
-                RealmUtil.Write { (realm) in
+                RealmUtil.LocalOnlyWrite { (realm) in
                     story.readLocation = contentLength - targetLength
                 }
                 ringPageTurningSound()
@@ -479,7 +479,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         // 抜けてきたということは先頭まで行ってしまった。
         if let firstStory = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
-            RealmUtil.Write { (realm) in
+            RealmUtil.LocalOnlyWrite { (realm) in
                 firstStory.readLocation = 0
             }
             if firstStory.id != self.storyID {
@@ -502,7 +502,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     @discardableResult
     func LoadNextChapter() -> Bool{
         if let nextStory = SearchNextChapter(storyID: self.storyID) {
-            RealmUtil.Write { (realm) in
+            RealmUtil.LocalOnlyWrite { (realm) in
                 nextStory.readLocation = 0
             }
             ringPageTurningSound()
@@ -528,7 +528,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     @discardableResult
     func LoadPreviousChapter() -> Bool{
         if let previousStory = SearchPreviousChapter(storyID: storyID) {
-            RealmUtil.Write { (realm) in
+            RealmUtil.LocalOnlyWrite { (realm) in
                 previousStory.readLocation = 0
             }
             ringPageTurningSound()
@@ -836,7 +836,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         if let nextStory = SearchNextChapter(storyID: self.storyID) {
             self.ringPageTurningSound()
-            RealmUtil.Write { (realm) in
+            RealmUtil.LocalOnlyWrite { (realm) in
                 nextStory.readLocation = 0
             }
             self.SetStory(story: nextStory)
@@ -860,7 +860,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         set {
             if let story = RealmStory.SearchStoryFrom(storyID: self.storyID), let contentLength = story.content?.count, contentLength > newValue && newValue >= 0 {
                 speaker.updateCurrentReadingPoint(NSRange(location: newValue, length: 0))
-                RealmUtil.Write { (realm) in
+                RealmUtil.LocalOnlyWrite { (realm) in
                     story.readLocation = newValue
                 }
             }

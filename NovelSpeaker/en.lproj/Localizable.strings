@@ -131,12 +131,19 @@
 "SettingsViewController_iCloudDisable_done" = "iCloud sync has stopped";
 "SettingsViewController_CopyingLocalToCloud" = "Registering current data with iCloud";
 "SettingsViewController_CopyLocalToCloudFailed" = "Registration of current data to iCloud has failed.";
-"SettingsViewController_iCloudEnable_done" = "iCloud Sync has started";
+"SettingsViewController_iCloudEnable_done" = "iCloud Sync has started.\nSynchronization has been started, but synchronization (transfer) work between the handset and iCloud has not been completed.\nIf there is a lot of data to be transferred, it may take quite a while to complete the transfer. Unfortunately, there is nothing (unless the developer knows) to know if the transfer has ended. According to Apple's comment, if you launch the app again for 24 hours, it will continue to transfer, but you may not feel much relieved. If there is unsent or unsent data, it will make an effort to turn the indicator during communication, but it may not mean that the transfer has ended when this indicator has disappeared. Please understand.";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData" = "There seems to be data available on the iCloud side. Select whether to use the iCloud data as it is or overwrite the data on iCloud with the current data.";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud" = "Use iCloud data as it is";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal" = "Overwrite data on iCloud with current data";
 "SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "Checking iCloud data";
 "SettingsViewController_IsUseiCloud_FailedSyncEngineStart" = "Failed to connect to iCloud.";
+"SettingsViewController_CloudPullProcessingDialog" = "Loading data from iCloud.";
+"SettingsViewController_CloudPushProcessingDialog" = "Writing data to iCloud side.";
+"SettingsViewController_IsUseiCloud_ConifirmRemoveLocalData" = "I will use the data on iCloud.\nThe current data is discarded.\nThis operation can not be undone.\nIs it OK?";
+"SettingsViewController_iCloudAccountInvalid_restricted" = "Your iCloud account is in a restricted state and can not be used.";
+"SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloud account has not been set up.";
+"SettingsViewController_iCloudAccountInvalid_cloudNotDetermine" = "Could not get the status of your iCloud account.";
+"SettingsViewController_InvalidiCloudStatus" = "There was a problem with the state of iCloud.";
 
 
 "NovelSpeakerUtility_ExportingNovelData" = "Exporting novel";
@@ -370,6 +377,7 @@
 "CoreDataToRealmTool_ProgressSpeechMod" = "Converting correction of the reading settings";
 
 "MigrationViewController_DoingCoreDataMigration" = "Updating the old database.";
+"MigrationViewController_FetchAllCloudData_Progress" = "We check whether available data is left for data on iCloud.";
 
 "SpeakerSetting_NewSpeakerSetting" = "New speaker";
 
@@ -454,6 +462,7 @@
 "BookShelfRATreeViewController_UpTo1YearAgo" = "Up to a year ago";
 "BookShelfRATreeViewController_BeforeThat" = "More than a year ago";
 "BookShelfRATreeViewController_UnknownWriter" = "(unknown name)";
+"BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseNoStory" = "It seems that no text of the novel has been downloaded. Do you try to redownload this novel?";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
 

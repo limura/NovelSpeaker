@@ -35,8 +35,13 @@ class MultipleNovelIDSelectorViewController: FormViewController {
         createSelectorCells()
         self.filterButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .done, target: self, action: #selector(filterButtonClicked(sender:)))
         navigationItem.rightBarButtonItems = [filterButton]
+        registNotificationCenter()
     }
-    
+
+    deinit {
+        self.unregistNotificationCenter()
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         print("MultipleNovelIDSelectorViewController.viewWillDisappear()")
@@ -44,6 +49,17 @@ class MultipleNovelIDSelectorViewController: FormViewController {
         delegate.MultipleNovelIDSelectorSelected(selectedNovelIDSet: self.SelectedNovelIDSet, hint: self.Hint)
     }
     
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
+    }
+
     func observeNovelArray() {
         guard let allNovels = RealmNovel.GetAllObjects() else { return }
         self.novelArrayNotificationToken = allNovels.observe({ (change) in

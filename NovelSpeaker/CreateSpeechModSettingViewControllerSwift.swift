@@ -28,8 +28,24 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         self.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_Title", comment: "読みの修正詳細")
         
         createCells()
+        registNotificationCenter()
     }
     
+    deinit {
+        self.unregistNotificationCenter()
+    }
+    
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
+    }
+
     func validateBeforeString(text:String, isUseRegexp: Bool) -> Bool {
         if isUseRegexp {
             if ((try? NSRegularExpression(pattern: text, options: [])) != nil) {
@@ -220,7 +236,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 for novelID in self.targetNovelIDSet {
                     setting.targetNovelIDArray.append(novelID)
                 }
-                realm.add(setting, update: true)
+                realm.add(setting, update: .modified)
             }
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)

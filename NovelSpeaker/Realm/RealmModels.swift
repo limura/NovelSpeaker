@@ -13,6 +13,7 @@ import UIKit
 
 @objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 0
+    static let currentSchemaVersionForLocalOnly : UInt64 = 0
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
@@ -21,7 +22,11 @@ import UIKit
     static let lock = NSLock()
     static var realmLocalCache:[String:Realm] = [:]
     static var realmCloudCache:[String:Realm] = [:]
+    static let lockLocalOnly = NSLock()
+    static var realmLocalOnlyCache:[String:Realm] = [:]
     
+    static var syncEngineDispatchQueue:DispatchQueue = DispatchQueue.main
+
     static func Migrate_0_To_1(migration:Migration, oldSchemaVersion:UInt64) {
         
     }
@@ -30,12 +35,24 @@ import UIKit
             Migrate_0_To_1(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
+    static func MigrateFuncForLocalOnly(migration:Migration, oldSchemaVersion:UInt64) {
+        
+    }
     
     static func GetLocalRealmFilePath() -> URL? {
         let fileManager = FileManager.default
         do {
             let directory = try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             return directory.appendingPathComponent("local.realm")
+        }catch{
+            return nil
+        }
+    }
+    static func GetLocalOnlyRealmFilePath() -> URL? {
+        let fileManager = FileManager.default
+        do {
+            let directory = try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            return directory.appendingPathComponent("localOnly.realm")
         }catch{
             return nil
         }
@@ -54,6 +71,21 @@ import UIKit
             lock.unlock()
         }
         realmLocalCache.removeAll()
+    }
+    @objc static func RemoveLocalOnlyRealmFile() {
+        if let path = GetLocalOnlyRealmFilePath() {
+            let fileManager = FileManager.default
+            do {
+                try fileManager.removeItem(at: path)
+            }catch{
+                print("file \(path.absoluteString) remove failed.")
+            }
+        }
+        lockLocalOnly.lock()
+        defer {
+            lockLocalOnly.unlock()
+        }
+        realmLocalOnlyCache.removeAll()
     }
     static func GetLocalRealm() throws -> Realm {
         lock.lock()
@@ -74,6 +106,25 @@ import UIKit
         })
         let realm = try Realm(configuration: config)
         realmLocalCache[threadID] = realm
+        return realm
+    }
+    static func GetLocalOnlyRealm() throws -> Realm {
+        lockLocalOnly.lock()
+        defer { lockLocalOnly.unlock() }
+        let threadID = "\(Thread.current)"
+        if let realm = realmLocalOnlyCache[threadID] {
+            return realm
+        }
+        let config = Realm.Configuration(
+            fileURL: GetLocalOnlyRealmFilePath(),
+            schemaVersion: currentSchemaVersionForLocalOnly,
+            migrationBlock: MigrateFuncForLocalOnly,
+            deleteRealmIfMigrationNeeded: deleteRealmIfMigrationNeeded,
+            shouldCompactOnLaunch: { (totalBytes:Int, usedBytes:Int) in
+                return Double(totalBytes) * 1.3 < Double(usedBytes)
+        })
+        let realm = try Realm(configuration: config)
+        realmLocalOnlyCache[threadID] = realm
         return realm
     }
     static func GetCloudRealmFilePath() -> URL? {
@@ -111,13 +162,12 @@ import UIKit
         do {
             let realm = try GetCloudRealm()
             try realm.write {
+                /*
                 for obj in realm.objects(RealmStory.self) {
                     obj.isDeleted = true
                 }
+                */
                 for obj in realm.objects(RealmNovel.self) {
-                    obj.isDeleted = true
-                }
-                for obj in realm.objects(RealmStory.self) {
                     obj.isDeleted = true
                 }
                 for obj in realm.objects(RealmSpeechModSetting.self) {
@@ -199,7 +249,7 @@ import UIKit
         let container = GetContainer()
         let realm = try RealmUtil.GetCloudRealmWithoutLock()
         return SyncEngine(objects: [
-            SyncObject<RealmStory>(realm: realm),
+            //SyncObject<RealmStory>(realm: realm, dispatchQueue: dispatchQueue),
             SyncObject<RealmNovel>(realm: realm),
             SyncObject<RealmSpeechModSetting>(realm: realm),
             SyncObject<RealmSpeechWaitConfig>(realm: realm),
@@ -210,21 +260,142 @@ import UIKit
             SyncObject<RealmDisplaySetting>(realm: realm),
             SyncObject<RealmNovelTag>(realm: realm),
             SyncObject<RealmSpeechOverrideSetting>(realm: realm)
-            ], container: container, in: realm)
+            ], databaseScope: .private, container: container)
     }
+    
     static func EnableSyncEngine() throws {
         lock.lock()
         defer { lock.unlock() }
         if syncEngine != nil { return }
-        syncEngine = try CreateSyncEngine()
+        //self.syncEngineDispatchQueue = DispatchQueue(label: "NovelSpeakerRealmModelsSyncEngineQueue", qos: .utility, attributes: DispatchQueue.Attributes.concurrent, autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.workItem, target: nil)
+        self.syncEngineDispatchQueue = DispatchQueue.main
+        //self.backgroundWorker = BackgroundWorker()
+        if Thread.isMainThread {
+            self.syncEngine = try CreateSyncEngine()
+        }else{
+            try self.syncEngineDispatchQueue.sync {
+                self.syncEngine = try CreateSyncEngine()
+            }
+        }
     }
-    static func CloudSync() {
-        // pull() で iCloud 上の最新データで上書きした後に、pushAll() する。
-        // というのは、どうも pushAll() をしないでも local の変更を勝手に push されているようであるというのと、
-        // どうやら pushAll() というのは local の変更を push するものではなく
-        // 「今現在のデータを全部上書きで登録する」というものらしいので。
+    static func isSyncEngineStarted() -> Bool {
+        return syncEngine != nil
+    }
+    static func stopSyncEngine() {
+        syncEngine = nil
+    }
+    static func FetchAllLongLivedOperationIDs(completionHandler: @escaping ([CKOperation.ID]?, Error?) -> Void) {
+        let container = GetContainer()
+        container.fetchAllLongLivedOperationIDs(completionHandler: completionHandler)
+    }
+    static func GetCloudAccountStatus(completionHandler: @escaping (CKAccountStatus, Error?) -> Void) {
+        let container = GetContainer()
+        container.accountStatus(completionHandler: completionHandler)
+    }
+    // LongLivedOperationID が全部消えるまで待ちます。
+    static func WaitAllLongLivedOperationIDCleared(watchInterval:TimeInterval = 1.0, completion:@escaping (()->Void)) {
+        FetchAllLongLivedOperationIDs { (operationIDArray, error) in
+            guard error == nil, let operationIDArray = operationIDArray, operationIDArray.count > 0 else {
+                completion()
+                return
+            }
+            DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + watchInterval) {
+                WaitAllLongLivedOperationIDCleared(completion: completion)
+            }
+        }
+    }
+    
+    static func CountAllCloudRealmRecords(realm:Realm) -> Int {
+        let targetRealmClasses = [
+            //RealmStory.self,
+            RealmNovel.self,
+            RealmSpeechWaitConfig.self,
+            RealmSpeakerSetting.self,
+            RealmSpeechSectionConfig.self,
+            RealmSpeechQueue.self,
+            RealmGlobalState.self,
+            RealmDisplaySetting.self,
+            RealmNovelTag.self,
+            RealmSpeechOverrideSetting.self
+        ]
+        var count = 0
+        realm.refresh()
+        for realmClass in targetRealmClasses {
+            count += realm.objects(realmClass).count
+        }
+        return count
+    }
+    /// iCloud上にあるデータが使い物になるかどうかを確認します。
+    /// 全てのデータが取得できたという事を確認する事が難しいため、
+    /// 全てのデータが取得できていなかったとしても、使い物になるかどうかの確認だけをして、
+    /// 使い物になりそうであれば completion method で true を返します。
+    /// 動作としては、syncEngine?.pull() してから暫く待って、
+    /// iCloud 側のデータが増えているならもう少し(timeoutLimitまで)待ってみて、
+    /// それでも駄目なら駄目だったと返します(completion に false を入れて呼び出します)。
+    /// timeout については、
+    /// minimumTimeoutLimit の間、iCloud 上のデータのRecord数が 0 のまま新しい record を取得できないのであれば false
+    /// record数は増えていたが、timeoutLimit の間に有効なデータが取得できなければ false を返す事になります。
+    static func CheckCloudDataIsValid(minimumTimeoutLimit: TimeInterval = 5.0, timeoutLimit: TimeInterval = 60.0, completion: ((Bool) -> Void)?) {
+        guard let realm = try? GetCloudRealm() else {
+            completion?(false)
+            return
+        }
+        realm.refresh()
+        let startCount = CountAllCloudRealmRecords(realm: realm)
+        let minimumTimelimitDate = Date(timeIntervalSinceNow: minimumTimeoutLimit)
+        let timelimitDate = Date(timeIntervalSinceNow: timeoutLimit)
+        if startCount > 0 && NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
+            completion?(true)
+            return
+        }
+
         syncEngine?.pull()
-        syncEngine?.pushAll()
+        func watcher(completion: ((Bool) -> Void)?, startCount:Int, minimumTimelimitDate:Date, timelimitDate:Date) {
+            DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 1) {
+                guard let realm = try? GetCloudRealm() else {
+                    completion?(false)
+                    return
+                }
+                realm.refresh()
+                let currentCount = CountAllCloudRealmRecords(realm: realm)
+                if currentCount > startCount && NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
+                    completion?(true)
+                    return
+                }
+                if Date() > timelimitDate {
+                    completion?(false)
+                    return
+                }
+                if startCount <= 0 && currentCount <= 0 && Date() > minimumTimelimitDate {
+                    // minimumTimeoutLimit秒経っても count が 0 から何も増えてないということは多分何も入っていない
+                    completion?(false)
+                    return
+                }
+                watcher(completion: completion, startCount: startCount, minimumTimelimitDate: minimumTimelimitDate, timelimitDate: timelimitDate)
+            }
+        }
+        watcher(completion: completion, startCount: startCount, minimumTimelimitDate: minimumTimelimitDate, timelimitDate: timelimitDate)
+    }
+    // IceCream の使っている iCloud 同期の状態管理をしている UserDefaults 値を消します。
+    // (WARN: targetIceCreamKeyArray に書かれている値は IceCream の source code から推測して作られた値なので、
+    // 将来的にこのままではおかしな動作になる可能性があります)
+    // 効果としては、SyncEngine.pull() で取得される値が前回からの差分で更新があったもののみ、というのが「全て」に変わります。
+    static func ForceRemoveIceCreamDatabaseSyncTokens() {
+        let defaults = UserDefaults.standard
+        let targetIceCreamKeyArray = [ // wow! magic word!
+            "icecream.keys.databaseChangesTokenKey",
+            "icecream.keys.zoneChangesTokenKey",
+            "icecream.keys.subscriptionIsLocallyCachedKey",
+            "icecream.keys.hasCustomZoneCreatedKey",
+        ]
+        for key in defaults.dictionaryRepresentation().keys {
+            for targetKey in targetIceCreamKeyArray {
+                if key.contains(targetKey) {
+                    print("delete IceCream Key: \(key)")
+                    defaults.removeObject(forKey: key)
+                }
+            }
+        }
     }
     static func CloudPull() {
         syncEngine?.pull()
@@ -236,10 +407,12 @@ import UIKit
     // iCloud 上の全てのデータを消します
     static func ClearCloudData() throws {
         try EnableSyncEngine()
+        ForceRemoveIceCreamDatabaseSyncTokens()
         CloudPull()
-        ClearCloudRealmModels()
-        CloudPush()
-        CloudPull()
+        WaitAllLongLivedOperationIDCleared {
+            ClearCloudRealmModels()
+            CloudPush()
+        }
     }
 
     static let UseCloudRealmKey = "RealmUtil_UseCloudRealm"
@@ -251,22 +424,12 @@ import UIKit
     static func SetIsUseCloudRealm(isUse:Bool) {
         let defaults = UserDefaults.standard
         defaults.set(isUse, forKey: UseCloudRealmKey)
+        NovelSpeakerNotificationTool.AnnounceRealmSettingChanged()
     }
     static func GetRealm() throws -> Realm {
         if IsUseCloudRealm() {
             if syncEngine == nil {
-                // SyncEngine を作るときは main thread でないと駄目ぽい。
-                if Thread.isMainThread {
-                    try EnableSyncEngine()
-                }else{
-                    DispatchQueue.main.sync {
-                        do {
-                            try EnableSyncEngine()
-                        }catch{
-                            // TODO: exception を握りつぶしている
-                        }
-                    }
-                }
+                try EnableSyncEngine()
             }
             return try GetCloudRealm()
         }
@@ -284,11 +447,7 @@ import UIKit
     }
     
     // TODO: 書き込み失敗を無視している
-    static func Write(block:((_ realm:Realm)->Void)) {
-        guard let realm = try? RealmUtil.GetRealm() else {
-            print("realm get failed.")
-            return
-        }
+    static func WriteWith(realm:Realm, block:((_ realm:Realm)->Void)) {
         realm.refresh()
         do {
             try realm.write {
@@ -298,14 +457,13 @@ import UIKit
             print("realm.write failed.")
         }
     }
-
+    
     // TODO: 書き込み失敗を無視している
-    static func Write(withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Void)) {
-        guard let realm = try? RealmUtil.GetRealm() else { return }
+    static func WriteWith(realm:Realm, withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Void)) {
         realm.refresh()
         let withoutNotifying = withoutNotifying.filter { (token) -> Bool in
             token != nil
-        } as! [NotificationToken]
+            } as! [NotificationToken]
         realm.beginWrite()
         block(realm)
         do {
@@ -319,6 +477,32 @@ import UIKit
         }
     }
 
+    static func Write(block:((_ realm:Realm)->Void)) {
+        guard let realm = try? RealmUtil.GetRealm() else {
+            print("realm get failed.")
+            return
+        }
+        WriteWith(realm: realm, block: block)
+    }
+
+    static func Write(withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Void)) {
+        guard let realm = try? RealmUtil.GetRealm() else { return }
+        WriteWith(realm: realm, withoutNotifying: withoutNotifying, block: block)
+    }
+
+    static func LocalOnlyWrite(block:((_ realm:Realm)->Void)) {
+        guard let realm = try? RealmUtil.GetLocalOnlyRealm() else {
+            print("realm get failed.")
+            return
+        }
+        WriteWith(realm: realm, block: block)
+    }
+    
+    static func LocalOnlyWrite(withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Void)) {
+        guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return }
+        WriteWith(realm: realm, withoutNotifying: withoutNotifying, block: block)
+    }
+
     static func Delete(realm:Realm, model:Object) {
         if var model = model as? CanWriteIsDeleted {
             model.isDeleted = true
@@ -326,6 +510,12 @@ import UIKit
         if !IsUseCloudRealm() {
             realm.delete(model)
         }
+    }
+    static func LocalOnlyDelete(realm:Realm, model:Object) {
+        if var model = model as? CanWriteIsDeleted {
+            model.isDeleted = true
+        }
+        realm.delete(model)
     }
     
     static func CheckIsLocalRealmCreated() -> Bool {
@@ -364,7 +554,8 @@ protocol CanWriteIsDeleted {
 
     var linkedQueues : [RealmSpeechQueue]? {
         get {
-            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            //guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
             realm.refresh()
             return realm.objects(RealmSpeechQueue.self).filter({ (speechQueue) -> Bool in
                 return !speechQueue.isDeleted && speechQueue.targetStoryIDArray.contains(self.id)
@@ -373,7 +564,8 @@ protocol CanWriteIsDeleted {
     }
     var owner : RealmNovel? {
         get {
-            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            //guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
             realm.refresh()
             return realm.objects(RealmNovel.self).filter("isDeleted = false AND novelID = %@", self.novelID).first
         }
@@ -404,7 +596,8 @@ protocol CanWriteIsDeleted {
         return 0
     }
     static func SearchStory(novelID:String, chapterNumber:Int) -> RealmStory? {
-        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        //guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
         realm.refresh()
         if let result = realm.object(ofType: RealmStory.self, forPrimaryKey: CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber)), result.isDeleted == false {
             return result
@@ -413,7 +606,8 @@ protocol CanWriteIsDeleted {
     }
     
     static func GetAllObjects() -> Results<RealmStory>? {
-        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        //guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
         realm.refresh()
         return realm.objects(RealmStory.self).filter("isDeleted = false")
     }
@@ -426,12 +620,19 @@ protocol CanWriteIsDeleted {
     }
 
     static func SearchStoryFrom(storyID:String) -> RealmStory? {
-        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        //guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
         realm.refresh()
         if let result = realm.object(ofType: RealmStory.self, forPrimaryKey: storyID), result.isDeleted == false {
             return result
         }
         return nil
+    }
+    static func SearchStoryFrom(novelID:String) -> Results<RealmStory>? {
+        //guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
+        realm.refresh()
+        return realm.objects(RealmStory.self).filter("isDeleted = false AND novelID = %@", novelID)
     }
     
     func delete(realm:Realm) {
@@ -440,7 +641,9 @@ protocol CanWriteIsDeleted {
                 queue.unref(realm:realm, storyID: self.id)
             }
         }
-        RealmUtil.Delete(realm: realm, model: self)
+        RealmUtil.LocalOnlyWrite { (realm) in
+            RealmUtil.LocalOnlyDelete(realm: realm, model: self)
+        }
     }
 
     override class func primaryKey() -> String? {
@@ -466,11 +669,11 @@ extension RealmStory: CanWriteIsDeleted {
 @objc final class RealmNovel : Object {
     @objc dynamic var novelID : String = RealmNovel.CreateUniqueID() // novelID は primary key です。
     @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var _type : Int = NovelType.URL.rawValue
+    @objc dynamic var m_type : Int = NovelType.URL.rawValue
     @objc dynamic var writer : String = ""
     @objc dynamic var title : String = ""
     @objc dynamic var url : String = ""
-    @objc dynamic var _urlSecret : String = ""
+    @objc dynamic var m_urlSecret : String = ""
     @objc dynamic var createdDate : Date = Date()
     @objc dynamic var likeLevel : Int8 = 0
     @objc dynamic var isNeedSpeechAfterDelete : Bool = false
@@ -478,10 +681,10 @@ extension RealmStory: CanWriteIsDeleted {
 
     var type : NovelType {
         get {
-            return NovelType(rawValue: self._type) ?? NovelType.UserCreated
+            return NovelType(rawValue: self.m_type) ?? NovelType.UserCreated
         }
         set {
-            self._type = newValue.rawValue
+            self.m_type = newValue.rawValue
         }
     }
     
@@ -494,9 +697,7 @@ extension RealmStory: CanWriteIsDeleted {
     // ということで、以下のような link されているものを検索するようなクエリは遅くなるかもしれん。というか多分遅い。
     var linkedStorys: Results<RealmStory>? {
         get {
-            guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
-            return realm.objects(RealmStory.self).filter("isDeleted = false AND novelID = %@", self.novelID)
+            return RealmStory.SearchStoryFrom(novelID: self.novelID)
         }
     }
     var linkedSpeechModSettings : [RealmSpeechModSetting]? {
@@ -588,7 +789,7 @@ extension RealmStory: CanWriteIsDeleted {
     
     var urlSecret: [String] {
         get {
-            return _urlSecret.components(separatedBy: ";")
+            return m_urlSecret.components(separatedBy: ";")
         }
     }
     
@@ -655,13 +856,13 @@ extension RealmStory: CanWriteIsDeleted {
         novel.type = .UserCreated
         novel.title = title
         RealmUtil.Write { (realm) in
-            realm.add(novel, update: true)
+            realm.add(novel, update: .modified)
         }
         let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
         story.content = content
         story.lastReadDate = Date(timeIntervalSinceNow: -60)
-        RealmUtil.Write { (realm) in
-            realm.add(story, update: true)
+        RealmUtil.LocalOnlyWrite { (realm) in
+            realm.add(story, update: .modified)
         }
     }
     static func AddNewNovelWithMultiplText(contents:[String], title:String) {
@@ -669,7 +870,7 @@ extension RealmStory: CanWriteIsDeleted {
         novel.type = .UserCreated
         novel.title = title
         RealmUtil.Write { (realm) in
-            realm.add(novel, update: true)
+            realm.add(novel, update: .modified)
         }
         var chapterNumber = 1
         for content in contents {
@@ -679,8 +880,8 @@ extension RealmStory: CanWriteIsDeleted {
             if chapterNumber != 1 {
                 story.lastReadDate = Date(timeIntervalSinceNow: -60)
             }
-            RealmUtil.Write { (realm) in
-                realm.add(story, update: true)
+            RealmUtil.LocalOnlyWrite { (realm) in
+                realm.add(story, update: .modified)
             }
             chapterNumber += 1
         }
@@ -698,15 +899,14 @@ extension RealmStory: CanWriteIsDeleted {
         let novel = RealmNovel()
         novel.novelID = novelID
         novel.url = novelID
-        novel._urlSecret = cookieParameter
+        novel.m_urlSecret = cookieParameter
         novel.title = title
         if let author = author {
             novel.writer = author
         }
         novel.type = .URL
-        guard let realm = try? RealmUtil.GetRealm() else { return false }
-        try! realm.write {
-            realm.add(novel, update: true)
+        RealmUtil.Write { (realm) in
+            realm.add(novel, update: .modified)
         }
         let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
         story.content = firstContent
@@ -716,9 +916,9 @@ extension RealmStory: CanWriteIsDeleted {
         if let storyUrl = htmlStory.url {
             story.url = storyUrl
         }
-        try! realm.write {
+        RealmUtil.LocalOnlyWrite { (realm) in
             story.lastReadDate = Date(timeIntervalSince1970: 60)
-            realm.add(story, update: true)
+            realm.add(story, update: .modified)
         }
         if let tagArray = tag {
             for tagName in tagArray {
@@ -1102,7 +1302,8 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     
     var targetStoryArray : [RealmStory]? {
         get {
-            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            //guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
             realm.refresh()
             return realm.objects(RealmStory.self).filter({ (story) -> Bool in
                 return !story.isDeleted && self.targetStoryIDArray.contains(story.id)
@@ -1172,7 +1373,7 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     @objc dynamic var isForceSiteInfoReloadIsEnabled = false
     @objc dynamic var isMenuItemIsAddSpeechModSettingOnly = false
     @objc dynamic var isPageTurningSoundEnabled = false
-    @objc dynamic var _bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
+    @objc dynamic var m_bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
     
     @objc dynamic var defaultDisplaySettingID = ""
     @objc dynamic var defaultSpeakerID = ""
@@ -1180,10 +1381,10 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     
     var bookShelfSortType : NarouContentSortType {
         get {
-            return NarouContentSortType(rawValue: UInt(_bookSelfSortType)) ?? NarouContentSortType.ncode
+            return NarouContentSortType(rawValue: UInt(m_bookSelfSortType)) ?? NarouContentSortType.ncode
         }
         set {
-            _bookSelfSortType = Int(newValue.rawValue)
+            m_bookSelfSortType = Int(newValue.rawValue)
         }
     }
     
@@ -1305,7 +1506,8 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
         UIScrollView.appearance().indicatorStyle = UIScrollView.IndicatorStyle.black
     }
     static func GetLastReadStory() -> RealmStory? {
-        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        //guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
         realm.refresh()
         return realm.objects(RealmStory.self).sorted(byKeyPath: "lastReadDate", ascending: true).last
     }
@@ -1472,7 +1674,7 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
             let tag = CreateNewTag(name: name, type: type)
             tag.targetNovelIDArray.append(novelID)
             if let realm = try? RealmUtil.GetRealm() {
-                realm.add(tag, update: true)
+                realm.add(tag, update: .modified)
             }
         }
     }
@@ -1525,7 +1727,7 @@ extension RealmNovelTag: CanWriteIsDeleted {
     @objc dynamic var name = "" // primary key
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var createdDate = Date()
-    @objc dynamic var _repeatSpeechType : Int = Int(RepeatSpeechType.noRepeat.rawValue)
+    @objc dynamic var m_repeatSpeechType : Int = Int(RepeatSpeechType.noRepeat.rawValue)
     @objc dynamic var isOverrideRubyIsEnabled = false
     @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
     @objc dynamic var isIgnoreURIStringSpeechEnabled = false
@@ -1534,10 +1736,10 @@ extension RealmNovelTag: CanWriteIsDeleted {
     
     var repeatSpeechType : RepeatSpeechType {
         get {
-            return RepeatSpeechType(rawValue: UInt(_repeatSpeechType)) ?? RepeatSpeechType.noRepeat
+            return RepeatSpeechType(rawValue: UInt(m_repeatSpeechType)) ?? RepeatSpeechType.noRepeat
         }
         set {
-            _repeatSpeechType = Int(newValue.rawValue)
+            m_repeatSpeechType = Int(newValue.rawValue)
         }
     }
     
@@ -1583,7 +1785,7 @@ extension RealmNovelTag: CanWriteIsDeleted {
     override class func primaryKey() -> String? {
         return "name"
     }
-    
+
     override static func indexedProperties() -> [String] {
         return ["name", "targetNovelArray", "createdDate", "isDeleted"]
     }

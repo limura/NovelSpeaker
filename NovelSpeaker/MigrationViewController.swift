@@ -38,6 +38,28 @@ class MigrationViewController: UIViewController {
             }
         }
     }
+    
+    func FetchValidCloudData() {
+        DispatchQueue.main.async {
+            self.progressLabel.text = NSLocalizedString("MigrationViewController_FetchAllCloudData_Progress", comment: "iCloud上のデータに利用可能なデータが残されているかを確認しています。")
+        }
+        let semaphore = DispatchSemaphore(value: 0)
+        RealmUtil.CheckCloudDataIsValid() { (result) in
+            semaphore.signal()
+        }
+        semaphore.wait()
+    }
+    
+    func CopyLocalToCloud() -> Bool {
+        guard let localRealm = try? RealmUtil.GetLocalRealm(), let cloudRealm = try? RealmUtil.GetCloudRealm() else { return false }
+        // TODO: ここで localRealm から cloudRealm に上書きコピーをして良いのかの確認プロセスが無い
+        try! RealmToRealmCopyTool.DoCopy(from: localRealm, to: cloudRealm) { (text) in
+            DispatchQueue.main.async {
+                self.progressLabel.text = text
+            }
+        }
+        return true
+    }
 
     func CheckAndDoCoreDataToRealmMigration() {
         if RealmUtil.IsUseCloudRealm() {
@@ -46,20 +68,21 @@ class MigrationViewController: UIViewController {
             }catch{
                 // TODO: exception を握りつぶしている
             }
-            // iCloud を使う場合で、
-            if RealmUtil.CheckIsCloudRealmCreated() {
+            if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
                 // iCloud の データがあるならそれを使う
                 return
             }
-            if RealmUtil.CheckIsLocalRealmCreated() {
-                // local のがあるならそこからコピーする
-                guard let localRealm = try? RealmUtil.GetLocalRealm(), let cloudRealm = try? RealmUtil.GetCloudRealm() else { return }
-                // TODO: ここで localRealm から cloudRealm に上書きコピーをして良いのかの確認プロセスが無い
-                try! RealmToRealmCopyTool.DoCopy(from: localRealm, to: cloudRealm) { (text) in
-                    DispatchQueue.main.async {
-                        self.progressLabel.text = text
-                    }
-                }
+            // iCloud を使うようにマークされているが、
+            // local に読み込まれた iCloud のデータは不正なものであったようである。
+            // 仕方がないので iCloud側 のデータを全て読み直す事にする。
+            self.FetchValidCloudData()
+            // 再度確認する
+            if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
+                // iCloud の データがあるならそれを使う
+                return
+            }
+            // local のがあるならそこからコピーする
+            if RealmUtil.CheckIsLocalRealmCreated() && CopyLocalToCloud() {
                 return
             }
             if GlobalDataSingleton.getInstance()?.isAliveCoreDataSaveFile() ?? false {

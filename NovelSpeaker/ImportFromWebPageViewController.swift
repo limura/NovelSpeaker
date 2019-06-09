@@ -129,11 +129,13 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
             self.progressView.setProgress(Float(wkWebView.estimatedProgress), animated: true)
             break
         case "loading":
-            UIApplication.shared.isNetworkActivityIndicatorVisible = wkWebView.isLoading
+            let activityIndicatorID = "ImportFormWebPageViewController_loading"
             if wkWebView.isLoading {
                 self.progressView.setProgress(0.1, animated: true)
+                ActivityIndicatorManager.enable(id: activityIndicatorID)
             }else{
                 self.progressView.setProgress(0.0, animated: false)
+                ActivityIndicatorManager.disable(id: activityIndicatorID)
             }
             break
         case "URL":

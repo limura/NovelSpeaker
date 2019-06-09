@@ -35,11 +35,27 @@ class TextSizeSettingViewControllerSwift: UIViewController {
         self.navigationItem.rightBarButtonItems = [
             UIBarButtonItem(title: NSLocalizedString("TextSizeSettingViewController_FontSettingTitle", comment: "字体設定"), style: .plain, target: self, action: #selector(fontSettingButtonClicked(_:)))
         ]
+        registNotificationCenter()
     }
-    
+    deinit {
+        self.unregistNotificationCenter()
+    }
+
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
     }
+    
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
+    }
+
     
     func setFontFromRealm() {
         if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {

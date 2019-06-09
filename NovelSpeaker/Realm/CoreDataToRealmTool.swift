@@ -96,7 +96,7 @@ class CoreDataToRealmTool: NSObject {
         realmState.defaultSpeakerID = defaultSpeaker.name
         realmState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.name
 
-        realm.add([defaultSpeechOverrideSetting, defaultSpeaker, defaultDisplaySetting, realmState], update: true)
+        realm.add([defaultSpeechOverrideSetting, defaultSpeaker, defaultDisplaySetting, realmState], update: .modified)
     }
     
     private static func CreateRealmSpeakerSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) {
@@ -171,7 +171,7 @@ class CoreDataToRealmTool: NSObject {
                 mod.isUseRegularExpression = speechMod.isRegexpType()
                 mod.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
 
-                realm.add(mod, update: true)
+                realm.add(mod, update: .modified)
             }
         }
     }
@@ -209,24 +209,21 @@ class CoreDataToRealmTool: NSObject {
             return
         }
         for storyObj in storyArray {
-            guard let storyCoreData = storyObj as? StoryCacheData else {
+            guard let storyCoreData = storyObj as? StoryCacheData, let chapterNumber = storyCoreData.chapter_number as? Int else {
                 continue
             }
-            let story = RealmStory()
-            story.novelID = novelID
-            if let chapterNumber = storyCoreData.chapter_number as? Int {
-                story.chapterNumber = chapterNumber
+            let story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber)
+            RealmUtil.LocalOnlyWrite { (realm) in
+                if let readLocation = storyCoreData.readLocation as? Int {
+                    story.readLocation = readLocation
+                }
+                story.content = storyCoreData.content
+                if let ncode = content.ncode, let end = content.end as? Bool {
+                    story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
+                }
+                
+                realm.add(story, update: .modified)
             }
-            if let readLocation = storyCoreData.readLocation as? Int {
-                story.readLocation = readLocation
-            }
-            story.content = storyCoreData.content
-            if let ncode = content.ncode, let end = content.end as? Bool {
-                story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
-            }
-            story.id = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: story.chapterNumber)
-            
-            realm.add(story, update: true)
         }
     }
     
@@ -262,7 +259,7 @@ class CoreDataToRealmTool: NSObject {
             if novelCoreData.isURLContent() {
                 novel.url = NarouContentToNovelID(content: novelCoreData)
                 if let urlSecret = novelCoreData.keyword {
-                    novel._urlSecret = urlSecret
+                    novel.m_urlSecret = urlSecret
                 }
                 novel.type = NovelType.URL
             }else if novelCoreData.isUserCreatedContent() {
@@ -283,31 +280,33 @@ class CoreDataToRealmTool: NSObject {
                 novel.title = title
             }
 
-            // 読んでいる章が設定されていたらその章の読んだ日時を新しくすることで最後に読んだ章をそこにする
-            if let currentReadingChapter = novelCoreData.currentReadingStory?.chapter_number as? Int {
-                if let readingStory = novel.linkedStorys?.filter("chapterNumber = %@", currentReadingChapter).first {
-                    readingStory.lastReadDate = Date(timeIntervalSinceNow: 1)
-                    realm.add(readingStory, update: true)
+            RealmUtil.LocalOnlyWrite { (realm) in
+                // 読んでいる章が設定されていたらその章の読んだ日時を新しくすることで最後に読んだ章をそこにする
+                if let currentReadingChapter = novelCoreData.currentReadingStory?.chapter_number as? Int {
+                    if let readingStory = novel.linkedStorys?.filter("chapterNumber = %@", currentReadingChapter).first {
+                        readingStory.lastReadDate = Date(timeIntervalSinceNow: 1)
+                        realm.add(readingStory, update: .modified)
+                    }
                 }
-            }
-
-            // chapterNumber が最後の章に関しては、
-            if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
-                // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する
-                if novelCoreData.isURLContent(), let lastDownloadURL = novelCoreData.userid {
-                    lastStory.url = lastDownloadURL
-                }
-                // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
-                if let newFlug = novelCoreData.is_new_flug as? Bool {
-                    if newFlug {
-                        lastStory.downloadDate = Date(timeIntervalSinceNow: 1.1)
-                        realm.add(lastStory, update: true)
+                
+                // chapterNumber が最後の章に関しては、
+                if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
+                    // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する
+                    if novelCoreData.isURLContent(), let lastDownloadURL = novelCoreData.userid {
+                        lastStory.url = lastDownloadURL
+                    }
+                    // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
+                    if let newFlug = novelCoreData.is_new_flug as? Bool {
+                        if newFlug {
+                            lastStory.downloadDate = Date(timeIntervalSinceNow: 1.1)
+                            realm.add(lastStory, update: .modified)
+                        }
                     }
                 }
             }
             //print("novel add: novelID: \(novel.novelID), url: \(novel.url), coredata.ncode: \(novelCoreData.ncode ?? "unknown"), coredata.userid: \(novelCoreData.userid ?? "unknown"), isURLContent: \(novelCoreData.isURLContent() ? "true" : "false"), isUserCreatedContent: \(novelCoreData.isUserCreatedContent() ? "true" : "false")")
 
-            realm.add(novel, update: true)
+            realm.add(novel, update: .modified)
         }
     }
     
@@ -344,25 +343,15 @@ class CoreDataToRealmTool: NSObject {
     
     @objc static func IsNeedMigration() -> Bool {
         if RealmUtil.IsUseCloudRealm() {
-            if RealmUtil.CheckIsCloudRealmCreated() {
-                do {
-                    try RealmUtil.EnableSyncEngine()
-                }catch{
-                    // TODO: exception を握りつぶしている
-                }
-                return false
-            }
             do {
                 try RealmUtil.EnableSyncEngine()
             }catch{
                 // TODO: exception を握りつぶしている
             }
-            if RealmUtil.CheckIsLocalRealmCreated() {
-                return true
+            if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
+                return false
             }
-            if GlobalDataSingleton.getInstance()?.isAliveCoreDataSaveFile() ?? false {
-                return true
-            }
+            print("CheckDefaultSettingsAlive() to cloudRealm failed.")
         }else{
             if RealmUtil.CheckIsLocalRealmCreated() {
                 if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {

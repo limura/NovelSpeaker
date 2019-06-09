@@ -24,8 +24,24 @@ class NovelDetailViewController: FormViewController {
         observeNovel()
         observeSpeakerSetting()
         observeSpeechSectionConfig()
+        registNotificationCenter()
     }
     
+    deinit {
+        self.unregistNotificationCenter()
+    }
+    
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
+    }
+
     func observeNovel() {
         guard let novel = RealmNovel.SearchNovelFrom(novelID: self.novelID) else { return }
         self.novelObserverToken = novel.observe({ (change) in

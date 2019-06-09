@@ -35,6 +35,10 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
         navigationItem.rightBarButtonItems = [addButton, editButtonItem, filterButton]
     }
     
+    deinit {
+        self.unregistNotificationCenter()
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         addNotificationReceiver()
@@ -48,6 +52,17 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
     func addNotificationReceiver(){

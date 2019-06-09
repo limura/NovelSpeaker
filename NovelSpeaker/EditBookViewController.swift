@@ -51,16 +51,16 @@ class EditBookViewController: UIViewController {
         }else{
             navigationController?.popViewController(animated: true)
         }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        // safe area guide は viewDidLoad() では受け取れなくて viewDidAppear() で受け取るとかなんとか？
-        // https://i-app-tec.com/ios/iphone-safearea.html
+        registNotificationCenter()
         startObserve()
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
+    deinit {
+        self.unregistNotificationCenter()
         endObserve()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
         saveCurrentStory()
         saveCurrentNovel()
     }
@@ -77,6 +77,17 @@ class EditBookViewController: UIViewController {
             button?.titleLabel?.numberOfLines = 0
             button?.titleLabel?.adjustsFontForContentSizeCategory = true
         }
+    }
+    
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
     func applyNovel(novel:RealmNovel) {
@@ -359,9 +370,9 @@ class EditBookViewController: UIViewController {
     }
     
     func saveCurrentStory() {
-        RealmUtil.Write { (realm) in
+        RealmUtil.LocalOnlyWrite { (realm) in
             currentStory.content = storyTextView.text
-            realm.add(currentStory, update: true)
+            realm.add(currentStory, update: .modified)
         }
     }
     func saveCurrentNovel() {
@@ -370,7 +381,7 @@ class EditBookViewController: UIViewController {
                 if let title = titleTextField.text, title.count > 0 {
                     novel.title = title
                 }
-                realm.add(novel, update: true)
+                realm.add(novel, update: .modified)
             }
         }
     }

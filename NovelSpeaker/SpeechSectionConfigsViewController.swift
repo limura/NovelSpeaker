@@ -28,8 +28,24 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         }
         createCells()
         observeSectionConfig()
+        registNotificationCenter()
+    }
+
+    deinit {
+        self.unregistNotificationCenter()
     }
     
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
+    }
+
     func observeSectionConfig() {
         guard let sectionConfigList = RealmSpeechSectionConfig.GetAllObjects() else { return }
         self.sectionConfigObserverToken = sectionConfigList.observe({ (change) in
@@ -289,7 +305,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                             }
                         }
                         RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
-                            realm.add(newSpeechSectionConfig, update: true)
+                            realm.add(newSpeechSectionConfig, update: .modified)
                         }
                         newSpeechSectionConfig.AddTargetNovelID(novelID: self.targetNovelID)
                         self.form.append(self.createSpeechSectionConfigCells(speechSectionConfig: newSpeechSectionConfig))

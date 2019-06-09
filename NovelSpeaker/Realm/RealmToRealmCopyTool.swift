@@ -11,12 +11,9 @@ import RealmSwift
 
 class RealmToRealmCopyTool: NSObject {
     static func CopyStorys(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmStory.self) {
-            let newObj = RealmStory()
-            newObj.id = obj.id
-            newObj.novelID = obj.novelID
-            newObj.chapterNumber = obj.chapterNumber
+            to.beginWrite()
+            let newObj = RealmStory.CreateNewStory(novelID: obj.novelID, chapterNumber: obj.chapterNumber)
             newObj.isDeleted = obj.isDeleted
             newObj.contentZiped = obj.contentZiped
             newObj.readLocation = obj.readLocation
@@ -24,33 +21,33 @@ class RealmToRealmCopyTool: NSObject {
             newObj.lastReadDate = obj.lastReadDate
             newObj.downloadDate = obj.downloadDate
             newObj.subtitle = obj.subtitle
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
     static func CopyNovels(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmNovel.self) {
+            to.beginWrite()
             let newObj = RealmNovel()
             newObj.novelID = obj.novelID
             newObj.isDeleted = obj.isDeleted
-            newObj._type = obj._type
+            newObj.m_type = obj.m_type
             newObj.writer = obj.writer
             newObj.title = obj.title
             newObj.url = obj.url
-            newObj._urlSecret = obj._urlSecret
+            newObj.m_urlSecret = obj.m_urlSecret
             newObj.createdDate = obj.createdDate
             newObj.likeLevel = obj.likeLevel
             newObj.isNeedSpeechAfterDelete = obj.isNeedSpeechAfterDelete
             newObj.defaultSpeakerID = obj.defaultSpeakerID
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
 
     static func CopySpeechModSetting(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmSpeechModSetting.self) {
+            to.beginWrite()
             let newObj = RealmSpeechModSetting()
             newObj.isDeleted = obj.isDeleted
             newObj.before = obj.before
@@ -59,27 +56,27 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isUseRegularExpression = obj.isUseRegularExpression
             newObj.targetNovelIDArray.removeAll()
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
 
     static func CopySpeechWaitConfig(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmSpeechWaitConfig.self) {
+            to.beginWrite()
             let newObj = RealmSpeechWaitConfig()
             newObj.isDeleted = obj.isDeleted
             newObj.targetText = obj.targetText
             newObj.delayTimeInSec = obj.delayTimeInSec
             newObj.createdDate = obj.createdDate
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
 
     static func CopySpeakerSetting(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmSpeakerSetting.self) {
+            to.beginWrite()
             let newObj = RealmSpeakerSetting()
             newObj.isDeleted = obj.isDeleted
             newObj.name = obj.name
@@ -93,14 +90,14 @@ class RealmToRealmCopyTool: NSObject {
             newObj.voiceIdentifier = obj.voiceIdentifier
             newObj.locale = obj.locale
             newObj.createdDate = obj.createdDate
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
 
     static func CopySpeechSectionConfig(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmSpeechSectionConfig.self) {
+            to.beginWrite()
             let newObj = RealmSpeechSectionConfig()
             newObj.isDeleted = obj.isDeleted
             newObj.name = obj.name
@@ -110,28 +107,28 @@ class RealmToRealmCopyTool: NSObject {
             newObj.speakerID = obj.speakerID
             newObj.targetNovelIDArray.removeAll()
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
 
     static func CopySpeechQueue(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmSpeechQueue.self) {
+            to.beginWrite()
             let newObj = RealmSpeechQueue()
             newObj.isDeleted = obj.isDeleted
             newObj.name = obj.name
             newObj.createdDate = obj.createdDate
             newObj.targetStoryIDArray.removeAll()
             newObj.targetStoryIDArray.append(objectsIn: obj.targetStoryIDArray)
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
 
     static func CopyGlobalState(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmGlobalState.self) {
+            to.beginWrite()
             let newObj = RealmGlobalState()
             newObj.isDeleted = obj.isDeleted
             newObj.id = obj.id
@@ -152,18 +149,18 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isForceSiteInfoReloadIsEnabled = obj.isForceSiteInfoReloadIsEnabled
             newObj.isMenuItemIsAddSpeechModSettingOnly = obj.isMenuItemIsAddSpeechModSettingOnly
             newObj.isPageTurningSoundEnabled = obj.isPageTurningSoundEnabled
-            newObj._bookSelfSortType = obj._bookSelfSortType
+            newObj.m_bookSelfSortType = obj.m_bookSelfSortType
             newObj.defaultDisplaySettingID = obj.defaultDisplaySettingID
             newObj.defaultSpeakerID = obj.defaultSpeakerID
             newObj.defaultSpeechOverrideSettingID = obj.defaultSpeechOverrideSettingID
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
 
     static func CopyDisplaySetting(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmDisplaySetting.self) {
+            to.beginWrite()
             let newObj = RealmDisplaySetting()
             newObj.isDeleted = obj.isDeleted
             newObj.name = obj.name
@@ -173,41 +170,41 @@ class RealmToRealmCopyTool: NSObject {
             newObj.createdDate = obj.createdDate
             newObj.targetNovelIDArray.removeAll()
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
     
     static func CopyNovelTag(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmNovelTag.self) {
+            to.beginWrite()
             let newObj = RealmNovelTag.CreateNewTag(name: obj.name, type: obj.type)
             newObj.isDeleted = obj.isDeleted
             newObj.createdDate = obj.createdDate
             newObj.hint = obj.hint
             newObj.targetNovelIDArray.removeAll()
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
 
     static func CopySpeechOverrideSetting(from:Realm, to:Realm) throws {
-        to.beginWrite()
         for obj in from.objects(RealmSpeechOverrideSetting.self) {
+            to.beginWrite()
             let newObj = RealmSpeechOverrideSetting()
             newObj.isDeleted = obj.isDeleted
             newObj.name = obj.name
             newObj.createdDate = obj.createdDate
-            newObj._repeatSpeechType = obj._repeatSpeechType
+            newObj.m_repeatSpeechType = obj.m_repeatSpeechType
             newObj.isOverrideRubyIsEnabled = obj.isOverrideRubyIsEnabled
             newObj.notRubyCharactorStringArray = obj.notRubyCharactorStringArray
             newObj.isIgnoreURIStringSpeechEnabled = obj.isIgnoreURIStringSpeechEnabled
             newObj.targetNovelIDArray.removeAll()
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
-            to.add(newObj, update: true)
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
         }
-        try to.commitWrite()
     }
     
     static func DoCopy(from:Realm, to:Realm, progress:(String)->Void) throws {
@@ -221,6 +218,6 @@ class RealmToRealmCopyTool: NSObject {
         try CopyNovelTag(from: from, to: to)
         try CopySpeechOverrideSetting(from: from, to: to)
         try CopyNovels(from: from, to: to)
-        try CopyStorys(from: from, to: to)
+        //try CopyStorys(from: from, to: to)
     }
 }

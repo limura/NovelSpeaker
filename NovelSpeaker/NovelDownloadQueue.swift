@@ -106,6 +106,12 @@ class DownloadQueueHolder: NSObject {
         }
         return result
     }
+    func ClearAllQueue() {
+        self.lock.lock()
+        defer { self.lock.unlock() }
+        self.nowDownloading.removeAll()
+        self.queue.removeAll()
+    }
 }
 
 // 読み込みを何秒に一回にするのかの値[秒]
@@ -187,7 +193,7 @@ class NovelDownloader : NSObject {
                 if chapterNumber == 1 {
                     story.lastReadDate = Date(timeIntervalSinceNow: -60)
                 }
-                RealmUtil.Write(block: { (realm) in
+                RealmUtil.LocalOnlyWrite(block: { (realm) in
                     /* // 通常の更新時にはタグの更新はしないでおきます
                      if let keywordArray = htmlStory.keyword {
                      for keyword in keywordArray {
@@ -196,7 +202,7 @@ class NovelDownloader : NSObject {
                      }
                      }
                      */
-                    realm.add(story, update: true)
+                    realm.add(story, update: .modified)
                 })
                 print("add new story: \(novelID), chapterNumber: \(chapterNumber), url: \(targetURL.absoluteString)")
                 if let nextUrl = htmlStory.nextUrl {
@@ -275,13 +281,13 @@ class NovelDownloader : NSObject {
                         chapterNumber = 0 // あとで +1 して downloadOnce() が呼ばれるので。
                     }else{
                         let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: 1) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: 1)
-                        RealmUtil.Write(block: { (realm) in
+                        RealmUtil.LocalOnlyWrite(block: { (realm) in
                             story.content = htmlStory.content ?? ""
                             story.subtitle = htmlStory.subtitle ?? ""
                             story.downloadDate = Date()
-                            story.lastReadDate = Date(timeIntervalSinceNow: -60)
+                            story.lastReadDate = Date(timeIntervalSince1970: 60)
                             story.url = lastDownloadURL.absoluteString
-                            realm.add(story, update: true)
+                            realm.add(story, update: .modified)
                         })
                         if let url = htmlStory.nextUrl {
                             targetURL = url
@@ -373,11 +379,12 @@ class NovelDownloadQueue : NSObject {
     }
     
     func updateNetworkActivityIndicatorStatus(){
+        let activityIndicatorID = "NovelDownloadQueue"
         DispatchQueue.main.async {
             if self.queueHolder.GetCurrentDownloadingNovelIDArray().count > 0 {
-                UIApplication.shared.isNetworkActivityIndicatorVisible = true
+                ActivityIndicatorManager.enable(id: activityIndicatorID)
             }else{
-                UIApplication.shared.isNetworkActivityIndicatorVisible = false
+                ActivityIndicatorManager.disable(id: activityIndicatorID)
             }
         }
     }
@@ -447,6 +454,11 @@ class NovelDownloadQueue : NSObject {
         self.queueHolder.addQueue(novelID: novelID)
         self.isDownloadStop = false
         semaphore.signal()
+    }
+    
+    func ClearAllDownloadQueue() {
+        downloadStop()
+        self.queueHolder.ClearAllQueue()
     }
 
     // ダウンロードを再開します。(semaphore.signal() を呼ぶ事で強制的に一回 queue の確認を走らせます)

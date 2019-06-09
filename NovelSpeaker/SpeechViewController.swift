@@ -46,6 +46,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
         }
         observeDispaySetting()
+        registNotificationCenter()
+    }
+    
+    deinit {
+        self.unregistNotificationCenter()
     }
 
     // 表示される直前に呼ばれる
@@ -113,17 +118,21 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
     
     func setStoryWithoutSetToStorySpeaker(story:RealmStory) {
+        let novelID = story.novelID
+        let chapterNumber = story.chapterNumber
+        let content = story.content
+        let storyID = story.id
         DispatchQueue.main.async {
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: story.novelID), let lastChapterNumber = novel.lastChapterNumber else {
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let lastChapterNumber = novel.lastChapterNumber else {
                 return
             }
 
-            if story.chapterNumber <= 1 {
+            if chapterNumber <= 1 {
                 self.previousChapterButton.isEnabled = false
             }else{
                 self.previousChapterButton.isEnabled = true
             }
-            if story.chapterNumber < lastChapterNumber {
+            if chapterNumber < lastChapterNumber {
                 self.nextChapterButton.isEnabled = true
             }else{
                 self.nextChapterButton.isEnabled = false
@@ -132,7 +141,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             self.chapterSlider.maximumValue = Float(lastChapterNumber) + Float(0.01)
             self.chapterSlider.value = Float(story.chapterNumber)
             
-            self.chapterPositionLabel.text = "\(story.chapterNumber)/\(lastChapterNumber)"
+            self.chapterPositionLabel.text = "\(chapterNumber)/\(lastChapterNumber)"
             if let constraint = self.chapterPositionLabelWidthConstraint {
                 self.chapterPositionLabel.removeConstraint(constraint)
             }
@@ -141,7 +150,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             self.chapterPositionLabelWidthConstraint.isActive = true
             
             if let textViewText = self.textView.text, textViewText != story.content {
-                if let content = story.content {
+                if let content = content {
                     self.textView.text = content
                 }else{
                     self.textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
@@ -150,10 +159,21 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                 self.textView.selectedRange = NSRange(location: story.readLocation, length: 1)
                 self.textViewScrollTo(readLocation: story.readLocation)
             }
-            self.storyID = story.id
-            self.observeStory(storyID: story.id)
-            self.observeStoryArray(story: story)
+            self.storyID = storyID
+            self.observeStory(storyID: storyID)
+            self.observeStoryArray(storyID: storyID)
         }
+    }
+    
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
     func observeNovel(novelID:String) {
@@ -186,9 +206,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                     // content が書き換わった時のみを監視します。
                     // でないと lastReadDate とかが書き換わった時にも表示の更新が走ってしまいます。
                     if property.name == "contentZiped", let story = RealmStory.SearchStoryFrom(storyID: storyID) {
-                        DispatchQueue.main.async {
-                            self?.setStoryWithoutSetToStorySpeaker(story: story)
-                        }
+                        self?.setStoryWithoutSetToStorySpeaker(story: story)
                     }
                 }
             case .deleted:
@@ -196,24 +214,20 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             }
         })
     }
-    func observeStoryArray(story:RealmStory) {
-        guard let storyArray = RealmStory.GetAllObjects()?.filter("novelID = %@", story.novelID) else { return }
-        let storyID = story.id
+    func observeStoryArray(storyID:String) {
+        guard let storyArray = RealmStory.GetAllObjects()?.filter("novelID = %@", RealmStory.StoryIDToNovelID(storyID: storyID)) else { return }
+        let storyID = storyID
         self.storyArrayObserverToken = storyArray.observe({ [weak self] (changes) in
             switch changes {
             case .initial(_):
                 break
             case .update(_, let deletions, let insertions, _):
                 if deletions.count > 0 || insertions.count > 0 {
-                    guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else {
-                        // 表示しているstoryが削除されたっぽい
-                        DispatchQueue.main.async {
-                            print("SpeechViewController: current story deleted? popViewController")
-                            self?.navigationController?.popViewController(animated: true)
-                        }
-                        return
-                    }
                     DispatchQueue.main.async {
+                        guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else {
+                            // 表示しているstoryが削除されたっぽい
+                            return
+                        }
                         print("SpeechViewController: story delete or inserted. update display")
                         self?.setStoryWithoutSetToStorySpeaker(story: story)
                     }

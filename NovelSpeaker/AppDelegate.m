@@ -56,6 +56,8 @@ void uncaughtExceptionHandler(NSException *exception)
     //TODO: ここに入れるとマイグレーション時に酷いことになるけどここにあるべき。
     // [NovelSpeakerUtility InsertDefaultSettingsIfNeeded];
     
+    [NovelSpeakerUtility StartAllLongLivedOperationIDWatcher];
+    
     UIViewController* toplevelViewController = nil;
     // 強制的に localRealm を消す場合はこうします
     //[CoreDataToRealmTool UnregisterConvertFromCoreDataFinished];

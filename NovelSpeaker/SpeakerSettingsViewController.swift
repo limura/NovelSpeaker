@@ -22,6 +22,21 @@ class SpeakerSettingsViewController: FormViewController {
         BehaviorLogger.AddLog(description: "SettingsViewController viewDidLoad", data: [:])
         self.title = NSLocalizedString("SpeakerSettingsViewController_TitleText", comment: "話者設定")
         createSettingsTable()
+        registNotificationCenter()
+    }
+    deinit {
+        self.unregistNotificationCenter()
+    }
+    
+    func registNotificationCenter() {
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    func unregistNotificationCenter() {
+        NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
     func testSpeech(pitch:Float, rate: Float, identifier: String, text: String) {
@@ -300,7 +315,7 @@ class SpeakerSettingsViewController: FormViewController {
                         let newSpeakerSetting = RealmSpeakerSetting()
                         RealmUtil.Write { (realm) in
                             newSpeakerSetting.name = name
-                            realm.add(newSpeakerSetting, update: true)
+                            realm.add(newSpeakerSetting, update: .modified)
                         }
                         self.form.append(self.createSpeakSettingRows(currentSetting: newSpeakerSetting))
                         DispatchQueue.main.async {
