@@ -87,7 +87,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         registObserver()
         registNotificationCenter()
 
-        view.layoutIfNeeded()
+        autoreleasepool {
+            view.layoutIfNeeded()
+        }
     }
     
     deinit {
@@ -127,7 +129,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func registObserver() {
         guard let novelArray = RealmNovel.GetAllObjects() else { return }
         novelArrayNotificationToken = novelArray.observe { (change) in
-            self.reloadAllData()
+            DispatchQueue.main.async {
+                self.reloadAllData()
+            }
         }
     }
 
@@ -142,10 +146,16 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return Array(allNovels.sorted(byKeyPath: "novelID", ascending: true))
         case .novelUpdatedAt:
             return allNovels.sorted(by: { (a, b) -> Bool in
-                if let ad = a.lastDownloadDate, let bd = b.lastDownloadDate {
-                    return ad > bd
-                }else{
-                    return a.novelID > b.novelID
+                let ad = a.lastDownloadDate
+                let bd = b.lastDownloadDate
+                if let ad = ad, let bd = bd {
+                    return ad < bd
+                } else if ad != nil {
+                    return false
+                } else if bd != nil {
+                    return false
+                } else {
+                    return a.novelID < b.novelID
                 }
             })
         case .title:

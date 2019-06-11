@@ -269,7 +269,7 @@ class CoreDataToRealmTool: NSObject {
                 novel.type = NovelType.URL
                 if let keyword = novelCoreData.keyword {
                     for tag in keyword.components(separatedBy: " ") {
-                        RealmNovelTag.AddTag(name: tag, novelID: novel.novelID, type: "keyword")
+                        RealmNovelTag.AddTag(realm: realm, name: tag, novelID: novel.novelID, type: "keyword")
                     }
                 }
             }
@@ -342,23 +342,25 @@ class CoreDataToRealmTool: NSObject {
     }
     
     @objc static func IsNeedMigration() -> Bool {
-        if RealmUtil.IsUseCloudRealm() {
-            do {
-                try RealmUtil.EnableSyncEngine()
-            }catch{
-                // TODO: exception を握りつぶしている
-            }
-            if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
-                return false
-            }
-            print("CheckDefaultSettingsAlive() to cloudRealm failed.")
-        }else{
-            if RealmUtil.CheckIsLocalRealmCreated() {
-                if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {
+        return autoreleasepool {
+            if RealmUtil.IsUseCloudRealm() {
+                do {
+                    try RealmUtil.EnableSyncEngine()
+                }catch{
+                    // TODO: exception を握りつぶしている
+                }
+                if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
                     return false
                 }
+                print("CheckDefaultSettingsAlive() to cloudRealm failed.")
+            }else{
+                if RealmUtil.CheckIsLocalRealmCreated() {
+                    if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {
+                        return false
+                    }
+                }
             }
+            return true
         }
-        return true
     }
 }

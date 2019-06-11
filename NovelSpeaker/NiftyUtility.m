@@ -165,8 +165,10 @@
 
 /// 空白や改行など表示されない文字を全て排除した文字列を生成する
 + (NSString*)removeWhiteSpace:(NSString*)str{
-    NSRegularExpression* regexp = [[NSRegularExpression alloc] initWithPattern:@"\\s+" options:0 error:nil];
-    return [regexp stringByReplacingMatchesInString:str options:0 range:NSMakeRange(0, [str length]) withTemplate:@""];
+    @autoreleasepool {
+        NSRegularExpression* regexp = [[NSRegularExpression alloc] initWithPattern:@"\\s+" options:0 error:nil];
+        return [regexp stringByReplacingMatchesInString:str options:0 range:NSMakeRange(0, [str length]) withTemplate:@""];
+    }
 }
 
 /// 通知を表示させます

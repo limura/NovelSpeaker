@@ -44,93 +44,97 @@ class MigrationViewController: UIViewController {
             self.progressLabel.text = NSLocalizedString("MigrationViewController_FetchAllCloudData_Progress", comment: "iCloud上のデータに利用可能なデータが残されているかを確認しています。")
         }
         let semaphore = DispatchSemaphore(value: 0)
-        RealmUtil.CheckCloudDataIsValid() { (result) in
+        RealmUtil.CheckCloudDataIsValid { (result) in
             semaphore.signal()
         }
         semaphore.wait()
     }
     
     func CopyLocalToCloud() -> Bool {
-        guard let localRealm = try? RealmUtil.GetLocalRealm(), let cloudRealm = try? RealmUtil.GetCloudRealm() else { return false }
-        // TODO: ここで localRealm から cloudRealm に上書きコピーをして良いのかの確認プロセスが無い
-        try! RealmToRealmCopyTool.DoCopy(from: localRealm, to: cloudRealm) { (text) in
-            DispatchQueue.main.async {
-                self.progressLabel.text = text
+        return autoreleasepool {
+            guard let localRealm = try? RealmUtil.GetLocalRealm(), let cloudRealm = try? RealmUtil.GetCloudRealm() else { return false }
+            // TODO: ここで localRealm から cloudRealm に上書きコピーをして良いのかの確認プロセスが無い
+            try! RealmToRealmCopyTool.DoCopy(from: localRealm, to: cloudRealm) { (text) in
+                DispatchQueue.main.async {
+                    self.progressLabel.text = text
+                }
             }
+            return true
         }
-        return true
     }
 
     func CheckAndDoCoreDataToRealmMigration() {
-        if RealmUtil.IsUseCloudRealm() {
-            do {
-                try RealmUtil.EnableSyncEngine()
-            }catch{
-                // TODO: exception を握りつぶしている
-            }
-            if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
-                // iCloud の データがあるならそれを使う
-                return
-            }
-            // iCloud を使うようにマークされているが、
-            // local に読み込まれた iCloud のデータは不正なものであったようである。
-            // 仕方がないので iCloud側 のデータを全て読み直す事にする。
-            self.FetchValidCloudData()
-            // 再度確認する
-            if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
-                // iCloud の データがあるならそれを使う
-                return
-            }
-            // local のがあるならそこからコピーする
-            if RealmUtil.CheckIsLocalRealmCreated() && CopyLocalToCloud() {
-                return
-            }
-            if GlobalDataSingleton.getInstance()?.isAliveCoreDataSaveFile() ?? false {
-                // CoreData のがあるならそこからコピーする
-                CoreDataToRealmTool.ConvertFromCoreaData { (text) in
-                    DispatchQueue.main.async {
-                        self.progressLabel.text = text
-                    }
+        autoreleasepool {
+            if RealmUtil.IsUseCloudRealm() {
+                do {
+                    try RealmUtil.EnableSyncEngine()
+                }catch{
+                    // TODO: exception を握りつぶしている
                 }
-                return
-            }else{
-                // CoreData のものはなかったので CoreData からの移行は完了したと印をつけておく
-                CoreDataToRealmTool.RegisterConvertFromCoreDataFinished()
-            }
-            // それでもないなら default値 を入れておく
-            NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
-        }else{
-            // Local Ream を使う場合で、
-            if RealmUtil.CheckIsLocalRealmCreated() {
-                // realm file はあって
-                if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {
-                    // CoreData からの移行もできてるならそれを使う
+                if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
+                    // iCloud の データがあるならそれを使う
                     return
                 }
-                // CoreData からの移行が完了していないらしいので Local Realm file は消しておきます
-                RealmUtil.RemoveLocalRealmFile()
+                // iCloud を使うようにマークされているが、
+                // local に読み込まれた iCloud のデータは不正なものであったようである。
+                // 仕方がないので iCloud側 のデータを全て読み直す事にする。
+                self.FetchValidCloudData()
+                // 再度確認する
+                if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
+                    // iCloud の データがあるならそれを使う
+                    return
+                }
+                // local のがあるならそこからコピーする
+                if RealmUtil.CheckIsLocalRealmCreated() && CopyLocalToCloud() {
+                    return
+                }
+                if GlobalDataSingleton.getInstance()?.isAliveCoreDataSaveFile() ?? false {
+                    // CoreData のがあるならそこからコピーする
+                    CoreDataToRealmTool.ConvertFromCoreaData { (text) in
+                        DispatchQueue.main.async {
+                            self.progressLabel.text = text
+                        }
+                    }
+                    return
+                }else{
+                    // CoreData のものはなかったので CoreData からの移行は完了したと印をつけておく
+                    CoreDataToRealmTool.RegisterConvertFromCoreDataFinished()
+                }
+                // それでもないなら default値 を入れておく
+                NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
+            }else{
+                // Local Ream を使う場合で、
+                if RealmUtil.CheckIsLocalRealmCreated() {
+                    // realm file はあって
+                    if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {
+                        // CoreData からの移行もできてるならそれを使う
+                        return
+                    }
+                    // CoreData からの移行が完了していないらしいので Local Realm file は消しておきます
+                    RealmUtil.RemoveLocalRealmFile()
+                }
             }
-        }
-        // ここに来るのは
-        // ・LocalRealm を使用する
-        // ・LocalRealm file は無い(か消した)
-        // という状態。
-        if !(GlobalDataSingleton.getInstance()?.isAliveCoreDataSaveFile() ?? true) {
-            // CoreData のファイルが無いなら CoreData からの移行は完了したとマークしておく
-            CoreDataToRealmTool.RegisterConvertFromCoreDataFinished()
-            // 標準の設定を入れて終了
-            print("NovelSpeakerUtility.InsertDefaultSettingsIfNeeded() call.")
+            // ここに来るのは
+            // ・LocalRealm を使用する
+            // ・LocalRealm file は無い(か消した)
+            // という状態。
+            if !(GlobalDataSingleton.getInstance()?.isAliveCoreDataSaveFile() ?? true) {
+                // CoreData のファイルが無いなら CoreData からの移行は完了したとマークしておく
+                CoreDataToRealmTool.RegisterConvertFromCoreDataFinished()
+                // 標準の設定を入れて終了
+                print("NovelSpeakerUtility.InsertDefaultSettingsIfNeeded() call.")
+                NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
+                return
+            }
+            // そうでもないなら CoreData からの移行を行う
+            print("CoreDataToRealmTool.ConvertFromCoreaData() call.")
+            CoreDataToRealmTool.ConvertFromCoreaData { (text) in
+                DispatchQueue.main.async {
+                    self.progressLabel.text = text
+                }
+            }
             NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
-            return
         }
-        // そうでもないなら CoreData からの移行を行う
-        print("CoreDataToRealmTool.ConvertFromCoreaData() call.")
-        CoreDataToRealmTool.ConvertFromCoreaData { (text) in
-            DispatchQueue.main.async {
-                self.progressLabel.text = text
-            }
-        }
-        NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
     }
     
     func goToMainStoryBoard() {

@@ -144,6 +144,8 @@
 "SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloud account has not been set up.";
 "SettingsViewController_iCloudAccountInvalid_cloudNotDetermine" = "Could not get the status of your iCloud account.";
 "SettingsViewController_InvalidiCloudStatus" = "There was a problem with the state of iCloud.";
+"SettingsViewController_ClearSiteInfoCache" = "Delete SiteInfo cache";
+"SettingsViewController_ClearSiteInfoCache_done" = "The saved SiteInfo information has been deleted.";
 
 
 "NovelSpeakerUtility_ExportingNovelData" = "Exporting novel";

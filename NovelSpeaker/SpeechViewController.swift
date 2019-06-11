@@ -464,7 +464,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             self.textViewScrollTo(readLocation: range.location)
         }
     }
-    func storySpeakerStoryChanged(story:RealmStory){
+    func storySpeakerStoryChanged(storyID:String){
+        guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else { return }
         setStoryWithoutSetToStorySpeaker(story: story)
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false

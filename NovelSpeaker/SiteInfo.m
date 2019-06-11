@@ -35,11 +35,13 @@
 
 /// 指定された url がこの SiteInfo の示すURLであるか否かを判定します
 - (BOOL)isTargetUrl:(NSURL*)url{
-    NSString* urlString = [url absoluteString];
-    if([m_UrlPattern numberOfMatchesInString:urlString options:0 range:NSMakeRange(0, urlString.length)] > 0){
-        return true;
+    @autoreleasepool {
+        NSString* urlString = [url absoluteString];
+        if([m_UrlPattern numberOfMatchesInString:urlString options:0 range:NSMakeRange(0, urlString.length)] > 0){
+            return true;
+        }
+        return false;
     }
-    return false;
 }
 
 - (NSURL*)GetURLFromXpath:(NSString*)xpathString document:(xmlDocPtr)document context:(xmlXPathContextPtr)context currentURL:(NSURL*)currentURL documentEncoding:(unsigned long)documentEncoding {
@@ -129,13 +131,15 @@
         //@"<img[^>]*?>", // img は将来的に ALT を表示できたらいいのかもしれないなぁと思ったりもする……
     ];
     for (NSString* regexString in targetRegexStrings) {
-        NSError* error = nil;
-        NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:regexString options:(NSRegularExpressionCaseInsensitive | NSRegularExpressionDotMatchesLineSeparators) error:&error];
-        if (regex == nil) {
-            NSLog(@"regex error: %@, %@", regexString, error);
-        }
-        if (regex != nil) {
-            [regex replaceMatchesInString:result options:0 range:NSMakeRange(0, result.length) withTemplate:@""];
+        @autoreleasepool {
+            NSError* error = nil;
+            NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:regexString options:(NSRegularExpressionCaseInsensitive | NSRegularExpressionDotMatchesLineSeparators) error:&error];
+            if (regex == nil) {
+                NSLog(@"regex error: %@, %@", regexString, error);
+            }
+            if (regex != nil) {
+                [regex replaceMatchesInString:result options:0 range:NSMakeRange(0, result.length) withTemplate:@""];
+            }
         }
     }
     return result;
@@ -181,11 +185,13 @@
 /// <ruby>|xxx<rp>(</rp><rt>yyy</rt><rp>)</rt></ruby> という文字列に変換します。
 /// つまり、xxx(yyy) となるはずのものを、|xxx(yyy) となるように変換するわけです。
 + (NSString*)AddDummyRubyRpVerticalBar:(NSString*)htmlString {
-    NSString* convFrom = @"<ruby>(<rb>)?([^<]+)\\s*(</rb>)?\\s*(<rp>[^<]*</rp>)?\\s*(<rt>[^<]+</rt>)\\s*(<rp>[^<]*</rp>)?</ruby>";
-    NSString* convTo = @"<ruby>|$1$2$3<rp>(</rp>$5<rp>)</rp></ruby>";
-    NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:convFrom options:NSRegularExpressionCaseInsensitive error:nil];
-    
-    return [regexp stringByReplacingMatchesInString:htmlString options:0 range:NSMakeRange(0, htmlString.length) withTemplate:convTo];
+    @autoreleasepool {
+        NSString* convFrom = @"<ruby>(<rb>)?([^<]+)\\s*(</rb>)?\\s*(<rp>[^<]*</rp>)?\\s*(<rt>[^<]+</rt>)\\s*(<rp>[^<]*</rp>)?</ruby>";
+        NSString* convTo = @"<ruby>|$1$2$3<rp>(</rp>$5<rp>)</rp></ruby>";
+        NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:convFrom options:NSRegularExpressionCaseInsensitive error:nil];
+        
+        return [regexp stringByReplacingMatchesInString:htmlString options:0 range:NSMakeRange(0, htmlString.length) withTemplate:convTo];
+    }
 }
 
 /// HTMLの <ruby> 関係のタグを排除します

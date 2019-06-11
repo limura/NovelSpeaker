@@ -638,6 +638,15 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
+    static public func FileCachedHttpGet_RemoveCacheFile(cacheFileName:String) {
+        guard let cacheFilePath = GetCacheFilePath(fileName: cacheFileName) else { return }
+        do {
+            try FileManager.default.removeItem(at: cacheFilePath)
+        }catch{
+            // nothing to do!
+        }
+    }
+    
     static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?) {
         if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName),
             FileManager.default.fileExists(atPath: cacheFilePath.path),

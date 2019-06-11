@@ -550,7 +550,19 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     return self.m_RubySwitchToggleHitCount < -10
                 })
             }
-            
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingsViewController_ClearSiteInfoCache", comment: "SiteInfoキャッシュを削除する")
+            }.onCellSelection({ (cellOf, row) in
+                NovelDownloadQueue.shared.clearSiteInfoCache()
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.EasyDialogOneButton(
+                        viewController: self,
+                        title: nil,
+                        message: NSLocalizedString("SettingsViewController_ClearSiteInfoCache_done", comment: "保存されている SiteInfo 情報を削除しました。"),
+                        buttonTitle: nil,
+                        buttonAction: nil)
+                }
+            })
             <<< SwitchRow("OverrideForceSiteInfoReload") {
                 $0.title = NSLocalizedString("SettingTableViewController_ForceSiteInfoReload", comment:"SiteInfoを毎回読み直す")
                 $0.value = false
@@ -619,41 +631,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             <<< ButtonRow() {
-                $0.title = "FetchAllLongLivedOperationIDs"
-            }.onCellSelection({ (cellOf, row) in
-                RealmUtil.FetchAllLongLivedOperationIDs() { (operationIDArray, error) in
-                    guard let operationIDArray = operationIDArray else {
-                        print("RealmUtil.FetchAllLongLivedOperationIDs() return but operationIDArray is nil")
-                        return
-                    }
-                    print("RealmUtil.FetchAllLongLivedOperationIDs() got operationIDs: \(operationIDArray.count)")
-                    for operationID in operationIDArray {
-                        print("\(operationID)")
-                    }
-                }
-            })
-            <<< ButtonRow() {
-                $0.title = "iCloud上のデータを全て削除する"
-            }.onCellSelection({ (cellOf, row) in
-                if RealmUtil.IsUseCloudRealm() {
-                    DispatchQueue.main.async {
-                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: "iCloud 同期が有効になっています。iCloud 同期を無効にした状態でのみ実行可能です。", buttonTitle: nil, buttonAction: nil)
-                    }
-                    return
-                }
-                DispatchQueue.main.async {
-                    try! RealmUtil.EnableSyncEngine()
-                    let dialog = NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: nil, message: "iCloud上のデータを削除中……")
-                    RealmUtil.ClearCloudRealmModels()
-                    RealmUtil.CloudPush()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-                        dialog.dismiss(animated: false) {
-                            NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: "iCloud 上のデータを全て削除しました。", buttonTitle: nil, buttonAction: nil)
-                        }
-                    })
-                }
-            })
-            <<< ButtonRow() {
                 $0.title = "次回起動時に CoreData(旧データベース) の情報に書き戻す"
             }.onCellSelection({ (cellOf, row) in
                 CoreDataToRealmTool.UnregisterConvertFromCoreDataFinished()
@@ -676,51 +653,53 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             let dialog = NiftyUtilitySwift.EasyDialogNoButton(
                 viewController: self, title: nil, message: "-")
             DispatchQueue.global(qos: .utility).async {
-                self.AssignMessageTo(tag: 100, text: NSLocalizedString("SettingsViewController_CopyingCloudToLocal", comment: "iCloud側のデータを端末側のデータへ変換中"), dialog: dialog)
-                guard let cloudRealm = try? RealmUtil.GetCloudRealm(), let localRealm = try? RealmUtil.GetLocalRealm() else {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        dialog.dismiss(animated: false, completion: {
-                            DispatchQueue.main.async {
-                                NiftyUtilitySwift.EasyDialogOneButton(
-                                    viewController: self,
-                                    title: nil,
-                                    message: NSLocalizedString("SettingsViewController_CopyCloudToLocalFailed", comment: "iCloudのデータの取得に失敗しました。") + "(1)",
-                                    buttonTitle: nil,
-                                    buttonAction: nil)
-                                guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
-                                row.value = true
-                                row.updateCell()
-                            }
+                autoreleasepool {
+                    self.AssignMessageTo(tag: 100, text: NSLocalizedString("SettingsViewController_CopyingCloudToLocal", comment: "iCloud側のデータを端末側のデータへ変換中"), dialog: dialog)
+                    guard let cloudRealm = try? RealmUtil.GetCloudRealm(), let localRealm = try? RealmUtil.GetLocalRealm() else {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            dialog.dismiss(animated: false, completion: {
+                                DispatchQueue.main.async {
+                                    NiftyUtilitySwift.EasyDialogOneButton(
+                                        viewController: self,
+                                        title: nil,
+                                        message: NSLocalizedString("SettingsViewController_CopyCloudToLocalFailed", comment: "iCloudのデータの取得に失敗しました。") + "(1)",
+                                        buttonTitle: nil,
+                                        buttonAction: nil)
+                                    guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                                    row.value = true
+                                    row.updateCell()
+                                }
+                            })
+                        }
+                        return
+                    }
+                    do {
+                        try RealmToRealmCopyTool.DoCopy(from: cloudRealm, to: localRealm, progress: { (text) in
+                            self.AssignMessageTo(tag: 100, text: text, dialog: dialog)
                         })
+                    }catch {
+                        DispatchQueue.main.async {
+                            NiftyUtilitySwift.EasyDialogOneButton(
+                                viewController: self,
+                                title: nil,
+                                message: NSLocalizedString("SettingsViewController_CopyCloudToLocalFailed", comment: "iCloudのデータの取得に失敗しました。") + "(2)",
+                                buttonTitle: nil, buttonAction: nil)
+                            guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                            row.value = true
+                            row.updateCell()
+                        }
+                        return
                     }
-                    return
-                }
-                do {
-                    try RealmToRealmCopyTool.DoCopy(from: cloudRealm, to: localRealm, progress: { (text) in
-                        self.AssignMessageTo(tag: 100, text: text, dialog: dialog)
-                    })
-                }catch {
-                    DispatchQueue.main.async {
-                        NiftyUtilitySwift.EasyDialogOneButton(
-                            viewController: self,
-                            title: nil,
-                            message: NSLocalizedString("SettingsViewController_CopyCloudToLocalFailed", comment: "iCloudのデータの取得に失敗しました。") + "(2)",
-                            buttonTitle: nil, buttonAction: nil)
-                        guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
-                        row.value = true
-                        row.updateCell()
-                    }
-                    return
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    dialog.dismiss(animated: false) {
-                        RealmUtil.SetIsUseCloudRealm(isUse: false)
-                        NiftyUtilitySwift.EasyDialogOneButton(
-                            viewController: self,
-                            title: nil,
-                            message: NSLocalizedString("SettingsViewController_iCloudDisable_done", comment: "iCloud同期を停止しました"),
-                            buttonTitle: nil,
-                            buttonAction: nil)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        dialog.dismiss(animated: false) {
+                            RealmUtil.SetIsUseCloudRealm(isUse: false)
+                            NiftyUtilitySwift.EasyDialogOneButton(
+                                viewController: self,
+                                title: nil,
+                                message: NSLocalizedString("SettingsViewController_iCloudDisable_done", comment: "iCloud同期を停止しました"),
+                                buttonTitle: nil,
+                                buttonAction: nil)
+                        }
                     }
                 }
             }
@@ -732,54 +711,56 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             let dialog = NiftyUtilitySwift.EasyDialogNoButton(
                 viewController: self, title: nil, message: "-")
             DispatchQueue.global(qos: .utility).async {
-                RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
-                RealmUtil.CloudPull()
-                self.AssignMessageTo(tag: 100, text: NSLocalizedString("SettingsViewController_CopyingLocalToCloud", comment: "現在のデータをiCloud側に登録中"), dialog: dialog)
-                guard let cloudRealm = try? RealmUtil.GetCloudRealm(), let localRealm = try? RealmUtil.GetLocalRealm() else {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        dialog.dismiss(animated: false, completion: {
-                            DispatchQueue.main.async {
-                                NiftyUtilitySwift.EasyDialogOneButton(
-                                    viewController: self,
-                                    title: nil,
-                                    message: NSLocalizedString("SettingsViewController_CopyLocalToCloudFailed", comment: "現在のデータのiCloud側への登録に失敗しました。") + "(1)",
-                                    buttonTitle: nil, buttonAction: nil)
-                                guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
-                                row.value = false
-                                row.updateCell()
-                            }
+                autoreleasepool {
+                    RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
+                    RealmUtil.CloudPull()
+                    self.AssignMessageTo(tag: 100, text: NSLocalizedString("SettingsViewController_CopyingLocalToCloud", comment: "現在のデータをiCloud側に登録中"), dialog: dialog)
+                    guard let cloudRealm = try? RealmUtil.GetCloudRealm(), let localRealm = try? RealmUtil.GetLocalRealm() else {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            dialog.dismiss(animated: false, completion: {
+                                DispatchQueue.main.async {
+                                    NiftyUtilitySwift.EasyDialogOneButton(
+                                        viewController: self,
+                                        title: nil,
+                                        message: NSLocalizedString("SettingsViewController_CopyLocalToCloudFailed", comment: "現在のデータのiCloud側への登録に失敗しました。") + "(1)",
+                                        buttonTitle: nil, buttonAction: nil)
+                                    guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                                    row.value = false
+                                    row.updateCell()
+                                }
+                            })
+                        }
+                        return
+                    }
+                    do {
+                        try RealmToRealmCopyTool.DoCopy(from: localRealm, to: cloudRealm, progress: { (text) in
+                            self.AssignMessageTo(tag: 100, text: text, dialog: dialog)
                         })
+                    }catch {
+                        DispatchQueue.main.async {
+                            NiftyUtilitySwift.EasyDialogOneButton(
+                                viewController: self,
+                                title: nil,
+                                message: NSLocalizedString("SettingsViewController_CopyLocalToCloudFailed", comment: "現在のデータのiCloud側への登録に失敗しました。") + "(2)",
+                                buttonTitle: nil, buttonAction: nil)
+                            guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                            row.value = false
+                            row.updateCell()
+                        }
+                        return
                     }
-                    return
-                }
-                do {
-                    try RealmToRealmCopyTool.DoCopy(from: localRealm, to: cloudRealm, progress: { (text) in
-                        self.AssignMessageTo(tag: 100, text: text, dialog: dialog)
-                    })
-                }catch {
-                    DispatchQueue.main.async {
-                        NiftyUtilitySwift.EasyDialogOneButton(
-                            viewController: self,
-                            title: nil,
-                            message: NSLocalizedString("SettingsViewController_CopyLocalToCloudFailed", comment: "現在のデータのiCloud側への登録に失敗しました。") + "(2)",
-                            buttonTitle: nil, buttonAction: nil)
-                        guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
-                        row.value = false
-                        row.updateCell()
-                    }
-                    return
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    dialog.dismiss(animated: false) {
-                        RealmUtil.SetIsUseCloudRealm(isUse: true)
-                        // TODO: local realm file をここで消してしまうと、iCloud側への転送が終わっていない records が転送できなくなってしまう……気がします。(要調査)
-                        RealmUtil.RemoveLocalRealmFile()
-                        NiftyUtilitySwift.EasyDialogOneButton(
-                            viewController: self,
-                            title: nil,
-                            message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました。\n同期は開始されましたが、端末側に保存されているデータをiCloud側へ登録する作業は続いています。\n端末側に保存されているデータが多い場合には、iCloud側への転送が終わるまでかなりの時間がかかる可能性があります。\nなお、残念ながらiCloud側への転送が終わったかどうかを知るすべが(開発者の知る限りでは)ありません。Appleの解説によると24時間の間はアプリを再度立ち上げれば転送を継続してくれるそうですが、機内モードにすると全てを諦められてしまうなどといった問題があるという話をWeb上でみかけたりしましたので、あまり安心はできないかもしれません。\n一応未送信や未受信のデータがある場合には通信中のインジケータを回すように努力はしますが、このインジケータが消えた事で送信が終了したというわけではないかもしれない、という事を理解しておいてください。"),
-                            buttonTitle: nil,
-                            buttonAction: nil)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        dialog.dismiss(animated: false) {
+                            RealmUtil.SetIsUseCloudRealm(isUse: true)
+                            // TODO: local realm file をここで消してしまうと、iCloud側への転送が終わっていない records が転送できなくなってしまう……気がします。(要調査)
+                            RealmUtil.RemoveLocalRealmFile()
+                            NiftyUtilitySwift.EasyDialogOneButton(
+                                viewController: self,
+                                title: nil,
+                                message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました。\n同期は開始されましたが、端末側に保存されているデータをiCloud側へ登録する作業は続いています。\n端末側に保存されているデータが多い場合には、iCloud側への転送が終わるまでかなりの時間がかかる可能性があります。\nなお、残念ながらiCloud側への転送が終わったかどうかを知るすべが(開発者の知る限りでは)ありません。Appleの解説によると24時間の間はアプリを再度立ち上げれば転送を継続してくれるそうですが、機内モードにすると全てを諦められてしまうなどといった問題があるという話をWeb上でみかけたりしましたので、あまり安心はできないかもしれません。\n一応未送信や未受信のデータがある場合には通信中のインジケータを回すように努力はしますが、このインジケータが消えた事で送信が終了したというわけではないかもしれない、という事を理解しておいてください。"),
+                                buttonTitle: nil,
+                                buttonAction: nil)
+                        }
                     }
                 }
             }
@@ -875,7 +856,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 return
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-                RealmUtil.CheckCloudDataIsValid() { (result) in
+                RealmUtil.CheckCloudDataIsValid { (result) in
                     if result {
                         // iCloud側に使えそうなデータがあった
                         DispatchQueue.main.async {

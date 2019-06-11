@@ -14,7 +14,7 @@ protocol StorySpeakerDeletgate {
     func storySpeakerStartSpeechEvent(storyID:String)
     func storySpeakerStopSpeechEvent(storyID:String)
     func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange)
-    func storySpeakerStoryChanged(story:RealmStory)
+    func storySpeakerStoryChanged(storyID:String)
 }
 
 class AnnounceSpeakerHolder: NSObject {
@@ -89,7 +89,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         updatePlayngInfo(story: story)
         observeStory(storyID: self.storyID)
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
-            delegate.storySpeakerStoryChanged(story: story)
+            delegate.storySpeakerStoryChanged(storyID: storyID)
         }
     }
     

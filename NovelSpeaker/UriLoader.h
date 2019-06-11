@@ -55,4 +55,7 @@
 /// 保存されている SiteInfo を開放します
 - (void)ClearSiteInfoCache;
 
+ /// 保持している SiteInfo の数を取得します
+- (NSUInteger)HoldSiteInfoCont;
+
 @end

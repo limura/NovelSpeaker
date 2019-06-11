@@ -143,6 +143,8 @@
 "SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloud アカウントが設定されていません。";
 "SettingsViewController_iCloudAccountInvalid_cloudNotDetermine" = "iCloud アカウントの状態を取得できませんでした。";
 "SettingsViewController_InvalidiCloudStatus" = "iCloud状態 に問題があります";
+"SettingsViewController_ClearSiteInfoCache" = "SiteInfoキャッシュを削除する";
+"SettingsViewController_ClearSiteInfoCache_done" = "保存されている SiteInfo 情報を削除しました。";
 
 "NovelSpeakerUtility_ExportingNovelData" = "小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "設定情報の抽出中";

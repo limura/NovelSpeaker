@@ -205,27 +205,29 @@
 }
 
 + (NSString*)GetContentCharSetFromHTTPResponse:(NSHTTPURLResponse*)httpResponse {
-    NSDictionary* dictionary = [httpResponse allHeaderFields];
-    if (dictionary == nil) {
-        return nil;
+    @autoreleasepool {
+        NSDictionary* dictionary = [httpResponse allHeaderFields];
+        if (dictionary == nil) {
+            return nil;
+        }
+        NSString* contentType = [dictionary valueForKey:@"Content-Type"];
+        if (contentType == nil) {
+            return nil;
+        }
+        NSRegularExpression* regexp = [[NSRegularExpression alloc] initWithPattern:@"; *charset=([^ ]*)" options:0 error:nil];
+        NSTextCheckingResult* result = [regexp firstMatchInString:contentType options:0 range:NSMakeRange(0, contentType.length)];
+        if (result == nil) {
+            //NSLog(@"header: charset unknwon. %@", contentType);
+            return nil;
+        }
+        if (result.numberOfRanges <= 0) {
+            //NSLog(@"header: charset unknown numberOfRanges <= 0: %@", contentType);
+            return nil;
+        }
+        NSRange range = [result rangeAtIndex:1];
+        NSString* encodingString = [contentType substringWithRange:range];
+        return encodingString;
     }
-    NSString* contentType = [dictionary valueForKey:@"Content-Type"];
-    if (contentType == nil) {
-        return nil;
-    }
-    NSRegularExpression* regexp = [[NSRegularExpression alloc] initWithPattern:@"; *charset=([^ ]*)" options:0 error:nil];
-    NSTextCheckingResult* result = [regexp firstMatchInString:contentType options:0 range:NSMakeRange(0, contentType.length)];
-    if (result == nil) {
-        //NSLog(@"header: charset unknwon. %@", contentType);
-        return nil;
-    }
-    if (result.numberOfRanges <= 0) {
-        //NSLog(@"header: charset unknown numberOfRanges <= 0: %@", contentType);
-        return nil;
-    }
-    NSRange range = [result rangeAtIndex:1];
-    NSString* encodingString = [contentType substringWithRange:range];
-    return encodingString;
 }
 
 + (NSString*)GetContentCharSet:(NSHTTPURLResponse*)httpResponse data:(NSData*)data faileoverCharset:(NSString*)faileoverCherset {
@@ -259,14 +261,16 @@
        @"meta +charset=[\"'](.*?)[\"']",
     ];
     for (NSString* pattern in charsetTagRegexpArray) {
-        NSError* err = nil;
-        NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&err];
-        NSTextCheckingResult* match = [regexp firstMatchInString:tmpString options:0 range:NSMakeRange(0, tmpString.length)];
-        if (match.numberOfRanges >= 2) {
-            NSString* charset = [tmpString substringWithRange:[match rangeAtIndex:1]];
-            if (charset != nil && charset.length > 0) {
-                //NSLog(@"charset found: %@", charset);
-                return charset;
+        @autoreleasepool {
+            NSError* err = nil;
+            NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&err];
+            NSTextCheckingResult* match = [regexp firstMatchInString:tmpString options:0 range:NSMakeRange(0, tmpString.length)];
+            if (match.numberOfRanges >= 2) {
+                NSString* charset = [tmpString substringWithRange:[match rangeAtIndex:1]];
+                if (charset != nil && charset.length > 0) {
+                    //NSLog(@"charset found: %@", charset);
+                    return charset;
+                }
             }
         }
     }
@@ -541,17 +545,19 @@
 - (void)FetchOneUrl:(NSURL*)url cookieArray:(NSArray*)cookieArray successAction:(void(^)(HtmlStory* story))successAction failedAction:(void(^)(NSURL* url, NSString* errorString))failedAction {
     NSLog(@"FetchOneUrl: %@", [url absoluteString]);
     dispatch_async(m_WebAccessQueue, ^{
-        NSHTTPCookieStorage* cookieStorage = [self createCookieStorage:cookieArray url:url];
-        NSMutableString* errorMutableString = [NSMutableString new];
-        HtmlStory* story = [self FetchStoryForURL:url cookieStorage:cookieStorage out_error:errorMutableString];
-        if (story == nil) {
-            if (failedAction) {
-                failedAction(url, errorMutableString);
+        @autoreleasepool {
+            NSHTTPCookieStorage* cookieStorage = [self createCookieStorage:cookieArray url:url];
+            NSMutableString* errorMutableString = [NSMutableString new];
+            HtmlStory* story = [self FetchStoryForURL:url cookieStorage:cookieStorage out_error:errorMutableString];
+            if (story == nil) {
+                if (failedAction) {
+                    failedAction(url, errorMutableString);
+                }
+                return;
             }
-            return;
-        }
-        if (successAction) {
-            successAction(story);
+            if (successAction) {
+                successAction(story);
+            }
         }
     });
 }
@@ -614,6 +620,10 @@
     m_SleepTime = sleepTime;
 }
 
+/// 保持している SiteInfo の数を取得します
+- (NSUInteger)HoldSiteInfoCont {
+    return m_SiteInfoArray.count + m_CustomSiteInfoArray.count;
+}
 
 
 @end
