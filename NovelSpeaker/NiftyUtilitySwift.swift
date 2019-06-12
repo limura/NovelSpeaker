@@ -12,7 +12,7 @@ import RealmSwift
 import UserNotifications
 
 class NiftyUtilitySwift: NSObject {
-    static let textCountSeparatorArray:[String] = ["[[改ページ]]", "[改ページ]", "［＃改ページ］", "［＃改丁］", "\n\n", "\r\n\r\n", "\r\r"]
+    static let textCountSeparatorArray:[String] = ["[[改ページ]]", "[改ページ]", "［＃改ページ］", "［＃改丁］", "\n\n\n", "\r\n\r\n\r\n", "\r\r\r"]
     
     // 分割すべき大きさで、分割できそうな文字列であれば分割して返します
     static func CheckShouldSeparate(text:String) -> [String]? {

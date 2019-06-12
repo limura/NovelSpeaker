@@ -871,6 +871,7 @@ extension RealmStory: CanWriteIsDeleted {
             }
             let count = Double(downloadDateArray.suffix(10).count)
             let diffTimeInSec = Date().timeIntervalSince1970 - targetDownloadDate.timeIntervalSince1970
+            // likeLevel がある場合は updateFrequency を1日分早い感じにします。
             return count / (diffTimeInSec / (60.0*60.0*24)) + Double(self.likeLevel) * count
         }
     }
