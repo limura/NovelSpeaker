@@ -274,7 +274,12 @@
 "NovelDetailViewController_SpeakerAlertRowTitle" = "Standard speaker";
 "NovelDetailViewController_DetailSectionTitle" = "Detail";
 "NovelDetailViewController_SettingSectionTitle" = "Setting dedicated to this novel";
-
+"NovelDetailViewController_AddRubyToSpeechModButtonTitle" = "Overwrite the ruby notation that appears in the novel to the correction of the reading for this novel";
+"NovelDetailViewController_CanNotGetNovelData" = "Failed to extract novel text data.";
+"NovelDetailViewController_RubyNotFound" = "Could not find a valid ruby notation.";
+"NovelDetailViewController_SpeechModAdded" = "I have registered the following replacement for this novel";
+"NovelDetailViewController_AddToFolderButtonTitle" = "Classify to folder";
+"NovelDetailViewController_LikeLevelStepperRowTitle" = "Liked";
 
 "NarouDownloadQueue_URLDownloadTitleFixed" = "downloading \"%@\" ";
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "Could not get the title of the downloaded thing, will leave it as URL.\n%@";
@@ -457,6 +462,10 @@
 "NovelDownloader_FailedByNoRealmNovel" = "Novel download aborted. This novel was not registered on the bookshelf.";
 "NovelDownloader_InvalidNovelID" = "Novel  download failed. Could not start the download without getting the data (URL etc.) to download. It seems that there are problems with novel data not stored or deleted.";
 
+"AssignNovelFolderViewController_Title" = "Classify to folder";
+"AssignNovelFolderViewController_CreateNewTagTitle" = "Create new folder";
+"AssignNovelFolderViewController_CreateNewTagPlaceHolder" = "Can not create folder with same name";
+"AssignNovelFolderViewController_DeleteSwipeActionTitle" = "Delete";
 
 "BookShelfRATreeViewController_Title" = "Bookshelf";
 "BookShelfRATreeViewController_UpTo1DayAgo" = "Up to one day ago";
@@ -467,10 +476,11 @@
 "BookShelfRATreeViewController_BeforeThat" = "More than a year ago";
 "BookShelfRATreeViewController_UnknownWriter" = "(unknown name)";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseNoStory" = "It seems that no text of the novel has been downloaded. Do you try to redownload this novel?";
+"BookShelfRATreeViewController_BookshelfNoListed" = "(Uncategorized)";
+"BookShelfRATreeViewController_SortTypeBookshelf" = "Original folder order";
+"BookShelfRATreeViewController_SortTypeUpdateDateWithFilder" = "Last download date (with folder)";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
-
-
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";

@@ -24,6 +24,8 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
     NarouContentSortType_Title,
     NarouContentSortType_Writer,
     NarouContentSortType_Ncode,
+    NarouContentSortType_SelfCreatedBookshelf,
+    NarouContentSortType_NovelUpdatedAtWithFolder,
 };
 
 /// 繰り返し再生の対象タイプ

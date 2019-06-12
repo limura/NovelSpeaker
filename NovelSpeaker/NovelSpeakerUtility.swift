@@ -675,7 +675,7 @@ class NovelSpeakerUtility: NSObject {
             if let keyword = novel.object(forKey: "keyword") as? String {
                 for tag in keyword.components(separatedBy: CharacterSet.whitespacesAndNewlines) {
                     let tagName = CleanTagString(tag: tag)
-                    RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: "keyword")
+                    RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: RealmNovelTag.TagType.Keyword)
                 }
             }
         }

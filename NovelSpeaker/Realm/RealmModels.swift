@@ -12,8 +12,8 @@ import CloudKit
 import UIKit
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 1
-    static let currentSchemaVersionForLocalOnly : UInt64 = 1
+    static let currentSchemaVersion : UInt64 = 2
+    static let currentSchemaVersionForLocalOnly : UInt64 = 2
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
@@ -26,6 +26,9 @@ import UIKit
     static var realmLocalOnlyCache:[String:Realm] = [:]
     
     static var syncEngineDispatchQueue:DispatchQueue = DispatchQueue.main
+    
+    static var writeCount = 0
+    static let writeCountPullInterval = 10 // realm.write を何回したら pull するか
 
     static func Migrate_0_To_1(migration:Migration, oldSchemaVersion:UInt64) {
         
@@ -406,10 +409,10 @@ import UIKit
             }
         }
     }
-    static func CloudPull() {
+    @objc static func CloudPull() {
         syncEngine?.pull()
     }
-    static func CloudPush() {
+    @objc static func CloudPush() {
         syncEngine?.pushAll()
     }
     
@@ -473,6 +476,10 @@ import UIKit
             }
         }catch{
             print("realm.write failed.")
+        }
+        writeCount += 1
+        if writeCount % writeCountPullInterval == 0 && IsUseCloudRealm() {
+            CloudPull()
         }
     }
 
@@ -582,7 +589,9 @@ protocol CanWriteIsDeleted {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
                 realm.refresh()
-                return realm.object(ofType: RealmNovel.self, forPrimaryKey: self.novelID)
+                guard let obj = realm.object(ofType: RealmNovel.self, forPrimaryKey: self.novelID) else { return nil }
+                if obj.isDeleted { return nil }
+                return obj
             }
         }
     }
@@ -845,7 +854,9 @@ extension RealmStory: CanWriteIsDeleted {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
                 realm.refresh()
-                return realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: self.defaultSpeakerID)
+                guard let obj = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: self.defaultSpeakerID) else { return nil }
+                if obj.isDeleted { return nil }
+                return obj
             }
         }
     }
@@ -856,11 +867,11 @@ extension RealmStory: CanWriteIsDeleted {
     var updateFrequency: Double {
         get {
             guard let targetDownloadDate = downloadDateArray.suffix(10).first else {
-                return 1.0 / 30.0 // 未ダウンロードのものは30日に1度の頻度とする。
+                return 1.0 / 60.0*60.0*24.0*30.0 // 未ダウンロードのものは30日に1度の頻度とする。
             }
-            let count = downloadDateArray.suffix(10).count
+            let count = Double(downloadDateArray.suffix(10).count)
             let diffTimeInSec = Date().timeIntervalSince1970 - targetDownloadDate.timeIntervalSince1970
-            return Double(count) / (diffTimeInSec / (60.0*60.0*24))
+            return count / (diffTimeInSec / (60.0*60.0*24)) + Double(self.likeLevel) * count
         }
     }
     
@@ -1013,7 +1024,7 @@ extension RealmStory: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        return ["writer", "title", "novelID", "likeLevel", "isDeleted"]
+        return ["writer", "title", "novelID", "likeLevel", "isDeleted", "lastDownloadDate", "lastReadDate"]
     }
 }
 extension RealmNovel: CKRecordConvertible {
@@ -1600,7 +1611,9 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
             realm.refresh()
-            return realm.object(ofType: RealmGlobalState.self, forPrimaryKey: UniqueID)
+            guard let obj = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: UniqueID) else { return nil }
+            if obj.isDeleted { return nil }
+            return obj
         }
     }
 
@@ -1715,6 +1728,11 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     
     let targetNovelIDArray = List<String>()
     
+    struct TagType {
+        static let Keyword = "keyword"
+        static let Bookshelf = "bookshelf"
+    }
+    
     var targetNovelArray : [RealmNovel]? {
         get {
             return autoreleasepool {
@@ -1750,7 +1768,9 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
             realm.refresh()
-            return realm.object(ofType: RealmNovelTag.self, forPrimaryKey: RealmNovelTag.CreateUniqueID(name: name, type: type))
+            guard let obj = realm.object(ofType: RealmNovelTag.self, forPrimaryKey: RealmNovelTag.CreateUniqueID(name: name, type: type)) else { return nil }
+            if obj.isDeleted { return nil }
+            return obj
         }
     }
     
@@ -1867,7 +1887,9 @@ extension RealmNovelTag: CanWriteIsDeleted {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
             realm.refresh()
-            return realm.object(ofType: RealmSpeechOverrideSetting.self, forPrimaryKey: name)
+            guard let obj = realm.object(ofType: RealmSpeechOverrideSetting.self, forPrimaryKey: name) else { return nil }
+            if obj.isDeleted { return nil }
+            return obj
         }
     }
     func unref(realm:Realm, novelID:String) {

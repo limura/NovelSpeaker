@@ -249,6 +249,11 @@ class NiftyUtilitySwift: NSObject {
         builded.show()
         return builded
     }
+    
+    @discardableResult
+    @objc public static func EasyDialogMessageDialog(viewController: UIViewController, message: String) -> EasyDialog {
+        return EasyDialogOneButton(viewController: viewController, title: nil, message: message, buttonTitle: nil, buttonAction: nil)
+    }
 
     @discardableResult
     @objc public static func EasyDialogOneButton(viewController: UIViewController, title: String?, message: String?, buttonTitle: String?, buttonAction:(()->Void)?) -> EasyDialog {

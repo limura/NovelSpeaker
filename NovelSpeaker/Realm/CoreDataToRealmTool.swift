@@ -278,7 +278,7 @@ class CoreDataToRealmTool: NSObject {
                 novel.type = NovelType.URL
                 if let keyword = novelCoreData.keyword {
                     for tag in keyword.components(separatedBy: " ") {
-                        RealmNovelTag.AddTag(realm: realm, name: tag, novelID: novel.novelID, type: "keyword")
+                        RealmNovelTag.AddTag(realm: realm, name: tag, novelID: novel.novelID, type: RealmNovelTag.TagType.Keyword)
                     }
                 }
             }

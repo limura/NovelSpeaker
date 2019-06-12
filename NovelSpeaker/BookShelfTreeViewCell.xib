@@ -31,7 +31,7 @@
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="5lT-a7-cAi">
+                    <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="5lT-a7-cAi">
                         <rect key="frame" x="267" y="3.5" width="37" height="37"/>
                         <color key="color" cocoaTouchSystemColor="darkTextColor"/>
                     </activityIndicatorView>
@@ -45,6 +45,16 @@
                             <constraint firstAttribute="height" constant="2" id="qXF-YQ-98B"/>
                         </constraints>
                     </progressView>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageSizeForAccessibilityContentSizeCategory="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JYf-xN-EC1">
+                        <rect key="frame" x="44" y="0.0" width="43.5" height="43.5"/>
+                        <constraints>
+                            <constraint firstAttribute="width" secondItem="JYf-xN-EC1" secondAttribute="height" multiplier="1:1" id="nKa-i9-nV7"/>
+                        </constraints>
+                        <state key="normal" image="LikeStar.png"/>
+                        <connections>
+                            <action selector="likeButtonClicked:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="XFc-Zj-QJT"/>
+                        </connections>
+                    </button>
                 </subviews>
                 <constraints>
                     <constraint firstAttribute="trailing" secondItem="5lT-a7-cAi" secondAttribute="trailing" constant="16" id="1sU-qD-t0u"/>
@@ -52,8 +62,11 @@
                     <constraint firstItem="NDu-xh-oRj" firstAttribute="leading" secondItem="aG3-qg-zYJ" secondAttribute="trailing" constant="8" id="6zA-8S-mAo"/>
                     <constraint firstItem="Rsq-pE-Xp7" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="7qG-pB-xSe"/>
                     <constraint firstAttribute="bottom" secondItem="NDu-xh-oRj" secondAttribute="bottom" constant="10.5" id="A1E-xr-V2O"/>
+                    <constraint firstAttribute="bottom" secondItem="JYf-xN-EC1" secondAttribute="bottom" id="A7N-8u-SWi"/>
                     <constraint firstAttribute="bottom" secondItem="Rsq-pE-Xp7" secondAttribute="bottom" id="DR2-G7-vZj"/>
                     <constraint firstItem="5lT-a7-cAi" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="3.5" id="FiV-JY-Ubt"/>
+                    <constraint firstItem="JYf-xN-EC1" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="HB2-3Z-2pF"/>
+                    <constraint firstItem="JYf-xN-EC1" firstAttribute="leading" secondItem="aG3-qg-zYJ" secondAttribute="trailing" id="M6Y-Sf-RaW"/>
                     <constraint firstItem="NDu-xh-oRj" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="12" id="Rwm-Yf-pMI"/>
                     <constraint firstAttribute="trailing" secondItem="E7x-yC-sPR" secondAttribute="trailing" constant="16" id="UBQ-c2-YPe"/>
                     <constraint firstAttribute="bottom" secondItem="E7x-yC-sPR" secondAttribute="bottom" constant="4.5" id="ZXG-Dj-xt3"/>
@@ -68,6 +81,7 @@
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
                 <outlet property="downloadingActivityIndicator" destination="5lT-a7-cAi" id="4Fw-6N-ZY1"/>
+                <outlet property="likeButton" destination="JYf-xN-EC1" id="6Vh-o8-lxE"/>
                 <outlet property="newImageView" destination="Rsq-pE-Xp7" id="Ybj-03-rWp"/>
                 <outlet property="readProgressView" destination="E7x-yC-sPR" id="8tb-3h-eS1"/>
                 <outlet property="titleLabel" destination="NDu-xh-oRj" id="4Eb-ke-Pe4"/>
@@ -78,6 +92,7 @@
         </tableViewCell>
     </objects>
     <resources>
+        <image name="LikeStar.png" width="17.691429138183594" height="17.691429138183594"/>
         <image name="NEW!.png" width="43" height="43"/>
     </resources>
 </document>

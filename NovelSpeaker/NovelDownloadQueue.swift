@@ -285,7 +285,7 @@ class NovelDownloader : NSObject {
                             if let keywords = htmlStory.keyword {
                                 for keyword in keywords {
                                     guard let keyword = keyword as? String else { continue }
-                                    RealmNovelTag.AddTag(realm: realm, name: keyword, novelID: novelID, type: "keyword")
+                                    RealmNovelTag.AddTag(realm: realm, name: keyword, novelID: novelID, type: RealmNovelTag.TagType.Keyword)
                                 }
                             }
                         }

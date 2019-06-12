@@ -79,6 +79,13 @@
 		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
+		2163599D22B1428400264A89 /* AssignNovelFolderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */; };
+		216359A122B167A700264A89 /* LikeStar.png in Resources */ = {isa = PBXBuildFile; fileRef = 2163599E22B167A700264A89 /* LikeStar.png */; };
+		216359A222B167A700264A89 /* LikeStar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2163599F22B167A700264A89 /* LikeStar@2x.png */; };
+		216359A322B167A700264A89 /* LikeStar@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 216359A022B167A700264A89 /* LikeStar@3x.png */; };
+		216359A722B16F5A00264A89 /* NotLikeStar.png in Resources */ = {isa = PBXBuildFile; fileRef = 216359A422B16F5900264A89 /* NotLikeStar.png */; };
+		216359A822B16F5A00264A89 /* NotLikeStar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 216359A522B16F5A00264A89 /* NotLikeStar@2x.png */; };
+		216359A922B16F5A00264A89 /* NotLikeStar@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 216359A622B16F5A00264A89 /* NotLikeStar@3x.png */; };
 		21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */; };
 		21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */; };
 		21647FFC228CF44900A183DF /* UpdateLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21647FFB228CF44900A183DF /* UpdateLogViewController.swift */; };
@@ -323,6 +330,13 @@
 		2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMultithreadTests.m; sourceTree = "<group>"; };
 		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignNovelFolderViewController.swift; sourceTree = "<group>"; };
+		2163599E22B167A700264A89 /* LikeStar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = LikeStar.png; path = Resources/LikeStar.png; sourceTree = "<group>"; };
+		2163599F22B167A700264A89 /* LikeStar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "LikeStar@2x.png"; path = "Resources/LikeStar@2x.png"; sourceTree = "<group>"; };
+		216359A022B167A700264A89 /* LikeStar@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "LikeStar@3x.png"; path = "Resources/LikeStar@3x.png"; sourceTree = "<group>"; };
+		216359A422B16F5900264A89 /* NotLikeStar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NotLikeStar.png; path = Resources/NotLikeStar.png; sourceTree = "<group>"; };
+		216359A522B16F5A00264A89 /* NotLikeStar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "NotLikeStar@2x.png"; path = "Resources/NotLikeStar@2x.png"; sourceTree = "<group>"; };
+		216359A622B16F5A00264A89 /* NotLikeStar@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "NotLikeStar@3x.png"; path = "Resources/NotLikeStar@3x.png"; sourceTree = "<group>"; };
 		21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSizeSettingViewControllerSwift.swift; sourceTree = "<group>"; };
 		21647FF9228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateSpeechModSettingViewControllerSwift.swift; sourceTree = "<group>"; };
 		21647FFB228CF44900A183DF /* UpdateLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateLogViewController.swift; sourceTree = "<group>"; };
@@ -678,6 +692,12 @@
 				210958C21A0DF55600E9171F /* soundbook@3x.png */,
 				21B53A1919619C00009658B7 /* sound.png */,
 				21B53A1A19619C00009658B7 /* sound@2x.png */,
+				2163599E22B167A700264A89 /* LikeStar.png */,
+				2163599F22B167A700264A89 /* LikeStar@2x.png */,
+				216359A022B167A700264A89 /* LikeStar@3x.png */,
+				216359A422B16F5900264A89 /* NotLikeStar.png */,
+				216359A522B16F5A00264A89 /* NotLikeStar@2x.png */,
+				216359A622B16F5A00264A89 /* NotLikeStar@3x.png */,
 				2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */,
 				21429D82209F4516001426F5 /* nc48625.m4a */,
 				21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */,
@@ -895,6 +915,7 @@
 				21A2CDC32297D3A50080AEE6 /* NarouSearchViewController.swift */,
 				21A291F522A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift */,
 				21A291F722A3F9DA000AA58C /* NovelDetailViewController.swift */,
+				2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1062,6 +1083,7 @@
 				21D3979F1FC95CBB0018F883 /* earth@3x.png in Resources */,
 				21FDF5642043CDB200DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */,
 				2133F2AC1E80E175001A0BC5 /* Icon-Small-50@2x.png in Resources */,
+				216359A922B16F5A00264A89 /* NotLikeStar@3x.png in Resources */,
 				2133743F2013816D0043D995 /* bookmark-false@2x.png in Resources */,
 				210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */,
 				21D397B01FC97A380018F883 /* home@2x.png in Resources */,
@@ -1085,6 +1107,7 @@
 				21F563C71FD801970037F5D7 /* >.png in Resources */,
 				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
 				21F563CF1FD802400037F5D7 /* <.png in Resources */,
+				216359A822B16F5A00264A89 /* NotLikeStar@2x.png in Resources */,
 				21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */,
 				210958EB1A0E1C5500E9171F /* NEW!.png in Resources */,
 				21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */,
@@ -1093,7 +1116,9 @@
 				2133F2AF1E80E175001A0BC5 /* Icon-Small@3x.png in Resources */,
 				2133F2B01E80E175001A0BC5 /* Icon.png in Resources */,
 				2133F2AE1E80E175001A0BC5 /* Icon-Small@2x.png in Resources */,
+				216359A222B167A700264A89 /* LikeStar@2x.png in Resources */,
 				21CAC81C21273C0A00F74092 /* UpdateMemo.txt in Resources */,
+				216359A722B16F5A00264A89 /* NotLikeStar.png in Resources */,
 				21D397A81FC960E10018F883 /* bookmark-true@2x.png in Resources */,
 				21F563C81FD801970037F5D7 /* >@2x.png in Resources */,
 				212F011C1D907CF1009D69E6 /* Default568@2x.png in Resources */,
@@ -1115,6 +1140,7 @@
 				210958CB1A0DF55600E9171F /* soundbook.png in Resources */,
 				210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */,
 				21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */,
+				216359A322B167A700264A89 /* LikeStar@3x.png in Resources */,
 				21D3979E1FC95CBB0018F883 /* earth@2x.png in Resources */,
 				210958C91A0DF55600E9171F /* icloud1@2x.png in Resources */,
 				2133F2AB1E80E175001A0BC5 /* Icon-Small-50.png in Resources */,
@@ -1132,6 +1158,7 @@
 				2133F2B21E80E175001A0BC5 /* iTunesArtwork in Resources */,
 				2133F2A51E80E175001A0BC5 /* Icon-72@2x.png in Resources */,
 				212852DC19B1D101001A75DC /* Localizable.strings in Resources */,
+				216359A122B167A700264A89 /* LikeStar.png in Resources */,
 				21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */,
 				219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */,
 				213374402013816D0043D995 /* bookmark-false@3x.png in Resources */,
@@ -1270,6 +1297,7 @@
 				21A291F622A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				21A291F822A3F9DA000AA58C /* NovelDetailViewController.swift in Sources */,
+				2163599D22B1428400264A89 /* AssignNovelFolderViewController.swift in Sources */,
 				21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */,

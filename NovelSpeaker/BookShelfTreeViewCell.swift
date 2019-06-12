@@ -19,10 +19,12 @@ class BookShelfTreeViewCell: UITableViewCell {
     @IBOutlet weak var newImageView: UIImageView!
     @IBOutlet weak var readProgressView: UIProgressView!
     @IBOutlet weak var treeDepthImageViewWidthConstraint: NSLayoutConstraint!
+    @IBOutlet weak var likeButton: UIButton!
     
     var storyObserveToken: NotificationToken? = nil
     var storyForNovelArrayObserveToken: NotificationToken? = nil
     var globalStateObserveToken: NotificationToken? = nil
+    var novelObserveToken: NotificationToken? = nil
     var watchNovelIDArray:[String] = []
     
     deinit {
@@ -33,6 +35,10 @@ class BookShelfTreeViewCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
         registerDownloadStatusNotification()
+
+        likeButton.imageView?.contentMode = .scaleAspectFit
+        likeButton.contentHorizontalAlignment = .fill
+        likeButton.contentVerticalAlignment = .fill
     }
     
     override func prepareForReuse() {
@@ -125,6 +131,39 @@ class BookShelfTreeViewCell: UITableViewCell {
             }
         }
     }
+    
+    func applyLikeStarStatus(novelID:String) {
+        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
+            self.likeButton.isHidden = true
+            return
+        }
+        DispatchQueue.main.async {
+            if novel.likeLevel > 0 {
+                self.likeButton.imageView?.image = UIImage(named: "LikeStar.png")
+            }else{
+                self.likeButton.imageView?.image = UIImage(named: "NotLikeStar.png")
+            }
+        }
+    }
+    
+    func registerNovelObserver(novelID:String) {
+        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+        self.novelObserveToken = novel.observe { (change) in
+            switch change {
+            case .error(_):
+                break
+            case .change(let properties):
+                for property in properties {
+                    if property.name == "likeLevel" {
+                        self.applyLikeStarStatus(novelID: novelID)
+                        return
+                    }
+                }
+            case .deleted:
+                break
+            }
+        }
+    }
 
     func registerStoryObserver(novelID:String) {
         self.storyObserveToken = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID).observe({ (change) in
@@ -197,7 +236,7 @@ class BookShelfTreeViewCell: UITableViewCell {
         guard let globalState = RealmGlobalState.GetInstance() else { return }
         let isDisplay = globalState.isReadingProgressDisplayEnabled
         DispatchQueue.main.async {
-            if isDisplay {
+            if isDisplay && self.watchNovelIDArray.count == 1 {
                 self.readProgressView.isHidden = false
             }else{
                 self.readProgressView.isHidden = true
@@ -212,7 +251,7 @@ class BookShelfTreeViewCell: UITableViewCell {
                     if property.name == "isReadingProgressDisplayEnabled" {
                         if let isDisplayEnabled = property.newValue as? Bool {
                             DispatchQueue.main.async {
-                                if isDisplayEnabled {
+                                if isDisplayEnabled && self.watchNovelIDArray.count == 1 {
                                     self.readProgressView.isHidden = false
                                 }else{
                                     self.readProgressView.isHidden = true
@@ -252,9 +291,13 @@ class BookShelfTreeViewCell: UITableViewCell {
             self.readProgressView.isHidden = false
             applyCurrentReadingPointToIndicator(novelID: novelID)
             registerStoryObserver(novelID: novelID)
+            registerNovelObserver(novelID: novelID)
+            applyLikeStarStatus(novelID: novelID)
+            self.likeButton.isHidden = false
             self.storyForNovelArrayObserveToken = nil
         }else{
             self.readProgressView.isHidden = true
+            self.likeButton.isHidden = true
             registerStoryForNovelArrayObserver(novelIDArray: watchNovelIDArray)
             self.storyObserveToken = nil
         }
@@ -268,4 +311,14 @@ class BookShelfTreeViewCell: UITableViewCell {
         }
     }
     
+    @IBAction func likeButtonClicked(_ sender: Any) {
+        guard self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+        RealmUtil.Write { (realm) in
+            if novel.likeLevel > 0 {
+                novel.likeLevel = 0
+            }else{
+                novel.likeLevel = 1
+            }
+        }
+    }
 }

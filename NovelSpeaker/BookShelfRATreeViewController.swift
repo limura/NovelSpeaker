@@ -153,16 +153,16 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         switch sortType {
         case .ncode:
             return Array(allNovels.sorted(byKeyPath: "novelID", ascending: true))
+        case .novelUpdatedAtWithFolder:
+            fallthrough
         case .novelUpdatedAt:
-            return allNovels.sorted(by: { (a, b) -> Bool in
-                let ad = a.lastDownloadDate
-                let bd = b.lastDownloadDate
-                return ad > bd
-            })
-        case .title:
-            return Array(allNovels.sorted(byKeyPath: "title", ascending: false))
+            return Array(allNovels.sorted(byKeyPath: "lastDownloadDate", ascending: true))
         case .writer:
             return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
+        case .title:
+            fallthrough
+        case .selfCreatedBookshelf:
+            fallthrough
         @unknown default:
             return Array(allNovels.sorted(byKeyPath: "title", ascending: false))
         }
@@ -268,6 +268,44 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         return result
     }
     
+    // 作者名でフォルダ分けします
+    func createBookShelfTagBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
+        guard let novels = getNovelArray(sortType: NarouContentSortType.writer), let tags = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Bookshelf) else { return [] }
+        var result = [BookShelfRATreeViewCellData]()
+        var listedNovelIDSet = Set<String>()
+        for tag in tags {
+            guard let novels = tag.targetNovelArray else { continue }
+            let folder = BookShelfRATreeViewCellData()
+            folder.childrens = [BookShelfRATreeViewCellData]()
+            folder.title = tag.name
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.novel = novel
+                folder.childrens?.append(data)
+                listedNovelIDSet.insert(novel.novelID)
+            }
+            result.append(folder)
+        }
+        var noListedNovels = [RealmNovel]()
+        for novel in novels {
+            if listedNovelIDSet.contains(novel.novelID) { continue }
+            noListedNovels.append(novel)
+        }
+        if noListedNovels.count > 0 {
+            let folder = BookShelfRATreeViewCellData()
+            folder.title = NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)")
+            folder.childrens = [BookShelfRATreeViewCellData]()
+            for novel in noListedNovels {
+                let data = BookShelfRATreeViewCellData()
+                data.novel = novel
+                folder.childrens?.append(data)
+            }
+            result.append(folder)
+        }
+        return result
+    }
+
+    
     func getBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
         guard let globalState = RealmGlobalState.GetInstance() else { return [] }
         let sortType = globalState.bookShelfSortType
@@ -275,10 +313,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         case .ncode: fallthrough
         case .title:
             return createSimpleBookShelfRATreeViewCellDataTree(sortType: sortType)
+        case .novelUpdatedAtWithFolder:
+            return createUpdateDateBookShelfRATreeViewCellDataTreeWithFolder()
         case .novelUpdatedAt:
             return createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder()
         case .writer:
             return createWriterBookShelfRATreeViewCellDataTree()
+        case .selfCreatedBookshelf:
+            return createBookShelfTagBookShelfRATreeViewCellDataTree()
         default:
             break
         }
@@ -357,6 +399,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             , NSLocalizedString("BookShelfTableViewController_SortTypeWriter", comment: "作者名順"): NarouContentSortType.writer
             , NSLocalizedString("BookShelfTableViewController_SortTypeNovelName", comment: "小説名順"): NarouContentSortType.title
             , NSLocalizedString("BookShelfTableViewController_SortTypeUpdateDate", comment: "更新順"): NarouContentSortType.novelUpdatedAt
+            , NSLocalizedString("BookShelfRATreeViewController_SortTypeBookshelf", comment: "自作フォルダ順"): NarouContentSortType.selfCreatedBookshelf
+            , NSLocalizedString("BookShelfRATreeViewController_SortTypeUpdateDateWithFilder", comment: "最終ダウンロード順(フォルダ分類版)"): NarouContentSortType.novelUpdatedAtWithFolder
         ]
     }
 
@@ -381,12 +425,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     
     @objc func sortTypeSelectButtonClicked(sender:Any) {
         let targetView = self.view
-        let dialog = PickerViewDialog.createNewDialog([
-            NSLocalizedString("BookShelfTableViewController_SortTypeNcode", comment: "Ncode順"),
-            NSLocalizedString("BookShelfTableViewController_SortTypeWriter", comment: "作者名順"),
-            NSLocalizedString("BookShelfTableViewController_SortTypeNovelName", comment: "小説名順"),
-            NSLocalizedString("BookShelfTableViewController_SortTypeUpdateDate", comment: "更新順"),
-        ], firstSelectedString: getCurrentSortTypeDisplayString(), parentView: targetView) { (selectedText) in
+        let dialog = PickerViewDialog.createNewDialog(
+            getDisplayStringToSortTypeDictionary().map({ (arg0) -> String in
+                let (key, _) = arg0
+                return key
+            }).sorted(by: { (a:String, b:String) -> Bool in
+                a < b
+            }),
+            firstSelectedString: getCurrentSortTypeDisplayString(), parentView: targetView) { (selectedText) in
             let sortType = self.convertDisplayStringToSortType(key: selectedText!)
             if let globalState = RealmGlobalState.GetInstance() {
                 RealmUtil.Write { (realm) in
@@ -465,6 +511,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }
                 }
                 return
+            }
+            if let story = novelList.first {
+                nextViewStoryID = story.id
+                self.isNextViewNeedResumeSpeech = isNeedSpeech
+                self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
             }
             return
         }
@@ -550,8 +601,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     func treeView(_ treeView: RATreeView, canEditRowForItem item: Any) -> Bool {
         if let data = item as? BookShelfRATreeViewCellData {
-            if data.novel != nil {
-                return true
+            if let novel = data.novel {
+                return novel.likeLevel <= 0
             }
         }
         return false

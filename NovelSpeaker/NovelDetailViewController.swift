@@ -171,6 +171,81 @@ class NovelDetailViewController: FormViewController {
             $0.title = NSLocalizedString("SettingTableViewController_CorrectionOfTheReading", comment:"読みの修正")
             $0.presentationMode = .segueName(segueName: "speechModSettingSegue", onDismiss: nil)
         }
+        settingSection <<< ButtonRow() {
+            $0.title = NSLocalizedString("NovelDetailViewController_AddRubyToSpeechModButtonTitle", comment: "小説中に出てくるルビ表記をこの小説用の読みの修正に上書き追加する")
+            $0.cell.textLabel?.numberOfLines = 0
+        }.onCellSelection({ (cellOf, row) in
+            let novelID = self.novelID
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let storys = novel.linkedStorys else {
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_CanNotGetNovelData", comment: "小説本文データの抽出に失敗しました。"))
+                }
+                return
+            }
+            var result:[String:String] = [:]
+            for story in storys {
+                guard let content = story.content, let rubyDictionary =  StringSubstituter.findNarouRubyNotation(content, notRubyString: nil) else { continue }
+                for (key, value) in rubyDictionary {
+                    guard let fromBase = key as? String, let to = value as? String else { continue }
+                    print("\(fromBase) -> \(to)")
+                    var from = fromBase
+                    for replaceTarget in [to, "|", "｜", "(", "（", ")", "）", "《", "》"] {
+                        from = from.replacingOccurrences(of: replaceTarget, with: "")
+                    }
+                    result[from] = to
+                }
+            }
+            if result.count <= 0 {
+                NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_RubyNotFound", comment: "有効なルビ表記を発見できませんでした。"))
+                return
+            }
+            var message = ""
+            RealmUtil.Write(block: { (realm) in
+                for (before, after) in result {
+                    if before.count <= 0 || after.count <= 0 { continue }
+                    let modSetting = RealmSpeechModSetting()
+                    modSetting.before = before
+                    modSetting.after = after
+                    modSetting.isUseRegularExpression = false
+                    modSetting.targetNovelIDArray.append(novelID)
+                    realm.add(modSetting, update: .modified)
+                    message += "\(before) → \(after)\n"
+                }
+            })
+            DispatchQueue.main.async {
+                EasyDialog.Builder(self)
+                .title(title: NSLocalizedString("NovelDetailViewController_SpeechModAdded", comment: "この小説用に以下の読み替えを登録しました"))
+                .textView(content: message.trimmingCharacters(in: .whitespacesAndNewlines), heightMultiplier: 0.7)
+                .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                    dialog.dismiss(animated: true, completion: nil)
+                }).build().show()
+            }
+        })
+        settingSection <<< ButtonRow() {
+            $0.title = NSLocalizedString("NovelDetailViewController_AddToFolderButtonTitle", comment: "フォルダへ分類")
+        }.onCellSelection({ (_, _) in
+            let nextViewController = AssignNovelFolderViewController()
+            nextViewController.targetNovelID = self.novelID
+            self.navigationController?.pushViewController(nextViewController, animated: true)
+        }).cellUpdate({ (cell, button) in
+            cell.textLabel?.textAlignment = .left
+            cell.accessoryType = .disclosureIndicator
+            cell.editingAccessoryType = cell.accessoryType
+            cell.textLabel?.textColor = nil
+        })
+        settingSection <<< CheckRow() {
+            $0.title = NSLocalizedString("NovelDetailViewController_LikeLevelStepperRowTitle", comment: "お気に入り")
+            $0.value = novel.likeLevel > 0
+        }.onChange({ (row) in
+            guard let value = row.value, let novel = RealmNovel.SearchNovelFrom(novelID: self.novelID) else { return }
+            RealmUtil.Write(block: { (relam) in
+                if value {
+                    novel.likeLevel = 1
+                }else{
+                    novel.likeLevel = 0
+                }
+            })
+        })
 
         form +++ settingSection
     }

@@ -253,6 +253,12 @@
 "NovelDetailViewController_SpeakerAlertRowTitle" = "標準の話者";
 "NovelDetailViewController_DetailSectionTitle" = "概要";
 "NovelDetailViewController_SettingSectionTitle" = "この小説専用の設定";
+"NovelDetailViewController_AddRubyToSpeechModButtonTitle" = "(実験的機能)小説中に出てくるルビ表記をこの小説用の読みの修正に上書き追加する";
+"NovelDetailViewController_CanNotGetNovelData" = "小説本文データの抽出に失敗しました。";
+"NovelDetailViewController_RubyNotFound" = "有効なルビ表記を発見できませんでした。";
+"NovelDetailViewController_SpeechModAdded" = "この小説用に以下の読み替えを登録しました";
+"NovelDetailViewController_AddToFolderButtonTitle" = "フォルダへ分類";
+"NovelDetailViewController_LikeLevelStepperRowTitle" = "お気に入り";
 
 "EditUserBookViewController_PleaseInputTitle" = "タイトルを入力してください";
 "EditUserBookViewController_PleaseInputBookBody" = "本文を入力してください";
@@ -448,6 +454,10 @@
 "NovelDownloader_FailedByNoRealmNovel" = "小説が本棚に登録されていなかったため、ダウンロードを終了します。";
 "NovelDownloader_InvalidNovelID" = "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。";
 
+"AssignNovelFolderViewController_Title" = "フォルダへ分類";
+"AssignNovelFolderViewController_CreateNewTagTitle" = "新規フォルダ作成";
+"AssignNovelFolderViewController_CreateNewTagPlaceHolder" = "同じ名前のフォルダは生成できません";
+"AssignNovelFolderViewController_DeleteSwipeActionTitle" = "削除";
 
 "BookShelfRATreeViewController_Title" = "本棚";
 "BookShelfRATreeViewController_UpTo1DayAgo" = "1日前まで";
@@ -458,6 +468,9 @@
 "BookShelfRATreeViewController_BeforeThat" = "それ以前";
 "BookShelfRATreeViewController_UnknownWriter" = "(作者名不明)";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseNoStory" = "本文が何も読み込まれていないようです。この小説の再ダウンロードを試みますか？";
+"BookShelfRATreeViewController_BookshelfNoListed" = "(未分類)";
+"BookShelfRATreeViewController_SortTypeBookshelf" = "自作フォルダ順";
+"BookShelfRATreeViewController_SortTypeUpdateDateWithFilder" = "最終ダウンロード日時順(フォルダ分類版)";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 

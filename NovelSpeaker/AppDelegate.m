@@ -116,6 +116,9 @@ void uncaughtExceptionHandler(NSException *exception)
     NSLog(@"application will enter foreground.");
     // badge clear.
     [[NovelDownloadQueue shared] ClearDownloadCountBadge];
+    if ([RealmUtil IsUseCloudRealm]) {
+        [RealmUtil CloudPull];
+    }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -131,6 +134,9 @@ void uncaughtExceptionHandler(NSException *exception)
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     NSLog(@"application will terminate");
     [[GlobalDataSingleton GetInstance] saveContext];
+    if ([RealmUtil IsUseCloudRealm]) {
+        [RealmUtil CloudPull];
+    }
 }
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options{
