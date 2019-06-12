@@ -12,8 +12,8 @@ import CloudKit
 import UIKit
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 0
-    static let currentSchemaVersionForLocalOnly : UInt64 = 0
+    static let currentSchemaVersion : UInt64 = 1
+    static let currentSchemaVersionForLocalOnly : UInt64 = 1
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
@@ -561,8 +561,8 @@ protocol CanWriteIsDeleted {
     @objc dynamic var contentZiped = Data()
     @objc dynamic var readLocation = 0
     @objc dynamic var url = ""
-    @objc dynamic var lastReadDate = Date(timeIntervalSince1970: 0)
-    @objc dynamic var downloadDate = Date()
+    //@objc dynamic var lastReadDate = Date(timeIntervalSince1970: 0)
+    //@objc dynamic var downloadDate = Date()
     @objc dynamic var subtitle = ""
 
     var linkedQueues : [RealmSpeechQueue]? {
@@ -675,7 +675,7 @@ protocol CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        return ["novelID", "chapterNumber", "downloadDate", "lastReadDate", "isDeleted"]
+        return ["novelID", "chapterNumber", "isDeleted"]
     }
 }
 extension RealmStory: CKRecordConvertible {
@@ -702,6 +702,13 @@ extension RealmStory: CanWriteIsDeleted {
     @objc dynamic var likeLevel : Int8 = 0
     @objc dynamic var isNeedSpeechAfterDelete : Bool = false
     @objc dynamic var defaultSpeakerID : String = ""
+
+    // RealmStory等 に保存していて参照時にはそこから生成しようと思ったのだけれどアホみたいに遅いのでこちらに保存するようにします。
+    @objc dynamic var m_lastChapterStoryID : String = ""
+    @objc dynamic var lastDownloadDate : Date = Date()
+    @objc dynamic var m_readingChapterStoryID : String = ""
+    @objc dynamic var lastReadDate : Date = Date(timeIntervalSince1970: 0)
+    let downloadDateArray = List<Date>()
 
     var type : NovelType {
         get {
@@ -784,12 +791,16 @@ extension RealmStory: CanWriteIsDeleted {
     
     var lastChapter : RealmStory? {
         get {
-            return linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last
+            return RealmStory.SearchStoryFrom(storyID: m_lastChapterStoryID)
         }
     }
     var lastChapterNumber : Int? {
         get {
-            return lastChapter?.chapterNumber
+            let chapterNumber = RealmStory.StoryIDToChapterNumber(storyID: m_lastChapterStoryID)
+            if chapterNumber <= 0 {
+                return nil
+            }
+            return chapterNumber
         }
     }
     var lastDownloadURL : String? {
@@ -797,28 +808,13 @@ extension RealmStory: CanWriteIsDeleted {
             return lastChapter?.url
         }
     }
-    var lastDownloadDate: Date? {
-        get {
-            return linkedStorys?.sorted(byKeyPath: "downloadDate", ascending: true).last?.downloadDate
-        }
-    }
     var readingChapter: RealmStory? {
         get {
-            return linkedStorys?.sorted(byKeyPath: "lastReadDate", ascending: true).last
-        }
-    }
-    var lastReadDate: Date? {
-        get {
-            return readingChapter?.lastReadDate
+            return RealmStory.SearchStoryFrom(storyID: m_readingChapterStoryID)
         }
     }
     var isNewFlug: Bool {
-        if let dd = lastDownloadDate {
-            if let lr = lastReadDate {
-                return dd > lr
-            }
-        }
-        return false
+        return lastDownloadDate > lastReadDate
     }
     
     var urlSecret: [String] {
@@ -845,24 +841,10 @@ extension RealmStory: CanWriteIsDeleted {
     // 最初に1000件とかダウンロードされた小説が既に更新終了していたとしても、10件分しか効果がないので10日経つと1に、100日経てば0.1になる。
     var updateFrequency: Double {
         get {
-            guard let storys = linkedStorys?.sorted(byKeyPath: "downloadDate", ascending: true) else {
+            guard let targetDownloadDate = downloadDateArray.suffix(10).first else {
                 return 1.0 / 30.0 // 未ダウンロードのものは30日に1度の頻度とする。
             }
-            let count:Double
-            let targetStory:RealmStory?
-            if storys.count >= 10 {
-                count = 10.0
-                targetStory = storys[storys.count - 10]
-            }else{
-                count = Double(storys.count)
-                targetStory = storys.first
-            }
-            let targetDownloadDate:Date
-            if let story = targetStory {
-                targetDownloadDate = story.downloadDate
-            }else{
-                targetDownloadDate = Date(timeIntervalSinceNow: -60*60*24*30)
-            }
+            let count = downloadDateArray.suffix(10).count
             let diffTimeInSec = Date().timeIntervalSince1970 - targetDownloadDate.timeIntervalSince1970
             return Double(count) / (diffTimeInSec / (60.0*60.0*24))
         }
@@ -895,35 +877,40 @@ extension RealmStory: CanWriteIsDeleted {
         let novel = RealmNovel()
         novel.type = .UserCreated
         novel.title = title
-        RealmUtil.Write { (realm) in
-            realm.add(novel, update: .modified)
-        }
+        novel.lastReadDate = Date(timeIntervalSince1970: 1)
+        novel.lastDownloadDate = Date()
+        novel.downloadDateArray.append(novel.lastDownloadDate)
         let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
         story.content = content
-        story.lastReadDate = Date(timeIntervalSinceNow: -60)
         RealmUtil.LocalOnlyWrite { (realm) in
             realm.add(story, update: .modified)
+        }
+        novel.m_lastChapterStoryID = story.id
+        RealmUtil.Write { (realm) in
+            realm.add(novel, update: .modified)
         }
     }
     static func AddNewNovelWithMultiplText(contents:[String], title:String) {
         let novel = RealmNovel()
         novel.type = .UserCreated
         novel.title = title
-        RealmUtil.Write { (realm) in
-            realm.add(novel, update: .modified)
-        }
+        novel.m_lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: contents.count)
         var chapterNumber = 1
         for content in contents {
             if content.count <= 0 { continue }
             let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: chapterNumber)
             story.content = content
             if chapterNumber != 1 {
-                story.lastReadDate = Date(timeIntervalSinceNow: -60)
+                //story.lastReadDate = Date(timeIntervalSinceNow: -60)
             }
             RealmUtil.LocalOnlyWrite { (realm) in
                 realm.add(story, update: .modified)
             }
             chapterNumber += 1
+            novel.downloadDateArray.append(Date())
+        }
+        RealmUtil.Write { (realm) in
+            realm.add(novel, update: .modified)
         }
     }
     
@@ -945,6 +932,7 @@ extension RealmStory: CanWriteIsDeleted {
             novel.writer = author
         }
         novel.type = .URL
+        novel.m_lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1)
         RealmUtil.Write { (realm) in
             realm.add(novel, update: .modified)
         }
@@ -957,7 +945,7 @@ extension RealmStory: CanWriteIsDeleted {
             story.url = storyUrl
         }
         RealmUtil.LocalOnlyWrite { (realm) in
-            story.lastReadDate = Date(timeIntervalSince1970: 60)
+            //story.lastReadDate = Date(timeIntervalSince1970: 60)
             realm.add(story, update: .modified)
         }
         if let tagArray = tag {
@@ -1452,6 +1440,7 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     @objc dynamic var defaultDisplaySettingID = ""
     @objc dynamic var defaultSpeakerID = ""
     @objc dynamic var defaultSpeechOverrideSettingID = ""
+    @objc dynamic var currentReadingNovelID = ""
     
     var bookShelfSortType : NarouContentSortType {
         get {
@@ -1586,19 +1575,11 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
         UIScrollView.appearance().indicatorStyle = UIScrollView.IndicatorStyle.black
     }
     static func GetLastReadStory() -> RealmStory? {
-        return autoreleasepool {
-            //guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
-            realm.refresh()
-            return realm.objects(RealmStory.self).sorted(byKeyPath: "lastReadDate", ascending: true).last
-        }
+        return GetLastReadNovel()?.readingChapter
     }
     static func GetLastReadNovel() -> RealmNovel? {
-        return autoreleasepool {
-            guard let realm = try? RealmUtil.GetRealm(), let lastReadStory = GetLastReadStory() else { return nil }
-            realm.refresh()
-            return realm.object(ofType: RealmNovel.self, forPrimaryKey: lastReadStory.novelID)
-        }
+        guard let globalState = RealmGlobalState.GetInstance() else { return nil }
+        return RealmNovel.SearchNovelFrom(novelID: globalState.currentReadingNovelID)
     }
 
     static public func GetInstance() -> RealmGlobalState? {

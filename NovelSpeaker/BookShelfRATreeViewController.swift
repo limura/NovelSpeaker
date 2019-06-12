@@ -129,8 +129,17 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func registObserver() {
         guard let novelArray = RealmNovel.GetAllObjects() else { return }
         novelArrayNotificationToken = novelArray.observe { (change) in
-            DispatchQueue.main.async {
-                self.reloadAllData()
+            switch change {
+            case .initial(_):
+                break
+            case .update(_, let deletions, let insertions, _):
+                if deletions.count > 0 || insertions.count > 0 {
+                    DispatchQueue.main.async {
+                        self.reloadAllData()
+                    }
+                }
+            case .error(_):
+                break
             }
         }
     }
@@ -148,15 +157,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return allNovels.sorted(by: { (a, b) -> Bool in
                 let ad = a.lastDownloadDate
                 let bd = b.lastDownloadDate
-                if let ad = ad, let bd = bd {
-                    return ad < bd
-                } else if ad != nil {
-                    return false
-                } else if bd != nil {
-                    return false
-                } else {
-                    return a.novelID < b.novelID
-                }
+                return ad > bd
             })
         case .title:
             return Array(allNovels.sorted(byKeyPath: "title", ascending: false))
@@ -203,12 +204,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             folder.title = filter.title
             folder.childrens = []
             for novel in novels {
-                if let lastDownloadDate = novel.lastDownloadDate {
-                    if lastDownloadDate <= prevDate && lastDownloadDate > filter.date {
-                        let data = BookShelfRATreeViewCellData()
-                        data.novel = novel
-                        folder.childrens?.append(data)
-                    }
+                let lastDownloadDate = novel.lastDownloadDate
+                if lastDownloadDate <= prevDate && lastDownloadDate > filter.date {
+                    let data = BookShelfRATreeViewCellData()
+                    data.novel = novel
+                    folder.childrens?.append(data)
                 }
             }
             result.append(folder)

@@ -48,6 +48,15 @@ class CoreDataToRealmTool: NSObject {
                 }
             }
         }
+        if let content = globalDataSingleton.getCurrentReadingContent() {
+            if content.isURLContent(), let url = content.ncode {
+                realmState.currentReadingNovelID = url
+            }else if content.isUserCreatedContent(), let ncode = content.ncode, ncode.hasPrefix("_u") {
+                realmState.currentReadingNovelID = "https://example.com/" + ncode
+            }else if let ncode = content.ncode{
+                realmState.currentReadingNovelID = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: 1, end: false)
+            }
+        }
         realmState.readedPrivacyPolicy = globalDataSingleton.getReadedPrivacyPolicy()
         realmState.isOpenRecentNovelInStartTime = globalDataSingleton.isOpenRecentNovelInStartTime()
         realmState.isLicenseReaded = globalDataSingleton.isLicenseReaded()
@@ -279,29 +288,30 @@ class CoreDataToRealmTool: NSObject {
             if let title = novelCoreData.title {
                 novel.title = title
             }
+            if let currentReadingChapter = novelCoreData.currentReadingStory?.chapter_number as? Int {
+                novel.m_readingChapterStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: currentReadingChapter)
+            }
+            // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
+            if let newFlug = novelCoreData.is_new_flug as? Bool {
+                if newFlug {
+                    //lastStory.downloadDate = Date(timeIntervalSinceNow: 1.1)
+                    //realm.add(lastStory, update: .modified)
+                    novel.lastDownloadDate = Date(timeIntervalSinceNow: 1)
+                    novel.lastReadDate = Date(timeIntervalSinceNow: 0)
+                }else{
+                    novel.lastDownloadDate = Date(timeIntervalSinceNow: 0)
+                    novel.lastReadDate = Date(timeIntervalSinceNow: 1)
+                }
+            }
 
             RealmUtil.LocalOnlyWrite { (realm) in
-                // 読んでいる章が設定されていたらその章の読んだ日時を新しくすることで最後に読んだ章をそこにする
-                if let currentReadingChapter = novelCoreData.currentReadingStory?.chapter_number as? Int {
-                    if let readingStory = novel.linkedStorys?.filter("chapterNumber = %@", currentReadingChapter).first {
-                        readingStory.lastReadDate = Date(timeIntervalSinceNow: 1)
-                        realm.add(readingStory, update: .modified)
-                    }
-                }
-                
                 // chapterNumber が最後の章に関しては、
                 if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
                     // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する
                     if novelCoreData.isURLContent(), let lastDownloadURL = novelCoreData.userid {
                         lastStory.url = lastDownloadURL
                     }
-                    // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
-                    if let newFlug = novelCoreData.is_new_flug as? Bool {
-                        if newFlug {
-                            lastStory.downloadDate = Date(timeIntervalSinceNow: 1.1)
-                            realm.add(lastStory, update: .modified)
-                        }
-                    }
+                    novel.m_lastChapterStoryID = lastStory.id
                 }
             }
             //print("novel add: novelID: \(novel.novelID), url: \(novel.url), coredata.ncode: \(novelCoreData.ncode ?? "unknown"), coredata.userid: \(novelCoreData.userid ?? "unknown"), isURLContent: \(novelCoreData.isURLContent() ? "true" : "false"), isUserCreatedContent: \(novelCoreData.isUserCreatedContent() ? "true" : "false")")

@@ -244,6 +244,7 @@ class NovelSpeakerUtility: NSObject {
     }
     
     // タグとして使われる文字として混ざってると変かなという文字を削除します。
+    // TODO: String.applyingTransform() で全角から半角にできるみたいなのだけれど、カタカナまで半角にされてしまうのでどうしたもんか
     static func CleanTagString(tag:String) -> String {
         return tag.replacingOccurrences(of: "「", with: "").replacingOccurrences(of: "」", with: "").replacingOccurrences(of: "\"", with: "").replacingOccurrences(of: "”", with: "").replacingOccurrences(of: "#", with: "").replacingOccurrences(of: "＃", with: "")
     }
@@ -632,6 +633,35 @@ class NovelSpeakerUtility: NSObject {
             realmNovel.novelID = urlString
         }
         let novelID = realmNovel.novelID
+        let currentReadingChapterNumber:Int
+        if let current_reading_chapter_number = novel.object(forKey: "current_reading_chapter_number") as? NSNumber {
+            currentReadingChapterNumber = current_reading_chapter_number.intValue
+            realmNovel.m_readingChapterStoryID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: currentReadingChapterNumber)
+        }else{
+            currentReadingChapterNumber = 0
+        }
+        let isNewFlug:Bool
+        if let is_new_flug = novel.object(forKey: "is_new_flug") as? NSNumber {
+            isNewFlug = is_new_flug.boolValue
+        }else{
+            isNewFlug = false
+        }
+        if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
+            realmNovel.lastDownloadDate = lastDownloadDate
+            if isNewFlug {
+                realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(-1)
+            }else{
+                realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(1)
+            }
+        }else{
+            if isNewFlug {
+                realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: 0)
+                realmNovel.lastReadDate = Date(timeIntervalSinceNow: -1)
+            }else{
+                realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
+                realmNovel.lastReadDate = Date(timeIntervalSinceNow: 0)
+            }
+        }
         RealmUtil.Write { (realm) in
             realmNovel.url = urlString
             realmNovel.type = .URL
@@ -649,7 +679,13 @@ class NovelSpeakerUtility: NSObject {
                 }
             }
         }
-        if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true), let is_new_flug = novel.object(forKey: "is_new_flug") as? NSNumber, let end = novel.object(forKey: "end") as? NSNumber, let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let current_reading_chapter_number = novel.object(forKey: "current_reading_chapter_number") as? NSNumber, let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
+        if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true), let end = novel.object(forKey: "end") as? NSNumber {
+            let currentReadingChapterReadLocation:Int
+            if let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
+                currentReadingChapterReadLocation = current_reading_chapter_read_location.intValue
+            }else{
+                currentReadingChapterReadLocation = 0
+            }
             var no = 0
             repeat {
                 no += 1
@@ -659,20 +695,17 @@ class NovelSpeakerUtility: NSObject {
                 RealmUtil.LocalOnlyWrite { (realm) in
                     story.content = content
                     story.url = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: no, end: end.boolValue)
-                    if current_reading_chapter_number.intValue == no {
-                        story.lastReadDate = Date()
-                        story.readLocation = current_reading_chapter_read_location.intValue
-                    }else{
-                        story.lastReadDate = Date(timeIntervalSince1970: 0)
-                    }
-                    if is_new_flug.boolValue {
-                        story.downloadDate = Date(timeIntervalSinceNow: 60)
-                    }else{
-                        story.downloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) ?? Date(timeIntervalSinceNow: -90)
+                    if currentReadingChapterNumber == no {
+                        story.readLocation = currentReadingChapterReadLocation
                     }
                     realm.add(story, update: .modified)
                 }
             }while(true)
+            RealmUtil.Write { (realm) in
+                for _ in 0..<no {
+                    realmNovel.downloadDateArray.append(realmNovel.lastDownloadDate)
+                }
+            }
         }else{
             NovelDownloadQueue.shared.addQueue(novelID: novelID)
         }
@@ -687,19 +720,49 @@ class NovelSpeakerUtility: NSObject {
             realmNovel.type = .URL
         }
         let novelID = realmNovel.novelID
+        let currentReadingChapterNumber:Int
+        if let current_reading_chapter_number = (novel.object(forKey: "current_reading_chapter_number") as? NSNumber)?.intValue {
+            currentReadingChapterNumber = current_reading_chapter_number
+        }else{
+            currentReadingChapterNumber = 0
+        }
+        let isNewFlug:Bool
+        if let is_new_flug = novel.object(forKey: "is_new_flug") as? NSNumber {
+            isNewFlug = is_new_flug.boolValue
+        }else{
+            isNewFlug = false
+        }
+        if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
+            realmNovel.lastDownloadDate = lastDownloadDate
+            if isNewFlug {
+                realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(-1)
+            }else{
+                realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(1)
+            }
+        }else{
+            if isNewFlug {
+                realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: 0)
+                realmNovel.lastReadDate = Date(timeIntervalSinceNow: -1)
+            }else{
+                realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
+                realmNovel.lastReadDate = Date(timeIntervalSinceNow: 0)
+            }
+        }
         RealmUtil.Write { (realm) in
             if let title = novel.object(forKey: "title") as? String {
                 realmNovel.title = title
             }
             if let secret = novel.object(forKey: "secret") as? String {
-                realmNovel.m_urlSecret = secret
+                realmNovel.m_urlSecret = NiftyUtility.stringDecrypt(secret, key: url)
             }
             if let author = novel.object(forKey: "author") as? String {
                 realmNovel.writer = author
             }
+            if currentReadingChapterNumber > 0 {
+                realmNovel.m_readingChapterStoryID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: currentReadingChapterNumber)
+            }
             realm.add(realmNovel, update: .modified)
         }
-        let current_reading_chapter_number = (novel.object(forKey: "current_reading_chapter_number") as? NSNumber)?.intValue ?? -1
         if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true) {
             var no = 0
             repeat {
@@ -709,20 +772,17 @@ class NovelSpeakerUtility: NSObject {
                 let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: no) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: no)
                 RealmUtil.LocalOnlyWrite { (realm) in
                     story.content = content
-                    if current_reading_chapter_number == no {
-                        story.lastReadDate = Date()
-                        if let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
-                            story.readLocation = current_reading_chapter_read_location.intValue
-                        }
-                    }else{
-                        story.lastReadDate = Date(timeIntervalSince1970: 0)
-                    }
-                    if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let novelUpdatedAt = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
-                        story.downloadDate = novelUpdatedAt
+                    if currentReadingChapterNumber == no, let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
+                        story.readLocation = current_reading_chapter_read_location.intValue
                     }
                     realm.add(story, update: .modified)
                 }
             }while(true)
+            RealmUtil.Write { (realm) in
+                for _ in 0..<no {
+                    realmNovel.downloadDateArray.append(realmNovel.lastDownloadDate)
+                }
+            }
             no -= 1
             if no > 0, let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: no), let last_download_url = novel.object(forKey: "last_download_url") as? String {
                 RealmUtil.LocalOnlyWrite { (realm) in
@@ -807,9 +867,17 @@ class NovelSpeakerUtility: NSObject {
         if let novelArray = toplevelDictionary.object(forKey: "bookshelf") as? NSArray {
             RestoreBookshelf_V_1_0_0(novelArray:novelArray, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
         }
-        if let targetNovelID = currentReadingNovelID, let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let readingChapter = novel.readingChapter {
-            RealmUtil.LocalOnlyWrite { (realm) in
-                readingChapter.lastReadDate = Date(timeIntervalSinceNow: +60)
+        if let targetNovelID = currentReadingNovelID, let globalState = RealmGlobalState.GetInstance() {
+            let coreDataNarouContent = NarouContentCacheData()
+            coreDataNarouContent.ncode = targetNovelID
+            RealmUtil.Write { (realm) in
+                if coreDataNarouContent.isURLContent() {
+                    globalState.currentReadingNovelID = targetNovelID
+                }else if targetNovelID.hasPrefix("_u") {
+                    globalState.currentReadingNovelID = "https://example.com/" + targetNovelID
+                }else{
+                    globalState.currentReadingNovelID = CoreDataToRealmTool.NcodeToUrlString(ncode: targetNovelID, no: 1, end: false)
+                }
             }
         }
         return true
@@ -836,9 +904,17 @@ class NovelSpeakerUtility: NSObject {
         if let novelArray = toplevelDictionary.object(forKey: "bookshelf") as? NSArray {
             RestoreBookshelf_V_1_0_0(novelArray:novelArray, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
         }
-        if let targetNovelID = currentReadingNovelID, let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let readingChapter = novel.readingChapter {
-            RealmUtil.LocalOnlyWrite { (realm) in
-                readingChapter.lastReadDate = Date(timeIntervalSinceNow: +60)
+        if let targetNovelID = currentReadingNovelID, let globalState = RealmGlobalState.GetInstance() {
+            let coreDataNarouContent = NarouContentCacheData()
+            coreDataNarouContent.ncode = targetNovelID
+            RealmUtil.Write { (realm) in
+                if coreDataNarouContent.isURLContent() {
+                    globalState.currentReadingNovelID = targetNovelID
+                }else if targetNovelID.hasPrefix("_u") {
+                    globalState.currentReadingNovelID = "https://example.com/" + targetNovelID
+                }else{
+                    globalState.currentReadingNovelID = CoreDataToRealmTool.NcodeToUrlString(ncode: targetNovelID, no: 1, end: false)
+                }
             }
         }
         return true
@@ -848,22 +924,23 @@ class NovelSpeakerUtility: NSObject {
             guard let speechMod = speechModDic as? NSDictionary,
                 let before = before as? String,
                 let after = speechMod.object(forKey: "afterString") as? String,
-                let createdDateString = speechMod.object(forKey: "createdDate") as? String,
-                let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
-                let isUseRegularExpression = speechMod.object(forKey: "isUseRegularExpression") as? NSNumber,
-                let targetNovelIDArray = speechMod.object(forKey: "targetNovelIDArray") as? NSArray else { continue }
+                let isUseRegularExpression = speechMod.object(forKey: "isUseRegularExpression") as? NSNumber else { continue }
             let mod = RealmSpeechModSetting.SearchFrom(beforeString: before) ?? RealmSpeechModSetting()
             if mod.before != before {
                 mod.before = before
             }
             RealmUtil.Write { (realm) in
                 mod.after = after
-                mod.createdDate = createdDate
+                if let createdDateString = speechMod.object(forKey: "createdDate") as? String, let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                    mod.createdDate = createdDate
+                }
                 mod.isUseRegularExpression = isUseRegularExpression.boolValue
                 mod.targetNovelIDArray.removeAll()
-                for novelID in targetNovelIDArray {
-                    if let novelID = novelID as? String, novelID.count > 0 {
-                        mod.targetNovelIDArray.append(novelID)
+                if let targetNovelIDArray = speechMod.object(forKey: "targetNovelIDArray") as? NSArray {
+                    for novelID in targetNovelIDArray {
+                        if let novelID = novelID as? String, novelID.count > 0 {
+                            mod.targetNovelIDArray.append(novelID)
+                        }
                     }
                 }
             }
@@ -874,16 +951,17 @@ class NovelSpeakerUtility: NSObject {
         for speechWaitDic in waitArray {
             guard let speechWait = speechWaitDic as? NSDictionary,
                 let delayTimeInSec = speechWait.object(forKey: "delayTimeInSec") as? NSNumber,
-                let targetText = speechWait.object(forKey: "targetText") as? String,
-                let createdDateString = speechWait.object(forKey: "createdDate") as? String,
-                let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) else { return }
+                let targetText = speechWait.object(forKey: "targetText") as? String else { return }
             let speechWaitConfig = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) ?? RealmSpeechWaitConfig()
             if speechWaitConfig.targetText != targetText {
                 speechWaitConfig.targetText = targetText
             }
             RealmUtil.Write { (realm) in
                 speechWaitConfig.delayTimeInSec = delayTimeInSec.floatValue
-                speechWaitConfig.createdDate = createdDate
+                if let createdDateString = speechWait.object(forKey: "createdDate") as? String,
+                    let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                    speechWaitConfig.createdDate = createdDate
+                }
                 realm.add(speechWaitConfig, update: .modified)
             }
         }
@@ -893,17 +971,9 @@ class NovelSpeakerUtility: NSObject {
         for speaker in speakerArray {
             guard let speaker = speaker as? NSDictionary,
                 let name = speaker.object(forKey: "name") as? String,
-                let pitch = speaker.object(forKey: "pitch") as? NSNumber,
-                let rate = speaker.object(forKey: "rate") as? NSNumber,
-                let lmd = speaker.object(forKey: "lmd") as? NSNumber,
-                let acc = speaker.object(forKey: "acc") as? NSNumber,
-                let base = speaker.object(forKey: "base") as? NSNumber,
-                let volume = speaker.object(forKey: "volume") as? NSNumber,
                 let type = speaker.object(forKey: "type") as? String,
                 let voiceIdentifier = speaker.object(forKey: "voiceIdentifier") as? String,
-                let locale = speaker.object(forKey: "locale") as? String,
-                let createdDateString = speaker.object(forKey: "createdDate") as? String,
-                let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) else { continue }
+                let locale = speaker.object(forKey: "locale") as? String else { continue }
             let speakerSetting:RealmSpeakerSetting
             if name == defaultSpeakerSettingID {
                 guard let defaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker else { continue }
@@ -915,16 +985,31 @@ class NovelSpeakerUtility: NSObject {
                 }
             }
             RealmUtil.Write { (realm) in
-                speakerSetting.pitch = pitch.floatValue
-                speakerSetting.rate = rate.floatValue
-                speakerSetting.lmd = lmd.floatValue
-                speakerSetting.acc = acc.floatValue
-                speakerSetting.base = base.int32Value
-                speakerSetting.volume = volume.floatValue
+                if let pitch = speaker.object(forKey: "pitch") as? NSNumber {
+                    speakerSetting.pitch = pitch.floatValue
+                }
+                if let rate = speaker.object(forKey: "rate") as? NSNumber {
+                    speakerSetting.rate = rate.floatValue
+                }
+                if let lmd = speaker.object(forKey: "lmd") as? NSNumber {
+                    speakerSetting.lmd = lmd.floatValue
+                }
+                if let acc = speaker.object(forKey: "acc") as? NSNumber {
+                    speakerSetting.acc = acc.floatValue
+                }
+                if let base = speaker.object(forKey: "base") as? NSNumber {
+                    speakerSetting.base = base.int32Value
+                }
+                if let volume = speaker.object(forKey: "volume") as? NSNumber {
+                    speakerSetting.volume = volume.floatValue
+                }
                 speakerSetting.type = type
                 speakerSetting.voiceIdentifier = voiceIdentifier
                 speakerSetting.locale = locale
-                speakerSetting.createdDate = createdDate
+                if let createdDateString = speaker.object(forKey: "createdDate") as? String,
+                    let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                    speakerSetting.createdDate = createdDate
+                }
                 realm.add(speakerSetting, update: .modified)
             }
         }
@@ -936,10 +1021,7 @@ class NovelSpeakerUtility: NSObject {
                 let name = sectionConfigDic.object(forKey: "name") as? String,
                 let startText = sectionConfigDic.object(forKey: "startText") as? String,
                 let endText = sectionConfigDic.object(forKey: "endText") as? String,
-                let createdDateString = sectionConfigDic.object(forKey: "createdDate") as? String,
-                let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
-                let speakerID = sectionConfigDic.object(forKey: "speakerID") as? String,
-                let targetNovelIDArray = sectionConfigDic.object(forKey: "targetNovelIDArray") as? NSArray
+                let speakerID = sectionConfigDic.object(forKey: "speakerID") as? String
                 else { continue }
             let sectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) ?? RealmSpeechSectionConfig()
             if sectionConfig.name != name {
@@ -948,12 +1030,17 @@ class NovelSpeakerUtility: NSObject {
             RealmUtil.Write { (realm) in
                 sectionConfig.startText = startText
                 sectionConfig.endText = endText
-                sectionConfig.createdDate = createdDate
+                if let createdDateString = sectionConfigDic.object(forKey: "createdDate") as? String,
+                    let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                    sectionConfig.createdDate = createdDate
+                }
                 sectionConfig.speakerID = speakerID
                 sectionConfig.targetNovelIDArray.removeAll()
-                for novel in targetNovelIDArray {
-                    guard let novel = novel as? String else { continue }
-                    sectionConfig.targetNovelIDArray.append(novel)
+                if let targetNovelIDArray = sectionConfigDic.object(forKey: "targetNovelIDArray") as? NSArray {
+                    for novel in targetNovelIDArray {
+                        guard let novel = novel as? String else { continue }
+                        sectionConfig.targetNovelIDArray.append(novel)
+                    }
                 }
             }
         }
@@ -961,13 +1048,7 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreDisplaySettings_V_2_0_0(displaySettingArray:NSArray,  defaultSpeakerSettingID:String) {
         for displaySettingObj in displaySettingArray {
             guard let displaySettingDic = displaySettingObj as? NSDictionary,
-                let textSizeValue = displaySettingDic.object(forKey: "textSizeValue") as? NSNumber,
-                let fontID = displaySettingDic.object(forKey: "fontID") as? String,
-                let name = displaySettingDic.object(forKey: "name") as? String,
-                let isVertical = displaySettingDic.object(forKey: "isVertical") as? NSNumber,
-                let createdDateString = displaySettingDic.object(forKey: "createdDate") as? String,
-                let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
-                let targetNovelIDArray = displaySettingDic.object(forKey: "targetNovelIDArray") as? NSArray else { continue }
+                let name = displaySettingDic.object(forKey: "name") as? String else { continue }
             let setting:RealmDisplaySetting
             if name == defaultSpeakerSettingID {
                 guard let defaultSetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { continue }
@@ -979,14 +1060,25 @@ class NovelSpeakerUtility: NSObject {
                 }
             }
             RealmUtil.Write { (realm) in
-                setting.textSizeValue = textSizeValue.floatValue
-                setting.fontID = fontID
-                setting.isVertical = isVertical.boolValue
-                setting.createdDate = createdDate
+                if let textSizeValue = displaySettingDic.object(forKey: "textSizeValue") as? NSNumber {
+                    setting.textSizeValue = textSizeValue.floatValue
+                }
+                if let fontID = displaySettingDic.object(forKey: "fontID") as? String {
+                    setting.fontID = fontID
+                }
+                if let isVertical = displaySettingDic.object(forKey: "isVertical") as? NSNumber {
+                    setting.isVertical = isVertical.boolValue
+                }
+                if let createdDateString = displaySettingDic.object(forKey: "createdDate") as? String,
+                    let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                    setting.createdDate = createdDate
+                }
                 setting.targetNovelIDArray.removeAll()
-                for novelID in targetNovelIDArray {
-                    guard let novelID = novelID as? String else { continue }
-                    setting.targetNovelIDArray.append(novelID)
+                if let targetNovelIDArray = displaySettingDic.object(forKey: "targetNovelIDArray") as? NSArray  {
+                    for novelID in targetNovelIDArray {
+                        guard let novelID = novelID as? String else { continue }
+                        setting.targetNovelIDArray.append(novelID)
+                    }
                 }
                 realm.add(setting, update: .modified)
             }
@@ -996,19 +1088,22 @@ class NovelSpeakerUtility: NSObject {
         for tagDic in novelTagArray {
             guard let tagDic = tagDic as? NSDictionary,
                 let name = tagDic.object(forKey: "name") as? String,
-                let type = tagDic.object(forKey: "type") as? String,
-                let hint = tagDic.object(forKey: "hint") as? String,
-                let createdDateString = tagDic.object(forKey: "createdDate") as? String,
-                let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
-                let targetNovelIDArray = tagDic.object(forKey: "targetNovelIDArray") as? NSArray else { continue }
+                let type = tagDic.object(forKey: "type") as? String else { continue }
             let tag = RealmNovelTag.SearchWith(name: name, type: type) ?? RealmNovelTag.CreateNewTag(name: name, type: type)
             RealmUtil.Write { (realm) in
-                tag.createdDate = createdDate
+                if let createdDateString = tagDic.object(forKey: "createdDate") as? String,
+                    let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString){
+                    tag.createdDate = createdDate
+                }
+                if let hint = tagDic.object(forKey: "hint") as? String {
+                    tag.hint = hint
+                }
                 tag.targetNovelIDArray.removeAll()
-                tag.hint = hint
-                for novelID in targetNovelIDArray {
-                    guard let novelID = novelID as? String else { continue }
-                    tag.targetNovelIDArray.append(novelID)
+                if let targetNovelIDArray = tagDic.object(forKey: "targetNovelIDArray") as? NSArray {
+                    for novelID in targetNovelIDArray {
+                        guard let novelID = novelID as? String else { continue }
+                        tag.targetNovelIDArray.append(novelID)
+                    }
                 }
                 realm.add(tag, update: .modified)
             }
@@ -1018,28 +1113,34 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreSpeechOverrideSettings_V_2_0_0(speechOverrideSettingArray:NSArray, defaultSpeechOverrideSettingID:String) {
         for overrideSettingDic in speechOverrideSettingArray {
             guard let overrideSettingDic = overrideSettingDic as? NSDictionary,
-                let name = overrideSettingDic.object(forKey: "name") as? String,
-                let createdDateString = overrideSettingDic.object(forKey: "createdDate") as? String,
-                let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
-                let repeatSpeechType = overrideSettingDic.object(forKey: "repeatSpeechType") as? NSNumber,
-                let isOverrideRubyIsEnabled = overrideSettingDic.object(forKey: "isOverrideRubyIsEnabled") as? NSNumber,
-                let notRubyCharactorStringArray = overrideSettingDic.object(forKey: "notRubyCharactorStringArray") as? String,
-                let isIgnoreURIStringSpeechEnabled = overrideSettingDic.object(forKey: "isIgnoreURIStringSpeechEnabled") as? NSNumber,
-                let targetNovelIDArray = overrideSettingDic.object(forKey: "targetNovelIDArray") as? NSArray else { continue }
+                let name = overrideSettingDic.object(forKey: "name") as? String else { continue }
             let setting = RealmSpeechOverrideSetting.SearchObjectFrom(name: name) ?? RealmSpeechOverrideSetting()
             if setting.name != name {
                 setting.name = name
             }
             RealmUtil.Write { (realm) in
-                setting.createdDate = createdDate
-                setting.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.uintValue) ?? RepeatSpeechType.noRepeat
-                setting.isOverrideRubyIsEnabled = isOverrideRubyIsEnabled.boolValue
-                setting.notRubyCharactorStringArray = notRubyCharactorStringArray
-                setting.isIgnoreURIStringSpeechEnabled = isIgnoreURIStringSpeechEnabled.boolValue
+                if let createdDateString = overrideSettingDic.object(forKey: "createdDate") as? String,
+                    let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                    setting.createdDate = createdDate
+                }
+                if let repeatSpeechType = overrideSettingDic.object(forKey: "repeatSpeechType") as? NSNumber {
+                    setting.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.uintValue) ?? RepeatSpeechType.noRepeat
+                }
+                if let isOverrideRubyIsEnabled = overrideSettingDic.object(forKey: "isOverrideRubyIsEnabled") as?   NSNumber {
+                    setting.isOverrideRubyIsEnabled = isOverrideRubyIsEnabled.boolValue
+                }
+                if let notRubyCharactorStringArray = overrideSettingDic.object(forKey:  "notRubyCharactorStringArray") as? String {
+                    setting.notRubyCharactorStringArray = notRubyCharactorStringArray
+                }
+                if let isIgnoreURIStringSpeechEnabled = overrideSettingDic.object(forKey:   "isIgnoreURIStringSpeechEnabled") as? NSNumber {
+                    setting.isIgnoreURIStringSpeechEnabled = isIgnoreURIStringSpeechEnabled.boolValue
+                }
                 setting.targetNovelIDArray.removeAll()
-                for novelID in targetNovelIDArray {
-                    guard let novelID = novelID as? String else { continue }
-                    setting.targetNovelIDArray.append(novelID)
+                if let targetNovelIDArray = overrideSettingDic.object(forKey: "targetNovelIDArray") as? NSArray {
+                    for novelID in targetNovelIDArray {
+                        guard let novelID = novelID as? String else { continue }
+                        setting.targetNovelIDArray.append(novelID)
+                    }
                 }
                 realm.add(setting, update: .modified)
             }
@@ -1048,44 +1149,62 @@ class NovelSpeakerUtility: NSObject {
 
 
     static func RestoreGlobalState_V_2_0_0(dic:NSDictionary) {
-        guard let maxSpeechTimeInSec = dic.object(forKey: "maxSpeechTimeInSec") as? NSNumber,
-            let webImportBookmarkArray = dic.object(forKey: "webImportBookmarkArray") as? NSArray,
-            let readedPrivacyPolicy = dic.object(forKey: "readedPrivacyPolicy") as? String,
-            let isOpenRecentNovelInStartTime = dic.object(forKey: "isOpenRecentNovelInStartTime") as? NSNumber,
-            let isLicenseReaded = dic.object(forKey: "isLicenseReaded") as? NSNumber,
-            let isDuckOthersEnabled = dic.object(forKey: "isDuckOthersEnabled") as? NSNumber,
-            let isMixWithOthersEnabled = dic.object(forKey: "isMixWithOthersEnabled") as? NSNumber,
-            let isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = dic.object(forKey: "isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled") as? NSNumber,
-            let isDarkThemeEnabled = dic.object(forKey: "isDarkThemeEnabled") as? NSNumber,
-            let isPlaybackDurationEnabled = dic.object(forKey: "isPlaybackDurationEnabled") as? NSNumber,
-            let isShortSkipEnabled = dic.object(forKey: "isShortSkipEnabled") as? NSNumber,
-            let isReadingProgressDisplayEnabled = dic.object(forKey: "isReadingProgressDisplayEnabled") as? NSNumber,
-            let isForceSiteInfoReloadIsEnabled = dic.object(forKey: "isForceSiteInfoReloadIsEnabled") as? NSNumber,
-            let isMenuItemIsAddSpeechModSettingOnly = dic.object(forKey: "isMenuItemIsAddSpeechModSettingOnly") as? NSNumber,
-            let isPageTurningSoundEnabled = dic.object(forKey: "isPageTurningSoundEnabled") as? NSNumber,
-            let bookSelfSortType = dic.object(forKey: "bookSelfSortType") as? NSNumber,
-            let globalState = RealmGlobalState.GetInstance()
-            else { return }
+        guard let globalState = RealmGlobalState.GetInstance() else { return }
         RealmUtil.Write { (realm) in
-            globalState.maxSpeechTimeInSec = maxSpeechTimeInSec.intValue
-            for bookmark in webImportBookmarkArray {
-                guard let bookmark = bookmark as? String, !globalState.webImportBookmarkArray.contains(bookmark) else { continue }
-                globalState.webImportBookmarkArray.append(bookmark)
+            if let maxSpeechTimeInSec = dic.object(forKey: "maxSpeechTimeInSec") as? NSNumber {
+                globalState.maxSpeechTimeInSec = maxSpeechTimeInSec.intValue
             }
-            globalState.readedPrivacyPolicy = readedPrivacyPolicy
-            globalState.isOpenRecentNovelInStartTime = isOpenRecentNovelInStartTime.boolValue
-            globalState.isLicenseReaded = isLicenseReaded.boolValue
-            globalState.isDuckOthersEnabled = isDuckOthersEnabled.boolValue
-            globalState.isMixWithOthersEnabled = isMixWithOthersEnabled.boolValue
-            globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled.boolValue
-            globalState.isDarkThemeEnabled = isDarkThemeEnabled.boolValue
-            globalState.isPlaybackDurationEnabled = isPlaybackDurationEnabled.boolValue
-            globalState.isShortSkipEnabled = isShortSkipEnabled.boolValue
-            globalState.isReadingProgressDisplayEnabled = isReadingProgressDisplayEnabled.boolValue
-            globalState.isForceSiteInfoReloadIsEnabled = isForceSiteInfoReloadIsEnabled.boolValue
-            globalState.isMenuItemIsAddSpeechModSettingOnly = isMenuItemIsAddSpeechModSettingOnly.boolValue
-            globalState.isPageTurningSoundEnabled = isPageTurningSoundEnabled.boolValue
-            globalState.bookShelfSortType = NarouContentSortType(rawValue: UInt(bookSelfSortType.intValue)) ?? NarouContentSortType.ncode
+            if let webImportBookmarkArray = dic.object(forKey: "webImportBookmarkArray") as? NSArray {
+                for bookmark in webImportBookmarkArray {
+                    guard let bookmark = bookmark as? String, !globalState.webImportBookmarkArray.contains(bookmark) else { continue }
+                    globalState.webImportBookmarkArray.append(bookmark)
+                }
+            }
+            if let readedPrivacyPolicy = dic.object(forKey: "readedPrivacyPolicy") as? String {
+                globalState.readedPrivacyPolicy = readedPrivacyPolicy
+            }
+            if let isOpenRecentNovelInStartTime = dic.object(forKey: "isOpenRecentNovelInStartTime") as? NSNumber {
+                globalState.isOpenRecentNovelInStartTime = isOpenRecentNovelInStartTime.boolValue
+            }
+            if let isLicenseReaded = dic.object(forKey: "isLicenseReaded") as? NSNumber {
+                globalState.isLicenseReaded = isLicenseReaded.boolValue
+            }
+            if let isDuckOthersEnabled = dic.object(forKey: "isDuckOthersEnabled") as? NSNumber {
+                globalState.isDuckOthersEnabled = isDuckOthersEnabled.boolValue
+            }
+            if let isMixWithOthersEnabled = dic.object(forKey: "isMixWithOthersEnabled") as? NSNumber {
+                globalState.isMixWithOthersEnabled = isMixWithOthersEnabled.boolValue
+            }
+            if let isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = dic.object(forKey: "isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled") as? NSNumber {
+                globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled.boolValue
+            }
+            if let isDarkThemeEnabled = dic.object(forKey: "isDarkThemeEnabled") as? NSNumber {
+                globalState.isDarkThemeEnabled = isDarkThemeEnabled.boolValue
+            }
+            if let isPlaybackDurationEnabled = dic.object(forKey: "isPlaybackDurationEnabled") as? NSNumber {
+                globalState.isPlaybackDurationEnabled = isPlaybackDurationEnabled.boolValue
+            }
+            if let isShortSkipEnabled = dic.object(forKey: "isShortSkipEnabled") as? NSNumber {
+                globalState.isShortSkipEnabled = isShortSkipEnabled.boolValue
+            }
+            if let isReadingProgressDisplayEnabled = dic.object(forKey: "isReadingProgressDisplayEnabled") as? NSNumber {
+                globalState.isReadingProgressDisplayEnabled = isReadingProgressDisplayEnabled.boolValue
+            }
+            if let isForceSiteInfoReloadIsEnabled = dic.object(forKey: "isForceSiteInfoReloadIsEnabled") as? NSNumber {
+                globalState.isForceSiteInfoReloadIsEnabled = isForceSiteInfoReloadIsEnabled.boolValue
+            }
+            if let isMenuItemIsAddSpeechModSettingOnly = dic.object(forKey: "isMenuItemIsAddSpeechModSettingOnly")  as? NSNumber {
+                globalState.isMenuItemIsAddSpeechModSettingOnly = isMenuItemIsAddSpeechModSettingOnly.boolValue
+            }
+            if let isPageTurningSoundEnabled = dic.object(forKey: "isPageTurningSoundEnabled") as? NSNumber {
+                globalState.isPageTurningSoundEnabled = isPageTurningSoundEnabled.boolValue
+            }
+            if let bookSelfSortType = dic.object(forKey: "bookSelfSortType") as? NSNumber {
+                globalState.bookShelfSortType = NarouContentSortType(rawValue: UInt(bookSelfSortType.intValue)) ?? NarouContentSortType.ncode
+            }
+            if let currentReadingNovelID = dic.object(forKey: "currentReadingNovelID") as? String {
+                globalState.currentReadingNovelID = currentReadingNovelID
+            }
         }
     }
     
@@ -1099,64 +1218,98 @@ class NovelSpeakerUtility: NSObject {
             progressUpdate(NSLocalizedString("NovelSpeakerUtility_ExportingNovelData", comment: "小説を抽出中") + " (\(novelCount)/\(novelArrayCount))")
             guard let novelDic = novelDic as? NSDictionary,
                 let novelID = novelDic.object(forKey: "novelID") as? String,
-                let type = novelDic.object(forKey: "type") as? NSNumber,
-                let writer = novelDic.object(forKey: "writer") as? String,
-                let title = novelDic.object(forKey: "title") as? String,
-                let url = novelDic.object(forKey: "url") as? String,
-                let secret = novelDic.object(forKey: "secret") as? String,
-                let createdDateString = novelDic.object(forKey: "createdDate") as? String,
-                let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString),
-                let likeLevel = novelDic.object(forKey: "likeLevel") as? NSNumber,
-                let isNeedSpeechAfterDelete = novelDic.object(forKey: "isNeedSpeechAfterDelete") as? NSNumber,
-                let defaultSpeakerID = novelDic.object(forKey: "defaultSpeakerID") as? String
-                else { continue }
+                let type = novelDic.object(forKey: "type") as? NSNumber else { continue }
             let novel = RealmNovel.SearchNovelFrom(novelID: novelID) ?? RealmNovel()
             if novel.novelID != novelID {
                 novel.novelID = novelID
             }
             RealmUtil.Write { (realm) in
                 novel.type = NovelType(rawValue: type.intValue) ?? NovelType.UserCreated
-                novel.writer = writer
-                novel.title = title
-                novel.url = url
-                novel.m_urlSecret = secret
-                novel.createdDate = createdDate
-                novel.likeLevel = likeLevel.int8Value
-                novel.isNeedSpeechAfterDelete = isNeedSpeechAfterDelete.boolValue
-                novel.defaultSpeakerID = defaultSpeakerID
-                realm.add(novel, update: .modified)
-            }
-            if let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
-                let extractedDirectory = extractedDirectory, let storys = novelDic.object(forKey: "storys") as? NSArray {
-                let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
-                if FileManager.default.fileExists(atPath: contentDirectory.path) {
-                    for storyDic in storys {
-                        guard let storyDic = storyDic as? NSDictionary,
-                            let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber,
-                            let readLocation = storyDic.object(forKey: "readLocation") as? NSNumber,
-                            let url = storyDic.object(forKey: "url") as? String,
-                            let lastReadDateString = storyDic.object(forKey: "lastReadDate") as? String,
-                            let lastReadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: lastReadDateString),
-                            let downloadDateString = storyDic.object(forKey: "downloadDate") as? String,
-                            let downloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: downloadDateString),
-                            let subtitle = storyDic.object(forKey: "subtitle") as? String else { continue }
-                        let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
-                        guard let data = try? Data(contentsOf: contentFilePath) else { continue }
-                        let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: chapterNumber.intValue) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber.intValue)
-                        RealmUtil.LocalOnlyWrite { (realm) in
-                            story.readLocation = readLocation.intValue
-                            story.url = url
-                            story.lastReadDate = lastReadDate
-                            story.downloadDate = downloadDate
-                            story.subtitle = subtitle
-                            story.contentZiped = data
-                            realm.add(story, update: .modified)
+                if let writer = novelDic.object(forKey: "writer") as? String {
+                    novel.writer = writer
+                }
+                if let title = novelDic.object(forKey: "title") as? String {
+                    novel.title = title
+                }
+                if let url = novelDic.object(forKey: "url") as? String {
+                    novel.url = url
+                }
+                if let secret = novelDic.object(forKey: "secret") as? String {
+                    novel.m_urlSecret = NiftyUtility.stringDecrypt(secret, key: novelID)
+                }
+                if let createdDateString = novelDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                    novel.createdDate = createdDate
+                }
+                if let likeLevel = novelDic.object(forKey: "likeLevel") as? NSNumber {
+                    novel.likeLevel = likeLevel.int8Value
+                }
+                if let isNeedSpeechAfterDelete = novelDic.object(forKey: "isNeedSpeechAfterDelete") as? NSNumber {
+                    novel.isNeedSpeechAfterDelete = isNeedSpeechAfterDelete.boolValue
+                }
+                if let defaultSpeakerID = novelDic.object(forKey: "defaultSpeakerID") as? String {
+                    novel.defaultSpeakerID = defaultSpeakerID
+                }
+                if let lastChapterStoryID = novelDic.object(forKey: "lastChapterStoryID") as? String {
+                    novel.m_lastChapterStoryID = lastChapterStoryID
+                }
+                if let lastDownloadDateString = novelDic.object(forKey: "lastDownloadDate") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: lastDownloadDateString) {
+                    novel.lastDownloadDate = lastDownloadDate
+                }
+                if let readingChapterStoryID = novelDic.object(forKey: "readingChapterStoryID") as? String {
+                    novel.m_readingChapterStoryID = readingChapterStoryID
+                }
+                if let lastReadDateString = novelDic.object(forKey: "lastReadDate") as? String, let lastReadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: lastReadDateString) {
+                    novel.lastReadDate = lastReadDate
+                }
+                if let downloadDateArray = novelDic.object(forKey: "downloadDateArray") as? NSArray {
+                    novel.downloadDateArray.removeAll()
+                    for downloadDateStringObj in downloadDateArray {
+                        if let downloadDateString = downloadDateStringObj as? String, let downloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: downloadDateString) {
+                            novel.downloadDateArray.append(downloadDate)
                         }
                     }
-                }else{
-                    NovelDownloadQueue.shared.addQueue(novelID: novelID)
                 }
-            }else{
+                realm.add(novel, update: .modified)
+            }
+            var hasInvalidData = false
+            if let storys = novelDic.object(forKey: "storys") as? NSArray {
+                for storyDic in storys {
+                    guard let storyDic = storyDic as? NSDictionary,
+                        let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber else { continue }
+                    let data:Data
+                    if let contentZipedString = storyDic.object(forKey: "contentZiped") as? String, let contentZiped = Data(base64Encoded: contentZipedString) {
+                        data = contentZiped
+                    }else{
+                        guard let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
+                            let extractedDirectory = extractedDirectory else {
+                            hasInvalidData = true
+                            continue
+                        }
+                        let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
+                        let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
+                        guard let contentData = try? Data(contentsOf: contentFilePath) else {
+                            hasInvalidData = true
+                            continue
+                        }
+                        data = contentData
+                    }
+                    let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: chapterNumber.intValue) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber.intValue)
+                    RealmUtil.LocalOnlyWrite { (realm) in
+                        if let readLocation = storyDic.object(forKey: "readLocation") as? NSNumber {
+                            story.readLocation = readLocation.intValue
+                        }
+                        if let url = storyDic.object(forKey: "url") as? String {
+                            story.url = url
+                        }
+                        if let subtitle = storyDic.object(forKey: "subtitle") as? String {
+                            story.subtitle = subtitle
+                        }
+                        story.contentZiped = data
+                        realm.add(story, update: .modified)
+                    }
+                }
+            }
+            if hasInvalidData {
                 NovelDownloadQueue.shared.addQueue(novelID: novelID)
             }
         }
@@ -1279,6 +1432,15 @@ class NovelSpeakerUtility: NSObject {
         var result:[[String:Any]] = []
         guard let storyArray = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true) else { return result }
         for story in storyArray {
+            var storyData:[String:Any] = [
+                //"id": story.id,
+                //"novelID": story.novelID,
+                "chapterNumber": story.chapterNumber,
+                //"contentZiped": story.contentZiped,
+                "readLocation": story.readLocation,
+                "url": story.url,
+                "subtitle": story.subtitle
+            ]
             if let contentWriteTo = contentWriteTo {
                 do {
                     let filePath = contentWriteTo.appendingPathComponent("\(story.chapterNumber)")
@@ -1286,18 +1448,10 @@ class NovelSpeakerUtility: NSObject {
                 }catch{
                     print("\(story.novelID) chapter: \(story.chapterNumber) content write failed.")
                 }
+            }else{
+                storyData["contentZiped"] = story.contentZiped.base64EncodedString()
             }
-            result.append([
-                //"id": story.id,
-                //"novelID": story.novelID,
-                "chapterNumber": story.chapterNumber,
-                //"contentZiped": story.contentZiped,
-                "readLocation": story.readLocation,
-                "url": story.url,
-                "lastReadDate": NiftyUtilitySwift.Date2ISO8601String(date: story.lastReadDate),
-                "downloadDate": NiftyUtilitySwift.Date2ISO8601String(date: story.downloadDate),
-                "subtitle": story.subtitle
-            ])
+            result.append(storyData)
         }
         return result
     }
@@ -1322,6 +1476,11 @@ class NovelSpeakerUtility: NSObject {
                 "likeLevel": novel.likeLevel,
                 "isNeedSpeechAfterDelete": novel.isNeedSpeechAfterDelete,
                 "defaultSpeakerID": novel.defaultSpeakerID,
+                "lastChapterStoryID": novel.m_lastChapterStoryID,
+                "lastDownloadDate": NiftyUtilitySwift.Date2EpochSecond(date: novel.lastDownloadDate),
+                "readingChapterStoryID": novel.m_readingChapterStoryID,
+                "lastReadDate": NiftyUtilitySwift.Date2EpochSecond(date: novel.lastReadDate),
+                "downloadDateArray": novel.downloadDateArray,
                 "contentDirectory": "\(novelCount)"
             ]
             let contentDirectory = NiftyUtilitySwift.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
@@ -1423,6 +1582,7 @@ class NovelSpeakerUtility: NSObject {
             //"isBackgroundNovelFetchEnabled": globalState.isBackgroundNovelFetchEnabled,
             "isPageTurningSoundEnabled": globalState.isPageTurningSoundEnabled,
             "bookSelfSortType": globalState.m_bookSelfSortType,
+            "currentReadingNovelID": globalState.currentReadingNovelID,
 
             "defaultDisplaySettingID": globalState.defaultDisplaySettingID,
             "defaultSpeakerID": globalState.defaultSpeakerID,

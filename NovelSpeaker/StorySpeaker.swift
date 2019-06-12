@@ -199,9 +199,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func updateReadDate(storyID:String) {
-        if let story = RealmStory.SearchStoryFrom(storyID: storyID) {
-            RealmUtil.LocalOnlyWrite { (realm) in
-                story.lastReadDate = Date()
+        let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+        if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
+            RealmUtil.Write { (realm) in
+                novel.lastReadDate = Date()
+                novel.m_readingChapterStoryID = storyID
+            }
+        }
+        if let globalState = RealmGlobalState.GetInstance() {
+            RealmUtil.Write { (realm) in
+                globalState.currentReadingNovelID = novelID
             }
         }
     }

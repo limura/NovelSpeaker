@@ -179,7 +179,7 @@ class NovelDownloader : NSObject {
                         }
                         return
                     }
-                    guard RealmNovel.SearchNovelFrom(novelID: novelID) != nil else {
+                    guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
                         print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: 読み込みには成功したのですが、RealmNovel を検索したところ存在が確認できませんでした。ダウンロード中に本棚から削除された可能性があります。ダウンロードを停止します。(\(novelID))")
                         failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_FailedByNoRealmNovel", comment: "小説が本棚に登録されていなかったため、ダウンロードを終了します。") + "(novelID: \(novelID))")
                         return
@@ -187,12 +187,12 @@ class NovelDownloader : NSObject {
                     let story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber)
                     story.url = targetURL.absoluteString
                     story.content = content
-                    story.downloadDate = queuedDate
+                    //story.downloadDate = queuedDate
                     if let subtitle = htmlStory.subtitle {
                         story.subtitle = subtitle
                     }
                     if chapterNumber == 1 {
-                        story.lastReadDate = Date(timeIntervalSince1970: 60)
+                        //story.lastReadDate = Date(timeIntervalSince1970: 60)
                     }
                     RealmUtil.LocalOnlyWrite { (realm) in
                         /* // 通常の更新時にはタグの更新はしないでおきます
@@ -204,6 +204,15 @@ class NovelDownloader : NSObject {
                          }
                          */
                         realm.add(story, update: .modified)
+                    }
+                    let storyID = story.id
+                    RealmUtil.Write { (realm) in
+                        novel.m_lastChapterStoryID = storyID
+                        novel.lastDownloadDate = queuedDate
+                        if chapterNumber == 1 {
+                            novel.m_readingChapterStoryID = storyID
+                        }
+                        novel.downloadDateArray.append(queuedDate)
                     }
                     print("add new story: \(novelID), chapterNumber: \(chapterNumber), url: \(targetURL.absoluteString)")
                     if let nextUrl = htmlStory.nextUrl {
@@ -289,10 +298,17 @@ class NovelDownloader : NSObject {
                             RealmUtil.LocalOnlyWrite { (realm) in
                                 story.content = htmlStory.content ?? ""
                                 story.subtitle = htmlStory.subtitle ?? ""
-                                story.downloadDate = Date()
-                                story.lastReadDate = Date(timeIntervalSince1970: 60)
+                                //story.downloadDate = Date()
+                                //story.lastReadDate = Date(timeIntervalSince1970: 60)
                                 story.url = lastDownloadURL.absoluteString
                                 realm.add(story, update: .modified)
+                            }
+                            let storyID = story.id
+                            RealmUtil.Write { (realm) in
+                                novel.m_lastChapterStoryID = storyID
+                                novel.lastDownloadDate = queuedDate
+                                novel.m_readingChapterStoryID = storyID
+                                novel.downloadDateArray.append(queuedDate)
                             }
                             if let url = htmlStory.nextUrl {
                                 targetURL = url

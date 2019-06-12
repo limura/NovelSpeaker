@@ -18,8 +18,8 @@ class RealmToRealmCopyTool: NSObject {
             newObj.contentZiped = obj.contentZiped
             newObj.readLocation = obj.readLocation
             newObj.url = obj.url
-            newObj.lastReadDate = obj.lastReadDate
-            newObj.downloadDate = obj.downloadDate
+            //newObj.lastReadDate = obj.lastReadDate
+            //newObj.downloadDate = obj.downloadDate
             newObj.subtitle = obj.subtitle
             to.add(newObj, update: .modified)
             try to.commitWrite()
@@ -40,6 +40,12 @@ class RealmToRealmCopyTool: NSObject {
             newObj.likeLevel = obj.likeLevel
             newObj.isNeedSpeechAfterDelete = obj.isNeedSpeechAfterDelete
             newObj.defaultSpeakerID = obj.defaultSpeakerID
+            newObj.m_lastChapterStoryID = obj.m_lastChapterStoryID
+            newObj.lastDownloadDate = obj.lastDownloadDate
+            newObj.m_readingChapterStoryID = obj.m_readingChapterStoryID
+            newObj.lastReadDate = obj.lastReadDate
+            newObj.downloadDateArray.removeAll()
+            newObj.downloadDateArray.append(objectsIn: obj.downloadDateArray)
             to.add(newObj, update: .modified)
             try to.commitWrite()
         }
@@ -153,6 +159,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.defaultDisplaySettingID = obj.defaultDisplaySettingID
             newObj.defaultSpeakerID = obj.defaultSpeakerID
             newObj.defaultSpeechOverrideSettingID = obj.defaultSpeechOverrideSettingID
+            newObj.currentReadingNovelID = obj.currentReadingNovelID
             to.add(newObj, update: .modified)
             try to.commitWrite()
         }
