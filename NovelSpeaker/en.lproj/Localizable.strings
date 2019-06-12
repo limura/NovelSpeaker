@@ -220,6 +220,8 @@
 "SpeechViewController_CheckSpeechTextDialogTitle" = "The string used for reading is as follows.";
 "SpeechViewController_AddCheckSpeechText" = "Check the translated text used for speech";
 "SpeechViewController_AddSpeechModSettingsForThisNovel" = "Add to speech mod settings for this novel";
+"SpeechViewController_Subtitles" = "Index";
+"SpeechViewController_CanNotGetStorys" = "I could not refer to the novel information.";
 
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";

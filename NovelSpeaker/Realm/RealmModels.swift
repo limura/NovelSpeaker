@@ -659,6 +659,20 @@ protocol CanWriteIsDeleted {
         }
     }
     
+    func GetSubtitle() -> String {
+        if subtitle.count > 0 {
+            return subtitle
+        }
+        guard let text = content else { return "-" }
+        for line in text.components(separatedBy: .newlines) {
+            let trimedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimedLine.count > 0 {
+                return trimedLine
+            }
+        }
+        return "-"
+    }
+    
     func delete(realm:Realm) {
         if let queueArray = linkedQueues {
             for queue in queueArray {

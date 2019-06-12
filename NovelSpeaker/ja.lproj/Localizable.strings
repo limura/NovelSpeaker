@@ -206,6 +206,8 @@
 "SpeechViewController_CheckSpeechTextDialogTitle" = "読み上げに使われる文字列は以下のようになります。";
 "SpeechViewController_AddCheckSpeechText" = "読み替え後の文字列を確認する";
 "SpeechViewController_AddSpeechModSettingsForThisNovel" = "この小説用の読み替え辞書へ登録";
+"SpeechViewController_Subtitles" = "目次";
+"SpeechViewController_CanNotGetStorys" = "小説情報を参照できませんでした。";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";

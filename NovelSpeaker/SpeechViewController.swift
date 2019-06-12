@@ -105,6 +105,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         ]
         barButtonArray.append(
             UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Detail", comment: "詳細"), style: .plain, target: self, action: #selector(detailButtonClicked(_:))))
+        barButtonArray.append(UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Subtitles", comment: "目次"), style: .plain, target: self, action: #selector(tableOfContentsButtonClicked(_:))))
         if novel.type == .URL {
             let buttonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action:   #selector(shareButtonClicked(_:)))
             self.shareButtonItem = buttonItem
@@ -397,6 +398,30 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
     @objc func detailButtonClicked(_ sender: UIBarButtonItem) {
         performSegue(withIdentifier: "NovelDetailViewPushSegue", sender: self)
+    }
+    @objc func tableOfContentsButtonClicked(_ sender: UIBarButtonItem) {
+        guard let storyID = storyID, let storys = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID))?.linkedStorys else {
+            NiftyUtilitySwift.EasyDialogOneButton(
+                viewController: self,
+                title: nil,
+                message: NSLocalizedString("SpeechViewController_CanNotGetStorys", comment: "小説情報を参照できませんでした。"),
+                buttonTitle: nil, buttonAction: nil)
+            return
+        }
+        let displayTextArray = Array(storys.map { (story) -> String in
+            return "\(story.chapterNumber): " + story.GetSubtitle()
+        })
+        let selectedText:String?
+        if let story = RealmStory.SearchStoryFrom(storyID: storyID) {
+            selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
+        }else{
+            selectedText = nil
+        }
+        let picker = PickerViewDialog.createNewDialog(displayTextArray, firstSelectedString: selectedText, parentView: self.view) { (selectedText) in
+            guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)) else { return }
+            self.storySpeaker.SetStory(story: story)
+        }
+        picker?.popup(nil)
     }
 
     @objc func shareButtonClicked(_ sender: UIBarButtonItem) {
