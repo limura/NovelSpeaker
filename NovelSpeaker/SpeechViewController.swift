@@ -37,11 +37,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         storySpeaker.AddDelegate(delegate: self)
         // Do any additional setup after loading the view.
         initWidgets()
-        if let storyID = storyID, let story = RealmStory.SearchStoryFrom(storyID: storyID) {
-            if let novel = RealmNovel.SearchNovelFrom(novelID: story.novelID){
+        if let storyID = storyID {
+            if let novel = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID)){
                 loadNovel(novel: novel)
             }
-            self.storySpeaker.SetStory(story: story)
+            self.storySpeaker.SetStory(storyID: storyID)
         }else{
             textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
         }
@@ -418,8 +418,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             selectedText = nil
         }
         let picker = PickerViewDialog.createNewDialog(displayTextArray, firstSelectedString: selectedText, parentView: self.view) { (selectedText) in
-            guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)) else { return }
-            self.storySpeaker.SetStory(story: story)
+            guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number) else { return }
+            self.storySpeaker.SetStory(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber))
         }
         picker?.popup(nil)
     }
@@ -500,11 +500,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
 
 
     @IBAction func chapterSliderValueChanged(_ sender: Any) {
-        guard let storyID = self.storyID, let story = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: storyID), chapterNumber: Int(self.chapterSlider.value + 0.5))) else {
+        guard let storyID = self.storyID else {
             return
         }
-        self.chapterSlider.value = Float(story.chapterNumber)
-        self.storySpeaker.SetStory(story: story)
+        let chapterNumber = Int(self.chapterSlider.value + 0.5)
+        let targetStoryID = RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)
+        self.chapterSlider.value = Float(chapterNumber)
+        self.storySpeaker.SetStory(storyID: targetStoryID)
     }
     @IBAction func previousChapterButtonClicked(_ sender: Any) {
         self.storySpeaker.LoadPreviousChapter()

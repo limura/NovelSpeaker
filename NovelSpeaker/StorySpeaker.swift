@@ -80,10 +80,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
 
     // 読み上げに用いられる小説の章を設定します。
     // 読み上げが行われていた場合、読み上げは停止します。
-    func SetStory(story:RealmStory) {
+    func SetStory(storyID:String) {
         speaker.stopSpeech()
-        guard let content = story.content else { return }
-        self.storyID = story.id
+        guard let story = RealmStory.SearchStoryFrom(storyID: storyID), let content = story.content else { return }
+        self.storyID = storyID
         updateReadDate(storyID: storyID)
         ApplySpeakConfigs(novelID: story.novelID, content: content, location: story.readLocation)
         updatePlayngInfo(story: story)
@@ -478,7 +478,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                     story.readLocation = contentLength - targetLength
                 }
                 ringPageTurningSound()
-                SetStory(story: story)
+                SetStory(storyID: story.id)
                 return
             }
             targetStory = SearchPreviousChapter(storyID: story.id)
@@ -492,7 +492,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             if firstStory.id != self.storyID {
                 ringPageTurningSound()
             }
-            SetStory(story: firstStory)
+            SetStory(storyID: firstStory.id)
         }
     }
     
@@ -513,7 +513,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 nextStory.readLocation = 0
             }
             ringPageTurningSound()
-            SetStory(story: nextStory)
+            SetStory(storyID: nextStory.id)
             return true
         }
         return false
@@ -539,7 +539,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 previousStory.readLocation = 0
             }
             ringPageTurningSound()
-            SetStory(story: previousStory)
+            SetStory(storyID: previousStory.id)
             return true
         }
         return false
@@ -827,8 +827,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         switch speechOverrideSetting.repeatSpeechType {
         case .rewindToFirstStory:
             let novelID = RealmStory.StoryIDToNovelID(storyID: self.storyID)
-            if let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let lastChapterNumber = novel.lastChapterNumber, let currentChapterNumber = RealmStory.SearchStoryFrom(storyID: self.storyID)?.chapterNumber, lastChapterNumber == currentChapterNumber, let targetStory = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
-                self.SetStory(story: targetStory)
+            if let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let lastChapterNumber = novel.lastChapterNumber, let currentChapterNumber = RealmStory.SearchStoryFrom(storyID: self.storyID)?.chapterNumber, lastChapterNumber == currentChapterNumber {
+                self.SetStory(storyID: RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1))
                 self.StartSpeech(withMaxSpeechTimeReset: false)
                 return
             }
@@ -846,7 +846,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             RealmUtil.LocalOnlyWrite { (realm) in
                 nextStory.readLocation = 0
             }
-            self.SetStory(story: nextStory)
+            self.SetStory(storyID: nextStory.id)
             self.StartSpeech(withMaxSpeechTimeReset: false)
         }else{
             self.StopSpeech()
