@@ -631,7 +631,7 @@ protocol CanWriteIsDeleted {
             return nil
         }
     }
-    
+
     static func GetAllObjects() -> Results<RealmStory>? {
         return autoreleasepool {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
@@ -664,7 +664,7 @@ protocol CanWriteIsDeleted {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
             guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
             realm.refresh()
-            return realm.objects(RealmStory.self).filter("isDeleted = false AND novelID = %@", novelID)
+            return realm.objects(RealmStory.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         }
     }
     
@@ -889,14 +889,12 @@ extension RealmStory: CanWriteIsDeleted {
     }
 
     static func SearchNovelFrom(novelID:String) -> RealmNovel? {
-        return autoreleasepool {
-            guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
-            if let result = realm.object(ofType: RealmNovel.self, forPrimaryKey: novelID), result.isDeleted == false {
-                return result
-            }
-            return nil
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        realm.refresh()
+        if let result = realm.object(ofType: RealmNovel.self, forPrimaryKey: novelID), result.isDeleted == false {
+            return result
         }
+        return nil
     }
     
     static func AddNewNovelOnlyText(content:String, title:String) {
@@ -1609,13 +1607,11 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     }
 
     static public func GetInstance() -> RealmGlobalState? {
-        return autoreleasepool {
-            guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
-            guard let obj = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: UniqueID) else { return nil }
-            if obj.isDeleted { return nil }
-            return obj
-        }
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        realm.refresh()
+        guard let obj = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: UniqueID) else { return nil }
+        if obj.isDeleted { return nil }
+        return obj
     }
 
     override class func primaryKey() -> String? {
