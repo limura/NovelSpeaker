@@ -612,6 +612,32 @@ import UIKit
         return false
     }
 
+    static var runLoop:RunLoop? = nil
+    static var runLoopThread:Thread? = nil
+    @objc static func startRealmRunLoopThread() {
+        runLoopThread = Thread {
+            runLoop = RunLoop.current
+            guard let thread = runLoopThread else { return }
+            while thread.isCancelled != true {
+                RunLoop.current.run(mode: .default, before: .distantFuture)
+            }
+            Thread.exit()
+        }
+        guard let thread = runLoopThread else { return }
+        thread.name = "RealmUtil runLoopThread: \(UUID().uuidString)"
+        thread.start()
+    }
+    static func doOnRunLoop(block: @escaping () -> Void) {
+        guard let runLoop = runLoop else { return }
+        autoreleasepool {
+            runLoop.perform(block)
+        }
+    }
+    static func stopRunLoop() {
+        guard let thread = runLoopThread else { return }
+        thread.cancel()
+    }
+    
 }
 
 protocol CanWriteIsDeleted {

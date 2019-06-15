@@ -56,6 +56,8 @@ void uncaughtExceptionHandler(NSException *exception)
     //TODO: ここに入れるとマイグレーション時に酷いことになるけどここにあるべき。
     // [NovelSpeakerUtility InsertDefaultSettingsIfNeeded];
     
+    // TODO: RunLoop のを使わないのであれば消す
+    [RealmUtil startRealmRunLoopThread];
     [NovelSpeakerUtility StartAllLongLivedOperationIDWatcher];
     
     UIViewController* toplevelViewController = nil;
