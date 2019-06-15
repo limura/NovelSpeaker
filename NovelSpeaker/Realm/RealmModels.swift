@@ -13,17 +13,18 @@ import UIKit
 
 @objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 2
-    static let currentSchemaVersionForLocalOnly : UInt64 = 2
+    static let currentSchemaVersionForRealmStory : UInt64 = 2
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
 
     static var syncEngine: SyncEngine? = nil
+    static var realmStorySyncEngine: SyncEngine? = nil
     static let lock = NSLock()
     static var realmLocalCache:[String:Realm] = [:]
     static var realmCloudCache:[String:Realm] = [:]
-    static let lockLocalOnly = NSLock()
-    static var realmLocalOnlyCache:[String:Realm] = [:]
+    static let lockRealmStory = NSLock()
+    static var realmRealmStoryCache:[String:Realm] = [:]
     
     static var syncEngineDispatchQueue:DispatchQueue = DispatchQueue.main
     
@@ -38,7 +39,7 @@ import UIKit
             Migrate_0_To_1(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
-    static func MigrateFuncForLocalOnly(migration:Migration, oldSchemaVersion:UInt64) {
+    static func MigrateFuncForRealmStory(migration:Migration, oldSchemaVersion:UInt64) {
         
     }
     
@@ -51,11 +52,11 @@ import UIKit
             return nil
         }
     }
-    static func GetLocalOnlyRealmFilePath() -> URL? {
+    static func GetRealmStoryLocalRealmFilePath() -> URL? {
         let fileManager = FileManager.default
         do {
             let directory = try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            return directory.appendingPathComponent("localOnly.realm")
+            return directory.appendingPathComponent("localStory.realm")
         }catch{
             return nil
         }
@@ -75,8 +76,8 @@ import UIKit
         }
         realmLocalCache.removeAll()
     }
-    @objc static func RemoveLocalOnlyRealmFile() {
-        if let path = GetLocalOnlyRealmFilePath() {
+    @objc static func RemoveRealmStoryLocalRealmFile() {
+        if let path = GetRealmStoryLocalRealmFilePath() {
             let fileManager = FileManager.default
             do {
                 try fileManager.removeItem(at: path)
@@ -84,11 +85,11 @@ import UIKit
                 print("file \(path.absoluteString) remove failed.")
             }
         }
-        lockLocalOnly.lock()
+        lockRealmStory.lock()
         defer {
-            lockLocalOnly.unlock()
+            lockRealmStory.unlock()
         }
-        realmLocalOnlyCache.removeAll()
+        realmRealmStoryCache.removeAll()
     }
     static func GetLocalRealm() throws -> Realm {
         lock.lock()
@@ -111,17 +112,17 @@ import UIKit
         //realmLocalCache[threadID] = realm
         return realm
     }
-    static func GetLocalOnlyRealm() throws -> Realm {
-        lockLocalOnly.lock()
-        defer { lockLocalOnly.unlock() }
+    static func GetRealmStoryLocalRealm() throws -> Realm {
+        lockRealmStory.lock()
+        defer { lockRealmStory.unlock() }
         let threadID = "\(Thread.current)"
-        if let realm = realmLocalOnlyCache[threadID] {
+        if let realm = realmRealmStoryCache[threadID] {
             return realm
         }
         let config = Realm.Configuration(
-            fileURL: GetLocalOnlyRealmFilePath(),
-            schemaVersion: currentSchemaVersionForLocalOnly,
-            migrationBlock: MigrateFuncForLocalOnly,
+            fileURL: GetRealmStoryLocalRealmFilePath(),
+            schemaVersion: currentSchemaVersionForRealmStory,
+            migrationBlock: MigrateFuncForRealmStory,
             deleteRealmIfMigrationNeeded: deleteRealmIfMigrationNeeded,
             shouldCompactOnLaunch: { (totalBytes:Int, usedBytes:Int) in
                 return Double(totalBytes) * 1.3 < Double(usedBytes)
@@ -143,6 +144,16 @@ import UIKit
         }catch{
             return nil
         }
+    }
+    static func GetRealmStoryCloudRealmFilePath() -> URL? {
+        let fileManager = FileManager.default
+        do {
+            let directory = try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            return directory.appendingPathComponent("cloudStory.realm")
+        }catch{
+            return nil
+        }
+
     }
     static func RemoveCloudRealmFile() {
         // 注意：
@@ -236,6 +247,19 @@ import UIKit
         realm.autorefresh = true
         return realm
     }
+    fileprivate static func GetRealmStoryCloudRealmWithoutLock() throws -> Realm {
+        let config = Realm.Configuration(
+            fileURL: GetRealmStoryCloudRealmFilePath(),
+            schemaVersion: currentSchemaVersionForRealmStory,
+            migrationBlock: MigrateFuncForRealmStory,
+            deleteRealmIfMigrationNeeded: deleteRealmIfMigrationNeeded,
+            shouldCompactOnLaunch: { (totalBytes, usedBytes) in
+                return Double(totalBytes) * 1.2 < Double(usedBytes)
+        })
+        let realm = try Realm(configuration: config)
+        realm.autorefresh = true
+        return realm
+    }
     
     static func GetCloudRealm() throws -> Realm {
         lock.lock()
@@ -250,6 +274,19 @@ import UIKit
         //realmCloudCache[threadID] = realm
         return realm
     }
+    static func GetRealmStoryCloudRealm() throws -> Realm {
+        lockRealmStory.lock()
+        defer {
+            lockRealmStory.unlock()
+        }
+        let threadID = "\(Thread.current)"
+        if let realm = realmRealmStoryCache[threadID] {
+            return realm
+        }
+        let realm = try GetRealmStoryCloudRealmWithoutLock()
+        //realmCloudCache[threadID] = realm
+        return realm
+    }
     static func GetContainer() -> CKContainer {
         return CKContainer(identifier: CKContainerIdentifier)
     }
@@ -257,7 +294,6 @@ import UIKit
         let container = GetContainer()
         let realm = try RealmUtil.GetCloudRealmWithoutLock()
         return SyncEngine(objects: [
-            //SyncObject<RealmStory>(realm: realm, dispatchQueue: dispatchQueue),
             SyncObject<RealmNovel>(realm: realm),
             SyncObject<RealmSpeechModSetting>(realm: realm),
             SyncObject<RealmSpeechWaitConfig>(realm: realm),
@@ -270,27 +306,30 @@ import UIKit
             SyncObject<RealmSpeechOverrideSetting>(realm: realm)
             ], databaseScope: .private, container: container)
     }
-    
+    fileprivate static func CreateRealmStorySyncEngine() throws -> SyncEngine {
+        let container = GetContainer()
+        let realm = try RealmUtil.GetRealmStoryCloudRealmWithoutLock()
+        return SyncEngine(objects: [
+            SyncObject<RealmStory>(realm: realm)
+            ], databaseScope: .private, container: container)
+    }
+
     static func EnableSyncEngine() throws {
         lock.lock()
         defer { lock.unlock() }
         if syncEngine != nil { return }
-        //self.syncEngineDispatchQueue = DispatchQueue(label: "NovelSpeakerRealmModelsSyncEngineQueue", qos: .utility, attributes: DispatchQueue.Attributes.concurrent, autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.workItem, target: nil)
-        self.syncEngineDispatchQueue = DispatchQueue.main
-        //self.backgroundWorker = BackgroundWorker()
-        if Thread.isMainThread {
-            self.syncEngine = try CreateSyncEngine()
-        }else{
-            try self.syncEngineDispatchQueue.sync {
-                self.syncEngine = try CreateSyncEngine()
-            }
-        }
+        self.syncEngine = try CreateSyncEngine()
     }
-    static func isSyncEngineStarted() -> Bool {
-        return syncEngine != nil
+    static func EnableRealmStorySyncEngine() throws {
+        lockRealmStory.lock()
+        defer { lockRealmStory.unlock() }
+        if realmStorySyncEngine != nil { return }
+        self.realmStorySyncEngine = try CreateRealmStorySyncEngine()
     }
+    
     static func stopSyncEngine() {
         syncEngine = nil
+        realmStorySyncEngine = nil
     }
     static func FetchAllLongLivedOperationIDs(completionHandler: @escaping ([CKOperation.ID]?, Error?) -> Void) {
         let container = GetContainer()
@@ -438,6 +477,17 @@ import UIKit
         defaults.set(isUse, forKey: UseCloudRealmKey)
         NovelSpeakerNotificationTool.AnnounceRealmSettingChanged()
     }
+    static let UseRealmStoryCloudRealmKey = "RealmUtil_RealmStoryUseCloudRealm"
+    static func IsUseRealmStoryCloudRealm() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [UseRealmStoryCloudRealmKey: false])
+        return defaults.bool(forKey: UseRealmStoryCloudRealmKey)
+    }
+    static func SetIsUseRealmStoryCloudRealm(isUse:Bool) {
+        let defaults = UserDefaults.standard
+        defaults.set(isUse, forKey: UseRealmStoryCloudRealmKey)
+        //NovelSpeakerNotificationTool.AnnounceRealmSettingChanged()
+    }
     static func GetRealm() throws -> Realm {
         if IsUseCloudRealm() {
             if syncEngine == nil {
@@ -446,6 +496,15 @@ import UIKit
             return try GetCloudRealm()
         }
         return try GetLocalRealm()
+    }
+    static func GetRealmStoryRealm() throws -> Realm {
+        if IsUseRealmStoryCloudRealm() {
+            if realmStorySyncEngine == nil {
+                try EnableRealmStorySyncEngine()
+            }
+            return try GetRealmStoryCloudRealm()
+        }
+        return try GetRealmStoryLocalRealm()
     }
     @objc static func IsValidRealmData() -> Bool {
         return RealmGlobalState.GetInstance() != nil
@@ -505,7 +564,7 @@ import UIKit
 
     static func LocalOnlyWrite(block:((_ realm:Realm)->Void)) {
         autoreleasepool {
-            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else {
+            guard let realm = try? RealmUtil.GetRealmStoryRealm() else {
                 print("realm get failed.")
                 return
             }
@@ -515,7 +574,7 @@ import UIKit
     
     static func LocalOnlyWrite(withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Void)) {
         autoreleasepool {
-            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else {
+            guard let realm = try? RealmUtil.GetRealmStoryRealm() else {
                 print("realm get failed.")
                 return
             }
@@ -576,7 +635,7 @@ protocol CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 //guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
+                guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
                 realm.refresh()
                 return realm.objects(RealmSpeechQueue.self).filter({ (speechQueue) -> Bool in
                     return !speechQueue.isDeleted && speechQueue.targetStoryIDArray.contains(self.id)
@@ -623,7 +682,7 @@ protocol CanWriteIsDeleted {
     static func SearchStory(novelID:String, chapterNumber:Int) -> RealmStory? {
         return autoreleasepool {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
+            guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
             realm.refresh()
             if let result = realm.object(ofType: RealmStory.self, forPrimaryKey: CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber)), result.isDeleted == false {
                 return result
@@ -635,7 +694,7 @@ protocol CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmStory>? {
         return autoreleasepool {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
+            guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
             realm.refresh()
             return realm.objects(RealmStory.self).filter("isDeleted = false")
         }
@@ -651,7 +710,7 @@ protocol CanWriteIsDeleted {
     static func SearchStoryFrom(storyID:String) -> RealmStory? {
         return autoreleasepool {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
+            guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
             realm.refresh()
             if let result = realm.object(ofType: RealmStory.self, forPrimaryKey: storyID), result.isDeleted == false {
                 return result
@@ -662,7 +721,7 @@ protocol CanWriteIsDeleted {
     static func SearchStoryFrom(novelID:String) -> Results<RealmStory>? {
         return autoreleasepool {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
+            guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
             realm.refresh()
             return realm.objects(RealmStory.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         }
@@ -1384,7 +1443,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 //guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                guard let realm = try? RealmUtil.GetLocalOnlyRealm() else { return nil }
+                guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
                 realm.refresh()
                 return realm.objects(RealmStory.self).filter({ (story) -> Bool in
                     return !story.isDeleted && self.targetStoryIDArray.contains(story.id)

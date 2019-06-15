@@ -194,6 +194,7 @@ class NovelDownloader : NSObject {
                     if chapterNumber == 1 {
                         //story.lastReadDate = Date(timeIntervalSince1970: 60)
                     }
+                    let storyID = story.id
                     RealmUtil.LocalOnlyWrite { (realm) in
                         /* // 通常の更新時にはタグの更新はしないでおきます
                          if let keywordArray = htmlStory.keyword {
@@ -205,7 +206,6 @@ class NovelDownloader : NSObject {
                          */
                         realm.add(story, update: .modified)
                     }
-                    let storyID = story.id
                     RealmUtil.Write { (realm) in
                         novel.m_lastChapterStoryID = storyID
                         novel.lastDownloadDate = queuedDate
