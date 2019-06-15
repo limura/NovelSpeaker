@@ -50,7 +50,7 @@
                         <constraints>
                             <constraint firstAttribute="width" secondItem="JYf-xN-EC1" secondAttribute="height" multiplier="1:1" id="nKa-i9-nV7"/>
                         </constraints>
-                        <state key="normal" image="LikeStar.png"/>
+                        <state key="normal" image="NotLikeStar.png"/>
                         <connections>
                             <action selector="likeButtonClicked:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="XFc-Zj-QJT"/>
                         </connections>
@@ -92,7 +92,7 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="LikeStar.png" width="17.691429138183594" height="17.691429138183594"/>
         <image name="NEW!.png" width="43" height="43"/>
+        <image name="NotLikeStar.png" width="17.691429138183594" height="17.691429138183594"/>
     </resources>
 </document>
