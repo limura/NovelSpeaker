@@ -370,7 +370,7 @@ class EditBookViewController: UIViewController {
     }
     
     func saveCurrentStory() {
-        RealmUtil.LocalOnlyWrite { (realm) in
+        RealmUtil.RealmStoryWrite { (realm) in
             currentStory.content = storyTextView.text
             realm.add(currentStory, update: .modified)
         }

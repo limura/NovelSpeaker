@@ -222,7 +222,7 @@ class CoreDataToRealmTool: NSObject {
                 continue
             }
             let story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber)
-            RealmUtil.LocalOnlyWrite { (realm) in
+            RealmUtil.RealmStoryWrite { (realm) in
                 if let readLocation = storyCoreData.readLocation as? Int {
                     story.readLocation = readLocation
                 }
@@ -304,7 +304,7 @@ class CoreDataToRealmTool: NSObject {
                 }
             }
 
-            RealmUtil.LocalOnlyWrite { (realm) in
+            RealmUtil.RealmStoryWrite { (realm) in
                 // chapterNumber が最後の章に関しては、
                 if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
                     // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する

@@ -1092,7 +1092,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         realm.add(novel, update: .modified)
                     }
                     let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
-                    RealmUtil.LocalOnlyWrite { (realm) in
+                    RealmUtil.RealmStoryWrite { (realm) in
                         realm.add(story, update: .modified)
                     }
                     nextViewController.targetNovel = novel

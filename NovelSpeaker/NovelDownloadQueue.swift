@@ -195,7 +195,7 @@ class NovelDownloader : NSObject {
                         //story.lastReadDate = Date(timeIntervalSince1970: 60)
                     }
                     let storyID = story.id
-                    RealmUtil.LocalOnlyWrite { (realm) in
+                    RealmUtil.RealmStoryWrite { (realm) in
                         /* // 通常の更新時にはタグの更新はしないでおきます
                          if let keywordArray = htmlStory.keyword {
                          for keyword in keywordArray {
@@ -295,7 +295,7 @@ class NovelDownloader : NSObject {
                             chapterNumber = 0 // あとで +1 して downloadOnce() が呼ばれるので。
                         }else{
                             let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: 1) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: 1)
-                            RealmUtil.LocalOnlyWrite { (realm) in
+                            RealmUtil.RealmStoryWrite { (realm) in
                                 story.content = htmlStory.content ?? ""
                                 story.subtitle = htmlStory.subtitle ?? ""
                                 //story.downloadDate = Date()

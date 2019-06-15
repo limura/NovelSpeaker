@@ -692,7 +692,7 @@ class NovelSpeakerUtility: NSObject {
                 let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
                 guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data))  else { break }
                 let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: no) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: no)
-                RealmUtil.LocalOnlyWrite { (realm) in
+                RealmUtil.RealmStoryWrite { (realm) in
                     story.content = content
                     story.url = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: no, end: end.boolValue)
                     if currentReadingChapterNumber == no {
@@ -770,7 +770,7 @@ class NovelSpeakerUtility: NSObject {
                 let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
                 guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data))  else { break }
                 let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: no) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: no)
-                RealmUtil.LocalOnlyWrite { (realm) in
+                RealmUtil.RealmStoryWrite { (realm) in
                     story.content = content
                     if currentReadingChapterNumber == no, let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
                         story.readLocation = current_reading_chapter_read_location.intValue
@@ -785,7 +785,7 @@ class NovelSpeakerUtility: NSObject {
             }
             no -= 1
             if no > 0, let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: no), let last_download_url = novel.object(forKey: "last_download_url") as? String {
-                RealmUtil.LocalOnlyWrite { (realm) in
+                RealmUtil.RealmStoryWrite { (realm) in
                     story.url = last_download_url
                 }
             }
@@ -810,7 +810,7 @@ class NovelSpeakerUtility: NSObject {
             for story in storys {
                 no += 1
                 guard let story = story as? String else { continue }
-                RealmUtil.LocalOnlyWrite() { (realm) in
+                RealmUtil.RealmStoryWrite() { (realm) in
                     if let realmStory = RealmStory.SearchStory(novelID: novelID, chapterNumber: no) {
                         realmStory.content = story
                     }else{
@@ -1294,7 +1294,7 @@ class NovelSpeakerUtility: NSObject {
                         data = contentData
                     }
                     let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: chapterNumber.intValue) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber.intValue)
-                    RealmUtil.LocalOnlyWrite { (realm) in
+                    RealmUtil.RealmStoryWrite { (realm) in
                         if let readLocation = storyDic.object(forKey: "readLocation") as? NSNumber {
                             story.readLocation = readLocation.intValue
                         }

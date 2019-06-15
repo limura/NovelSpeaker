@@ -562,7 +562,7 @@ import UIKit
         }
     }
 
-    static func LocalOnlyWrite(block:((_ realm:Realm)->Void)) {
+    static func RealmStoryWrite(block:((_ realm:Realm)->Void)) {
         autoreleasepool {
             guard let realm = try? RealmUtil.GetRealmStoryRealm() else {
                 print("realm get failed.")
@@ -572,7 +572,7 @@ import UIKit
         }
     }
     
-    static func LocalOnlyWrite(withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Void)) {
+    static func RealmStoryWrite(withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Void)) {
         autoreleasepool {
             guard let realm = try? RealmUtil.GetRealmStoryRealm() else {
                 print("realm get failed.")
@@ -747,7 +747,7 @@ protocol CanWriteIsDeleted {
                 queue.unref(realm:realm, storyID: self.id)
             }
         }
-        RealmUtil.LocalOnlyWrite { (realm) in
+        RealmUtil.RealmStoryWrite { (realm) in
             RealmUtil.LocalOnlyDelete(realm: realm, model: self)
         }
     }
@@ -965,7 +965,7 @@ extension RealmStory: CanWriteIsDeleted {
         novel.downloadDateArray.append(novel.lastDownloadDate)
         let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
         story.content = content
-        RealmUtil.LocalOnlyWrite { (realm) in
+        RealmUtil.RealmStoryWrite { (realm) in
             realm.add(story, update: .modified)
         }
         novel.m_lastChapterStoryID = story.id
@@ -986,7 +986,7 @@ extension RealmStory: CanWriteIsDeleted {
             if chapterNumber != 1 {
                 //story.lastReadDate = Date(timeIntervalSinceNow: -60)
             }
-            RealmUtil.LocalOnlyWrite { (realm) in
+            RealmUtil.RealmStoryWrite { (realm) in
                 realm.add(story, update: .modified)
             }
             chapterNumber += 1
@@ -1027,7 +1027,7 @@ extension RealmStory: CanWriteIsDeleted {
         if let storyUrl = htmlStory.url {
             story.url = storyUrl
         }
-        RealmUtil.LocalOnlyWrite { (realm) in
+        RealmUtil.RealmStoryWrite { (realm) in
             //story.lastReadDate = Date(timeIntervalSince1970: 60)
             realm.add(story, update: .modified)
         }
