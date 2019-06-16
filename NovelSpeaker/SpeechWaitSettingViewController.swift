@@ -232,7 +232,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                         let newSpeechWaitConfig = RealmSpeechWaitConfig()
                         newSpeechWaitConfig.targetText = text
                         RealmUtil.Write { (realm) in
-                            realm.add(newSpeechWaitConfig)
+                            realm.add(newSpeechWaitConfig, update: .modified)
                         }
                         self.form.append(self.createSpeechWaitCells(speechWaitSetting: newSpeechWaitConfig))
                         DispatchQueue.main.async {

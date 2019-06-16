@@ -1095,7 +1095,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     RealmUtil.RealmStoryWrite { (realm) in
                         realm.add(story, update: .modified)
                     }
-                    nextViewController.targetNovel = novel
+                    nextViewController.targetNovelID = novel.novelID
                 }
                 break
             default:

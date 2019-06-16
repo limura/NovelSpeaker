@@ -26,8 +26,6 @@ import UIKit
     static let lockRealmStory = NSLock()
     static var realmRealmStoryCache:[String:Realm] = [:]
     
-    static var syncEngineDispatchQueue:DispatchQueue = DispatchQueue.main
-    
     static var writeCount = 0
     static let writeCountPullInterval = 10 // realm.write を何回したら pull するか
 

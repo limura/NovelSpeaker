@@ -157,7 +157,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         case .novelUpdatedAtWithFolder:
             fallthrough
         case .novelUpdatedAt:
-            return Array(allNovels.sorted(byKeyPath: "lastDownloadDate", ascending: true))
+            return Array(allNovels.sorted(byKeyPath: "lastDownloadDate", ascending: false))
         case .writer:
             return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
         case .title:
@@ -516,6 +516,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }
             print("targetChapterNumber: \(targetChapterNumber), novelList.count: \(novelList.count)")
             if novelList.count < targetChapterNumber {
+                let nextViewStoryID = novelList.first?.id
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogTwoButton(
                         viewController: self,
@@ -523,8 +524,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                         message: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber", comment: "読み上げ位置がダウンロードされていない章を示しています。この小説の追加の章のダウンロードを試みますか？"),
                         button1Title: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OpenFirstStory", comment: "最初の章を開く"),
                         button1Action: {
-                            if let story = novelList.first {
-                                self.nextViewStoryID = story.id
+                            if let nextViewStoryID = nextViewStoryID {
+                                self.nextViewStoryID = nextViewStoryID
                                 self.isNextViewNeedResumeSpeech = isNeedSpeech
                                 self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
                             }

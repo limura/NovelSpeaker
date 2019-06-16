@@ -71,13 +71,17 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         speaker.speech(text)
     }
     func updateTitleCell(speechSectionConfig:RealmSpeechSectionConfig) {
+        let name = speechSectionConfig.name
+        let startText = speechSectionConfig.startText
+        let endText = speechSectionConfig.endText
+        let speakerName = speechSectionConfig.speaker?.name
         DispatchQueue.main.async {
-            guard let row = self.form.rowBy(tag: "TitleLabelRow-\(speechSectionConfig.name)") as? LabelRow else {
+            guard let row = self.form.rowBy(tag: "TitleLabelRow-\(name)") as? LabelRow else {
                 return
             }
-            row.title = "\(speechSectionConfig.name): \(speechSectionConfig.startText) …… \(speechSectionConfig.endText)"
-            if let speaker = speechSectionConfig.speaker {
-                row.value = speaker.name
+            row.title = "\(name): \(startText) …… \(endText)"
+            if let speakerName = speakerName {
+                row.value = speakerName
             }
             row.updateCell()
         }

@@ -140,7 +140,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             }
             self.chapterSlider.minimumValue = 1.0
             self.chapterSlider.maximumValue = Float(lastChapterNumber) + Float(0.01)
-            self.chapterSlider.value = Float(story.chapterNumber)
+            self.chapterSlider.value = Float(chapterNumber)
             
             self.chapterPositionLabel.text = "\(chapterNumber)/\(lastChapterNumber)"
             if let constraint = self.chapterPositionLabelWidthConstraint {
@@ -346,8 +346,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "EditUserTextSegue" {
-            if let nextViewController = segue.destination as? EditBookViewController, let storyID = self.storyID, let novel = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID)) {
-                nextViewController.targetNovel = novel
+            if let nextViewController = segue.destination as? EditBookViewController, let storyID = self.storyID {
+                nextViewController.targetNovelID = RealmStory.StoryIDToNovelID(storyID: storyID)
             }
         }else if segue.identifier == "NovelDetailViewPushSegue" {
             guard let nextViewController = segue.destination as? NovelDetailViewController, let storyID = self.storyID else { return }

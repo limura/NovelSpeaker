@@ -11,7 +11,7 @@ import RealmSwift
 import SZTextView
 
 class EditBookViewController: UIViewController {
-    public var targetNovel:RealmNovel? = nil
+    public var targetNovelID:String = ""
     
     @IBOutlet weak var titleTextField: UITextField!
     @IBOutlet weak var movePreviousButton: UIButton!
@@ -40,14 +40,14 @@ class EditBookViewController: UIViewController {
     //var storyTextViewBottomConstraint:NSLayoutConstraint? = nil
     //var chapterNumberIndicatorLabelWidthConstraint:NSLayoutConstraint? = nil
     var fontSizeObserveToken:NotificationToken? = nil
-    var currentStory:RealmStory = RealmStory()
+    var currentStoryID:String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         initWidgets()
-        if let novel = targetNovel {
-            applyNovel(novel: novel)
+        if let novel = RealmNovel.SearchNovelFrom(novelID: self.targetNovelID) {
+            applyNovel(novelID: novel.novelID)
         }else{
             navigationController?.popViewController(animated: true)
         }
@@ -90,19 +90,18 @@ class EditBookViewController: UIViewController {
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
-    func applyNovel(novel:RealmNovel) {
+    func applyNovel(novelID:String) {
+        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
         titleTextField.text = novel.title
         if let story = novel.readingChapter {
-            setStory(story: story, novel: novel)
+            setStory(storyID: story.id)
         }else if let story = novel.linkedStorys?.first {
             print("load chapter: \(story.chapterNumber)")
-            setStory(story: story, novel: novel)
+            setStory(storyID: story.id)
         }else{
-            let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
-            currentStory = story
-            print("create new chapter: 1, \(story.id)")
+            currentStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: 1)
             saveCurrentStory()
-            setStory(story: story, novel: novel)
+            setStory(storyID: currentStoryID)
         }
     }
     
@@ -321,8 +320,19 @@ class EditBookViewController: UIViewController {
         }
     }
 
-    func setStory(story:RealmStory, novel:RealmNovel) {
+    func setStory(storyID:String) {
         DispatchQueue.main.async {
+            let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+            let story:RealmStory
+            if let storyObj = RealmStory.SearchStoryFrom(storyID: storyID) {
+                story = storyObj
+            }else{
+                story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: RealmStory.StoryIDToChapterNumber(storyID: storyID))
+                RealmUtil.RealmStoryWrite { (realm) in
+                    realm.add(story, update: .modified)
+                }
+            }
             if let linkedStoryArray = novel.linkedStorys {
                 let maxChapterNumber = linkedStoryArray.count
                 self.chapterNumberIndicatorLabel.text = "\(story.chapterNumber)/\(maxChapterNumber)"
@@ -363,25 +373,31 @@ class EditBookViewController: UIViewController {
                 self.storyTextView.selectedRange = range
                 self.storyTextView.scrollRangeToVisible(range)
             }
-            self.currentStory = story
+            self.currentStoryID = storyID
             self.saveCurrentStory()
         }
     }
     
     func saveCurrentStory() {
+        let content = storyTextView.text
         RealmUtil.RealmStoryWrite { (realm) in
-            currentStory.content = storyTextView.text
-            realm.add(currentStory, update: .modified)
+            let story:RealmStory
+            if let storyObj = RealmStory.SearchStoryFrom(storyID: self.currentStoryID) {
+                story = storyObj
+            }else{
+                story = RealmStory.CreateNewStory(novelID: RealmStory.StoryIDToNovelID(storyID: self.currentStoryID), chapterNumber: 1)
+            }
+            story.content = content
+            realm.add(story, update: .modified)
         }
     }
     func saveCurrentNovel() {
-        if let novel = targetNovel {
-            RealmUtil.Write { (realm) in
-                if let title = titleTextField.text, title.count > 0 {
-                    novel.title = title
-                }
-                realm.add(novel, update: .modified)
+        guard let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID) else { return }
+        RealmUtil.Write { (realm) in
+            if let title = titleTextField.text, title.count > 0 {
+                novel.title = title
             }
+            realm.add(novel, update: .modified)
         }
     }
 
@@ -392,46 +408,43 @@ class EditBookViewController: UIViewController {
     }
     @IBAction func movePreviousButtonClicked(_ sender: Any) {
         saveCurrentStory()
-        let chapterNumber = currentStory.chapterNumber - 1
-        if let novel = targetNovel, let story = novel.linkedStorys?.filter("chapterNumber = %@", chapterNumber).first {
-            setStory(story: story, novel: novel)
-        }else{
-            print("chapter: \(chapterNumber) not found")
-        }
+        let chapterNumber = RealmStory.StoryIDToChapterNumber(storyID: currentStoryID) - 1
+        setStory(storyID: RealmStory.CreateUniqueID(novelID: targetNovelID, chapterNumber: chapterNumber))
     }
     @IBAction func moveNextButtonClicked(_ sender: Any) {
         saveCurrentStory()
-        let chapterNumber = currentStory.chapterNumber + 1
-        if let novel = targetNovel, let story = novel.linkedStorys?.filter("chapterNumber = %@", chapterNumber).first {
-            setStory(story: story, novel: novel)
-        }else{
-            print("chapter: \(chapterNumber) not found")
-        }
+        let chapterNumber = RealmStory.StoryIDToChapterNumber(storyID: currentStoryID) + 1
+        setStory(storyID: RealmStory.CreateUniqueID(novelID: targetNovelID, chapterNumber: chapterNumber))
     }
     @IBAction func chapterSliderChanged(_ sender: Any) {
         saveCurrentStory()
         let chapterNumber = Int(chapterSlider.value)
-        if let novel = targetNovel, let story = novel.linkedStorys?.filter("chapterNumber = %@", chapterNumber).first {
-            setStory(story: story, novel: novel)
-        }else{
-            print("chapter: \(chapterNumber) not found")
-        }
+        setStory(storyID: RealmStory.CreateUniqueID(novelID: targetNovelID, chapterNumber: chapterNumber))
     }
     @IBAction func addChapterButtonClicked(_ sender: Any) {
         saveCurrentStory()
 
-        if let novel = targetNovel, let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
-            let newStory = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: lastStory.chapterNumber + 1)
-            setStory(story: newStory, novel: novel)
+        if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
+            let newStoryID = RealmStory.CreateUniqueID(novelID: targetNovelID, chapterNumber: lastStory.chapterNumber + 1)
+            RealmUtil.Write { (realm) in
+                novel.m_lastChapterStoryID = newStoryID
+                novel.lastDownloadDate = Date()
+            }
+            setStory(storyID: newStoryID)
         }
     }
     @IBAction func deleteChapterButtonClicked(_ sender: Any) {
         // memo: 削除できるのは最後の章だけ(のはず)です。
-        RealmUtil.Write { (realm) in
-            realm.delete(currentStory)
+        RealmUtil.RealmStoryWrite { (realm) in
+            if let story = RealmStory.SearchStoryFrom(storyID: currentStoryID) {
+                realm.delete(story)
+            }
         }
-        if let novel = targetNovel, let story = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
-            setStory(story: story, novel: novel)
+        if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let story = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
+            RealmUtil.Write { (realm) in
+                novel.m_lastChapterStoryID = story.id
+            }
+            setStory(storyID: story.id)
         }else{
             print("last chapter not found")
         }
