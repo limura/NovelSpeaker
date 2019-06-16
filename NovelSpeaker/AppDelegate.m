@@ -57,7 +57,7 @@ void uncaughtExceptionHandler(NSException *exception)
     // [NovelSpeakerUtility InsertDefaultSettingsIfNeeded];
     
     // TODO: RunLoop のを使わないのであれば消す
-    [RealmUtil startRealmRunLoopThread];
+    //[RealmUtil startRealmRunLoopThread];
     [NovelSpeakerUtility StartAllLongLivedOperationIDWatcher];
     
     UIViewController* toplevelViewController = nil;
