@@ -152,25 +152,25 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         }
     }
     
-    func setStoryWithoutSetToStorySpeaker(story:RealmStory) {
+    func setStoryWithoutSetToStorySpeaker(storyID:String) {
+        guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else { return }
         let content = story.content
         let storyID = story.id
+        let readLocation = story.readLocation
         self.applyChapterListChange()
         DispatchQueue.main.async {
-            if let textViewText = self.textView.text, textViewText != story.content {
+            if let textViewText = self.textView.text, textViewText != content {
                 if let content = content {
                     self.textView.text = content
                 }else{
                     self.textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
                 }
                 self.textView.select(self)
-                self.textView.selectedRange = NSRange(location: story.readLocation, length: 1)
-                self.textViewScrollTo(readLocation: story.readLocation)
+                self.textView.selectedRange = NSRange(location: readLocation, length: 1)
+                self.textViewScrollTo(readLocation: readLocation)
             }
             self.storyID = storyID
-            DispatchQueue.main.async {
-                self.observeStory(storyID: storyID)
-            }
+            self.observeStory(storyID: storyID)
         }
     }
     
@@ -214,8 +214,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                 for property in properties {
                     // content が書き換わった時のみを監視します。
                     // でないと lastReadDate とかが書き換わった時にも表示の更新が走ってしまいます。
-                    if property.name == "contentZiped", let story = RealmStory.SearchStoryFrom(storyID: storyID) {
-                        self?.setStoryWithoutSetToStorySpeaker(story: story)
+                    if property.name == "contentZiped" {
+                        self?.setStoryWithoutSetToStorySpeaker(storyID: storyID)
                     }
                 }
             case .deleted:
@@ -493,8 +493,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         }
     }
     func storySpeakerStoryChanged(storyID:String){
-        guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else { return }
-        setStoryWithoutSetToStorySpeaker(story: story)
+        setStoryWithoutSetToStorySpeaker(storyID: storyID)
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false
             self.storySpeaker.StartSpeech(withMaxSpeechTimeReset: true)

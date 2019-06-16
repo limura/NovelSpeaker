@@ -259,10 +259,9 @@ class EditBookViewController: UIViewController {
             fontSizeObserveToken = displaySetting.observe({ (change) in
                 switch change {
                 case .change(_):
-                    if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
-                        DispatchQueue.main.async {
-                            self.storyTextView.font = displaySetting.font
-                        }
+                    DispatchQueue.main.async {
+                        guard let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { return }
+                        self.storyTextView.font = displaySetting.font
                     }
                 case .error(_):
                     break
