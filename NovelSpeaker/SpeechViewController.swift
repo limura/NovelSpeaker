@@ -116,18 +116,18 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         navigationItem.rightBarButtonItems = barButtonArray
         navigationItem.title = novel.title
         observeNovel(novelID: novel.novelID)
+        self.observeStoryArray(novelID: novel.novelID)
     }
     
-    func setStoryWithoutSetToStorySpeaker(story:RealmStory) {
+    func applyChapterListChange() {
+        guard let storyID = self.storyID, let story = RealmStory.SearchStoryFrom(storyID: storyID) else { return }
         let novelID = story.novelID
         let chapterNumber = story.chapterNumber
-        let content = story.content
-        let storyID = story.id
         DispatchQueue.main.async {
             guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let lastChapterNumber = novel.lastChapterNumber else {
                 return
             }
-
+            
             if chapterNumber <= 1 {
                 self.previousChapterButton.isEnabled = false
             }else{
@@ -149,7 +149,14 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             self.chapterPositionLabel.sizeToFit()
             self.chapterPositionLabelWidthConstraint = self.chapterPositionLabel.widthAnchor.constraint(equalToConstant: self.chapterPositionLabel.frame.width)
             self.chapterPositionLabelWidthConstraint.isActive = true
-            
+        }
+    }
+    
+    func setStoryWithoutSetToStorySpeaker(story:RealmStory) {
+        let content = story.content
+        let storyID = story.id
+        self.applyChapterListChange()
+        DispatchQueue.main.async {
             if let textViewText = self.textView.text, textViewText != story.content {
                 if let content = content {
                     self.textView.text = content
@@ -161,8 +168,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                 self.textViewScrollTo(readLocation: story.readLocation)
             }
             self.storyID = storyID
-            self.observeStory(storyID: storyID)
-            self.observeStoryArray(storyID: storyID)
+            DispatchQueue.main.async {
+                self.observeStory(storyID: storyID)
+            }
         }
     }
     
@@ -215,9 +223,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             }
         })
     }
-    func observeStoryArray(storyID:String) {
-        guard let storyArray = RealmStory.GetAllObjects()?.filter("novelID = %@", RealmStory.StoryIDToNovelID(storyID: storyID)) else { return }
-        let storyID = storyID
+    func observeStoryArray(novelID:String) {
+        guard let storyArray = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID) else { return }
         self.storyArrayObserverToken = storyArray.observe({ [weak self] (changes) in
             switch changes {
             case .initial(_):
@@ -225,12 +232,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             case .update(_, let deletions, let insertions, _):
                 if deletions.count > 0 || insertions.count > 0 {
                     DispatchQueue.main.async {
-                        guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else {
-                            // 表示しているstoryが削除されたっぽい
-                            return
-                        }
                         print("SpeechViewController: story delete or inserted. update display")
-                        self?.setStoryWithoutSetToStorySpeaker(story: story)
+                        self?.applyChapterListChange()
                     }
                 }
             case .error(_):
