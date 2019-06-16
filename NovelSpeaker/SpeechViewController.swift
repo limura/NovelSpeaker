@@ -157,6 +157,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         let content = story.content
         let storyID = story.id
         let readLocation = story.readLocation
+        if let currentStoryID = self.storyID, currentStoryID != storyID {
+            self.observeStory(storyID: storyID)
+        }
+        self.storyID = storyID
         self.applyChapterListChange()
         DispatchQueue.main.async {
             if let textViewText = self.textView.text, textViewText != content {
@@ -169,8 +173,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                 self.textView.selectedRange = NSRange(location: readLocation, length: 1)
                 self.textViewScrollTo(readLocation: readLocation)
             }
-            self.storyID = storyID
-            self.observeStory(storyID: storyID)
         }
     }
     
@@ -493,6 +495,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         }
     }
     func storySpeakerStoryChanged(storyID:String){
+        print("storySpeakerStoryChanged() in.")
         setStoryWithoutSetToStorySpeaker(storyID: storyID)
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false
