@@ -61,56 +61,60 @@ class MultipleNovelIDSelectorViewController: FormViewController {
     }
 
     func observeNovelArray() {
-        guard let allNovels = RealmNovel.GetAllObjects() else { return }
-        self.novelArrayNotificationToken = allNovels.observe({ (change) in
-            switch change {
-            case .initial(_):
-                break
-            case .update(_, let deletions, let insertions, let modifications):
-                if deletions.count > 0 || insertions.count > 0 || modifications.count > 0 {
-                    DispatchQueue.main.async {
-                        self.form.removeAll()
-                        self.createSelectorCells()
+        autoreleasepool {
+            guard let allNovels = RealmNovel.GetAllObjects() else { return }
+            self.novelArrayNotificationToken = allNovels.observe({ (change) in
+                switch change {
+                case .initial(_):
+                    break
+                case .update(_, let deletions, let insertions, let modifications):
+                    if deletions.count > 0 || insertions.count > 0 || modifications.count > 0 {
+                        DispatchQueue.main.async {
+                            self.form.removeAll()
+                            self.createSelectorCells()
+                        }
                     }
+                case .error(_):
+                    break
                 }
-            case .error(_):
-                break
-            }
-        })
+            })
+        }
     }
     
     func createSelectorCells() {
-        guard var allNovels = RealmNovel.GetAllObjects() else { return }
         let section = Section()
-        if IsUseAnyNovelID {
-            section <<< CheckRow(MultipleNovelIDSelectorViewController.AnyTypeTag) {
-                $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AnyTargetName", comment: "全ての小説")
-                $0.value = self.SelectedNovelIDSet.contains(MultipleNovelIDSelectorViewController.AnyTypeTag)
-            }.onChange({ (row) in
-                guard let value = row.value else { return }
-                if value {
-                    self.SelectedNovelIDSet.insert(MultipleNovelIDSelectorViewController.AnyTypeTag)
-                }else{
-                    self.SelectedNovelIDSet.remove(MultipleNovelIDSelectorViewController.AnyTypeTag)
-                }
-            })
-        }
-        if self.filterString.count > 0 {
-            allNovels = allNovels.filter("title CONTAINS %@ OR writer CONTAINS %@", self.filterString, self.filterString)
-        }
-        for novel in allNovels {
-            let novelID = novel.novelID
-            section <<< CheckRow(novelID) {
-                $0.title = novel.title
-                $0.value = self.SelectedNovelIDSet.contains(novelID)
-            }.onChange({ (row) in
-                guard let value = row.value else { return }
-                if value {
-                    self.SelectedNovelIDSet.insert(novelID)
-                }else{
-                    self.SelectedNovelIDSet.remove(novelID)
-                }
-            })
+        autoreleasepool {
+            guard var allNovels = RealmNovel.GetAllObjects() else { return }
+            if IsUseAnyNovelID {
+                section <<< CheckRow(MultipleNovelIDSelectorViewController.AnyTypeTag) {
+                    $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AnyTargetName", comment: "全ての小説")
+                    $0.value = self.SelectedNovelIDSet.contains(MultipleNovelIDSelectorViewController.AnyTypeTag)
+                }.onChange({ (row) in
+                    guard let value = row.value else { return }
+                    if value {
+                        self.SelectedNovelIDSet.insert(MultipleNovelIDSelectorViewController.AnyTypeTag)
+                    }else{
+                        self.SelectedNovelIDSet.remove(MultipleNovelIDSelectorViewController.AnyTypeTag)
+                    }
+                })
+            }
+            if self.filterString.count > 0 {
+                allNovels = allNovels.filter("title CONTAINS %@ OR writer CONTAINS %@", self.filterString, self.filterString)
+            }
+            for novel in allNovels {
+                let novelID = novel.novelID
+                section <<< CheckRow(novelID) {
+                    $0.title = novel.title
+                    $0.value = self.SelectedNovelIDSet.contains(novelID)
+                }.onChange({ (row) in
+                    guard let value = row.value else { return }
+                    if value {
+                        self.SelectedNovelIDSet.insert(novelID)
+                    }else{
+                        self.SelectedNovelIDSet.remove(novelID)
+                    }
+                })
+            }
         }
         form +++ section
     }

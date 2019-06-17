@@ -478,6 +478,7 @@
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseNoStory" = "It seems that no text of the novel has been downloaded. Do you try to redownload this novel?";
 "BookShelfRATreeViewController_BookshelfNoListed" = "(Uncategorized)";
 "BookShelfRATreeViewController_SortTypeBookshelf" = "Original folder order";
+"BookShelfRATreeViewController_SortTypeKeywardTag" = "Keyword Tag order";
 "BookShelfRATreeViewController_SortTypeUpdateDateWithFilder" = "Last download date (with folder)";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber" = "Indicates a chapter where the reading position has not been downloaded. Do you try to download additional chapters of this novel?";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK" = "Download";

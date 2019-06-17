@@ -50,10 +50,14 @@ class SpeakerSettingsViewController: FormViewController {
     func createSpeakSettingRows(currentSetting:RealmSpeakerSetting) -> Section {
         let targetID = currentSetting.name
         var isDefaultSpeakerSetting = false
-        if let globalState = RealmGlobalState.GetInstance() {
-            if let defaultSpeakerSetting = globalState.defaultSpeaker {
-                if defaultSpeakerSetting.name == targetID {
-                    isDefaultSpeakerSetting = true
+        autoreleasepool {
+            if let globalState = RealmGlobalState.GetInstance() {
+                autoreleasepool {
+                    if let defaultSpeakerSetting = globalState.defaultSpeaker {
+                        if defaultSpeakerSetting.name == targetID {
+                            isDefaultSpeakerSetting = true
+                        }
+                    }
                 }
             }
         }
@@ -95,9 +99,11 @@ class SpeakerSettingsViewController: FormViewController {
             })
         }.onChange({ (row) in
             if let value = row.value {
-                if let setting = RealmSpeakerSetting.SearchFrom(name: targetID) {
-                    RealmUtil.Write { (realm) in
-                        setting.pitch = value
+                autoreleasepool {
+                    if let setting = RealmSpeakerSetting.SearchFrom(name: targetID) {
+                        RealmUtil.Write { (realm) in
+                            setting.pitch = value
+                        }
                     }
                 }
             }
@@ -135,16 +141,20 @@ class SpeakerSettingsViewController: FormViewController {
                     let targetID = String(targetTag.suffix(targetTag.count - 14))
                     targetRow.value = rate
                     targetRow.updateCell()
-                    if let setting = RealmSpeakerSetting.SearchFrom(name: targetID) {
-                        RealmUtil.Write { (realm) in
-                            setting.rate = rate
+                    autoreleasepool {
+                        if let setting = RealmSpeakerSetting.SearchFrom(name: targetID) {
+                            RealmUtil.Write { (realm) in
+                                setting.rate = rate
+                            }
                         }
                     }
                 }
             }else{
-                if let setting = RealmSpeakerSetting.SearchFrom(name: targetID) {
-                    RealmUtil.Write { (realm) in
-                        setting.rate = rate
+                autoreleasepool {
+                    if let setting = RealmSpeakerSetting.SearchFrom(name: targetID) {
+                        RealmUtil.Write { (realm) in
+                            setting.rate = rate
+                        }
                     }
                 }
             }
@@ -166,27 +176,29 @@ class SpeakerSettingsViewController: FormViewController {
                 return self.hideCache[targetID] ?? true
             })
         }.onChange({ (row) in
-            guard let locale = row.value else {
-                return
-            }
-            guard let setting = RealmSpeakerSetting.SearchFrom(name: targetID) else {
-                return
-            }
-            var voiceNames:[String] = []
-            var voiceName = ""
-            RealmUtil.Write { (realm) in
-                let voices = AVSpeechSynthesisVoice.speechVoices().filter({$0.language == locale})
-                voiceNames = voices.map({$0.name})
-                voiceName = voiceNames.first ?? ""
-                if let newVoice = voices.filter({$0.name == voiceName}).first {
-                    setting.voiceIdentifier = newVoice.identifier
+            autoreleasepool {
+                guard let locale = row.value else {
+                    return
                 }
-                setting.locale = locale
-            }
-            if let voiceIdentifierRow = self.form.rowBy(tag: "VoiceIdentifierAlertRow-\(targetID)") as? AlertRow<String> {
-                voiceIdentifierRow.options = voiceNames
-                voiceIdentifierRow.value = voiceName
-                voiceIdentifierRow.updateCell()
+                guard let setting = RealmSpeakerSetting.SearchFrom(name: targetID) else {
+                    return
+                }
+                var voiceNames:[String] = []
+                var voiceName = ""
+                RealmUtil.Write { (realm) in
+                    let voices = AVSpeechSynthesisVoice.speechVoices().filter({$0.language == locale})
+                    voiceNames = voices.map({$0.name})
+                    voiceName = voiceNames.first ?? ""
+                    if let newVoice = voices.filter({$0.name == voiceName}).first {
+                        setting.voiceIdentifier = newVoice.identifier
+                    }
+                    setting.locale = locale
+                }
+                if let voiceIdentifierRow = self.form.rowBy(tag: "VoiceIdentifierAlertRow-\(targetID)") as? AlertRow<String> {
+                    voiceIdentifierRow.options = voiceNames
+                    voiceIdentifierRow.value = voiceName
+                    voiceIdentifierRow.updateCell()
+                }
             }
         })
         <<< AlertRow<String>("VoiceIdentifierAlertRow-\(targetID)") {
@@ -206,17 +218,19 @@ class SpeakerSettingsViewController: FormViewController {
                 return self.hideCache[targetID] ?? true
             })
         }.onChange({ (row) in
-            guard let voiceName = row.value else {
-                return
-            }
-            guard let voice = AVSpeechSynthesisVoice.speechVoices().filter({$0.name == voiceName}).first else {
-                return
-            }
-            guard  let setting = RealmSpeakerSetting.SearchFrom(name: targetID) else {
-                return
-            }
-            RealmUtil.Write { (realm) in
-                setting.voiceIdentifier = voice.identifier
+            autoreleasepool {
+                guard let voiceName = row.value else {
+                    return
+                }
+                guard let voice = AVSpeechSynthesisVoice.speechVoices().filter({$0.name == voiceName}).first else {
+                    return
+                }
+                guard  let setting = RealmSpeakerSetting.SearchFrom(name: targetID) else {
+                    return
+                }
+                RealmUtil.Write { (realm) in
+                    setting.voiceIdentifier = voice.identifier
+                }
             }
         })
         <<< ButtonRow("TestSpeechButtonRow-\(targetID)") {
@@ -225,10 +239,12 @@ class SpeakerSettingsViewController: FormViewController {
                 return self.hideCache[targetID] ?? true
             })
         }.onCellSelection({ (buttonCellOf, button) in
-            guard  let setting = RealmSpeakerSetting.SearchFrom(name: targetID) else {
-                return
+            autoreleasepool {
+                guard  let setting = RealmSpeakerSetting.SearchFrom(name: targetID) else {
+                    return
+                }
+                self.testSpeech(pitch: setting.pitch, rate: setting.rate, identifier: setting.voiceIdentifier, text: self.testText)
             }
-            self.testSpeech(pitch: setting.pitch, rate: setting.rate, identifier: setting.voiceIdentifier, text: self.testText)
         })
         if !isDefaultSpeakerSetting {
             section <<< ButtonRow("RemoveButtonRow-\(targetID)") {
@@ -238,8 +254,10 @@ class SpeakerSettingsViewController: FormViewController {
                 })
             }.onCellSelection({ (buttonCellOf, button) in
                 var settingName = ""
-                if let setting = RealmSpeakerSetting.SearchFrom(name: targetID) {
-                    settingName = setting.name
+                autoreleasepool {
+                    if let setting = RealmSpeakerSetting.SearchFrom(name: targetID) {
+                        settingName = setting.name
+                    }
                 }
                 NiftyUtilitySwift.EasyDialogTwoButton(
                 viewController: self,
@@ -249,11 +267,13 @@ class SpeakerSettingsViewController: FormViewController {
                 button1Action: nil,
                 button2Title: NSLocalizedString("OK_button", comment: "OK"),
                 button2Action: {
-                    guard let setting = RealmSpeakerSetting.SearchFrom(name: targetID) else {
-                        return
-                    }
-                    RealmUtil.Write { (realm) in
-                        setting.delete(realm: realm)
+                    autoreleasepool {
+                        guard let setting = RealmSpeakerSetting.SearchFrom(name: targetID) else {
+                            return
+                        }
+                        RealmUtil.Write { (realm) in
+                            setting.delete(realm: realm)
+                        }
                     }
                     if let index = self.form.firstIndex(of: section) {
                         print("remove section index: \(index)")
@@ -295,29 +315,36 @@ class SpeakerSettingsViewController: FormViewController {
                     rightButtonText: NSLocalizedString("OK_button", comment: "OK"),
                     leftButtonAction: nil,
                     rightButtonAction: { (name) in
-                        if RealmSpeakerSetting.SearchFrom(name: name) != nil {
-                            DispatchQueue.main.async {
-                                NiftyUtilitySwift.EasyDialogOneButton(
-                                    viewController: self,
-                                    title: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorAlready", comment: "既に同じ名前の話者設定が存在します。"),
-                                    message: nil, buttonTitle: nil, buttonAction: nil)
+                        if autoreleasepool(invoking: { () -> Bool in
+                            if RealmSpeakerSetting.SearchFrom(name: name) != nil {
+                                DispatchQueue.main.async {
+                                    NiftyUtilitySwift.EasyDialogOneButton(
+                                        viewController: self,
+                                        title: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorAlready", comment: "既に同じ名前の話者設定が存在します。"),
+                                        message: nil, buttonTitle: nil, buttonAction: nil)
+                                }
+                                return true
+                            }else if name.count <= 0 {
+                                DispatchQueue.main.async {
+                                    NiftyUtilitySwift.EasyDialogOneButton(
+                                        viewController: self,
+                                        title: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorNil", comment: "名前に空文字列は設定できません"),
+                                        message: nil, buttonTitle: nil, buttonAction: nil)
+                                }
+                                return true
                             }
-                            return
-                        }else if name.count <= 0 {
-                            DispatchQueue.main.async {
-                                NiftyUtilitySwift.EasyDialogOneButton(
-                                    viewController: self,
-                                    title: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorNil", comment: "名前に空文字列は設定できません"),
-                                    message: nil, buttonTitle: nil, buttonAction: nil)
-                            }
+                            return false
+                        }) {
                             return
                         }
-                        let newSpeakerSetting = RealmSpeakerSetting()
-                        RealmUtil.Write { (realm) in
-                            newSpeakerSetting.name = name
-                            realm.add(newSpeakerSetting, update: .modified)
+                        autoreleasepool {
+                            let newSpeakerSetting = RealmSpeakerSetting()
+                            RealmUtil.Write { (realm) in
+                                newSpeakerSetting.name = name
+                                realm.add(newSpeakerSetting, update: .modified)
+                            }
+                            self.form.append(self.createSpeakSettingRows(currentSetting: newSpeakerSetting))
                         }
-                        self.form.append(self.createSpeakSettingRows(currentSetting: newSpeakerSetting))
                         DispatchQueue.main.async {
                             NiftyUtilitySwift.EasyDialogOneButton(
                                 viewController: self,
@@ -340,21 +367,27 @@ class SpeakerSettingsViewController: FormViewController {
             self.isRateSettingSync = value
         })
         
-        guard let globalState = RealmGlobalState.GetInstance() else {
-            return
-        }
-        if let defaultSpeaker = globalState.defaultSpeaker {
-            // defaultSpeaker がある場合はそれが一番上です。
-            sections = sections +++ createSpeakSettingRows(currentSetting: defaultSpeaker)
-            if let speakerSettingArray  = RealmSpeakerSetting.GetAllObjects()?.filter("name != %@", defaultSpeaker.name) {
-                for speakerSetting in speakerSettingArray {
-                    sections = sections +++ createSpeakSettingRows(currentSetting: speakerSetting)
-                }
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else {
+                return
             }
-        }else{
-            if let speakerSettingArray  = RealmSpeakerSetting.GetAllObjects() {
-                for speakerSetting in speakerSettingArray {
-                    sections = sections +++ createSpeakSettingRows(currentSetting: speakerSetting)
+            if let defaultSpeaker = globalState.defaultSpeaker {
+                // defaultSpeaker がある場合はそれが一番上です。
+                sections = sections +++ createSpeakSettingRows(currentSetting: defaultSpeaker)
+                autoreleasepool {
+                    if let speakerSettingArray  = RealmSpeakerSetting.GetAllObjects()?.filter("name != %@", defaultSpeaker.name) {
+                        for speakerSetting in speakerSettingArray {
+                            sections = sections +++ createSpeakSettingRows(currentSetting: speakerSetting)
+                        }
+                    }
+                }
+            }else{
+                autoreleasepool {
+                    if let speakerSettingArray  = RealmSpeakerSetting.GetAllObjects() {
+                        for speakerSetting in speakerSettingArray {
+                            sections = sections +++ createSpeakSettingRows(currentSetting: speakerSetting)
+                        }
+                    }
                 }
             }
         }

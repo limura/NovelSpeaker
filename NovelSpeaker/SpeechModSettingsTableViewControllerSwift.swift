@@ -66,9 +66,11 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     }
     
     func addNotificationReceiver(){
-        self.speechModSettingObserveToken = RealmSpeechModSetting.GetAllObjects()?.observe { (collectionChange) in
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
+        autoreleasepool {
+            self.speechModSettingObserveToken = RealmSpeechModSetting.GetAllObjects()?.observe { (collectionChange) in
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
             }
         }
     }
@@ -85,10 +87,12 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        if let speechModSettingArray = GetSpeechModArray() {
-            return (speechModSettingArray.count);
+        return autoreleasepool {
+            if let speechModSettingArray = GetSpeechModArray() {
+                return (speechModSettingArray.count);
+            }
+            return 0
         }
-        return 0
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -100,11 +104,13 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
 
         cell.textLabel?.adjustsFontForContentSizeCategory = true
         cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .body)
-        let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)
-        if modSetting == nil {
-            cell.textLabel?.text = "-"
-        }else{
-            cell.textLabel?.text = String(format: NSLocalizedString("SpeechModSettingsTableViewController_DisplayPattern", comment:"\"%@\" を \"%@\" に"), (modSetting?.before)!, (modSetting?.after)!)
+        autoreleasepool {
+            let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)
+            if modSetting == nil {
+                cell.textLabel?.text = "-"
+            }else{
+                cell.textLabel?.text = String(format: NSLocalizedString("SpeechModSettingsTableViewController_DisplayPattern", comment:"\"%@\" を \"%@\" に"), (modSetting?.before)!, (modSetting?.after)!)
+            }
         }
         return cell
     }
@@ -129,10 +135,14 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
-            if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
-                if let targetModSetting = RealmSpeechModSetting.SearchFrom(beforeString: modSetting.before) {
-                    RealmUtil.Write { (realm)  in
-                        targetModSetting.delete(realm: realm)
+            autoreleasepool {
+                if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
+                    autoreleasepool {
+                        if let targetModSetting = RealmSpeechModSetting.SearchFrom(beforeString: modSetting.before) {
+                            RealmUtil.Write { (realm)  in
+                                targetModSetting.delete(realm: realm)
+                            }
+                        }
                     }
                 }
             }
@@ -144,8 +154,10 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
 
     // セルが選択された時
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
-            PushToCreateSpeechModSettingViewControllerSwift(modSetting: modSetting)
+        autoreleasepool {
+            if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
+                PushToCreateSpeechModSettingViewControllerSwift(modSetting: modSetting)
+            }
         }
     }
     

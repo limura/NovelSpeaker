@@ -99,22 +99,26 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.presentationMode = .segueName(segueName: "textSizeSettingSegue", onDismiss: nil)
             }
             
-            <<< TimeIntervalCountDownRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
+            <<< TimeIntervalCountDownRow() { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
                 let duration = GlobalDataSingleton.getInstance().getGlobalState().maxSpeechTimeInSec
                 //Date(timeIntervalSince1970: duration as! TimeInterval)
                 //Date(timeIntervalSinceReferenceDate: duration as! TimeInterval)
-                $0.minuteInterval = 5
-                if let globalState = RealmGlobalState.GetInstance() {
-                    $0.value = Double(globalState.maxSpeechTimeInSec)
-                }else{
-                    $0.value = 60*60*24-60
+                row.minuteInterval = 5
+                autoreleasepool {
+                    if let globalState = RealmGlobalState.GetInstance() {
+                        row.value = Double(globalState.maxSpeechTimeInSec)
+                    }else{
+                        row.value = 60*60*24-60
+                    }
                 }
             }.onChange({ row in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.maxSpeechTimeInSec = Int(value)
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.maxSpeechTimeInSec = Int(value)
+                    }
+                }
             })
             
             <<< ButtonRow() {
@@ -141,11 +145,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         })
                         .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
                             NiftyUtilitySwift.RegisterUserNotification()
-                            if let globalState = RealmGlobalState.GetInstance() {
-                                RealmUtil.Write(block: { (realm) in
-                                    globalState.isBackgroundNovelFetchEnabled = true
-                                })
-                                NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
+                            autoreleasepool {
+                                if let globalState = RealmGlobalState.GetInstance() {
+                                    RealmUtil.Write { (realm) in
+                                        globalState.isBackgroundNovelFetchEnabled = true
+                                    }
+                                    NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
+                                }
                             }
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: true)
@@ -153,125 +159,163 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         })
                         .build().show()
                 }else{
-                    if let globalState = RealmGlobalState.GetInstance() {
-                        RealmUtil.Write(block: { (realm) in
-                            globalState.isBackgroundNovelFetchEnabled = false
-                        })
-                        NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
+                    autoreleasepool {
+                        if let globalState = RealmGlobalState.GetInstance() {
+                            RealmUtil.Write { (realm) in
+                                globalState.isBackgroundNovelFetchEnabled = false
+                            }
+                            NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
+                        }
                     }
                 }
             })
             
-            <<< SwitchRow("OverrideRubySwitchRow") {
-                $0.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
-                guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else {
-                    $0.value = false
-                    return
+            <<< SwitchRow("OverrideRubySwitchRow") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
+                autoreleasepool {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else {
+                        row.value = false
+                        return
+                    }
+                    row.value = speechOverrideSetting.isOverrideRubyIsEnabled
                 }
-                $0.value = speechOverrideSetting.isOverrideRubyIsEnabled
             }.onChange({ row in
                 self.m_RubySwitchToggleHitCount += 1
-                guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    speechOverrideSetting.isOverrideRubyIsEnabled = value
-                })
+                autoreleasepool {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        speechOverrideSetting.isOverrideRubyIsEnabled = value
+                    }
+                }
             })
-            <<< TextRow("OverrideRubyTextRow") {
-                $0.title = NSLocalizedString("SettingTableViewController_EditNotRubyStringTitle", comment:"非ルビ文字")
-                $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
+            <<< TextRow("OverrideRubyTextRow") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_EditNotRubyStringTitle", comment:"非ルビ文字")
+                row.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
                     let row: RowOf<Bool>! = form.rowBy(tag: "OverrideRubySwitchRow")
                     return row.value ?? false == false
                 })
-                guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else {
-                    $0.value = ""
-                    return
+                autoreleasepool {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else {
+                        row.value = ""
+                        return
+                    }
+                    row.value = speechOverrideSetting.notRubyCharactorStringArray
                 }
-                $0.value = speechOverrideSetting.notRubyCharactorStringArray
             }.onChange({ textRow in
-                guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let value = textRow.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    speechOverrideSetting.notRubyCharactorStringArray = value
-                })
+                autoreleasepool {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let value = textRow.value else { return }
+                    RealmUtil.Write { (realm) in
+                        speechOverrideSetting.notRubyCharactorStringArray = value
+                    }
+                }
             })
-            <<< SwitchRow(){
-                $0.title = NSLocalizedString("SettingTableViewController_DisplayBookmarkPositionOnBookshelf", comment: "本棚に栞の現在位置ゲージを表示する")
-                $0.cell.textLabel?.numberOfLines = 0
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isReadingProgressDisplayEnabled
+            <<< SwitchRow(){ row in
+                row.title = NSLocalizedString("SettingTableViewController_DisplayBookmarkPositionOnBookshelf", comment: "本棚に栞の現在位置ゲージを表示する")
+                row.cell.textLabel?.numberOfLines = 0
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isReadingProgressDisplayEnabled
+                }
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isReadingProgressDisplayEnabled = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isReadingProgressDisplayEnabled = value
+                    }
+                }
             })
-            <<< SwitchRow(){
-                $0.title = NSLocalizedString("SettingTableViewController_OnlyDisplayAddSpeechModSettings", comment: "本文中の長押しメニューを読み替え辞書へ登録のみにする")
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isMenuItemIsAddSpeechModSettingOnly
+            <<< SwitchRow(){ row in
+                row.title = NSLocalizedString("SettingTableViewController_OnlyDisplayAddSpeechModSettings", comment: "本文中の長押しメニューを読み替え辞書へ登録のみにする")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isMenuItemIsAddSpeechModSettingOnly
+                }
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isMenuItemIsAddSpeechModSettingOnly = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isMenuItemIsAddSpeechModSettingOnly = value
+                    }
+                }
             })
-            <<< SwitchRow(){
-                $0.title = NSLocalizedString("SettingTableViewController_ShortSkipIsEnabled", comment: "コントロールセンターの前後の章(トラック)への移動ボタンを、少し前/少し後の文への移動にする")
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isShortSkipEnabled
+            <<< SwitchRow(){ row in
+                row.title = NSLocalizedString("SettingTableViewController_ShortSkipIsEnabled", comment: "コントロールセンターの前後の章(トラック)への移動ボタンを、少し前/少し後の文への移動にする")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isShortSkipEnabled
+                }
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isShortSkipEnabled = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isShortSkipEnabled = value
+                    }
+                }
             })
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_PlaybackDurationIsEnabled", comment: "コントロールセンターの再生時間ゲージを有効にする(表示される時間は概算で、正確な値にはなりません)")
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isPlaybackDurationEnabled
+            <<< SwitchRow() { row in
+                row.title = NSLocalizedString("SettingTableViewController_PlaybackDurationIsEnabled", comment: "コントロールセンターの再生時間ゲージを有効にする(表示される時間は概算で、正確な値にはなりません)")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isPlaybackDurationEnabled
+                }
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isPlaybackDurationEnabled = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isPlaybackDurationEnabled = value
+                    }
+                }
             })
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_DarkThemeIsEnabled", comment: "小説を読む時に背景を暗くする")
-                $0.cell.textLabel?.numberOfLines = 0
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isDarkThemeEnabled
+            <<< SwitchRow() { row in
+                row.title = NSLocalizedString("SettingTableViewController_DarkThemeIsEnabled", comment: "小説を読む時に背景を暗くする")
+                row.cell.textLabel?.numberOfLines = 0
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isDarkThemeEnabled
+                }
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isDarkThemeEnabled = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isDarkThemeEnabled = value
+                    }
+                }
             })
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_PageTurningSoundIsEnabled", comment: "ページめくり時に音を鳴らす")
-                $0.cell.textLabel?.numberOfLines = 0
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isPageTurningSoundEnabled
+            <<< SwitchRow() { row in
+                row.title = NSLocalizedString("SettingTableViewController_PageTurningSoundIsEnabled", comment: "ページめくり時に音を鳴らす")
+                row.cell.textLabel?.numberOfLines = 0
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isPageTurningSoundEnabled
+                }
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isPageTurningSoundEnabled = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isPageTurningSoundEnabled = value
+                    }
+                }
             })
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_IgnoreURISpeechIsEnabled", comment: "URIを読み上げないようにする")
-                $0.cell.textLabel?.numberOfLines = 0
-                guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else { return }
-                $0.value = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
+            <<< SwitchRow() { row in
+                row.title = NSLocalizedString("SettingTableViewController_IgnoreURISpeechIsEnabled", comment: "URIを読み上げないようにする")
+                row.cell.textLabel?.numberOfLines = 0
+                autoreleasepool {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else { return }
+                    row.value = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
+                }
             }.onChange({ (row) in
-                guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    speechOverrideSetting.isIgnoreURIStringSpeechEnabled = value
-                })
+                autoreleasepool {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        speechOverrideSetting.isIgnoreURIStringSpeechEnabled = value
+                    }
+                }
             })
             <<< AlertRow<String>() { row in
                 row.title = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
@@ -281,35 +325,41 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
                 row.options = [noRepeat, rewindToFirstStory, rewindToThisStory]
                 row.value = noRepeat
-                guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else { return }
-                let type = speechOverrideSetting.repeatSpeechType
-                if type == .rewindToFirstStory {
-                    row.value = rewindToFirstStory
-                }
-                if type == .rewindToThisStory {
-                    row.value = rewindToThisStory
+                autoreleasepool {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else { return }
+                    let type = speechOverrideSetting.repeatSpeechType
+                    if type == .rewindToFirstStory {
+                        row.value = rewindToFirstStory
+                    }
+                    if type == .rewindToThisStory {
+                        row.value = rewindToThisStory
+                    }
                 }
             }.onChange({ (row) in
                 let noRepeat = NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
                 let rewindToFirstStory = NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
                 let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
-                guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let typeString = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    if typeString == noRepeat {
-                        speechOverrideSetting.repeatSpeechType = .noRepeat
-                    }else if typeString == rewindToFirstStory {
-                        speechOverrideSetting.repeatSpeechType = .rewindToFirstStory
-                    }else if typeString == rewindToThisStory {
-                        speechOverrideSetting.repeatSpeechType = .rewindToThisStory
+                autoreleasepool {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let typeString = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        if typeString == noRepeat {
+                            speechOverrideSetting.repeatSpeechType = .noRepeat
+                        }else if typeString == rewindToFirstStory {
+                            speechOverrideSetting.repeatSpeechType = .rewindToFirstStory
+                        }else if typeString == rewindToThisStory {
+                            speechOverrideSetting.repeatSpeechType = .rewindToThisStory
+                        }
                     }
-                })
+                }
             })
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
+            <<< SwitchRow() { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
+                }
             }.onChange({ (row) in
                 let judge = row.value
                 if judge! {
@@ -327,56 +377,72 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: true)
                             }
-                            guard let globalState = RealmGlobalState.GetInstance() else { return }
-                            RealmUtil.Write(block: { (realm) in
-                                globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = true
-                            })
+                            autoreleasepool {
+                                guard let globalState = RealmGlobalState.GetInstance() else { return }
+                                RealmUtil.Write { (realm) in
+                                    globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = true
+                                }
+                            }
                         })
                         .build().show()
                 }else{
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
-                    RealmUtil.Write(block: { (realm) in
-                        globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = false
-                    })
+                    autoreleasepool {
+                        guard let globalState = RealmGlobalState.GetInstance() else { return }
+                        RealmUtil.Write { (realm) in
+                            globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = false
+                        }
+                    }
                 }
             })
-            <<< SwitchRow("MixWithOthersSwitchRow") {
-                $0.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)")
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isMixWithOthersEnabled
+            <<< SwitchRow("MixWithOthersSwitchRow") { row in
+                row.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isMixWithOthersEnabled
+                }
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isMixWithOthersEnabled = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isMixWithOthersEnabled = value
+                    }
+                }
             })
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_DuckOthersIsEnabled", comment: "他のアプリの音を小さくする")
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.hidden = .function(["MixWithOthersSwitchRow"], { form -> Bool in
+            <<< SwitchRow() { row in
+                row.title = NSLocalizedString("SettingTableViewController_DuckOthersIsEnabled", comment: "他のアプリの音を小さくする")
+                row.cell.textLabel?.numberOfLines = 0
+                row.hidden = .function(["MixWithOthersSwitchRow"], { form -> Bool in
                     let row: RowOf<Bool>! = form.rowBy(tag: "MixWithOthersSwitchRow")
                     return row.value ?? false == false
                 })
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isDuckOthersEnabled
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isDuckOthersEnabled
+                }
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isDuckOthersEnabled = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isDuckOthersEnabled = value
+                    }
+                }
             })
-            <<< SwitchRow("IsOpenRecentBookInStartTime") {
-                $0.title = NSLocalizedString("SettingTableViewController_IsOpenRecentBookInStartTime", comment: "起動時に前回開いていた小説を開く")
-                $0.cell.textLabel?.numberOfLines = 0
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isOpenRecentNovelInStartTime
+            <<< SwitchRow("IsOpenRecentBookInStartTime") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsOpenRecentBookInStartTime", comment: "起動時に前回開いていた小説を開く")
+                row.cell.textLabel?.numberOfLines = 0
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isOpenRecentNovelInStartTime
+                }
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isOpenRecentNovelInStartTime = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isOpenRecentNovelInStartTime = value
+                    }
+                }
             })
             <<< SwitchRow("IsUseiCloud") {
                 $0.title = NSLocalizedString("SettingsViewController_IsUseiCloud_Title", comment: "iCloud 同期を使用する")
@@ -563,16 +629,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         buttonAction: nil)
                 }
             })
-            <<< SwitchRow("OverrideForceSiteInfoReload") {
-                $0.title = NSLocalizedString("SettingTableViewController_ForceSiteInfoReload", comment:"SiteInfoを毎回読み直す")
-                $0.value = false
-                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                $0.value = globalState.isForceSiteInfoReloadIsEnabled
+            <<< SwitchRow("OverrideForceSiteInfoReload") { row in
+                row.title = NSLocalizedString("SettingTableViewController_ForceSiteInfoReload", comment:"SiteInfoを毎回読み直す")
+                row.value = false
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.isForceSiteInfoReloadIsEnabled
+                }
             }.onChange({ row in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write(block: { (realm) in
-                    globalState.isForceSiteInfoReloadIsEnabled = value
-                })
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.isForceSiteInfoReloadIsEnabled = value
+                    }
+                }
             })
             /*
             <<< SwitchRow("IsDummySilentSoundEnabled") {
@@ -1086,16 +1156,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             switch identifier {
             case "CreateNewUserTextSegue":
                 if let nextViewController:EditBookViewController = segue.destination as? EditBookViewController {
-                    let novel = RealmNovel()
-                    novel.type = .UserCreated
-                    RealmUtil.Write { (realm) in
-                        realm.add(novel, update: .modified)
+                    autoreleasepool {
+                        let novel = RealmNovel()
+                        novel.type = .UserCreated
+                        RealmUtil.Write { (realm) in
+                            realm.add(novel, update: .modified)
+                        }
+                        nextViewController.targetNovelID = novel.novelID
+                        autoreleasepool {
+                            let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
+                            RealmUtil.RealmStoryWrite { (realm) in
+                                realm.add(story, update: .modified)
+                            }
+                        }
                     }
-                    let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
-                    RealmUtil.RealmStoryWrite { (realm) in
-                        realm.add(story, update: .modified)
-                    }
-                    nextViewController.targetNovelID = novel.novelID
                 }
                 break
             default:

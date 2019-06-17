@@ -46,10 +46,14 @@ class EditBookViewController: UIViewController {
         super.viewDidLoad()
 
         initWidgets()
-        if let novel = RealmNovel.SearchNovelFrom(novelID: self.targetNovelID) {
-            applyNovel(novelID: novel.novelID)
-        }else{
-            navigationController?.popViewController(animated: true)
+        autoreleasepool {
+            if let novel = RealmNovel.SearchNovelFrom(novelID: self.targetNovelID) {
+                applyNovel(novelID: novel.novelID)
+            }else{
+                DispatchQueue.main.async {
+                    self.navigationController?.popViewController(animated: true)
+                }
+            }
         }
         registNotificationCenter()
         startObserve()
@@ -66,8 +70,10 @@ class EditBookViewController: UIViewController {
     }
     
     func initWidgets() {
-        if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
-            storyTextView.font = displaySetting.font
+        autoreleasepool {
+            if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
+                storyTextView.font = displaySetting.font
+            }
         }
         
         storyTextView.placeholder = NSLocalizedString("EditBookViewController_StoryPlaceholderText", comment: "ここに本文を入力します。")
@@ -91,17 +97,19 @@ class EditBookViewController: UIViewController {
     }
     
     func applyNovel(novelID:String) {
-        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
-        titleTextField.text = novel.title
-        if let story = novel.readingChapter {
-            setStory(storyID: story.id)
-        }else if let story = novel.linkedStorys?.first {
-            print("load chapter: \(story.chapterNumber)")
-            setStory(storyID: story.id)
-        }else{
-            currentStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: 1)
-            saveCurrentStory()
-            setStory(storyID: currentStoryID)
+        autoreleasepool {
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+            titleTextField.text = novel.title
+            if let story = novel.readingChapter {
+                setStory(storyID: story.id)
+            }else if let story = novel.linkedStorys?.first {
+                print("load chapter: \(story.chapterNumber)")
+                setStory(storyID: story.id)
+            }else{
+                currentStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: 1)
+                saveCurrentStory()
+                setStory(storyID: currentStoryID)
+            }
         }
     }
     
@@ -254,20 +262,24 @@ class EditBookViewController: UIViewController {
         center.addObserver(self, selector: #selector(willHideKeyboardEventHandler(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
         // storyTextView は自前のフォント設定を使うので、それが更新されるのを監視しておきます
-        if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
-            fontSizeObserveToken = displaySetting.observe({ (change) in
-                switch change {
-                case .change(_):
-                    DispatchQueue.main.async {
-                        guard let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { return }
-                        self.storyTextView.font = displaySetting.font
+        autoreleasepool {
+            if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
+                fontSizeObserveToken = displaySetting.observe({ (change) in
+                    switch change {
+                    case .change(_):
+                        DispatchQueue.main.async {
+                            autoreleasepool {
+                                guard let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { return }
+                                self.storyTextView.font = displaySetting.font
+                            }
+                        }
+                    case .error(_):
+                        break
+                    case .deleted:
+                        break
                     }
-                case .error(_):
-                    break
-                case .deleted:
-                    break
-                }
-            })
+                })
+            }
         }
     }
     func endObserve() {
@@ -322,82 +334,89 @@ class EditBookViewController: UIViewController {
 
     func setStory(storyID:String) {
         DispatchQueue.main.async {
-            let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
-            let story:RealmStory
-            if let storyObj = RealmStory.SearchStoryFrom(storyID: storyID) {
-                story = storyObj
-            }else{
-                story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: RealmStory.StoryIDToChapterNumber(storyID: storyID))
-                RealmUtil.RealmStoryWrite { (realm) in
-                    realm.add(story, update: .modified)
-                }
-            }
-            if let linkedStoryArray = novel.linkedStorys {
-                let maxChapterNumber = linkedStoryArray.count
-                self.chapterNumberIndicatorLabel.text = "\(story.chapterNumber)/\(maxChapterNumber)"
-                self.chapterNumberIndicatorLabel.removeConstraint(self.chapterNumberIndicatorLabelWidthConstraint)
-                self.chapterNumberIndicatorLabel.sizeToFit()
-                self.chapterNumberIndicatorLabelWidthConstraint = self.chapterNumberIndicatorLabel.widthAnchor.constraint(equalToConstant: self.chapterNumberIndicatorLabel.frame.width)
-                self.chapterNumberIndicatorLabelWidthConstraint.isActive = true
-                self.chapterNumberIndicatorLabel.layoutIfNeeded()
-                
-                self.chapterSlider.minimumValue = 1.0
-                self.chapterSlider.maximumValue = Float(maxChapterNumber) + 0.01
-                self.chapterSlider.value = Float(story.chapterNumber)
-                
-                if story.chapterNumber >= maxChapterNumber {
-                    self.moveNextButton.isEnabled = false
-                    self.addChapterButton.isEnabled = true
-                    self.deleteChapterButton.isEnabled = true
+            autoreleasepool {
+                let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+                guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+                let chapterNumber = RealmStory.StoryIDToChapterNumber(storyID: storyID)
+                let story:RealmStory
+                if let storyObj = RealmStory.SearchStoryFrom(storyID: storyID) {
+                    story = storyObj
                 }else{
-                    self.moveNextButton.isEnabled = true
-                    self.addChapterButton.isEnabled = false
-                    self.deleteChapterButton.isEnabled = false
+                    story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: RealmStory.StoryIDToChapterNumber(storyID: storyID))
+                    RealmUtil.RealmStoryWrite { (realm) in
+                        realm.add(story, update: .modified)
+                    }
                 }
-                if story.chapterNumber <= 1 {
-                    self.movePreviousButton.isEnabled = false
-                    // 最後の章であったとしても、最初の章は削除させない。章の無い本は存在できないので。
-                    // 本の削除は本棚で行います。
-                    self.deleteChapterButton.isEnabled = false
-                }else{
-                    self.movePreviousButton.isEnabled = true
+                if let linkedStoryArray = novel.linkedStorys {
+                    let maxChapterNumber = linkedStoryArray.count
+                    self.chapterNumberIndicatorLabel.text = "\(chapterNumber)/\(maxChapterNumber)"
+                    self.chapterNumberIndicatorLabel.removeConstraint(self.chapterNumberIndicatorLabelWidthConstraint)
+                    self.chapterNumberIndicatorLabel.sizeToFit()
+                    self.chapterNumberIndicatorLabelWidthConstraint = self.chapterNumberIndicatorLabel.widthAnchor.constraint(equalToConstant: self.chapterNumberIndicatorLabel.frame.width)
+                    self.chapterNumberIndicatorLabelWidthConstraint.isActive = true
+                    self.chapterNumberIndicatorLabel.layoutIfNeeded()
+                    
+                    self.chapterSlider.minimumValue = 1.0
+                    self.chapterSlider.maximumValue = Float(maxChapterNumber) + 0.01
+                    self.chapterSlider.value = Float(chapterNumber)
+                    
+                    if chapterNumber >= maxChapterNumber {
+                        self.moveNextButton.isEnabled = false
+                        self.addChapterButton.isEnabled = true
+                        self.deleteChapterButton.isEnabled = true
+                    }else{
+                        self.moveNextButton.isEnabled = true
+                        self.addChapterButton.isEnabled = false
+                        self.deleteChapterButton.isEnabled = false
+                    }
+                    if chapterNumber <= 1 {
+                        self.movePreviousButton.isEnabled = false
+                        // 最後の章であったとしても、最初の章は削除させない。章の無い本は存在できないので。
+                        // 本の削除は本棚で行います。
+                        self.deleteChapterButton.isEnabled = false
+                    }else{
+                        self.movePreviousButton.isEnabled = true
+                    }
                 }
+                
+                self.storyTextView.text = story.content
+                if story.readLocation <= story.content?.count ?? 0 {
+                    let range = NSRange(location: story.readLocation, length: 0)
+                    self.storyTextView.isScrollEnabled = false
+                    self.storyTextView.isScrollEnabled = true
+                    self.storyTextView.selectedRange = range
+                    self.storyTextView.scrollRangeToVisible(range)
+                }
+                self.currentStoryID = storyID
             }
-            
-            self.storyTextView.text = story.content
-            if story.readLocation <= story.content?.count ?? 0 {
-                let range = NSRange(location: story.readLocation, length: 0)
-                self.storyTextView.isScrollEnabled = false
-                self.storyTextView.isScrollEnabled = true
-                self.storyTextView.selectedRange = range
-                self.storyTextView.scrollRangeToVisible(range)
-            }
-            self.currentStoryID = storyID
             self.saveCurrentStory()
         }
     }
     
     func saveCurrentStory() {
         let content = storyTextView.text
-        RealmUtil.RealmStoryWrite { (realm) in
-            let story:RealmStory
-            if let storyObj = RealmStory.SearchStoryFrom(storyID: self.currentStoryID) {
-                story = storyObj
-            }else{
-                story = RealmStory.CreateNewStory(novelID: RealmStory.StoryIDToNovelID(storyID: self.currentStoryID), chapterNumber: 1)
+        autoreleasepool {
+            RealmUtil.RealmStoryWrite { (realm) in
+                let story:RealmStory
+                if let storyObj = RealmStory.SearchStoryFrom(storyID: self.currentStoryID) {
+                    story = storyObj
+                }else{
+                    story = RealmStory.CreateNewStory(novelID: RealmStory.StoryIDToNovelID(storyID: self.currentStoryID), chapterNumber: 1)
+                }
+                story.content = content
+                realm.add(story, update: .modified)
             }
-            story.content = content
-            realm.add(story, update: .modified)
         }
     }
     func saveCurrentNovel() {
-        guard let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID) else { return }
-        RealmUtil.Write { (realm) in
-            if let title = titleTextField.text, title.count > 0 {
-                novel.title = title
+        autoreleasepool {
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID) else { return }
+            RealmUtil.Write { (realm) in
+                if let title = titleTextField.text, title.count > 0 {
+                    novel.title = title
+                }
+                realm.add(novel, update: .modified)
             }
-            realm.add(novel, update: .modified)
         }
     }
 
@@ -423,30 +442,35 @@ class EditBookViewController: UIViewController {
     }
     @IBAction func addChapterButtonClicked(_ sender: Any) {
         saveCurrentStory()
-
-        if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
-            let newStoryID = RealmStory.CreateUniqueID(novelID: targetNovelID, chapterNumber: lastStory.chapterNumber + 1)
-            RealmUtil.Write { (realm) in
-                novel.m_lastChapterStoryID = newStoryID
-                novel.lastDownloadDate = Date()
+        autoreleasepool {
+            if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
+                let newStoryID = RealmStory.CreateUniqueID(novelID: targetNovelID, chapterNumber: lastStory.chapterNumber + 1)
+                RealmUtil.Write { (realm) in
+                    novel.m_lastChapterStoryID = newStoryID
+                    novel.lastDownloadDate = Date()
+                }
+                setStory(storyID: newStoryID)
             }
-            setStory(storyID: newStoryID)
         }
     }
     @IBAction func deleteChapterButtonClicked(_ sender: Any) {
         // memo: 削除できるのは最後の章だけ(のはず)です。
-        RealmUtil.RealmStoryWrite { (realm) in
-            if let story = RealmStory.SearchStoryFrom(storyID: currentStoryID) {
-                realm.delete(story)
+        autoreleasepool {
+            RealmUtil.RealmStoryWrite { (realm) in
+                if let story = RealmStory.SearchStoryFrom(storyID: currentStoryID) {
+                    realm.delete(story)
+                }
             }
         }
-        if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let story = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
-            RealmUtil.Write { (realm) in
-                novel.m_lastChapterStoryID = story.id
+        autoreleasepool {
+            if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let story = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
+                RealmUtil.Write { (realm) in
+                    novel.m_lastChapterStoryID = story.id
+                }
+                setStory(storyID: story.id)
+            }else{
+                print("last chapter not found")
             }
-            setStory(storyID: story.id)
-        }else{
-            print("last chapter not found")
         }
     }
 }

@@ -597,10 +597,12 @@ class NiftyUtilitySwift: NSObject {
     }
     
     @objc static public func IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled() -> Bool {
-        guard let globalState = RealmGlobalState.GetInstance() else {
-            return false
+        return autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else {
+                return false
+            }
+            return globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
         }
-        return globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
     }
     
     static public func GetCacheFilePath(fileName:String) -> URL? {
@@ -755,5 +757,9 @@ class NiftyUtilitySwift: NSObject {
             }
         }
         return encoding
+    }
+    
+    static func RunLoopSleep(deltaSecond:TimeInterval) {
+        RunLoop.current.run(mode: .default, before: Date(timeIntervalSinceNow: deltaSecond))
     }
 }

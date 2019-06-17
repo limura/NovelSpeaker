@@ -20,12 +20,14 @@ protocol StorySpeakerDeletgate {
 class AnnounceSpeakerHolder: NSObject {
     let speaker = Speaker()
     func Speech(text:String) {
-        guard let defaultSpeechConfig = RealmGlobalState.GetInstance()?.defaultSpeaker else {
+        autoreleasepool {
+            guard let defaultSpeechConfig = RealmGlobalState.GetInstance()?.defaultSpeaker else {
+                speaker.speech(text)
+                return
+            }
+            defaultSpeechConfig.applyTo(speaker: speaker)
             speaker.speech(text)
-            return
         }
-        defaultSpeechConfig.applyTo(speaker: speaker)
-        speaker.speech(text)
     }
 }
 
@@ -82,14 +84,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     // 読み上げが行われていた場合、読み上げは停止します。
     func SetStory(storyID:String) {
         speaker.stopSpeech()
-        guard let story = RealmStory.SearchStoryFrom(storyID: storyID), let content = story.content else { return }
-        self.storyID = storyID
-        updateReadDate(storyID: storyID)
-        ApplySpeakConfigs(novelID: story.novelID, content: content, location: story.readLocation)
-        updatePlayngInfo(story: story)
-        observeStory(storyID: self.storyID)
-        for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
-            delegate.storySpeakerStoryChanged(storyID: storyID)
+        autoreleasepool {
+            guard let story = RealmStory.SearchStoryFrom(storyID: storyID), let content = story.content else { return }
+            self.storyID = storyID
+            updateReadDate(storyID: storyID)
+            ApplySpeakConfigs(novelID: story.novelID, content: content, location: story.readLocation)
+            updatePlayngInfo(story: story)
+            observeStory(storyID: self.storyID)
+            for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
+                delegate.storySpeakerStoryChanged(storyID: storyID)
+            }
         }
     }
     
@@ -114,50 +118,56 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         center.removeObserver(self)
     }
     func observeGlobalState() {
-        guard let globalState = RealmGlobalState.GetInstance() else {
-            return
-        }
-        self.globalStateObserveToken = globalState.observe({ (change) in
-            switch change {
-            case .change(let propertys):
-                for property in propertys {
-                    if property.name == "isMixWithOthersEnabled" || property.name == "isDuckOthersEnabled" {
-                        guard let oldValue = property.oldValue as? Bool, let newValue = property.newValue as? Bool else { continue }
-                        if oldValue != newValue {
-                            self.audioSessionInit(isActive: false)
-                            break
-                        }
-                    }else if property.name == "isPlaybackDurationEnabled" || property.name == "isShortSkipEnabled" {
-                        self.DisableMPRemoteCommandCenterEvents()
-                        self.EnableMPRemoteCommandCenterEvents()
-                        if property.name == "isPlaybackDurationEnabled" && self.speaker.isSpeaking(), let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
-                            self.updatePlayngInfo(story: story)
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else {
+                return
+            }
+            self.globalStateObserveToken = globalState.observe({ (change) in
+                switch change {
+                case .change(let propertys):
+                    for property in propertys {
+                        if property.name == "isMixWithOthersEnabled" || property.name == "isDuckOthersEnabled" {
+                            guard let oldValue = property.oldValue as? Bool, let newValue = property.newValue as? Bool else { continue }
+                            if oldValue != newValue {
+                                self.audioSessionInit(isActive: false)
+                                break
+                            }
+                        }else if property.name == "isPlaybackDurationEnabled" || property.name == "isShortSkipEnabled" {
+                            self.DisableMPRemoteCommandCenterEvents()
+                            self.EnableMPRemoteCommandCenterEvents()
+                            autoreleasepool {
+                                if property.name == "isPlaybackDurationEnabled" && self.speaker.isSpeaking(), let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
+                                    self.updatePlayngInfo(story: story)
+                                }
+                            }
                         }
                     }
+                default:
+                    break
                 }
-            default:
-                break
-            }
-        })
+            })
+        }
     }
     func observeStory(storyID:String) {
+        autoreleasepool {
         guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else { return }
-        self.storyObserverToken = story.observe({ (change) in
-            switch change {
-            case .error(_):
-                break
-            case .change(let properties):
-                for property in properties {
-                    if property.name == "readLocation", let location = property.newValue as? Int {
-                        self.speaker.updateCurrentReadingPoint(NSRange(location: location, length: 0))
-                    }else if property.name == "contentZiped", let contentZiped = property.newValue as? Data, let newContent = NiftyUtility.stringInflate(contentZiped) {
-                        self.speaker.setText(self.ForceOverrideHungSpeakString(text: newContent))
+            self.storyObserverToken = story.observe({ (change) in
+                switch change {
+                case .error(_):
+                    break
+                case .change(let properties):
+                    for property in properties {
+                        if property.name == "readLocation", let location = property.newValue as? Int {
+                            self.speaker.updateCurrentReadingPoint(NSRange(location: location, length: 0))
+                        }else if property.name == "contentZiped", let contentZiped = property.newValue as? Data, let newContent = NiftyUtility.stringInflate(contentZiped) {
+                            self.speaker.setText(self.ForceOverrideHungSpeakString(text: newContent))
+                        }
                     }
+                case .deleted:
+                    break
                 }
-            case .deleted:
-                break
-            }
-        })
+            })
+        }
     }
     
     @objc func audioSessionDidInterrupt(notification:Notification) {
@@ -200,54 +210,64 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     
     func updateReadDate(storyID:String) {
         let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
-        RealmUtil.Write { (realm) in
-            if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
-                novel.lastReadDate = Date()
-                novel.m_readingChapterStoryID = storyID
-            }
-            if let globalState = RealmGlobalState.GetInstance() {
-                if globalState.currentReadingNovelID != novelID {
-                    globalState.currentReadingNovelID = novelID
+        autoreleasepool {
+            RealmUtil.Write { (realm) in
+                if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
+                    novel.lastReadDate = Date()
+                    novel.m_readingChapterStoryID = storyID
+                }
+                autoreleasepool {
+                    if let globalState = RealmGlobalState.GetInstance() {
+                        if globalState.currentReadingNovelID != novelID {
+                            globalState.currentReadingNovelID = novelID
+                        }
+                    }
                 }
             }
         }
     }
     
     func applySpeechConfig(novelID:String, speaker:NiftySpeaker) {
-        guard let defaultSpeakerSetting = RealmNovel.SearchNovelFrom(novelID: novelID)?.defaultSpeaker else { return }
-        speaker.setDefaultSpeechConfig(defaultSpeakerSetting.speechConfig)
-        guard let speechSectionConfigArray = RealmSpeechSectionConfig.SearchSettingsFor(novelID: novelID) else { return }
-        for sectionConfig in speechSectionConfigArray {
-            guard let speakerSetting = sectionConfig.speaker else { continue }
-            speaker.addBlockStartSeparator(sectionConfig.startText, end: sectionConfig.endText, speechConfig: speakerSetting.speechConfig)
+        autoreleasepool {
+            guard let defaultSpeakerSetting = RealmNovel.SearchNovelFrom(novelID: novelID)?.defaultSpeaker else { return }
+            speaker.setDefaultSpeechConfig(defaultSpeakerSetting.speechConfig)
+            guard let speechSectionConfigArray = RealmSpeechSectionConfig.SearchSettingsFor(novelID: novelID) else { return }
+            for sectionConfig in speechSectionConfigArray {
+                guard let speakerSetting = sectionConfig.speaker else { continue }
+                speaker.addBlockStartSeparator(sectionConfig.startText, end: sectionConfig.endText, speechConfig: speakerSetting.speechConfig)
+            }
         }
     }
     
     func observeSpeechConfig(novelID:String) {
-        guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
-        self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { (change) in
-            self.isNeedApplySpeechConfigs = true
+        autoreleasepool {
+            guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
+            self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { (change) in
+                self.isNeedApplySpeechConfigs = true
+            }
         }
-        guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
-        self.speechSectionConfigArrayObserverToken = allSpeechSectionConfigArray.observe({ (change) in
-            switch change {
-            case .initial(_):
-                break
-            case .update(let sectionConfigArray, let deletions, _, _):
-                if deletions.count > 0 {
-                    self.isNeedApplySpeechConfigs = true
-                    return
-                }
-                for sectionConfig in sectionConfigArray {
-                    if sectionConfig.targetNovelIDArray.count <= 0 || sectionConfig.targetNovelIDArray.contains(novelID) {
+        autoreleasepool {
+            guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
+            self.speechSectionConfigArrayObserverToken = allSpeechSectionConfigArray.observe({ (change) in
+                switch change {
+                case .initial(_):
+                    break
+                case .update(let sectionConfigArray, let deletions, _, _):
+                    if deletions.count > 0 {
                         self.isNeedApplySpeechConfigs = true
                         return
                     }
+                    for sectionConfig in sectionConfigArray {
+                        if sectionConfig.targetNovelIDArray.count <= 0 || sectionConfig.targetNovelIDArray.contains(novelID) {
+                            self.isNeedApplySpeechConfigs = true
+                            return
+                        }
+                    }
+                case .error(_):
+                    break
                 }
-            case .error(_):
-                break
-            }
-        })
+            })
+        }
     }
     
     func applySpeechModSetting(novelID:String, targetText:String, speaker:NiftySpeaker) {
@@ -255,18 +275,22 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         var notRubyCharactorStringArray = ""
         var isIgnoreURIStringSpeechEnabled = false
         
-        if let globalState = RealmGlobalState.GetInstance() {
-            if let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
-                isOverrideRubyEnabled = speechOverrideSetting.isOverrideRubyIsEnabled
-                notRubyCharactorStringArray = speechOverrideSetting.notRubyCharactorStringArray
-                isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
+        autoreleasepool {
+            if let globalState = RealmGlobalState.GetInstance() {
+                if let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
+                    isOverrideRubyEnabled = speechOverrideSetting.isOverrideRubyIsEnabled
+                    notRubyCharactorStringArray = speechOverrideSetting.notRubyCharactorStringArray
+                    isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
+                }
             }
         }
-        if let settingArray = RealmSpeechOverrideSetting.SearchObjectFrom(novelID: novelID) {
-            for speechOverrideSetting in settingArray {
-                isOverrideRubyEnabled = speechOverrideSetting.isOverrideRubyIsEnabled
-                notRubyCharactorStringArray = speechOverrideSetting.notRubyCharactorStringArray
-                isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
+        autoreleasepool {
+            if let settingArray = RealmSpeechOverrideSetting.SearchObjectFrom(novelID: novelID) {
+                for speechOverrideSetting in settingArray {
+                    isOverrideRubyEnabled = speechOverrideSetting.isOverrideRubyIsEnabled
+                    notRubyCharactorStringArray = speechOverrideSetting.notRubyCharactorStringArray
+                    isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
+                }
             }
         }
 
@@ -290,88 +314,96 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             }
         }
         
-        if let speechModSettingArray = RealmSpeechModSetting.SearchSettingsFor(novelID: novelID) {
-            for setting in speechModSettingArray {
-                if setting.isUseRegularExpression {
-                    guard let modSettingArray = StringSubstituter.findRegexpSpeechModConfigs(targetText, pattern: setting.before, to: setting.after) else { continue }
-                    for modSetting in modSettingArray {
-                        guard let modSetting = modSetting as? SpeechModSetting else { continue }
-                        speaker.addSpeechModText(modSetting.beforeString, to: modSetting.afterString)
+        autoreleasepool {
+            if let speechModSettingArray = RealmSpeechModSetting.SearchSettingsFor(novelID: novelID) {
+                for setting in speechModSettingArray {
+                    if setting.isUseRegularExpression {
+                        guard let modSettingArray = StringSubstituter.findRegexpSpeechModConfigs(targetText, pattern: setting.before, to: setting.after) else { continue }
+                        for modSetting in modSettingArray {
+                            guard let modSetting = modSetting as? SpeechModSetting else { continue }
+                            speaker.addSpeechModText(modSetting.beforeString, to: modSetting.afterString)
+                        }
+                    }else{
+                        speaker.addSpeechModText(setting.before, to: setting.after)
                     }
-                }else{
-                    speaker.addSpeechModText(setting.before, to: setting.after)
                 }
             }
         }
-        self.speechModSettingArrayObserverToken = RealmSpeechModSetting.GetAllObjects()?.observe({ (change) in
-            switch change {
-            case .initial(_):
-                break
-            case .update(let speechModSettingArray, let deletions, _, _):
-                if deletions.count > 0 {
-                    self.isNeedApplySpeechConfigs = true
-                    return
-                }
-                for setting in speechModSettingArray {
-                    if setting.targetNovelIDArray.count <= 0 || setting.targetNovelIDArray.contains(novelID) {
+        autoreleasepool {
+            self.speechModSettingArrayObserverToken = RealmSpeechModSetting.GetAllObjects()?.observe({ (change) in
+                switch change {
+                case .initial(_):
+                    break
+                case .update(let speechModSettingArray, let deletions, _, _):
+                    if deletions.count > 0 {
                         self.isNeedApplySpeechConfigs = true
                         return
                     }
-                }
-            case .error(_):
-                break
-            }
-        })
-    }
-    
-    func observeSpeechModSetting(novelID:String) {
-        if let globalState = RealmGlobalState.GetInstance(), let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
-            self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ (change) in
-                switch change {
-                case .error(_):
-                    break
-                case .change(let properties):
-                    for property in properties {
-                        if ["isOverrideRubyIsEnabled", "notRubyCharactorStringArray", "isIgnoreURIStringSpeechEnabled"].contains(property.name) {
+                    for setting in speechModSettingArray {
+                        if setting.targetNovelIDArray.count <= 0 || setting.targetNovelIDArray.contains(novelID) {
                             self.isNeedApplySpeechConfigs = true
                             return
                         }
                     }
-                case .deleted:
+                case .error(_):
                     break
                 }
             })
         }
-        self.novelIDSpeechOverrideSettingArrayObserverToken = RealmSpeechOverrideSetting.GetAllObjects()?.observe({ (change) in
-            switch change {
-            case .initial(_):
-                break
-            case .update(let speechOverrideSettingArray, let deletions, _, _):
-                if deletions.count > 0 {
-                    self.isNeedApplySpeechConfigs = true
-                    return
-                }
-                for setting in speechOverrideSettingArray {
-                    if setting.targetNovelIDArray.contains(novelID) {
+    }
+    
+    func observeSpeechModSetting(novelID:String) {
+        autoreleasepool {
+            if let globalState = RealmGlobalState.GetInstance(), let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
+                self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ (change) in
+                    switch change {
+                    case .error(_):
+                        break
+                    case .change(let properties):
+                        for property in properties {
+                            if ["isOverrideRubyIsEnabled", "notRubyCharactorStringArray", "isIgnoreURIStringSpeechEnabled"].contains(property.name) {
+                                self.isNeedApplySpeechConfigs = true
+                                return
+                            }
+                        }
+                    case .deleted:
+                        break
+                    }
+                })
+            }
+        }
+        autoreleasepool {
+            self.novelIDSpeechOverrideSettingArrayObserverToken = RealmSpeechOverrideSetting.GetAllObjects()?.observe({ (change) in
+                switch change {
+                case .initial(_):
+                    break
+                case .update(let speechOverrideSettingArray, let deletions, _, _):
+                    if deletions.count > 0 {
                         self.isNeedApplySpeechConfigs = true
                         return
                     }
+                    for setting in speechOverrideSettingArray {
+                        if setting.targetNovelIDArray.contains(novelID) {
+                            self.isNeedApplySpeechConfigs = true
+                            return
+                        }
+                    }
+                case .error(_):
+                    break
                 }
-            case .error(_):
-                break
-            }
-        })
-
+            })
+        }
     }
     
     func audioSessionInit(isActive:Bool) {
-        guard let globalState = RealmGlobalState.GetInstance() else { return }
-
         var option:UInt = 0
-        if globalState.isMixWithOthersEnabled {
-            option = AVAudioSession.CategoryOptions.mixWithOthers.rawValue
-            if globalState.isDuckOthersEnabled {
-                option |= AVAudioSession.CategoryOptions.duckOthers.rawValue
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else { return }
+            if globalState.isMixWithOthersEnabled {
+                option = AVAudioSession.CategoryOptions.mixWithOthers.rawValue
+                if globalState.isDuckOthersEnabled {
+                    option |= AVAudioSession.CategoryOptions.duckOthers.rawValue
+                }
             }
         }
         let session = AVAudioSession.sharedInstance()
@@ -402,11 +434,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         if (self.isMaxSpeechTimeExceeded && (!withMaxSpeechTimeReset)) {
             return
         }
-        if let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
-            updatePlayngInfo(story: story)
-            // story をここでも参照するので怪しくこの if の中に入れます
-            if self.isNeedApplySpeechConfigs, let content = story.content {
-                self.ApplySpeakConfigs(novelID: story.novelID, content: content, location: story.readLocation)
+        autoreleasepool {
+            if let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
+                updatePlayngInfo(story: story)
+                // story をここでも参照するので怪しくこの if の中に入れます
+                if self.isNeedApplySpeechConfigs, let content = story.content {
+                    self.ApplySpeakConfigs(novelID: story.novelID, content: content, location: story.readLocation)
+                }
             }
         }
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
@@ -436,9 +470,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             print("audioSession.setActive(false) failed.")
         }
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
-        if let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
-            RealmUtil.RealmStoryWrite(withoutNotifying: [self.storyObserverToken]) { (realm) in
-                story.readLocation = speaker.getCurrentReadingPoint().location
+        autoreleasepool {
+            if let story = RealmStory.SearchStoryFrom(storyID: self.storyID) {
+                RealmUtil.RealmStoryWrite(withoutNotifying: [self.storyObserverToken]) { (realm) in
+                    story.readLocation = speaker.getCurrentReadingPoint().location
+                }
             }
         }
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
@@ -447,20 +483,22 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func SkipForward(length:Int) {
-        guard let story = RealmStory.SearchStoryFrom(storyID: self.storyID) else {
-            return
-        }
-        let readingPoint = speaker.getCurrentReadingPoint().location
-        let nextReadingPoint = readingPoint + length
-        let contentLength = story.content?.count ?? 0
-        if nextReadingPoint > contentLength {
-            if !LoadNextChapter() {
-                RealmUtil.RealmStoryWrite { (realm) in
-                    story.readLocation = contentLength
-                }
+        autoreleasepool {
+            guard let story = RealmStory.SearchStoryFrom(storyID: self.storyID) else {
+                return
             }
-        }else{
-            speaker.updateCurrentReadingPoint(NSRange(location: nextReadingPoint, length: 0))
+            let readingPoint = speaker.getCurrentReadingPoint().location
+            let nextReadingPoint = readingPoint + length
+            let contentLength = story.content?.count ?? 0
+            if nextReadingPoint > contentLength {
+                if !LoadNextChapter() {
+                    RealmUtil.RealmStoryWrite { (realm) in
+                        story.readLocation = contentLength
+                    }
+                }
+            }else{
+                speaker.updateCurrentReadingPoint(NSRange(location: nextReadingPoint, length: 0))
+            }
         }
     }
     func SkipBackward(length:Int){
@@ -470,29 +508,34 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             return
         }
         var targetLength = length - readingPoint
-        var targetStory = SearchPreviousChapter(storyID: self.storyID)
-        while let story = targetStory {
-            let contentLength = story.content?.count ?? 0
-            if targetLength <= contentLength {
-                RealmUtil.RealmStoryWrite { (realm) in
-                    story.readLocation = contentLength - targetLength
+        var targetStory:RealmStory? = nil
+        autoreleasepool {
+            targetStory = SearchPreviousChapter(storyID: self.storyID)
+            while let story = targetStory {
+                let contentLength = story.content?.count ?? 0
+                if targetLength <= contentLength {
+                    RealmUtil.RealmStoryWrite { (realm) in
+                        story.readLocation = contentLength - targetLength
+                    }
+                    ringPageTurningSound()
+                    SetStory(storyID: story.id)
+                    return
                 }
-                ringPageTurningSound()
-                SetStory(storyID: story.id)
-                return
+                targetStory = SearchPreviousChapter(storyID: story.id)
+                targetLength -= contentLength
             }
-            targetStory = SearchPreviousChapter(storyID: story.id)
-            targetLength -= contentLength
         }
         // 抜けてきたということは先頭まで行ってしまった。
-        if let firstStory = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
-            RealmUtil.RealmStoryWrite { (realm) in
-                firstStory.readLocation = 0
+        autoreleasepool {
+            if let firstStory = RealmStory.SearchStoryFrom(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
+                RealmUtil.RealmStoryWrite { (realm) in
+                    firstStory.readLocation = 0
+                }
+                if firstStory.id != self.storyID {
+                    ringPageTurningSound()
+                }
+                SetStory(storyID: firstStory.id)
             }
-            if firstStory.id != self.storyID {
-                ringPageTurningSound()
-            }
-            SetStory(storyID: firstStory.id)
         }
     }
     
@@ -508,15 +551,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     @discardableResult
     func LoadNextChapter() -> Bool{
-        if let nextStory = SearchNextChapter(storyID: self.storyID) {
-            RealmUtil.RealmStoryWrite { (realm) in
-                nextStory.readLocation = 0
+        return autoreleasepool {
+            if let nextStory = SearchNextChapter(storyID: self.storyID) {
+                RealmUtil.RealmStoryWrite { (realm) in
+                    nextStory.readLocation = 0
+                }
+                ringPageTurningSound()
+                SetStory(storyID: nextStory.id)
+                return true
             }
-            ringPageTurningSound()
-            SetStory(storyID: nextStory.id)
-            return true
+            return false
         }
-        return false
     }
 
     func SearchPreviousChapter(storyID:String) -> RealmStory? {
@@ -534,32 +579,38 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     @discardableResult
     func LoadPreviousChapter() -> Bool{
-        if let previousStory = SearchPreviousChapter(storyID: storyID) {
-            RealmUtil.RealmStoryWrite { (realm) in
-                previousStory.readLocation = 0
+        return autoreleasepool {
+            if let previousStory = SearchPreviousChapter(storyID: storyID) {
+                RealmUtil.RealmStoryWrite { (realm) in
+                    previousStory.readLocation = 0
+                }
+                ringPageTurningSound()
+                SetStory(storyID: previousStory.id)
+                return true
             }
-            ringPageTurningSound()
-            SetStory(storyID: previousStory.id)
-            return true
+            return false
         }
-        return false
     }
     
     func ringPageTurningSound() {
-        guard let globalState = RealmGlobalState.GetInstance(), globalState.isPageTurningSoundEnabled == true else { return }
-        self.pageTurningSoundPlayer.startPlay()
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance(), globalState.isPageTurningSoundEnabled == true else { return }
+            self.pageTurningSoundPlayer.startPlay()
+        }
     }
     
     func startMaxSpeechInSecTimer() {
-        guard let globalState = RealmGlobalState.GetInstance() else { return }
-        stopMaxSpeechInSecTimer()
-        self.isMaxSpeechTimeExceeded = false
-        self.maxSpeechInSecTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(integerLiteral:     Int64(globalState.maxSpeechTimeInSec)), repeats: false) { (timer) in
-            self.isMaxSpeechTimeExceeded = true
-            self.StopSpeech()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                self.announceSpeakerHolder.Speech(text: NSLocalizedString("GlobalDataSingleton_AnnounceStopedByTimer", comment: "最大連続再生時間を超えたので、読み上げを停止します。"))
-            })
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else { return }
+            stopMaxSpeechInSecTimer()
+            self.isMaxSpeechTimeExceeded = false
+            self.maxSpeechInSecTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(integerLiteral:     Int64(globalState.maxSpeechTimeInSec)), repeats: false) { (timer) in
+                self.isMaxSpeechTimeExceeded = true
+                self.StopSpeech()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                    self.announceSpeakerHolder.Speech(text: NSLocalizedString("GlobalDataSingleton_AnnounceStopedByTimer", comment: "最大連続再生時間を超えたので、読み上げを停止します。"))
+                })
+            }
         }
     }
     func stopMaxSpeechInSecTimer() {
@@ -589,19 +640,23 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             MPMediaItemPropertyTitle: titleName,
             MPMediaItemPropertyArtist: writer
         ]
-        if RealmGlobalState.GetInstance()?.isPlaybackDurationEnabled ?? false {
-            let textLength:Int
-            if let content = story.content {
-                textLength = content.count
-            }else{
-                textLength = 0
-            }
-            if let speakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker {
-                let duration = GuessSpeakDuration(textLength: textLength, speechConfig: speakerSetting)
-                let position = GuessSpeakDuration(textLength: story.readLocation, speechConfig: speakerSetting)
-                songInfo[MPMediaItemPropertyPlaybackDuration] = duration
-                songInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = position
-                songInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1.0
+        autoreleasepool {
+            if RealmGlobalState.GetInstance()?.isPlaybackDurationEnabled ?? false {
+                let textLength:Int
+                if let content = story.content {
+                    textLength = content.count
+                }else{
+                    textLength = 0
+                }
+                autoreleasepool {
+                    if let speakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker {
+                        let duration = GuessSpeakDuration(textLength: textLength, speechConfig: speakerSetting)
+                        let position = GuessSpeakDuration(textLength: story.readLocation, speechConfig: speakerSetting)
+                        songInfo[MPMediaItemPropertyPlaybackDuration] = duration
+                        songInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = position
+                        songInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1.0
+                    }
+                }
             }
         }
         if let image = UIImage.init(named: "NovelSpeakerIcon-167px.png") {
@@ -657,16 +712,18 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         commandCenter.seekForwardCommand.isEnabled = true
         commandCenter.seekBackwardCommand.addTarget(self, action: #selector(seekBackwardEvent(event:)))
         commandCenter.seekBackwardCommand.isEnabled = true
-        if let globalState = RealmGlobalState.GetInstance() {
-            if globalState.isShortSkipEnabled {
-                commandCenter.skipForwardCommand.addTarget(self, action: #selector(skipForwardEvent(_:)))
-                commandCenter.skipForwardCommand.isEnabled = true
-                commandCenter.skipBackwardCommand.addTarget(self, action: #selector(skipBackwardEvent(_:)))
-                commandCenter.skipBackwardCommand.isEnabled = true
-            }
-            if globalState.isPlaybackDurationEnabled {
-                commandCenter.changePlaybackPositionCommand.addTarget(self, action: #selector(changePlaybackPositionEvent(event:)))
-                commandCenter.changePlaybackPositionCommand.isEnabled = true
+        autoreleasepool {
+            if let globalState = RealmGlobalState.GetInstance() {
+                if globalState.isShortSkipEnabled {
+                    commandCenter.skipForwardCommand.addTarget(self, action: #selector(skipForwardEvent(_:)))
+                    commandCenter.skipForwardCommand.isEnabled = true
+                    commandCenter.skipBackwardCommand.addTarget(self, action: #selector(skipBackwardEvent(_:)))
+                    commandCenter.skipBackwardCommand.isEnabled = true
+                }
+                if globalState.isPlaybackDurationEnabled {
+                    commandCenter.changePlaybackPositionCommand.addTarget(self, action: #selector(changePlaybackPositionEvent(event:)))
+                    commandCenter.changePlaybackPositionCommand.isEnabled = true
+                }
             }
         }
     }
@@ -790,26 +847,28 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
     }
     @objc func changePlaybackPositionEvent(event:MPChangePlaybackPositionCommandEvent?) -> MPRemoteCommandHandlerStatus {
-        guard let event = event, let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker, let story = RealmStory.SearchStoryFrom(storyID: self.storyID), let contentLength = story.content?.count else {
-            return MPRemoteCommandHandlerStatus.commandFailed
+        return autoreleasepool {
+            guard let event = event, let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker, let story = RealmStory.SearchStoryFrom(storyID: self.storyID), let contentLength = story.content?.count else {
+                return MPRemoteCommandHandlerStatus.commandFailed
+            }
+            
+            print("MPChangePlaybackPositionCommandEvent in: \(event.positionTime)")
+            var newLocation = self.GuessSpeakLocationFromDulation(dulation: Float(event.positionTime), speechConfig: defaultSpeakerSetting)
+            let textLength = contentLength
+            if newLocation > textLength {
+                newLocation = textLength
+            }
+            if newLocation <= 0 {
+                newLocation = 0
+            }
+            
+            StopSpeech()
+            self.readLocation = newLocation
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: {
+                self.StartSpeech(withMaxSpeechTimeReset: true)
+            })
+            return MPRemoteCommandHandlerStatus.success
         }
-        
-        print("MPChangePlaybackPositionCommandEvent in: \(event.positionTime)")
-        var newLocation = self.GuessSpeakLocationFromDulation(dulation: Float(event.positionTime), speechConfig: defaultSpeakerSetting)
-        let textLength = contentLength
-        if newLocation > textLength {
-            newLocation = textLength
-        }
-        if newLocation <= 0 {
-            newLocation = 0
-        }
-        
-        StopSpeech()
-        self.readLocation = newLocation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: {
-            self.StartSpeech(withMaxSpeechTimeReset: true)
-        })
-        return MPRemoteCommandHandlerStatus.success
     }
     
     // MARK: SpeakRangeDeleate implement
@@ -821,36 +880,47 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     
     func finishSpeak() {
         self.readLocation = speaker.getCurrentReadingPoint().location
-        guard let globalState = RealmGlobalState.GetInstance(), let speechOverrideSetting = globalState.defaultSpeechOverrideSetting else {
-            return
+        let repeatSpeechType:RepeatSpeechType? =
+            autoreleasepool { () -> RepeatSpeechType? in
+            return RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting?.repeatSpeechType
         }
-        switch speechOverrideSetting.repeatSpeechType {
-        case .rewindToFirstStory:
-            let novelID = RealmStory.StoryIDToNovelID(storyID: self.storyID)
-            if let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let lastChapterNumber = novel.lastChapterNumber, let currentChapterNumber = RealmStory.SearchStoryFrom(storyID: self.storyID)?.chapterNumber, lastChapterNumber == currentChapterNumber {
-                self.SetStory(storyID: RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1))
+        if let repeatSpeechType = repeatSpeechType {
+            switch repeatSpeechType {
+            case .rewindToFirstStory:
+                let novelID = RealmStory.StoryIDToNovelID(storyID: self.storyID)
+                let processSuccess = autoreleasepool { () -> Bool in
+                    if let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let lastChapterNumber = novel.lastChapterNumber, let currentChapterNumber = RealmStory.SearchStoryFrom(storyID: self.storyID)?.chapterNumber, lastChapterNumber == currentChapterNumber {
+                        self.SetStory(storyID: RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1))
+                        self.StartSpeech(withMaxSpeechTimeReset: false)
+                        return true
+                    }
+                    return false
+                }
+                if processSuccess {
+                    return
+                }
+            case .rewindToThisStory:
+                self.readLocation = 0
                 self.StartSpeech(withMaxSpeechTimeReset: false)
                 return
+            case .noRepeat:
+                break
+            @unknown default:
+                break
             }
-        case .rewindToThisStory:
-            self.readLocation = 0
-            self.StartSpeech(withMaxSpeechTimeReset: false)
-            return
-        case .noRepeat:
-            break
-        @unknown default:
-            break
         }
-        if let nextStory = SearchNextChapter(storyID: self.storyID) {
-            self.ringPageTurningSound()
-            RealmUtil.RealmStoryWrite { (realm) in
-                nextStory.readLocation = 0
+        autoreleasepool {
+            if let nextStory = SearchNextChapter(storyID: self.storyID) {
+                self.ringPageTurningSound()
+                RealmUtil.RealmStoryWrite { (realm) in
+                    nextStory.readLocation = 0
+                }
+                self.SetStory(storyID: nextStory.id)
+                self.StartSpeech(withMaxSpeechTimeReset: false)
+            }else{
+                self.StopSpeech()
+                self.announceSpeakerHolder.Speech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
             }
-            self.SetStory(storyID: nextStory.id)
-            self.StartSpeech(withMaxSpeechTimeReset: false)
-        }else{
-            self.StopSpeech()
-            self.announceSpeakerHolder.Speech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
         }
     }
     
@@ -865,10 +935,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             return speaker.getCurrentReadingPoint().location
         }
         set {
-            if let story = RealmStory.SearchStoryFrom(storyID: self.storyID), let contentLength = story.content?.count, contentLength > newValue && newValue >= 0 {
-                speaker.updateCurrentReadingPoint(NSRange(location: newValue, length: 0))
-                RealmUtil.RealmStoryWrite { (realm) in
-                    story.readLocation = newValue
+            autoreleasepool {
+                if let story = RealmStory.SearchStoryFrom(storyID: self.storyID), let contentLength = story.content?.count, contentLength > newValue && newValue >= 0 {
+                    speaker.updateCurrentReadingPoint(NSRange(location: newValue, length: 0))
+                    RealmUtil.RealmStoryWrite { (realm) in
+                        story.readLocation = newValue
+                    }
                 }
             }
         }

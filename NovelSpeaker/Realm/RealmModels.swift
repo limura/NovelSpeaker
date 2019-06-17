@@ -699,7 +699,9 @@ protocol CanWriteIsDeleted {
     static func StoryIDToChapterNumber(storyID:String) -> Int {
         if let index = storyID.firstIndex(of: ":") {
             let numString = String(storyID[..<index])
-            return Int(string: numString) ?? 0
+            if let result = Int(numString) {
+                return result
+            }
         }
         return 0
     }
@@ -981,90 +983,100 @@ extension RealmStory: CanWriteIsDeleted {
     }
     
     static func AddNewNovelOnlyText(content:String, title:String) {
-        let novel = RealmNovel()
-        novel.type = .UserCreated
-        novel.title = title
-        novel.lastReadDate = Date(timeIntervalSince1970: 1)
-        novel.lastDownloadDate = Date()
-        novel.downloadDateArray.append(novel.lastDownloadDate)
-        let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
-        story.content = content
-        RealmUtil.RealmStoryWrite { (realm) in
-            realm.add(story, update: .modified)
-        }
-        novel.m_lastChapterStoryID = story.id
-        RealmUtil.Write { (realm) in
-            realm.add(novel, update: .modified)
-        }
-    }
-    static func AddNewNovelWithMultiplText(contents:[String], title:String) {
-        let novel = RealmNovel()
-        novel.type = .UserCreated
-        novel.title = title
-        novel.m_lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: contents.count)
-        var chapterNumber = 1
-        for content in contents {
-            if content.count <= 0 { continue }
-            let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: chapterNumber)
+        autoreleasepool {
+            let novel = RealmNovel()
+            novel.type = .UserCreated
+            novel.title = title
+            novel.lastReadDate = Date(timeIntervalSince1970: 1)
+            novel.lastDownloadDate = Date()
+            novel.downloadDateArray.append(novel.lastDownloadDate)
+            let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
             story.content = content
-            if chapterNumber != 1 {
-                //story.lastReadDate = Date(timeIntervalSinceNow: -60)
-            }
             RealmUtil.RealmStoryWrite { (realm) in
                 realm.add(story, update: .modified)
             }
-            chapterNumber += 1
-            novel.downloadDateArray.append(Date())
+            novel.m_lastChapterStoryID = story.id
+            RealmUtil.Write { (realm) in
+                realm.add(novel, update: .modified)
+            }
         }
-        RealmUtil.Write { (realm) in
-            realm.add(novel, update: .modified)
+    }
+    static func AddNewNovelWithMultiplText(contents:[String], title:String) {
+        autoreleasepool {
+            let novel = RealmNovel()
+            novel.type = .UserCreated
+            novel.title = title
+            novel.m_lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: contents.count)
+            var chapterNumber = 1
+            for content in contents {
+                if content.count <= 0 { continue }
+                let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: chapterNumber)
+                story.content = content
+                if chapterNumber != 1 {
+                    //story.lastReadDate = Date(timeIntervalSinceNow: -60)
+                }
+                RealmUtil.RealmStoryWrite { (realm) in
+                    realm.add(story, update: .modified)
+                }
+                chapterNumber += 1
+                novel.downloadDateArray.append(Date())
+            }
+            RealmUtil.Write { (realm) in
+                realm.add(novel, update: .modified)
+            }
         }
     }
     
     static func AddNewNovelWithFirstStory(url:URL, htmlStory:HtmlStory, cookieParameter:String, title:String, author:String?, tag:[Any]?, firstContent:String) -> Bool {
-        let novelID = url.absoluteString
-        guard novelID.count > 0 else {
-            return false
-        }
-        if SearchNovelFrom(novelID: url.absoluteString) != nil {
-            // already downloaded.
-            return false
-        }
-        let novel = RealmNovel()
-        novel.novelID = novelID
-        novel.url = novelID
-        novel.m_urlSecret = cookieParameter
-        novel.title = title
-        if let author = author {
-            novel.writer = author
-        }
-        novel.type = .URL
-        novel.m_lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1)
-        RealmUtil.Write { (realm) in
-            realm.add(novel, update: .modified)
-        }
-        let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
-        story.content = firstContent
-        if let subtitle = htmlStory.subtitle {
-            story.subtitle = subtitle
-        }
-        if let storyUrl = htmlStory.url {
-            story.url = storyUrl
-        }
-        RealmUtil.RealmStoryWrite { (realm) in
-            //story.lastReadDate = Date(timeIntervalSince1970: 60)
-            realm.add(story, update: .modified)
-        }
-        if let tagArray = tag {
+        return autoreleasepool {
+            let novelID = url.absoluteString
+            guard novelID.count > 0 else {
+                return false
+            }
+            if SearchNovelFrom(novelID: url.absoluteString) != nil {
+                // already downloaded.
+                return false
+            }
+            let novel = RealmNovel()
+            novel.novelID = novelID
+            novel.url = novelID
+            novel.m_urlSecret = cookieParameter
+            novel.title = title
+            if let author = author {
+                novel.writer = author
+            }
+            novel.type = .URL
+            novel.m_lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1)
             RealmUtil.Write { (realm) in
-                for tagName in tagArray {
-                    if let tagName = tagName as? String {
-                        RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: "keyword")
+                realm.add(novel, update: .modified)
+            }
+            autoreleasepool {
+                let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
+                story.content = firstContent
+                if let subtitle = htmlStory.subtitle {
+                    story.subtitle = subtitle
+                }
+                if let storyUrl = htmlStory.url {
+                    story.url = storyUrl
+                }
+                RealmUtil.RealmStoryWrite { (realm) in
+                    //story.lastReadDate = Date(timeIntervalSince1970: 60)
+                    realm.add(story, update: .modified)
+                }
+            }
+            if let tagArray = tag {
+                autoreleasepool {
+                    RealmUtil.Write { (realm) in
+                        for tagName in tagArray {
+                            if let tagName = tagName as? String {
+                                RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: "keyword")
+                            }
+                        }
                     }
                 }
             }
+            return true
         }
-        return true
     }
     
     func delete(realm:Realm) {

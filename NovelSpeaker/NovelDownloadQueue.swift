@@ -39,10 +39,17 @@ class DownloadQueueHolder: NSObject {
     var nowDownloading = [String:String]()
     
     func addQueue(novelID:String) {
-        guard novelID.count > 0, let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+        var updateFrequencyTmp:Double? = nil
+        guard novelID.count > 0 else { return }
+        autoreleasepool {
+            if let updateFrequency = RealmNovel.SearchNovelFrom(novelID: novelID)?.updateFrequency {
+                updateFrequencyTmp = updateFrequency
+            }
+        }
+        guard let updateFrequency = updateFrequencyTmp else { return }
         self.lock.lock()
         defer { self.lock.unlock() }
-        let item = QueueItem(novelID: novelID, updateFrequency: novel.updateFrequency)
+        let item = QueueItem(novelID: novelID, updateFrequency: updateFrequency)
         let hostName = item.hostName
         if var queueList = queue[hostName] {
             for queue in queueList {
@@ -242,29 +249,35 @@ class NovelDownloader : NSObject {
             successAction(novelID, 0)
             return
         }
-        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
-            print("NovelDownloader.startDownload(): novel \(novelID) has invalid condition. download aborted.")
-            failedAction(novelID, 0, NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "(novelID: \"\(novelID)\")")
-            return
-        }
-        let urlSecret = novel.urlSecret
+        var urlSecret:[String] = []
         var chapterNumber = 1
-        let lastDownloadURL:URL
-        if let lastChapter = novel.lastChapter, let lastDownloadURLString = novel.lastDownloadURL, let targetURL = URL(string: lastDownloadURLString) {
-            chapterNumber = lastChapter.chapterNumber
-            lastDownloadURL = targetURL
-        }else if let targetURL = URL(string: novelID) {
-            chapterNumber = 1
-            lastDownloadURL = targetURL
-        }else{
-            print("NovelDownloader.startDownload(): novel \(novelID) has invalid condition. download aborted.")
-            failedAction(novelID, 0, NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "(novelID: \"\(novelID)\")")
-            return
+        var lastDownloadURLTmp:URL? = nil
+        autoreleasepool {
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
+                print("NovelDownloader.startDownload(): novel \(novelID) has invalid condition. download aborted.")
+                failedAction(novelID, 0, NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "(novelID: \"\(novelID)\")")
+                return
+            }
+            urlSecret = novel.urlSecret
+            autoreleasepool {
+                if let lastChapter = novel.lastChapter, let lastDownloadURLString = novel.lastDownloadURL, let targetURL = URL(string: lastDownloadURLString) {
+                    chapterNumber = lastChapter.chapterNumber
+                    lastDownloadURLTmp = targetURL
+                }else if let targetURL = URL(string: novelID) {
+                    chapterNumber = 1
+                    lastDownloadURLTmp = targetURL
+                }else{
+                    print("NovelDownloader.startDownload(): novel \(novelID) has invalid condition. download aborted.")
+                    failedAction(novelID, 0, NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "(novelID: \"\(novelID)\")")
+                    return
+                }
+            }
         }
+        guard let lastDownloadURL = lastDownloadURLTmp else { return }
         let queuedDate = Date()
         uriLoader.fetchOneUrl(
             lastDownloadURL,
-            cookieArray: novel.urlSecret,
+            cookieArray: urlSecret,
             successAction: { (htmlStory) in
                 autoreleasepool {
                     guard let htmlStory = htmlStory, let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
@@ -294,16 +307,18 @@ class NovelDownloader : NSObject {
                             targetURL = firstPage
                             chapterNumber = 0 // あとで +1 して downloadOnce() が呼ばれるので。
                         }else{
-                            let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: 1) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: 1)
-                            RealmUtil.RealmStoryWrite { (realm) in
-                                story.content = htmlStory.content ?? ""
-                                story.subtitle = htmlStory.subtitle ?? ""
-                                //story.downloadDate = Date()
-                                //story.lastReadDate = Date(timeIntervalSince1970: 60)
-                                story.url = lastDownloadURL.absoluteString
-                                realm.add(story, update: .modified)
+                            let storyID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1)
+                            autoreleasepool {
+                                let story = RealmStory.SearchStoryFrom(storyID: storyID) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: 1)
+                                RealmUtil.RealmStoryWrite { (realm) in
+                                    story.content = htmlStory.content ?? ""
+                                    story.subtitle = htmlStory.subtitle ?? ""
+                                    //story.downloadDate = Date()
+                                    //story.lastReadDate = Date(timeIntervalSince1970: 60)
+                                    story.url = lastDownloadURL.absoluteString
+                                    realm.add(story, update: .modified)
+                                }
                             }
-                            let storyID = story.id
                             RealmUtil.Write { (realm) in
                                 novel.m_lastChapterStoryID = storyID
                                 novel.lastDownloadDate = queuedDate
@@ -375,11 +390,13 @@ class NovelDownloadQueue : NSObject {
         return autoreleasepool {
             let newUriLoader = UriLoader()
             let semaphore = DispatchSemaphore(value: 0)
-            let cacheExpireTimeinterval:Double
-            if let instance = RealmGlobalState.GetInstance(), instance.isForceSiteInfoReloadIsEnabled {
-                cacheExpireTimeinterval = 0
-            }else{
-                cacheExpireTimeinterval = cacheFileExpireTimeinterval
+            var cacheExpireTimeinterval:Double = 0
+            autoreleasepool {
+                if let instance = RealmGlobalState.GetInstance(), instance.isForceSiteInfoReloadIsEnabled {
+                    cacheExpireTimeinterval = 0
+                }else{
+                    cacheExpireTimeinterval = cacheFileExpireTimeinterval
+                }
             }
             var novelSpeakerSiteInfoData:Data? = nil
             var autopagerizeSiteInfoData:Data? = nil
@@ -427,14 +444,16 @@ class NovelDownloadQueue : NSObject {
         var tmpUriLoaderLoadDate = Date()
         while self.isDownloadStop == false && self.queueHolder.GetCurrentDownloadingNovelIDArray().count < self.maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
             autoreleasepool {
-                let cacheExpireTimeinterval:Double
-                if let instance = RealmGlobalState.GetInstance(), instance.isForceSiteInfoReloadIsEnabled {
-                    cacheExpireTimeinterval = 0
-                }else{
-                    cacheExpireTimeinterval = cacheFileExpireTimeinterval
+                var cacheExpireTimeinterval:Double = 0
+                autoreleasepool {
+                    if let instance = RealmGlobalState.GetInstance(), instance.isForceSiteInfoReloadIsEnabled {
+                        cacheExpireTimeinterval = 0
+                    }else{
+                        cacheExpireTimeinterval = cacheFileExpireTimeinterval
+                    }
                 }
                 let uriLoader:UriLoader
-                if let aliveUriLoader = tmpUriLoader, !(RealmGlobalState.GetInstance()?.isForceSiteInfoReloadIsEnabled ?? false) && (Date().timeIntervalSince1970 - tmpUriLoaderLoadDate.timeIntervalSince1970) < cacheExpireTimeinterval {
+                if let aliveUriLoader = tmpUriLoader, (Date().timeIntervalSince1970 - tmpUriLoaderLoadDate.timeIntervalSince1970) < cacheExpireTimeinterval {
                     uriLoader = aliveUriLoader
                 }else{
                     uriLoader = self.createUriLoader()
@@ -515,19 +534,21 @@ class NovelDownloadQueue : NSObject {
     }
 
     @objc func StartBackgroundFetchIfNeeded() {
-        guard let globalState = RealmGlobalState.GetInstance() else { return }
-        if !globalState.isBackgroundNovelFetchEnabled {
-            DispatchQueue.main.async {
-                UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplication.backgroundFetchIntervalNever)
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else { return }
+            if !globalState.isBackgroundNovelFetchEnabled {
+                DispatchQueue.main.async {
+                    UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplication.backgroundFetchIntervalNever)
+                }
+                return
             }
-            return
-        }
-        var hour:TimeInterval = 60*60
-        if hour < UIApplication.backgroundFetchIntervalMinimum {
-            hour = UIApplication.backgroundFetchIntervalMinimum
-        }
-        DispatchQueue.main.async {
-            UIApplication.shared.setMinimumBackgroundFetchInterval(hour)
+            var hour:TimeInterval = 60*60
+            if hour < UIApplication.backgroundFetchIntervalMinimum {
+                hour = UIApplication.backgroundFetchIntervalMinimum
+            }
+            DispatchQueue.main.async {
+                UIApplication.shared.setMinimumBackgroundFetchInterval(hour)
+            }
         }
     }
     func GetCurrentDownloadCount() -> Int {
@@ -573,14 +594,15 @@ class NovelDownloadQueue : NSObject {
             return
         }
         let fetchedNovelIDList = GetAlreadyBackgroundFetchedNovelIDList()
-        guard let novelArray = RealmNovel.GetAllObjects() else {
-            performFetchWithCompletionHandler(.noData)
-            return
-        }
         var targetNovelIDList:[String] = []
-        for novel in novelArray {
-            if novel.type == .URL && !fetchedNovelIDList.contains(novel.novelID) {
-                targetNovelIDList.append(novel.novelID)
+        autoreleasepool {
+            guard let novelArray = RealmNovel.GetAllObjects() else {
+                return
+            }
+            for novel in novelArray {
+                if novel.type == .URL && !fetchedNovelIDList.contains(novel.novelID) {
+                    targetNovelIDList.append(novel.novelID)
+                }
             }
         }
         if targetNovelIDList.count <= 0 {
@@ -617,8 +639,10 @@ class NovelDownloadQueue : NSObject {
                 let downloadSuccessTitle = String(format: NSLocalizedString("GlobalDataSingleton_NovelUpdateAlertBody", comment: "%d個の更新があります。"), novelIDArray.count)
                 var novelTitleArray:[String] = []
                 for novelID in novelIDArray {
-                    guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { continue }
-                    novelTitleArray.append(novel.title)
+                    autoreleasepool {
+                        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+                        novelTitleArray.append(novel.title)
+                    }
                 }
                 let displayDownloadCount = self.GetCurrentDownloadCount() + novelIDArray.count
                 self.SetCurrentDownloadCount(count: displayDownloadCount)

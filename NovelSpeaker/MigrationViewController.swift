@@ -71,8 +71,13 @@ class MigrationViewController: UIViewController {
                 }catch{
                     // TODO: exception を握りつぶしている
                 }
-                if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
-                    // iCloud の データがあるならそれを使う
+                if autoreleasepool(invoking: { () -> Bool in
+                    if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
+                        // iCloud の データがあるならそれを使う
+                        return true
+                    }
+                    return false
+                }) {
                     return
                 }
                 // iCloud を使うようにマークされているが、
@@ -80,9 +85,14 @@ class MigrationViewController: UIViewController {
                 // 仕方がないので iCloud側 のデータを全て読み直す事にする。
                 self.FetchValidCloudData()
                 // 再度確認する
-                if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
-                    // iCloud の データがあるならそれを使う
-                    return
+                if autoreleasepool(invoking: { () -> Bool in
+                    if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
+                        // iCloud の データがあるならそれを使う
+                        return true
+                    }
+                    return false
+                }) {
+                   return
                 }
                 // local のがあるならそこからコピーする
                 if RealmUtil.CheckIsLocalRealmCreated() && CopyLocalToCloud() {

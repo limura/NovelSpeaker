@@ -26,9 +26,11 @@ class FontSelectViewController: FormViewController {
             }
             $0.tag = fontName
         }.onCellSelection { (labelCallOf, labelRow) in
-            if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting, let fontID = labelRow.tag {
-                RealmUtil.Write { (realm) in
-                    displaySetting.fontID = fontID
+            autoreleasepool {
+                if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting, let fontID = labelRow.tag {
+                    RealmUtil.Write { (realm) in
+                        displaySetting.fontID = fontID
+                    }
                 }
             }
             self.navigationController?.popViewController(animated: true)

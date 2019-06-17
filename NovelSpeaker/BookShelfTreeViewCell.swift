@@ -69,22 +69,24 @@ class BookShelfTreeViewCell: UITableViewCell {
         self.treeDepthImageViewWidthConstraint.isActive = true
     }
     func applyCurrentReadingPointToIndicator(novelID:String) {
-        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let story = novel.readingChapter else {
-            self.readProgressView.progress = 0.0
-            return
-        }
-        let chapterNumber = story.chapterNumber
-        let readLocation = Float(story.readLocation)
-        let contentCount = Float(story.content?.count ?? story.readLocation)
-        let lastChapterNumber = novel.lastChapterNumber ?? 1
-        let progress = ((Float(chapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
-        DispatchQueue.main.async {
-            if chapterNumber == lastChapterNumber && contentCount <= (readLocation + 10) {
-                self.readProgressView.tintColor = UIColor(displayP3Red: 0.6, green: 0.3, blue: 0.9, alpha: 1.0)
-            }else{
-                self.readProgressView.tintColor = UIColor(displayP3Red: 255/256.0, green: 188/256.0, blue: 2/256.0, alpha: 1.0)
+        autoreleasepool {
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let story = novel.readingChapter else {
+                self.readProgressView.progress = 0.0
+                return
             }
-            self.readProgressView.progress = progress
+            let chapterNumber = story.chapterNumber
+            let readLocation = Float(story.readLocation)
+            let contentCount = Float(story.content?.count ?? story.readLocation)
+            let lastChapterNumber = novel.lastChapterNumber ?? 1
+            let progress = ((Float(chapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
+            DispatchQueue.main.async {
+                if chapterNumber == lastChapterNumber && contentCount <= (readLocation + 10) {
+                    self.readProgressView.tintColor = UIColor(displayP3Red: 0.6, green: 0.3, blue: 0.9, alpha: 1.0)
+                }else{
+                    self.readProgressView.tintColor = UIColor(displayP3Red: 255/256.0, green: 188/256.0, blue: 2/256.0, alpha: 1.0)
+                }
+                self.readProgressView.progress = progress
+            }
         }
     }
     func applyCurrentDownloadIndicatorVisibleStatus(novelIDArray:[String]) {
@@ -133,136 +135,148 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     
     func applyLikeStarStatus(novelID:String) {
-        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
-            self.likeButton.isHidden = true
-            return
-        }
-        DispatchQueue.main.async {
-            if novel.likeLevel > 0 {
-                self.likeButton.imageView?.image = UIImage(named: "LikeStar.png")
-            }else{
-                self.likeButton.imageView?.image = UIImage(named: "NotLikeStar.png")
+        autoreleasepool {
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
+                self.likeButton.isHidden = true
+                return
+            }
+            DispatchQueue.main.async {
+                if novel.likeLevel > 0 {
+                    self.likeButton.imageView?.image = UIImage(named: "LikeStar.png")
+                }else{
+                    self.likeButton.imageView?.image = UIImage(named: "NotLikeStar.png")
+                }
             }
         }
     }
     
     func registerNovelObserver(novelID:String) {
-        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
-        self.novelObserveToken = novel.observe { (change) in
-            switch change {
-            case .error(_):
-                break
-            case .change(let properties):
-                for property in properties {
-                    if property.name == "likeLevel" {
-                        self.applyLikeStarStatus(novelID: novelID)
-                        return
+        autoreleasepool {
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+            self.novelObserveToken = novel.observe { (change) in
+                switch change {
+                case .error(_):
+                    break
+                case .change(let properties):
+                    for property in properties {
+                        if property.name == "likeLevel" {
+                            self.applyLikeStarStatus(novelID: novelID)
+                            return
+                        }
                     }
+                case .deleted:
+                    break
                 }
-            case .deleted:
-                break
             }
         }
     }
 
     func registerStoryObserver(novelID:String) {
-        self.storyObserveToken = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID).observe({ (change) in
-            switch (change) {
-            case .initial(_):
-                break
-            case .update(_, _, let insertions, let modifications):
-                // 「更新有」の反映
-                if insertions.count > 0 {
-                    DispatchQueue.main.async {
-                        self.activateNewImageView()
+        autoreleasepool {
+            self.storyObserveToken = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID).observe({ (change) in
+                switch (change) {
+                case .initial(_):
+                    break
+                case .update(_, _, let insertions, let modifications):
+                    // 「更新有」の反映
+                    if insertions.count > 0 {
+                        DispatchQueue.main.async {
+                            self.activateNewImageView()
+                        }
+                    }else if modifications.count > 0{
+                        DispatchQueue.main.async {
+                            self.checkAndUpdateNewImage(novelIDArray: [novelID])
+                        }
                     }
-                }else if modifications.count > 0{
+                    // 読んだ位置の更新
                     DispatchQueue.main.async {
-                        self.checkAndUpdateNewImage(novelIDArray: [novelID])
+                        self.applyCurrentReadingPointToIndicator(novelID: novelID)
                     }
+                case .error(_):
+                    break
                 }
-                // 読んだ位置の更新
-                DispatchQueue.main.async {
-                    self.applyCurrentReadingPointToIndicator(novelID: novelID)
-                }
-            case .error(_):
-                break
-            }
-        })
+            })
+        }
     }
     func checkAndUpdateNewImage(novelIDArray:[String]) {
-        guard let novelArray = RealmNovel.GetAllObjects()?.filter("novelID IN %@", novelIDArray) else { return }
-        for novel in novelArray {
-            if novel.isNewFlug {
-                activateNewImageView()
-                return
+        autoreleasepool {
+            guard let novelArray = RealmNovel.GetAllObjects()?.filter("novelID IN %@", novelIDArray) else { return }
+            for novel in novelArray {
+                if novel.isNewFlug {
+                    activateNewImageView()
+                    return
+                }
             }
+            deactivateNewImageView()
         }
-        deactivateNewImageView()
     }
     // TODO: StoryObserver といいつつ、New フラグしか見張ってない
     func registerStoryForNovelArrayObserver(novelIDArray:[String]) {
-        self.storyForNovelArrayObserveToken = RealmStory.GetAllObjects()?.filter("novelID IN %@", novelIDArray).observe({ (change) in
-            switch (change) {
-            case .initial(_):
-                break
-            case .update(let objs, _, let insertions, let modifications):
-                // New! の 表示/非表示 周り
-                if insertions.count > 0 {
-                    DispatchQueue.main.async {
-                        self.activateNewImageView()
-                    }
-                }else if modifications.count > 0 {
-                    var novelIDSet = Set<String>()
-                    for index in modifications {
-                        if objs.count > index {
-                            let story = objs[index]
-                            novelIDSet.insert(story.novelID)
+        autoreleasepool {
+            self.storyForNovelArrayObserveToken = RealmStory.GetAllObjects()?.filter("novelID IN %@", novelIDArray).observe({ (change) in
+                switch (change) {
+                case .initial(_):
+                    break
+                case .update(let objs, _, let insertions, let modifications):
+                    // New! の 表示/非表示 周り
+                    if insertions.count > 0 {
+                        DispatchQueue.main.async {
+                            self.activateNewImageView()
+                        }
+                    }else if modifications.count > 0 {
+                        var novelIDSet = Set<String>()
+                        for index in modifications {
+                            if objs.count > index {
+                                let story = objs[index]
+                                novelIDSet.insert(story.novelID)
+                            }
+                        }
+                        DispatchQueue.main.async {
+                            self.checkAndUpdateNewImage(novelIDArray: Array(novelIDSet))
                         }
                     }
-                    DispatchQueue.main.async {
-                        self.checkAndUpdateNewImage(novelIDArray: Array(novelIDSet))
-                    }
+                case .error(_):
+                    break
                 }
-            case .error(_):
-                break
-            }
-        })
+            })
+        }
     }
     func unregistStoryObserver() {
         self.storyObserveToken = nil
     }
     func registerGlobalStateObserver() {
-        guard let globalState = RealmGlobalState.GetInstance() else { return }
-        let isDisplay = globalState.isReadingProgressDisplayEnabled
-        DispatchQueue.main.async {
-            if isDisplay && self.watchNovelIDArray.count == 1 {
-                self.readProgressView.isHidden = false
-            }else{
-                self.readProgressView.isHidden = true
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else { return }
+            let isDisplay = globalState.isReadingProgressDisplayEnabled
+            DispatchQueue.main.async {
+                if isDisplay && self.watchNovelIDArray.count == 1 {
+                    self.readProgressView.isHidden = false
+                }else{
+                    self.readProgressView.isHidden = true
+                }
             }
-        }
-        self.globalStateObserveToken = globalState.observe { (changes) in
-            switch changes {
-            case .error(_):
-                break
-            case .change(let properties):
-                for property in properties {
-                    if property.name == "isReadingProgressDisplayEnabled" {
-                        if let isDisplayEnabled = property.newValue as? Bool {
-                            DispatchQueue.main.async {
-                                if isDisplayEnabled && self.watchNovelIDArray.count == 1 {
-                                    self.readProgressView.isHidden = false
-                                }else{
-                                    self.readProgressView.isHidden = true
+            self.globalStateObserveToken = globalState.observe { (changes) in
+                switch changes {
+                case .error(_):
+                    break
+                case .change(let properties):
+                    for property in properties {
+                        if property.name == "isReadingProgressDisplayEnabled" {
+                            if let isDisplayEnabled = property.newValue as? Bool {
+                                DispatchQueue.main.async {
+                                    if isDisplayEnabled && self.watchNovelIDArray.count == 1 {
+                                        self.readProgressView.isHidden = false
+                                    }else{
+                                        self.readProgressView.isHidden = true
+                                    }
                                 }
                             }
+                            break
                         }
-                        break
                     }
+                case .deleted:
+                    break
                 }
-            case .deleted:
-                break
             }
         }
     }
@@ -312,12 +326,14 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     
     @IBAction func likeButtonClicked(_ sender: Any) {
-        guard self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
-        RealmUtil.Write { (realm) in
-            if novel.likeLevel > 0 {
-                novel.likeLevel = 0
-            }else{
-                novel.likeLevel = 1
+        autoreleasepool {
+            guard self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+            RealmUtil.Write { (realm) in
+                if novel.likeLevel > 0 {
+                    novel.likeLevel = 0
+                }else{
+                    novel.likeLevel = 1
+                }
             }
         }
     }

@@ -249,52 +249,58 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
 
     // よりSwiftらしいBookmarkの形式([[String:URL]])のブックマークリストとしてブックマークリストを読み出します。
     func getBookmark() -> ([[String:URL]]) {
-        var resultArray = [[String:URL]]()
-        guard let bookmarks = RealmGlobalState.GetInstance()?.webImportBookmarkArray else {
+        return autoreleasepool {
+            var resultArray = [[String:URL]]()
+            guard let bookmarks = RealmGlobalState.GetInstance()?.webImportBookmarkArray else {
+                return resultArray
+            }
+            for bookmarkString in bookmarks {
+                let nameAndURL = bookmarkString.components(separatedBy: "\n")
+                if nameAndURL.count != 2 {
+                    continue
+                }
+                let name = nameAndURL[0]
+                let urlString = nameAndURL[1]
+                let url = URL(string: urlString)
+                if let url = url {
+                    resultArray.append([name:url])
+                }
+            }
             return resultArray
         }
-        for bookmarkString in bookmarks {
-            let nameAndURL = bookmarkString.components(separatedBy: "\n")
-            if nameAndURL.count != 2 {
-                continue
-            }
-            let name = nameAndURL[0]
-            let urlString = nameAndURL[1]
-            let url = URL(string: urlString)
-            if let url = url {
-                resultArray.append([name:url])
-            }
-        }
-        return resultArray
     }
     func delBookmark(url:URL) {
-        guard let globalState = RealmGlobalState.GetInstance() else {
-            return
-        }
-        var dic:[String:Int] = [:]
-        var i:Int = -1
-        for bookmarkString in globalState.webImportBookmarkArray {
-            i += 1
-            let nameAndURL = bookmarkString.components(separatedBy: "\n")
-            if nameAndURL.count != 2 {
-                continue
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else {
+                return
             }
-            let urlString = nameAndURL[1]
-            dic[urlString] = i
-        }
-        if let index = dic[url.absoluteString] {
-            RealmUtil.Write { (realm) in
-                globalState.webImportBookmarkArray.remove(at: index)
+            var dic:[String:Int] = [:]
+            var i:Int = -1
+            for bookmarkString in globalState.webImportBookmarkArray {
+                i += 1
+                let nameAndURL = bookmarkString.components(separatedBy: "\n")
+                if nameAndURL.count != 2 {
+                    continue
+                }
+                let urlString = nameAndURL[1]
+                dic[urlString] = i
+            }
+            if let index = dic[url.absoluteString] {
+                RealmUtil.Write { (realm) in
+                    globalState.webImportBookmarkArray.remove(at: index)
+                }
             }
         }
     }
     func addBookmark(url:URL, name:String) {
-        guard let globalState = RealmGlobalState.GetInstance() else {
-            return
-        }
-        RealmUtil.Write { (realm) in
-            let saveName = name.replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "\r", with: "")
-            globalState.webImportBookmarkArray.append("\(saveName)\n\(url.absoluteString)")
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else {
+                return
+            }
+            RealmUtil.Write { (realm) in
+                let saveName = name.replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "\r", with: "")
+                globalState.webImportBookmarkArray.append("\(saveName)\n\(url.absoluteString)")
+            }
         }
     }
 

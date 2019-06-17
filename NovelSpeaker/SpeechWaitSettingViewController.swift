@@ -16,22 +16,24 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
     var hideCache:[String:Bool] = [:]
 
     func testSpeech(text: String, delaySetting:RealmSpeechWaitConfig) {
-        guard let globalState = RealmGlobalState.GetInstance() else {
-            print("can not get globalState")
-            return
+        autoreleasepool {
+            guard let globalState = RealmGlobalState.GetInstance() else {
+                print("can not get globalState")
+                return
+            }
+            guard let speakerSetting = globalState.defaultSpeaker else {
+                print("can not get defaultSpeakerSetting")
+                return
+            }
+            
+            speaker.stopSpeech()
+            speaker.clearSpeakSettings()
+            speaker.setDefaultSpeechConfig(speakerSetting.speechConfig)
+            delaySetting.ApplyDelaySettingTo(niftySpeaker: speaker)
+            speaker.setText(text)
+            speaker.updateCurrentReadingPoint(NSRange(location: 0, length: 0))
+            speaker.startSpeech()
         }
-        guard let speakerSetting = globalState.defaultSpeaker else {
-            print("can not get defaultSpeakerSetting")
-            return
-        }
-        
-        speaker.stopSpeech()
-        speaker.clearSpeakSettings()
-        speaker.setDefaultSpeechConfig(speakerSetting.speechConfig)
-        delaySetting.ApplyDelaySettingTo(niftySpeaker: speaker)
-        speaker.setText(text)
-        speaker.updateCurrentReadingPoint(NSRange(location: 0, length: 0))
-        speaker.startSpeech()
     }
     
     override func viewDidLoad() {
@@ -92,8 +94,10 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                 self.hideCache[targetText] = false
             }
             if self.hideCache[targetText] == false {
-                if let setting = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) {
-                    self.updateTestText(targetString: setting.targetText)
+                autoreleasepool {
+                    if let setting = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) {
+                        self.updateTestText(targetString: setting.targetText)
+                    }
                 }
             }
             for tag in [
@@ -151,14 +155,16 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                 return self.hideCache[targetText] ?? true
             })
         }.onChange({ (row) in
-            guard let value = row.value, let setting = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) else {
-                return
+            autoreleasepool {
+                guard let value = row.value, let setting = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) else {
+                    return
+                }
+                RealmUtil.Write { (realm) in
+                    setting.delayTimeInSec = Float(value)
+                }
+                self.updateTestText(targetString: setting.targetText)
+                self.updateTitleCell(speechWaitConfig: setting)
             }
-            RealmUtil.Write { (realm) in
-                setting.delayTimeInSec = Float(value)
-            }
-            self.updateTestText(targetString: setting.targetText)
-            self.updateTitleCell(speechWaitConfig: setting)
         })
         <<< ButtonRow("SpeechTestButtonRow-\(targetText)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")
@@ -166,10 +172,12 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                 return self.hideCache[targetText] ?? true
             })
         }.onCellSelection({ (buttonCellOf, button) in
-            guard let setting = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) else {
-                return
+            autoreleasepool {
+                guard let setting = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) else {
+                    return
+                }
+                self.testSpeech(text: self.testText, delaySetting: setting)
             }
-            self.testSpeech(text: self.testText, delaySetting: setting)
         })
         <<< ButtonRow("RemoveButtonRow-\(targetText)") {
             $0.title = NSLocalizedString("SpeechWaitSettingViewController_RemoveButtonRow", comment: "この間の設定を削除")
@@ -185,11 +193,13 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                 button1Action: nil,
                 button2Title: NSLocalizedString("OK_button", comment: "OK"),
                 button2Action: {
-                    guard let setting = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) else {
-                        return
-                    }
-                    RealmUtil.Write { (realm) in
-                        setting.delete(realm: realm)
+                    autoreleasepool {
+                        guard let setting = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) else {
+                            return
+                        }
+                        RealmUtil.Write { (realm) in
+                            setting.delete(realm: realm)
+                        }
                     }
                     if let index = self.form.firstIndex(of: section) {
                         print("remove section index: \(index)")
@@ -202,8 +212,12 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
     }
     
     func createCells() {
-        let globalData = RealmGlobalState.GetInstance()
-        let isSpeechWaitSettingUseExperimentalWait = globalData?.isSpeechWaitSettingUseExperimentalWait ?? false
+        var isSpeechWaitSettingUseExperimentalWait = false
+        autoreleasepool {
+            if let globalData = RealmGlobalState.GetInstance() {
+                isSpeechWaitSettingUseExperimentalWait = globalData.isSpeechWaitSettingUseExperimentalWait
+            }
+        }
         form +++ Section()
         <<< TextAreaRow() {
             $0.value = NSLocalizedString("SpeechWaitSettingViewController_Usage", comment: "句読点や空白行を読み上げる時の間を設定します。\n「読み上げ時の間の仕組み」を非推奨型にするとより短い間の設定もできるようになりますが、将来的に動かなくなる可能性があります。改行については「<改行>」という文字列があるとそれを改行として認識するようになっています。")
@@ -223,18 +237,25 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                     rightButtonText: NSLocalizedString("OK_button", comment: "OK"),
                     leftButtonAction: nil,
                     rightButtonAction: { (text) in
-                        if RealmSpeechWaitConfig.SearchFrom(targetText: text) != nil {
-                            DispatchQueue.main.async {
-                                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechWaitSettingViewController_IsAlreadyDefined", comment: "既に定義されている文字列が指定されました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                        if autoreleasepool(invoking: { () -> Bool in
+                            if RealmSpeechWaitConfig.SearchFrom(targetText: text) != nil {
+                                DispatchQueue.main.async {
+                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechWaitSettingViewController_IsAlreadyDefined", comment: "既に定義されている文字列が指定されました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                                }
+                                return true
                             }
+                            return false
+                        }) {
                             return
                         }
-                        let newSpeechWaitConfig = RealmSpeechWaitConfig()
-                        newSpeechWaitConfig.targetText = text
-                        RealmUtil.Write { (realm) in
-                            realm.add(newSpeechWaitConfig, update: .modified)
+                        autoreleasepool {
+                            let newSpeechWaitConfig = RealmSpeechWaitConfig()
+                            newSpeechWaitConfig.targetText = text
+                            RealmUtil.Write { (realm) in
+                                realm.add(newSpeechWaitConfig, update: .modified)
+                            }
+                            self.form.append(self.createSpeechWaitCells(speechWaitSetting: newSpeechWaitConfig))
                         }
-                        self.form.append(self.createSpeechWaitCells(speechWaitSetting: newSpeechWaitConfig))
                         DispatchQueue.main.async {
                             NiftyUtilitySwift.EasyDialogOneButton(
                                 viewController: self,
@@ -254,14 +275,11 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
             $0.value = isSpeechWaitSettingUseExperimentalWait ? NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", comment: "非推奨型") : NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default", comment: "標準型")
             $0.options = [NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Default", comment: "標準型"), NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", comment: "非推奨型")]
         }.onChange({ (row) in
-            guard let value = row.value else {
-                return
-            }
-            guard let globalData = RealmGlobalState.GetInstance() else {
-                return
-            }
-            RealmUtil.Write { (realm) in
-                globalData.isSpeechWaitSettingUseExperimentalWait = value == NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", comment: "非推奨型")
+            autoreleasepool {
+                guard let value = row.value, let globalData = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.Write { (realm) in
+                    globalData.isSpeechWaitSettingUseExperimentalWait = value == NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", comment: "非推奨型")
+                }
             }
         })
         <<< TextAreaRow(TestTextAreaTag) {
@@ -276,9 +294,11 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
             }
         })
         
-        if let configArray = RealmSpeechWaitConfig.GetAllObjects() {
-            for config in configArray {
-                form.append(createSpeechWaitCells(speechWaitSetting: config))
+        autoreleasepool {
+            if let configArray = RealmSpeechWaitConfig.GetAllObjects() {
+                for config in configArray {
+                    form.append(createSpeechWaitCells(speechWaitSetting: config))
+                }
             }
         }
     }

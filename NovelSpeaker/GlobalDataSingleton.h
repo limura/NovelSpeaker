@@ -25,6 +25,7 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
     NarouContentSortType_Writer,
     NarouContentSortType_Ncode,
     NarouContentSortType_SelfCreatedBookshelf,
+    NarouContentSortType_KeywordTag,
     NarouContentSortType_NovelUpdatedAtWithFolder,
 };
 

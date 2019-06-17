@@ -47,20 +47,22 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
     }
 
     func observeSectionConfig() {
-        guard let sectionConfigList = RealmSpeechSectionConfig.GetAllObjects() else { return }
-        self.sectionConfigObserverToken = sectionConfigList.observe({ (change) in
-            switch change {
-            case .initial(_):
-                break
-            case .update(_, _, _, _):
-                DispatchQueue.main.async {
-                    self.form.removeAll()
-                    self.createCells()
+        autoreleasepool {
+            guard let sectionConfigList = RealmSpeechSectionConfig.GetAllObjects() else { return }
+            self.sectionConfigObserverToken = sectionConfigList.observe({ (change) in
+                switch change {
+                case .initial(_):
+                    break
+                case .update(_, _, _, _):
+                    DispatchQueue.main.async {
+                        self.form.removeAll()
+                        self.createCells()
+                    }
+                case .error(_):
+                    break
                 }
-            case .error(_):
-                break
-            }
-        })
+            })
+        }
     }
 
     func testSpeech(text: String, speakerSetting:RealmSpeakerSetting) {
@@ -141,13 +143,15 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
             if text.count <= 0 {
                 return
             }
-            guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) else {
-                return
+            autoreleasepool {
+                guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) else {
+                    return
+                }
+                RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
+                    speechSectionConfig.startText = text
+                }
+                self.updateTitleCell(speechSectionConfig: speechSectionConfig)
             }
-            RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
-                speechSectionConfig.startText = text
-            }
-            self.updateTitleCell(speechSectionConfig: speechSectionConfig)
         }).cellUpdate({ (textCell, textRow) in
             if !textRow.isValid {
                 textCell.titleLabel?.textColor = .red
@@ -171,37 +175,43 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
             if text.count <= 0 {
                 return
             }
-            guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) else {
-                return
+            autoreleasepool {
+                guard let speechSectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) else {
+                    return
+                }
+                RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
+                    speechSectionConfig.endText = text
+                }
+                self.updateTitleCell(speechSectionConfig: speechSectionConfig)
             }
-            RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
-                speechSectionConfig.endText = text
-            }
-            self.updateTitleCell(speechSectionConfig: speechSectionConfig)
         }).cellUpdate({ (textCell, textRow) in
             if !textRow.isValid {
                 textCell.titleLabel?.textColor = .red
             }
             textCell.textField.clearButtonMode = .always
         })
-        <<< AlertRow<String>("SpeakerAlertRow-\(name)") {
-            $0.title = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerAlertRowTitle", comment: "話者")
-            $0.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
-            $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
+        <<< AlertRow<String>("SpeakerAlertRow-\(name)") { (row) -> Void in
+            row.title = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerAlertRowTitle", comment: "話者")
+            row.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
+            row.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
                 return self.hideCache[name] ?? true
             })
-            $0.selectorTitle = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSelectorTitle", comment: "話者を選択してください")
-            guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjects()?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
-            $0.options = speakerSettingArray.map({$0.name})
-            $0.value = speechSectionConfig.speaker?.name ?? NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
+            row.selectorTitle = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSelectorTitle", comment: "話者を選択してください")
+            autoreleasepool {
+                guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjects()?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
+                row.options = speakerSettingArray.map({$0.name})
+            }
+            row.value = speechSectionConfig.speaker?.name ?? NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
         }.onChange({ (row) in
-            guard let targetName = row.value, let sectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name), let speaker = RealmSpeakerSetting.SearchFrom(name: targetName) else {
-                return
+            autoreleasepool {
+                guard let targetName = row.value, let sectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name), let speaker = RealmSpeakerSetting.SearchFrom(name: targetName) else {
+                    return
+                }
+                RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
+                    sectionConfig.speakerID = speaker.name
+                }
+                self.updateTitleCell(speechSectionConfig: sectionConfig)
             }
-            RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
-                sectionConfig.speakerID = speaker.name
-            }
-            self.updateTitleCell(speechSectionConfig: sectionConfig)
         })
         <<< LabelRow("TargetNovelIDLabelRow-\(name)") {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TargetNovelIDLabelTitle", comment: "適用対象")
@@ -230,10 +240,12 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 return self.hideCache[name] ?? true
             })
         }.onCellSelection({ (buttonCellOf, button) in
-            guard let speaker = RealmSpeechSectionConfig.SearchFrom(name: name)?.speaker else {
-                return
+            autoreleasepool {
+                guard let speaker = RealmSpeechSectionConfig.SearchFrom(name: name)?.speaker else {
+                    return
+                }
+                self.testSpeech(text: self.testText, speakerSetting: speaker)
             }
-            self.testSpeech(text: self.testText, speakerSetting: speaker)
         })
         <<< ButtonRow("RemoveButtonRow-\(name)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_RemoveButtonRow", comment: "この設定を削除")
@@ -249,11 +261,13 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 button1Action: nil,
                 button2Title: NSLocalizedString("OK_button", comment: "OK"),
                 button2Action: {
-                    guard let setting = RealmSpeechSectionConfig.SearchFrom(name: name) else {
-                        return
-                    }
-                    RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
-                        setting.delete(realm: realm)
+                    autoreleasepool {
+                        guard let setting = RealmSpeechSectionConfig.SearchFrom(name: name) else {
+                            return
+                        }
+                        RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
+                            setting.delete(realm: realm)
+                        }
                     }
                     if let index = self.form.firstIndex(of: section) {
                         print("remove section index: \(index)")
@@ -298,21 +312,25 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                             }
                             return
                         }
-                        let newSpeechSectionConfig:RealmSpeechSectionConfig
-                        if let config = RealmSpeechSectionConfig.SearchFrom(name: name) {
-                            newSpeechSectionConfig = config
-                        }else{
-                            newSpeechSectionConfig = RealmSpeechSectionConfig()
-                            newSpeechSectionConfig.name = name
-                            if let defaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker {
-                                newSpeechSectionConfig.speakerID = defaultSpeaker.name
+                        autoreleasepool {
+                            let newSpeechSectionConfig:RealmSpeechSectionConfig
+                            if let config = RealmSpeechSectionConfig.SearchFrom(name: name) {
+                                newSpeechSectionConfig = config
+                            }else{
+                                newSpeechSectionConfig = RealmSpeechSectionConfig()
+                                newSpeechSectionConfig.name = name
+                                autoreleasepool {
+                                    if let defaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker {
+                                        newSpeechSectionConfig.speakerID = defaultSpeaker.name
+                                    }
+                                }
                             }
+                            RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
+                                realm.add(newSpeechSectionConfig, update: .modified)
+                            }
+                            newSpeechSectionConfig.AddTargetNovelID(novelID: self.targetNovelID)
+                            self.form.append(self.createSpeechSectionConfigCells(speechSectionConfig: newSpeechSectionConfig))
                         }
-                        RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
-                            realm.add(newSpeechSectionConfig, update: .modified)
-                        }
-                        newSpeechSectionConfig.AddTargetNovelID(novelID: self.targetNovelID)
-                        self.form.append(self.createSpeechSectionConfigCells(speechSectionConfig: newSpeechSectionConfig))
                         DispatchQueue.main.async {
                             NiftyUtilitySwift.EasyDialogOneButton(
                                 viewController: self,
@@ -338,12 +356,14 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         })
         form +++ section
 
-        if let speechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects()?.sorted(byKeyPath: "createdDate").filter({ (setting) -> Bool in
-            if self.targetNovelID == RealmSpeechSectionConfig.anyTarget { return true }
-            return setting.targetNovelIDArray.contains(self.targetNovelID)
-        }) {
-            for speechSectionConfig in speechSectionConfigArray {
-                form.append(self.createSpeechSectionConfigCells(speechSectionConfig: speechSectionConfig))
+        autoreleasepool {
+            if let speechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects()?.sorted(byKeyPath: "createdDate").filter({ (setting) -> Bool in
+                if self.targetNovelID == RealmSpeechSectionConfig.anyTarget { return true }
+                return setting.targetNovelIDArray.contains(self.targetNovelID)
+            }) {
+                for speechSectionConfig in speechSectionConfigArray {
+                    form.append(self.createSpeechSectionConfigCells(speechSectionConfig: speechSectionConfig))
+                }
             }
         }
     }
@@ -355,8 +375,10 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         }
         for novelID in selectedNovelIDSet {
             if novelID == MultipleNovelIDSelectorViewController.AnyTypeTag { continue }
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { continue }
-            selectedNovelNameArray.append(novel.title)
+            autoreleasepool {
+                guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+                selectedNovelNameArray.append(novel.title)
+            }
         }
         return selectedNovelNameArray.joined(separator: ", ")
     }
@@ -375,11 +397,13 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                         button1Action: nil,
                         button2Title: nil,
                         button2Action: {
-                            guard let setting = RealmSpeechSectionConfig.SearchFrom(name: name) else {
-                                return
-                            }
-                            RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
-                                setting.delete(realm: realm)
+                            autoreleasepool {
+                                guard let setting = RealmSpeechSectionConfig.SearchFrom(name: name) else {
+                                    return
+                                }
+                                RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
+                                    setting.delete(realm: realm)
+                                }
                             }
                             if let section = self.form.sectionBy(tag: name), let index = self.form.firstIndex(of: section) {
                                 print("remove section index: \(index)")
@@ -393,13 +417,15 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 return
             }
             self.targetNovelIDSetMap[name] = selectedNovelIDSet
-            guard let sectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) else { return }
-            RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken], block: { (realm) in
-                sectionConfig.targetNovelIDArray.removeAll()
-                for novelID in selectedNovelIDSet {
-                    sectionConfig.targetNovelIDArray.append(novelID)
-                }
-            })
+            autoreleasepool {
+                guard let sectionConfig = RealmSpeechSectionConfig.SearchFrom(name: name) else { return }
+                RealmUtil.Write(withoutNotifying: [self.sectionConfigObserverToken], block: { (realm) in
+                    sectionConfig.targetNovelIDArray.removeAll()
+                    for novelID in selectedNovelIDSet {
+                        sectionConfig.targetNovelIDArray.append(novelID)
+                    }
+                })
+            }
             row.value = self.SelectedNovelIDSetToNovelNameString(selectedNovelIDSet: selectedNovelIDSet)
             row.updateCell()
         }
