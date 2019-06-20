@@ -1550,10 +1550,12 @@ class NovelSpeakerUtility: NSObject {
                     "isNeedSpeechAfterDelete": novel.isNeedSpeechAfterDelete,
                     "defaultSpeakerID": novel.defaultSpeakerID,
                     "lastChapterStoryID": novel.m_lastChapterStoryID,
-                    "lastDownloadDate": NiftyUtilitySwift.Date2EpochSecond(date: novel.lastDownloadDate),
+                    "lastDownloadDate": NiftyUtilitySwift.Date2ISO8601String(date: novel.lastDownloadDate),
                     "readingChapterStoryID": novel.m_readingChapterStoryID,
-                    "lastReadDate": NiftyUtilitySwift.Date2EpochSecond(date: novel.lastReadDate),
-                    "downloadDateArray": novel.downloadDateArray,
+                    "lastReadDate": NiftyUtilitySwift.Date2ISO8601String(date: novel.lastReadDate),
+                    "downloadDateArray": Array(novel.downloadDateArray.map({ (date) -> String in
+                        NiftyUtilitySwift.Date2ISO8601String(date: date)
+                    })),
                     "contentDirectory": "\(novelCount)"
                 ]
                 let contentDirectory = NiftyUtilitySwift.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
