@@ -252,7 +252,14 @@ class NiftyUtilitySwift: NSObject {
     
     @discardableResult
     @objc public static func EasyDialogMessageDialog(viewController: UIViewController, message: String) -> EasyDialog {
-        return EasyDialogOneButton(viewController: viewController, title: nil, message: message, buttonTitle: nil, buttonAction: nil)
+        let dialog = EasyDialog.Builder(viewController)
+        .textView(content: message, heightMultiplier: 0.7)
+        .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+            dialog.dismiss(animated: false, completion: nil)
+        }
+        .build()
+        dialog.show()
+        return dialog
     }
 
     @discardableResult

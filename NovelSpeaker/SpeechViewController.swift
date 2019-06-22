@@ -321,7 +321,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         self.storySpeaker.applySpeechModSetting(novelID: novelID, targetText: text, speaker: dummySpeaker)
         dummySpeaker.setText(text)
         if let speechText = dummySpeaker.getSpeechText() {
-            NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechViewController_CheckSpeechTextDialogTitle", comment: "読み上げに使われる文字列は以下のようになります。"), message: speechText, buttonTitle: nil, buttonAction: nil)
+            NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: speechText)
         }
     }
 
