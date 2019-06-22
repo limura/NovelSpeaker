@@ -45,7 +45,9 @@ class RealmToRealmCopyTool: NSObject {
             newObj.m_readingChapterStoryID = obj.m_readingChapterStoryID
             newObj.lastReadDate = obj.lastReadDate
             newObj.downloadDateArray.removeAll()
-            newObj.downloadDateArray.append(objectsIn: obj.downloadDateArray)
+            for date in obj.downloadDateArray {
+                newObj.AppendDownloadDate(date: date, realm: to)
+            }
             to.add(newObj, update: .modified)
             try to.commitWrite()
         }

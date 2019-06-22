@@ -740,7 +740,7 @@ class NovelSpeakerUtility: NSObject {
                 }while(true)
                 RealmUtil.Write { (realm) in
                     for _ in 0..<no {
-                        realmNovel.downloadDateArray.append(realmNovel.lastDownloadDate)
+                        realmNovel.AppendDownloadDate(date: realmNovel.lastDownloadDate, realm: realm)
                     }
                 }
             }else{
@@ -821,7 +821,7 @@ class NovelSpeakerUtility: NSObject {
                 }while(true)
                 RealmUtil.Write { (realm) in
                     for _ in 0..<no {
-                        realmNovel.downloadDateArray.append(realmNovel.lastDownloadDate)
+                        realmNovel.AppendDownloadDate(date: realmNovel.lastDownloadDate, realm: realm)
                     }
                 }
                 no -= 1
@@ -1332,7 +1332,7 @@ class NovelSpeakerUtility: NSObject {
                         novel.downloadDateArray.removeAll()
                         for downloadDateStringObj in downloadDateArray {
                             if let downloadDateString = downloadDateStringObj as? String, let downloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: downloadDateString) {
-                                novel.downloadDateArray.append(downloadDate)
+                                novel.AppendDownloadDate(date: downloadDate, realm: realm)
                             }
                         }
                     }

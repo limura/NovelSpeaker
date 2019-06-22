@@ -950,12 +950,13 @@ extension RealmStory: CanWriteIsDeleted {
     // 推測によるアップデート頻度。単位は1日に何度更新されるのか(1日に1度なら1、10日に1度なら0.1、1日に3度なら3)。
     // 計算としては 章数 / (現在 - 直近から数えて10個前のものがダウンロードされた日付)[日] なので、最後にダウンロードされた日付が古くても評価は下がる。
     // 最初に1000件とかダウンロードされた小説が既に更新終了していたとしても、10件分しか効果がないので10日経つと1に、100日経てば0.1になる。
+    static let updateFrequencyTargetCount = 10
     var updateFrequency: Double {
         get {
             guard let targetDownloadDate = downloadDateArray.suffix(10).first else {
                 return 1.0 / 60.0*60.0*24.0*30.0 // 未ダウンロードのものは30日に1度の頻度とする。
             }
-            let count = Double(downloadDateArray.suffix(10).count)
+            let count = Double(downloadDateArray.suffix(RealmNovel.updateFrequencyTargetCount).count)
             let diffTimeInSec = Date().timeIntervalSince1970 - targetDownloadDate.timeIntervalSince1970
             // likeLevel がある場合は updateFrequency を1日分早い感じにします。
             return count / (diffTimeInSec / (60.0*60.0*24)) + Double(self.likeLevel) * count
@@ -990,7 +991,6 @@ extension RealmStory: CanWriteIsDeleted {
             novel.title = title
             novel.lastReadDate = Date(timeIntervalSince1970: 1)
             novel.lastDownloadDate = Date()
-            novel.downloadDateArray.append(novel.lastDownloadDate)
             let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
             story.content = content
             RealmUtil.RealmStoryWrite { (realm) in
@@ -998,31 +998,32 @@ extension RealmStory: CanWriteIsDeleted {
             }
             novel.m_lastChapterStoryID = story.id
             RealmUtil.Write { (realm) in
+                novel.AppendDownloadDate(date: novel.lastDownloadDate, realm: realm)
                 realm.add(novel, update: .modified)
             }
         }
     }
     static func AddNewNovelWithMultiplText(contents:[String], title:String) {
         autoreleasepool {
-            let novel = RealmNovel()
-            novel.type = .UserCreated
-            novel.title = title
-            novel.m_lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: contents.count)
-            var chapterNumber = 1
-            for content in contents {
-                if content.count <= 0 { continue }
-                let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: chapterNumber)
-                story.content = content
-                if chapterNumber != 1 {
-                    //story.lastReadDate = Date(timeIntervalSinceNow: -60)
-                }
-                RealmUtil.RealmStoryWrite { (realm) in
-                    realm.add(story, update: .modified)
-                }
-                chapterNumber += 1
-                novel.downloadDateArray.append(Date())
-            }
             RealmUtil.Write { (realm) in
+                let novel = RealmNovel()
+                novel.type = .UserCreated
+                novel.title = title
+                novel.m_lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: contents.count)
+                var chapterNumber = 1
+                for content in contents {
+                    if content.count <= 0 { continue }
+                    let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: chapterNumber)
+                    story.content = content
+                    if chapterNumber != 1 {
+                        //story.lastReadDate = Date(timeIntervalSinceNow: -60)
+                    }
+                    RealmUtil.RealmStoryWrite { (realm) in
+                        realm.add(story, update: .modified)
+                    }
+                    chapterNumber += 1
+                    novel.AppendDownloadDate(date: Date(), realm: realm)
+                }
                 realm.add(novel, update: .modified)
             }
         }
@@ -1077,6 +1078,13 @@ extension RealmStory: CanWriteIsDeleted {
                 }
             }
             return true
+        }
+    }
+    
+    func AppendDownloadDate(date:Date, realm:Realm) {
+        downloadDateArray.append(date)
+        while downloadDateArray.count > 10 {
+            downloadDateArray.remove(at: 0)
         }
     }
     

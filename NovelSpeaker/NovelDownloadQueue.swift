@@ -219,7 +219,7 @@ class NovelDownloader : NSObject {
                         if chapterNumber == 1 {
                             novel.m_readingChapterStoryID = storyID
                         }
-                        novel.downloadDateArray.append(queuedDate)
+                        novel.AppendDownloadDate(date: queuedDate, realm: realm)
                     }
                     print("add new story: \(novelID), chapterNumber: \(chapterNumber), url: \(targetURL.absoluteString)")
                     if let nextUrl = htmlStory.nextUrl {
@@ -323,7 +323,7 @@ class NovelDownloader : NSObject {
                                 novel.m_lastChapterStoryID = storyID
                                 novel.lastDownloadDate = queuedDate
                                 novel.m_readingChapterStoryID = storyID
-                                novel.downloadDateArray.append(queuedDate)
+                                novel.AppendDownloadDate(date: queuedDate, realm: realm)
                             }
                             if let url = htmlStory.nextUrl {
                                 targetURL = url
