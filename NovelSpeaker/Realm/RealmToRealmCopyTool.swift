@@ -153,7 +153,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isShortSkipEnabled = obj.isShortSkipEnabled
             newObj.isReadingProgressDisplayEnabled = obj.isReadingProgressDisplayEnabled
             newObj.isForceSiteInfoReloadIsEnabled = obj.isForceSiteInfoReloadIsEnabled
-            newObj.isMenuItemIsAddSpeechModSettingOnly = obj.isMenuItemIsAddSpeechModSettingOnly
+            newObj.isMenuItemIsAddNovelSpeakerItemsOnly = obj.isMenuItemIsAddNovelSpeakerItemsOnly
             newObj.isPageTurningSoundEnabled = obj.isPageTurningSoundEnabled
             newObj.m_bookSelfSortType = obj.m_bookSelfSortType
             newObj.defaultDisplaySettingID = obj.defaultDisplaySettingID

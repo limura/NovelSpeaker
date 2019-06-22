@@ -1559,7 +1559,7 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     @objc dynamic var isShortSkipEnabled = false
     @objc dynamic var isReadingProgressDisplayEnabled = false
     @objc dynamic var isForceSiteInfoReloadIsEnabled = false
-    @objc dynamic var isMenuItemIsAddSpeechModSettingOnly = false
+    @objc dynamic var isMenuItemIsAddNovelSpeakerItemsOnly = false
     @objc dynamic var isPageTurningSoundEnabled = false
     @objc dynamic var m_bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
     

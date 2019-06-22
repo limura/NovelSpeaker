@@ -604,7 +604,7 @@ class NovelSpeakerUtility: NSObject {
                     globalState.bookShelfSortType = NarouContentSortType(rawValue: content_sort_type.uintValue) ?? NarouContentSortType.title
                 }
                 if let menuitem_is_add_speech_mod_setting_only = dic.value(forKey: "menuitem_is_add_speech_mod_setting_only") as? NSNumber {
-                    globalState.isMenuItemIsAddSpeechModSettingOnly = menuitem_is_add_speech_mod_setting_only.boolValue
+                    globalState.isMenuItemIsAddNovelSpeakerItemsOnly = menuitem_is_add_speech_mod_setting_only.boolValue
                 }
                 if let override_ruby_is_enabled = dic.value(forKey: "override_ruby_is_enabled") as? NSNumber {
                     speechOverrideSetting.isOverrideRubyIsEnabled = override_ruby_is_enabled.boolValue
@@ -1258,8 +1258,8 @@ class NovelSpeakerUtility: NSObject {
                 if let isForceSiteInfoReloadIsEnabled = dic.object(forKey: "isForceSiteInfoReloadIsEnabled") as? NSNumber {
                     globalState.isForceSiteInfoReloadIsEnabled = isForceSiteInfoReloadIsEnabled.boolValue
                 }
-                if let isMenuItemIsAddSpeechModSettingOnly = dic.object(forKey: "isMenuItemIsAddSpeechModSettingOnly")  as? NSNumber {
-                    globalState.isMenuItemIsAddSpeechModSettingOnly = isMenuItemIsAddSpeechModSettingOnly.boolValue
+                if let isMenuItemIsAddNovelSpeakerItemsOnly = dic.object(forKey: "isMenuItemIsAddNovelSpeakerItemsOnly")  as? NSNumber {
+                    globalState.isMenuItemIsAddNovelSpeakerItemsOnly = isMenuItemIsAddNovelSpeakerItemsOnly.boolValue
                 }
                 if let isPageTurningSoundEnabled = dic.object(forKey: "isPageTurningSoundEnabled") as? NSNumber {
                     globalState.isPageTurningSoundEnabled = isPageTurningSoundEnabled.boolValue
@@ -1663,7 +1663,7 @@ class NovelSpeakerUtility: NSObject {
                 "isShortSkipEnabled": globalState.isShortSkipEnabled,
                 "isReadingProgressDisplayEnabled": globalState.isReadingProgressDisplayEnabled,
                 "isForceSiteInfoReloadIsEnabled": globalState.isForceSiteInfoReloadIsEnabled,
-                "isMenuItemIsAddSpeechModSettingOnly": globalState.isMenuItemIsAddSpeechModSettingOnly,
+                "isMenuItemIsAddSpeechModSettingOnly": globalState.isMenuItemIsAddNovelSpeakerItemsOnly,
                 //"isBackgroundNovelFetchEnabled": globalState.isBackgroundNovelFetchEnabled,
                 "isPageTurningSoundEnabled": globalState.isPageTurningSoundEnabled,
                 "bookSelfSortType": globalState.m_bookSelfSortType,

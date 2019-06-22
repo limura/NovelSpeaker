@@ -230,13 +230,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 autoreleasepool {
                     guard let globalState = RealmGlobalState.GetInstance() else { return }
-                    row.value = globalState.isMenuItemIsAddSpeechModSettingOnly
+                    row.value = globalState.isMenuItemIsAddNovelSpeakerItemsOnly
                 }
             }.onChange({ (row) in
                 autoreleasepool {
                     guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
                     RealmUtil.Write { (realm) in
-                        globalState.isMenuItemIsAddSpeechModSettingOnly = value
+                        globalState.isMenuItemIsAddNovelSpeakerItemsOnly = value
                     }
                 }
             })

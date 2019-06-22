@@ -68,7 +68,7 @@ class CoreDataToRealmTool: NSObject {
         realmState.isShortSkipEnabled = globalDataSingleton.isShortSkipEnabled()
         realmState.isReadingProgressDisplayEnabled = globalDataSingleton.isReadingProgressDisplayEnabled()
         realmState.isForceSiteInfoReloadIsEnabled = globalDataSingleton.getForceSiteInfoReloadIsEnabled()
-        realmState.isMenuItemIsAddSpeechModSettingOnly = globalDataSingleton.getMenuItemIsAddSpeechModSettingOnly()
+        realmState.isMenuItemIsAddNovelSpeakerItemsOnly = globalDataSingleton.getMenuItemIsAddSpeechModSettingOnly()
         //realmState.isBackgroundNovelFetchEnabled = globalDataSingleton.getBackgroundNovelFetchEnabled()
         realmState.bookShelfSortType = globalDataSingleton.getBookSelfSortType()
         realmState.isPageTurningSoundEnabled = globalDataSingleton.isPageTurningSoundEnabled()
