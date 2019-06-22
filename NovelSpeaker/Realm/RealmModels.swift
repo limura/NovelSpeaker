@@ -12,8 +12,8 @@ import CloudKit
 import UIKit
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 3
-    static let currentSchemaVersionForRealmStory : UInt64 = 3
+    static let currentSchemaVersion : UInt64 = 4
+    static let currentSchemaVersionForRealmStory : UInt64 = 4
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"

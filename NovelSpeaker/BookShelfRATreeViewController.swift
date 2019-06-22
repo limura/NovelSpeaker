@@ -587,7 +587,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }
                     return
                 }
-                print("targetChapterNumber: \(targetChapterNumber), novelList.count: \(novelList.count)")
+                //print("targetChapterNumber: \(targetChapterNumber), novelList.count: \(novelList.count)")
                 if novelList.count < targetChapterNumber {
                     let nextViewStoryID = novelList.first?.id
                     DispatchQueue.main.async {
@@ -762,12 +762,23 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                 }
                             }
                         }
-                        autoreleasepool {
-                            if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
-                                RealmUtil.Write(withoutNotifying: [self.novelArrayNotificationToken]) { (realm) in
-                                    novel.delete(realm: realm)
+                        DispatchQueue.main.async {
+                            let dialog = NiftyUtilitySwift.EasyDialogNoButton(
+                                viewController: self,
+                                title: NSLocalizedString("BookShelfRATreeViewController_NovelDeletingTitle", comment: "小説を削除しています……"),
+                                message: nil)
+                            DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 0.3, execute: {
+                                autoreleasepool {
+                                    if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
+                                        RealmUtil.Write { (realm) in
+                                            novel.delete(realm: realm)
+                                        }
+                                    }
                                 }
-                            }
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: false, completion: nil)
+                                }
+                            })
                         }
                     }
                 }

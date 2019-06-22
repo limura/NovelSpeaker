@@ -483,6 +483,7 @@
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber" = "Indicates a chapter where the reading position has not been downloaded. Do you try to download additional chapters of this novel?";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK" = "Download";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OpenFirstStory" = "Open first story";
+"BookShelfRATreeViewController_NovelDeletingTitle" = "Deleting novel...";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";

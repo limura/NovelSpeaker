@@ -475,6 +475,7 @@
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber" = "読み上げ位置がダウンロードされていない章を示しています。この小説の追加の章のダウンロードを試みますか？";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK" = "ダウンロードする";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OpenFirstStory" = "最初の章を開く";
+"BookShelfRATreeViewController_NovelDeletingTitle" = "小説を削除しています……";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 

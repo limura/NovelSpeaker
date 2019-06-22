@@ -252,7 +252,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                 case .update(_, let deletions, let insertions, _):
                     if deletions.count > 0 || insertions.count > 0 {
                         DispatchQueue.main.async {
-                            print("SpeechViewController: story delete or inserted. update display")
+                            //print("SpeechViewController: story delete or inserted. update display")
                             self?.applyChapterListChange()
                         }
                     }
