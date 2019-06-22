@@ -321,7 +321,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         self.storySpeaker.applySpeechModSetting(novelID: novelID, targetText: text, speaker: dummySpeaker)
         dummySpeaker.setText(text)
         if let speechText = dummySpeaker.getSpeechText() {
-            NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: speechText)
+            NiftyUtilitySwift.EasyDialogLongMessageDialog(viewController: self, message: speechText)
         }
     }
 
