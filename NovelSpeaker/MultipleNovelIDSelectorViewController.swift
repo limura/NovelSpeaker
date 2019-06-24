@@ -125,7 +125,7 @@ class MultipleNovelIDSelectorViewController: FormViewController {
             title: NSLocalizedString("SpeechModSettingsTableView_SearchTitle", comment: "検索"),
             message: nil,
             textFieldText: self.filterString,
-            placeHolder: NSLocalizedString("BookShelfTableViewController_SearchMessage", comment: "小説名 と 作者名 が対象となります")) { (text) in
+            placeHolder: NSLocalizedString("BookShelfTableViewController_SearchMessage", comment: "小説名 と 作者名 が対象となります"), action: { (text) in
             self.filterString = text
             DispatchQueue.main.async {
                 self.form.removeAll(keepingCapacity: true)
@@ -136,6 +136,6 @@ class MultipleNovelIDSelectorViewController: FormViewController {
                     self.filterButton.title = NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索") + "(\(self.filterString))"
                 }
             }
-        }
+        })
     }
 }

@@ -386,45 +386,44 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         return createSimpleBookShelfRATreeViewCellDataTree(sortType: NarouContentSortType.title)
     }
-
-    func reloadAllDataAndScrollToCurrentReadingContent(){
-        self.displayDataArray = getBookShelfRATreeViewCellDataTree()
-        if let treeView = self.treeView {
-            treeView.reloadData()
-            DispatchQueue.main.async {
-                autoreleasepool {
-                    guard let lastReadNovel = RealmGlobalState.GetLastReadNovel() else { return }
-                    let novelID = lastReadNovel.novelID
-                    UIView.animate(withDuration: 0.3, animations: {
-                        for cellItem in self.displayDataArray {
-                            // tree が展開されるのは一段目までです(´・ω・`)
-                            if let childrens = cellItem.childrens {
-                                for cellItemChild in childrens {
-                                    if cellItemChild.novelID == novelID {
-                                        self.treeView?.expandRow(forItem: cellItem)
-                                        self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
-                                        return
-                                    }
+    
+    func scrollToCurrentReadingContent() {
+        DispatchQueue.main.async {
+            autoreleasepool {
+                guard let lastReadNovel = RealmGlobalState.GetLastReadNovel() else { return }
+                let novelID = lastReadNovel.novelID
+                UIView.animate(withDuration: 0.3, animations: {
+                    for cellItem in self.displayDataArray {
+                        // tree が展開されるのは一段目までです(´・ω・`)
+                        if let childrens = cellItem.childrens {
+                            for cellItemChild in childrens {
+                                if cellItemChild.novelID == novelID {
+                                    self.treeView?.expandRow(forItem: cellItem)
+                                    self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
+                                    return
                                 }
                             }
-                            if cellItem.novelID == novelID {
-                                self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
-                                return
-                            }
                         }
-                    }, completion: { (finished) in
-                        self.addPreviousNovelSpeakButtonIfNeeded()
-                    })
-                }
+                        if cellItem.novelID == novelID {
+                            self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
+                            return
+                        }
+                    }
+                }, completion: { (finished) in
+                    self.addPreviousNovelSpeakButtonIfNeeded()
+                })
             }
         }
     }
-
-    func reloadAllData(){
+    
+    func reloadAllData() {
         self.displayDataArray = getBookShelfRATreeViewCellDataTree()
-        if let treeView = self.treeView {
-            treeView.reloadData()
-        }
+        self.treeView?.reloadData()
+    }
+
+    func reloadAllDataAndScrollToCurrentReadingContent(){
+        reloadAllData()
+        scrollToCurrentReadingContent()
     }
 
     func showVersionUpNotice(){
@@ -714,74 +713,58 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     // 削除されたりした時に呼ばれるぽい
     func treeView(_ treeView: RATreeView, commit editingStyle: UITableViewCell.EditingStyle, forRowForItem item: Any) {
         if editingStyle == UITableViewCell.EditingStyle.delete {
-            if let data = item as? BookShelfRATreeViewCellData {
-                if let novelID = data.novelID {
-                    let parent = self.treeView?.parent(forItem: item)
-                    var index:Int = -1
-                    if parent == nil {
-                        for (idx, cellData) in self.displayDataArray.enumerated() {
-                            if let thisNovelID = cellData.novelID {
-                                if thisNovelID == novelID {
-                                    index = idx
-                                    break
-                                }
-                            }
-                        }
-                    }else if let parent = parent as? BookShelfRATreeViewCellData{
-                        if let childrens = parent.childrens {
-                            for (idx, child) in childrens.enumerated() {
-                                if child.novelID == novelID {
-                                    index = idx
-                                }
-                            }
-                        }
+            guard let data = item as? BookShelfRATreeViewCellData, let novelID = data.novelID else { return }
+            let parent = self.treeView?.parent(forItem: item)
+            var isNeedReload:Bool = false
+            var expandedItemList:[BookShelfRATreeViewCellData] = []
+            if parent == nil {
+                // parent が居ない場合は一つだけしか無いはずなので普通に消して良い
+                for (idx, cellData) in self.displayDataArray.enumerated() {
+                    if let thisNovelID = cellData.novelID, thisNovelID == novelID {
+                        self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
+                        self.displayDataArray.remove(at: idx)
+                        break
                     }
-                    if index >= 0 {
-                        self.treeView?.deleteItems(at: IndexSet([index]), inParent: parent, with: RATreeViewRowAnimationFade)
-                        for (idx, cellData) in self.displayDataArray.enumerated() {
-                            if let thisNovelID = cellData.novelID {
-                                if thisNovelID == novelID {
-                                    // 一段目に novel があったということは階層は無いので単に一つ消すだけで良い
-                                    self.displayDataArray.remove(at: idx)
-                                    break
-                                }
-                            }else if var childrens = cellData.childrens {
-                                for (childIdx, childCellData) in childrens.enumerated() {
-                                    if let thisNovelID = childCellData.novelID {
-                                        if thisNovelID == novelID {
-                                            childrens.remove(at: childIdx)
-                                            cellData.childrens = childrens
-                                            self.displayDataArray[idx].childrens = childrens
-                                        }
-                                    }
-                                }
-                                if childrens.count <= 0 {
-                                    // このchildを消したらchildが無くなったので、最上位のcellも消す
-                                    self.displayDataArray.remove(at: idx)
-                                    self.treeView?.deleteItems(at: IndexSet([idx]), inParent: nil, with: RATreeViewRowAnimationFade)
+                }
+            }else if let _ = parent as? BookShelfRATreeViewCellData{
+                // parent があるということはフォルダ分けされているので削除対象が複数のフォルダ内にある可能性があるため、
+                // データを消して再度フォルダ分けからやり直す必要がある
+                isNeedReload = true
+                for item in self.displayDataArray {
+                    if let treeView = self.treeView, let cell = treeView.cell(forItem: item), treeView.isCellExpanded(cell) {
+                        expandedItemList.append(item)
+                    }
+                }
+            }
+            DispatchQueue.main.async {
+                NiftyUtilitySwift.EasyDialogNoButton(
+                    viewController: self,
+                    title: NSLocalizedString("BookShelfRATreeViewController_NovelDeletingTitle", comment: "小説を削除しています……"),
+                    message: nil,
+                    completion: { (dialog) in
+                    DispatchQueue.global(qos: .utility).async {
+                        autoreleasepool {
+                            if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
+                                RealmUtil.Write { (realm) in
+                                    novel.delete(realm: realm)
                                 }
                             }
                         }
                         DispatchQueue.main.async {
-                            let dialog = NiftyUtilitySwift.EasyDialogNoButton(
-                                viewController: self,
-                                title: NSLocalizedString("BookShelfRATreeViewController_NovelDeletingTitle", comment: "小説を削除しています……"),
-                                message: nil)
-                            DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 0.3, execute: {
-                                autoreleasepool {
-                                    if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
-                                        RealmUtil.Write { (realm) in
-                                            novel.delete(realm: realm)
+                            dialog.dismiss(animated: false, completion: nil)
+                            if isNeedReload, let treeView = self.treeView {
+                                self.reloadAllData()
+                                for currentItem in self.displayDataArray {
+                                    for item in expandedItemList {
+                                        if let currentItemTitle = currentItem.title, let itemTitle = item.title, currentItemTitle == itemTitle {
+                                            treeView.expandRow(forItem: currentItem)
                                         }
                                     }
                                 }
-                                DispatchQueue.main.async {
-                                    dialog.dismiss(animated: false, completion: nil)
-                                }
-                            })
+                            }
                         }
                     }
-                }
+                })
             }
         }
         else if editingStyle == UITableViewCell.EditingStyle.insert {

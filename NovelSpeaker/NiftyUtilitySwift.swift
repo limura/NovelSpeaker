@@ -237,7 +237,7 @@ class NiftyUtilitySwift: NSObject {
     }
     
     @discardableResult
-    @objc public static func EasyDialogNoButton(viewController: UIViewController, title: String?, message: String?) -> EasyDialog {
+    @objc public static func EasyDialogNoButton(viewController: UIViewController, title: String?, message: String?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         var dialog = EasyDialog.Builder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
@@ -246,29 +246,31 @@ class NiftyUtilitySwift: NSObject {
             dialog = dialog.label(text: message, textAlignment: .left, tag: 100)
         }
         let builded = dialog.build()
-        builded.show()
+        builded.show {
+            completion?(builded)
+        }
         return builded
     }
     
     @discardableResult
-    @objc public static func EasyDialogMessageDialog(viewController: UIViewController, message: String) -> EasyDialog {
-        return EasyDialogOneButton(viewController: viewController, title: nil, message: message, buttonTitle: nil, buttonAction: nil)
+    @objc public static func EasyDialogMessageDialog(viewController: UIViewController, message: String, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
+        return EasyDialogOneButton(viewController: viewController, title: nil, message: message, buttonTitle: nil, buttonAction: nil, completion: completion)
     }
     
     @discardableResult
-    @objc public static func EasyDialogLongMessageDialog(viewController: UIViewController, message: String) -> EasyDialog {
+    @objc public static func EasyDialogLongMessageDialog(viewController: UIViewController, message: String, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         let dialog = EasyDialog.Builder(viewController)
             .textView(content: message, heightMultiplier: 0.7)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
                 dialog.dismiss(animated: false, completion: nil)
             }
             .build()
-        dialog.show()
+        dialog.show { completion?(dialog) }
         return dialog
     }
 
     @discardableResult
-    @objc public static func EasyDialogOneButton(viewController: UIViewController, title: String?, message: String?, buttonTitle: String?, buttonAction:(()->Void)?) -> EasyDialog {
+    @objc public static func EasyDialogOneButton(viewController: UIViewController, title: String?, message: String?, buttonTitle: String?, buttonAction:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         var dialog = EasyDialog.Builder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
@@ -277,18 +279,19 @@ class NiftyUtilitySwift: NSObject {
             dialog = dialog.label(text: message, textAlignment: .left)
         }
         dialog = dialog.addButton(title: buttonTitle != nil ? buttonTitle! : NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-            if let buttonAction = buttonAction {
-                buttonAction()
-            }
-            dialog.dismiss(animated: false, completion: nil)
+            dialog.dismiss(animated: false, completion: {
+                if let buttonAction = buttonAction {
+                    buttonAction()
+                }
+            })
         })
         let builded = dialog.build()
-        builded.show()
+        builded.show { completion?(builded) }
         return builded
     }
     
     @discardableResult
-    @objc public static func EasyDialogTwoButton(viewController: UIViewController, title: String?, message: String?, button1Title: String?, button1Action:(()->Void)?, button2Title: String?, button2Action:(()->Void)?) -> EasyDialog {
+    @objc public static func EasyDialogTwoButton(viewController: UIViewController, title: String?, message: String?, button1Title: String?, button1Action:(()->Void)?, button2Title: String?, button2Action:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         var dialog = EasyDialog.Builder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
@@ -297,23 +300,25 @@ class NiftyUtilitySwift: NSObject {
             dialog = dialog.label(text: message, textAlignment: .left)
         }
         dialog = dialog.addButton(title: button1Title != nil ? button1Title! : NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
-            if let button1Action = button1Action {
-                button1Action()
-            }
-            dialog.dismiss(animated: false, completion: nil)
+            dialog.dismiss(animated: false, completion: {
+                if let button1Action = button1Action {
+                    button1Action()
+                }
+            })
         })
         dialog = dialog.addButton(title: button2Title != nil ? button2Title! : NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-            if let button2Action = button2Action {
-                button2Action()
-            }
-            dialog.dismiss(animated: false, completion: nil)
+            dialog.dismiss(animated: false, completion: {
+                if let button2Action = button2Action {
+                    button2Action()
+                }
+            })
         })
         let builded = dialog.build()
-        builded.show()
+        builded.show { completion?(builded) }
         return builded
     }
     
-    @objc public static func EasyDialogTextInput(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, action:((String)->Void)?) {
+    @objc public static func EasyDialogTextInput(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, action:((String)->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) {
         var dialog = EasyDialog.Builder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
@@ -321,18 +326,20 @@ class NiftyUtilitySwift: NSObject {
         if let message = message {
             dialog = dialog.label(text: message, textAlignment: .left)
         }
-        dialog.textField(tag: 100, placeholder: placeHolder, content: textFieldText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always)
+        let builded = dialog.textField(tag: 100, placeholder: placeHolder, content: textFieldText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
-                if let action = action {
-                    let filterTextField = dialog.view.viewWithTag(100) as! UITextField
-                    let newFilterString = filterTextField.text ?? ""
-                    action(newFilterString)
-                }
-                dialog.dismiss(animated: false, completion: nil)
-            }.build().show()
+                dialog.dismiss(animated: false, completion: {
+                    if let action = action {
+                        let filterTextField = dialog.view.viewWithTag(100) as! UITextField
+                        let newFilterString = filterTextField.text ?? ""
+                        action(newFilterString)
+                    }
+                })
+            }.build()
+        builded.show { completion?(builded) }
     }
     
-    @objc public static func EasyDialogTextInput2Button(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, leftButtonText: String?, rightButtonText: String?, leftButtonAction:((String)->Void)?, rightButtonAction:((String)->Void)?, shouldReturnIsRightButtonClicked:Bool = false) {
+    @objc public static func EasyDialogTextInput2Button(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, leftButtonText: String?, rightButtonText: String?, leftButtonAction:((String)->Void)?, rightButtonAction:((String)->Void)?, shouldReturnIsRightButtonClicked:Bool = false, completion: ((_ dialog:EasyDialog)->Void)? = nil) {
         var dialog = EasyDialog.Builder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
@@ -342,35 +349,39 @@ class NiftyUtilitySwift: NSObject {
         }
         dialog = dialog.textField(tag: 100, placeholder: placeHolder, content: textFieldText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always, shouldReturnEventHandler:{ (dialog) in
             if shouldReturnIsRightButtonClicked {
-                if let action = rightButtonAction {
-                    let filterTextField = dialog.view.viewWithTag(100) as! UITextField
-                    let newFilterString = filterTextField.text ?? ""
-                    action(newFilterString)
-                }
-                dialog.dismiss(animated: false, completion: nil)
+                dialog.dismiss(animated: false, completion: {
+                    if let action = rightButtonAction {
+                        let filterTextField = dialog.view.viewWithTag(100) as! UITextField
+                        let newFilterString = filterTextField.text ?? ""
+                        action(newFilterString)
+                    }
+                })
             }
         })
         if let leftButtonText = leftButtonText {
             dialog = dialog.addButton(title: leftButtonText, callback: { (dialog) in
-                if let action = leftButtonAction {
-                    let filterTextField = dialog.view.viewWithTag(100) as! UITextField
-                    let newFilterString = filterTextField.text ?? ""
-                    action(newFilterString)
-                }
-                dialog.dismiss(animated: false, completion: nil)
+                dialog.dismiss(animated: false, completion: {
+                    if let action = leftButtonAction {
+                        let filterTextField = dialog.view.viewWithTag(100) as! UITextField
+                        let newFilterString = filterTextField.text ?? ""
+                        action(newFilterString)
+                    }
+                })
             })
         }
         if let rightButtonText = rightButtonText {
             dialog = dialog.addButton(title: rightButtonText, callback: { (dialog) in
-                if let action = rightButtonAction {
-                    let filterTextField = dialog.view.viewWithTag(100) as! UITextField
-                    let newFilterString = filterTextField.text ?? ""
-                    action(newFilterString)
-                }
-                dialog.dismiss(animated: false, completion: nil)
+                dialog.dismiss(animated: false, completion: {
+                    if let action = rightButtonAction {
+                        let filterTextField = dialog.view.viewWithTag(100) as! UITextField
+                        let newFilterString = filterTextField.text ?? ""
+                        action(newFilterString)
+                    }
+                })
             })
         }
-        dialog.build().show()
+        let builded = dialog.build()
+        builded.show { completion?(builded) }
     }
 
     @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){

@@ -2448,6 +2448,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return false;
 }
 
+/*
 /// URLで呼び出された時の反応をします。
 - (BOOL)ProcessURL:(NSURL*)url{
     NSString* scheme = [url scheme];
@@ -2456,6 +2457,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return [self ProcessCustomFileUTI:url];
 }
+ */
 
 /// URLスキームで呼び出された時の反応をします。
 /// 反応する URL は、
@@ -4763,6 +4765,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return true;
 }
 
+/*
 - (BOOL)ImportNovelFromPDFFile:(NSURL*)url{
     NSString* text = [NiftyUtilitySwift FilePDFToStringWithUrl:url];
     __block UIViewController* toplevelViewController = nil;
@@ -4904,7 +4907,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
     return result;
 }
-
+*/
 /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
 - (void)ForceOverrideHungSpeakStringToSpeechModSettings{
     NSDictionary* targetStrings = @{
