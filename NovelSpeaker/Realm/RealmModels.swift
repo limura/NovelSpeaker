@@ -1029,15 +1029,15 @@ extension RealmStory: CanWriteIsDeleted {
         }
     }
     
-    static func AddNewNovelWithFirstStory(url:URL, htmlStory:HtmlStory, cookieParameter:String, title:String, author:String?, tag:[Any]?, firstContent:String) -> Bool {
+    static func AddNewNovelWithFirstStory(url:URL, htmlStory:HtmlStory, cookieParameter:String, title:String, author:String?, tagArray:[String], firstContent:String) -> String? {
         return autoreleasepool {
             let novelID = url.absoluteString
             guard novelID.count > 0 else {
-                return false
+                return nil
             }
             if SearchNovelFrom(novelID: url.absoluteString) != nil {
                 // already downloaded.
-                return false
+                return nil
             }
             let novel = RealmNovel()
             novel.novelID = novelID
@@ -1066,18 +1066,14 @@ extension RealmStory: CanWriteIsDeleted {
                     realm.add(story, update: .modified)
                 }
             }
-            if let tagArray = tag {
-                autoreleasepool {
-                    RealmUtil.Write { (realm) in
-                        for tagName in tagArray {
-                            if let tagName = tagName as? String {
-                                RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: "keyword")
-                            }
-                        }
+            autoreleasepool {
+                RealmUtil.Write { (realm) in
+                    for tagName in tagArray {
+                        RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: "keyword")
                     }
                 }
             }
-            return true
+            return novelID
         }
     }
     

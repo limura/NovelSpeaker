@@ -2459,6 +2459,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
  */
 
+/*
 /// URLスキームで呼び出された時の反応をします。
 /// 反応する URL は、
 /// novelspeaker://downloadncode/ncode-ncode-ncode...
@@ -2506,7 +2507,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return false;
 }
-
+*/
 // log用
 - (NSString*)GetLogString
 {
@@ -3145,6 +3146,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return siteInfo;
 }
 
+/*
 /// http://...#cookie の形式の文字列を受け取り、ダウンロードqueueに追加します。
 - (NSString*)AddDownloadQueueForURLString:(NSString*)urlWithCookieString{
     NSRange range = [urlWithCookieString rangeOfString:@"#"];
@@ -3159,7 +3161,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     
     return [self AddDownloadQueueForURL:[urlString stringByRemovingPercentEncoding] cookieParameter:[cookieString stringByRemovingPercentEncoding]];
 }
+ */
 
+/*
 /// ダウンロードqueueに追加しようとします
 /// 追加した場合は nil を返します。
 /// 追加できなかった場合はエラーメッセージを返します。
@@ -3181,6 +3185,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtilitySwift checkUrlAndConifirmToUserWithViewController:rootViewController url:url cookieArray:cookieArray depth:0];
     return nil;
 }
+ */
 
 /*
 - (void)AddDirectoryDownloadQueueForURL:(NSString *)urlString cookieParameter:(NSString *)cookieParameter author:(NSString*)author title:(NSString*)title {
@@ -3416,6 +3421,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [self saveContext];
 }
 
+/*
 /// AppGroup で指示されたqueueを処理します
 - (void)HandleAppGroupQueue{
     return;
@@ -3434,6 +3440,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         }
     }
 }
+ */
 
 /// 通知をONにしようとします
 - (void)RegisterUserNotification {
