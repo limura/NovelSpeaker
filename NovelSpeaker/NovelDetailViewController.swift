@@ -195,15 +195,10 @@ class NovelDetailViewController: FormViewController {
                         return
                     }
                     for story in storys {
-                        guard let content = story.content, let rubyDictionary =  StringSubstituter.findNarouRubyNotation(content, notRubyString: nil) else { continue }
-                        for (key, value) in rubyDictionary {
-                            guard let fromBase = key as? String, let to = value as? String else { continue }
-                            print("\(fromBase) -> \(to)")
-                            var from = fromBase
-                            for replaceTarget in [to, "|", "｜", "(", "（", ")", "）", "《", "》"] {
-                                from = from.replacingOccurrences(of: replaceTarget, with: "")
-                            }
-                            result[from] = to
+                        guard let content = story.content else { continue }
+                        let rubyDictionary =  NiftyUtilitySwift.FindRubyNotation(text: content)
+                        for (before, after) in rubyDictionary {
+                            result[before] = after
                         }
                     }
                 }

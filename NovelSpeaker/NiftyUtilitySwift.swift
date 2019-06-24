@@ -785,4 +785,23 @@ class NiftyUtilitySwift: NSObject {
     static func RunLoopSleep(deltaSecond:TimeInterval) {
         RunLoop.current.run(mode: .default, before: Date(timeIntervalSinceNow: deltaSecond))
     }
+    
+    static func FindRubyNotation(text:String) -> [String:String] {
+        let targetRegexpArray = [
+            "\\|([^|《(（]+?)[《(（]([^》)）]+?)[》)）]", // | のある場合
+            "\\｜([^｜《(（]+?)[《(（]([^》)）]+?)[》)）]", // ｜ のある場合
+        ]
+        var result:[String:String] = [:]
+        for pattern in targetRegexpArray {
+            guard let regexp = try? NSRegularExpression(pattern: pattern, options: []) else { continue }
+            let matches = regexp.matches(in: text, options: [], range: NSRange(location: 0, length: text.count))
+            guard matches.count >= 1 else { continue }
+            let match = matches[0]
+            guard let beforeRange = Range(match.range(at: 1), in: text), let afterRange = Range(match.range(at: 2), in: text) else { continue}
+            let before = String(text[beforeRange])
+            let after = String(text[afterRange])
+            result[before] = after
+        }
+        return result
+    }
 }

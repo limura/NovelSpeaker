@@ -466,7 +466,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     
     // 認証周りのチェックに呼ばれる
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        print("webView:didReceive challenge:completionHandler called.")
+        //print("webView:didReceive challenge:completionHandler called.")
         if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
             guard let serverTrust = challenge.protectionSpace.serverTrust else {
                 completionHandler(.rejectProtectionSpace, nil)
