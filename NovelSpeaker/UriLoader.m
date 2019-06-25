@@ -511,7 +511,7 @@
         NSString* removeRubyString = [SiteInfo RemoveRubyTag:pageHtml];
         NSString* replaceLonlyTagString = [SiteInfo ReplaceXhtmlLonlyTag:removeRubyString];
         NSString* tmpString = [replaceLonlyTagString stringByReplacingOccurrencesOfString:@"&#13;" withString:@""];
-        if (tmpString == nil || [tmpString length] <= 0) {
+        if ((tmpString == nil || [tmpString length] <= 0) && firstPageLink == nil) {
             //NSLog(@"tmpString == nil || tmpString.length <= 0");
             continue;
         }
@@ -523,13 +523,13 @@
         story.subtitle = [siteInfo GetSubtitle:document context:context documentEncoding:charsetValue];
         story.firstPageLink = firstPageLink;
         story.keyword = [siteInfo GetTagArray:document context:context documentEncoding:charsetValue];
-        //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"%@ の読み込みを完了しました。 %@", [targetUrl absoluteString], [siteInfo GetDescription]]];
+        [[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"%@ の読み込みを完了しました。 %@, story.content.length: %lu, story.firstPageLink: %@, story.nextUrl: %@, story.title: %@, story.author: %@, story.subtitle: %@, story.keyword.count: %lu", [targetUrl absoluteString], [siteInfo GetDescription], (unsigned long)story.content.length, story.firstPageLink.absoluteString, story.nextUrl.absoluteString, story.title, story.author, story.subtitle, (unsigned long)story.keyword.count]];
         break;
     }
     xmlXPathFreeContext(context);
     xmlFreeDoc(document);
     
-    if (story.content == nil || [story.content length] <= 0 || [[NiftyUtility removeWhiteSpace:story.content] length] <= 0) {
+    if ((story.content == nil || [story.content length] <= 0 || [[NiftyUtility removeWhiteSpace:story.content] length] <= 0) && story.firstPageLink == nil) {
         NSLog(@"fetchURL failed: story.content == nil or length <= 0");
         if (out_errorString != nil) {
             [out_errorString setString:NSLocalizedString(@"UriLoader_HTMLParseFailed_ContentIsNil", @"HTMLの解析に失敗しました。(content is nil)")];

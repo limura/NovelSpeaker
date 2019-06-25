@@ -113,7 +113,12 @@
 /// NSArray の中身は NSString* ですが、HTMLを含む文字列なので、HtmlStringToAttributedString を呼ぶ必要があるかもしれません。
 - (NSArray*)GetTagArray:(xmlDocPtr)document context:(xmlXPathContextPtr)context documentEncoding:(unsigned long)documentEncoding {
     NSArray* tagArray = [self ExecuteXpathToStringArray:m_Tag document:document context:context documentEncoding:documentEncoding];
-    return tagArray;
+    NSMutableArray* resultArray = [NSMutableArray new];
+    for (NSString* tag in tagArray) {
+        NSAttributedString* cleanTag = [SiteInfo HtmlStringToAttributedString:tag];
+        [resultArray addObject:[[cleanTag string] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]];
+    }
+    return resultArray;
 }
 
 /// HTML文字列の中の表示にはいらなそうなタグの部分をまるっと削除して返します。
