@@ -301,6 +301,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 }
                 result.append(folder)
             }
+            result.sort(by: { (a, b) -> Bool in
+                a.title! < b.title!
+            })
             var noListedNovels = [RealmNovel]()
             for novel in novels {
                 if listedNovelIDSet.contains(novel.novelID) { continue }
@@ -324,7 +327,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     // キーワード(Tag)でフォルダ分けします
     func createBookShelfKeywordTagRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
         return autoreleasepool {
-            guard let novels = getNovelArray(sortType: NarouContentSortType.writer), let tags = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Keyword) else { return [] }
+            // ２つ以上の小説が登録されていないタグは無視します。
+            guard let novels = getNovelArray(sortType: NarouContentSortType.writer), let tags = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Keyword)?.filter({ (tag) -> Bool in
+                return tag.targetNovelIDArray.count >= 2
+            }) else { return [] }
             var result = [BookShelfRATreeViewCellData]()
             var listedNovelIDSet = Set<String>()
             for tag in tags {
@@ -340,6 +346,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 }
                 result.append(folder)
             }
+            result.sort(by: { (a, b) -> Bool in
+                a.title! < b.title!
+            })
             var noListedNovels = [RealmNovel]()
             for novel in novels {
                 if listedNovelIDSet.contains(novel.novelID) { continue }
