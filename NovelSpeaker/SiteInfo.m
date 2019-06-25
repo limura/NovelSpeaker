@@ -115,8 +115,8 @@
     NSArray* tagArray = [self ExecuteXpathToStringArray:m_Tag document:document context:context documentEncoding:documentEncoding];
     NSMutableArray* resultArray = [NSMutableArray new];
     for (NSString* tag in tagArray) {
-        NSAttributedString* cleanTag = [SiteInfo HtmlStringToAttributedString:tag];
-        [resultArray addObject:[[cleanTag string] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]];
+        NSString* cleanTag = [[[SiteInfo HtmlStringToAttributedString:tag] string] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+        [resultArray addObjectsFromArray:[cleanTag componentsSeparatedByString:@" "]];
     }
     return resultArray;
 }
