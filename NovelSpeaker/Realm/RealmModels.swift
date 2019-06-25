@@ -988,7 +988,7 @@ extension RealmStory: CanWriteIsDeleted {
         autoreleasepool {
             let novel = RealmNovel()
             novel.type = .UserCreated
-            novel.title = title
+            novel.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
             novel.lastReadDate = Date(timeIntervalSince1970: 1)
             novel.lastDownloadDate = Date()
             let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
@@ -1008,7 +1008,7 @@ extension RealmStory: CanWriteIsDeleted {
             RealmUtil.Write { (realm) in
                 let novel = RealmNovel()
                 novel.type = .UserCreated
-                novel.title = title
+                novel.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
                 novel.m_lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: contents.count)
                 var chapterNumber = 1
                 for content in contents {
@@ -1043,7 +1043,7 @@ extension RealmStory: CanWriteIsDeleted {
             novel.novelID = novelID
             novel.url = novelID
             novel.m_urlSecret = cookieParameter
-            novel.title = title
+            novel.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
             if let author = author {
                 novel.writer = author
             }
@@ -1876,6 +1876,16 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
             if obj.isDeleted { return nil }
             return obj
         }
+    }
+    static func SearchWith(novelID:String, type:String) -> LazyFilterSequence<Results<RealmNovelTag>>? {
+        return autoreleasepool {
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            realm.refresh()
+            return realm.objects(RealmNovelTag.self).filter("isDeleted = false AND type = %@", type).filter({ (tag) -> Bool in
+                return tag.targetNovelIDArray.contains(novelID)
+            })
+        }
+
     }
     
     // RealmWrite の中で呼んでください

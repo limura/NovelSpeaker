@@ -280,6 +280,13 @@
 "NovelDetailViewController_SpeechModAdded" = "I have registered the following replacement for this novel";
 "NovelDetailViewController_AddToFolderButtonTitle" = "Classify to folder";
 "NovelDetailViewController_LikeLevelStepperRowTitle" = "Liked";
+"NovelDetailViewController_Tags" = "Tags";
+
+"NovelKeywordTagSelectorViewController_Title" = "Select Tag";
+"NovelKeywordTagSelectorViewController_AddTagTitle" = "Add Tag";
+"NovelKeywordTagSelectorViewController_AddTagTitlePlaceHolder" = "Empty string can not be specified.";
+"NovelKeywordTagSelectorViewController_SearchButtonTitle" = "Search";
+
 
 "NarouDownloadQueue_URLDownloadTitleFixed" = "downloading \"%@\" ";
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "Could not get the title of the downloaded thing, will leave it as URL.\n%@";

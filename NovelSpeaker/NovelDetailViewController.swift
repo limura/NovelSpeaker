@@ -15,6 +15,7 @@ class NovelDetailViewController: FormViewController {
     var speakerSettingObserverToken:NotificationToken? = nil
     var speechSectionConfigObserverToken:NotificationToken? = nil
     var novelObserverToken:NotificationToken? = nil
+    var tagObserverToken:NotificationToken? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +25,7 @@ class NovelDetailViewController: FormViewController {
         observeNovel()
         observeSpeakerSetting()
         observeSpeechSectionConfig()
+        observeTag()
         registNotificationCenter()
     }
     
@@ -51,9 +53,9 @@ class NovelDetailViewController: FormViewController {
                     break
                 case .change(let properties):
                     for property in properties {
-                        if property.name == "defaultSpeakerID" {
+                        if property.name == "defaultSpeakerID", let newValue = property.newValue as? String, let oldValue = property.oldValue as? String, newValue != oldValue {
                             DispatchQueue.main.async {
-                                print("observeNovel() reload all.")
+                                print("defaultSpeakerID changed. observeNovel() reload all.")
                                 self.form.removeAll()
                                 self.createCells()
                             }
@@ -106,6 +108,46 @@ class NovelDetailViewController: FormViewController {
             })
         }
     }
+    func observeTag() {
+        autoreleasepool {
+            guard let tagList = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Keyword) else { return }
+            self.tagObserverToken = tagList.observe({ (change) in
+                switch change {
+                    
+                case .initial(_):
+                    break
+                case .update(let objs, _, _, _):
+                    for obj in objs {
+                        if obj.targetNovelIDArray.contains(self.novelID) {
+                            DispatchQueue.main.async {
+                                guard let row = self.form.rowBy(tag: "TagsLabel") as? LabelRow else { return }
+                                self.assignTagList(row: row)
+                            }
+                            break
+                        }
+                    }
+                case .error(_):
+                    break
+                }
+            })
+        }
+    }
+    
+    func assignTagList(row:LabelRow) {
+        var tagListText = ""
+        autoreleasepool {
+            guard let tags = RealmNovelTag.SearchWith(novelID: self.novelID, type: RealmNovelTag.TagType.Keyword) else {
+                print("can not get tags")
+                return
+            }
+            var tagNames = Set<String>()
+            for tag in tags {
+                tagNames.insert(tag.name)
+            }
+            tagListText = Array(tagNames).sorted().joined(separator: ", ")
+        }
+        row.value = tagListText
+    }
     
     func createCells() {
         autoreleasepool {
@@ -130,7 +172,7 @@ class NovelDetailViewController: FormViewController {
                     $0.title = NSLocalizedString("NovelDetailViewController_URL", comment: "URL")
                     $0.value = novel.url
                     $0.cell.accessoryType = .disclosureIndicator
-                }.onCellSelection({ (celloF, row) in
+                }.onCellSelection({ (cellOf, row) in
                     DispatchQueue.main.async {
                         /// XXX 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
                         let targetTabIndex = 2
@@ -140,6 +182,16 @@ class NovelDetailViewController: FormViewController {
                     }
                 })
             }
+            detailSection <<< LabelRow("TagsLabel") {
+                $0.title = NSLocalizedString("NovelDetailViewController_Tags", comment: "タグ")
+                $0.cell.accessoryType = .disclosureIndicator
+                assignTagList(row: $0)
+            }.onCellSelection({ (cellOf, row) in
+                let nextViewController = NovelKeywordTagSelecterViewController()
+                nextViewController.novelID = self.novelID
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            })
+            
             self.form +++ detailSection
             let settingSection = Section(NSLocalizedString("NovelDetailViewController_SettingSectionTitle", comment: "この小説専用の設定"))
             // novel.likeLevel

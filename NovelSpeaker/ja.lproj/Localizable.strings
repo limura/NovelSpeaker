@@ -259,6 +259,12 @@
 "NovelDetailViewController_SpeechModAdded" = "この小説用に以下の読み替えを登録しました";
 "NovelDetailViewController_AddToFolderButtonTitle" = "フォルダへ分類";
 "NovelDetailViewController_LikeLevelStepperRowTitle" = "お気に入り";
+"NovelDetailViewController_Tags" = "タグ";
+
+"NovelKeywordTagSelectorViewController_Title" = "タグを選択";
+"NovelKeywordTagSelectorViewController_AddTagTitle" = "タグの追加";
+"NovelKeywordTagSelectorViewController_AddTagTitlePlaceHolder" = "空文字列は指定できません";
+"NovelKeywordTagSelectorViewController_SearchButtonTitle" = "検索";
 
 "EditUserBookViewController_PleaseInputTitle" = "タイトルを入力してください";
 "EditUserBookViewController_PleaseInputBookBody" = "本文を入力してください";
