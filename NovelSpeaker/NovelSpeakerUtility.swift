@@ -196,7 +196,7 @@ class NovelSpeakerUtility: NSObject {
                             //"アルファポリス\nhttps://www.alphapolis.co.jp/novel/",
                             //"pixiv/ノベル\nhttps://www.pixiv.net/novel/",
                             "星空文庫\nhttps://slib.net/",
-                            "ノベルアップ＋\nhttps://novelup.plus/"
+                            //"ノベルアップ＋\nhttps://novelup.plus/"
                         ]
                         for bookmark in defaultBookmarks {
                             globalState.webImportBookmarkArray.append(bookmark)
