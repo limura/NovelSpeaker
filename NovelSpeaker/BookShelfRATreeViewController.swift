@@ -246,7 +246,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     // 作者名でフォルダ分けします
     func createWriterBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
         return autoreleasepool {
-            guard let novels = getNovelArray(sortType: NarouContentSortType.writer) else { return [] }
+            guard let novels = getNovelArray(sortType: NarouContentSortType.title) else { return [] }
             var dic = [String:Any]()
             for novel in novels {
                 if var array = dic[novel.writer] as? [RealmNovel]{
@@ -285,7 +285,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     // 自作のフォルダでフォルダ分けします
     func createBookShelfTagBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
         return autoreleasepool {
-            guard let novels = getNovelArray(sortType: NarouContentSortType.writer), let tags = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Bookshelf) else { return [] }
+            guard let novels = getNovelArray(sortType: NarouContentSortType.title), let tags = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Bookshelf) else { return [] }
             var result = [BookShelfRATreeViewCellData]()
             var listedNovelIDSet = Set<String>()
             for tag in tags {
@@ -328,7 +328,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func createBookShelfKeywordTagRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
         return autoreleasepool {
             // ２つ以上の小説が登録されていないタグは無視します。
-            guard let novels = getNovelArray(sortType: NarouContentSortType.writer), let tags = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Keyword)?.filter({ (tag) -> Bool in
+            guard let novels = getNovelArray(sortType: NarouContentSortType.title), let tags = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Keyword)?.filter({ (tag) -> Bool in
                 return tag.targetNovelIDArray.count >= 2
             }) else { return [] }
             var result = [BookShelfRATreeViewCellData]()
