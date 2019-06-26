@@ -102,6 +102,7 @@
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
 		216741A92047714D008A578D /* PDFKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 216741A82047714D008A578D /* PDFKit.framework */; };
+		2169D65C22C26028008787A4 /* NovelKeywordTagSelecterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2169D65B22C26028008787A4 /* NovelKeywordTagSelecterViewController.swift */; };
 		216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */; };
 		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
 		2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */; };
@@ -354,6 +355,7 @@
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
 		216741A82047714D008A578D /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = System/Library/Frameworks/PDFKit.framework; sourceTree = SDKROOT; };
+		2169D65B22C26028008787A4 /* NovelKeywordTagSelecterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelKeywordTagSelecterViewController.swift; sourceTree = "<group>"; };
 		216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSelectViewController.swift; sourceTree = "<group>"; };
 		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
 		21724EEE1974163700DF6DC4 /* StoryCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoryCacheData.m; sourceTree = "<group>"; };
@@ -921,6 +923,7 @@
 				21A291F522A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift */,
 				21A291F722A3F9DA000AA58C /* NovelDetailViewController.swift */,
 				2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */,
+				2169D65B22C26028008787A4 /* NovelKeywordTagSelecterViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1289,6 +1292,7 @@
 				212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */,
 				216741A3204421F1008A578D /* BugReportViewController.swift in Sources */,
 				212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */,
+				2169D65C22C26028008787A4 /* NovelKeywordTagSelecterViewController.swift in Sources */,
 				2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */,
 				212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,

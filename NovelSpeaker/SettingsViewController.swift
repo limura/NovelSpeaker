@@ -55,6 +55,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         form +++ Section()
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SpeakerSettingsViewController_TitleText", comment:"話者・声色設定")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (_, _) in
                 let nextViewController = SpeakerSettingsViewController()
                 self.navigationController?.pushViewController(nextViewController, animated: true)
@@ -66,6 +67,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_SpeechModSettingsButtonTitle", comment:"話者変更設定(会話文等で声質を変えたりする設定)")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (_, _) in
                 let nextViewController = SpeechSectionConfigsViewController()
                 nextViewController.targetNovelID = RealmSpeechSectionConfig.anyTarget
@@ -79,6 +81,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
 
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_SettingOfTheSpeechDelay", comment:"読み上げ時の間の設定")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (_, _) in
                 let nextViewController = SpeechWaitSettingViewControllerSwift()
                 self.navigationController?.pushViewController(nextViewController, animated: true)
@@ -92,11 +95,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_CorrectionOfTheReading", comment:"読みの修正")
                 $0.presentationMode = .segueName(segueName: "speechModSettingSegue", onDismiss: nil)
+                $0.cell.textLabel?.numberOfLines = 0
             }
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_SettingOfTheTextSize", comment:"文字サイズの設定")
                 $0.presentationMode = .segueName(segueName: "textSizeSettingSegue", onDismiss: nil)
+                $0.cell.textLabel?.numberOfLines = 0
             }
             
             <<< TimeIntervalCountDownRow() { (row) in
@@ -105,6 +110,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 //Date(timeIntervalSince1970: duration as! TimeInterval)
                 //Date(timeIntervalSinceReferenceDate: duration as! TimeInterval)
                 row.minuteInterval = 5
+                row.cell.textLabel?.numberOfLines = 0
                 autoreleasepool {
                     if let globalState = RealmGlobalState.GetInstance() {
                         row.value = Double(globalState.maxSpeechTimeInSec)
@@ -123,6 +129,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_CreateNewUserText", comment:"新規自作本の追加")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 self.CreateNewUserText()
             })
@@ -130,6 +137,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_BackgroundFetch", comment:"小説の自動更新")
                 $0.value = GlobalDataSingleton.getInstance().getBackgroundNovelFetchEnabled()
+                $0.cell.textLabel?.numberOfLines = 0
             }.onChange({ row in
                 let judge = row.value
                 if judge! {
@@ -172,6 +180,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             
             <<< SwitchRow("OverrideRubySwitchRow") { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
+                row.cell.textLabel?.numberOfLines = 0
                 autoreleasepool {
                     guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else {
                         row.value = false
@@ -190,6 +199,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             <<< TextRow("OverrideRubyTextRow") { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_EditNotRubyStringTitle", comment:"非ルビ文字")
+                row.cell.textLabel?.numberOfLines = 0
                 row.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
                     let row: RowOf<Bool>! = form.rowBy(tag: "OverrideRubySwitchRow")
                     return row.value ?? false == false
@@ -325,6 +335,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
                 row.options = [noRepeat, rewindToFirstStory, rewindToThisStory]
                 row.value = noRepeat
+                row.cell.textLabel?.numberOfLines = 0
                 autoreleasepool {
                     guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else { return }
                     let type = speechOverrideSetting.repeatSpeechType
@@ -447,6 +458,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow("IsUseiCloud") {
                 $0.title = NSLocalizedString("SettingsViewController_IsUseiCloud_Title", comment: "iCloud 同期を使用する")
                 $0.value = RealmUtil.IsUseCloudRealm()
+                $0.cell.textLabel?.numberOfLines = 0
             }.onChange({ (row) in
                 guard let value = row.value else { return }
                 if value == true {
@@ -461,11 +473,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 self.ConfirmAddDefaultSpeechModSetting()
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings", comment:"標準の読みの修正と同じものを読み替え辞書登録から削除")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogTwoButton(
@@ -491,12 +505,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
 
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GetNcodeDownloadURLScheme", comment:"再ダウンロード用データの生成")
-                }.onCellSelection({ (butonCellof, buttonRow) in
-                    self.ShareNcodeListURLScheme()
-                })
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (butonCellof, buttonRow) in
+                self.ShareNcodeListURLScheme()
+            })
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GoToSupportSite", comment: "サポートサイトを開く")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCellof, buttonRow) in
                 if let url = URL(string: "https://limura.github.io/NovelSpeaker/") {
                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
@@ -504,11 +520,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_SendBugReport", comment: "不都合報告をmailで開発者に送る")
+                $0.cell.textLabel?.numberOfLines = 0
                 $0.presentationMode = .segueName(segueName: "BugReportViewSegue", onDismiss: nil)
             }
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GoToReleaseLog", comment:"更新履歴")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCellOf, button) in
                 let nextViewController = UpdateLogViewController()
                 self.navigationController?.pushViewController(nextViewController, animated: true)
@@ -522,10 +540,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_RightNotation", comment:"権利表記")
                 $0.presentationMode = .segueName(segueName: "CreditPageSegue", onDismiss: nil)
+                $0.cell.textLabel?.numberOfLines = 0
             }
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCellof, buttonRow) in
                 EasyDialog.Builder(self)
                 .label(text: NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について"))
@@ -538,6 +558,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_LICENSE", comment: "LICENSE")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCallof, buttonRow) in
                 if let path = Bundle.main.path(forResource: "LICENSE", ofType: ".txt") {
                     do {
@@ -618,6 +639,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_ClearSiteInfoCache", comment: "SiteInfoキャッシュを削除する")
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 NovelDownloadQueue.shared.clearSiteInfoCache()
                 DispatchQueue.main.async {
@@ -632,6 +654,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow("OverrideForceSiteInfoReload") { row in
                 row.title = NSLocalizedString("SettingTableViewController_ForceSiteInfoReload", comment:"SiteInfoを毎回読み直す")
                 row.value = false
+                row.cell.textLabel?.numberOfLines = 0
                 autoreleasepool {
                     guard let globalState = RealmGlobalState.GetInstance() else { return }
                     row.value = globalState.isForceSiteInfoReloadIsEnabled
@@ -650,6 +673,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.cell.textLabel?.numberOfLines = 0
                 $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 $0.value = GlobalDataSingleton.getInstance()?.isDummySilentSoundEnabled()
+                $0.cell.textLabel?.numberOfLines = 0
                 }.onChange({ row in
                     GlobalDataSingleton.getInstance()?.setIsDummySilentSoundEnabled(row.value!)
                 })
@@ -657,10 +681,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
+                $0.cell.textLabel?.numberOfLines = 0
             }
             
             <<< ButtonRow() {
                 $0.title = "iCloud pull (with remove server change token)"
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPullProcessingDialog", comment: "iCloud からデータを読み込み中です。"), completion: { (dialog) in
@@ -679,6 +705,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             <<< ButtonRow() {
                 $0.title = "iCloud pull (normal pull)"
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPullProcessingDialog", comment: "iCloud からデータを読み込み中です。"), completion: { (dialog) in
@@ -692,6 +719,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             <<< ButtonRow() {
                 $0.title = "iCloud push"
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPushProcessingDialog", comment: "iCloud 側へデータを書き込み中です。"), completion: { (dialog) in
@@ -705,6 +733,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             <<< ButtonRow() {
                 $0.title = "次回起動時に CoreData(旧データベース) の情報に書き戻す"
+                $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 CoreDataToRealmTool.UnregisterConvertFromCoreDataFinished()
                 DispatchQueue.main.async {
@@ -833,7 +862,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                     RealmUtil.SetIsUseCloudRealm(isUse: true)
                                     // TODO: local realm file をここで消してしまうと、iCloud側への転送が終わっていない records が転送できなくなってしまう……気がします。(要調査)
                                     RealmUtil.RemoveLocalRealmFile()
-                                    NiftyUtilitySwift.EasyDialogMessageDialog(
+                                    NiftyUtilitySwift.EasyDialogLongMessageDialog(
                                         viewController: self,
                                         message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました。\n同期は開始されましたが、端末側に保存されているデータをiCloud側へ登録する作業は続いています。\n端末側に保存されているデータが多い場合には、iCloud側への転送が終わるまでかなりの時間がかかる可能性があります。\nなお、残念ながらiCloud側への転送が終わったかどうかを知るすべが(開発者の知る限りでは)ありません。Appleの解説によると24時間の間はアプリを再度立ち上げれば転送を継続してくれるそうですが、機内モードにすると全てを諦められてしまうなどといった問題があるという話をWeb上でみかけたりしましたので、あまり安心はできないかもしれません。\n一応未送信や未受信のデータがある場合には通信中のインジケータを回すように努力はしますが、このインジケータが消えた事で送信が終了したというわけではないかもしれない、という事を理解しておいてください。"))
                                 }
@@ -871,7 +900,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         RealmUtil.SetIsUseCloudRealm(isUse: true)
                                         // local realm は消して良いと言われたので消します。
                                         RealmUtil.RemoveLocalRealmFile()
-                                        NiftyUtilitySwift.EasyDialogMessageDialog(
+                                        NiftyUtilitySwift.EasyDialogLongMessageDialog(
                                             viewController: self,
                                             message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました"))
                                     }

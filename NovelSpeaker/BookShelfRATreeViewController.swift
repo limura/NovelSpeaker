@@ -440,9 +440,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             .title(title: NSLocalizedString(
                 "BookShelfTableViewController_AnnounceNewViersion"
                 , comment: "アップデートされました"))
-            .label(text: NSLocalizedString(
+            .textView(content: NSLocalizedString(
                 "BookShelfTableViewController_AnnounceNewVersionMessage"
-                , comment: "Version 1.1.2\r\n..."))
+                , comment: "Version 1.1.2\r\n..."), heightMultiplier: 0.63)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { dialog in
                 dialog.dismiss(animated: true, completion: nil)
                 autoreleasepool {

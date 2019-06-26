@@ -68,7 +68,6 @@
 "SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "Added a standard paraphrasing dictionary.";
 "SettingTableViewController_NoContentHave" = "No book in bookshelf";
 "SettingTableViewController_ShareNcodeListURLScheme" = "re-download URL created.";
-"SettingTableViewController_ShareNcodeListURLSchemeMessage" = "Re-Download URL created. You can use this URL for re-download all novels in bookshelf. This is for a backup use. You should e-mail it to oneself.";
 "SettingTableViewController_ConfirmAddDefaultSpeechModSetting" = "Confirm";
 "SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage" = "Add a standard paraphrasing dictionary. Will that be all right?";
 "SettingTableViewController_GoToReleaseLog" = "Update log";
@@ -150,7 +149,6 @@
 
 "NovelSpeakerUtility_ExportingNovelData" = "Exporting novel";
 "NovelSpeakerUtility_ExportOtherSettings" = "Exporting settings";
-"NovelSpeakerUtility_downloadncodeSchemeIsNotImplementedYet" = "The format of novelspeaker://downloadncode/ is temporarily unsupported. It is not a good idea to make it usable, but I think that there is a feeling that there may be no one who uses it so much, so development has been delayed. Please contact us from the support site if you want early implementation.";
 "NovelSpeakerUtility_RestoreingJSONType" = "Loading settings from backup file.";
 "NovelSpeakerUtility_UnzipProgress" = "Decompressing backup file";
 "NovelSpeakerUtility_RestoreBackupTitle" = "Loading backup data";
