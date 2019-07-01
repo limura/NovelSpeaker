@@ -10,8 +10,11 @@ import UIKit
 import RealmSwift
 
 class RealmToRealmCopyTool: NSObject {
-    static func CopyStorys(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmStory.self) {
+    static func CopyStorys(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmStory.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_Story", comment: "小説本文を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmStory.CreateNewStory(novelID: obj.novelID, chapterNumber: obj.chapterNumber)
             newObj.isDeleted = obj.isDeleted
@@ -25,8 +28,11 @@ class RealmToRealmCopyTool: NSObject {
             try to.commitWrite()
         }
     }
-    static func CopyNovels(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmNovel.self) {
+    static func CopyNovels(from:Realm, to:Realm, progress: (String)->Void) throws {
+        let objects = from.objects(RealmNovel.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_Novel", comment: "小説情報を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmNovel()
             newObj.novelID = obj.novelID
@@ -53,8 +59,11 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopySpeechModSetting(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmSpeechModSetting.self) {
+    static func CopySpeechModSetting(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmSpeechModSetting.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_SpeechModSetting", comment: "読み替え辞書を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmSpeechModSetting()
             newObj.isDeleted = obj.isDeleted
@@ -69,8 +78,11 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopySpeechWaitConfig(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmSpeechWaitConfig.self) {
+    static func CopySpeechWaitConfig(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmSpeechWaitConfig.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_SpeechWaitConfig", comment: "読み上げ時の間の設定を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmSpeechWaitConfig()
             newObj.isDeleted = obj.isDeleted
@@ -82,8 +94,11 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopySpeakerSetting(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmSpeakerSetting.self) {
+    static func CopySpeakerSetting(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmSpeakerSetting.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_SpeakerSetting", comment: "話者設定を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmSpeakerSetting()
             newObj.isDeleted = obj.isDeleted
@@ -103,8 +118,11 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopySpeechSectionConfig(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmSpeechSectionConfig.self) {
+    static func CopySpeechSectionConfig(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmSpeechSectionConfig.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_SpeechSectionConfig", comment: "話者変更設定を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmSpeechSectionConfig()
             newObj.isDeleted = obj.isDeleted
@@ -120,8 +138,11 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopySpeechQueue(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmSpeechQueue.self) {
+    static func CopySpeechQueue(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmSpeechQueue.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_SpeechQueue", comment: "読み上げリストを移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmSpeechQueue()
             newObj.isDeleted = obj.isDeleted
@@ -134,8 +155,11 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopyGlobalState(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmGlobalState.self) {
+    static func CopyGlobalState(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmGlobalState.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_GlobalState", comment: "全体設定を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmGlobalState()
             newObj.isDeleted = obj.isDeleted
@@ -167,8 +191,11 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopyDisplaySetting(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmDisplaySetting.self) {
+    static func CopyDisplaySetting(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmDisplaySetting.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_DisplaySetting", comment: "表示文字等の設定を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmDisplaySetting()
             newObj.isDeleted = obj.isDeleted
@@ -184,8 +211,11 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
     
-    static func CopyNovelTag(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmNovelTag.self) {
+    static func CopyNovelTag(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmNovelTag.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_NovelTag", comment: "タグを移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmNovelTag.CreateNewTag(name: obj.name, type: obj.type)
             newObj.isDeleted = obj.isDeleted
@@ -198,8 +228,11 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopySpeechOverrideSetting(from:Realm, to:Realm) throws {
-        for obj in from.objects(RealmSpeechOverrideSetting.self) {
+    static func CopySpeechOverrideSetting(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmSpeechOverrideSetting.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_SpeechOverrideSetting", comment: "読み替え設定を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
             let newObj = RealmSpeechOverrideSetting()
             newObj.isDeleted = obj.isDeleted
@@ -217,16 +250,16 @@ class RealmToRealmCopyTool: NSObject {
     }
     
     static func DoCopy(from:Realm, to:Realm, progress:(String)->Void) throws {
-        try CopySpeechModSetting(from: from, to: to)
-        try CopySpeechWaitConfig(from: from, to: to)
-        try CopySpeakerSetting(from: from, to: to)
-        try CopySpeechSectionConfig(from: from, to: to)
-        try CopySpeechQueue(from: from, to: to)
-        try CopyGlobalState(from: from, to: to)
-        try CopyDisplaySetting(from: from, to: to)
-        try CopyNovelTag(from: from, to: to)
-        try CopySpeechOverrideSetting(from: from, to: to)
-        try CopyNovels(from: from, to: to)
-        //try CopyStorys(from: from, to: to)
+        try CopySpeechModSetting(from: from, to: to, progress: progress)
+        try CopySpeechWaitConfig(from: from, to: to, progress: progress)
+        try CopySpeakerSetting(from: from, to: to, progress: progress)
+        try CopySpeechSectionConfig(from: from, to: to, progress: progress)
+        try CopySpeechQueue(from: from, to: to, progress: progress)
+        try CopyGlobalState(from: from, to: to, progress: progress)
+        try CopyDisplaySetting(from: from, to: to, progress: progress)
+        try CopyNovelTag(from: from, to: to, progress: progress)
+        try CopySpeechOverrideSetting(from: from, to: to, progress: progress)
+        try CopyNovels(from: from, to: to, progress: progress)
+        //try CopyStorys(from: from, to: to, progress: progress)
     }
 }

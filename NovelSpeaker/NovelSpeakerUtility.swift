@@ -1815,4 +1815,19 @@ class NovelSpeakerUtility: NSObject {
         }
         AllLongLivedOperationIDWatcher()
     }
+    
+    static func CheckAndRecoverStoryCount(novelID:String) {
+        autoreleasepool {
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let storyList = RealmStory.SearchStoryFrom(novelID: novelID), let lastStory = storyList.last else { return }
+            let storyCount = storyList.count
+            let lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: storyCount)
+            if novel.m_lastChapterStoryID != lastChapterStoryID && lastStory.id == lastChapterStoryID {
+                autoreleasepool {
+                    RealmUtil.Write(block: { (realm) in
+                        novel.m_lastChapterStoryID = lastChapterStoryID
+                    })
+                }
+            }
+        }
+    }
 }

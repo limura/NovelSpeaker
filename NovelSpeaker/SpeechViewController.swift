@@ -33,13 +33,15 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         storySpeaker.AddDelegate(delegate: self)
         // Do any additional setup after loading the view.
         initWidgets()
         if let storyID = storyID {
+            let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+            NovelSpeakerUtility.CheckAndRecoverStoryCount(novelID: novelID)
             autoreleasepool {
-                if let novel = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID)){
+                if let novel = RealmNovel.SearchNovelFrom(novelID: novelID){
                     loadNovel(novel: novel)
                 }
             }

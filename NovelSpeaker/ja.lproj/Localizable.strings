@@ -133,7 +133,7 @@
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData" = "iCloud側に利用可能なデータが存在するようです。iCloud側のデータをそのまま利用するか、iCloud上のデータに現在のデータを上書きで追加するかを選択してください。";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud" = "iCloudのデータをそのまま利用する(現在のデータは破棄されます)";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal" = "現在のデータをiCloud上のデータに上書き追加する";
-"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "iCloud側のデータを確認しています";
+"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "iCloud側のデータを確認しています。\n過去に ことせかい で iCloud同期 を使用していた場合や、別の端末の ことせかい で iCloud同期 を利用しているなどで iCloud側 に多量のデータが保存されている場合、この作業は時間がかかる可能性があります。";
 "SettingsViewController_IsUseiCloud_FailedSyncEngineStart" = "iCloud への接続に失敗しました。";
 "SettingsViewController_CloudPullProcessingDialog" = "iCloud からデータを読み込み中です。";
 "SettingsViewController_CloudPushProcessingDialog" = "iCloud 側へデータを書き込み中です。";
@@ -482,6 +482,19 @@
 "BookShelfRATreeViewController_NovelDeletingTitle" = "小説を削除しています……";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
+
+"RealmToRealmCopyTool_Progress_SpeechModSetting" = "読み替え辞書を移行中";
+"RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "読み上げ時の間の設定を移行中";
+"RealmToRealmCopyTool_Progress_SpeakerSetting" = "話者設定を移行中";
+"RealmToRealmCopyTool_Progress_SpeechSectionConfig" = "話者変更設定を移行中";
+"RealmToRealmCopyTool_Progress_SpeechQueue" = "読み上げリストを移行中";
+"RealmToRealmCopyTool_Progress_GlobalState" = "全体設定を移行中";
+"RealmToRealmCopyTool_Progress_DisplaySetting" = "表示文字等の設定を移行中";
+"RealmToRealmCopyTool_Progress_NovelTag" = "タグを移行中";
+"RealmToRealmCopyTool_Progress_SpeechOverrideSetting" = "読み替え設定を移行中";
+"RealmToRealmCopyTool_Progress_Novel" = "小説情報を移行中";
+"RealmToRealmCopyTool_Progress_Story" = "小説本文を移行中";
+
 
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

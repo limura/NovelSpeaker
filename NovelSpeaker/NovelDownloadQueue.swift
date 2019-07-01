@@ -506,6 +506,7 @@ class NovelDownloadQueue : NSObject {
     }
     
     func addQueue(novelID:String) {
+        NovelSpeakerUtility.CheckAndRecoverStoryCount(novelID: novelID)
         self.queueHolder.addQueue(novelID: novelID)
         self.isDownloadStop = false
         semaphore.signal()

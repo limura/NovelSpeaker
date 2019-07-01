@@ -39,6 +39,7 @@ class BookShelfTreeViewCell: UITableViewCell {
         likeButton.imageView?.contentMode = .scaleAspectFit
         likeButton.contentHorizontalAlignment = .fill
         likeButton.contentVerticalAlignment = .fill
+        downloadingActivityIndicator.isHidden = true
     }
     
     override func prepareForReuse() {

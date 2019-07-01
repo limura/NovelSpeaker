@@ -134,7 +134,7 @@
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData" = "There seems to be data available on the iCloud side. Select whether to use the iCloud data as it is or overwrite the data on iCloud with the current data.";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud" = "Use iCloud data as it is";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal" = "Overwrite data on iCloud with current data";
-"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "Checking iCloud data";
+"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "Checking iCloud data.\nIf you have used iCloud in the past with NovelSpeaker, or if iCloud is stored in another device such as NovelSpeaker, this work may take a long time if the iCloud side stores a large amount of data.";
 "SettingsViewController_IsUseiCloud_FailedSyncEngineStart" = "Failed to connect to iCloud.";
 "SettingsViewController_CloudPullProcessingDialog" = "Loading data from iCloud.";
 "SettingsViewController_CloudPushProcessingDialog" = "Writing data to iCloud side.";
@@ -489,6 +489,19 @@
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK" = "Download";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OpenFirstStory" = "Open first story";
 "BookShelfRATreeViewController_NovelDeletingTitle" = "Deleting novel...";
+
+"RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
+"RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
+"RealmToRealmCopyTool_Progress_SpeakerSetting" = "Migrating speaker settings";
+"RealmToRealmCopyTool_Progress_SpeechSectionConfig" = "Migrating speaker change settings";
+"RealmToRealmCopyTool_Progress_SpeechQueue" = "Migrating a Reading List";
+"RealmToRealmCopyTool_Progress_GlobalState" = "Migrating overall settings";
+"RealmToRealmCopyTool_Progress_DisplaySetting" = "Migrating settings such as display characters";
+"RealmToRealmCopyTool_Progress_NovelTag" = "Migrating tags";
+"RealmToRealmCopyTool_Progress_SpeechOverrideSetting" = "Migrating translation settings";
+"RealmToRealmCopyTool_Progress_Novel" = "Migrating novel information";
+"RealmToRealmCopyTool_Progress_Story" = "Migrating the novel text";
+
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
