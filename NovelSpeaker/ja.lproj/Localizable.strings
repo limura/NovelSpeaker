@@ -480,6 +480,7 @@
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK" = "ダウンロードする";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OpenFirstStory" = "最初の章を開く";
 "BookShelfRATreeViewController_NovelDeletingTitle" = "小説を削除しています……";
+"BookShelfRATreeViewController_ShowNovelInformationButtonTitle" = "小説情報を表示する";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 

@@ -357,6 +357,44 @@ class NiftyUtilitySwift: NSObject {
         return builded
     }
     
+    @discardableResult
+    @objc public static func EasyDialogForButton(viewController: UIViewController, title: String?, message: String?, button1Title: String?, button1Action:(()->Void)?, button2Title: String?, button2Action:(()->Void)?, button3Title: String?, button3Action:(()->Void)?, button4Title: String?, button4Action:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
+        var dialog = EasyDialog.Builder(viewController)
+        if let title = title {
+            dialog = dialog.title(title: title)
+        }
+        if let message = message {
+            dialog = dialog.label(text: message, textAlignment: .left)
+        }
+        if let button1Title = button1Title, button1Title.count > 0 {
+            dialog = dialog.addButton(title: button1Title, callback: { (dialog) in
+                dialog.dismiss(animated: false, completion: {
+                    button1Action?()
+                })
+            })
+        }
+        if let button2Title = button2Title, button2Title.count > 0 {
+            dialog = dialog.addButton(title: button2Title, callback: { (dialog) in
+                dialog.dismiss(animated: false, completion: {
+                    button2Action?()
+                })
+            })
+        }
+        dialog = dialog.addButton(title: button3Title != nil ? button3Title! : NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
+            dialog.dismiss(animated: false, completion: {
+                button3Action?()
+            })
+        })
+        dialog = dialog.addButton(title: button4Title != nil ? button4Title! : NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+            dialog.dismiss(animated: false, completion: {
+                button4Action?()
+            })
+        })
+        let builded = dialog.build()
+        builded.show { completion?(builded) }
+        return builded
+    }
+    
     @objc public static func EasyDialogTextInput(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, action:((String)->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) {
         var dialog = EasyDialog.Builder(viewController)
         if let title = title {

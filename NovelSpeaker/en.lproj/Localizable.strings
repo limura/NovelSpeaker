@@ -489,6 +489,7 @@
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK" = "Download";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OpenFirstStory" = "Open first story";
 "BookShelfRATreeViewController_NovelDeletingTitle" = "Deleting novel...";
+"BookShelfRATreeViewController_ShowNovelInformationButtonTitle" = "Show novel information";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";

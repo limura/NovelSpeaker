@@ -572,6 +572,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }
         }
     }
+    func showNovelInformation(novelID:String) {
+        let nextViewController = NovelDetailViewController()
+        nextViewController.novelID = novelID
+        self.navigationController?.pushViewController(nextViewController, animated: true)
+    }
+    
     // 次のビューに飛ばします。
     func pushNextView(novelID:String, isNeedSpeech: Bool){
         autoreleasepool {
@@ -581,14 +587,18 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 guard let novelList = novel.linkedStorys, novelList.count > 0 else {
                     if novel.type == .URL {
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogTwoButton(
+                            NiftyUtilitySwift.EasyDialogForButton(
                                 viewController: self,
                                 title: nil,
                                 message: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseNoStory", comment: "本文が何も読み込まれていないようです。この小説の再ダウンロードを試みますか？"),
-                                button1Title: nil, // Cancel
+                                button1Title: nil,
                                 button1Action: nil,
-                                button2Title: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK", comment: "ダウンロードする"), // OK
-                                button2Action: {
+                                button2Title: NSLocalizedString("Cancel_button", comment: "Cancel"),
+                                button2Action: nil,
+                                button3Title: NSLocalizedString("BookShelfRATreeViewController_ShowNovelInformationButtonTitle", comment: "小説情報を表示する"),
+                                button3Action: { self.showNovelInformation(novelID: novelID) },
+                                button4Title: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK", comment: "ダウンロードする"), // OK
+                                button4Action: {
                                     NovelDownloadQueue.shared.addQueue(novelID: novelID)
                             })
                         }
