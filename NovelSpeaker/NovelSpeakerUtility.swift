@@ -791,8 +791,8 @@ class NovelSpeakerUtility: NSObject {
                 if let title = novel.object(forKey: "title") as? String {
                     realmNovel.title = title
                 }
-                if let secret = novel.object(forKey: "secret") as? String {
-                    realmNovel.m_urlSecret = NiftyUtility.stringDecrypt(secret, key: url)
+                if let secret = novel.object(forKey: "secret") as? String, let urlSecret = NiftyUtility.stringDecrypt(secret, key: url) {
+                    realmNovel.m_urlSecret = urlSecret
                 }
                 if let author = novel.object(forKey: "author") as? String {
                     realmNovel.writer = author
@@ -1301,8 +1301,8 @@ class NovelSpeakerUtility: NSObject {
                     if let url = novelDic.object(forKey: "url") as? String {
                         novel.url = url
                     }
-                    if let secret = novelDic.object(forKey: "secret") as? String {
-                        novel.m_urlSecret = NiftyUtility.stringDecrypt(secret, key: novelID)
+                    if let secret = novelDic.object(forKey: "secret") as? String, let urlSecret = NiftyUtility.stringDecrypt(secret, key: novelID) {
+                        novel.m_urlSecret = urlSecret
                     }
                     if let createdDateString = novelDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
                         novel.createdDate = createdDate
