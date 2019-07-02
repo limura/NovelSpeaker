@@ -193,10 +193,13 @@ class NovelDownloader : NSObject {
                     }
                     let story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber)
                     story.url = targetURL.absoluteString
-                    story.content = content
+                    story.content = content.trimmingCharacters(in: .whitespacesAndNewlines)
                     //story.downloadDate = queuedDate
                     if let subtitle = htmlStory.subtitle {
-                        story.subtitle = subtitle
+                        let trimedSubtitle = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if trimedSubtitle.count > 0 {
+                            story.subtitle = trimedSubtitle
+                        }
                     }
                     if chapterNumber == 1 {
                         //story.lastReadDate = Date(timeIntervalSince1970: 60)
@@ -311,8 +314,8 @@ class NovelDownloader : NSObject {
                             autoreleasepool {
                                 let story = RealmStory.SearchStoryFrom(storyID: storyID) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: 1)
                                 RealmUtil.RealmStoryWrite { (realm) in
-                                    story.content = htmlStory.content ?? ""
-                                    story.subtitle = htmlStory.subtitle ?? ""
+                                    story.content = (htmlStory.content ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                                    story.subtitle = (htmlStory.subtitle ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
                                     //story.downloadDate = Date()
                                     //story.lastReadDate = Date(timeIntervalSince1970: 60)
                                     story.url = lastDownloadURL.absoluteString
