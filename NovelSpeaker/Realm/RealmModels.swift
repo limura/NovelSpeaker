@@ -27,7 +27,8 @@ import UIKit
     static var realmRealmStoryCache:[String:Realm] = [:]
     
     static var writeCount = 0
-    static let writeCountPullInterval = 10 // realm.write を何回したら pull するか
+    static let writeCountPullInterval = 1000 // realm.write を何回したら pull するか
+    public static let isUseCloudRealmForStory = true
 
     static func Migrate_0_To_1(migration:Migration, oldSchemaVersion:UInt64) {
         
@@ -51,6 +52,10 @@ import UIKit
         }
     }
     static func GetRealmStoryLocalRealmFilePath() -> URL? {
+        if isUseCloudRealmForStory {
+            return GetLocalRealmFilePath()
+        }
+        
         let fileManager = FileManager.default
         do {
             let directory = try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -111,6 +116,10 @@ import UIKit
         return realm
     }
     static func GetRealmStoryLocalRealm() throws -> Realm {
+        if isUseCloudRealmForStory {
+            return try GetLocalRealm()
+        }
+        
         lockRealmStory.lock()
         defer { lockRealmStory.unlock() }
         let threadID = "\(Thread.current)"
@@ -144,6 +153,10 @@ import UIKit
         }
     }
     static func GetRealmStoryCloudRealmFilePath() -> URL? {
+        if isUseCloudRealmForStory {
+            return GetCloudRealmFilePath()
+        }
+        
         let fileManager = FileManager.default
         do {
             let directory = try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -246,6 +259,10 @@ import UIKit
         return realm
     }
     fileprivate static func GetRealmStoryCloudRealmWithoutLock() throws -> Realm {
+        if isUseCloudRealmForStory {
+            return try GetCloudRealmWithoutLock()
+        }
+        
         let config = Realm.Configuration(
             fileURL: GetRealmStoryCloudRealmFilePath(),
             schemaVersion: currentSchemaVersionForRealmStory,
@@ -273,6 +290,10 @@ import UIKit
         return realm
     }
     static func GetRealmStoryCloudRealm() throws -> Realm {
+        if isUseCloudRealmForStory {
+            return try GetCloudRealm()
+        }
+        
         lockRealmStory.lock()
         defer {
             lockRealmStory.unlock()
@@ -292,6 +313,7 @@ import UIKit
         let container = GetContainer()
         let realm = try RealmUtil.GetCloudRealmWithoutLock()
         return SyncEngine(objects: [
+            SyncObject<RealmStory>(realm: realm),
             SyncObject<RealmNovel>(realm: realm),
             SyncObject<RealmSpeechModSetting>(realm: realm),
             SyncObject<RealmSpeechWaitConfig>(realm: realm),
@@ -319,6 +341,10 @@ import UIKit
         self.syncEngine = try CreateSyncEngine()
     }
     static func EnableRealmStorySyncEngine() throws {
+        if isUseCloudRealmForStory {
+            return try EnableSyncEngine()
+        }
+        
         lockRealmStory.lock()
         defer { lockRealmStory.unlock() }
         if realmStorySyncEngine != nil { return }
@@ -352,7 +378,7 @@ import UIKit
     
     static func CountAllCloudRealmRecords(realm:Realm) -> Int {
         let targetRealmClasses = [
-            //RealmStory.self,
+            RealmStory.self,
             RealmNovel.self,
             RealmSpeechWaitConfig.self,
             RealmSpeakerSetting.self,
@@ -370,6 +396,10 @@ import UIKit
         }
         return count
     }
+    static func FetchCloudData(syncObjectType:AnyClass, predicate:NSPredicate) {
+        syncEngine?.query(syncObjectType: syncObjectType, predicate: predicate)
+    }
+    
     /// iCloud上にあるデータが使い物になるかどうかを確認します。
     /// 全てのデータが取得できたという事を確認する事が難しいため、
     /// 全てのデータが取得できていなかったとしても、使い物になるかどうかの確認だけをして、
@@ -380,7 +410,16 @@ import UIKit
     /// timeout については、
     /// minimumTimeoutLimit の間、iCloud 上のデータのRecord数が 0 のまま新しい record を取得できないのであれば false
     /// record数は増えていたが、timeoutLimit の間に有効なデータが取得できなければ false を返す事になります。
-    static func CheckCloudDataIsValid(minimumTimeoutLimit: TimeInterval = 60.0, timeoutLimit: TimeInterval = 60.0 * 60.0, completion: ((Bool) -> Void)?) {
+    static func CheckCloudDataIsValid(minimumTimeoutLimit: TimeInterval = 15.0, timeoutLimit: TimeInterval = 60.0 * 60.0, completion: ((Bool) -> Void)?) {
+
+        // カンジ悪く必要そうなものを別途 fetch してしまいます(というか、RealmNovel や RealmStory は数が多すぎるので fetch したくないんですけど、syncEngine を起動した時に fetch が走ってしまいます)
+        FetchCloudData(syncObjectType: RealmGlobalState.self, predicate: NSPredicate(format: "id = %@", RealmGlobalState.UniqueID))
+        FetchCloudData(syncObjectType: RealmSpeakerSetting.self, predicate: NSPredicate(value: true))
+        FetchCloudData(syncObjectType: RealmSpeechSectionConfig.self, predicate: NSPredicate(value: true))
+        FetchCloudData(syncObjectType: RealmSpeechWaitConfig.self, predicate: NSPredicate(value: true))
+        FetchCloudData(syncObjectType: RealmSpeechModSetting.self, predicate: NSPredicate(value: true))
+        FetchCloudData(syncObjectType: RealmSpeechOverrideSetting.self, predicate: NSPredicate(value: true))
+
         autoreleasepool {
             guard let realm = try? GetCloudRealm() else {
                 completion?(false)
@@ -407,6 +446,12 @@ import UIKit
                         let currentCount = CountAllCloudRealmRecords(realm: realm)
                         if currentCount > startCount && NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
                             completion?(true)
+                            FetchCloudData(syncObjectType: RealmStory.self, predicate: NSPredicate(value: true))
+                            FetchCloudData(syncObjectType: RealmNovel.self, predicate: NSPredicate(value: true))
+                            FetchCloudData(syncObjectType: RealmSpeechQueue.self, predicate: NSPredicate(value: true))
+                            FetchCloudData(syncObjectType: RealmDisplaySetting.self, predicate: NSPredicate(value: true))
+                            FetchCloudData(syncObjectType: RealmNovelTag.self, predicate: NSPredicate(value: true))
+
                             return
                         }
                         if Date() > timelimitDate {
@@ -496,6 +541,10 @@ import UIKit
         return try GetLocalRealm()
     }
     static func GetRealmStoryRealm() throws -> Realm {
+        if isUseCloudRealmForStory {
+            return try GetRealm()
+        }
+        
         if IsUseRealmStoryCloudRealm() {
             if realmStorySyncEngine == nil {
                 try EnableRealmStorySyncEngine()
@@ -773,9 +822,12 @@ protocol CanWriteIsDeleted {
                 queue.unref(realm:realm, storyID: self.id)
             }
         }
+        RealmUtil.Delete(realm: realm, model: self)
+        /*
         RealmUtil.RealmStoryWrite { (realm) in
             RealmUtil.LocalOnlyDelete(realm: realm, model: self)
         }
+         */
     }
 
     override class func primaryKey() -> String? {
