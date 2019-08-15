@@ -397,7 +397,8 @@ import UIKit
         return count
     }
     static func FetchCloudData(syncObjectType:AnyClass, predicate:NSPredicate) {
-        syncEngine?.query(syncObjectType: syncObjectType, predicate: predicate)
+        // TODO: IceCream側でなんとかして欲しいんだけどどうしたもんか。
+        //syncEngine?.query(syncObjectType: syncObjectType, predicate: predicate)
     }
     
     /// iCloud上にあるデータが使い物になるかどうかを確認します。
