@@ -132,7 +132,7 @@
     if ([globalData IsDarkThemeEnabled]) {
         [self ApplyDarkTheme];
     }else{
-        [self ApplyBrightTheme];
+        //[self ApplyBrightTheme];
     }
 
     //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidAppear %@", self.NarouContentDetail.title]]; // NSLog
@@ -182,7 +182,10 @@
     [self SaveCurrentReadingPoint];
     [[GlobalDataSingleton GetInstance] DeleteSpeakRangeDelegate:self];
     
-    [self ApplyBrightTheme];
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    if ([globalData IsDarkThemeEnabled]) {
+        [self ApplyBrightTheme];
+    }
     [super viewWillDisappear:animated];
 }
 
