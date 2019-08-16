@@ -56,6 +56,9 @@
 
 "DebugLogViewControllerSwift_Copied" = "Copied";
 
+"SettingsTableViewController_Information" = "Information";
+"SettingsTableViewController_Information_CanNotGetInformation" = "Information text download failed.";
+"SettingsTableViewController_Information_NoImportantInformationAlived" = "There is no important information now.";
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "Quality of voice";
 "SettingTableViewController_CorrectionOfTheReading" = "Correction of the reading";
 "SettingTableViewController_SettingOfTheTextSize" = "Setting of the text";

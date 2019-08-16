@@ -55,6 +55,9 @@
 
 "DebugLogViewControllerSwift_Copied" = "コピーしました";
 
+"SettingsTableViewController_Information" = "お知らせ";
+"SettingsTableViewController_Information_CanNotGetInformation" = "お知らせの読み込みに失敗しました。";
+"SettingsTableViewController_Information_NoImportantInformationAlived" = "今現在、重要なお知らせはありません。";
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "声質の設定";
 "SettingTableViewController_CorrectionOfTheReading" = "読みの修正";
 "SettingTableViewController_SettingOfTheTextSize" = "表示文字の設定";

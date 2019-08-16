@@ -100,6 +100,17 @@
     }
     m_ResumeSpeechFloatingButton = nil;
     
+    [NiftyUtilitySwift CheckNewImportantImformationWithHasNewInformationAlive:^(NSString * _Nonnull text) {
+        if ([text length] > 0) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                // TODO: magic word 3!!!!
+                self.tabBarController.tabBar.items[3].badgeValue = @"!";
+            });
+        }
+    } hasNoNewInformation:^{
+        // nothing to do!
+    }];
+    
     if ([globalData IsVersionUped]) {
         [self ShowVersionUpNotice];
     }
