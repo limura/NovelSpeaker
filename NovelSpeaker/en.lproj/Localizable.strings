@@ -58,6 +58,9 @@
 
 "DebugLogViewControllerSwift_Copied" = "Copied";
 
+"SettingsTableViewController_Information" = "Information";
+"SettingsTableViewController_Information_CanNotGetInformation" = "Information text download failed.";
+"SettingsTableViewController_Information_NoImportantInformationAlived" = "There is no important information now.";
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "Quality of voice";
 "SettingTableViewController_CorrectionOfTheReading" = "Correction of the reading";
 "SettingTableViewController_SettingOfTheTextSize" = "Setting of the text";
@@ -541,6 +544,17 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 -Change speaker setting items
 -Added a function to separate chapters into text files when importing text files etc.
 -Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
+
+# Version 1.1.54
+
+Interface change
+
+- When there is a new announcement, a badge is attached to the setting tab to prompt confirmation
+- Added ON / OFF setting of \"Attach operation log saved internally\" to \"Settings\" -> \"Contact developer\"
+
+Bug fix
+
+- Fixed a problem that occurred when a new novel was imported on WebImport and it seemed that the novel was not added to the bookshelf
 
 
 # Version 1.1.51

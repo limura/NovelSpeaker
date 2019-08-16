@@ -664,6 +664,42 @@ class NiftyUtilitySwift: NSObject {
         return appVersionString
     }
     
+    static let USER_DEFAULTS_LAST_READ_IMPORTANT_INFORMATION_TEXT = "UserDefaultsLastReadImportantInformationText"
+    static let IMPORTANT_INFORMATION_TEXT_URL = "https://limura.github.io/NovelSpeaker/ImportantInformation.txt"
+    @objc static public func FetchNewImportantImformation(fetched:@escaping ((_ text:String)->Void), err:(()->Void)?) {
+        guard let url = URL(string: IMPORTANT_INFORMATION_TEXT_URL) else { return }
+        cashedHTTPGet(url: url, delay: 60*60*6, successAction: { (data) in
+            guard let text = String(bytes: data, encoding: .utf8) else { return }
+            var stripedText = ""
+            text.enumerateLines(invoking: { (line, inOut) in
+                if line.count > 0 && line[line.startIndex] != "#" {
+                    stripedText += line + "\n"
+                }
+            })
+            fetched(stripedText)
+        }) { (error) in
+            err?()
+        }
+    }
+    @objc static public func CheckNewImportantImformation(hasNewInformationAlive:@escaping ((_ text:String)->Void), hasNoNewInformation:(()->Void)?) {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [USER_DEFAULTS_LAST_READ_IMPORTANT_INFORMATION_TEXT: ""])
+        guard let lastReadInformationText = defaults.string(forKey: USER_DEFAULTS_LAST_READ_IMPORTANT_INFORMATION_TEXT) else { return }
+        FetchNewImportantImformation(fetched: { (text) in
+            if lastReadInformationText != text {
+                hasNewInformationAlive(text)
+            }else{
+                hasNoNewInformation?()
+            }
+        }) {
+            hasNoNewInformation?()
+        }
+    }
+    @objc static public func SaveCheckedImportantInformation(text:String) {
+        let defaults = UserDefaults.standard
+        defaults.set(text, forKey: USER_DEFAULTS_LAST_READ_IMPORTANT_INFORMATION_TEXT)
+    }
+    
     @objc static public func getLogText(searchString:String?) -> String {
         let logStringArray = GlobalDataSingleton.getInstance().getLogStringArray()
         var logResult = ""

@@ -57,6 +57,9 @@
 
 "DebugLogViewControllerSwift_Copied" = "コピーしました";
 
+"SettingsTableViewController_Information" = "お知らせ";
+"SettingsTableViewController_Information_CanNotGetInformation" = "お知らせの読み込みに失敗しました。";
+"SettingsTableViewController_Information_NoImportantInformationAlived" = "今現在、重要なお知らせはありません。";
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "声質の設定";
 "SettingTableViewController_CorrectionOfTheReading" = "読みの修正";
 "SettingTableViewController_SettingOfTheTextSize" = "表示文字の設定";
@@ -533,6 +536,17 @@
 - 話者関係の設定項目を変更
 - テキストファイル等の取込時にテキトーに章を分ける機能を追加
 - 小説毎の専用設定の概念を追加
+
+# Version 1.1.54
+
+インタフェースの変更
+
+- 新しい告知があった場合に 設定タブ にバッジがついたりして確認を促すように
+- 設定 → 開発者へ問い合わせる に「内部に保存されている操作ログを添付する」のON/OFF設定を追加
+
+不都合の修正
+
+- Web取込側で新しく小説を取り込んだ時に、本棚に小説が追加されていないように見えてしまっていた場合の有る問題を修正
 
 
 # Version 1.1.51

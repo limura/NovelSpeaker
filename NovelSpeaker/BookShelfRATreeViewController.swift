@@ -83,6 +83,18 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         reloadAllDataAndScrollToCurrentReadingContent()
         
+        NiftyUtilitySwift.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
+            if text.count > 0 {
+                DispatchQueue.main.async {
+                    if let item = self.tabBarController?.tabBar.items?[3] {
+                        item.badgeValue = "!"
+                    }
+                }
+            }
+        }) {
+            // nothing to do.
+        }
+        
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshControlValueChangedEvent), for: .valueChanged)
         treeView.scrollView.addSubview(refreshControl)

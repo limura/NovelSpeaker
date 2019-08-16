@@ -53,6 +53,48 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     func createSettingsTable(){
         form +++ Section()
+            <<< LabelRow() { (row) in
+                row.tag = "SettingsTableViewController_Information_TAG"
+                row.title = NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ")
+                NiftyUtilitySwift.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
+                    if text.count > 0 {
+                        row.value = "❗"
+                    }else{
+                        row.value = ""
+                    }
+                }, hasNoNewInformation: {
+                    row.value = ""
+                })
+                row.cell.accessoryType = .disclosureIndicator
+            }.onCellSelection({ (butonCellof, buttonRow) in
+                NiftyUtilitySwift.FetchNewImportantImformation(fetched: { (text) in
+                    var informationText = NSLocalizedString("SettingsTableViewController_Information_NoImportantInformationAlived", comment: "今現在、重要なお知らせはありません。")
+                    if text.count > 0 {
+                        informationText = text
+                    }
+                    EasyDialog.Builder(self)
+                    .title(title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"))
+                    .textView(content: informationText, heightMultiplier: 0.65)
+                    .addButton(title: NSLocalizedString("OK_button", comment: "OK"),
+                               callback: { (dialog) in
+                        DispatchQueue.main.async {
+                            NiftyUtilitySwift.SaveCheckedImportantInformation(text: text)
+                            self.tabBarController?.tabBar.items?[3].badgeValue = nil
+                            if let row = self.form.rowBy(tag: "SettingsTableViewController_Information_TAG") as? LabelRow {
+                                row.value = ""
+                                row.updateCell()
+                            }
+                            dialog.dismiss(animated: false, completion: nil)
+                        }
+                    }).build().show()
+                }, err: {
+                    NiftyUtilitySwift.EasyDialogOneButton(
+                        viewController: self,
+                        title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"),
+                        message: NSLocalizedString("SettingsTableViewController_Information_CanNotGetInformation", comment: "お知らせの読み込みに失敗しました。"),
+                        buttonTitle: nil, buttonAction: nil)
+                })
+            })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SpeakerSettingsViewController_TitleText", comment:"話者・声色設定")
                 $0.cell.textLabel?.numberOfLines = 0
