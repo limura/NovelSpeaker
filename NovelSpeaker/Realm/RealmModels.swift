@@ -12,8 +12,8 @@ import CloudKit
 import UIKit
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 4
-    static let currentSchemaVersionForRealmStory : UInt64 = 4
+    static let currentSchemaVersion : UInt64 = 5
+    static let currentSchemaVersionForRealmStory : UInt64 = 5
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
@@ -836,8 +836,7 @@ protocol CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        //return ["novelID", "chapterNumber", "isDeleted"]
-        return ["novelID"]
+        return ["novelID", "chapterNumber", "isDeleted"]
     }
 }
 extension RealmStory: CKRecordConvertible {
@@ -1176,8 +1175,7 @@ extension RealmStory: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        //return ["writer", "title", "novelID", "likeLevel", "isDeleted", "lastDownloadDate", "lastReadDate"]
-        return ["writer", "title", "novelID", "lastDownloadDate", "lastReadDate"]
+        return ["writer", "title", "novelID", "likeLevel", "isDeleted", "lastDownloadDate", "lastReadDate"]
     }
 }
 extension RealmNovel: CKRecordConvertible {
@@ -1256,8 +1254,7 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
     }
     
     override static func indexedProperties() -> [String] {
-        //return ["before", "after", "createdDate", "isDeleted"]
-        return ["before", "after", "createdDate"]
+        return ["before", "after", "createdDate", "isDeleted"]
     }
 }
 extension RealmSpeechModSetting: CKRecordConvertible {
@@ -1323,8 +1320,7 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        //return ["targetText", "createdDate", "isDeleted"]
-        return ["targetText", "createdDate"]
+        return ["targetText", "createdDate", "isDeleted"]
     }
 }
 extension RealmSpeechWaitConfig: CKRecordConvertible {
@@ -1404,8 +1400,7 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        //return ["name", "createdDate", "isDeleted"]
-        return ["name", "createdDate"]
+        return ["name", "createdDate", "isDeleted"]
     }
 }
 extension RealmSpeakerSetting: CKRecordConvertible {
@@ -1520,8 +1515,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        //return ["name", "startText", "createdDate", "speakerID", "isDeleted"]
-        return ["name", "startText", "createdDate", "speakerID"]
+        return ["name", "startText", "createdDate", "speakerID", "isDeleted"]
     }
 }
 extension RealmSpeechSectionConfig: CKRecordConvertible {
@@ -1587,8 +1581,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        //return ["createdDate", "name", "isDeleted"]
-        return ["createdDate", "name"]
+        return ["createdDate", "name", "isDeleted"]
     }
 }
 extension RealmSpeechQueue: CKRecordConvertible {
@@ -1863,8 +1856,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
         return "name"
     }
     override static func indexedProperties() -> [String] {
-        //return ["name", "createdDate", "isDeleted"]
-        return ["name", "createdDate"]
+        return ["name", "createdDate", "isDeleted"]
     }
 }
 extension RealmDisplaySetting:CKRecordConvertible{
@@ -1992,8 +1984,7 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        //return ["id", "name", "type", "createdDate", "isDeleted", "hint"]
-        return ["id", "name", "type", "createdDate", "hint"]
+        return ["id", "name", "type", "createdDate", "isDeleted", "hint"]
     }
 }
 extension RealmNovelTag: CKRecordConvertible {
@@ -2077,8 +2068,7 @@ extension RealmNovelTag: CanWriteIsDeleted {
     }
 
     override static func indexedProperties() -> [String] {
-        //return ["name", "targetNovelArray", "createdDate", "isDeleted"]
-        return ["name", "createdDate"]
+        return ["name", "targetNovelArray", "createdDate", "isDeleted"]
     }
 }
 extension RealmSpeechOverrideSetting: CKRecordConvertible {
