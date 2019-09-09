@@ -64,7 +64,7 @@
 "SettingTableViewController_SettingOfTheSpeechDelay" = "読み上げ時の間の設定";
 "SettingTableViewController_MaxSpeechTime" = "最大連続再生時間";
 "SettingTableViewController_AddDefaultCorrectionOfTheReading" = "標準の読みの修正を上書き追加";
-"SettingTableViewController_GetNcodeDownloadURLScheme" = "再ダウンロード用データの生成";
+"SettingTableViewController_GetNcodeDownloadURLScheme" = "バックアップ用データの生成";
 "SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "標準の読み替え辞書を上書き追加しました。";
 "SettingTableViewController_NoContentHave" = "本棚に本がありません";
 "SettingTableViewController_ShareNcodeListURLScheme" = "本棚に登録されている小説の再ダウンロードURLスキームを生成します";
@@ -301,15 +301,22 @@
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
 "BookShelfTableViewController_Resume:" = "▶︎再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.54
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.55
 
-- 新しい告知があった場合に 設定タブ にバッジがついたりして確認を促すように
-- 設定 → 開発者へ問い合わせる に「内部に保存されている操作ログを添付する」のON/OFF設定を追加
-- Web取込側で新しく小説を取り込んだ時に、本棚に小説が追加されていないように見えてしまっていた場合の有る問題を修正
+- 読み込んだ章の最初と最後の空白や改行部分を削除するように
+- 「設定」→「再ダウンロード用データの生成」のタイトルを「バックアップ用データの生成」に変更
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.55
+
+インタフェースの変更
+
+- 読み込んだ章の最初と最後の空白や改行部分を削除するように
+- 「設定」→「再ダウンロード用データの生成」のタイトルを「バックアップ用データの生成」に変更
+
+
 # Version 1.1.54
 
 インタフェースの変更
