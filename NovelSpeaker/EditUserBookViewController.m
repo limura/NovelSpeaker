@@ -138,6 +138,9 @@
         self.AddChapterButton.enabled = false;
         self.DelChapterButton.enabled = false;
     }
+    if ([content isURLContent]) {
+        self.DelChapterButton.enabled = false;
+    }
     
     return true;
 }
