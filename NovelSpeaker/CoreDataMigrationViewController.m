@@ -40,6 +40,7 @@
             // 通常の main storyboard に移行します。
             UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
             UIViewController* firstViewController = [storyboard instantiateInitialViewController];
+            self.modalPresentationStyle = UIModalPresentationFullScreen;
             [self presentViewController:firstViewController animated:YES completion:NULL];
         });
     });

@@ -35,6 +35,7 @@
         }
     }
     
+    viewController.modalPresentationStyle = UIModalPresentationFullScreen;
     [viewController presentViewController:activityViewController
                        animated:YES
                      completion:nil];
