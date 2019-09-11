@@ -308,6 +308,7 @@
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.55
 
 - Remove blanks and newlines at the beginning and end of imported chapters
+- For chapters imported by Web import, chapters cannot be deleted from editing
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -317,6 +318,7 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 Interface Change
 
 - Remove blanks and newlines at the beginning and end of imported chapters
+- For chapters imported by Web import, chapters cannot be deleted from editing
 
 
 # Version 1.1.54
