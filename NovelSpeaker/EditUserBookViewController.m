@@ -66,6 +66,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated
 {
+    [[GlobalDataSingleton GetInstance] UpdateNarouContent:self.NarouContentDetail];
     [self SaveCurrentStory];
     [super viewWillDisappear:animated];
 }
@@ -181,9 +182,18 @@
     if([self.NarouContentDetail.general_all_no intValue] <= 0){
         return false;
     }
+    StoryCacheData* readingStory = self.NarouContentDetail.currentReadingStory;
+    NSNumber* general_all_no = self.NarouContentDetail.general_all_no;
+    
     StoryCacheData* deleteTargetStory = [StoryCacheData new];
     deleteTargetStory.ncode = self.NarouContentDetail.ncode;
     deleteTargetStory.chapter_number = self.NarouContentDetail.general_all_no;
+
+    if([readingStory.chapter_number intValue] == [general_all_no intValue]){
+        deleteTargetStory = readingStory;
+        self.NarouContentDetail.reading_chapter = nil;
+        self.NarouContentDetail.currentReadingStory = nil;
+    }
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     if([globalData DeleteStory:deleteTargetStory] != true)
     {
