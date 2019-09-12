@@ -2106,6 +2106,10 @@ Bug fix
 - 「設定」→「再ダウンロード用データの生成」のタイトルを「バックアップ用データの生成」に変更
 - Web取込 で取り込んだ小説について、編集から章の削除ができないように
 
+不都合の修正
+
+- 自作小説を編集中に章の削除をしようとした時に、その削除した章が栞のはさまれた章だった場合にその章が削除されなかった問題を修正
+
 評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
 
 今回の修正は以下のような目的の修正となっています。
@@ -2129,6 +2133,9 @@ Interface Change
 - Remove blanks and newlines at the beginning and end of imported chapters
 - For chapters imported by Web import, chapters cannot be deleted from editing
 
+Bug fix
+
+- Fixed an issue where when deleting a chapter while editing a self-made novel, the deleted chapter was not deleted if the deleted chapter was a trapped chapter
 
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す

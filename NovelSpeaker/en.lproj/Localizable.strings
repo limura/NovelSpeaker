@@ -309,6 +309,7 @@
 
 - Remove blanks and newlines at the beginning and end of imported chapters
 - For chapters imported by Web import, chapters cannot be deleted from editing
+- Fixed an issue where when deleting a chapter while editing a self-made novel, the deleted chapter was not deleted if the deleted chapter was a trapped chapter
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -320,6 +321,9 @@ Interface Change
 - Remove blanks and newlines at the beginning and end of imported chapters
 - For chapters imported by Web import, chapters cannot be deleted from editing
 
+Bug fix
+
+- Fixed an issue where when deleting a chapter while editing a self-made novel, the deleted chapter was not deleted if the deleted chapter was a trapped chapter
 
 # Version 1.1.54
 
