@@ -74,7 +74,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                     EasyDialog.Builder(self)
                     .title(title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"))
-                    .textView(content: informationText, heightMultiplier: 0.65)
+                    .textView(content: informationText, heightMultiplier: 0.6)
                     .addButton(title: NSLocalizedString("OK_button", comment: "OK"),
                                callback: { (dialog) in
                         DispatchQueue.main.async {
@@ -655,7 +655,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         if let currentPrivacyPolicy = String(data: data, encoding: .utf8) {
                             DispatchQueue.main.async {
                                 EasyDialog.Builder(self)
-                                .textView(content: currentPrivacyPolicy, heightMultiplier: 0.7)
+                                .textView(content: currentPrivacyPolicy, heightMultiplier: 0.6)
                                 .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                     DispatchQueue.main.async {
                                         dialog.dismiss(animated: true)

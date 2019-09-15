@@ -66,7 +66,7 @@
 "SettingTableViewController_SettingOfTheSpeechDelay" = "読み上げ時の間の設定";
 "SettingTableViewController_MaxSpeechTime" = "最大連続再生時間";
 "SettingTableViewController_AddDefaultCorrectionOfTheReading" = "標準の読みの修正を上書き追加";
-"SettingTableViewController_GetNcodeDownloadURLScheme" = "再ダウンロード用データの生成";
+"SettingTableViewController_GetNcodeDownloadURLScheme" = "バックアップ用データの生成";
 "SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary" = "標準の読み替え辞書を上書き追加しました。";
 "SettingTableViewController_NoContentHave" = "本棚に本がありません";
 "SettingTableViewController_ShareNcodeListURLScheme" = "本棚に登録されている小説の再ダウンロードURLスキームを生成します";
@@ -536,6 +536,20 @@
 - 話者関係の設定項目を変更
 - テキストファイル等の取込時にテキトーに章を分ける機能を追加
 - 小説毎の専用設定の概念を追加
+
+
+# Version 1.1.55
+
+インタフェースの変更
+
+- 読み込んだ章の最初と最後の空白や改行部分を削除するように
+- 「設定」→「再ダウンロード用データの生成」のタイトルを「バックアップ用データの生成」に変更
+- Web取込 で取り込んだ小説について、編集から章の削除ができないように
+
+不都合の修正
+
+- 自作小説を編集中に章の削除をしようとした時に、その削除した章が栞のはさまれた章だった場合にその章が削除されなかった問題を修正
+
 
 # Version 1.1.54
 

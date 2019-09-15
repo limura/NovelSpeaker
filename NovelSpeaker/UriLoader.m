@@ -511,7 +511,7 @@
             continue;
         }
         NSAttributedString* textAttributedString = [SiteInfo HtmlStringToAttributedString:tmpString];
-        story.content = textAttributedString.string;
+        story.content = [textAttributedString.string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         story.title = [siteInfo GetTitle:document context:context documentEncoding:charsetValue];
         story.author = [siteInfo GetAuthor:document context:context documentEncoding:charsetValue];
         story.nextUrl = [siteInfo GetNextURL:document context:context currentURL:targetUrl documentEncoding:charsetValue];

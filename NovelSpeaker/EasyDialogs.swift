@@ -32,7 +32,7 @@ fileprivate class EasyDialogCustomUITextField: UITextField {
 }
 
 fileprivate class EasyDialogCustomUITextView: UITextView, UITextViewDelegate {
-    public var heightMultiplier: CGFloat = 0.7
+    public var heightMultiplier: CGFloat = 0.6
 }
 
 fileprivate func colorFromDecimalRGB(_ red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat = 1.0) -> UIColor {
