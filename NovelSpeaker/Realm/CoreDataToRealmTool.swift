@@ -227,7 +227,8 @@ class CoreDataToRealmTool: NSObject {
             }
             autoreleasepool {
                 let story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber)
-                RealmUtil.RealmStoryWrite { (realm) in
+                // Story が同じ realm だとこれはいけない。(逆に Story が別の realm だと RealmUtil.RealmStoryWrite() はしないといけない
+                //RealmUtil.RealmStoryWrite { (realm) in
                     if let readLocation = storyCoreData.readLocation as? Int {
                         story.readLocation = readLocation
                     }
@@ -237,7 +238,7 @@ class CoreDataToRealmTool: NSObject {
                     }
                     
                     realm.add(story, update: .modified)
-                }
+                //}
             }
         }
     }
@@ -313,7 +314,8 @@ class CoreDataToRealmTool: NSObject {
 
                 var lastStoryID:String? = nil
                 autoreleasepool {
-                    RealmUtil.RealmStoryWrite { (realm) in
+                    // RealmStory が別 Realm でない場合は呼んでしまうと駄目
+                    //RealmUtil.RealmStoryWrite { (realm) in
                         // chapterNumber が最後の章に関しては、
                         if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
                             // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する
@@ -322,12 +324,12 @@ class CoreDataToRealmTool: NSObject {
                             }
                             lastStoryID = lastStory.id
                         }
-                    }
+                    //}
                 }
                 if let lastStoryID = lastStoryID {
-                    RealmUtil.Write { (realm) in
+                    //RealmUtil.Write { (realm) in
                         novel.m_lastChapterStoryID = lastStoryID
-                    }
+                    //}
                 }
                 //print("novel add: novelID: \(novel.novelID), url: \(novel.url), coredata.ncode: \(novelCoreData.ncode ?? "unknown"), coredata.userid: \(novelCoreData.userid ?? "unknown"), isURLContent: \(novelCoreData.isURLContent() ? "true" : "false"), isUserCreatedContent: \(novelCoreData.isUserCreatedContent() ? "true" : "false")")
 
