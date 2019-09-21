@@ -130,9 +130,13 @@
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     
     if ([globalData IsDarkThemeEnabled]) {
-        [self ApplyDarkTheme];
-    }else{
-        //[self ApplyBrightTheme];
+        if (@available(iOS 13.0, *)) {
+            if (UITraitCollection.currentTraitCollection.userInterfaceStyle != UIUserInterfaceStyleDark) {
+                [self ApplyDarkTheme];
+            }
+        } else {
+            [self ApplyDarkTheme];
+        }
     }
 
     //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidAppear %@", self.NarouContentDetail.title]]; // NSLog
@@ -184,7 +188,13 @@
     
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     if ([globalData IsDarkThemeEnabled]) {
-        [self ApplyBrightTheme];
+        if (@available(iOS 13.0, *)) {
+            if (UITraitCollection.currentTraitCollection.userInterfaceStyle != UIUserInterfaceStyleDark) {
+                [self ApplyBrightTheme];
+            }
+        } else {
+            [self ApplyBrightTheme];
+        }
     }
     [super viewWillDisappear:animated];
 }
@@ -205,6 +215,11 @@
     UIColor* backgroundColor = UIColor.blackColor;
     UIColor* foregroundColor = UIColor.whiteColor;
     
+    if (@available(iOS 13.0, *)) {
+        backgroundColor = UIColor.systemBackgroundColor;
+        foregroundColor = UIColor.labelColor;
+    }
+
     self.view.backgroundColor = backgroundColor;
     self.textView.textColor = foregroundColor;
     self.textView.backgroundColor = backgroundColor;
@@ -229,7 +244,12 @@
 - (void)ApplyBrightTheme{
     UIColor* backgroundColor = UIColor.whiteColor;
     UIColor* foregroundColor = UIColor.blackColor;
-    
+
+    if (@available(iOS 13.0, *)) {
+        backgroundColor = UIColor.systemBackgroundColor;
+        foregroundColor = UIColor.labelColor;
+    }
+
     self.view.backgroundColor = backgroundColor;
     self.textView.textColor = foregroundColor;
     self.textView.backgroundColor = backgroundColor;
