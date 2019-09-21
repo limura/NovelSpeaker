@@ -851,17 +851,19 @@
 }
 
 /// MPRemoteCommandCenter からの play イベントのイベントハンドラ
-- (void)playEvent:(id)sendor {
+- (MPRemoteCommandHandlerStatus)playEvent:(id)sendor {
     [self startSpeech:YES];
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 
 /// MPRemoteCommandCenter からの stop イベントのイベントハンドラ
-- (void)stopEvent:(id)sendor {
+- (MPRemoteCommandHandlerStatus)stopEvent:(id)sendor {
     [self stopSpeech];
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 
 /// MPRemoteCommandCenter からの togglePlayPause イベントのイベントハンドラ
-- (void)togglePlayPauseEvent:(id)sendor {
+- (MPRemoteCommandHandlerStatus)togglePlayPauseEvent:(id)sendor {
     if ([[GlobalDataSingleton GetInstance] isSpeaking]) {
         NSLog(@"toggle stopSpeech");
         [self stopSpeech];
@@ -869,45 +871,50 @@
         NSLog(@"toggle startSpeech");
         [self startSpeech:YES];
     }
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 
 /// MPRemoteCommandCenter からの nextTrack イベントのイベントハンドラ
-- (void)nextTrackEvent:(id)sendor {
+- (MPRemoteCommandHandlerStatus)nextTrackEvent:(id)sendor {
     [self stopSpeechWithoutDiactivate];
     if ([self SetNextChapter]) {
         [self startSpeech:YES];
     }
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 
 /// MPRemoteCommandCenter からの previousTrack イベントのイベントハンドラ
-- (void)previousTrackEvent:(id)sendor {
+- (MPRemoteCommandHandlerStatus)previousTrackEvent:(id)sendor {
     [self stopSpeechWithoutDiactivate];
     if ([self SetPreviousChapter]) {
         [self startSpeech:YES];
     }
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 
 /// MPRemoteCommandCenter からの skipForward イベントのイベントハンドラ
-- (void)skipForwardEvent:(id)sendor {
+- (MPRemoteCommandHandlerStatus)skipForwardEvent:(id)sendor {
     //[self stopSpeechWithoutDiactivate];
     [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
     [self skipForward:100];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
         [self startSpeech:YES];
     });
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 /// MPRemoteCommandCenter からの skipBackword イベントのイベントハンドラ
-- (void)skipBackwardEvent:(id)sendor {
+- (MPRemoteCommandHandlerStatus)skipBackwardEvent:(id)sendor {
     //[self stopSpeechWithoutDiactivate];
     [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
     [self skipBackward:100];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(20 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
         [self startSpeech:YES];
     });
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 
 /// MPRemoteCommandCenter からの seekForward イベントのイベントハンドラ
-- (void)seekForwardEvent:(MPSeekCommandEvent *)event{
+- (MPRemoteCommandHandlerStatus)seekForwardEvent:(MPSeekCommandEvent *)event{
     if (event.type == MPSeekCommandEventTypeBeginSeeking) {
         [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_AnnounceSeekForward", @"早送り")];
         m_bIsSeeking = true;
@@ -926,9 +933,10 @@
     if (event.type == MPSeekCommandEventTypeEndSeeking) {
         m_bIsSeeking = false;
     }
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 /// MPRemoteCommandCenter からの seekBackward イベントのイベントハンドラ
-- (void)seekBackwardEvent:(MPSeekCommandEvent *)event{
+- (MPRemoteCommandHandlerStatus)seekBackwardEvent:(MPSeekCommandEvent *)event{
     if (event.type == MPSeekCommandEventTypeBeginSeeking) {
         [[GlobalDataSingleton GetInstance] AnnounceBySpeech:NSLocalizedString(@"SpeechViewController_AnnounceSeekBackward", @"巻き戻し")];
         m_bIsSeeking = true;
@@ -947,6 +955,7 @@
     if (event.type == MPSeekCommandEventTypeEndSeeking) {
         m_bIsSeeking = false;
     }
+    return MPRemoteCommandHandlerStatusSuccess;
 }
 
 - (MPRemoteCommandHandlerStatus)changePlaybackPositionEvent:(MPChangePlaybackPositionCommandEvent*)event{
