@@ -215,11 +215,6 @@
     UIColor* backgroundColor = UIColor.blackColor;
     UIColor* foregroundColor = UIColor.whiteColor;
     
-    if (@available(iOS 13.0, *)) {
-        backgroundColor = UIColor.systemBackgroundColor;
-        foregroundColor = UIColor.labelColor;
-    }
-
     self.view.backgroundColor = backgroundColor;
     self.textView.textColor = foregroundColor;
     self.textView.backgroundColor = backgroundColor;
