@@ -38,8 +38,8 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         BehaviorLogger.AddLog(description: "ImportFromWebPageViewController viewDidLoad", data: [:])
         
         if #available(iOS 13.0, *) {
-            addressBarBackgroundColor = UIColor.systemBackground
-            addressBarBackgroundColorValid = UIColor.systemBackground
+            addressBarBackgroundColor = UIColor.secondarySystemBackground
+            addressBarBackgroundColorValid = UIColor.secondarySystemBackground
         }
         self.addressBarUITextField.backgroundColor = addressBarBackgroundColor
 

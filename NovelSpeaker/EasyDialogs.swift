@@ -152,7 +152,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
                     self.titleColor = titleColor
                 }
                 if alertBackgroudColor == UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0) {
-                    self.alertBackgroudColor = UIColor.systemBackground
+                    self.alertBackgroudColor = UIColor.secondarySystemBackground
                 }else{
                     self.alertBackgroudColor = alertBackgroudColor
                 }
@@ -185,8 +185,8 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             
             public init(backgroundColor: UIColor = UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0), selectedBackgroundColor: UIColor = UIColor(red: 230 / 255.0, green: 230 / 255.0, blue: 230 / 255.0, alpha: 1.0), textColor: UIColor = UIColor(red: 19 / 255.0, green: 144 / 255.0, blue: 255 / 255.0, alpha: 1.0), font: UIFont = UIFont.boldSystemFont(ofSize: 16.0)) {
                 if #available(iOS 13.0, *) {
-                    self.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
-                    self.selectedBackgroundColor = UIColor.systemGroupedBackground.withAlphaComponent(0.9)
+                    self.backgroundColor = UIColor.secondarySystemBackground
+                    self.selectedBackgroundColor = UIColor.systemBackground
                     self.textColor = UIColor.label
                 } else {
                     self.backgroundColor = backgroundColor
