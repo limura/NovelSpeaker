@@ -37,7 +37,11 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         super.viewDidLoad()
         BehaviorLogger.AddLog(description: "ImportFromWebPageViewController viewDidLoad", data: [:])
         
-        self.addressBarUITextField.backgroundColor = #colorLiteral(red: 0.8865675194, green: 0.8865675194, blue: 0.8865675194, alpha: 1)
+        if #available(iOS 13.0, *) {
+            addressBarBackgroundColor = UIColor.systemBackground
+            addressBarBackgroundColorValid = UIColor.systemBackground
+        }
+        self.addressBarUITextField.backgroundColor = addressBarBackgroundColor
 
         let wkWebViewConfiguration = makeWKWebViewConfiguration()
         let wkWebView = WKWebView(frame: .zero, configuration: wkWebViewConfiguration)

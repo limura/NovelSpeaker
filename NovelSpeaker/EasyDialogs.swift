@@ -140,14 +140,38 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
         
         public init(textColor: UIColor = UIColor.black, textFont: UIFont = UIFont.systemFont(ofSize: 16.0), titleColor: UIColor = UIColor.black, titleFont: UIFont = UIFont.boldSystemFont(ofSize: 18.0), alertBackgroudColor: UIColor = UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0), cornerRadius: CGFloat = 15.0, maskViewAlpha: CGFloat = 0.6, separatorColor: UIColor = UIColor.lightGray) {
             
-            self.textColor = textColor
-            self.titleColor = titleColor
+            if #available(iOS 13.0, *) {
+                if textColor == UIColor.black {
+                    self.textColor = UIColor.label
+                }else{
+                    self.textColor = textColor
+                }
+                if titleColor == UIColor.black {
+                    self.titleColor = UIColor.label
+                }else{
+                    self.titleColor = titleColor
+                }
+                if alertBackgroudColor == UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0) {
+                    self.alertBackgroudColor = UIColor.systemBackground
+                }else{
+                    self.alertBackgroudColor = alertBackgroudColor
+                }
+                if separatorColor == UIColor.lightGray {
+                    self.separatorColor = UIColor.label
+                }else{
+                    self.separatorColor = separatorColor
+                }
+            }else{
+                self.textColor = textColor
+                self.titleColor = titleColor
+                self.alertBackgroudColor = alertBackgroudColor
+                self.separatorColor = separatorColor
+            }
+            
             self.titleFont = titleFont
             self.textFont = textFont
-            self.alertBackgroudColor = alertBackgroudColor
             self.cornerRadius = cornerRadius
             self.maskViewAlpha = maskViewAlpha
-            self.separatorColor = separatorColor
             self.positiveButton = Theme.Button.positive
             self.destructiveButton = Theme.Button.destructive
             self.regularButton = Theme.Button.regular
@@ -160,9 +184,15 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             let font: UIFont
             
             public init(backgroundColor: UIColor = UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0), selectedBackgroundColor: UIColor = UIColor(red: 230 / 255.0, green: 230 / 255.0, blue: 230 / 255.0, alpha: 1.0), textColor: UIColor = UIColor(red: 19 / 255.0, green: 144 / 255.0, blue: 255 / 255.0, alpha: 1.0), font: UIFont = UIFont.boldSystemFont(ofSize: 16.0)) {
-                self.backgroundColor = backgroundColor
-                self.selectedBackgroundColor = selectedBackgroundColor
-                self.textColor = textColor
+                if #available(iOS 13.0, *) {
+                    self.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
+                    self.selectedBackgroundColor = UIColor.systemGroupedBackground.withAlphaComponent(0.9)
+                    self.textColor = UIColor.label
+                } else {
+                    self.backgroundColor = backgroundColor
+                    self.selectedBackgroundColor = selectedBackgroundColor
+                    self.textColor = textColor
+                }
                 self.font = font
             }
             
@@ -367,7 +397,11 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
         public func build() -> EasyDialog {
             let dialog = EasyDialog()
             dialog.builder = self
-            dialog.view.backgroundColor = UIColor(white: 0, alpha: theme.maskViewAlpha)
+            if #available(iOS 13.0, *) {
+                dialog.view.backgroundColor = UIColor.systemBackground.withAlphaComponent(theme.maskViewAlpha)
+            } else {
+                dialog.view.backgroundColor = UIColor(white: 0, alpha: theme.maskViewAlpha)
+            }
             
             dialog.modalPresentationStyle = .overCurrentContext
             dialog.modalTransitionStyle = .crossDissolve
