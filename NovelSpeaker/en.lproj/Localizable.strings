@@ -310,13 +310,20 @@
 "BookShelfTableViewController_Resume:" = "▶︎Speech: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.55
 
-- Remove blanks and newlines at the beginning and end of imported chapters
-- For chapters imported by Web import, chapters cannot be deleted from editing
-- Fixed an issue where when deleting a chapter while editing a self-made novel, the deleted chapter was not deleted if the deleted chapter was a trapped chapter
+- Added support for DarkMode
+- Added a search button to the novel text scene
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.56
+
+Interface Change
+
+- Added support for DarkMode
+- Added a search button to the novel text scene
+
+
 # Version 1.1.55
 
 Interface Change

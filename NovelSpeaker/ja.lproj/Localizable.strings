@@ -304,16 +304,22 @@
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
 "BookShelfTableViewController_Resume:" = "▶︎再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.55
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.56
 
-- 読み込んだ章の最初と最後の空白や改行部分を削除するように
-- 「設定」→「再ダウンロード用データの生成」のタイトルを「バックアップ用データの生成」に変更
-- Web取込 で取り込んだ小説について、編集から章の削除ができないように
-- 自作小説を編集中に章の削除をしようとした時に、その削除した章が栞のはさまれた章だった場合にその章が削除されなかった問題を修正
+- DarkMode へ対応しました
+- 小説本文シーンに検索ボタンを追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.56
+
+インタフェースの変更
+
+- DarkMode へ対応しました
+- 小説本文シーンに検索ボタンを追加
+
+
 # Version 1.1.55
 
 インタフェースの変更
