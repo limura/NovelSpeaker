@@ -314,6 +314,7 @@
 - Added support for DarkMode
 - Added a search button to the novel text scene
 - Display slide bar value in Settings -> Quality of voice
+- Added settings -> Do not download on mobile phone network ON/OFF setting
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -325,6 +326,7 @@ Interface Change
 - Added support for DarkMode
 - Added a search button to the novel text scene
 - Display slide bar value in Settings -> Quality of voice
+- Added settings -> Do not download on mobile phone network ON/OFF setting
 
 
 # Version 1.1.55

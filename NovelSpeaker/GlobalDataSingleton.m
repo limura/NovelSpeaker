@@ -4027,6 +4027,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_mix_with_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsMixWithOthersEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_duck_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsDuckOthersEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_open_recent_novel_in_start_time_enabled" number:[[NSNumber alloc] initWithBool:[self IsOpenRecentNovelInStartTime]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_disallows_cellular_access" number:[[NSNumber alloc] initWithBool:[self IsDisallowsCellularAccess]]];
     NarouContentCacheData* currentReadingContent = [self GetCurrentReadingContent];
     if (currentReadingContent != nil) {
         [NiftyUtility addStringForJSONNSDictionary:result key:@"current_reading_content" string:currentReadingContent.ncode];
@@ -4597,6 +4598,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSNumber* is_open_recent_novel_in_start_time_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_open_recent_novel_in_start_time_enabled"];
     if (is_open_recent_novel_in_start_time_enabled != nil) {
         [self SetIsOpenRecentNovelInStartTime:[is_open_recent_novel_in_start_time_enabled boolValue]];
+    }
+    NSNumber* is_disallows_cellular_access = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_disallows_cellular_access"];
+    if (is_disallows_cellular_access != nil) {
+        [self SetIsDisallowsCellularAccess:[is_disallows_cellular_access boolValue]];
     }
     NSString* current_reading_content = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"current_reading_content"];
     return current_reading_content;

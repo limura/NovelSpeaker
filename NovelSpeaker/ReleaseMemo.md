@@ -2144,6 +2144,7 @@ Bug fix
 - DarkMode へ対応しました
 - 小説本文シーンに検索ボタンを追加
 - 設定 -> 声質の設定にて、スライドバーの値を表示するように
+- 設定 -> 携帯電話網ではダウンロードしないようにする の ON/OFF 設定を追加
 
 評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
 
@@ -2163,6 +2164,8 @@ Interface Change
 
 - Added support for DarkMode
 - Added a search button to the novel text scene
+- Display slide bar value in Settings -> Quality of voice
+- Added settings -> Do not download on mobile phone network ON/OFF setting
 
 
 
