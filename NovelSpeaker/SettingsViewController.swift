@@ -513,6 +513,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            <<< SwitchRow("isDisallowsCellularAccess") {
+		// TODO: GlobalDataSingleton はもう使わない
+                $0.title = NSLocalizedString("SettingTableViewController_IsDisallowsCellularAccess", comment: "携帯電話網ではダウンロードしないようにする")
+                $0.value = GlobalDataSingleton.getInstance()?.isDisallowsCellularAccess()
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                GlobalDataSingleton.getInstance()?.setIsDisallowsCellularAccess(row.value!)
+            })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 $0.cell.textLabel?.numberOfLines = 0

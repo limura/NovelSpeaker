@@ -12,7 +12,7 @@
 #import "SpeechConfig.h"
 #import "NovelSpeaker-Swift.h"
 
-#define iOS12WillSpeakRangeBugTargetRegexp @"[\\s•・*]"
+#define iOS12WillSpeakRangeBugTargetRegexp @"[\\s•・*」]"
 #define iOS12WillSpeakRangeBugConvertToString @"α"
 
 @interface BlockSeparator : NSObject

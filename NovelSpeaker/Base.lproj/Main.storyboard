@@ -25,7 +25,7 @@
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="gQM-YC-Qn8" secondAttribute="trailing" constant="-16" id="Cza-lx-hvB"/>
                             <constraint firstItem="gQM-YC-Qn8" firstAttribute="bottom" secondItem="l03-Ng-qdH" secondAttribute="bottomMargin" id="avF-H3-1hF"/>
@@ -70,14 +70,14 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minValue="1" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="Fkj-1l-L3c">
-                                <rect key="frame" x="14" y="72" width="347" height="31"/>
+                                <rect key="frame" x="14" y="52" width="347" height="31"/>
                                 <connections>
                                     <action selector="textSizeSliderChanged:" destination="Pb4-1M-Lvn" eventType="valueChanged" id="dUE-qK-TOH"/>
                                 </connections>
                             </slider>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vgK-qt-EeE">
-                                <rect key="frame" x="16" y="110" width="343" height="500"/>
-                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <rect key="frame" x="16" y="90" width="343" height="520"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <string key="text">メロスは両手で老爺のからだをゆすぶって質問を重ねた。老爺は、あたりをはばかる低声で、わずか答えた。
 「王様は、人を殺します。」
 「なぜ殺すのだ。」
@@ -89,11 +89,12 @@
 　聞いて、メロスは激怒した。「呆れた王だ。生かして置けぬ。」
 　メロスは、単純な男であった。買い物を、背負ったままで、のそのそ王城にはいって行った。たちまち彼は、巡邏の警吏に捕縛された。調べられて、メロスの懐中からは短剣が出て来たので、騒ぎが大きくなってしまった。メロスは、王の前に引き出された。
 「この短刀で何をするつもりであったか。言え！」暴君ディオニスは静かに、けれども威厳を以て問いつめた。その王の顔は蒼白で、眉間の皺しわは、刻み込まれたように深かった。  太宰治 走れメロスより</string>
+                                <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="vgK-qt-EeE" firstAttribute="leading" secondItem="OW2-Cz-epG" secondAttribute="leadingMargin" id="4QT-7q-iiY"/>
                             <constraint firstItem="Fkj-1l-L3c" firstAttribute="top" secondItem="WC8-P8-5Yg" secondAttribute="top" constant="8" id="Jh6-lD-Fzh"/>
@@ -138,13 +139,14 @@
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="IYP-gH-U8o">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <color key="sectionIndexBackgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="speechModSettingsTableViewDefaultCell" id="W85-N7-Sen">
-                                <rect key="frame" x="0.0" y="22" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="W85-N7-Sen" id="ZbH-ye-pyG">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>
@@ -194,6 +196,7 @@
                         <subviews>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YKK-cB-MCo">
                                 <rect key="frame" x="0.0" y="574" width="375" height="44"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="zYe-yy-RAc"/>
                                 </constraints>
@@ -249,11 +252,11 @@
                                 </constraints>
                             </progressView>
                             <textField opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="LSE-Fd-akM">
-                                <rect key="frame" x="10" y="20" width="355" height="30"/>
+                                <rect key="frame" x="10" y="0.0" width="355" height="30"/>
+                                <color key="backgroundColor" systemColor="secondarySystemBackgroundColor" red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="30" id="nNY-OD-eoC"/>
                                 </constraints>
-                                <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                                 <connections>
@@ -262,7 +265,7 @@
                                 </connections>
                             </textField>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="LSE-Fd-akM" firstAttribute="leading" secondItem="7Se-Bl-rd5" secondAttribute="leading" constant="10" id="53A-al-MMq"/>
                             <constraint firstItem="b2P-LC-lhM" firstAttribute="leading" secondItem="7Se-Bl-rd5" secondAttribute="leading" id="6aK-cA-78r"/>
@@ -402,7 +405,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="em1-qg-D62" firstAttribute="top" secondItem="Kai-Tt-fHY" secondAttribute="top" id="AgH-9b-pNs"/>
                             <constraint firstItem="em1-qg-D62" firstAttribute="bottom" secondItem="Kai-Tt-fHY" secondAttribute="bottom" id="WVw-cq-ie2"/>
@@ -424,7 +427,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                     <tabBarItem key="tabBarItem" title="設定" image="gear.png" id="RLW-4z-oWd"/>
                     <navigationItem key="navigationItem" id="n1k-4X-225"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="mIp-pB-YHg">
-                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -457,8 +460,9 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                 <navigationController definesPresentationContext="YES" id="LfY-GE-Mgm" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="なろう検索" image="booksearch.png" id="ZSv-78-9lg"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="6vb-08-2I9">
-                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                     </navigationBar>
                     <connections>
                         <segue destination="vgt-bB-KL1" kind="relationship" relationship="rootViewController" id="D6S-Lb-d63"/>
@@ -530,7 +534,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                     <tabBar key="tabBar" contentMode="scaleToFill" id="vA1-b7-MqS">
                         <rect key="frame" x="129" y="330" width="163" height="49"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" systemColor="systemGroupedBackgroundColor" red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </tabBar>
                     <connections>
                         <segue destination="v42-xJ-9mb" kind="relationship" relationship="viewControllers" id="ktK-js-zfL"/>
@@ -549,8 +553,9 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                 <navigationController definesPresentationContext="YES" id="v42-xJ-9mb" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="本棚" image="soundbook.png" id="48f-BN-UmV"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="kzS-si-TDC">
-                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                     </navigationBar>
                     <connections>
                         <segue destination="qdr-YW-SRT" kind="relationship" relationship="rootViewController" id="lw0-xX-U4f"/>
@@ -779,7 +784,7 @@ This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 Inte
                                 </connections>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="ZfF-jG-c09" firstAttribute="centerY" secondItem="LN3-sB-fzm" secondAttribute="centerY" id="5Qd-LU-hZu"/>
                             <constraint firstAttribute="trailingMargin" secondItem="LN3-sB-fzm" secondAttribute="trailing" constant="38" id="7Pr-ac-AM7"/>

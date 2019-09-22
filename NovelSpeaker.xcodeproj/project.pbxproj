@@ -429,6 +429,9 @@
 		21B53A2619619D23009658B7 /* app_globe@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_globe@2x.png"; sourceTree = "<group>"; };
 		21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalDataSingleton.h; sourceTree = "<group>"; };
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
+		21B96ED32338124100112B5F /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ja-JP"; path = "ja-JP.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaxSpeechTimeTableViewCell.h; sourceTree = "<group>"; };
+		21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MaxSpeechTimeTableViewCell.m; sourceTree = "<group>"; };
 		21C372DB21DFC41600FB2D52 /* UIImageExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIImageExtension.h; sourceTree = "<group>"; };
 		21C372DC21DFC41600FB2D52 /* UIImageExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIImageExtension.m; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
@@ -1057,6 +1060,7 @@
 				en,
 				Base,
 				ja,
+				"ja-JP",
 			);
 			mainGroup = 21F054C01917E0F100CC6BA9;
 			productRefGroup = 21F054CA1917E0F200CC6BA9 /* Products */;
@@ -1467,6 +1471,7 @@
 				21F054D61917E0F200CC6BA9 /* en */,
 				21A4F6DA19B1B30C007CCD32 /* Base */,
 				21A4F71D19B1B465007CCD32 /* ja */,
+				21B96ED32338124100112B5F /* ja-JP */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1506,6 +1511,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1.1.120;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1514,6 +1520,7 @@
 				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.1.56;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1540,6 +1547,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1.1.120;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1547,6 +1555,7 @@
 				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.1.56;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1668,6 +1677,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1.1.120;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1681,6 +1691,7 @@
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.1.56;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" -Xfrontend -warn-long-expression-type-checking=100 -Xfrontend -warn-long-function-bodies=100";
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1703,6 +1714,7 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1.1.120;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1716,6 +1728,7 @@
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.1.56;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

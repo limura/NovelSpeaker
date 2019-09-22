@@ -2567,6 +2567,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 #define USER_DEFAULTS_IS_MIX_WITH_OTHERS_ENABLED @"MixWithOthersEnabled"
 #define USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED @"DuckOthersEnabled"
 #define USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME @"IsOpenRecentNovelInStartTime"
+#define USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS @"IsDisallowCellarAccess"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3734,6 +3735,20 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// ダウンロード時に携帯電話回線を禁じるか否かの設定を取得します
+- (BOOL)IsDisallowsCellularAccess{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS];
+}
+/// ダウンロード時に携帯電話回線を禁じるか否かの設定を設定します
+- (void)SetIsDisallowsCellularAccess:(BOOL)isAllow{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isAllow forKey:USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS];
+    [userDefaults synchronize];
+}
+
+
 /// 最新のプライバシーポリシーのURLを取得します
 - (NSURL*)GetPrivacyPolicyURL {
     return [[NSURL alloc] initWithString:@"https://raw.githubusercontent.com/limura/NovelSpeaker/master/PrivacyPolicy.txt"];
@@ -4035,6 +4050,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_mix_with_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsMixWithOthersEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_duck_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsDuckOthersEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_open_recent_novel_in_start_time_enabled" number:[[NSNumber alloc] initWithBool:[self IsOpenRecentNovelInStartTime]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_disallows_cellular_access" number:[[NSNumber alloc] initWithBool:[self IsDisallowsCellularAccess]]];
     NarouContentCacheData* currentReadingContent = [self GetCurrentReadingContent];
     if (currentReadingContent != nil) {
         [NiftyUtility addStringForJSONNSDictionary:result key:@"current_reading_content" string:currentReadingContent.ncode];
@@ -4604,6 +4620,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSNumber* is_open_recent_novel_in_start_time_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_open_recent_novel_in_start_time_enabled"];
     if (is_open_recent_novel_in_start_time_enabled != nil) {
         [self SetIsOpenRecentNovelInStartTime:[is_open_recent_novel_in_start_time_enabled boolValue]];
+    }
+    NSNumber* is_disallows_cellular_access = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_disallows_cellular_access"];
+    if (is_disallows_cellular_access != nil) {
+        [self SetIsDisallowsCellularAccess:[is_disallows_cellular_access boolValue]];
     }
     NSString* current_reading_content = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"current_reading_content"];
     return current_reading_content;

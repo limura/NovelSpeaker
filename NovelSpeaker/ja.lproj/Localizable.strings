@@ -155,6 +155,7 @@
 "NovelSpeakerUtility_RestoreBackupTitle" = "バックアップデータを読み込んでいます";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
 
+"SettingTableViewController_IsDisallowsCellularAccess" = "携帯電話網ではダウンロードしないようにする";
 "SettingTableViewController_RepeatTypeTitle" = "繰り返し再生";
 "SettingTableViewController_RepeatType_NoRepeat" = "しない";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "最初から";
@@ -209,7 +210,9 @@
 "SpeechViewController_AddSpeechModSettingsForThisNovel" = "この小説用の読み替え辞書へ登録";
 "SpeechViewController_Subtitles" = "目次";
 "SpeechViewController_CanNotGetStorys" = "小説情報を参照できませんでした。";
-
+"SpeechViewController_SearchDialogTitle" = "検索";
+"SearchViewController_SearchDialogMessage" = "本文中から文字列を検索します";
+"SpeechViewController_SearchDialog_NotFoundTitle" = "指定された文字列は存在しませんでした。";
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
 "SpeechWaitConfigSettingView_PleaseSetSpeechText" = "読み上げテスト用の文字列を設定してください";
@@ -536,6 +539,20 @@
 - 話者関係の設定項目を変更
 - テキストファイル等の取込時にテキトーに章を分ける機能を追加
 - 小説毎の専用設定の概念を追加
+
+
+# Version 1.1.56
+
+インタフェースの変更
+
+- DarkMode へ対応しました
+- 小説本文シーンに検索ボタンを追加
+- 設定 -> 声質の設定にて、スライドバーの値を表示するように
+- 設定 -> 携帯電話網ではダウンロードしないようにする の ON/OFF 設定を追加
+
+問題の修正
+
+- 日本語環境下においてアプリ名が ことせかい ではなく NovelSpeaker になっていたのを ことせかい になるように修正
 
 
 # Version 1.1.55

@@ -158,6 +158,7 @@
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
 
 
+"SettingTableViewController_IsDisallowsCellularAccess" = "Do not download on the mobile phone network";
 "SettingTableViewController_RepeatTypeTitle" = "Repeat type";
 "SettingTableViewController_RepeatType_NoRepeat" = "none";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "First chapter";
@@ -223,7 +224,9 @@
 "SpeechViewController_AddSpeechModSettingsForThisNovel" = "Add to speech mod settings for this novel";
 "SpeechViewController_Subtitles" = "Index";
 "SpeechViewController_CanNotGetStorys" = "I could not refer to the novel information.";
-
+"SpeechViewController_SearchDialogTitle" = "Search";
+"SearchViewController_SearchDialogMessage" = "Search for text in body";
+"SpeechViewController_SearchDialog_NotFoundTitle" = "The specified string did not exist.";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";
@@ -544,6 +547,16 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 -Change speaker setting items
 -Added a function to separate chapters into text files when importing text files etc.
 -Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
+
+
+# Version 1.1.56
+
+Interface Change
+
+- Added support for DarkMode
+- Added a search button to the novel text scene
+- Display slide bar value in Settings -> Quality of voice
+- Added settings -> Do not download on mobile phone network ON/OFF setting
 
 
 # Version 1.1.55
