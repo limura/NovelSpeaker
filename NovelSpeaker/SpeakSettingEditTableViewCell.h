@@ -17,6 +17,8 @@ static NSString* const SpeakSettingEditTableViewCellID = @"SpeakSettingEditTable
 @property (weak, nonatomic) IBOutlet UITextField *startStringTextField;
 @property (weak, nonatomic) IBOutlet UITextField *endStringTextField;
 @property (weak, nonatomic) IBOutlet UISlider *pitchSlider;
+@property (weak, nonatomic) IBOutlet UILabel *pitchValueLabel;
+
 
 @property (nonatomic, weak) id<SettingTableViewDelegate> testSpeakDelegate;
 

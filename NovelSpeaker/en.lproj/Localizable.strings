@@ -312,6 +312,7 @@
 
 - Added support for DarkMode
 - Added a search button to the novel text scene
+- Display slide bar value in Settings -> Quality of voice
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -322,6 +323,7 @@ Interface Change
 
 - Added support for DarkMode
 - Added a search button to the novel text scene
+- Display slide bar value in Settings -> Quality of voice
 
 
 # Version 1.1.55

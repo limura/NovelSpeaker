@@ -35,6 +35,7 @@
         return;
     }
     pitchConfig.pitch = [[NSNumber alloc] initWithFloat:self.pitchSlider.value];
+    self.pitchValueLabel.text = [[NSString alloc] initWithFormat:@"%.2f", self.pitchSlider.value];
     [globalData UpdateSpeakPitchConfig:pitchConfig];
 }
 

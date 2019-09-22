@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -19,12 +17,12 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="d7p-yW-fKq">
-                        <rect key="frame" x="20" y="16" width="184" height="22"/>
+                        <rect key="frame" x="20" y="16" width="184" height="20.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="T6Z-4S-dHh">
-                        <rect key="frame" x="205" y="12" width="100" height="30"/>
+                        <rect key="frame" x="205" y="12" width="100" height="28.5"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="100" id="VT9-Qq-f9R"/>
                         </constraints>
@@ -35,7 +33,7 @@
                             <action selector="speakTestButtonClicked:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="lRI-k2-hvi"/>
                         </connections>
                     </button>
-                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="開始文字" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="vbO-Jc-aZQ">
+                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="開始文字" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="vbO-Jc-aZQ">
                         <rect key="frame" x="20" y="45" width="96" height="30"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <textInputTraits key="textInputTraits"/>
@@ -44,7 +42,7 @@
                             <action selector="startTextEditingDidEnd:" destination="KGk-i7-Jjw" eventType="editingDidEnd" id="QxR-qJ-WPA"/>
                         </connections>
                     </textField>
-                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="249" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="終了文字" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="QgX-Je-mVV">
+                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="249" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="終了文字" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="QgX-Je-mVV">
                         <rect key="frame" x="166" y="45" width="103" height="30"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <textInputTraits key="textInputTraits"/>
@@ -53,13 +51,13 @@
                             <action selector="endTextEditingDidEnd:" destination="KGk-i7-Jjw" eventType="editingDidEnd" id="z5J-is-L4D"/>
                         </connections>
                     </textField>
-                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="Us4-oC-9Tx">
-                        <rect key="frame" x="94" y="86.5" width="213" height="31"/>
+                    <slider opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="Us4-oC-9Tx">
+                        <rect key="frame" x="94" y="87" width="161" height="31"/>
                         <connections>
                             <action selector="pitchValueChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="IbQ-bQ-lAj"/>
                         </connections>
                     </slider>
-                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="高さ" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mOX-NR-x7e">
+                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="高さ" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mOX-NR-x7e">
                         <rect key="frame" x="20" y="92" width="34" height="19.5"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="34" id="h22-es-Zkr"/>
@@ -67,7 +65,7 @@
                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="から" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VrA-kz-5kO">
+                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="から" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VrA-kz-5kO">
                         <rect key="frame" x="124" y="49" width="34" height="21"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="34" id="UnD-fi-utK"/>
@@ -75,12 +73,21 @@
                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="まで" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8Wf-Ww-07S">
+                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="まで" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8Wf-Ww-07S">
                         <rect key="frame" x="277" y="52" width="34" height="19.5"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="34" id="Vay-Zd-Vk1"/>
                         </constraints>
                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="pitchValueLabel" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="frj-Uw-y9v">
+                        <rect key="frame" x="261" y="92" width="50" height="21"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="50" id="dh6-4D-qtR"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                 </subviews>
@@ -91,6 +98,7 @@
                     <constraint firstItem="vbO-Jc-aZQ" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="20" id="7yg-50-fqq"/>
                     <constraint firstItem="vbO-Jc-aZQ" firstAttribute="top" secondItem="d7p-yW-fKq" secondAttribute="bottom" constant="8" id="8DN-oG-9w2"/>
                     <constraint firstItem="d7p-yW-fKq" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="20" id="9aF-hi-Td6"/>
+                    <constraint firstItem="frj-Uw-y9v" firstAttribute="leading" secondItem="Us4-oC-9Tx" secondAttribute="trailing" constant="8" id="9bg-0m-GLq"/>
                     <constraint firstItem="QgX-Je-mVV" firstAttribute="centerY" secondItem="VrA-kz-5kO" secondAttribute="centerY" id="HgQ-kt-ZaH"/>
                     <constraint firstItem="T6Z-4S-dHh" firstAttribute="centerY" secondItem="d7p-yW-fKq" secondAttribute="centerY" id="HpD-RO-mrB"/>
                     <constraint firstAttribute="trailing" secondItem="8Wf-Ww-07S" secondAttribute="trailing" constant="9" id="KUR-ES-ibw"/>
@@ -99,12 +107,13 @@
                     <constraint firstItem="T6Z-4S-dHh" firstAttribute="leading" secondItem="d7p-yW-fKq" secondAttribute="trailing" constant="1" id="RbZ-bj-8oa"/>
                     <constraint firstItem="QgX-Je-mVV" firstAttribute="centerY" secondItem="vbO-Jc-aZQ" secondAttribute="centerY" id="Uu7-Fd-hJ8"/>
                     <constraint firstItem="Us4-oC-9Tx" firstAttribute="centerY" secondItem="mOX-NR-x7e" secondAttribute="centerY" id="Ydl-fQ-l2w"/>
+                    <constraint firstItem="frj-Uw-y9v" firstAttribute="centerY" secondItem="Us4-oC-9Tx" secondAttribute="centerY" id="ZOZ-cc-gsp"/>
                     <constraint firstItem="mOX-NR-x7e" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="20" id="b0R-Tw-Hlg"/>
                     <constraint firstItem="VrA-kz-5kO" firstAttribute="leading" secondItem="vbO-Jc-aZQ" secondAttribute="trailing" constant="8" id="hc7-pL-PKl"/>
                     <constraint firstItem="QgX-Je-mVV" firstAttribute="leading" secondItem="VrA-kz-5kO" secondAttribute="trailing" constant="8" id="hp3-0Y-Oyv"/>
                     <constraint firstItem="vbO-Jc-aZQ" firstAttribute="width" secondItem="QgX-Je-mVV" secondAttribute="width" id="iEv-rt-eSW"/>
-                    <constraint firstAttribute="trailing" secondItem="Us4-oC-9Tx" secondAttribute="trailing" constant="15" id="iIM-c4-GRc"/>
                     <constraint firstItem="mOX-NR-x7e" firstAttribute="top" secondItem="vbO-Jc-aZQ" secondAttribute="bottom" constant="15" id="jjc-Hw-UbN"/>
+                    <constraint firstAttribute="trailing" secondItem="frj-Uw-y9v" secondAttribute="trailing" constant="9" id="rZa-PB-lhk"/>
                     <constraint firstItem="d7p-yW-fKq" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="16" id="rqh-0Q-PxY"/>
                     <constraint firstItem="T6Z-4S-dHh" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="12" id="vBv-Eh-gBW"/>
                     <constraint firstItem="Us4-oC-9Tx" firstAttribute="leading" secondItem="mOX-NR-x7e" secondAttribute="trailing" constant="42" id="vPz-tA-agL"/>
@@ -115,9 +124,11 @@
             <connections>
                 <outlet property="endStringTextField" destination="QgX-Je-mVV" id="IUL-rF-Ky0"/>
                 <outlet property="pitchSlider" destination="Us4-oC-9Tx" id="aAb-jt-xAw"/>
+                <outlet property="pitchValueLabel" destination="frj-Uw-y9v" id="uGU-Qg-4x2"/>
                 <outlet property="startStringTextField" destination="vbO-Jc-aZQ" id="BON-sM-8UN"/>
                 <outlet property="titleLabel" destination="d7p-yW-fKq" id="QcV-ZL-gqe"/>
             </connections>
+            <point key="canvasLocation" x="132.80000000000001" y="127.736131934033"/>
         </tableViewCell>
     </objects>
 </document>

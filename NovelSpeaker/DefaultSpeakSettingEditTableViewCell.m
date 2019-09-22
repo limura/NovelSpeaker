@@ -28,6 +28,9 @@
     GlobalStateCacheData* globalState = [globalData GetGlobalState];
     self.pitchSlider.value = [globalState.defaultPitch floatValue];
     self.rateSlider.value = [globalState.defaultRate floatValue];
+    self.pitchValueLabel.text = [[NSString alloc] initWithFormat:@"%.2f", self.pitchSlider.value];
+    self.rateValueLabel.text = [[NSString alloc] initWithFormat:@"%.2f", self.rateSlider.value];
+
     NSString* speakerNameString = [NiftySpeaker getDisplayStringForVoiceIdentifier:[globalData GetVoiceIdentifier]];
     if (speakerNameString != nil) {
         [NiftyUtility setUIButtonText:self.speakerNameButton text:speakerNameString];
@@ -45,11 +48,13 @@
 - (IBAction)pitchValueChanged:(id)sender {
     GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     globalState.defaultPitch = [[NSNumber alloc] initWithFloat:self.pitchSlider.value];
+    self.pitchValueLabel.text = [[NSString alloc] initWithFormat:@"%.2f", self.pitchSlider.value];
     [[GlobalDataSingleton GetInstance] UpdateGlobalState:globalState];
 }
 - (IBAction)rateValueChanged:(id)sender {
     GlobalStateCacheData* globalState = [[GlobalDataSingleton GetInstance] GetGlobalState];
     globalState.defaultRate = [[NSNumber alloc] initWithFloat:self.rateSlider.value];
+    self.rateValueLabel.text = [[NSString alloc] initWithFormat:@"%.2f", self.rateSlider.value];
     [[GlobalDataSingleton GetInstance] UpdateGlobalState:globalState];
 }
 

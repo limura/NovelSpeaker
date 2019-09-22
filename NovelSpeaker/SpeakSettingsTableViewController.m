@@ -184,6 +184,7 @@
     cell.startStringTextField.text = config.startText;
     cell.endStringTextField.text = config.endText;
     cell.pitchSlider.value = [config.pitch floatValue];
+    cell.pitchValueLabel.text = [[NSString alloc] initWithFormat:@"%.2f", [config.pitch floatValue]];
     
     return cell;
 }
