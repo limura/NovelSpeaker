@@ -159,6 +159,9 @@
 "SpeechViewController_loading" = "loading...";
 "SpeechViewController_AnnounceSeekForward" = "Fast forward";
 "SpeechViewController_AnnounceSeekBackward" = "Rewind";
+"SpeechViewController_SearchDialogTitle" = "Search";
+"SearchViewController_SearchDialogMessage" = "Search for text in body";
+"SpeechViewController_SearchDialog_NotFoundTitle" = "The specified string did not exist.";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";

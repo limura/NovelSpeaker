@@ -19,6 +19,7 @@
 #import "CreateSpeechModSettingViewController.h"
 #import "EditUserBookViewController.h"
 #import "NovelSpeaker-Swift.h"
+#import "PickerViewDialog.h"
 
 @interface SpeechViewController ()
 
@@ -72,6 +73,7 @@
         UIBarButtonItem* safariButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"earth"] style:UIBarButtonItemStylePlain target:self action:@selector(safariButtonClick:)];
         [buttonItemList addObject:safariButton];
     }
+    [buttonItemList addObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSearch target:self action:@selector(searchButtonClicked:)]];
     self.navigationItem.rightBarButtonItems = buttonItemList;
     self.navigationItem.title = self.NarouContentDetail.title;
 
@@ -1223,5 +1225,67 @@
         }
     }
 }
-
+// 検索ボタン
+- (void)searchButtonClicked:(id)sender
+{
+    UIViewController* targetViewController = self;
+    [NiftyUtilitySwift
+     EasyDialogTextInputWithViewController: targetViewController
+     title:NSLocalizedString(@"SpeechViewController_SearchDialogTitle", @"検索")
+     message:NSLocalizedString(@"SearchViewController_SearchDialogMessage", @"本文中から文字列を検索します")
+     textFieldText:nil
+     placeHolder:nil
+     action:^(NSString * _Nonnull string) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+            NSArray* storyArray = [globalData GeAllStoryForNcode:self.NarouContentDetail.ncode];
+            NSMutableArray* hitListMutable = [NSMutableArray new];
+            NSMutableArray* titleListMutable = [NSMutableArray new];
+            NSLog(@"storyArray count: %lu, string: %@", (unsigned long)[storyArray count], string);
+            NSString* firstSelectedString = nil;
+            for (StoryCacheData* story in storyArray) {
+                if (story == nil || story.content == nil) {
+                    continue;
+                }
+                if ([string length] <= 0 || [story.content containsString:string]) {
+                    NSArray* lines = [[story.content stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+                    NSString* firstLine = @"";
+                    if ([lines count] > 0) {
+                        firstLine = lines[0];
+                    }
+                    NSString* selectTitle = [[NSString alloc] initWithFormat:@"%@:%@", story.chapter_number, firstLine];
+                    [titleListMutable addObject:selectTitle];
+                    [hitListMutable addObject:story];
+                    if ([story.chapter_number intValue] == [m_CurrentReadingStory.chapter_number intValue]) {
+                        firstSelectedString = selectTitle;
+                    }
+                }
+            }
+            NSArray* hitList = [[hitListMutable reverseObjectEnumerator] allObjects];
+            NSArray* titleList = [[titleListMutable reverseObjectEnumerator] allObjects];
+            if ([hitList count] <= 0) {
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [NiftyUtilitySwift EasyDialogOneButtonWithViewController:targetViewController
+               title:NSLocalizedString(@"SpeechViewController_SearchDialog_NotFoundTitle", @"指定された文字列は存在しませんでした。") message:nil buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:nil];
+                });
+                return;
+            }
+            NSLog(@"firstSelectedString: %@", firstSelectedString);
+            PickerViewDialog* picker = [PickerViewDialog createNewDialog:titleList firstSelectedString:firstSelectedString parentView:targetViewController.view resultReceiver:^(NSString* result){
+                NSArray* data = [result componentsSeparatedByString:@":"];
+                int chapterNumber = -1;
+                if ([data count] > 0) {
+                    chapterNumber = [data[0] intValue];
+                }
+                if (chapterNumber > 0) {
+                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(01. * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                        [self stopSpeech];
+                        [self ChangeChapterWithLastestReadLocation:chapterNumber];
+                    });
+                }
+            }];
+            [picker popup:nil];
+        });
+    }];
+}
 @end
