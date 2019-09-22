@@ -111,6 +111,7 @@
 "SettingsViewController_ChooseCancel" = "Stop generating backups";
 "SettingsViewController_ChooseFullBackup" = "Generate a full backup (it will take time)";
 "SettingsViewController_ChooseSmallBackup" = "Generate a lightweight backup (it will not take time)";
+"SettingTableViewController_IsDisallowsCellularAccess" = "Do not download on the mobile phone network";
 "SettingTableViewController_RepeatTypeTitle" = "Repeat type";
 "SettingTableViewController_RepeatType_NoRepeat" = "none";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "First chapter";

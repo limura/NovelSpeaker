@@ -110,6 +110,7 @@
 "SettingsViewController_ChooseCancel" = "バックアップ生成をやめる";
 "SettingsViewController_ChooseFullBackup" = "完全バックアップを生成する(時間がかかります)";
 "SettingsViewController_ChooseSmallBackup" = "軽量バックアップを生成する(時間はかかりません)";
+"SettingTableViewController_IsDisallowsCellularAccess" = "携帯電話網ではダウンロードしないようにする";
 "SettingTableViewController_RepeatTypeTitle" = "繰り返し再生";
 "SettingTableViewController_RepeatType_NoRepeat" = "しない";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "最初から";

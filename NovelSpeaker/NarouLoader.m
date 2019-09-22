@@ -21,7 +21,11 @@ static NSURLSession* session = nil;
     if (session != nil) {
         return session;
     }
-    session = [NSURLSession sessionWithConfiguration:NSURLSessionConfiguration.defaultSessionConfiguration];
+    NSURLSessionConfiguration* sessionConfig = NSURLSessionConfiguration.defaultSessionConfiguration;
+    if ([[GlobalDataSingleton GetInstance] IsDisallowsCellularAccess]) {
+        sessionConfig.allowsCellularAccess = false;
+    }
+    session = [NSURLSession sessionWithConfiguration:sessionConfig];
     return session;
 }
 

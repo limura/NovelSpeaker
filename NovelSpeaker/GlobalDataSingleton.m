@@ -2560,6 +2560,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 #define USER_DEFAULTS_IS_MIX_WITH_OTHERS_ENABLED @"MixWithOthersEnabled"
 #define USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED @"DuckOthersEnabled"
 #define USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME @"IsOpenRecentNovelInStartTime"
+#define USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS @"IsDisallowCellarAccess"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3710,6 +3711,20 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setBool:isOpen forKey:USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME];
     [userDefaults synchronize];
 }
+
+/// ダウンロード時に携帯電話回線を禁じるか否かの設定を取得します
+- (BOOL)IsDisallowsCellularAccess{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS];
+}
+/// ダウンロード時に携帯電話回線を禁じるか否かの設定を設定します
+- (void)SetIsDisallowsCellularAccess:(BOOL)isAllow{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isAllow forKey:USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS];
+    [userDefaults synchronize];
+}
+
 
 /// 最新のプライバシーポリシーのURLを取得します
 - (NSURL*)GetPrivacyPolicyURL {

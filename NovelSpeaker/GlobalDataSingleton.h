@@ -509,6 +509,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// 起動時に前回開いていた小説を開くか否かの設定を設定します
 - (void)SetIsOpenRecentNovelInStartTime:(BOOL)isOpen;
 
+/// ダウンロード時に携帯電話回線を禁じるか否かの設定を取得します
+- (BOOL)IsDisallowsCellularAccess;
+/// ダウンロード時に携帯電話回線を禁じるか否かの設定を設定します
+- (void)SetIsDisallowsCellularAccess:(BOOL)isAllow;
+
 /// 最新のプライバシーポリシーのURLを取得します
 - (NSURL*)GetPrivacyPolicyURL;
 /// 一度読んだ事のあるプライバシーポリシーを取得します(読んだことがなければ @"" が取得されます)
