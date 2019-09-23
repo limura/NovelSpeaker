@@ -755,15 +755,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     // MARK: MPCommandCenter commands
-    @objc func playEvent(_ sendor:MPRemoteCommandCenter) {
+    @objc func playEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: playEvent")
         StartSpeech(withMaxSpeechTimeReset: true)
+        return .success
     }
-    @objc func stopEvent(_ sendor:MPRemoteCommandCenter) {
+    @objc func stopEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: stopEvent")
         StopSpeech()
+        return .success
     }
-    @objc func togglePlayPauseEvent(_ sendor:MPRemoteCommandCenter) {
+    @objc func togglePlayPauseEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: togglePlayPauseEvent")
         if speaker.isSpeaking() {
             print("togglePlayPause stopSpeech")
@@ -771,38 +773,43 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }else{
             StartSpeech(withMaxSpeechTimeReset: true)
         }
+        return .success
     }
-    @objc func nextTrackEvent(_ sendor:MPRemoteCommandCenter) {
+    @objc func nextTrackEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: nextTrackEvent")
         self.isSeeking = false
         StopSpeech()
         if LoadNextChapter() {
             StartSpeech(withMaxSpeechTimeReset: true)
         }
+        return .success
     }
-    @objc func previousTrackEvent(_ sendor:MPRemoteCommandCenter) {
+    @objc func previousTrackEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: previousTrackEvent")
         self.isSeeking = false
         StopSpeech()
         if LoadPreviousChapter() {
             StartSpeech(withMaxSpeechTimeReset: true)
         }
+        return .success
     }
-    @objc func skipForwardEvent(_ sendor:MPRemoteCommandCenter) {
+    @objc func skipForwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: skipForwardEvent")
         StopSpeech()
         SkipForward(length: 100)
         StartSpeech(withMaxSpeechTimeReset: true)
+        return .success
     }
-    @objc func skipBackwardEvent(_ sendor:MPRemoteCommandCenter) {
+    @objc func skipBackwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: skipBackwardEvent")
         StopSpeech()
         SkipBackward(length: 100)
         StartSpeech(withMaxSpeechTimeReset: true)
+        return .success
     }
     
     var isSeeking = false
-    @objc func seekForwardEvent(event:MPSeekCommandEvent?) {
+    @objc func seekForwardEvent(event:MPSeekCommandEvent?) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: seekForwardEvent")
         if event?.type == MPSeekCommandEventType.endSeeking {
             print("MPCommandCenter: seekForwardEvent endSeeking")
@@ -824,8 +831,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 })
             }
         }
+        return .success
     }
-    @objc func seekBackwardEvent(event:MPSeekCommandEvent?) {
+    @objc func seekBackwardEvent(event:MPSeekCommandEvent?) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: seekBackwardEvent")
         if event?.type == MPSeekCommandEventType.endSeeking {
             self.isSeeking = false
@@ -845,6 +853,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 })
             }
         }
+        return .success
     }
     @objc func changePlaybackPositionEvent(event:MPChangePlaybackPositionCommandEvent?) -> MPRemoteCommandHandlerStatus {
         return autoreleasepool {
@@ -867,7 +876,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: {
                 self.StartSpeech(withMaxSpeechTimeReset: true)
             })
-            return MPRemoteCommandHandlerStatus.success
+            return .success
         }
     }
     
