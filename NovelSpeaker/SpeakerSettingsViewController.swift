@@ -91,7 +91,7 @@ class SpeakerSettingsViewController: FormViewController {
             $0.value = currentSetting.pitch
             $0.cell.slider.minimumValue = 0.5
             $0.cell.slider.maximumValue = 2.0
-            $0.shouldHideValue = true
+            $0.shouldHideValue = false
             $0.steps = 2501
             $0.title = NSLocalizedString("SpeakSettingsViewController_PitchTitle", comment: "高さ")
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
@@ -112,7 +112,7 @@ class SpeakerSettingsViewController: FormViewController {
             $0.value = currentSetting.rate
             $0.cell.slider.minimumValue = AVSpeechUtteranceMinimumSpeechRate
             $0.cell.slider.maximumValue = AVSpeechUtteranceMaximumSpeechRate
-            $0.shouldHideValue = true
+            $0.shouldHideValue = false
             $0.steps = 1001
             $0.title = NSLocalizedString("SpeakSettingsViewController_RateTitle", comment: "速度")
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
