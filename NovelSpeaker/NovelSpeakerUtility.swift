@@ -651,6 +651,9 @@ class NovelSpeakerUtility: NSObject {
                 if let is_open_recent_novel_in_start_time_enabled = dic.value(forKey: "is_open_recent_novel_in_start_time_enabled") as? NSNumber {
                     globalState.isOpenRecentNovelInStartTime = is_open_recent_novel_in_start_time_enabled.boolValue
                 }
+                if let is_disallows_cellular_access = dic.value(forKey: "is_disallows_cellular_access") as? NSNumber {
+                    globalState.IsDisallowsCellularAccess = is_disallows_cellular_access.boolValue
+                }
                 if let current_reading_content = dic.value(forKey: "current_reading_content") as? String {
                     currentReadingContent = current_reading_content
                 }

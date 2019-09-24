@@ -513,13 +513,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            <<< SwitchRow("isDisallowsCellularAccess") {
-		// TODO: GlobalDataSingleton はもう使わない
-                $0.title = NSLocalizedString("SettingTableViewController_IsDisallowsCellularAccess", comment: "携帯電話網ではダウンロードしないようにする")
-                $0.value = GlobalDataSingleton.getInstance()?.isDisallowsCellularAccess()
-                $0.cell.textLabel?.numberOfLines = 0
+            <<< SwitchRow("isDisallowsCellularAccess") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsDisallowsCellularAccess", comment: "携帯電話網ではダウンロードしないようにする")
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.IsDisallowsCellularAccess
+                }
+                row.cell.textLabel?.numberOfLines = 0
             }.onChange({ (row) in
-                GlobalDataSingleton.getInstance()?.setIsDisallowsCellularAccess(row.value!)
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.IsDisallowsCellularAccess = value
+                    }
+                }
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")

@@ -170,6 +170,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.webImportBookmarkArray.append(objectsIn: obj.webImportBookmarkArray)
             newObj.readedPrivacyPolicy = obj.readedPrivacyPolicy
             newObj.isOpenRecentNovelInStartTime = obj.isOpenRecentNovelInStartTime
+            newObj.IsDisallowsCellularAccess = obj.IsDisallowsCellularAccess
             newObj.isLicenseReaded = obj.isLicenseReaded
             newObj.isDuckOthersEnabled = obj.isDuckOthersEnabled
             newObj.isMixWithOthersEnabled = obj.isMixWithOthersEnabled

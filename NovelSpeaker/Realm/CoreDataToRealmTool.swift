@@ -59,6 +59,7 @@ class CoreDataToRealmTool: NSObject {
         }
         realmState.readedPrivacyPolicy = globalDataSingleton.getReadedPrivacyPolicy()
         realmState.isOpenRecentNovelInStartTime = globalDataSingleton.isOpenRecentNovelInStartTime()
+        realmState.IsDisallowsCellularAccess = globalDataSingleton.isDisallowsCellularAccess()
         realmState.isLicenseReaded = globalDataSingleton.isLicenseReaded()
         realmState.isDuckOthersEnabled = globalDataSingleton.isDuckOthersEnabled()
         realmState.isMixWithOthersEnabled = globalDataSingleton.isMixWithOthersEnabled()

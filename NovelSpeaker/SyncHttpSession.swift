@@ -40,8 +40,11 @@ class SyncHttpSession: NSObject {
     
     @objc public func Initialize(){
         sessionConfig = URLSessionConfiguration.default
-        if let isDisallowsCellularAccess = GlobalDataSingleton.getInstance()?.isDisallowsCellularAccess(), isDisallowsCellularAccess {
-            sessionConfig.allowsCellularAccess = false
+        autoreleasepool {
+            guard let globalData = RealmGlobalState.GetInstance() else { return }
+            if globalData.IsDisallowsCellularAccess {
+                sessionConfig.allowsCellularAccess = false
+            }
         }
         session = URLSession(configuration: sessionConfig)
     }
