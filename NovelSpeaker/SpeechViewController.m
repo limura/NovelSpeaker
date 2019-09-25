@@ -174,6 +174,7 @@
         startStopButton.title = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");
     }else{
         startStopButton.title = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
+        [self setNovelSpeakerMenu];
     }
 }
 
@@ -581,13 +582,13 @@
     
     startStopButton.title = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
     // 読み上げ中に出ないようにしていたメニュー表示を復活させます。(ことせかい 由来のものではないものは CustomUITextView:canPerformAction 側で制御しています)
-    [self setNovelSpeakerMenu];
     [self SaveCurrentReadingPoint];
 }
 
 /// 読み上げを停止します
 - (void)stopSpeech{
     [[GlobalDataSingleton GetInstance] StopSpeech];
+    [self setNovelSpeakerMenu];
 
     startStopButton.title = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
     [self SaveCurrentReadingPoint];

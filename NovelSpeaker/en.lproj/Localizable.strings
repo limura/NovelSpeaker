@@ -315,6 +315,7 @@
 - Added a search button to the novel text scene
 - Display slide bar value in Settings -> Quality of voice
 - Added settings -> Do not download on mobile phone network ON/OFF setting
+- Do not display the menu that appears above the reading position display during reading
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -328,6 +329,9 @@ Interface Change
 - Display slide bar value in Settings -> Quality of voice
 - Added settings -> Do not download on mobile phone network ON/OFF setting
 
+Bug fix
+
+- Do not display the menu that appears above the reading position display during reading
 
 # Version 1.1.55
 
