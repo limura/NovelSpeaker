@@ -14,6 +14,9 @@ public class CustomUITextView: UITextView {
     // from http://qiita.com/watt1006/items/2425bfa1720d522d05fd
     override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         let globalData = GlobalDataSingleton.getInstance();
+        if let isSpeaking = globalData?.isSpeaking(), isSpeaking {
+            return false;
+        }
         if globalData == nil || globalData?.getMenuItemIsAddSpeechModSettingOnly() != true {
             return super.canPerformAction(action, withSender: sender);
         }

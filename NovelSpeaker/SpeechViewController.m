@@ -103,10 +103,8 @@
     self.textView.delegate = self;
 
     // 読み替え辞書への直接登録メニューを追加します
-    UIMenuController* menuController = [UIMenuController sharedMenuController];
-    UIMenuItem* speechModMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"SpeechViewController_AddSpeechModSettings", @"読み替え辞書へ登録") action:@selector(setSpeechModSetting:)];
-    [menuController setMenuItems:@[speechModMenuItem]];
-    
+    [self setNovelSpeakerMenu];
+
     // ページめくり音を読み込んで準備……すると(設定如何によって)別アプリでの音楽再生が止められるため、
     // 再生開始時までは先送りにします
     m_PageTurningSoundPlayer = nil;
@@ -199,6 +197,16 @@
         }
     }
     [super viewWillDisappear:animated];
+}
+
+- (void)setNovelSpeakerMenu {
+    UIMenuController* menuController = [UIMenuController sharedMenuController];
+    UIMenuItem* speechModMenuItem = [[UIMenuItem alloc] initWithTitle:NSLocalizedString(@"SpeechViewController_AddSpeechModSettings", @"読み替え辞書へ登録") action:@selector(setSpeechModSetting:)];
+    [menuController setMenuItems:@[speechModMenuItem]];
+}
+- (void)clearNovelSpeakerMenu {
+    UIMenuController* menuController = [UIMenuController sharedMenuController];
+    [menuController setMenuItems:@[]];
 }
 
 - (DuplicateSoundPlayer*)GetPageTurningSoundPlayer {
@@ -561,6 +569,8 @@
     // 読み上げ開始位置以降の文字列について、読み上げを開始します。
     startStopButton.title = NSLocalizedString(@"SpeechViewController_Stop", @"Stop");
     
+    // 読み上げ中に出るメニュー表示を消す準備に ことせかい 由来のメニューを消します。
+    [self clearNovelSpeakerMenu];
     // 読み上げを開始します
     [[GlobalDataSingleton GetInstance] StartSpeech:withMaxSpeechTimeReset];
 }
@@ -570,6 +580,8 @@
     [[GlobalDataSingleton GetInstance] StopSpeechWithoutDiactivate];
     
     startStopButton.title = NSLocalizedString(@"SpeechViewController_Speak", @"Speak");
+    // 読み上げ中に出ないようにしていたメニュー表示を復活させます。(ことせかい 由来のものではないものは CustomUITextView:canPerformAction 側で制御しています)
+    [self setNovelSpeakerMenu];
     [self SaveCurrentReadingPoint];
 }
 
