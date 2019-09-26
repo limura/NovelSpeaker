@@ -34,28 +34,57 @@
                         <action selector="doneButtonBottomClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="iwh-jj-Yba"/>
                     </connections>
                 </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c0O-Y4-SkC">
+                    <rect key="frame" x="275" y="302.5" width="100" height="30"/>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="100" id="jyf-gn-s5P"/>
+                    </constraints>
+                    <state key="normal" title="OK"/>
+                    <connections>
+                        <action selector="okButtonClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="DDN-9c-8rO"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nHk-ko-Gf4">
+                    <rect key="frame" x="175" y="302.5" width="100" height="30"/>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="100" id="EDq-Ld-E0V"/>
+                    </constraints>
+                    <state key="normal" title="Cancel"/>
+                    <connections>
+                        <action selector="cancelButtonClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="fcH-TG-g6x"/>
+                    </connections>
+                </button>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstAttribute="trailing" secondItem="mly-Kl-0i7" secondAttribute="trailing" id="88u-Ld-rRS"/>
                 <constraint firstItem="W94-s4-ntb" firstAttribute="top" secondItem="mly-Kl-0i7" secondAttribute="bottom" id="BaO-d8-ooq"/>
+                <constraint firstItem="c0O-Y4-SkC" firstAttribute="leading" secondItem="nHk-ko-Gf4" secondAttribute="trailing" id="BuE-Eq-eqU"/>
                 <constraint firstAttribute="trailing" secondItem="Iou-Hj-Zb7" secondAttribute="trailing" id="CY7-BE-Pdn"/>
                 <constraint firstAttribute="trailing" secondItem="W94-s4-ntb" secondAttribute="trailing" id="X2O-yE-5x9"/>
                 <constraint firstItem="mly-Kl-0i7" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="X6q-55-7c7"/>
                 <constraint firstAttribute="bottom" secondItem="Iou-Hj-Zb7" secondAttribute="bottom" id="YDt-VA-sYx"/>
                 <constraint firstItem="Iou-Hj-Zb7" firstAttribute="height" secondItem="mly-Kl-0i7" secondAttribute="height" id="aUC-yw-fDg"/>
                 <constraint firstItem="Iou-Hj-Zb7" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="cp4-DR-0jO"/>
+                <constraint firstAttribute="trailing" secondItem="c0O-Y4-SkC" secondAttribute="trailing" id="eXz-0r-xoN"/>
+                <constraint firstItem="nHk-ko-Gf4" firstAttribute="top" secondItem="W94-s4-ntb" secondAttribute="bottom" id="i8K-aD-Gb9"/>
                 <constraint firstItem="mly-Kl-0i7" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="khM-UP-0HD"/>
+                <constraint firstAttribute="trailing" secondItem="c0O-Y4-SkC" secondAttribute="trailing" id="krF-J2-CsD"/>
                 <constraint firstItem="W94-s4-ntb" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="qce-SZ-OIW"/>
+                <constraint firstItem="c0O-Y4-SkC" firstAttribute="top" secondItem="W94-s4-ntb" secondAttribute="bottom" id="u7u-rv-eGB"/>
                 <constraint firstItem="Iou-Hj-Zb7" firstAttribute="top" secondItem="W94-s4-ntb" secondAttribute="bottom" id="yKq-9g-Fcu"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="CancelButton" destination="nHk-ko-Gf4" id="sqU-N9-QL6"/>
+                <outlet property="OKButton" destination="c0O-Y4-SkC" id="Zk1-Sy-Bai"/>
                 <outlet property="PickerView" destination="W94-s4-ntb" id="CD5-Xp-DBo"/>
                 <outlet property="doneButton" destination="mly-Kl-0i7" id="VVt-Rp-SlE"/>
                 <outlet property="doneButtonBottom" destination="Iou-Hj-Zb7" id="eXM-W6-TPw"/>
             </connections>
-            <point key="canvasLocation" x="26.5" y="-215.5"/>
+            <point key="canvasLocation" x="25.362318840579711" y="-215.95982142857142"/>
         </view>
     </objects>
 </document>
