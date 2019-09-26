@@ -1241,14 +1241,18 @@
 // 検索ボタン
 - (void)searchButtonClicked:(id)sender
 {
+    [self stopSpeech];
     UIViewController* targetViewController = self;
     [NiftyUtilitySwift
-     EasyDialogTextInputWithViewController: targetViewController
+     EasyDialogTextInput2ButtonWithViewController:targetViewController
      title:NSLocalizedString(@"SpeechViewController_SearchDialogTitle", @"検索")
      message:NSLocalizedString(@"SearchViewController_SearchDialogMessage", @"本文中から文字列を検索します")
      textFieldText:nil
      placeHolder:nil
-     action:^(NSString * _Nonnull string) {
+     leftButtonText:NSLocalizedString(@"Cancel_button", "Cancel")
+     rightButtonText:NSLocalizedString(@"SpeechViewController_SearchDialogTitle", @"検索")
+     leftButtonAction:nil
+     rightButtonAction:^(NSString * _Nonnull string) {
         dispatch_async(dispatch_get_main_queue(), ^{
             GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
             NSArray* storyArray = [globalData GeAllStoryForNcode:self.NarouContentDetail.ncode];
@@ -1299,6 +1303,6 @@
             }];
             [picker popup:nil];
         });
-    }];
+    } shouldReturnIsRightButtonClicked:true];
 }
 @end
