@@ -139,35 +139,33 @@
 
 // 検索ボタンがクリックされた
 - (IBAction)SearchButtonClicked:(id)sender {
-    EasyDialog* dialog = nil;
-    dialog = [NiftyUtilitySwift EasyDialogNoButtonWithViewController:self
-       title:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching")
-       message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching")];
-    NSString* searchText = self.SearchTextBox.text;
-    BOOL wName = self.WriterSwitch.on;
-    BOOL title = self.TitleSwitch.on;
-    BOOL keyword = self.KeywordSwitch.on;
-    BOOL ex = self.ExSwitch.on;
-    NSString* order = [self GetSearchOrderSystemString:
-                       [self.SearchOrderPickerView selectedRowInComponent:0]];
-    
-    dispatch_async(m_SearchQueue, ^{
-        NSArray* searchResult = [NarouLoader
-                                 Search: searchText
-                                 wname: wName
-                                 title: title
-                                 keyword: keyword
-                                 ex: ex
-                                 order: order
-                                 ];
-        self->m_SearchResult = searchResult;
-        dispatch_async(self->m_MainQueue, ^{
-            [dialog dismissViewControllerAnimated:false completion:^{
-                NSLog(@"search end. count: %lu", (unsigned long)[self->m_SearchResult count]);
-                [self performSegueWithIdentifier:@"searchResultPushSegue" sender:self];
-            }];
+    [NiftyUtilitySwift EasyDialogNoButtonWithViewController:self title:NSLocalizedString(@"NarouSearchViewController_SearchTitle_Searching", @"Searching") message:NSLocalizedString(@"NarouSearchViewController_SearchMessage_NowSearching", @"Now searching") completion:^(EasyDialog * _Nonnull dialog) {
+        NSString* searchText = self.SearchTextBox.text;
+        BOOL wName = self.WriterSwitch.on;
+        BOOL title = self.TitleSwitch.on;
+        BOOL keyword = self.KeywordSwitch.on;
+        BOOL ex = self.ExSwitch.on;
+        NSString* order = [self GetSearchOrderSystemString:
+                           [self.SearchOrderPickerView selectedRowInComponent:0]];
+        
+        dispatch_async(m_SearchQueue, ^{
+            NSArray* searchResult = [NarouLoader
+                                     Search: searchText
+                                     wname: wName
+                                     title: title
+                                     keyword: keyword
+                                     ex: ex
+                                     order: order
+                                     ];
+            self->m_SearchResult = searchResult;
+            dispatch_async(self->m_MainQueue, ^{
+                [dialog dismissViewControllerAnimated:false completion:^{
+                    NSLog(@"search end. count: %lu", (unsigned long)[self->m_SearchResult count]);
+                    [self performSegueWithIdentifier:@"searchResultPushSegue" sender:self];
+                }];
+            });
         });
-    });
+    }];
 }
 - (IBAction)NarouSearchTabDeleteAnnounceButtonClicked:(id)sender {
     NSURL* url = [[NSURL alloc] initWithString:@"https://limura.github.io/NovelSpeaker/QandA.html?utm_source=KotosekaiApp&utm_medium=InAppBrowser&utm_campaign=FromSearchTabDeleteAnnounce#DeleteSearchTab"];

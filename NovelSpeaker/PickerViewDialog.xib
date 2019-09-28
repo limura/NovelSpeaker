@@ -35,22 +35,16 @@
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c0O-Y4-SkC">
-                    <rect key="frame" x="275" y="302.5" width="100" height="30"/>
+                    <rect key="frame" x="187.5" y="302.5" width="187.5" height="30"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                    <constraints>
-                        <constraint firstAttribute="width" constant="100" id="jyf-gn-s5P"/>
-                    </constraints>
                     <state key="normal" title="OK"/>
                     <connections>
                         <action selector="okButtonClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="DDN-9c-8rO"/>
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nHk-ko-Gf4">
-                    <rect key="frame" x="175" y="302.5" width="100" height="30"/>
+                    <rect key="frame" x="0.0" y="302.5" width="187.5" height="30"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                    <constraints>
-                        <constraint firstAttribute="width" constant="100" id="EDq-Ld-E0V"/>
-                    </constraints>
                     <state key="normal" title="Cancel"/>
                     <connections>
                         <action selector="cancelButtonClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="fcH-TG-g6x"/>
@@ -59,9 +53,9 @@
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
+                <constraint firstItem="c0O-Y4-SkC" firstAttribute="width" secondItem="nHk-ko-Gf4" secondAttribute="width" id="40x-Aa-Pcc"/>
                 <constraint firstAttribute="trailing" secondItem="mly-Kl-0i7" secondAttribute="trailing" id="88u-Ld-rRS"/>
                 <constraint firstItem="W94-s4-ntb" firstAttribute="top" secondItem="mly-Kl-0i7" secondAttribute="bottom" id="BaO-d8-ooq"/>
-                <constraint firstItem="c0O-Y4-SkC" firstAttribute="leading" secondItem="nHk-ko-Gf4" secondAttribute="trailing" id="BuE-Eq-eqU"/>
                 <constraint firstAttribute="trailing" secondItem="Iou-Hj-Zb7" secondAttribute="trailing" id="CY7-BE-Pdn"/>
                 <constraint firstAttribute="trailing" secondItem="W94-s4-ntb" secondAttribute="trailing" id="X2O-yE-5x9"/>
                 <constraint firstItem="mly-Kl-0i7" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="X6q-55-7c7"/>
@@ -69,6 +63,8 @@
                 <constraint firstItem="Iou-Hj-Zb7" firstAttribute="height" secondItem="mly-Kl-0i7" secondAttribute="height" id="aUC-yw-fDg"/>
                 <constraint firstItem="Iou-Hj-Zb7" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="cp4-DR-0jO"/>
                 <constraint firstAttribute="trailing" secondItem="c0O-Y4-SkC" secondAttribute="trailing" id="eXz-0r-xoN"/>
+                <constraint firstItem="c0O-Y4-SkC" firstAttribute="leading" secondItem="nHk-ko-Gf4" secondAttribute="trailing" id="flT-gf-0ya"/>
+                <constraint firstItem="nHk-ko-Gf4" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="hBh-1j-0N4"/>
                 <constraint firstItem="nHk-ko-Gf4" firstAttribute="top" secondItem="W94-s4-ntb" secondAttribute="bottom" id="i8K-aD-Gb9"/>
                 <constraint firstItem="mly-Kl-0i7" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="khM-UP-0HD"/>
                 <constraint firstAttribute="trailing" secondItem="c0O-Y4-SkC" secondAttribute="trailing" id="krF-J2-CsD"/>

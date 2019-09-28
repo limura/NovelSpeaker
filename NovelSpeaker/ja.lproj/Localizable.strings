@@ -156,8 +156,10 @@
 "SpeechViewController_AnnounceSeekForward" = "早送り";
 "SpeechViewController_AnnounceSeekBackward" = "巻き戻し";
 "SpeechViewController_SearchDialogTitle" = "検索";
-"SearchViewController_SearchDialogMessage" = "本文中から文字列を検索します";
+"SpeechViewController_SearchDialogMessage" = "本文中から指定された文字列が含まれる章を検索します";
+"SpeechViewController_SearchDialogPlaceholderText" = "空文字列で検索すると全ての章がリストされます";
 "SpeechViewController_SearchDialog_NotFoundTitle" = "指定された文字列は存在しませんでした。";
+"SpeechViewController_NowSearchingTitle" = "検索中";
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
 "SpeechWaitConfigSettingView_PleaseSetSpeechText" = "読み上げテスト用の文字列を設定してください";

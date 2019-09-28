@@ -281,7 +281,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
             + """
 @media (prefers-color-scheme: light) {
   body {
-    background-color: white;
+    background-color: #e0e0e0;
     color: black;
     font-size: 2.4rem;
   }
@@ -290,8 +290,8 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
 }
 @media (prefers-color-scheme: dark) {
   body {
-    background-color: black;
-    color: white;
+    background-color: #202020;
+    color: #a0a0a0;
     font-size: 2.4rem;
   }
   a:link { color: #5050ff; }

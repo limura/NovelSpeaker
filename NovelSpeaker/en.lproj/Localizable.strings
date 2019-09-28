@@ -161,8 +161,10 @@
 "SpeechViewController_AnnounceSeekForward" = "Fast forward";
 "SpeechViewController_AnnounceSeekBackward" = "Rewind";
 "SpeechViewController_SearchDialogTitle" = "Search";
-"SearchViewController_SearchDialogMessage" = "Search for text in body";
+"SpeechViewController_SearchDialogMessage" = "Search for text in body";
+"SpeechViewController_SearchDialogPlaceholderText" = "Searching with an empty string will list all chapters";
 "SpeechViewController_SearchDialog_NotFoundTitle" = "The specified string did not exist.";
+"SpeechViewController_NowSearchingTitle" = "Searching";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";
