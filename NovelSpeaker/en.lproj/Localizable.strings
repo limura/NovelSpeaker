@@ -225,8 +225,10 @@
 "SpeechViewController_Subtitles" = "Index";
 "SpeechViewController_CanNotGetStorys" = "I could not refer to the novel information.";
 "SpeechViewController_SearchDialogTitle" = "Search";
-"SearchViewController_SearchDialogMessage" = "Search for text in body";
+"SpeechViewController_SearchDialogMessage" = "Search for text in body";
+"SpeechViewController_SearchDialogPlaceholderText" = "Searching with an empty string will list all chapters";
 "SpeechViewController_SearchDialog_NotFoundTitle" = "The specified string did not exist.";
+"SpeechViewController_NowSearchingTitle" = "Searching";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Setting update failed.";
@@ -558,6 +560,9 @@ Interface Change
 - Display slide bar value in Settings -> Quality of voice
 - Added settings -> Do not download on mobile phone network ON/OFF setting
 
+Bug fix
+
+- Do not display the menu that appears above the reading position display during reading
 
 # Version 1.1.55
 

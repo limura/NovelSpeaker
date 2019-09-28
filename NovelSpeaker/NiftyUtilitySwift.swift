@@ -276,7 +276,7 @@ class NiftyUtilitySwift: NSObject {
     }
     
     @discardableResult
-    @objc public static func EasyDialogNoButton(viewController: UIViewController, title: String?, message: String?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
+    @objc public static func EasyDialogNoButton(viewController: UIViewController, title: String?, message: String?, completion:((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         var dialog = EasyDialog.Builder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
@@ -426,35 +426,35 @@ class NiftyUtilitySwift: NSObject {
         }
         dialog = dialog.textField(tag: 100, placeholder: placeHolder, content: textFieldText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always, shouldReturnEventHandler:{ (dialog) in
             if shouldReturnIsRightButtonClicked {
-                dialog.dismiss(animated: false, completion: {
+                dialog.dismiss(animated: false) {
                     if let action = rightButtonAction {
                         let filterTextField = dialog.view.viewWithTag(100) as! UITextField
                         let newFilterString = filterTextField.text ?? ""
                         action(newFilterString)
                     }
-                })
+                }
             }
         })
         if let leftButtonText = leftButtonText {
             dialog = dialog.addButton(title: leftButtonText, callback: { (dialog) in
-                dialog.dismiss(animated: false, completion: {
+                dialog.dismiss(animated: false) {
                     if let action = leftButtonAction {
                         let filterTextField = dialog.view.viewWithTag(100) as! UITextField
                         let newFilterString = filterTextField.text ?? ""
                         action(newFilterString)
                     }
-                })
+                }
             })
         }
         if let rightButtonText = rightButtonText {
             dialog = dialog.addButton(title: rightButtonText, callback: { (dialog) in
-                dialog.dismiss(animated: false, completion: {
+                dialog.dismiss(animated: false) {
                     if let action = rightButtonAction {
                         let filterTextField = dialog.view.viewWithTag(100) as! UITextField
                         let newFilterString = filterTextField.text ?? ""
                         action(newFilterString)
                     }
-                })
+                }
             })
         }
         let builded = dialog.build()

@@ -98,12 +98,20 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         rightSwipe.direction = .right
         view.addGestureRecognizer(rightSwipe)
 
+        setCustomUIMenu()
+    }
+    
+    func setCustomUIMenu() {
         let menuController = UIMenuController.shared
         let speechModMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), action: #selector(setSpeechModSetting(sender:)))
         let speechModForThisNovelMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettingsForThisNovel", comment: "この小説用の読み替え辞書へ登録"), action: #selector(setSpeechModForThisNovelSetting(sender:)))
         let checkSpeechTextMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), action: #selector(checkSpeechText(sender:)))
         let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem]
         menuController.menuItems = menuItems
+    }
+    func removeCustomUIMenu() {
+        let menuController = UIMenuController.shared
+        menuController.menuItems = []
     }
     
     func loadNovel(novel:RealmNovel) {
@@ -527,11 +535,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     func storySpeakerStartSpeechEvent(storyID:String){
         DispatchQueue.main.async {
             self.startStopButtonItem?.title = NSLocalizedString("SpeechViewController_Stop", comment: "Stop")
+            self.removeCustomUIMenu()
         }
     }
     func storySpeakerStopSpeechEvent(storyID:String){
         DispatchQueue.main.async {
             self.startStopButtonItem?.title = NSLocalizedString("SpeechViewController_Speak", comment: "Speak")
+            self.setCustomUIMenu()
         }
     }
     func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange){

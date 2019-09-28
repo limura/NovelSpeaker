@@ -17,6 +17,8 @@
 @property (weak, nonatomic) IBOutlet UIPickerView *PickerView;
 @property (weak, nonatomic) IBOutlet UIButton *doneButton;
 @property (weak, nonatomic) IBOutlet UIButton *doneButtonBottom;
+@property (weak, nonatomic) IBOutlet UIButton *OKButton;
+@property (weak, nonatomic) IBOutlet UIButton *CancelButton;
 
 /// 新しく PickerViewDialog の UIView を作成します
 + (instancetype)createNewDialog:(NSArray*)displayTextArray firstSelectedString:(NSString*)firstSelectedString parentView:(UIView*)parentView resultReceiver:(void (^)(NSString*))resultReceiver;

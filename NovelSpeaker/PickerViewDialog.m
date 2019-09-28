@@ -134,10 +134,24 @@
 }
 
 - (IBAction)doneButtonClicked:(id)sender {
-    [self doneButtonClicked];
+    //[self doneButtonClicked];
+    [self popdown:^{
+        [self removeFromSuperview];
+    }];
 }
 - (IBAction)doneButtonBottomClicked:(id)sender {
+    //[self doneButtonClicked];
+    [self popdown:^{
+        [self removeFromSuperview];
+    }];
+}
+- (IBAction)okButtonClicked:(id)sender {
     [self doneButtonClicked];
+}
+- (IBAction)cancelButtonClicked:(id)sender {
+    [self popdown:^{
+        [self removeFromSuperview];
+    }];
 }
 
 

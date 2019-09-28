@@ -313,7 +313,26 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
             + "<head>"
             + "<title>home</title>"
             + "<style type=\"text/css\">"
-            + "body{font-size: 2.4rem;}"
+            + """
+@media (prefers-color-scheme: light) {
+  body {
+    background-color: #e0e0e0;
+    color: black;
+    font-size: 2.4rem;
+  }
+  a:link { color: #0000ff; }
+  a:visited { color: #000080; }
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #202020;
+    color: #a0a0a0;
+    font-size: 2.4rem;
+  }
+  a:link { color: #5050ff; }
+  a:visited { color: #4040a0; }
+}
+"""
             + "</style>"
             + "</head>"
             + "<html><body>"

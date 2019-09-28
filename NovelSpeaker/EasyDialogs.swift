@@ -604,7 +604,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
     private var forKeyboardConstraint: NSLayoutConstraint!
     private var forTextViewConstraintArray: [NSLayoutConstraint]!
     
-    public func show(completion: (()->Void)? = nil) {
+    public func show(completion:(()->Void)? = nil) {
         builder.targetViewController?.present(self, animated: false, completion: {
             self.builder.focusKeyboard()
             completion?()

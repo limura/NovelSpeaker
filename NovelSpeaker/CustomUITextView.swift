@@ -15,6 +15,9 @@ public class CustomUITextView: UITextView {
     // from http://qiita.com/watt1006/items/2425bfa1720d522d05fd
     override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         return autoreleasepool {
+            if StorySpeaker.shared.isPlayng {
+                return false
+            }
             if RealmGlobalState.GetInstance()?.isMenuItemIsAddNovelSpeakerItemsOnly ?? false {
                 return false
             }
