@@ -438,49 +438,60 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         performSegue(withIdentifier: "NovelDetailViewPushSegue", sender: self)
     }
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
-        let searchFunc = { (dialog:EasyDialog, searchString:String?) in
-            dialog.dismiss(animated: false, completion: nil)
-            autoreleasepool {
-                guard let storyID = self.storyID, let storys = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID))?.linkedStorys?.filter({ (story) -> Bool in
-                    guard let searchString = searchString else { return true }
-                    if searchString.count <= 0 { return true }
-                    guard let content = story.content else { return false }
-                    return content.contains(searchString)
-                }) else {
-                    NiftyUtilitySwift.EasyDialogOneButton(
-                        viewController: self,
-                        title: nil,
-                        message: NSLocalizedString("SpeechViewController_CanNotGetStorys", comment: "小説情報を参照できませんでした。"),
-                        buttonTitle: nil, buttonAction: nil)
-                    return
-                }
-                let displayTextArray = Array(storys.map { (story) -> String in
-                    return "\(story.chapterNumber): " + story.GetSubtitle()
-                })
-                var selectedText:String? = nil
+        self.storySpeaker.StopSpeech()
+        let searchFunc = { (searchString:String?) in
+            NiftyUtilitySwift.EasyDialogNoButton(
+                viewController: self,
+                title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
+                message: nil) { (searchingDialog) in
                 autoreleasepool {
-                    if let story = RealmStory.SearchStoryFrom(storyID: storyID) {
-                        selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
+                    guard let storyID = self.storyID, let storys = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID))?.linkedStorys?.filter({ (story) -> Bool in
+                        guard let searchString = searchString else { return true }
+                        if searchString.count <= 0 { return true }
+                        guard let content = story.content else { return false }
+                        return content.contains(searchString)
+                    }) else {
+                        NiftyUtilitySwift.EasyDialogOneButton(
+                            viewController: self,
+                            title: nil,
+                            message: NSLocalizedString("SpeechViewController_CanNotGetStorys", comment: "小説情報を参照できませんでした。"),
+                            buttonTitle: nil, buttonAction: nil)
+                        return
+                    }
+                    let displayTextArray = Array(storys.map { (story) -> String in
+                        return "\(story.chapterNumber): " + story.GetSubtitle()
+                    })
+                    var selectedText:String? = nil
+                    autoreleasepool {
+                        if let story = RealmStory.SearchStoryFrom(storyID: storyID) {
+                            selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
+                        }
+                    }
+                    let picker = PickerViewDialog.createNewDialog(displayTextArray, firstSelectedString: selectedText, parentView: self.view) { (selectedText) in
+                        guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number) else { return }
+                        self.storySpeaker.SetStory(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber))
+                    }
+                    searchingDialog.dismiss(animated: false) {
+                        picker?.popup(nil)
                     }
                 }
-                let picker = PickerViewDialog.createNewDialog(displayTextArray, firstSelectedString: selectedText, parentView: self.view) { (selectedText) in
-                    guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number) else { return }
-                    self.storySpeaker.SetStory(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber))
-                }
-                picker?.popup(nil)
             }
         }
         
-        EasyDialog.Builder(self)
-            .title(title: NSLocalizedString("SpeechViewController_SearchDialogTitle", comment: "検索"))
-            .label(text: NSLocalizedString("SearchViewController_SearchDialogMessage", comment: "本文中から文字列を検索します"))
-            .textField(tag: 100, placeholder: nil, content: nil, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always) { (dialog) -> (Void) in
-            let filterTextField = dialog.view.viewWithTag(100) as! UITextField
-            searchFunc(dialog, filterTextField.text)
-        }.addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
-            let filterTextField = dialog.view.viewWithTag(100) as! UITextField
-            searchFunc(dialog, filterTextField.text)
-        }.build().show()
+        NiftyUtilitySwift.EasyDialogTextInput2Button(
+            viewController: self,
+            title: NSLocalizedString("SpeechViewController_SearchDialogTitle", comment: "検索"),
+            message: NSLocalizedString("SpeechViewController_SearchDialogMessage", comment: "本文中から文字列を検索します"),
+            textFieldText: nil,
+            placeHolder: NSLocalizedString("SpeechViewController_SearchDialogPlaceholderText", comment: "空文字列で検索すると全ての章がリストされます"),
+            leftButtonText: NSLocalizedString("Cancel_button", comment: "Cancel"),
+            rightButtonText: NSLocalizedString("OK_button", comment: "OK"),
+            leftButtonAction: nil,
+            rightButtonAction: { (filterText) in
+                searchFunc(filterText)
+            },
+            shouldReturnIsRightButtonClicked: true,
+            completion: nil)
     }
 
     @objc func shareButtonClicked(_ sender: UIBarButtonItem) {
