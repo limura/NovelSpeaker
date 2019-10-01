@@ -62,7 +62,11 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
             }
             $0.cell.textLabel?.numberOfLines = 0
             $0.disabled = true
-        } <<< LabelRow() {
+        }.cellUpdate({ (cell, row) in
+            if #available(iOS 13.0, *) {
+                cell.textLabel?.textColor = UIColor.label.withAlphaComponent(0.6)
+            }
+        }) <<< LabelRow() {
             $0.title = NSLocalizedString("NarouSearchResultDetailViewControllerSwift_UpdateDate", comment: "更新日時")
             if let updatedAt = content.novelupdated_at {
                 let dateFormatter = DateFormatter()
@@ -139,7 +143,11 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
             }
             $0.cell.textLabel?.numberOfLines = 0
             $0.disabled = true
-        } <<< LabelRow() {
+        }.cellUpdate({ (cell, row) in
+            if #available(iOS 13.0, *) {
+                cell.textLabel?.textColor = UIColor.label.withAlphaComponent(0.6)
+            }
+        }) <<< LabelRow() {
             $0.title = NSLocalizedString("NarouSearchResultDetailViewControllerSwift_Story", comment: "あらすじ")
         } <<< TextRow() {
             if let story = content.story {
@@ -149,7 +157,11 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
             }
             $0.cell.textLabel?.numberOfLines = 0
             $0.disabled = true
-        }
+        }.cellUpdate({ (cell, row) in
+            if #available(iOS 13.0, *) {
+                cell.textLabel?.textColor = UIColor.label.withAlphaComponent(0.6)
+            }
+        })
     }
 
     override func didReceiveMemoryWarning() {
