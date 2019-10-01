@@ -24,13 +24,14 @@
 /// バージョンアップした時のアナウンスをします
 - (void)ShowVersionUpNotice
 {
-    [NiftyUtilitySwift EasyDialogOneButtonWithViewController:self
-       title:NSLocalizedString(@"BookShelfTableViewController_AnnounceNewViersion", @"アップデートされました")
-       message:NSLocalizedString(@"BookShelfTableViewController_AnnounceNewVersionMessage"
-         , @"Version 1.1.2\r\n"
-         @"- なろう検索で「検索開始」ボタンを押しやすくしました\r\n"
-         @"\r\n現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。")
-        buttonTitle:NSLocalizedString(@"OK_button", @"OK") buttonAction:^{
+    [NiftyUtilitySwift
+     EasyDialogMessageDialogWithViewController:self
+     title:NSLocalizedString(@"BookShelfTableViewController_AnnounceNewViersion", @"アップデートされました")
+     message:NSLocalizedString(@"BookShelfTableViewController_AnnounceNewVersionMessage"
+     , @"Version 1.1.2\r\n"
+     @"- なろう検索で「検索開始」ボタンを押しやすくしました\r\n"
+   @"\r\n現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。")
+       completion:^{
         GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
         [globalData UpdateCurrentVersionSaveData];
         if(![globalData IsFirstPageShowed])
