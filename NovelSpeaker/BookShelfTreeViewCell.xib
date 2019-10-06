@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina6_1" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -16,37 +14,37 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
-                <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="aG3-qg-zYJ">
-                        <rect key="frame" x="0.0" y="0.0" width="44" height="43.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="44" height="44"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="44" id="h8k-h1-aax"/>
                         </constraints>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NDu-xh-oRj">
-                        <rect key="frame" x="52" y="12" width="252" height="21"/>
+                        <rect key="frame" x="52" y="12" width="252" height="21.5"/>
                         <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="5lT-a7-cAi">
-                        <rect key="frame" x="267" y="3.5" width="37" height="37"/>
-                        <color key="color" cocoaTouchSystemColor="darkTextColor"/>
+                        <rect key="frame" x="267" y="3.5" width="37" height="37.5"/>
+                        <color key="color" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
                     </activityIndicatorView>
                     <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="NEW!.png" translatesAutoresizingMaskIntoConstraints="NO" id="Rsq-pE-Xp7">
-                        <rect key="frame" x="269" y="0.0" width="43" height="43.5"/>
+                        <rect key="frame" x="226" y="0.0" width="86" height="44"/>
                     </imageView>
                     <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="E7x-yC-sPR">
-                        <rect key="frame" x="52" y="37" width="252" height="2"/>
+                        <rect key="frame" x="52" y="37.5" width="252" height="2"/>
                         <color key="tintColor" red="1" green="0.76975434700000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="2" id="qXF-YQ-98B"/>
                         </constraints>
                     </progressView>
                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageSizeForAccessibilityContentSizeCategory="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JYf-xN-EC1">
-                        <rect key="frame" x="44" y="0.0" width="43.5" height="43.5"/>
+                        <rect key="frame" x="44" y="0.0" width="44" height="44"/>
                         <constraints>
                             <constraint firstAttribute="width" secondItem="JYf-xN-EC1" secondAttribute="height" multiplier="1:1" id="nKa-i9-nV7"/>
                         </constraints>
