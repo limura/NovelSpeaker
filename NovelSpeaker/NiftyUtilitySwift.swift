@@ -460,6 +460,20 @@ class NiftyUtilitySwift: NSObject {
         let builded = dialog.build()
         builded.show { completion?(builded) }
     }
+    @objc public static func EasyDialogMessageDialog(viewController: UIViewController, title: String?, message: String?, completion:(()->Void)?) {
+        var builder = EasyDialog.Builder(viewController)
+        if let title = title {
+            builder = builder.title(title: title)
+        }
+        if let message = message {
+            builder = builder.textView(content: message, heightMultiplier: 0.6)
+        }
+        builder.addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+            dialog.dismiss(animated: false) {
+                completion?()
+            }
+        }.build().show()
+    }
 
     @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
         let session: URLSession = URLSession.shared
