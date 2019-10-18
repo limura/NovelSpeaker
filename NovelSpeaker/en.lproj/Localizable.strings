@@ -61,7 +61,7 @@
 "SettingsTableViewController_Information_NoImportantInformationAlived" = "There is no important information now.";
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "Quality of voice";
 "SettingTableViewController_CorrectionOfTheReading" = "Correction of the reading";
-"SettingTableViewController_SettingOfTheTextSize" = "Setting of the text";
+"SettingTableViewController_SettingOfTheTextSize" = "Fiction text display settings";
 "SettingTableViewController_SettingOfTheSpeechDelay" = "Setting of the speech delay";
 "SettingTableViewController_MaxSpeechTime" = "Max speech time";
 "SettingTableViewController_AddDefaultCorrectionOfTheReading" = "Add default correction of the reading";
@@ -298,6 +298,13 @@
 "NarouSearchResultDetailViewControllerSwift_IsEnd=0&genelral_all_no>1" = "Completion";
 
 "TextSizeSettingViewController_FontSettingTitle" = "Font";
+"TextSizeSettinvViewController_ColorSettingTitle" = "Color";
+"TextSizeSettingViewController_ColorSettingTitle_Default" = "Default";
+"TextSizeSettingViewController_ColorSettingTitle_White" = "White background";
+"TextSizeSettingViewController_ColorSettingTitle_Cream" = "Cream background";
+"TextSizeSettingViewController_ColorSettingTitle_Gray" = "Gray background";
+"TextSizeSettingViewController_ColorSettingTitle_Black" = "Black background";
+"TextSizeSettingViewController_ColorSettingTitle_UserSetting" ="User Specified";
 
 "FontSelectViewController_DefaultFontTitle" = "DefaultFont";
 

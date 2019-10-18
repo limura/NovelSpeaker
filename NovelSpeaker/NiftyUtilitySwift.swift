@@ -500,39 +500,38 @@ class NiftyUtilitySwift: NSObject {
         var builder = EasyDialog.Builder(rootViewController)
         NiftyUtilitySwift.DispatchSyncMainQueue {
             builder = builder.label(text: NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元"), textAlignment: .center, tag: 100)
-        }
-        let dialog = builder.build()
-        
-        DispatchQueue.main.async {
+            let dialog = builder.build()
             dialog.show()
-        }
-        
-        let result = globalDataSingleton?.restoreBackup(fromJSONData: jsonData, dataDirectory: dataDirectory, progress: { (progressText) in
-            DispatchQueue.main.async {
-                if let label = dialog.view.viewWithTag(100) as? UILabel, let progressText = progressText{
-                    label.text = NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元")
-                    + "\r\n" + progressText
+            
+            DispatchQueue.global(qos: .background).async {
+                let result = globalDataSingleton?.restoreBackup(fromJSONData: jsonData, dataDirectory: dataDirectory, progress: { (progressText) in
+                    DispatchQueue.main.async {
+                        if let label = dialog.view.viewWithTag(100) as? UILabel, let progressText = progressText{
+                            label.text = NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元")
+                            + "\r\n" + progressText
+                        }
+                    }
+                })
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        if result == true {
+                            EasyDialog.Builder(rootViewController)
+                            .label(text: NSLocalizedString("GlobalDataSingleton_BackupDataLoaded", comment:"設定データを読み込みました。ダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。"), textAlignment: .center)
+                            .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                                dialog.dismiss(animated: false, completion: nil)
+                            })
+                            .build().show()
+                        }else{
+                            EasyDialog.Builder(rootViewController)
+                            .label(text: NSLocalizedString("GlobalDataSingleton_RestoreBackupDataFailed", comment:"設定データの読み込みに失敗しました。"), textAlignment: .center)
+                            .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                                dialog.dismiss(animated: false, completion: nil)
+                            })
+                            .build().show()
+                        }
+                    })
                 }
             }
-        })
-        DispatchQueue.main.async {
-            dialog.dismiss(animated: false, completion: {
-                if result == true {
-                    EasyDialog.Builder(rootViewController)
-                    .label(text: NSLocalizedString("GlobalDataSingleton_BackupDataLoaded", comment:"設定データを読み込みました。ダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。"), textAlignment: .center)
-                    .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                        dialog.dismiss(animated: false, completion: nil)
-                    })
-                    .build().show()
-                }else{
-                    EasyDialog.Builder(rootViewController)
-                    .label(text: NSLocalizedString("GlobalDataSingleton_RestoreBackupDataFailed", comment:"設定データの読み込みに失敗しました。"), textAlignment: .center)
-                    .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                        dialog.dismiss(animated: false, completion: nil)
-                    })
-                    .build().show()
-                }
-            })
         }
     }
     

@@ -40,4 +40,6 @@
 @property BOOL NeedResumeSpeech;
 
 - (IBAction)ChapterSliderChanged:(UISlider *)sender;
+
+- (UIStatusBarStyle)preferredStatusBarStyle;
 @end

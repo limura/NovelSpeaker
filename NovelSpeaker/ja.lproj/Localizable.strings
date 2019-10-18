@@ -60,7 +60,7 @@
 "SettingsTableViewController_Information_NoImportantInformationAlived" = "今現在、重要なお知らせはありません。";
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "声質の設定";
 "SettingTableViewController_CorrectionOfTheReading" = "読みの修正";
-"SettingTableViewController_SettingOfTheTextSize" = "表示文字の設定";
+"SettingTableViewController_SettingOfTheTextSize" = "小説本文表示画面の設定";
 "SettingTableViewController_SettingOfTheSpeechDelay" = "読み上げ時の間の設定";
 "SettingTableViewController_MaxSpeechTime" = "最大連続再生時間";
 "SettingTableViewController_AddDefaultCorrectionOfTheReading" = "標準の読みの修正を上書き追加";
@@ -294,6 +294,13 @@
 "NarouSearchResultDetailViewControllerSwift_IsEnd=0&genelral_all_no>1" = "完結";
 
 "TextSizeSettingViewController_FontSettingTitle" = "字体設定";
+"TextSizeSettinvViewController_ColorSettingTitle" = "色設定";
+"TextSizeSettingViewController_ColorSettingTitle_Default" = "標準色(ダークモードに追従)";
+"TextSizeSettingViewController_ColorSettingTitle_White" = "白地に黒で固定";
+"TextSizeSettingViewController_ColorSettingTitle_Cream" = "クリーム色地に黒で固定";
+"TextSizeSettingViewController_ColorSettingTitle_Gray" = "暗めの灰色地に白で固定";
+"TextSizeSettingViewController_ColorSettingTitle_Black" = "黒地に白で固定";
+"TextSizeSettingViewController_ColorSettingTitle_UserSetting" ="ユーザ指定色で固定";
 
 "FontSelectViewController_DefaultFontTitle" = "標準フォント";
 

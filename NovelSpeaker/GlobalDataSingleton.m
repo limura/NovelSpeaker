@@ -2561,6 +2561,8 @@ static DummySoundLooper* dummySoundLooper = nil;
 #define USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED @"DuckOthersEnabled"
 #define USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME @"IsOpenRecentNovelInStartTime"
 #define USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS @"IsDisallowCellarAccess"
+#define USER_DEFAULTS_READING_COLOR_SETTING_FOR_BACKGROUND_COLOR @"ReadingColorSettingForBackgroundColor"
+#define USER_DEFAULTS_READING_COLOR_SETTING_FOR_FOREGROUND_COLOR @"ReadingColorSettingForForegroundColor"
 
 /// 前回実行時とくらべてビルド番号が変わっているか否かを取得します
 - (BOOL)IsVersionUped
@@ -3725,6 +3727,125 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// 小説を読む部分での表示色設定を読み出します(背景色分)。標準設定の場合は nil が返ります。
+- (UIColor*)GetReadingColorSettingForBackgroundColor{
+    // 標準では JSON を入れておかずに JSON からの変換に失敗させます。
+    NSString* defaultColorSettingJson = @"ERROR STRING";
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_READING_COLOR_SETTING_FOR_BACKGROUND_COLOR: defaultColorSettingJson}];
+    NSString* colorSettingJson = [userDefaults stringForKey:USER_DEFAULTS_READING_COLOR_SETTING_FOR_BACKGROUND_COLOR];
+    NSError* error = nil;
+    NSDictionary* settingDictionary = [NSJSONSerialization JSONObjectWithData:[colorSettingJson dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+    if (settingDictionary == nil || error != nil) {
+        return nil;
+    }
+    CGFloat red, green, blue, alpha;
+    red = green = blue = alpha = -1.0;
+    typedef float (^GetColorFunc)(NSDictionary* dic, NSString* name);
+    GetColorFunc getColorFunc = ^(NSDictionary* dic, NSString* name) {
+        float colorValue = -1.0;
+        id colorObj = [dic valueForKey:name];
+        if ([colorObj isKindOfClass:[NSNumber class]]) {
+            NSNumber* color = colorObj;
+            return [color floatValue];
+        }
+        return colorValue;
+    };
+    red = getColorFunc(settingDictionary, @"red");
+    green = getColorFunc(settingDictionary, @"green");
+    blue = getColorFunc(settingDictionary, @"blue");
+    alpha = getColorFunc(settingDictionary, @"alpha");
+    if (red < 0.0 || green < 0.0 || blue < 0.0 || alpha < 0.0
+        || red > 1.0 || green > 1.0 || blue > 1.0 || alpha > 1.0) {
+        return nil;
+    }
+    return [[UIColor alloc] initWithRed:red green:green blue:blue alpha:alpha];
+}
+/// 小説を読む部分での表示色設定を設定します(背景色分)。標準設定に戻す場合は nil を指定します。
+- (void)SetReadingColorSettingForBackgroundColor:(UIColor*)color{
+    NSString* colorString = nil;
+    if (color != nil) {
+        NSMutableDictionary* dic = [NSMutableDictionary new];
+        CGFloat red, green, blue, alpha;
+        [color getRed:&red green:&green blue:&blue alpha:&alpha];
+        [dic setValue:[[NSNumber alloc] initWithDouble:red] forKey:@"red"];
+        [dic setValue:[[NSNumber alloc] initWithDouble:green] forKey:@"green"];
+        [dic setValue:[[NSNumber alloc] initWithDouble:blue] forKey:@"blue"];
+        [dic setValue:[[NSNumber alloc] initWithDouble:alpha] forKey:@"alpha"];
+        NSError* error = nil;
+        NSData* data = [NSJSONSerialization dataWithJSONObject:dic options:0 error:&error];
+        if (data != nil && error == nil) {
+            colorString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        }
+    }
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    if (colorString != nil) {
+        [userDefaults setObject:colorString forKey:USER_DEFAULTS_READING_COLOR_SETTING_FOR_BACKGROUND_COLOR];
+    }else{
+        [userDefaults removeObjectForKey:USER_DEFAULTS_READING_COLOR_SETTING_FOR_BACKGROUND_COLOR];
+    }
+    [userDefaults synchronize];
+}
+/// 小説を読む部分での表示色設定を読み出します(文字色分)。標準設定の場合は nil が返ります。
+- (UIColor*)GetReadingColorSettingForForegroundColor{
+    // 標準では JSON を入れておかずに JSON からの変換に失敗させます。
+    NSString* defaultColorSettingJson = @"ERROR STRING";
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_READING_COLOR_SETTING_FOR_FOREGROUND_COLOR: defaultColorSettingJson}];
+    NSString* colorSettingJson = [userDefaults stringForKey:USER_DEFAULTS_READING_COLOR_SETTING_FOR_FOREGROUND_COLOR];
+    NSError* error = nil;
+    NSDictionary* settingDictionary = [NSJSONSerialization JSONObjectWithData:[colorSettingJson dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+    if (settingDictionary == nil || error != nil) {
+        return nil;
+    }
+    CGFloat red, green, blue, alpha;
+    red = green = blue = alpha = -1.0;
+    typedef float (^GetColorFunc)(NSDictionary* dic, NSString* name);
+    GetColorFunc getColorFunc = ^(NSDictionary* dic, NSString* name) {
+        float colorValue = -1.0;
+        id colorObj = [dic valueForKey:name];
+        if ([colorObj isKindOfClass:[NSNumber class]]) {
+            NSNumber* color = colorObj;
+            return [color floatValue];
+        }
+        return colorValue;
+    };
+    red = getColorFunc(settingDictionary, @"red");
+    green = getColorFunc(settingDictionary, @"green");
+    blue = getColorFunc(settingDictionary, @"blue");
+    alpha = getColorFunc(settingDictionary, @"alpha");
+    if (red < 0.0 || green < 0.0 || blue < 0.0 || alpha < 0.0
+        || red > 1.0 || green > 1.0 || blue > 1.0 || alpha > 1.0) {
+        return nil;
+    }
+    return [[UIColor alloc] initWithRed:red green:green blue:blue alpha:alpha];
+}
+/// 小説を読む部分での表示色設定を設定します(背景色分)。標準設定に戻す場合は nil を指定します。
+- (void)SetReadingColorSettingForForegroundColor:(UIColor*)color{
+    NSString* colorString = nil;
+    if (color != nil) {
+        NSMutableDictionary* dic = [NSMutableDictionary new];
+        CGFloat red, green, blue, alpha;
+        [color getRed:&red green:&green blue:&blue alpha:&alpha];
+        [dic setValue:[[NSNumber alloc] initWithDouble:red] forKey:@"red"];
+        [dic setValue:[[NSNumber alloc] initWithDouble:green] forKey:@"green"];
+        [dic setValue:[[NSNumber alloc] initWithDouble:blue] forKey:@"blue"];
+        [dic setValue:[[NSNumber alloc] initWithDouble:alpha] forKey:@"alpha"];
+        NSError* error = nil;
+        NSData* data = [NSJSONSerialization dataWithJSONObject:dic options:0 error:&error];
+        if (data != nil && error == nil) {
+            colorString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        }
+    }
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    if (colorString != nil) {
+        [userDefaults setObject:colorString forKey:USER_DEFAULTS_READING_COLOR_SETTING_FOR_FOREGROUND_COLOR];
+    }else{
+        [userDefaults removeObjectForKey:USER_DEFAULTS_READING_COLOR_SETTING_FOR_FOREGROUND_COLOR];
+    }
+    [userDefaults synchronize];
+}
+
 
 /// 最新のプライバシーポリシーのURLを取得します
 - (NSURL*)GetPrivacyPolicyURL {
@@ -4028,6 +4149,27 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_duck_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsDuckOthersEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_open_recent_novel_in_start_time_enabled" number:[[NSNumber alloc] initWithBool:[self IsOpenRecentNovelInStartTime]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_disallows_cellular_access" number:[[NSNumber alloc] initWithBool:[self IsDisallowsCellularAccess]]];
+    UIColor* backgroundColor = [self GetReadingColorSettingForBackgroundColor];
+    UIColor* foregroundColor = [self GetReadingColorSettingForForegroundColor];
+    if (backgroundColor != nil && foregroundColor != nil) {
+        NSMutableDictionary* colorSettingDictionary = [NSMutableDictionary new];
+        CGFloat red, blue, green, alpha;
+        NSMutableDictionary* colorDictionary = [NSMutableDictionary new];
+        [backgroundColor getRed:&red green:&green blue:&blue alpha:&alpha];
+        [colorDictionary setValue:[[NSNumber alloc] initWithFloat:red] forKey:@"red"];
+        [colorDictionary setValue:[[NSNumber alloc] initWithFloat:green] forKey:@"green"];
+        [colorDictionary setValue:[[NSNumber alloc] initWithFloat:blue] forKey:@"blue"];
+        [colorDictionary setValue:[[NSNumber alloc] initWithFloat:alpha] forKey:@"alpha"];
+        [colorSettingDictionary setValue:colorDictionary forKey:@"background"];
+        colorDictionary = [NSMutableDictionary new];
+        [foregroundColor getRed:&red green:&green blue:&blue alpha:&alpha];
+        [colorDictionary setValue:[[NSNumber alloc] initWithFloat:red] forKey:@"red"];
+        [colorDictionary setValue:[[NSNumber alloc] initWithFloat:green] forKey:@"green"];
+        [colorDictionary setValue:[[NSNumber alloc] initWithFloat:blue] forKey:@"blue"];
+        [colorDictionary setValue:[[NSNumber alloc] initWithFloat:alpha] forKey:@"alpha"];
+        [colorSettingDictionary setValue:colorDictionary forKey:@"foreground"];
+        [result setValue:colorSettingDictionary forKey:@"display_color_settings"];
+    }
     NarouContentCacheData* currentReadingContent = [self GetCurrentReadingContent];
     if (currentReadingContent != nil) {
         [NiftyUtility addStringForJSONNSDictionary:result key:@"current_reading_content" string:currentReadingContent.ncode];
@@ -4602,6 +4744,64 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSNumber* is_disallows_cellular_access = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_disallows_cellular_access"];
     if (is_disallows_cellular_access != nil) {
         [self SetIsDisallowsCellularAccess:[is_disallows_cellular_access boolValue]];
+    }
+    NSDictionary* display_color_settings = [NiftyUtility validateNSDictionaryForDictionary:miscSettingsDictionary key:@"display_color_settings"];
+    if (display_color_settings != nil) {
+        NSLog(@"display_color_settings: != nil");
+        NSDictionary* backgroundColorSetting = [NiftyUtility validateNSDictionaryForDictionary:display_color_settings key:@"background"];
+        NSDictionary* foregroundColorSetting = [NiftyUtility validateNSDictionaryForDictionary:display_color_settings key:@"foreground"];
+        UIColor* backgroundColor = nil;
+        UIColor* foregroundColor = nil;
+        if (backgroundColorSetting != nil) {
+            CGFloat red, green, blue, alpha;
+            red = green = blue = alpha = -1.0;
+            NSNumber* color = nil;
+            if ((color = [NiftyUtility validateNSDictionaryForNumber:backgroundColorSetting key:@"red"]) != nil) {
+                red = [color floatValue];
+            }
+            if ((color = [NiftyUtility validateNSDictionaryForNumber:backgroundColorSetting key:@"green"]) != nil) {
+                green = [color floatValue];
+            }
+            if ((color = [NiftyUtility validateNSDictionaryForNumber:backgroundColorSetting key:@"blue"]) != nil) {
+                blue = [color floatValue];
+            }
+            if ((color = [NiftyUtility validateNSDictionaryForNumber:backgroundColorSetting key:@"alpha"]) != nil) {
+                alpha = [color floatValue];
+            }
+            NSLog(@"display_color_settings: bgColor RGBA: %.2f, %.2f, %.2f, %.2f", red, green, blue, alpha);
+            if (!(red < 0.0 || green < 0.0 || blue < 0.0 || alpha < 0.0
+                || red > 1.0 || green > 1.0 || blue > 1.0 || alpha > 1.0)) {
+                backgroundColor = [[UIColor alloc] initWithRed:red green:green blue:blue alpha:alpha];
+            }
+        }
+        if (foregroundColorSetting != nil) {
+            CGFloat red, green, blue, alpha;
+            red = green = blue = alpha = -1.0;
+            NSNumber* color = nil;
+            if ((color = [NiftyUtility validateNSDictionaryForNumber:foregroundColorSetting key:@"red"]) != nil) {
+                red = [color floatValue];
+            }
+            if ((color = [NiftyUtility validateNSDictionaryForNumber:foregroundColorSetting key:@"green"]) != nil) {
+                green = [color floatValue];
+            }
+            if ((color = [NiftyUtility validateNSDictionaryForNumber:foregroundColorSetting key:@"blue"]) != nil) {
+                blue = [color floatValue];
+            }
+            if ((color = [NiftyUtility validateNSDictionaryForNumber:foregroundColorSetting key:@"alpha"]) != nil) {
+                alpha = [color floatValue];
+            }
+            NSLog(@"display_color_settings: fgColor RGBA: %.2f, %.2f, %.2f, %.2f", red, green, blue, alpha);
+            if (!(red < 0.0 || green < 0.0 || blue < 0.0 || alpha < 0.0
+                || red > 1.0 || green > 1.0 || blue > 1.0 || alpha > 1.0)) {
+                foregroundColor = [[UIColor alloc] initWithRed:red green:green blue:blue alpha:alpha];
+            }
+        }
+        NSLog(@"display_color_settings: bgColor: %p, fgColor: %p", backgroundColor, foregroundColor);
+        if (backgroundColor != nil && foregroundColor != nil) {
+            NSLog(@"display_color_settings: set color.");
+            [self SetReadingColorSettingForBackgroundColor:backgroundColor];
+            [self SetReadingColorSettingForForegroundColor:foregroundColor];
+        }
     }
     NSString* current_reading_content = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"current_reading_content"];
     return current_reading_content;

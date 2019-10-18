@@ -514,6 +514,15 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// ダウンロード時に携帯電話回線を禁じるか否かの設定を設定します
 - (void)SetIsDisallowsCellularAccess:(BOOL)isAllow;
 
+/// 小説を読む部分での表示色設定を読み出します(背景色分)。標準の場合は nil が返ります。
+- (UIColor*)GetReadingColorSettingForBackgroundColor;
+/// 小説を読む部分での表示色設定を設定します(背景色分)。標準設定に戻す場合は nil を指定します。
+- (void)SetReadingColorSettingForBackgroundColor:(UIColor*)backgroundColor;
+/// 小説を読む部分での表示色設定を読み出します(文字色分)。標準の場合は nil が返ります。
+- (UIColor*)GetReadingColorSettingForForegroundColor;
+/// 小説を読む部分での表示色設定を設定します(背景色分)。標準設定に戻す場合は nil を指定します。
+- (void)SetReadingColorSettingForForegroundColor:(UIColor*)foregroundColor;
+
 /// 最新のプライバシーポリシーのURLを取得します
 - (NSURL*)GetPrivacyPolicyURL;
 /// 一度読んだ事のあるプライバシーポリシーを取得します(読んだことがなければ @"" が取得されます)

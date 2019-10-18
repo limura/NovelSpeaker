@@ -138,6 +138,7 @@
             [self ApplyDarkTheme];
         }
     }
+    [self ApplyCustomTheme];
 
     //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidAppear %@", self.NarouContentDetail.title]]; // NSLog
 
@@ -197,6 +198,7 @@
             [self ApplyBrightTheme];
         }
     }
+    [self ResumeTheme];
     [super viewWillDisappear:animated];
 }
 
@@ -219,6 +221,105 @@
         NSLog(@"load Page turning sound failed.");
     }
     return nil;
+}
+
+- (void)ApplyCustomTheme:(UIColor*)backgroundColor foregroundColor:(UIColor*)foregroundColor indicatorStyle:(UIScrollViewIndicatorStyle)indicatorStyle barStyle:(UIBarStyle)barStyle {
+
+    self.view.backgroundColor = backgroundColor;
+    self.textView.textColor = foregroundColor;
+    self.textView.backgroundColor = backgroundColor;
+    self.textView.indicatorStyle = indicatorStyle;
+    self.NextChapterButton.backgroundColor = backgroundColor;
+    self.PrevChapterButton.backgroundColor = backgroundColor;
+    self.ChapterSlider.backgroundColor = backgroundColor;
+    self.ChapterIndicatorLabel.backgroundColor = backgroundColor;
+    self.ChapterIndicatorLabel.textColor = foregroundColor;
+    self.tabBarController.tabBar.barTintColor = backgroundColor;
+    //self.navigationController.navigationBar.tintColor = [[UIColor alloc] initWithRed:0.5 green:0.5 blue:1.0 alpha:1.0];
+    self.navigationController.navigationBar.barTintColor = backgroundColor;
+    self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: foregroundColor};
+
+    // ステータスバーの色を指定する
+    if (self.navigationController != nil) {
+        self.navigationController.navigationBar.barStyle = barStyle;
+    }
+}
+
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    UIColor* backgroundColor = [globalData GetReadingColorSettingForBackgroundColor];
+    UIColor* foregroundColor = [globalData GetReadingColorSettingForForegroundColor];
+    if (backgroundColor == nil || foregroundColor == nil) {
+        return UIStatusBarStyleDefault;
+    }
+    CGFloat red, green, blue, alpha;
+    [backgroundColor getRed:&red green:&green blue:&blue alpha:&alpha];
+    if (((red + green + blue) / 3.0) < 0.5) {
+        return UIStatusBarStyleLightContent; // 白い字にする
+    }else{
+        if (@available(iOS 13.0, *)) {
+            return UIStatusBarStyleDarkContent; // ダークモード だと Default では 白い字 にされてしまうので、明示的に DarkContent とする必要がある
+        } else {
+            return UIStatusBarStyleDefault;
+        }
+    }
+    return UIStatusBarStyleDefault;
+}
+
+/// カスタム色設定を適用します
+- (void)ApplyCustomTheme{
+    UIColor* backgroundColor = UIColor.whiteColor;
+    UIColor* foregroundColor = UIColor.blackColor;
+    UIScrollViewIndicatorStyle indicatorStyle = UIScrollViewIndicatorStyleDefault;
+    UIBarStyle barStyle = UIBarStyleDefault;
+    
+    if (@available(iOS 13.0, *)) {
+        backgroundColor = UIColor.systemBackgroundColor;
+        foregroundColor = UIColor.labelColor;
+    }
+    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
+    UIColor* settingBackgroundColor = [globalData GetReadingColorSettingForBackgroundColor];
+    UIColor* settingForegroundColor = [globalData GetReadingColorSettingForForegroundColor];
+
+    if (settingBackgroundColor != nil && settingForegroundColor != nil) {
+        backgroundColor = settingBackgroundColor;
+        foregroundColor = settingForegroundColor;
+    }
+
+    CGFloat red, green, blue, alpha;
+    [backgroundColor getRed:&red green:&green blue:&blue alpha:&alpha];
+    NSLog(@"RGB: %.2f, %.2f, %.2f", red, green, blue);
+    if (((red + green + blue) / 3.0) < 0.5) {
+        indicatorStyle = UIScrollViewIndicatorStyleWhite;
+        barStyle = UIBarStyleBlack;
+    }
+    
+    [self ApplyCustomTheme:
+     backgroundColor
+     foregroundColor:foregroundColor
+     indicatorStyle:indicatorStyle
+     barStyle:barStyle];
+    [self setNeedsStatusBarAppearanceUpdate];
+}
+
+/// 設定した色設定を標準の色設定に戻します
+- (void)ResumeTheme{
+    UIColor* backgroundColor = UIColor.whiteColor;
+    UIColor* foregroundColor = UIColor.blackColor;
+    UIScrollViewIndicatorStyle indicatorStyle = UIScrollViewIndicatorStyleDefault;
+    UIBarStyle barStyle = UIBarStyleDefault;
+    
+    if (@available(iOS 13.0, *)) {
+        backgroundColor = UIColor.systemBackgroundColor;
+        foregroundColor = UIColor.labelColor;
+    }
+    
+    [self ApplyCustomTheme:
+     backgroundColor
+     foregroundColor:foregroundColor
+     indicatorStyle:indicatorStyle
+     barStyle:barStyle];
 }
 
 /// 背景の暗いテーマを適用します
