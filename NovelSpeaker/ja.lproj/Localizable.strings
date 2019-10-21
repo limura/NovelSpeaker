@@ -295,14 +295,18 @@
 
 "TextSizeSettingViewController_FontSettingTitle" = "字体設定";
 "TextSizeSettinvViewController_ColorSettingTitle" = "色設定";
-"TextSizeSettingViewController_ColorSettingTitle_Default" = "標準色(ダークモードに追従)";
-"TextSizeSettingViewController_ColorSettingTitle_White" = "白地に黒で固定";
-"TextSizeSettingViewController_ColorSettingTitle_Cream" = "クリーム色地に黒で固定";
-"TextSizeSettingViewController_ColorSettingTitle_Gray" = "暗めの灰色地に白で固定";
-"TextSizeSettingViewController_ColorSettingTitle_Black" = "黒地に白で固定";
-"TextSizeSettingViewController_ColorSettingTitle_UserSetting" ="ユーザ指定色で固定";
 
 "FontSelectViewController_DefaultFontTitle" = "標準フォント";
+
+"NovelDisplayColorSettingViewController_SampleText" = "メロスは激怒した。必ず、かの邪智暴虐の王を除かなければならぬと決意した。メロスには政治がわからぬ。メロスは、村の牧人である。笛を吹き、羊と遊んで暮して来た。けれども邪悪に対しては、人一倍に敏感であった。\nきょう未明メロスは村を出発し、野を越え山越え、十里はなれた此のシラクスの市にやって来た。メロスには父も、母も無い。女房も無い。十六の、内気な妹と二人暮しだ。";
+"NovelDisplayColorSettingViewController_ColorSettingButton_Default" = "標準(ダークモード等に追従します)";
+"NovelDisplayColorSettingViewController_ColorSettingButton_White" = "白地に黒で固定";
+"NovelDisplayColorSettingViewController_ColorSettingButton_Cream" = "クリーム色地に黒で固定";
+"NovelDisplayColorSettingViewController_ColorSettingButton_Gray" = "灰色地に白で固定";
+"NovelDisplayColorSettingViewController_ColorSettingButton_Black" = "黒地に白で固定";
+"NovelDisplayColorSettingViewController_ColorSettingButton_UserDefined_Foreground" = "字の色を直接指定";
+"NovelDisplayColorSettingViewController_ColorSettingButton_UserDefined_Background" = "背景色を直接指定";
+"NovelDisplayColorSettingViewController_ColorPickerDoneTitle" = "この色で設定";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
@@ -314,18 +318,25 @@
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
 "BookShelfTableViewController_Resume:" = "▶︎再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.56
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.57
 
-- DarkMode へ対応しました
-- 小説本文シーンに検索ボタンを追加
-- 設定 -> 声質の設定にて、スライドバーの値を表示するように
-- 設定 -> 携帯電話網ではダウンロードしないようにする の ON/OFF 設定を追加
-- 日本語環境下においてアプリ名が ことせかい ではなく NovelSpeaker になっていたのを ことせかい になるように修正
-- 読み上げ中は読み上げ位置表示の上に出るメニューを出さないように
+- 「設定」->「小説本文表示画面の設定」(旧「表示文字の設定」)に小説本文部分の表示部での色設定を追加
+  (この設定と重複するため「設定」->「小説を読む時に背景を暗くする」は削除されました。同設定をONにされていた方はお手数をおかけしますが、再度上記の設定にて背景を暗くする設定をするようお願いいたします)
+- バックアップファイルから復元時にアプリが終了する可能性があった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.57
+
+インタフェースの変更
+- 「設定」->「小説本文表示画面の設定」(旧「表示文字の設定」)に小説本文部分の表示部での色設定を追加
+  (この設定と重複するため「設定」->「小説を読む時に背景を暗くする」は削除されました。同設定をONにされていた方はお手数をおかけしますが、再度上記の設定にて背景を暗くする設定をするようお願いいたします)
+
+問題の修正
+- バックアップファイルから復元時にアプリが終了する可能性があった問題を修正
+
+
 # Version 1.1.56
 
 インタフェースの変更

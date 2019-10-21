@@ -10,6 +10,7 @@
 #import "GlobalDataSingleton.h"
 #import "NovelSpeaker-Swift.h"
 #import "PickerViewDialog.h"
+#import <MSColorPicker/MSColorPicker.h>
 
 @interface TextSizeSettingViewController ()
 
@@ -39,6 +40,11 @@
     
     [self setNotificationReciver];
     [self applyColorSetting];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [self applyColorSetting];
+    [super viewDidAppear:animated];
 }
 
 - (void)setFontFromGlobalState:(GlobalStateCacheData*)globalState {
@@ -133,47 +139,9 @@
 }
 
 - (void)colorButtonClick:(id)sender {
-    NSArray* colorSettingTitleList = @[
-        NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_Default", @"標準色(ダークモードやライトモード指定に従う)"),
-        NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_White", @"白地に黒で固定"),
-        NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_Cream", @"クリーム色地に黒で固定"),
-        NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_Gray", @"濃いめの灰色地に白で固定"),
-        NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_Black", @"黒地に白で固定"),
-        NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_UserSetting", @"ユーザ指定色で固定"),
-    ];
-    PickerViewDialog* picker = [PickerViewDialog
-        createNewDialog:colorSettingTitleList
-        firstSelectedString:colorSettingTitleList[0]
-        parentView:self.view
-        resultReceiver:^(NSString *targetString) {
-        GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-        if ([targetString compare:NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_Default", @"標準色(ダークモードやライトモード指定に従う)")] == NSOrderedSame) {
-            [globalData SetReadingColorSettingForBackgroundColor:nil];
-            [globalData SetReadingColorSettingForForegroundColor:nil];
-        }else if ([targetString compare:NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_White", @"白地に黒で固定")] == NSOrderedSame) {
-            [globalData SetReadingColorSettingForBackgroundColor:UIColor.whiteColor];
-            [globalData SetReadingColorSettingForForegroundColor:UIColor.blackColor];
-        }else if ([targetString compare:NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_Cream", @"クリーム色地に黒で固定")] == NSOrderedSame) {
-            [globalData SetReadingColorSettingForBackgroundColor:[[UIColor alloc] initWithRed:1.0 green:1.0 blue:0.878 alpha:1.0]];
-            [globalData SetReadingColorSettingForForegroundColor:UIColor.blackColor];
-        }else if ([targetString compare:NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_Gray", @"暗めの灰色地に白で固定")] == NSOrderedSame) {
-            [globalData SetReadingColorSettingForBackgroundColor:[[UIColor alloc] initWithRed:0.2 green:0.2 blue:0.2 alpha:1.0]];
-            [globalData SetReadingColorSettingForForegroundColor:UIColor.whiteColor];
-        }else if ([targetString compare:NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_Black", @"黒地に白で固定")] == NSOrderedSame) {
-            [globalData SetReadingColorSettingForBackgroundColor:UIColor.blackColor];
-            [globalData SetReadingColorSettingForForegroundColor:UIColor.whiteColor];
-        }else if ([targetString compare:NSLocalizedString(@"TextSizeSettingViewController_ColorSettingTitle_UserSetting", @"ユーザ指定色で固定")] == NSOrderedSame) {
-            [globalData SetReadingColorSettingForBackgroundColor:nil];
-            [globalData SetReadingColorSettingForForegroundColor:nil];
-        }else{
-            [globalData SetReadingColorSettingForBackgroundColor:nil];
-            [globalData SetReadingColorSettingForForegroundColor:nil];
-        }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self applyColorSetting];
-        });
-    }];
-    [picker popup:nil];
+    NovelDisplayColorSettingViewController* nextViewController = [NovelDisplayColorSettingViewController new];
+    [self.navigationController pushViewController:nextViewController animated:true];
+    return;
 }
 
 /// NotificationCenter の受信者の設定をします。

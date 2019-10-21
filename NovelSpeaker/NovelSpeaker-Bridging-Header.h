@@ -11,4 +11,4 @@
 #import "NarouLoader.h"
 #import "NarouSearchResultTableViewController.h"
 #import "NiftyUtility.h"
-
+#import <MSColorPicker/MSColorPicker.h>

@@ -460,9 +460,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 - (void)SetPlaybackDurationIsEnabled:(BOOL)isEnabled;
 
 /// 暗い色調にするか否かを取得します
-- (BOOL)IsDarkThemeEnabled;
+//- (BOOL)IsDarkThemeEnabled;
 /// 暗い色調にするか否かを設定します
-- (void)SetDarkThemeIsEnabled:(BOOL)isEnabled;
+//- (void)SetDarkThemeIsEnabled:(BOOL)isEnabled;
 
 /// ページめくり音を発生させるか否かを取得します
 - (BOOL)IsPageTurningSoundEnabled;

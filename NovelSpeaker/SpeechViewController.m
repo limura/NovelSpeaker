@@ -129,15 +129,6 @@
     [super viewDidAppear:animated];
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     
-    if ([globalData IsDarkThemeEnabled]) {
-        if (@available(iOS 13.0, *)) {
-            if (UITraitCollection.currentTraitCollection.userInterfaceStyle != UIUserInterfaceStyleDark) {
-                [self ApplyDarkTheme];
-            }
-        } else {
-            [self ApplyDarkTheme];
-        }
-    }
     [self ApplyCustomTheme];
 
     //[[GlobalDataSingleton GetInstance] AddLogString:[[NSString alloc] initWithFormat:@"SpeechViewController viewDidAppear %@", self.NarouContentDetail.title]]; // NSLog
@@ -188,16 +179,6 @@
     [self SaveCurrentReadingPoint];
     [[GlobalDataSingleton GetInstance] DeleteSpeakRangeDelegate:self];
     
-    GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    if ([globalData IsDarkThemeEnabled]) {
-        if (@available(iOS 13.0, *)) {
-            if (UITraitCollection.currentTraitCollection.userInterfaceStyle != UIUserInterfaceStyleDark) {
-                [self ApplyBrightTheme];
-            }
-        } else {
-            [self ApplyBrightTheme];
-        }
-    }
     [self ResumeTheme];
     [super viewWillDisappear:animated];
 }

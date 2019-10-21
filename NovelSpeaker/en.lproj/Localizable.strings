@@ -299,14 +299,19 @@
 
 "TextSizeSettingViewController_FontSettingTitle" = "Font";
 "TextSizeSettinvViewController_ColorSettingTitle" = "Color";
-"TextSizeSettingViewController_ColorSettingTitle_Default" = "Default";
-"TextSizeSettingViewController_ColorSettingTitle_White" = "White background";
-"TextSizeSettingViewController_ColorSettingTitle_Cream" = "Cream background";
-"TextSizeSettingViewController_ColorSettingTitle_Gray" = "Gray background";
-"TextSizeSettingViewController_ColorSettingTitle_Black" = "Black background";
-"TextSizeSettingViewController_ColorSettingTitle_UserSetting" ="User Specified";
 
 "FontSelectViewController_DefaultFontTitle" = "DefaultFont";
+
+"NovelDisplayColorSettingViewController_SampleText" = "If I speak in the tongues of men or of angels, but do not have love, I am only a resounding gong or a clanging cymbal. If I have the gift of prophecy and can fathom all mysteries and all knowledge, and if I have a faith that can move mountains, but do not have love, I am nothing. If I give all I possess to the poor and give over my body to hardship that I may boast,[b] but do not have love, I gain nothing.";
+"NovelDisplayColorSettingViewController_ColorSettingButton_Default" = "Standard (follows dark mode, etc.)";
+"NovelDisplayColorSettingViewController_ColorSettingButton_White" = "Fixed in black on a white background";
+"NovelDisplayColorSettingViewController_ColorSettingButton_Cream" = "Fixed in black on cream background";
+"NovelDisplayColorSettingViewController_ColorSettingButton_Gray" = "Fixed with gray on white";
+"NovelDisplayColorSettingViewController_ColorSettingButton_Black" = "Fixed with black on white";
+"NovelDisplayColorSettingViewController_ColorSettingButton_UserDefined_Foreground" = "Directly specify the character color";
+"NovelDisplayColorSettingViewController_ColorSettingButton_UserDefined_Background" = "Specify background color directly";
+"NovelDisplayColorSettingViewController_ColorPickerDoneTitle" = "Done";
+
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
@@ -318,17 +323,23 @@
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
 "BookShelfTableViewController_Resume:" = "▶︎Speech: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.55
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.57
 
-- Added support for DarkMode
-- Added a search button to the novel text scene
-- Display slide bar value in Settings -> Quality of voice
-- Added settings -> Do not download on mobile phone network ON/OFF setting
-- Do not display the menu that appears above the reading position display during reading
+- Add color settings at Settings -> Fiction text display settings.
+- Fixed an issue where the app could quit when restoring from a backup file.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.57
+
+Interface change
+- Add color settings at Settings -> Fiction text display settings.
+
+Bug fix
+- Fixed an issue where the app could quit when restoring from a backup file.
+
+
 # Version 1.1.56
 
 Interface Change

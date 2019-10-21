@@ -102,6 +102,7 @@
 		217F6E1C1942F14B008E432E /* Speaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 217F6E1B1942F14B008E432E /* Speaker.m */; };
 		21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21814C5B1E8D68A90096CB42 /* NSStringExtension.m */; };
 		21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */; };
+		21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */; };
 		21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
 		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
 		21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */; };
@@ -121,6 +122,7 @@
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
+		21A265692359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */; };
 		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
 		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
@@ -367,6 +369,7 @@
 		21814C5A1E8D68A90096CB42 /* NSStringExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringExtension.h; sourceTree = "<group>"; };
 		21814C5B1E8D68A90096CB42 /* NSStringExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStringExtension.m; sourceTree = "<group>"; };
 		21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-small-40@3x.png"; sourceTree = "<group>"; };
+		21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDisplayColorSettingViewController.swift; sourceTree = "<group>"; };
 		21890CF11D92F38800869046 /* NSDataZlibExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataZlibExtension.h; sourceTree = "<group>"; };
 		21890CF21D92F38800869046 /* NSDataZlibExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataZlibExtension.m; sourceTree = "<group>"; };
 		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -407,6 +410,7 @@
 		2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 8.xcdatamodel"; sourceTree = "<group>"; };
 		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavicationController+StatusBarHack.swift"; sourceTree = "<group>"; };
 		21A4F6DA19B1B30C007CCD32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F71C19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
 		21A4F71D19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -765,6 +769,7 @@
 				2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */,
 				21C372DB21DFC41600FB2D52 /* UIImageExtension.h */,
 				21C372DC21DFC41600FB2D52 /* UIImageExtension.m */,
+				21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -954,6 +959,7 @@
 				216741A2204421F1008A578D /* BugReportViewController.swift */,
 				21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */,
 				216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */,
+				21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1218,6 +1224,7 @@
 				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework",
 				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
+				"${BUILT_PRODUCTS_DIR}/MSColorPicker/MSColorPicker.framework",
 				"${BUILT_PRODUCTS_DIR}/SZTextView/SZTextView.framework",
 				"${BUILT_PRODUCTS_DIR}/Zip/Zip.framework",
 			);
@@ -1225,6 +1232,7 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Eureka.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FTLinearActivityIndicator.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSColorPicker.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SZTextView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Zip.framework",
 			);
@@ -1364,6 +1372,7 @@
 				21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */,
 				21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */,
 				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
+				21A265692359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift in Sources */,
 				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
 				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
 				213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */,
@@ -1375,6 +1384,7 @@
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
 				21EA62E420554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift in Sources */,
 				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
+				21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */,
 				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
 				215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */,
 				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
@@ -1561,7 +1571,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1.1.125;
+				CURRENT_PROJECT_VERSION = 1.1.126;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1570,7 +1580,7 @@
 				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.1.56;
+				MARKETING_VERSION = 1.1.57;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1597,7 +1607,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1.1.125;
+				CURRENT_PROJECT_VERSION = 1.1.126;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1605,7 +1615,7 @@
 				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.1.56;
+				MARKETING_VERSION = 1.1.57;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1722,7 +1732,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1.1.125;
+				CURRENT_PROJECT_VERSION = 1.1.126;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1736,7 +1746,7 @@
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.1.56;
+				MARKETING_VERSION = 1.1.57;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" -Xfrontend -warn-long-expression-type-checking=100 -Xfrontend -warn-long-function-bodies=100";
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1758,7 +1768,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1.1.125;
+				CURRENT_PROJECT_VERSION = 1.1.126;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1772,7 +1782,7 @@
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.1.56;
+				MARKETING_VERSION = 1.1.57;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

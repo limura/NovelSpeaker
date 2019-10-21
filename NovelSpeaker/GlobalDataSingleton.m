@@ -3549,6 +3549,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/*
 /// 暗い色調にするか否かを取得します
 - (BOOL)IsDarkThemeEnabled{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
@@ -3561,6 +3562,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_DARK_THEME_IS_ENABLED];
     [userDefaults synchronize];
 }
+ */
 
 /// ページめくり音を発生させるか否かを取得します
 - (BOOL)IsPageTurningSoundEnabled{
@@ -4140,7 +4142,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_reading_progress_display_enabled" number:[[NSNumber alloc] initWithBool:[self IsReadingProgressDisplayEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_short_skip_enabled" number:[[NSNumber alloc] initWithBool:[self IsShortSkipEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_playback_duration_enabled" number:[[NSNumber alloc] initWithBool:[self IsPlaybackDurationEnabled]]];
-    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_dark_theme_enabled" number:[[NSNumber alloc] initWithBool:[self IsDarkThemeEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_page_turning_sound_enabled" number:[[NSNumber alloc] initWithBool:[self IsPageTurningSoundEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_escape_about_speech_position_display_bug_on_ios12_enabled" number:[[NSNumber alloc] initWithBool:[self IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled]]];
     [NiftyUtility addStringForJSONNSDictionary:result key:@"display_font_name" string:[self GetDisplayFontName]];
@@ -4708,10 +4709,6 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSNumber* is_playback_duration_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_playback_duration_enabled"];
     if (is_playback_duration_enabled != nil) {
         [self SetPlaybackDurationIsEnabled:[is_playback_duration_enabled boolValue]];
-    }
-    NSNumber* is_dark_theme_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_dark_theme_enabled"];
-    if (is_dark_theme_enabled != nil) {
-        [self SetDarkThemeIsEnabled:[is_dark_theme_enabled boolValue]];
     }
     NSNumber* is_page_turning_sound_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_page_turning_sound_enabled"];
     if (is_page_turning_sound_enabled != nil) {
