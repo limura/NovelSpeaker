@@ -94,6 +94,16 @@ import UIKit
         }
         realmRealmStoryCache.removeAll()
     }
+    static func GetLocalRealmConfiguration() -> Realm.Configuration {
+        return Realm.Configuration(
+            fileURL: GetLocalRealmFilePath(),
+            schemaVersion: currentSchemaVersion,
+            migrationBlock: MigrateFunc,
+            deleteRealmIfMigrationNeeded: deleteRealmIfMigrationNeeded,
+            shouldCompactOnLaunch: { (totalBytes, usedBytes) in
+                return totalBytes * 2 < usedBytes
+        })
+    }
     static func GetLocalRealm() throws -> Realm {
         lock.lock()
         defer {
@@ -103,17 +113,20 @@ import UIKit
         if let realm = realmLocalCache[threadID] {
             return realm
         }
-        let config = Realm.Configuration(
-            fileURL: GetLocalRealmFilePath(),
-            schemaVersion: currentSchemaVersion,
-            migrationBlock: MigrateFunc,
-            deleteRealmIfMigrationNeeded: deleteRealmIfMigrationNeeded,
-            shouldCompactOnLaunch: { (totalBytes, usedBytes) in
-                return totalBytes * 2 < usedBytes
-        })
+        let config = GetLocalRealmConfiguration()
         let realm = try Realm(configuration: config)
         //realmLocalCache[threadID] = realm
         return realm
+    }
+    static func GetRealmStoryLocalRealmConfiguration() -> Realm.Configuration {
+        return Realm.Configuration(
+            fileURL: GetRealmStoryLocalRealmFilePath(),
+            schemaVersion: currentSchemaVersionForRealmStory,
+            migrationBlock: MigrateFuncForRealmStory,
+            deleteRealmIfMigrationNeeded: deleteRealmIfMigrationNeeded,
+            shouldCompactOnLaunch: { (totalBytes:Int, usedBytes:Int) in
+                return Double(totalBytes) * 1.3 < Double(usedBytes)
+        })
     }
     static func GetRealmStoryLocalRealm() throws -> Realm {
         if isUseCloudRealmForStory {
@@ -126,14 +139,7 @@ import UIKit
         if let realm = realmRealmStoryCache[threadID] {
             return realm
         }
-        let config = Realm.Configuration(
-            fileURL: GetRealmStoryLocalRealmFilePath(),
-            schemaVersion: currentSchemaVersionForRealmStory,
-            migrationBlock: MigrateFuncForRealmStory,
-            deleteRealmIfMigrationNeeded: deleteRealmIfMigrationNeeded,
-            shouldCompactOnLaunch: { (totalBytes:Int, usedBytes:Int) in
-                return Double(totalBytes) * 1.3 < Double(usedBytes)
-        })
+        let config = GetRealmStoryLocalRealmConfiguration()
         do {
             let realm = try Realm(configuration: config)
             //realmLocalOnlyCache[threadID] = realm
@@ -245,8 +251,8 @@ import UIKit
         */
         realmCloudCache.removeAll()
     }
-    fileprivate static func GetCloudRealmWithoutLock() throws -> Realm {
-        let config = Realm.Configuration(
+    fileprivate static func GetCloudRealmConfiguration() -> Realm.Configuration {
+        return Realm.Configuration(
             fileURL: GetCloudRealmFilePath(),
             schemaVersion: currentSchemaVersion,
             migrationBlock: MigrateFunc,
@@ -254,16 +260,15 @@ import UIKit
             shouldCompactOnLaunch: { (totalBytes, usedBytes) in
                 return totalBytes * 2 < usedBytes
         })
+    }
+    fileprivate static func GetCloudRealmWithoutLock() throws -> Realm {
+        let config = GetCloudRealmConfiguration()
         let realm = try Realm(configuration: config)
         realm.autorefresh = true
         return realm
     }
-    fileprivate static func GetRealmStoryCloudRealmWithoutLock() throws -> Realm {
-        if isUseCloudRealmForStory {
-            return try GetCloudRealmWithoutLock()
-        }
-        
-        let config = Realm.Configuration(
+    fileprivate static func GetRealmStoryCloudRealmConfiguration() -> Realm.Configuration {
+        return Realm.Configuration(
             fileURL: GetRealmStoryCloudRealmFilePath(),
             schemaVersion: currentSchemaVersionForRealmStory,
             migrationBlock: MigrateFuncForRealmStory,
@@ -271,6 +276,13 @@ import UIKit
             shouldCompactOnLaunch: { (totalBytes, usedBytes) in
                 return Double(totalBytes) * 1.2 < Double(usedBytes)
         })
+    }
+    fileprivate static func GetRealmStoryCloudRealmWithoutLock() throws -> Realm {
+        if isUseCloudRealmForStory {
+            return try GetCloudRealmWithoutLock()
+        }
+        
+        let config = GetRealmStoryCloudRealmConfiguration()
         let realm = try Realm(configuration: config)
         realm.autorefresh = true
         return realm
@@ -311,26 +323,26 @@ import UIKit
     }
     fileprivate static func CreateSyncEngine() throws -> SyncEngine {
         let container = GetContainer()
-        let realm = try RealmUtil.GetCloudRealmWithoutLock()
+        let realmConfiguration = RealmUtil.GetCloudRealmConfiguration()
         return SyncEngine(objects: [
-            SyncObject<RealmStory>(realm: realm),
-            SyncObject<RealmNovel>(realm: realm),
-            SyncObject<RealmSpeechModSetting>(realm: realm),
-            SyncObject<RealmSpeechWaitConfig>(realm: realm),
-            SyncObject<RealmSpeakerSetting>(realm: realm),
-            SyncObject<RealmSpeechSectionConfig>(realm: realm),
-            SyncObject<RealmSpeechQueue>(realm: realm),
-            SyncObject<RealmGlobalState>(realm: realm),
-            SyncObject<RealmDisplaySetting>(realm: realm),
-            SyncObject<RealmNovelTag>(realm: realm),
-            SyncObject<RealmSpeechOverrideSetting>(realm: realm)
+            SyncObject<RealmStory>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmNovel>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmSpeechModSetting>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmSpeechWaitConfig>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmSpeakerSetting>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmSpeechSectionConfig>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmSpeechQueue>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmGlobalState>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmDisplaySetting>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmNovelTag>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmSpeechOverrideSetting>(realmConfiguration: realmConfiguration)
             ], databaseScope: .private, container: container)
     }
     fileprivate static func CreateRealmStorySyncEngine() throws -> SyncEngine {
         let container = GetContainer()
-        let realm = try RealmUtil.GetRealmStoryCloudRealmWithoutLock()
+        let realmConfiguration = RealmUtil.GetRealmStoryCloudRealmConfiguration();
         return SyncEngine(objects: [
-            SyncObject<RealmStory>(realm: realm)
+            SyncObject<RealmStory>(realmConfiguration: realmConfiguration)
             ], databaseScope: .private, container: container)
     }
 
