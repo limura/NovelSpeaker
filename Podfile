@@ -7,9 +7,9 @@ target 'NovelSpeaker' do
 
   # Pods for NovelSpeaker
   pod 'SZTextView'
-  #pod 'Eureka', :git => 'https://github.com/xmartlabs/Eureka.git'
   pod 'Eureka'
   pod "RATreeView", "~> 2.1.2"
+  pod "MSColorPicker"
 
   source 'https://github.com/CocoaPods/Specs.git'
   pod 'Zip', '~> 1.1'

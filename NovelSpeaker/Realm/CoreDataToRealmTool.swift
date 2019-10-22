@@ -64,7 +64,6 @@ class CoreDataToRealmTool: NSObject {
         realmState.isDuckOthersEnabled = globalDataSingleton.isDuckOthersEnabled()
         realmState.isMixWithOthersEnabled = globalDataSingleton.isMixWithOthersEnabled()
         realmState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = globalDataSingleton.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled()
-        realmState.isDarkThemeEnabled = globalDataSingleton.isDarkThemeEnabled()
         realmState.isPlaybackDurationEnabled = globalDataSingleton.isPlaybackDurationEnabled()
         realmState.isShortSkipEnabled = globalDataSingleton.isShortSkipEnabled()
         realmState.isReadingProgressDisplayEnabled = globalDataSingleton.isReadingProgressDisplayEnabled()
@@ -73,6 +72,8 @@ class CoreDataToRealmTool: NSObject {
         //realmState.isBackgroundNovelFetchEnabled = globalDataSingleton.getBackgroundNovelFetchEnabled()
         realmState.bookShelfSortType = globalDataSingleton.getBookSelfSortType()
         realmState.isPageTurningSoundEnabled = globalDataSingleton.isPageTurningSoundEnabled()
+        realmState.backgroundColor = globalDataSingleton.getReadingColorSettingForBackgroundColor()
+        realmState.foregroundColor = globalDataSingleton.getReadingColorSettingForForegroundColor()
 
         defaultDisplaySetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
         if let textSizeValue = globalState?.textSizeValue as? Float {

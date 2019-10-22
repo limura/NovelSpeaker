@@ -116,6 +116,7 @@
 		217F6E1C1942F14B008E432E /* Speaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 217F6E1B1942F14B008E432E /* Speaker.m */; };
 		21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21814C5B1E8D68A90096CB42 /* NSStringExtension.m */; };
 		21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */; };
+		21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */; };
 		21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
 		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
 		2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */; };
@@ -128,6 +129,7 @@
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
+		21A265692359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */; };
 		21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */; };
 		21A291F622A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F522A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift */; };
 		21A291F822A3F9DA000AA58C /* NovelDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F722A3F9DA000AA58C /* NovelDetailViewController.swift */; };
@@ -377,6 +379,7 @@
 		21814C5A1E8D68A90096CB42 /* NSStringExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringExtension.h; sourceTree = "<group>"; };
 		21814C5B1E8D68A90096CB42 /* NSStringExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStringExtension.m; sourceTree = "<group>"; };
 		21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-small-40@3x.png"; sourceTree = "<group>"; };
+		21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDisplayColorSettingViewController.swift; sourceTree = "<group>"; };
 		21890CF11D92F38800869046 /* NSDataZlibExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataZlibExtension.h; sourceTree = "<group>"; };
 		21890CF21D92F38800869046 /* NSDataZlibExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataZlibExtension.m; sourceTree = "<group>"; };
 		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -403,6 +406,7 @@
 		2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 8.xcdatamodel"; sourceTree = "<group>"; };
 		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavicationController+StatusBarHack.swift"; sourceTree = "<group>"; };
 		21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmToRealmCopyTool.swift; sourceTree = "<group>"; };
 		21A291F522A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleNovelIDSelectorViewController.swift; sourceTree = "<group>"; };
 		21A291F722A3F9DA000AA58C /* NovelDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDetailViewController.swift; sourceTree = "<group>"; };
@@ -430,8 +434,6 @@
 		21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalDataSingleton.h; sourceTree = "<group>"; };
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
 		21B96ED32338124100112B5F /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ja-JP"; path = "ja-JP.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaxSpeechTimeTableViewCell.h; sourceTree = "<group>"; };
-		21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MaxSpeechTimeTableViewCell.m; sourceTree = "<group>"; };
 		21C372DB21DFC41600FB2D52 /* UIImageExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIImageExtension.h; sourceTree = "<group>"; };
 		21C372DC21DFC41600FB2D52 /* UIImageExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIImageExtension.m; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
@@ -755,6 +757,7 @@
 				21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */,
 				21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */,
 				21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */,
+				21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -927,6 +930,7 @@
 				21A291F722A3F9DA000AA58C /* NovelDetailViewController.swift */,
 				2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */,
 				2169D65B22C26028008787A4 /* NovelKeywordTagSelecterViewController.swift */,
+				21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1200,6 +1204,7 @@
 				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework",
 				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
+				"${BUILT_PRODUCTS_DIR}/MSColorPicker/MSColorPicker.framework",
 				"${BUILT_PRODUCTS_DIR}/RATreeView/RATreeView.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
@@ -1210,6 +1215,7 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Eureka.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FTLinearActivityIndicator.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSColorPicker.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RATreeView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
@@ -1348,6 +1354,7 @@
 				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
 				21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */,
 				21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */,
+				21A265692359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift in Sources */,
 				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
 				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
 				21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */,
@@ -1362,6 +1369,7 @@
 				21A2CDC42297D3A50080AEE6 /* NarouSearchViewController.swift in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
 				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
+				21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */,
 				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
 				215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */,
 				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
@@ -1511,7 +1519,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1.1.125;
+				CURRENT_PROJECT_VERSION = 1.1.126;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1520,7 +1528,7 @@
 				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.1.56;
+				MARKETING_VERSION = 1.1.57;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1547,7 +1555,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1.1.125;
+				CURRENT_PROJECT_VERSION = 1.1.126;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1555,7 +1563,7 @@
 				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 1.1.56;
+				MARKETING_VERSION = 1.1.57;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1677,21 +1685,16 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1.1.125;
+				CURRENT_PROJECT_VERSION = 1.1.126;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
-				"HEADER_SEARCH_PATHS[arch=*]" = (
-					"$(inherited)",
-					"\"${PODS_ROOT}/Headers/Public\"",
-					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
-					"\"${SDKROOT}/usr/include/libxml2\"",
-				);
+				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_ROOT}/Headers/Public\" \"${PODS_ROOT}/Headers/Public/SZTextView\" \"${SDKROOT}/usr/include/libxml2\"";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.1.56;
+				MARKETING_VERSION = 1.1.57;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" -Xfrontend -warn-long-expression-type-checking=100 -Xfrontend -warn-long-function-bodies=100";
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1714,21 +1717,16 @@
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1.1.125;
+				CURRENT_PROJECT_VERSION = 1.1.126;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
-				"HEADER_SEARCH_PATHS[arch=*]" = (
-					"$(inherited)",
-					"\"${PODS_ROOT}/Headers/Public\"",
-					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
-					"\"${SDKROOT}/usr/include/libxml2\"",
-				);
+				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_ROOT}/Headers/Public\" \"${PODS_ROOT}/Headers/Public/SZTextView\" \"${SDKROOT}/usr/include/libxml2\"";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.1.56;
+				MARKETING_VERSION = 1.1.57;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1811,17 +1809,7 @@
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Zip/Zip.framework/Headers\"",
 					"${SDKROOT}/usr/include/libxml2",
 				);
-				"HEADER_SEARCH_PATHS[arch=*]" = (
-					"$(inherited)",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/Eureka/Eureka.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/IceCream/IceCream.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/RATreeView/RATreeView.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/Realm/Realm.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/RealmSwift/RealmSwift.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/SZTextView/SZTextView.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/Zip/Zip.framework/Headers\"",
-				);
+				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_CONFIGURATION_BUILD_DIR}/Eureka/Eureka.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/IceCream/IceCream.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/RATreeView/RATreeView.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/Realm/Realm.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/RealmSwift/RealmSwift.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/SZTextView/SZTextView.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/Zip/Zip.framework/Headers\"";
 				INFOPLIST_FILE = "NovelSpeakerTests/NovelSpeakerTests-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-v";

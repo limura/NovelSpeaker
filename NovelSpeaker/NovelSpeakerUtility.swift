@@ -627,9 +627,6 @@ class NovelSpeakerUtility: NSObject {
                 if let is_playback_duration_enabled = dic.value(forKey: "is_playback_duration_enabled") as? NSNumber {
                     globalState.isPlaybackDurationEnabled = is_playback_duration_enabled.boolValue
                 }
-                if let is_dark_theme_enabled = dic.value(forKey: "is_dark_theme_enabled") as? NSNumber {
-                    globalState.isDarkThemeEnabled = is_dark_theme_enabled.boolValue
-                }
                 if let is_page_turning_sound_enabled = dic.value(forKey: "is_page_turning_sound_enabled") as? NSNumber {
                     globalState.isPageTurningSoundEnabled = is_page_turning_sound_enabled.boolValue
                 }
@@ -653,6 +650,14 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if let is_disallows_cellular_access = dic.value(forKey: "is_disallows_cellular_access") as? NSNumber {
                     globalState.IsDisallowsCellularAccess = is_disallows_cellular_access.boolValue
+                }
+                if let display_color_settings = dic.value(forKey: "display_color_settings") as? NSDictionary {
+                    if let background = display_color_settings.value(forKey: "background") as? NSDictionary, let red = background.value(forKey: "red") as? NSNumber, let green = background.value(forKey: "green") as? NSNumber, let blue = background.value(forKey: "blue") as? NSNumber, let alpha = background.value(forKey: "alpha") as? NSNumber {
+                        globalState.backgroundColor = UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
+                    }
+                    if let foreground = display_color_settings.value(forKey: "background") as? NSDictionary, let red = foreground.value(forKey: "red") as? NSNumber, let green = foreground.value(forKey: "green") as? NSNumber, let blue = foreground.value(forKey: "blue") as? NSNumber, let alpha = foreground.value(forKey: "alpha") as? NSNumber {
+                        globalState.backgroundColor = UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
+                    }
                 }
                 if let current_reading_content = dic.value(forKey: "current_reading_content") as? String {
                     currentReadingContent = current_reading_content
@@ -1246,9 +1251,6 @@ class NovelSpeakerUtility: NSObject {
                 if let isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = dic.object(forKey: "isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled") as? NSNumber {
                     globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled.boolValue
                 }
-                if let isDarkThemeEnabled = dic.object(forKey: "isDarkThemeEnabled") as? NSNumber {
-                    globalState.isDarkThemeEnabled = isDarkThemeEnabled.boolValue
-                }
                 if let isPlaybackDurationEnabled = dic.object(forKey: "isPlaybackDurationEnabled") as? NSNumber {
                     globalState.isPlaybackDurationEnabled = isPlaybackDurationEnabled.boolValue
                 }
@@ -1272,6 +1274,14 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if let currentReadingNovelID = dic.object(forKey: "currentReadingNovelID") as? String {
                     globalState.currentReadingNovelID = currentReadingNovelID
+                }
+                if let readingDisplayColor = dic.object(forKey: "readingDisplayColor") as? NSDictionary {
+                    if let foregroundColor = readingDisplayColor.object(forKey: "foregroundColor") as? NSDictionary, let red = foregroundColor.object(forKey: "red") as? NSNumber, let green = foregroundColor.object(forKey: "green") as? NSNumber, let blue = foregroundColor.object(forKey: "blue") as? NSNumber, let alpha = foregroundColor.object(forKey: "alpha") as? NSNumber {
+                        globalState.foregroundColor = UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
+                    }
+                    if let foregroundColor = readingDisplayColor.object(forKey: "backgroundColor") as? NSDictionary, let red = foregroundColor.object(forKey: "red") as? NSNumber, let green = foregroundColor.object(forKey: "green") as? NSNumber, let blue = foregroundColor.object(forKey: "blue") as? NSNumber, let alpha = foregroundColor.object(forKey: "alpha") as? NSNumber {
+                        globalState.backgroundColor = UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
+                    }
                 }
             }
         }
@@ -1649,6 +1659,38 @@ class NovelSpeakerUtility: NSObject {
             return result
         }
     }
+    fileprivate static func CreateBackupDataDictionary_GlobalState_TextColor(globalState:RealmGlobalState) -> [String:Any] {
+        var result:[String:Any] = [:]
+        if let color = globalState.foregroundColor {
+            var red:CGFloat = -1.0
+            var green:CGFloat = -1.0
+            var blue:CGFloat = -1.0
+            var alpha:CGFloat = -1.0
+            if color.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+                result["foreground"] = [
+                    "red": Float(red),
+                    "green": Float(green),
+                    "blue": Float(blue),
+                    "alpha": Float(alpha)
+                ]
+            }
+        }
+        if let color = globalState.backgroundColor {
+            var red:CGFloat = -1.0
+            var green:CGFloat = -1.0
+            var blue:CGFloat = -1.0
+            var alpha:CGFloat = -1.0
+            if color.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+                result["background"] = [
+                    "red": Float(red),
+                    "green": Float(green),
+                    "blue": Float(blue),
+                    "alpha": Float(alpha)
+                ]
+            }
+        }
+        return result
+    }
     fileprivate static func CreateBackupDataDictionary_GlobalState() -> [String:Any] {
         return autoreleasepool {
             guard let globalState = RealmGlobalState.GetInstance() else { return [:] }
@@ -1661,7 +1703,7 @@ class NovelSpeakerUtility: NSObject {
                 "isDuckOthersEnabled": globalState.isDuckOthersEnabled,
                 "isMixWithOthersEnabled": globalState.isMixWithOthersEnabled,
                 "isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled": globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled,
-                "isDarkThemeEnabled": globalState.isDarkThemeEnabled,
+                "readingDisplayColor": CreateBackupDataDictionary_GlobalState_TextColor(globalState: globalState),
                 "isPlaybackDurationEnabled": globalState.isPlaybackDurationEnabled,
                 "isShortSkipEnabled": globalState.isShortSkipEnabled,
                 "isReadingProgressDisplayEnabled": globalState.isReadingProgressDisplayEnabled,

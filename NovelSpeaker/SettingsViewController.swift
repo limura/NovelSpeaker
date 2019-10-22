@@ -325,21 +325,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             <<< SwitchRow() { row in
-                row.title = NSLocalizedString("SettingTableViewController_DarkThemeIsEnabled", comment: "小説を読む時に背景を暗くする")
-                row.cell.textLabel?.numberOfLines = 0
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
-                    row.value = globalState.isDarkThemeEnabled
-                }
-            }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
-                        globalState.isDarkThemeEnabled = value
-                    }
-                }
-            })
-            <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_PageTurningSoundIsEnabled", comment: "ページめくり時に音を鳴らす")
                 row.cell.textLabel?.numberOfLines = 0
                 autoreleasepool {

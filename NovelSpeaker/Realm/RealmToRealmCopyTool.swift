@@ -175,7 +175,8 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isDuckOthersEnabled = obj.isDuckOthersEnabled
             newObj.isMixWithOthersEnabled = obj.isMixWithOthersEnabled
             newObj.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = obj.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
-            newObj.isDarkThemeEnabled = obj.isDarkThemeEnabled
+            newObj.fgColor = obj.fgColor
+            newObj.bgColor = obj.bgColor
             newObj.isPlaybackDurationEnabled = obj.isPlaybackDurationEnabled
             newObj.isShortSkipEnabled = obj.isShortSkipEnabled
             newObj.isReadingProgressDisplayEnabled = obj.isReadingProgressDisplayEnabled

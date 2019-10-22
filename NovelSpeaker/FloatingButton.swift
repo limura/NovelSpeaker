@@ -76,7 +76,11 @@ class FloatingButton: UIView {
             view.superview?.superview?.addSubview(self.view)
         }
         layoutBottom(parentView: view)
-        self.view.backgroundColor = UIColor.init(red: 0.94, green: 0.94, blue: 0.94, alpha: 1)
+        if #available(iOS 13.0, *) {
+            self.view.backgroundColor = UIColor.secondarySystemBackground
+        } else {
+            self.view.backgroundColor = UIColor.init(red: 0.94, green: 0.94, blue: 0.94, alpha: 1)
+        }
         self.view.layer.cornerRadius = 5
         self.view.layer.masksToBounds = false
         self.view.layer.shadowOffset = CGSize(width: 5, height: 5)

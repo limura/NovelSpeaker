@@ -60,21 +60,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     // 表示される直前に呼ばれる
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        autoreleasepool {
-            if let globalState = RealmGlobalState.GetInstance(), globalState.isDarkThemeEnabled {
-                applyDarkTheme()
-            }
-        }
+        applyTheme()
     }
     
     // 非表示になる直前に呼ばれる
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        autoreleasepool {
-            if let globalState = RealmGlobalState.GetInstance(), globalState.isDarkThemeEnabled {
-                applyBrightTheme()
-            }
-        }
+        resumeTheme()
         let range = self.textView.selectedRange
         if range.location >= 0 && range.location < self.textView.text.count {
             storySpeaker.readLocation = range.location
@@ -389,47 +381,73 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             nextViewController.novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
         }
     }
+    
+    func applyThemeColor(backgroundColor:UIColor, foregroundColor:UIColor, indicatorStyle:UIScrollView.IndicatorStyle, barStyle:UIBarStyle) {
+        
+        self.view.backgroundColor = backgroundColor;
+        self.textView.textColor = foregroundColor;
+        self.textView.backgroundColor = backgroundColor;
+        self.textView.indicatorStyle = indicatorStyle
+        self.nextChapterButton.backgroundColor = backgroundColor
+        self.previousChapterButton.backgroundColor = backgroundColor
+        self.chapterSlider.backgroundColor = backgroundColor
+        self.chapterPositionLabel.backgroundColor = backgroundColor
+        self.chapterPositionLabel.textColor = foregroundColor
+        self.tabBarController?.tabBar.barTintColor = backgroundColor
+        self.navigationController?.navigationBar.barTintColor = backgroundColor
+        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
+        // ステータスバーの色を指定する
+        self.navigationController?.navigationBar.barStyle = barStyle
+    }
+    
+    func applyTheme() {
+        var backgroundColor = UIColor.white
+        var foregroundColor = UIColor.black
+        var indicatorStyle = UIScrollView.IndicatorStyle.default
+        var barStyle = UIBarStyle.default
+        
+        if #available(iOS 13.0, *) {
+            backgroundColor = UIColor.systemBackground
+            foregroundColor = UIColor.label
+        }
+        autoreleasepool {
+            if let globalState = RealmGlobalState.GetInstance() {
+                if let fgColor = globalState.foregroundColor {
+                    foregroundColor = fgColor
+                }
+                if let bgColor = globalState.backgroundColor {
+                    backgroundColor = bgColor
+                }
+            }
+        }
+        
+        var red:CGFloat = -1.0
+        var green:CGFloat = -1.0
+        var blue:CGFloat = -1.0
+        var alpha:CGFloat = -1.0
+        if backgroundColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            if ((Float(red) + Float(green) + Float(blue)) / 3.0) < 0.5 {
+                indicatorStyle = UIScrollView.IndicatorStyle.white
+                barStyle = UIBarStyle.black
+            }
+        }
 
-    func applyDarkTheme() {
-        let backgroundColor = UIColor.black
-        let foregroundColor = UIColor.white
-        
-        self.view.backgroundColor = backgroundColor;
-        self.textView.textColor = foregroundColor;
-        self.textView.backgroundColor = backgroundColor;
-        self.textView.indicatorStyle = UIScrollView.IndicatorStyle.white
-        self.nextChapterButton.backgroundColor = backgroundColor
-        self.previousChapterButton.backgroundColor = backgroundColor
-        self.chapterSlider.backgroundColor = backgroundColor
-        self.chapterPositionLabel.backgroundColor = backgroundColor
-        self.chapterPositionLabel.textColor = foregroundColor
-        self.tabBarController?.tabBar.barTintColor = backgroundColor
-        self.navigationController?.navigationBar.barTintColor = backgroundColor
-        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
-        // ステータスバーの色を指定する
-        self.navigationController?.navigationBar.barStyle = UIBarStyle.black
+        applyThemeColor(backgroundColor: backgroundColor, foregroundColor: foregroundColor, indicatorStyle: indicatorStyle, barStyle: barStyle)
     }
     
-    func applyBrightTheme() {
-        let backgroundColor = UIColor.white
-        let foregroundColor = UIColor.black
+    func resumeTheme() {
+        var backgroundColor = UIColor.white
+        var foregroundColor = UIColor.black
+        let indicatorStyle = UIScrollView.IndicatorStyle.default
+        let barStyle = UIBarStyle.default
         
-        self.view.backgroundColor = backgroundColor;
-        self.textView.textColor = foregroundColor;
-        self.textView.backgroundColor = backgroundColor;
-        self.textView.indicatorStyle = UIScrollView.IndicatorStyle.black
-        self.nextChapterButton.backgroundColor = backgroundColor
-        self.previousChapterButton.backgroundColor = backgroundColor
-        self.chapterSlider.backgroundColor = backgroundColor
-        self.chapterPositionLabel.backgroundColor = backgroundColor
-        self.chapterPositionLabel.textColor = foregroundColor
-        self.tabBarController?.tabBar.barTintColor = backgroundColor
-        self.navigationController?.navigationBar.barTintColor = backgroundColor
-        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
-        // ステータスバーの色を指定する
-        self.navigationController?.navigationBar.barStyle = UIBarStyle.default
+        if #available(iOS 13.0, *) {
+            backgroundColor = UIColor.systemBackground
+            foregroundColor = UIColor.label
+        }
+
+        applyThemeColor(backgroundColor: backgroundColor, foregroundColor: foregroundColor, indicatorStyle: indicatorStyle, barStyle: barStyle)
     }
-    
 
     @objc func editButtonClicked(_ sender: UIBarButtonItem) {
         pushToEditStory()

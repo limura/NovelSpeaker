@@ -35,7 +35,8 @@ class TextSizeSettingViewControllerSwift: UIViewController {
         }
         
         self.navigationItem.rightBarButtonItems = [
-            UIBarButtonItem(title: NSLocalizedString("TextSizeSettingViewController_FontSettingTitle", comment: "字体設定"), style: .plain, target: self, action: #selector(fontSettingButtonClicked(_:)))
+            UIBarButtonItem(title: NSLocalizedString("TextSizeSettingViewController_FontSettingTitle", comment: "字体設定"), style: .plain, target: self, action: #selector(fontSettingButtonClicked(_:))),
+            UIBarButtonItem(title: NSLocalizedString("TextSizeSettinvViewController_ColorSettingTitle", comment: "色設定"), style: .plain, target: self, action: #selector(colorSettingButtonClicked(_:))),
         ]
         registNotificationCenter()
     }
@@ -45,6 +46,20 @@ class TextSizeSettingViewControllerSwift: UIViewController {
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        applyColorSetting()
+    }
+    
+    func applyColorSetting() {
+        DispatchQueue.main.async {
+            if let state = RealmGlobalState.GetInstance() {
+                self.sampleTextTextView.backgroundColor = state.backgroundColor
+                self.sampleTextTextView.textColor = state.foregroundColor
+            }
+        }
     }
     
     func registNotificationCenter() {
@@ -78,6 +93,11 @@ class TextSizeSettingViewControllerSwift: UIViewController {
     
     @objc func fontSettingButtonClicked(_ sender: UIBarButtonItem) {
         let nextViewController = FontSelectViewController()
+        self.navigationController?.pushViewController(nextViewController, animated: true)
+    }
+    
+    @objc func colorSettingButtonClicked(_ sender: UIBarButtonItem) {
+        let nextViewController = NovelDisplayColorSettingViewController()
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
 

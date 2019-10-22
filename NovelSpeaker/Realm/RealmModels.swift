@@ -1616,7 +1616,6 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     @objc dynamic var isDuckOthersEnabled = false
     @objc dynamic var isMixWithOthersEnabled = false
     @objc dynamic var isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = false
-    @objc dynamic var isDarkThemeEnabled = false
     @objc dynamic var isPlaybackDurationEnabled = false
     @objc dynamic var isShortSkipEnabled = false
     @objc dynamic var isReadingProgressDisplayEnabled = false
@@ -1625,6 +1624,8 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
     @objc dynamic var isPageTurningSoundEnabled = false
     @objc dynamic var m_bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
     @objc dynamic var IsDisallowsCellularAccess = false
+    @objc dynamic var fgColor = Data()
+    @objc dynamic var bgColor = Data()
     
     @objc dynamic var defaultDisplaySettingID = ""
     @objc dynamic var defaultSpeakerID = ""
@@ -1680,88 +1681,67 @@ extension RealmSpeechQueue: CanWriteIsDeleted {
             userDefaults.set(newValue, forKey: RealmGlobalState.isBackgroundNovelFetchEnabledKey)
         }
     }
-    var backgroundColor:UIColor {
+    var backgroundColor:UIColor? {
         get {
-            if isDarkThemeEnabled {
-                return UIColor.black
+            if let color = try? JSONSerialization.jsonObject(with: bgColor, options: .allowFragments) as? NSDictionary, let red = color.object(forKey: "red") as? NSNumber, let green = color.object(forKey: "green") as? NSNumber, let blue = color.object(forKey: "blue") as? NSNumber, let alpha = color.object(forKey: "alpha") as? NSNumber {
+                return UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
+            }
+            if #available(iOS 13.0, *) {
+                return UIColor.systemBackground
             }
             return UIColor.white
         }
+        set(color) {
+            var red:CGFloat = -1.0
+            var green:CGFloat = -1.0
+            var blue:CGFloat = -1.0
+            var alpha:CGFloat = -1.0
+            guard let color = color else {
+                bgColor = Data()
+                return
+            }
+            if color.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+                var colorSetting = Dictionary<String,Float>()
+                colorSetting["red"] = Float(red)
+                colorSetting["green"] = Float(green)
+                colorSetting["blue"] = Float(blue)
+                colorSetting["alpha"] = Float(alpha)
+                if let jsonData = try? JSONSerialization.data(withJSONObject: colorSetting, options: []) {
+                    bgColor = jsonData
+                }
+            }
+        }
     }
-    var tintColor:UIColor {
+    var foregroundColor:UIColor? {
         get {
-            if isDarkThemeEnabled {
-                return UIColor.white
+            if let color = try? JSONSerialization.jsonObject(with: fgColor, options: .allowFragments) as? NSDictionary, let red = color.object(forKey: "red") as? NSNumber, let green = color.object(forKey: "green") as? NSNumber, let blue = color.object(forKey: "blue") as? NSNumber, let alpha = color.object(forKey: "alpha") as? NSNumber {
+                return UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
+            }
+            if #available(iOS 13.0, *) {
+                return UIColor.label
             }
             return UIColor.black
         }
-    }
-    var scrollviewIndicatorStyle:UIScrollView.IndicatorStyle {
-        get {
-            if isDarkThemeEnabled {
-                return .white
+        set(color) {
+            var red:CGFloat = -1.0
+            var green:CGFloat = -1.0
+            var blue:CGFloat = -1.0
+            var alpha:CGFloat = -1.0
+            guard let color = color else {
+                fgColor = Data()
+                return
             }
-            return .black
-        }
-    }
-    var uibarStyle:UIBarStyle{
-        get {
-            if isDarkThemeEnabled {
-                return .black
+            if color.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+                var colorSetting = Dictionary<String,Float>()
+                colorSetting["red"] = Float(red)
+                colorSetting["green"] = Float(green)
+                colorSetting["blue"] = Float(blue)
+                colorSetting["alpha"] = Float(alpha)
+                if let jsonData = try? JSONSerialization.data(withJSONObject: colorSetting, options: []) {
+                    fgColor = jsonData
+                }
             }
-            return .default
         }
-    }
-    // TODO: UIAppearance でテーマできちゃうぜやったーと思ったけど全然駄目だったのでとりあえず放置(´・ω・`)
-    func ApplyThemaToAppearance() {
-        let backgroundColor:UIColor
-        if isDarkThemeEnabled{
-            backgroundColor = UIColor.black
-        }else{
-            backgroundColor = UIColor.white
-        }
-        let tintColor:UIColor
-        if isDarkThemeEnabled{
-            tintColor = UIColor.white
-        }else{
-            tintColor = UIColor.black
-        }
-        let buttonTextColor:UIColor
-        if isDarkThemeEnabled{
-            buttonTextColor = UIColor.white
-        }else{
-            buttonTextColor = UIColor.blue
-        }
-        let barStyle:UIBarStyle
-        if isDarkThemeEnabled{
-            barStyle = .black
-        }else{
-            barStyle = .default
-        }
-        let indicatorStyle:UIScrollView.IndicatorStyle
-        if isDarkThemeEnabled{
-            indicatorStyle = .white
-        }else{
-            indicatorStyle = .black
-        }
-        UIView.appearance().backgroundColor = backgroundColor
-        UIView.appearance().tintColor = tintColor
-        UITextView.appearance().textColor = tintColor
-        UITabBar.appearance().barTintColor = backgroundColor
-        UINavigationBar.appearance().barTintColor = backgroundColor
-        UIButton.appearance().setTitleColor(buttonTextColor, for: .normal)
-        UINavigationBar.appearance().barStyle = barStyle
-        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: tintColor]
-        UIScrollView.appearance().indicatorStyle = indicatorStyle
-    }
-    static func FallbackApplyAppearance() {
-        UIView.appearance().backgroundColor = UIColor.white
-        UIView.appearance().tintColor = UIColor.black
-        UITextView.appearance().textColor = UIColor.black
-        UITabBar.appearance().barTintColor = UIColor.white
-        UINavigationBar.appearance().barStyle = UIBarStyle.default
-        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
-        UIScrollView.appearance().indicatorStyle = UIScrollView.IndicatorStyle.black
     }
     static func GetLastReadStory() -> RealmStory? {
         return GetLastReadNovel()?.readingChapter
