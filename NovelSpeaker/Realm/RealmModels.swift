@@ -10,6 +10,7 @@ import RealmSwift
 import IceCream
 import CloudKit
 import UIKit
+import MessagePacker
 
 @objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 5
@@ -704,7 +705,178 @@ protocol CanWriteIsDeleted {
     var isDeleted: Bool { get set }
 }
 
+class Story: Codable {
+    var url:URL? = nil
+    var subtitle:String? = nil
+    var content:String? = nil
+    var readLocation = 0
+    var chapterNumber = 0
+    
+    static func ConvertToData(story:Story) -> Data {
+        guard let data = try? MessagePackEncoder().encode(story) else { return Data() }
+        return NiftyUtility.dataDeflate(data, level: 9)
+    }
+    static func DecodeFromData(storyData:Data) -> Story? {
+        guard let data = NiftyUtility.dataInflate(storyData), let story = try? MessagePackDecoder().decode(Story.self, from: data) else { return nil }
+        return story
+    }
+    
+    func GetSubtitle() -> String {
+        if let subtitle = subtitle, subtitle.count > 0 {
+            return subtitle
+        }
+        guard let text = content else { return "-" }
+        for line in text.components(separatedBy: .newlines) {
+            let trimedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimedLine.count > 0 {
+                return trimedLine
+            }
+        }
+        return "-"
+    }
+}
+
 // MARK: Model
+@objc final class RealmStoryBulk : Object {
+    @objc dynamic var id = "" // primary key は RealmStoryBulk.CreateUniqueID() で生成したものを使います。
+    @objc dynamic var novelID = ""
+    @objc dynamic var chapterNumber = 0
+    @objc dynamic var isDeleted: Bool = false
+    let contentArray = List<Data>()
+    
+    static var bulkCount = 100
+
+    static func CreateUniqueID(novelID:String, chapterNumber:Int) -> String {
+        let chapterNumberBulk = (chapterNumber - 1) / bulkCount
+        return "\(chapterNumberBulk):\(novelID)"
+    }
+    
+    /// Story を一つづつ登録する場合に使いますが、こちらは Realm.write で囲った物から呼び出される事を期待しています。
+    /// 逆に言うと、Realm の write transaction を内部で呼び出しませんので、外部で呼び出す必要があります。
+    static func SetStoryWith(realm:Realm, novelID:String, story:Story) {
+        if let bulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: story.chapterNumber) {
+            let bulkIndex = (story.chapterNumber - 1) % bulkCount
+            if bulk.contentArray.count > bulkIndex {
+                bulk.contentArray[bulkIndex] = Story.ConvertToData(story: story)
+            }else{
+                if bulkIndex != bulk.contentArray.count {
+                    print("WARN: 未来の chapter が追加されている？")
+                }
+                bulk.contentArray.append(Story.ConvertToData(story: story))
+            }
+            realm.add(bulk, update: .modified)
+        }else{
+            // bulk が無いので作る
+            let bulk = RealmStoryBulk()
+            bulk.id = CreateUniqueID(novelID: novelID, chapterNumber: story.chapterNumber)
+            bulk.novelID = novelID
+            bulk.chapterNumber = (story.chapterNumber - 1) / bulkCount
+            if ((bulk.chapterNumber - 1) % bulkCount) != 0 {
+                print("WARN: 未来の chapter が追加されている")
+            }
+            bulk.contentArray.append(Story.ConvertToData(story: story))
+            realm.add(bulk, update: .modified)
+        }
+    }
+    
+    /// 一つのStoryを登録する場合に使います。一度に沢山のStoryを登録する場合には SetStoryWith() を使う事を勧めます
+    static func SetStory(novelID:String, story:Story) {
+        autoreleasepool {
+            RealmUtil.Write { (realm) in
+                SetStoryWith(realm: realm, novelID: novelID, story: story)
+            }
+        }
+    }
+    
+    static func RemoveLastStoryWith(realm:Realm, novelID:String) {
+        guard let lastStoryBulk = realm.objects(RealmStoryBulk.self).filter("isDeleted = FALSE AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true).last else { return }
+        if lastStoryBulk.contentArray.count <= 1 {
+            realm.delete(lastStoryBulk)
+        }else{
+            lastStoryBulk.contentArray.removeLast()
+            realm.add(lastStoryBulk, update: .modified)
+        }
+    }
+    static func RemoveLastStory(novelID:String) {
+        autoreleasepool {
+            RealmUtil.Write { (realm) in
+                RemoveLastStoryWith(realm: realm, novelID: novelID)
+            }
+        }
+    }
+    static func RemoveAllStoryWith(realm:Realm, novelID:String) {
+        let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = FALSE AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
+        realm.delete(storyBulkArray)
+    }
+    static func RemoveAllStory(novelID:String) {
+        autoreleasepool {
+            RealmUtil.Write { (realm) in
+                RemoveAllStoryWith(realm: realm, novelID: novelID)
+            }
+        }
+    }
+
+    static func SearchStoryBulkWith(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
+        guard let result = realm.object(ofType: RealmStoryBulk.self, forPrimaryKey: CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber)), result.isDeleted == false else { return nil }
+        return result
+    }
+    static func SearchStoryBulk(novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        realm.refresh()
+        return SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
+    }
+    
+    static func SearchStory(novelID:String, chapterNumber:Int) -> Story? {
+        return autoreleasepool {
+            guard let bulk = SearchStoryBulk(novelID: novelID, chapterNumber: chapterNumber) else { return nil }
+            let bulkIndex = (chapterNumber - 1) % bulkCount
+            if bulk.contentArray.count <= bulkIndex {
+                return nil
+            }
+            return Story.DecodeFromData(storyData: bulk.contentArray[bulkIndex])
+        }
+    }
+    
+    static func SearchAllStoryFor(novelID:String) -> Array<Story>? {
+        return autoreleasepool {
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            realm.refresh()
+            let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
+            var result = Array<Story>()
+            for storyBulk in storyBulkArray {
+                for storyData in storyBulk.contentArray {
+                    if let story = Story.DecodeFromData(storyData: storyData) {
+                        result.append(story)
+                    }
+                }
+            }
+            return result
+        }
+    }
+    
+    static func GetAllObjects() -> Results<RealmStoryBulk>? {
+        return autoreleasepool {
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            realm.refresh()
+            return realm.objects(RealmStoryBulk.self).filter("isDeleted = false")
+        }
+    }
+    
+    override class func primaryKey() -> String? {
+        return "id"
+    }
+    
+    override static func indexedProperties() -> [String] {
+        return ["novelID", "chapterNumber", "isDeleted"]
+    }
+}
+extension RealmStoryBulk: CKRecordConvertible {
+}
+extension RealmStoryBulk: CKRecordRecoverable {
+}
+extension RealmStoryBulk: CanWriteIsDeleted {
+}
+
 @objc final class RealmStory : Object {
     @objc dynamic var id = "" // primary key は RealmStory.CreateUniqueID() で生成したものを使います。
     @objc dynamic var novelID = ""

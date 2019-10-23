@@ -8,14 +8,16 @@ target 'NovelSpeaker' do
   # Pods for NovelSpeaker
   pod 'SZTextView'
   pod 'Eureka'
-  pod "RATreeView", "~> 2.1.2"
   pod "MSColorPicker"
 
   source 'https://github.com/CocoaPods/Specs.git'
   pod 'Zip', '~> 1.1'
   pod 'FTLinearActivityIndicator'
+
+  pod "RATreeView", "~> 2.1.2"
   #pod 'IceCream', :git => 'https://github.com/caiyue1993/IceCream.git'
   pod 'IceCream'
+  pod 'MessagePacker'
 
   target 'NovelSpeakerTests' do
     inherit! :search_paths
