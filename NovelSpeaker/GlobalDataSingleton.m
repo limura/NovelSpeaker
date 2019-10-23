@@ -4063,7 +4063,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     for (SpeechModSettingCacheData* speechMod in array) {
         [resultDictionary setObject:@{
           @"afterString": speechMod.afterString,
-          @"type": [[NSNumber alloc] initWithUnsignedInt:speechMod.convertType],
+          @"type": [[NSNumber alloc] initWithUnsignedInt:(unsigned int)speechMod.convertType],
           } forKey:speechMod.beforeString];
     }
     return resultDictionary;
@@ -4133,7 +4133,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addFloatValueForJSONNSDictionary:result key:@"text_size_value" number:globalState.textSizeValue];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"speech_wait_setting_use_experimental_wait" number:globalState.speechWaitSettingUseExperimentalWait];
     [NiftyUtility addStringForJSONNSDictionary:result key:@"default_voice_identifier" string:[self GetVoiceIdentifier]];
-    [NiftyUtility addIntValueForJSONNSDictionary:result key:@"content_sort_type" number:[[NSNumber alloc] initWithInt:[self GetBookSelfSortType]]];
+    [NiftyUtility addIntValueForJSONNSDictionary:result key:@"content_sort_type" number:[[NSNumber alloc] initWithInt:(int)[self GetBookSelfSortType]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"menuitem_is_add_speech_mod_setting_only" number:[[NSNumber alloc] initWithBool:[self GetMenuItemIsAddSpeechModSettingOnly]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"override_ruby_is_enabled" number:[[NSNumber alloc] initWithBool:[self GetOverrideRubyIsEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_ignore_url_speech_enabled" number:[[NSNumber alloc] initWithBool:[self GetIsIgnoreURIStringSpeechEnabled]]];

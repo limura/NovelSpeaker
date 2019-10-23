@@ -30,7 +30,7 @@ class FloatingButton: UIView {
     
     @objc public static func createNewFloatingButton() -> FloatingButton? {
         let nib = UINib.init(nibName: "FloatingButton", bundle: nil)
-        var view = nib.instantiate(withOwner: self, options: nil)
+        let view = nib.instantiate(withOwner: self, options: nil)
         if view.count <= 0 {
             return nil
         }
