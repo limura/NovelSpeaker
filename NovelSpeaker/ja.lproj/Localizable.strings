@@ -219,7 +219,7 @@
 "ImportFromWebPageViewController_ImputRequiredFrom..." = "%@が入力を求めています";
 "ImportFromWebPageViewController_ConifirmDeleteBookmark" = "このページのブックマークを削除します。よろしいですか？";
 
-"UriLoader_NSURLConnectionRequestFailed" = "Webサーバからの取得に失敗しました。(恐らくは接続に失敗しています。ネットワーク状況を確認してください)";
+"UriLoader_NSURLConnectionRequestFailed" = "Webサーバからの取得に失敗しました。(恐らくは接続に失敗しています。ネットワーク状況を確認してください。また、外出中など携帯電話網でしか接続されていない時でこの状況が発生する場合は、設定→携帯電話網ではダウンロードしないようにする の設定項目がONになっている可能性が考えられます)";
 "UriLoader_HTTPResponseIsInvalid" = "サーバから返されたステータスコードが正常値(200 OK等)ではなく、\"%ld\" を返されました。ログインが必要なサイトなどでこのエラーが出ている場合は対応は難しいと思われます。といっても、対応できる問題かもわかりませんので、ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂ければと思います";
 "UriLoader_HTMLParseFailed_Parse" = "HTMLの解析に失敗しました。(有効なHTMLまたはXHTML文書ではないようです。いまのところ、ことせかい はPDF等のHTMLやXHTMLではない文書は読み込む事ができません)";
 "UriLoader_HTMLParseFailed_Xpath" = "HTMLの解析に失敗しました。(不正なxpathが指定されました。恐らくはこのサイトの解析に用いるための「wedataに登録されている情報」が古くなっているか書き間違えています。ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLを添えて報告して頂くか、OpenIDを使って自身でwedataを編集することで解決するかもしれません)";
