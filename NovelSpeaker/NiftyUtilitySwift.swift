@@ -220,15 +220,7 @@ class NiftyUtilitySwift: NSObject {
                             if let err = error {
                                 errorMessage = err
                             }
-                            EasyDialog.Builder(viewController)
-                                .title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
-                                .label(text: errorMessage)
-                                .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                                    DispatchQueue.main.async {
-                                        dialog.dismiss(animated: false, completion: nil)
-                                    }
-                                })
-                                .build().show()
+                            NiftyUtilitySwift.EasyDialogMessageDialog(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"), message: errorMessage, completion: nil)
                         })
                     }
                 })
