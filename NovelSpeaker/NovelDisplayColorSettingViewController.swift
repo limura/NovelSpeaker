@@ -10,6 +10,7 @@ import UIKit
 import Eureka
 
 class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPresentationControllerDelegate, MSColorSelectionViewControllerDelegate {
+    var tmpColorSetting:UIColor = UIColor.white
     
     enum ColorPickerTarget {
         case foreground
@@ -93,9 +94,12 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
         case .foreground:
             colorSelectionViewController.color = self.getForegroundColor()
         }
+        self.tmpColorSetting = colorSelectionViewController.color
+        let cancelButtonItem = UIBarButtonItem(title: NSLocalizedString("Cancel_button", comment: "キャンセル"), style: .done, target: self, action: #selector(self.cancelAndDismissViewController(sendor:)))
+        colorSelectionViewController.navigationItem.leftBarButtonItem = cancelButtonItem
         if self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClass.compact {
-            let buttonItem = UIBarButtonItem(title: NSLocalizedString("NovelDisplayColorSettingViewController_ColorPickerDoneTitle", comment: "この色で設定"), style: .done, target: self, action: #selector(self.dismissViewController(sendor:)))
-            colorSelectionViewController.navigationItem.rightBarButtonItem = buttonItem
+            let commitButtonItem = UIBarButtonItem(title: NSLocalizedString("NovelDisplayColorSettingViewController_ColorPickerDoneTitle", comment: "この色で設定"), style: .done, target: self, action: #selector(self.dismissViewController(sendor:)))
+            colorSelectionViewController.navigationItem.rightBarButtonItem = commitButtonItem
         }
         self.present(navController, animated: true, completion: nil)
     }
@@ -155,7 +159,7 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
         })
     }
     
-    @objc func colorViewController(_ colorViewCntroller: MSColorSelectionViewController, didChange color: UIColor) {
+    func setColorPickerColor(color:UIColor) {
         switch self.colorPickerTarget {
         case .foreground:
             self.saveColor(foregroundColor: color, backgroundColor: getBackgroundColor())
@@ -166,10 +170,19 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
         }
     }
     
+    @objc func colorViewController(_ colorViewCntroller: MSColorSelectionViewController, didChange color: UIColor) {
+        setColorPickerColor(color: color)
+    }
+    
     @objc func prepareForPopoverPresentation(_ popoverPresentationController: UIPopoverPresentationController) {
     }
     
     @objc func dismissViewController(sendor:UIButton) {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    @objc func cancelAndDismissViewController(sendor:UIButton) {
+        setColorPickerColor(color: self.tmpColorSetting)
         self.dismiss(animated: true, completion: nil)
     }
 }
