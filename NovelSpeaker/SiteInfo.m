@@ -199,7 +199,7 @@
     }
     NSString* htmlTags = @"<[^>]*>";
     NSRange range;
-    while ((range = [html rangeOfString:htmlTags options:NSRegularExpressionSearch]).location != NSNotFound) {
+    while (html != nil && (range = [html rangeOfString:htmlTags options:NSRegularExpressionSearch]).location != NSNotFound) {
         html = [html stringByReplacingCharactersInRange:range withString:@""];
     }
     return html;
@@ -209,7 +209,7 @@
 + (NSString*)ReplaceXhtmlLonlyTag:(NSString*)html {
     NSString* lonlyTag = @"/>";
     NSRange range;
-    while ((range = [html rangeOfString:lonlyTag options:NSRegularExpressionSearch]).location != NSNotFound) {
+    while (html != nil && (range = [html rangeOfString:lonlyTag options:NSRegularExpressionSearch]).location != NSNotFound) {
         html = [html stringByReplacingCharactersInRange:range withString:@">"];
     }
     return html;
