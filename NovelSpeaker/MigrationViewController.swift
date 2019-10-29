@@ -154,6 +154,7 @@ class MigrationViewController: UIViewController {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             guard let firstViewController = storyboard.instantiateInitialViewController() else { return }
             NiftyUtilitySwift.RegisterToplevelViewController(viewController: firstViewController)
+            firstViewController.modalPresentationStyle = .fullScreen
             self.present(firstViewController, animated: true, completion: nil)
         }
     }
