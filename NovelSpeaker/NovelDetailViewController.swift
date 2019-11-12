@@ -247,8 +247,7 @@ class NovelDetailViewController: FormViewController {
                         return
                     }
                     for story in storys {
-                        guard let content = story.content else { continue }
-                        let rubyDictionary =  NiftyUtilitySwift.FindRubyNotation(text: content)
+                        let rubyDictionary =  NiftyUtilitySwift.FindRubyNotation(text: story.content)
                         for (before, after) in rubyDictionary {
                             result[before] = after
                         }

@@ -227,21 +227,18 @@ class CoreDataToRealmTool: NSObject {
             guard let storyCoreData = storyObj as? StoryCacheData, let chapterNumber = storyCoreData.chapter_number as? Int else {
                 continue
             }
-            autoreleasepool {
-                let story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber)
-                // Story が同じ realm だとこれはいけない。(逆に Story が別の realm だと RealmUtil.RealmStoryWrite() はしないといけない
-                //RealmUtil.RealmStoryWrite { (realm) in
-                    if let readLocation = storyCoreData.readLocation as? Int {
-                        story.readLocation = readLocation
-                    }
-                    story.content = storyCoreData.content
-                    if let ncode = content.ncode, let end = content.end as? Bool {
-                        story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
-                    }
-                    
-                    realm.add(story, update: .modified)
-                //}
+            var story = Story()
+            story.novelID = novelID
+            story.chapterNumber = chapterNumber
+            story.content = storyCoreData.content
+            if let ncode = content.ncode, let end = content.end as? Bool {
+                story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
             }
+            if let readLocation = storyCoreData.readLocation as? Int {
+                story.readLocation = readLocation
+            }
+            print("CreateRealmStoryFromCoreDataWithNarouContent SetStory(story.chapterNumber: \(story.chapterNumber))")
+            RealmStoryBulk.SetStoryWith(realm: realm, story: story)
         }
     }
     
@@ -299,7 +296,7 @@ class CoreDataToRealmTool: NSObject {
                     novel.title = title
                 }
                 if let currentReadingChapter = novelCoreData.currentReadingStory?.chapter_number as? Int {
-                    novel.m_readingChapterStoryID = RealmStory.CreateUniqueID(novelID: novel.novelID, chapterNumber: currentReadingChapter)
+                    novel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: currentReadingChapter)
                 }
                 // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
                 if let newFlug = novelCoreData.is_new_flug as? Bool {
@@ -315,18 +312,14 @@ class CoreDataToRealmTool: NSObject {
                 }
 
                 var lastStoryID:String? = nil
-                autoreleasepool {
-                    // RealmStory が別 Realm でない場合は呼んでしまうと駄目
-                    //RealmUtil.RealmStoryWrite { (realm) in
-                        // chapterNumber が最後の章に関しては、
-                        if let lastStory = novel.linkedStorys?.sorted(byKeyPath: "chapterNumber", ascending: true).last {
-                            // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する
-                            if novelCoreData.isURLContent(), let lastDownloadURL = novelCoreData.userid {
-                                lastStory.url = lastDownloadURL
-                            }
-                            lastStoryID = lastStory.id
-                        }
-                    //}
+                // chapterNumber が最後の章に関しては、
+                if var lastStory = novel.lastChapter {
+                    // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する
+                    if novelCoreData.isURLContent(), let lastDownloadURL = novelCoreData.userid {
+                        lastStory.url = lastDownloadURL
+                        RealmStoryBulk.SetStoryWith(realm: realm, story: lastStory)
+                    }
+                    lastStoryID = lastStory.storyID
                 }
                 if let lastStoryID = lastStoryID {
                     //RealmUtil.Write { (realm) in

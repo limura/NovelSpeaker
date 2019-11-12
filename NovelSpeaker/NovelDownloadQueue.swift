@@ -191,7 +191,9 @@ class NovelDownloader : NSObject {
                         failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_FailedByNoRealmNovel", comment: "小説が本棚に登録されていなかったため、ダウンロードを終了します。") + "(novelID: \(novelID))")
                         return
                     }
-                    let story = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber)
+                    var story = Story()
+                    story.novelID = novelID
+                    story.chapterNumber = chapterNumber
                     story.url = targetURL.absoluteString
                     story.content = content.trimmingCharacters(in: .whitespacesAndNewlines)
                     //story.downloadDate = queuedDate
@@ -204,25 +206,16 @@ class NovelDownloader : NSObject {
                     if chapterNumber == 1 {
                         //story.lastReadDate = Date(timeIntervalSince1970: 60)
                     }
-                    let storyID = story.id
-                    RealmUtil.RealmStoryWrite { (realm) in
-                        /* // 通常の更新時にはタグの更新はしないでおきます
-                         if let keywordArray = htmlStory.keyword {
-                         for keyword in keywordArray {
-                         guard let keyword = keyword as? String else { continue }
-                         RealmNovelTag.AddTag(realm: realm, tagName: keyword, novelID: novelID, type: "keyword")
-                         }
-                         }
-                         */
-                        realm.add(story, update: .modified)
-                    }
+                    let storyID = story.storyID
                     RealmUtil.Write { (realm) in
+                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
                         novel.m_lastChapterStoryID = storyID
                         novel.lastDownloadDate = queuedDate
                         if chapterNumber == 1 {
                             novel.m_readingChapterStoryID = storyID
                         }
                         novel.AppendDownloadDate(date: queuedDate, realm: realm)
+                        realm.add(novel, update: .modified)
                     }
                     print("add new story: \(novelID), chapterNumber: \(chapterNumber), url: \(targetURL.absoluteString)")
                     if let nextUrl = htmlStory.nextUrl {
@@ -298,6 +291,7 @@ class NovelDownloader : NSObject {
                             if let author = htmlStory.author, novel.writer.count <= 0 {
                                 novel.writer = author
                             }
+                            realm.add(novel, update: .modified)
                             if let keywords = htmlStory.keyword {
                                 for keyword in keywords {
                                     guard let keyword = keyword as? String else { continue }
@@ -310,23 +304,21 @@ class NovelDownloader : NSObject {
                             targetURL = firstPage
                             chapterNumber = 0 // あとで +1 して downloadOnce() が呼ばれるので。
                         }else{
-                            let storyID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: 1)
-                            autoreleasepool {
-                                let story = RealmStory.SearchStoryFrom(storyID: storyID) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: 1)
-                                RealmUtil.RealmStoryWrite { (realm) in
-                                    story.content = (htmlStory.content ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-                                    story.subtitle = (htmlStory.subtitle ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-                                    //story.downloadDate = Date()
-                                    //story.lastReadDate = Date(timeIntervalSince1970: 60)
-                                    story.url = lastDownloadURL.absoluteString
-                                    realm.add(story, update: .modified)
-                                }
-                            }
+                            let storyID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)
+                            var story = Story()
+                            story.novelID = novelID
+                            story.chapterNumber = 1
+                            story.content = (htmlStory.content ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                            story.subtitle = (htmlStory.subtitle ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                            story.url = lastDownloadURL.absoluteString
                             RealmUtil.Write { (realm) in
+                                RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                                print("\(storyID) saved.")
                                 novel.m_lastChapterStoryID = storyID
                                 novel.lastDownloadDate = queuedDate
                                 novel.m_readingChapterStoryID = storyID
                                 novel.AppendDownloadDate(date: queuedDate, realm: realm)
+                                realm.add(novel, update: .modified)
                             }
                             if let url = htmlStory.nextUrl {
                                 targetURL = url

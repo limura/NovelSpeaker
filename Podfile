@@ -17,7 +17,7 @@ target 'NovelSpeaker' do
   pod "RATreeView", "~> 2.1.2"
   #pod 'IceCream', :git => 'https://github.com/caiyue1993/IceCream.git'
   pod 'IceCream'
-  pod 'MessagePacker'
+  #pod 'MessagePacker'
 
   target 'NovelSpeakerTests' do
     inherit! :search_paths

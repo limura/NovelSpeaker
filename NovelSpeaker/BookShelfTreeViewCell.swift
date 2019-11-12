@@ -77,7 +77,7 @@ class BookShelfTreeViewCell: UITableViewCell {
             }
             let chapterNumber = story.chapterNumber
             let readLocation = Float(story.readLocation)
-            let contentCount = Float(story.content?.count ?? story.readLocation)
+            let contentCount = Float(story.content.count)
             let lastChapterNumber = novel.lastChapterNumber ?? 1
             let progress = ((Float(chapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
             DispatchQueue.main.async {
@@ -174,7 +174,7 @@ class BookShelfTreeViewCell: UITableViewCell {
 
     func registerStoryObserver(novelID:String) {
         autoreleasepool {
-            self.storyObserveToken = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID).observe({ (change) in
+            self.storyObserveToken = RealmStoryBulk.GetAllObjects()?.filter("novelID = %@", novelID).observe({ (change) in
                 switch (change) {
                 case .initial(_):
                     break
@@ -214,7 +214,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     // TODO: StoryObserver といいつつ、New フラグしか見張ってない
     func registerStoryForNovelArrayObserver(novelIDArray:[String]) {
         autoreleasepool {
-            self.storyForNovelArrayObserveToken = RealmStory.GetAllObjects()?.filter("novelID IN %@", novelIDArray).observe({ (change) in
+            self.storyForNovelArrayObserveToken = RealmStoryBulk.GetAllObjects()?.filter("novelID IN %@", novelIDArray).observe({ (change) in
                 switch (change) {
                 case .initial(_):
                     break

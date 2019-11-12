@@ -621,8 +621,10 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
                     NSLayoutConstraint.deactivate([forKeyboardConstraint])
                 }
                 // 新しい中央の場所をそれっぽく設定します
-                forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: -height / 2)
-                NSLayoutConstraint.activate([forKeyboardConstraint])
+                if let baseView = baseView {
+                    forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: -height / 2)
+                    NSLayoutConstraint.activate([forKeyboardConstraint])
+                }
                 // TextView は「ユーザが思い描いた感じで画面の大半を専有している」と仮定して、
                 // その高さを縮めないとキーボードを表示したために画面外に追いやられる部分がある、と思い込んで、
                 // とりあえず高さを 0.4倍 して表示しなおさせています。
@@ -659,8 +661,10 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             if forKeyboardConstraint != nil {
                 NSLayoutConstraint.deactivate([forKeyboardConstraint])
             }
-            forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: 0)
-            NSLayoutConstraint.activate([forKeyboardConstraint])
+            if let baseView = baseView {
+                forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: 0)
+                NSLayoutConstraint.activate([forKeyboardConstraint])
+            }
             if forTextViewConstraintArray != nil {
                 NSLayoutConstraint.deactivate(forTextViewConstraintArray)
             }

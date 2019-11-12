@@ -11,19 +11,17 @@ import RealmSwift
 
 class RealmToRealmCopyTool: NSObject {
     static func CopyStorys(from:Realm, to:Realm, progress:(String)->Void) throws {
-        let objects = from.objects(RealmStory.self)
+        let objects = from.objects(RealmStoryBulk.self)
         let maxCount = objects.count
         for (index, obj) in objects.enumerated() {
             progress(NSLocalizedString("RealmToRealmCopyTool_Progress_Story", comment: "小説本文を移行中") + " (\(index)/\(maxCount))")
             to.beginWrite()
-            let newObj = RealmStory.CreateNewStory(novelID: obj.novelID, chapterNumber: obj.chapterNumber)
+            let newObj = RealmStoryBulk()
+            newObj.novelID = obj.novelID
+            newObj.id = obj.id
+            newObj.chapterNumber = obj.chapterNumber
             newObj.isDeleted = obj.isDeleted
-            newObj.contentZiped = obj.contentZiped
-            newObj.readLocation = obj.readLocation
-            newObj.url = obj.url
-            //newObj.lastReadDate = obj.lastReadDate
-            //newObj.downloadDate = obj.downloadDate
-            newObj.subtitle = obj.subtitle
+            newObj.storyListAsset = obj.storyListAsset // TODO: CreamAsset はこういうコピーをして良いのか確認した方がよさげ？
             to.add(newObj, update: .modified)
             try to.commitWrite()
         }
@@ -138,23 +136,6 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopySpeechQueue(from:Realm, to:Realm, progress:(String)->Void) throws {
-        let objects = from.objects(RealmSpeechQueue.self)
-        let maxCount = objects.count
-        for (index, obj) in objects.enumerated() {
-            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_SpeechQueue", comment: "読み上げリストを移行中") + " (\(index)/\(maxCount))")
-            to.beginWrite()
-            let newObj = RealmSpeechQueue()
-            newObj.isDeleted = obj.isDeleted
-            newObj.name = obj.name
-            newObj.createdDate = obj.createdDate
-            newObj.targetStoryIDArray.removeAll()
-            newObj.targetStoryIDArray.append(objectsIn: obj.targetStoryIDArray)
-            to.add(newObj, update: .modified)
-            try to.commitWrite()
-        }
-    }
-
     static func CopyGlobalState(from:Realm, to:Realm, progress:(String)->Void) throws {
         let objects = from.objects(RealmGlobalState.self)
         let maxCount = objects.count
@@ -256,7 +237,6 @@ class RealmToRealmCopyTool: NSObject {
         try CopySpeechWaitConfig(from: from, to: to, progress: progress)
         try CopySpeakerSetting(from: from, to: to, progress: progress)
         try CopySpeechSectionConfig(from: from, to: to, progress: progress)
-        try CopySpeechQueue(from: from, to: to, progress: progress)
         try CopyGlobalState(from: from, to: to, progress: progress)
         try CopyDisplaySetting(from: from, to: to, progress: progress)
         try CopyNovelTag(from: from, to: to, progress: progress)

@@ -38,7 +38,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         // Do any additional setup after loading the view.
         initWidgets()
         if let storyID = storyID {
-            let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+            let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
             NovelSpeakerUtility.CheckAndRecoverStoryCount(novelID: novelID)
             autoreleasepool {
                 if let novel = RealmNovel.SearchNovelFrom(novelID: novelID){
@@ -130,7 +130,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     
     func applyChapterListChange() {
         autoreleasepool {
-            guard let storyID = self.storyID, let story = RealmStory.SearchStoryFrom(storyID: storyID) else { return }
+            guard let storyID = self.storyID, let story = RealmStoryBulk.SearchStory(storyID: storyID) else { return }
             let novelID = story.novelID
             let chapterNumber = story.chapterNumber
             DispatchQueue.main.async {
@@ -165,11 +165,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         }
     }
     
-    func setStoryWithoutSetToStorySpeaker(storyID:String) {
+    func setStoryWithoutSetToStorySpeaker(story:Story) {
         autoreleasepool {
-            guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else { return }
             let content = story.content
-            let storyID = story.id
+            let storyID = story.storyID
             let readLocation = story.readLocation
             if let currentStoryID = self.storyID, currentStoryID != storyID {
                 self.observeStory(storyID: storyID)
@@ -178,8 +177,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             self.applyChapterListChange()
             DispatchQueue.main.async {
                 if let textViewText = self.textView.text, textViewText != content {
-                    if let content = content {
-                        self.textView.text = content
+                    if story.content.count > 0 {
+                        self.textView.text = story.content
                     }else{
                         self.textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
                     }
@@ -225,8 +224,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
     func observeStory(storyID:String) {
         autoreleasepool {
-            guard let story = RealmStory.SearchStoryFrom(storyID: storyID) else { return }
-            self.storyObserverToken = story.observe({ [weak self] (change) in
+            guard let storyBulk = RealmStoryBulk.SearchStoryBulk(storyID: storyID) else { return }
+            let targetStoryID = storyID
+            self.storyObserverToken = storyBulk.observe({ [weak self] (change) in
                 switch change {
                 case .error(_):
                     break
@@ -234,8 +234,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                     for property in properties {
                         // content が書き換わった時のみを監視します。
                         // でないと lastReadDate とかが書き換わった時にも表示の更新が走ってしまいます。
-                        if property.name == "contentZiped" {
-                            self?.setStoryWithoutSetToStorySpeaker(storyID: storyID)
+                        if property.name == "contentArray", let contentArray = property.newValue as? List<Data>, let story = RealmStoryBulk.BulkToStory(bulk: contentArray, chapterNumber: RealmStoryBulk.StoryIDToChapterNumber(storyID: targetStoryID)), story.content != self?.textView.text {
+                            self?.setStoryWithoutSetToStorySpeaker(story: story)
                         }
                     }
                 case .deleted:
@@ -246,16 +246,38 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
     func observeStoryArray(novelID:String) {
         autoreleasepool {
-            guard let storyArray = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID) else { return }
-            self.storyArrayObserverToken = storyArray.observe({ [weak self] (changes) in
+            guard let storyBulkArray = RealmStoryBulk.SearchStoryBulk(novelID: novelID) else { return }
+            self.storyArrayObserverToken = storyBulkArray.observe({ [weak self] (changes) in
                 switch changes {
                 case .initial(_):
                     break
-                case .update(_, let deletions, let insertions, _):
+                case .update(let value, let deletions, let insertions, let modifications):
                     if deletions.count > 0 || insertions.count > 0 {
+                        // 数の増減があったら反映する
                         DispatchQueue.main.async {
                             //print("SpeechViewController: story delete or inserted. update display")
                             self?.applyChapterListChange()
+                        }
+                    }
+                    if modifications.count > 0 {
+                        // Bulk 管理になったので modifications でも数の増減がありえる
+                        var chapterCount = 0
+                        for storyBulk in value {
+                            if let storyArray = storyBulk.LoadStoryArray() {
+                                chapterCount += storyArray.count
+                            }
+                        }
+                        DispatchQueue.main.async {
+                            guard let chapterPositionText = self?.chapterPositionLabel.text else {
+                                return
+                            }
+                            let lastChapterNumberTextArray = chapterPositionText.components(separatedBy: "/")
+                            guard lastChapterNumberTextArray.count == 2, let lastChapterNumber = Int(string: lastChapterNumberTextArray[1]) else {
+                                return
+                            }
+                            if chapterCount != lastChapterNumber {
+                                self?.applyChapterListChange()
+                            }
                         }
                     }
                 case .error(_):
@@ -306,7 +328,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         nextViewController.targetSpeechModSettingBeforeString = text
         nextViewController.isUseAnyNovelID = true
         if let storyID = storyID {
-            nextViewController.targetNovelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+            nextViewController.targetNovelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         }else{
             // 不測の事態だ……('A`)
             return
@@ -316,7 +338,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
 
     @objc func checkSpeechText(sender: UIMenuItem) {
         guard let range = self.textView.selectedTextRange, let text = self.textView.text(in: range), let storyID = self.storyID else { return }
-        let novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         let dummySpeaker = NiftySpeaker()
         dummySpeaker.clearSpeakSettings()
         self.storySpeaker.applySpeechConfig(novelID: novelID, speaker: dummySpeaker)
@@ -374,11 +396,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "EditUserTextSegue" {
             if let nextViewController = segue.destination as? EditBookViewController, let storyID = self.storyID {
-                nextViewController.targetNovelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+                nextViewController.targetNovelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
             }
         }else if segue.identifier == "NovelDetailViewPushSegue" {
             guard let nextViewController = segue.destination as? NovelDetailViewController, let storyID = self.storyID else { return }
-            nextViewController.novelID = RealmStory.StoryIDToNovelID(storyID: storyID)
+            nextViewController.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         }
     }
     
@@ -463,11 +485,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                 title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
                 message: nil) { (searchingDialog) in
                 autoreleasepool {
-                    guard let storyID = self.storyID, let storys = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID))?.linkedStorys?.filter({ (story) -> Bool in
+                    guard let storyID = self.storyID, let storys = RealmStoryBulk.SearchAllStoryFor(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.filter({ (story) -> Bool in
                         guard let searchString = searchString else { return true }
                         if searchString.count <= 0 { return true }
-                        guard let content = story.content else { return false }
-                        return content.contains(searchString)
+                        return story.content.contains(searchString)
                     }) else {
                         NiftyUtilitySwift.EasyDialogOneButton(
                             viewController: self,
@@ -481,13 +502,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                     })
                     var selectedText:String? = nil
                     autoreleasepool {
-                        if let story = RealmStory.SearchStoryFrom(storyID: storyID) {
+                        if let story = RealmStoryBulk.SearchStory(storyID: storyID) {
                             selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
                         }
                     }
                     let picker = PickerViewDialog.createNewDialog(displayTextArray, firstSelectedString: selectedText, parentView: self.view) { (selectedText) in
                         guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number) else { return }
-                        self.storySpeaker.SetStory(storyID: RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber))
+                        self.storySpeaker.SetStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber))
                     }
                     searchingDialog.dismiss(animated: false) {
                         picker?.popup(nil)
@@ -514,7 +535,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
 
     @objc func shareButtonClicked(_ sender: UIBarButtonItem) {
         autoreleasepool {
-            guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID)) else {
+            guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelFrom(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID)) else {
                 NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechViewController_UnknownErrorForShare", comment: "不明なエラーでシェアできませんでした。"), message: nil, buttonTitle: NSLocalizedString("OK_button", comment: "OK"), buttonAction: nil)
                 return
             }
@@ -531,11 +552,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     
     @objc func urlRefreshButtonClicked(_ sender: UIBarButtonItem) {
         guard let storyID = self.storyID else { return }
-        NovelDownloadQueue.shared.addQueue(novelID: RealmStory.StoryIDToNovelID(storyID: storyID))
+        NovelDownloadQueue.shared.addQueue(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))
     }
     @objc func safariButtonClicked(_ sender: UIBarButtonItem) {
         autoreleasepool {
-            guard let storyID = self.storyID, let urlString = RealmNovel.SearchNovelFrom(novelID: RealmStory.StoryIDToNovelID(storyID: storyID))?.url else {
+            guard let storyID = self.storyID, let urlString = RealmNovel.SearchNovelFrom(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.url else {
                 return
             }
             /// XXX 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
@@ -583,8 +604,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             self.textViewScrollTo(readLocation: range.location)
         }
     }
-    func storySpeakerStoryChanged(storyID:String){
-        setStoryWithoutSetToStorySpeaker(storyID: storyID)
+    func storySpeakerStoryChanged(story:Story){
+        setStoryWithoutSetToStorySpeaker(story: story)
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false
             self.storySpeaker.StartSpeech(withMaxSpeechTimeReset: true)
@@ -597,8 +618,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             return
         }
         let chapterNumber = Int(self.chapterSlider.value + 0.5)
-        let targetStoryID = RealmStory.CreateUniqueID(novelID: RealmStory.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)
-        self.chapterSlider.value = Float(chapterNumber)
+        let targetStoryID = RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)
+        //self.chapterSlider.value = Float(chapterNumber)
         self.storySpeaker.SetStory(storyID: targetStoryID)
     }
     @IBAction func previousChapterButtonClicked(_ sender: Any) {

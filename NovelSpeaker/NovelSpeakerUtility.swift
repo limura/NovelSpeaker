@@ -670,42 +670,42 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreBookshelf_ncode_V_1_0_0(novel:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
         autoreleasepool {
             guard let ncode = novel.object(forKey: "ncode") as? String else { return }
-            let urlString = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: 1, end: false)
-            let realmNovel = RealmNovel.SearchNovelFrom(novelID: urlString) ?? RealmNovel()
-            if realmNovel.novelID != urlString {
-                realmNovel.novelID = urlString
-            }
-            let novelID = realmNovel.novelID
-            let currentReadingChapterNumber:Int
-            if let current_reading_chapter_number = novel.object(forKey: "current_reading_chapter_number") as? NSNumber {
-                currentReadingChapterNumber = current_reading_chapter_number.intValue
-                realmNovel.m_readingChapterStoryID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: currentReadingChapterNumber)
-            }else{
-                currentReadingChapterNumber = 0
-            }
-            let isNewFlug:Bool
-            if let is_new_flug = novel.object(forKey: "is_new_flug") as? NSNumber {
-                isNewFlug = is_new_flug.boolValue
-            }else{
-                isNewFlug = false
-            }
-            if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
-                realmNovel.lastDownloadDate = lastDownloadDate
-                if isNewFlug {
-                    realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(-1)
-                }else{
-                    realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(1)
-                }
-            }else{
-                if isNewFlug {
-                    realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: 0)
-                    realmNovel.lastReadDate = Date(timeIntervalSinceNow: -1)
-                }else{
-                    realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
-                    realmNovel.lastReadDate = Date(timeIntervalSinceNow: 0)
-                }
-            }
             RealmUtil.Write { (realm) in
+                let urlString = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: 1, end: false)
+                let realmNovel = RealmNovel.SearchNovelFrom(novelID: urlString) ?? RealmNovel()
+                if realmNovel.novelID != urlString {
+                    realmNovel.novelID = urlString
+                }
+                let novelID = realmNovel.novelID
+                let currentReadingChapterNumber:Int
+                if let current_reading_chapter_number = novel.object(forKey: "current_reading_chapter_number") as? NSNumber {
+                    currentReadingChapterNumber = current_reading_chapter_number.intValue
+                    realmNovel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: currentReadingChapterNumber)
+                }else{
+                    currentReadingChapterNumber = 0
+                }
+                let isNewFlug:Bool
+                if let is_new_flug = novel.object(forKey: "is_new_flug") as? NSNumber {
+                    isNewFlug = is_new_flug.boolValue
+                }else{
+                    isNewFlug = false
+                }
+                if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
+                    realmNovel.lastDownloadDate = lastDownloadDate
+                    if isNewFlug {
+                        realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(-1)
+                    }else{
+                        realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(1)
+                    }
+                }else{
+                    if isNewFlug {
+                        realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: 0)
+                        realmNovel.lastReadDate = Date(timeIntervalSinceNow: -1)
+                    }else{
+                        realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
+                        realmNovel.lastReadDate = Date(timeIntervalSinceNow: 0)
+                    }
+                }
                 realmNovel.url = urlString
                 realmNovel.type = .URL
                 if let writer = novel.object(forKey: "writer") as? String {
@@ -721,38 +721,35 @@ class NovelSpeakerUtility: NSObject {
                         RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: RealmNovelTag.TagType.Keyword)
                     }
                 }
-            }
-            if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true), let end = novel.object(forKey: "end") as? NSNumber {
-                let currentReadingChapterReadLocation:Int
-                if let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
-                    currentReadingChapterReadLocation = current_reading_chapter_read_location.intValue
-                }else{
-                    currentReadingChapterReadLocation = 0
-                }
-                var no = 0
-                repeat {
-                    no += 1
-                    let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
-                    guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data))  else { break }
-                    autoreleasepool {
-                        let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: no) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: no)
-                        RealmUtil.RealmStoryWrite { (realm) in
-                            story.content = content
-                            story.url = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: no, end: end.boolValue)
-                            if currentReadingChapterNumber == no {
-                                story.readLocation = currentReadingChapterReadLocation
-                            }
-                            realm.add(story, update: .modified)
-                        }
+
+                if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true), let end = novel.object(forKey: "end") as? NSNumber {
+                    let currentReadingChapterReadLocation:Int
+                    if let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
+                        currentReadingChapterReadLocation = current_reading_chapter_read_location.intValue
+                    }else{
+                        currentReadingChapterReadLocation = 0
                     }
-                }while(true)
-                RealmUtil.Write { (realm) in
+                    var no = 0
+                    repeat {
+                        no += 1
+                        let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
+                        guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data))  else { break }
+                        var story = Story()
+                        story.novelID = novelID
+                        story.chapterNumber = no
+                        story.content = content
+                        story.url = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: no, end: end.boolValue)
+                        if currentReadingChapterNumber == no {
+                            story.readLocation = currentReadingChapterReadLocation
+                        }
+                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    }while(true)
                     for _ in 0..<no {
                         realmNovel.AppendDownloadDate(date: realmNovel.lastDownloadDate, realm: realm)
                     }
+                }else{
+                    NovelDownloadQueue.shared.addQueue(novelID: novelID)
                 }
-            }else{
-                NovelDownloadQueue.shared.addQueue(novelID: novelID)
             }
         }
     }
@@ -760,42 +757,42 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreBookshelf_url_V_1_0_0(novel:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
         autoreleasepool {
             guard let url = novel.object(forKey: "url") as? String else { return }
-            let realmNovel = RealmNovel.SearchNovelFrom(novelID: url) ?? RealmNovel()
-            if realmNovel.novelID != url {
-                realmNovel.novelID = url
-                realmNovel.url = url
-                realmNovel.type = .URL
-            }
-            let novelID = realmNovel.novelID
-            let currentReadingChapterNumber:Int
-            if let current_reading_chapter_number = (novel.object(forKey: "current_reading_chapter_number") as? NSNumber)?.intValue {
-                currentReadingChapterNumber = current_reading_chapter_number
-            }else{
-                currentReadingChapterNumber = 0
-            }
-            let isNewFlug:Bool
-            if let is_new_flug = novel.object(forKey: "is_new_flug") as? NSNumber {
-                isNewFlug = is_new_flug.boolValue
-            }else{
-                isNewFlug = false
-            }
-            if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
-                realmNovel.lastDownloadDate = lastDownloadDate
-                if isNewFlug {
-                    realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(-1)
-                }else{
-                    realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(1)
-                }
-            }else{
-                if isNewFlug {
-                    realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: 0)
-                    realmNovel.lastReadDate = Date(timeIntervalSinceNow: -1)
-                }else{
-                    realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
-                    realmNovel.lastReadDate = Date(timeIntervalSinceNow: 0)
-                }
-            }
             RealmUtil.Write { (realm) in
+                let realmNovel = RealmNovel.SearchNovelFrom(novelID: url) ?? RealmNovel()
+                if realmNovel.novelID != url {
+                    realmNovel.novelID = url
+                    realmNovel.url = url
+                    realmNovel.type = .URL
+                }
+                let novelID = realmNovel.novelID
+                let currentReadingChapterNumber:Int
+                if let current_reading_chapter_number = (novel.object(forKey: "current_reading_chapter_number") as? NSNumber)?.intValue {
+                    currentReadingChapterNumber = current_reading_chapter_number
+                }else{
+                    currentReadingChapterNumber = 0
+                }
+                let isNewFlug:Bool
+                if let is_new_flug = novel.object(forKey: "is_new_flug") as? NSNumber {
+                    isNewFlug = is_new_flug.boolValue
+                }else{
+                    isNewFlug = false
+                }
+                if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
+                    realmNovel.lastDownloadDate = lastDownloadDate
+                    if isNewFlug {
+                        realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(-1)
+                    }else{
+                        realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(1)
+                    }
+                }else{
+                    if isNewFlug {
+                        realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: 0)
+                        realmNovel.lastReadDate = Date(timeIntervalSinceNow: -1)
+                    }else{
+                        realmNovel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
+                        realmNovel.lastReadDate = Date(timeIntervalSinceNow: 0)
+                    }
+                }
                 if let title = novel.object(forKey: "title") as? String {
                     realmNovel.title = title
                 }
@@ -806,42 +803,35 @@ class NovelSpeakerUtility: NSObject {
                     realmNovel.writer = author
                 }
                 if currentReadingChapterNumber > 0 {
-                    realmNovel.m_readingChapterStoryID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: currentReadingChapterNumber)
+                    realmNovel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: currentReadingChapterNumber)
                 }
                 realm.add(realmNovel, update: .modified)
-            }
-            if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true) {
-                var no = 0
-                repeat {
-                    no += 1
-                    let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
-                    guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data))  else { break }
-                    autoreleasepool {
-                        let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: no) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: no)
-                        RealmUtil.RealmStoryWrite { (realm) in
-                            story.content = content
-                            if currentReadingChapterNumber == no, let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
-                                story.readLocation = current_reading_chapter_read_location.intValue
-                            }
-                            realm.add(story, update: .modified)
+                if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true) {
+                    var no = 0
+                    repeat {
+                        no += 1
+                        let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
+                        guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data))  else { break }
+                        var story = Story()
+                        story.novelID = novelID
+                        story.chapterNumber = no
+                        story.content = content
+                        if currentReadingChapterNumber == no, let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
+                            story.readLocation = current_reading_chapter_read_location.intValue
                         }
-                    }
-                }while(true)
-                RealmUtil.Write { (realm) in
+                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    }while(true)
                     for _ in 0..<no {
                         realmNovel.AppendDownloadDate(date: realmNovel.lastDownloadDate, realm: realm)
                     }
-                }
-                no -= 1
-                autoreleasepool {
-                    if no > 0, let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: no), let last_download_url = novel.object(forKey: "last_download_url") as? String {
-                        RealmUtil.RealmStoryWrite { (realm) in
-                            story.url = last_download_url
-                        }
+                    no -= 1
+                    if no > 0, var story = RealmStoryBulk.SearchStory(novelID: novelID, chapterNumber: no), let last_download_url = novel.object(forKey: "last_download_url") as? String {
+                        story.url = last_download_url
+                        RealmStoryBulk.SetStory(story: story)
                     }
+                }else{
+                    NovelDownloadQueue.shared.addQueue(novelID: novelID)
                 }
-            }else{
-                NovelDownloadQueue.shared.addQueue(novelID: novelID)
             }
         }
     }
@@ -860,18 +850,14 @@ class NovelSpeakerUtility: NSObject {
                 realm.add(realmNovel, update: .modified)
 
                 var no = 0
-                for story in storys {
+                for storyText in storys {
+                    guard let storyText = storyText as? String else { continue }
                     no += 1
-                    guard let story = story as? String else { continue }
-                    RealmUtil.RealmStoryWrite() { (realm) in
-                        if let realmStory = RealmStory.SearchStory(novelID: novelID, chapterNumber: no) {
-                            realmStory.content = story
-                        }else{
-                            let realmStory = RealmStory.CreateNewStory(novelID: novelID, chapterNumber: no)
-                            realmStory.content = story
-                            realm.add(realmStory, update: .modified)
-                        }
-                    }
+                    var story = Story()
+                    story.novelID = novelID
+                    story.chapterNumber = no
+                    story.content = storyText
+                    RealmStoryBulk.SetStoryWith(realm: realm, story: story)
                 }
             }
         }
@@ -1354,41 +1340,41 @@ class NovelSpeakerUtility: NSObject {
             }
             var hasInvalidData = false
             if let storys = novelDic.object(forKey: "storys") as? NSArray {
-                for storyDic in storys {
-                    guard let storyDic = storyDic as? NSDictionary,
-                        let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber else { continue }
-                    let data:Data
-                    if let contentZipedString = storyDic.object(forKey: "contentZiped") as? String, let contentZiped = Data(base64Encoded: contentZipedString) {
-                        data = contentZiped
-                    }else{
-                        guard let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
-                            let extractedDirectory = extractedDirectory else {
-                            hasInvalidData = true
-                            continue
-                        }
-                        let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
-                        let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
-                        guard let contentData = try? Data(contentsOf: contentFilePath) else {
-                            hasInvalidData = true
-                            continue
-                        }
-                        data = contentData
-                    }
-                    autoreleasepool {
-                        let story = RealmStory.SearchStory(novelID: novelID, chapterNumber: chapterNumber.intValue) ?? RealmStory.CreateNewStory(novelID: novelID, chapterNumber: chapterNumber.intValue)
-                        RealmUtil.RealmStoryWrite { (realm) in
-                            if let readLocation = storyDic.object(forKey: "readLocation") as? NSNumber {
-                                story.readLocation = readLocation.intValue
+                RealmUtil.Write { (realm) in
+                    for storyDic in storys {
+                        guard let storyDic = storyDic as? NSDictionary,
+                            let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber else { continue }
+                        let data:Data
+                        if let contentZipedString = storyDic.object(forKey: "contentZiped") as? String, let contentZiped = Data(base64Encoded: contentZipedString) {
+                            data = contentZiped
+                        }else{
+                            guard let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
+                                let extractedDirectory = extractedDirectory else {
+                                hasInvalidData = true
+                                continue
                             }
-                            if let url = storyDic.object(forKey: "url") as? String {
-                                story.url = url
+                            let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
+                            let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
+                            guard let contentData = try? Data(contentsOf: contentFilePath) else {
+                                hasInvalidData = true
+                                continue
                             }
-                            if let subtitle = storyDic.object(forKey: "subtitle") as? String {
-                                story.subtitle = subtitle
-                            }
-                            story.contentZiped = data
-                            realm.add(story, update: .modified)
+                            data = contentData
                         }
+                        var story = Story()
+                        story.novelID = novelID
+                        story.chapterNumber = chapterNumber.intValue
+                        story.content = NiftyUtility.stringInflate(data)
+                        if let readLocation = storyDic.object(forKey: "readLocation") as? NSNumber {
+                            story.readLocation = readLocation.intValue
+                        }
+                        if let url = storyDic.object(forKey: "url") as? String {
+                            story.url = url
+                        }
+                        if let subtitle = storyDic.object(forKey: "subtitle") as? String {
+                            story.subtitle = subtitle
+                        }
+                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
                     }
                 }
             }
@@ -1514,26 +1500,29 @@ class NovelSpeakerUtility: NSObject {
     fileprivate static func CreateBackupDataDictionary_Story(novelID:String, contentWriteTo:URL?) -> [[String:Any]] {
         return autoreleasepool {
             var result:[[String:Any]] = []
-            guard let storyArray = RealmStory.GetAllObjects()?.filter("novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true) else { return result }
+            guard let storyArray = RealmStoryBulk.SearchAllStoryFor(novelID: novelID) else { return result }
             for story in storyArray {
                 var storyData:[String:Any] = [
-                    //"id": story.id,
-                    //"novelID": story.novelID,
                     "chapterNumber": story.chapterNumber,
-                    //"contentZiped": story.contentZiped,
                     "readLocation": story.readLocation,
-                    "url": story.url,
-                    "subtitle": story.subtitle
                 ]
-                if let contentWriteTo = contentWriteTo {
-                    do {
-                        let filePath = contentWriteTo.appendingPathComponent("\(story.chapterNumber)")
-                        try story.contentZiped.write(to: filePath)
-                    }catch{
-                        print("\(story.novelID) chapter: \(story.chapterNumber) content write failed.")
+                if story.url.count > 0 {
+                    storyData["url"] = story.url
+                }
+                if story.subtitle.count > 0 {
+                    storyData["subtitle"] = story.subtitle
+                }
+                if let contentZiped = NiftyUtility.stringDeflate(story.content, level: 9) {
+                    if let contentWriteTo = contentWriteTo {
+                        do {
+                            let filePath = contentWriteTo.appendingPathComponent("\(story.chapterNumber)")
+                            try contentZiped.write(to: filePath)
+                        }catch{
+                            print("\(novelID) chapter: \(story.chapterNumber) content write failed.")
+                        }
+                    }else{
+                        storyData["contentZiped"] = contentZiped.base64EncodedString()
                     }
-                }else{
-                    storyData["contentZiped"] = story.contentZiped.base64EncodedString()
                 }
                 result.append(storyData)
             }
@@ -1863,10 +1852,10 @@ class NovelSpeakerUtility: NSObject {
     
     static func CheckAndRecoverStoryCount(novelID:String) {
         autoreleasepool {
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let storyList = RealmStory.SearchStoryFrom(novelID: novelID), let lastStory = storyList.last else { return }
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let storyList = RealmStoryBulk.SearchAllStoryFor(novelID: novelID), let lastStory = storyList.last else { return }
             let storyCount = storyList.count
-            let lastChapterStoryID = RealmStory.CreateUniqueID(novelID: novelID, chapterNumber: storyCount)
-            if novel.m_lastChapterStoryID != lastChapterStoryID && lastStory.id == lastChapterStoryID {
+            let lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: storyCount)
+            if novel.m_lastChapterStoryID != lastChapterStoryID && RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStory.chapterNumber) == lastChapterStoryID {
                 autoreleasepool {
                     RealmUtil.Write(block: { (realm) in
                         novel.m_lastChapterStoryID = lastChapterStoryID

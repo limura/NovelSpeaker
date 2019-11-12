@@ -594,9 +594,19 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func pushNextView(novelID:String, isNeedSpeech: Bool){
         autoreleasepool {
             guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
-            guard let story = novel.readingChapter else {
-                let targetChapterNumber = RealmStory.StoryIDToChapterNumber(storyID: novel.m_readingChapterStoryID)
-                guard let novelList = novel.linkedStorys, novelList.count > 0 else {
+            if let storyList = novel.linkedStorys {
+                print("\(novelID) has \(storyList.count) storys.")
+                for story in storyList {
+                    print("  \(story.storyID)")
+                }
+            }else{
+                print("\(novelID) has NO storys.")
+            }
+            print("readingChapter: \(novel.m_readingChapterStoryID)")
+            print("lastChapter: \(novel.m_lastChapterStoryID)")
+            guard let story = novel.readingChapter ?? novel.firstChapter else {
+                let targetChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_readingChapterStoryID)
+                guard let novelCount = novel.linkedStorys?.count, novelCount > 0 else {
                     if novel.type == .URL {
                         DispatchQueue.main.async {
                             NiftyUtilitySwift.EasyDialogForButton(
@@ -618,8 +628,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     return
                 }
                 //print("targetChapterNumber: \(targetChapterNumber), novelList.count: \(novelList.count)")
-                if novelList.count < targetChapterNumber {
-                    let nextViewStoryID = novelList.first?.id
+                if novelCount < targetChapterNumber {
                     DispatchQueue.main.async {
                         NiftyUtilitySwift.EasyDialogTwoButton(
                             viewController: self,
@@ -627,10 +636,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                             message: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber", comment: "読み上げ位置がダウンロードされていない章を示しています。この小説の追加の章のダウンロードを試みますか？"),
                             button1Title: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OpenFirstStory", comment: "最初の章を開く"),
                             button1Action: {
-                                if let nextViewStoryID = nextViewStoryID {
+                                if let nextViewStoryID = novel.firstChapter?.storyID {
                                     self.nextViewStoryID = nextViewStoryID
                                     self.isNextViewNeedResumeSpeech = isNeedSpeech
                                     self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
+                                    return
                                 }
                         },
                             button2Title: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK", comment: "ダウンロードする"),
@@ -640,14 +650,15 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }
                     return
                 }
-                if let story = novelList.first {
-                    nextViewStoryID = story.id
+                if let story = novel.firstChapter {
+                    nextViewStoryID = story.storyID
+                    print("sendStoryID: \(nextViewStoryID ?? "unknown"), story.chapterNumber \(story.chapterNumber)")
                     self.isNextViewNeedResumeSpeech = isNeedSpeech
                     self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
                 }
                 return
             }
-            nextViewStoryID = story.id
+            nextViewStoryID = story.storyID
             self.isNextViewNeedResumeSpeech = isNeedSpeech
             self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
         }
@@ -924,9 +935,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             guard let lastReadStory = RealmGlobalState.GetLastReadStory(), let lastReadNovel = RealmNovel.SearchNovelFrom(novelID: lastReadStory.novelID) else {
                 return
             }
-            if let storyCount = lastReadNovel.linkedStorys?.count, lastReadStory.chapterNumber >= storyCount && (lastReadStory.readLocation + 5) >= lastReadStory.content?.lengthOfBytes(using: .utf8) ?? 0 {
+            if let storyCount = lastReadNovel.lastChapterNumber, lastReadStory.chapterNumber >= storyCount && (lastReadStory.readLocation + 5) >= lastReadStory.content.lengthOfBytes(using: .utf8) {
                 return
             }
+            
             lastReadNovelIDTmp = lastReadNovel.novelID
             lastReadNovelTitleTmp = lastReadNovel.title
         }

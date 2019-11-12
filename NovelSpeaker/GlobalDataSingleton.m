@@ -602,7 +602,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 /// 指定された ncode の小説で、保存されている Story の chapter_no のみのリストを取得します(公開用method)
 - (NSArray*)GetAllStoryForNcodeThreadUnsafe:(NSString*)ncode
 {
-    NSArray* fetchResults = [m_CoreDataObjectHolder SearchEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode] sortAttributeName:@"chapter_number" ascending:NO];
+    NSArray* fetchResults = [m_CoreDataObjectHolder SearchEntity:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode] sortAttributeName:@"chapter_number" ascending:YES];
     
     if(fetchResults == nil)
     {
@@ -2526,9 +2526,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     NSString* logString = [[NSString alloc] initWithFormat:@"%@ %@", [formatter stringFromDate:date], string];
     NSLog(@"%p, %@", m_LogStringArray, logString);
     dispatch_async(dispatch_get_main_queue(), ^{
-        [m_LogStringArray addObject:logString];
-        while ([m_LogStringArray count] > 1024) {
-            [m_LogStringArray removeObjectAtIndex:0];
+        [self->m_LogStringArray addObject:logString];
+        while ([self->m_LogStringArray count] > 1024) {
+            [self->m_LogStringArray removeObjectAtIndex:0];
         }
     });
 }

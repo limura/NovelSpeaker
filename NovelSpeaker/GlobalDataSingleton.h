@@ -417,7 +417,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 //- (void)SetMenuItemIsAddSpeechModSettingOnly:(BOOL)yesNo;
 
 /// AppGroup で指示されたqueueを処理します
-- (void)HandleAppGroupQueue;
+//- (void)HandleAppGroupQueue;
 
 /// 通知をONにしようとします
 //- (void)RegisterUserNotification;

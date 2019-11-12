@@ -959,7 +959,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
             })
-            .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
+            .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_Cancel", comment: "iCloud同期をやめる(キャンセル)"), callback: { (dialog) in
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
                     guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
@@ -1234,20 +1234,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             switch identifier {
             case "CreateNewUserTextSegue":
                 if let nextViewController:EditBookViewController = segue.destination as? EditBookViewController {
-                    autoreleasepool {
-                        let novel = RealmNovel()
-                        novel.type = .UserCreated
-                        RealmUtil.Write { (realm) in
-                            realm.add(novel, update: .modified)
-                        }
-                        nextViewController.targetNovelID = novel.novelID
-                        autoreleasepool {
-                            let story = RealmStory.CreateNewStory(novelID: novel.novelID, chapterNumber: 1)
-                            RealmUtil.RealmStoryWrite { (realm) in
-                                realm.add(story, update: .modified)
-                            }
-                        }
-                    }
+                    let novelID = RealmNovel.AddNewNovelOnlyText(content: "", title: NSLocalizedString("GlobalDataSingleton_NewUserBookTitle", comment: "新規ユーザ小説"))
+                    nextViewController.targetNovelID = novelID
                 }
                 break
             default:
