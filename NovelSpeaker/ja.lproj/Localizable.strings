@@ -60,6 +60,8 @@
 "SettingsTableViewController_Information" = "お知らせ";
 "SettingsTableViewController_Information_CanNotGetInformation" = "お知らせの読み込みに失敗しました。";
 "SettingsTableViewController_Information_NoImportantInformationAlived" = "今現在、重要なお知らせはありません。";
+"SettingsTableViewController_Information_ShowOutdatedInformation" = "過去のお知らせを確認する";
+"SettingsTableViewController_Information_PastInformationTitle" = "過去のお知らせ";
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "声質の設定";
 "SettingTableViewController_CorrectionOfTheReading" = "読みの修正";
 "SettingTableViewController_SettingOfTheTextSize" = "小説本文表示画面の設定";
@@ -157,6 +159,7 @@
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
 
 "SettingTableViewController_IsDisallowsCellularAccess" = "携帯電話網ではダウンロードしないようにする";
+"SettingTableViewController_IsNeedConfirmDeleteBook" = "小説を削除する時に確認する";
 "SettingTableViewController_RepeatTypeTitle" = "繰り返し再生";
 "SettingTableViewController_RepeatType_NoRepeat" = "しない";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "最初から";
@@ -528,6 +531,9 @@
 "BookShelfTableViewController_SearchTitle" = "検索";
 "BookShelfTableViewController_SearchMessage" = "小説名 と 作者名 が対象となります";
 "BookShelfTableViewController_SearchClear" = "クリア";
+"BookShelfTableViewController_WarningForDeleteBookTitle" = "小説の削除";
+"BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
+"BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.9
 
@@ -555,6 +561,18 @@
 - 話者関係の設定項目を変更
 - テキストファイル等の取込時にテキトーに章を分ける機能を追加
 - 小説毎の専用設定の概念を追加
+
+
+# Version 1.1.58
+
+インタフェースの変更
+
+- 設定 -> 小説を削除する時に確認する の設定項目を追加
+- 設定 -> お知らせ で出てくるダイアログに「過去のお知らせを確認する」ボタンを追加
+
+問題の修正
+
+- VoiceOver環境下において、本棚の右上にある「順番」などで出てくるピッカーダイアログが選択できなくなっていた問題を修正
 
 
 # Version 1.1.57

@@ -61,6 +61,8 @@
 "SettingsTableViewController_Information" = "Information";
 "SettingsTableViewController_Information_CanNotGetInformation" = "Information text download failed.";
 "SettingsTableViewController_Information_NoImportantInformationAlived" = "There is no important information now.";
+"SettingsTableViewController_Information_ShowOutdatedInformation" = "Check past notifications";
+"SettingsTableViewController_Information_PastInformationTitle" = "Past notifications";
 "SettingsTableViewController_SettingOfTheQualityOfVoice" = "Quality of voice";
 "SettingTableViewController_CorrectionOfTheReading" = "Correction of the reading";
 "SettingTableViewController_SettingOfTheTextSize" = "Fiction text display settings";
@@ -160,6 +162,7 @@
 
 
 "SettingTableViewController_IsDisallowsCellularAccess" = "Do not download on the mobile phone network";
+"SettingTableViewController_IsNeedConfirmDeleteBook" = "Confirm when deleting a novel";
 "SettingTableViewController_RepeatTypeTitle" = "Repeat type";
 "SettingTableViewController_RepeatType_NoRepeat" = "none";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "First chapter";
@@ -535,6 +538,9 @@
 "BookShelfTableViewController_SearchTitle" = "Search";
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
+"BookShelfTableViewController_WarningForDeleteBookTitle" = "Delete a book";
+"BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
+"BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Speech: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.9
 
@@ -562,6 +568,18 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 -Change speaker setting items
 -Added a function to separate chapters into text files when importing text files etc.
 -Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
+
+
+# Version 1.1.58
+
+Interface change
+
+- add Settings -> \"Confirm when deleting a novel\"
+- add \"Check past notifications\" button on Settings -> Information dialog
+
+Bug fix
+
+- Fixed an issue where the picker dialog that appeared in the \"Order\" etc. at the top right of the bookshelf could not be selected under VoiceOver.
 
 
 # Version 1.1.57

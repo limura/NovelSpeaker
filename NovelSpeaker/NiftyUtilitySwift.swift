@@ -671,7 +671,7 @@ class NiftyUtilitySwift: NSObject {
     
     static let USER_DEFAULTS_LAST_READ_IMPORTANT_INFORMATION_TEXT = "UserDefaultsLastReadImportantInformationText"
     static let IMPORTANT_INFORMATION_TEXT_URL = "https://limura.github.io/NovelSpeaker/ImportantInformation.txt"
-    @objc static public func FetchNewImportantImformation(fetched:@escaping ((_ text:String)->Void), err:(()->Void)?) {
+    @objc static public func FetchNewImportantImformation(fetched:@escaping ((_ text:String, _ holeText:String)->Void), err:(()->Void)?) {
         guard let url = URL(string: IMPORTANT_INFORMATION_TEXT_URL) else { return }
         cashedHTTPGet(url: url, delay: 60*60*6, successAction: { (data) in
             guard let text = String(bytes: data, encoding: .utf8) else { return }
@@ -681,7 +681,7 @@ class NiftyUtilitySwift: NSObject {
                     stripedText += line + "\n"
                 }
             })
-            fetched(stripedText)
+            fetched(stripedText, text)
         }) { (error) in
             err?()
         }
@@ -690,7 +690,7 @@ class NiftyUtilitySwift: NSObject {
         let defaults = UserDefaults.standard
         defaults.register(defaults: [USER_DEFAULTS_LAST_READ_IMPORTANT_INFORMATION_TEXT: ""])
         guard let lastReadInformationText = defaults.string(forKey: USER_DEFAULTS_LAST_READ_IMPORTANT_INFORMATION_TEXT) else { return }
-        FetchNewImportantImformation(fetched: { (text) in
+        FetchNewImportantImformation(fetched: { (text, holeText) in
             if lastReadInformationText != text {
                 hasNewInformationAlive(text)
             }else{
