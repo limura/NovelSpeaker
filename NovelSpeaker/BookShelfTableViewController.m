@@ -410,18 +410,34 @@
             NSLog(@"indexPath.row is out of range %lu < %ld", (unsigned long)[contentList count], (long)indexPath.row);
             return;
         }
-        NarouContentCacheData* content = contentList[indexPath.row];
         NSLog(@"tableView row deleting. before content.length: %lu", (unsigned long)[contentList count]);
-        // Contentを消すことによって Notification が飛んで変なことになるので一旦切ります。
-        [self removeNotificationReciver];
-        if([[GlobalDataSingleton GetInstance] DeleteContent:content] != true)
-        {
-            NSLog(@"delete content failed ncode: %@ title: %@", content.ncode, content.title);
+        NarouContentCacheData* content = contentList[indexPath.row];
+        if ([[GlobalDataSingleton GetInstance] IsNeedConfirmDeleteBook]) {
+            [NiftyUtilitySwift EasyDialogTwoButtonWithViewController:self title:NSLocalizedString(@"BookShelfTableViewController_WarningForDeleteBookTitle", @"本の削除") message:[[NSString alloc] initWithFormat:@"%@%@", NSLocalizedString(@"BookShelfTableViewController_WarningDeleteBookMessage", @"本を削除しますか？\n"), content.title] button1Title:nil button1Action:nil button2Title:NSLocalizedString(@"BookShelfTableViewController_WarningDeleteBookOKButtonTitle", @"削除") button2Action:^{
+                // Contentを消すことによって Notification が飛んで変なことになるので一旦切ります。
+                [self removeNotificationReciver];
+                if([[GlobalDataSingleton GetInstance] DeleteContent:content] != true)
+                {
+                    NSLog(@"delete content failed ncode: %@ title: %@", content.ncode, content.title);
+                }
+                // NotificationReciver を復活させます
+                [self setNotificationReciver];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+                });
+            }];
+        }else{
+            [self removeNotificationReciver];
+            if([[GlobalDataSingleton GetInstance] DeleteContent:content] != true)
+            {
+                NSLog(@"delete content failed ncode: %@ title: %@", content.ncode, content.title);
+            }
+            // NotificationReciver を復活させます
+            [self setNotificationReciver];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+            });
         }
-        // NotificationReciver を復活させます
-        [self setNotificationReciver];
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-        NSLog(@"tableView row delete.    after content.length: %lu", (unsigned long)[contentList count]);
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
     }   

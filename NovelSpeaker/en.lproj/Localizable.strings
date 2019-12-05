@@ -112,6 +112,7 @@
 "SettingsViewController_ChooseFullBackup" = "Generate a full backup (it will take time)";
 "SettingsViewController_ChooseSmallBackup" = "Generate a lightweight backup (it will not take time)";
 "SettingTableViewController_IsDisallowsCellularAccess" = "Do not download on the mobile phone network";
+"SettingTableViewController_IsNeedConfirmDeleteBook" = "Confirm when deleting a novel";
 "SettingTableViewController_RepeatTypeTitle" = "Repeat type";
 "SettingTableViewController_RepeatType_NoRepeat" = "none";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "First chapter";
@@ -322,6 +323,9 @@
 "BookShelfTableViewController_SearchTitle" = "Search";
 "BookShelfTableViewController_SearchMessage" = "Novel name and author name will be searched";
 "BookShelfTableViewController_SearchClear" = "Clear";
+"BookShelfTableViewController_WarningForDeleteBookTitle" = "Delete a book";
+"BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
+"BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎Speech: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.57
 

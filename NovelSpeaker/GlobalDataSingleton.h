@@ -514,6 +514,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 /// ダウンロード時に携帯電話回線を禁じるか否かの設定を設定します
 - (void)SetIsDisallowsCellularAccess:(BOOL)isAllow;
 
+/// 本棚で小説を削除する時に確認するか否かを取得します
+- (BOOL)IsNeedConfirmDeleteBook;
+/// 本棚で小説を削除する時に確認するか否かを設定します
+- (void)SetIsNeedConfirmDeleteBook:(BOOL)isNeedConfirm;
+
 /// 小説を読む部分での表示色設定を読み出します(背景色分)。標準の場合は nil が返ります。
 - (UIColor*)GetReadingColorSettingForBackgroundColor;
 /// 小説を読む部分での表示色設定を設定します(背景色分)。標準設定に戻す場合は nil を指定します。

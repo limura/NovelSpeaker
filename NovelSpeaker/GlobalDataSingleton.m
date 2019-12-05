@@ -2561,6 +2561,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 #define USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED @"DuckOthersEnabled"
 #define USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME @"IsOpenRecentNovelInStartTime"
 #define USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS @"IsDisallowCellarAccess"
+#define USER_DEFAULTS_IS_NEED_CONFIRM_DELETE_BOOK @"IsNeedConfirmDeleteBook"
 #define USER_DEFAULTS_READING_COLOR_SETTING_FOR_BACKGROUND_COLOR @"ReadingColorSettingForBackgroundColor"
 #define USER_DEFAULTS_READING_COLOR_SETTING_FOR_FOREGROUND_COLOR @"ReadingColorSettingForForegroundColor"
 
@@ -3729,6 +3730,20 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// 本棚で小説を削除する時に確認するか否かを取得します
+- (BOOL)IsNeedConfirmDeleteBook{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_IS_NEED_CONFIRM_DELETE_BOOK: @false}];
+    return [userDefaults boolForKey:USER_DEFAULTS_IS_NEED_CONFIRM_DELETE_BOOK];
+}
+/// 本棚で小説を削除する時に確認するか否かを設定します
+- (void)SetIsNeedConfirmDeleteBook:(BOOL)isNeedConfirm{
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:isNeedConfirm forKey:USER_DEFAULTS_IS_NEED_CONFIRM_DELETE_BOOK];
+    [userDefaults synchronize];
+}
+
+
 /// 小説を読む部分での表示色設定を読み出します(背景色分)。標準設定の場合は nil が返ります。
 - (UIColor*)GetReadingColorSettingForBackgroundColor{
     // 標準では JSON を入れておかずに JSON からの変換に失敗させます。
@@ -4150,6 +4165,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_duck_others_enabled" number:[[NSNumber alloc] initWithBool:[self IsDuckOthersEnabled]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_open_recent_novel_in_start_time_enabled" number:[[NSNumber alloc] initWithBool:[self IsOpenRecentNovelInStartTime]]];
     [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_disallows_cellular_access" number:[[NSNumber alloc] initWithBool:[self IsDisallowsCellularAccess]]];
+    [NiftyUtility addBoolValueForJSONNSDictionary:result key:@"is_need_confirm_delete_book" number:[[NSNumber alloc] initWithBool:[self IsNeedConfirmDeleteBook]]];
     UIColor* backgroundColor = [self GetReadingColorSettingForBackgroundColor];
     UIColor* foregroundColor = [self GetReadingColorSettingForForegroundColor];
     if (backgroundColor != nil && foregroundColor != nil) {
@@ -4741,6 +4757,10 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSNumber* is_disallows_cellular_access = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_disallows_cellular_access"];
     if (is_disallows_cellular_access != nil) {
         [self SetIsDisallowsCellularAccess:[is_disallows_cellular_access boolValue]];
+    }
+    NSNumber* is_need_confirm_delete_book = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_need_confirm_delete_book"];
+    if (is_need_confirm_delete_book != nil) {
+        [self SetIsNeedConfirmDeleteBook:[is_need_confirm_delete_book boolValue]];
     }
     NSDictionary* display_color_settings = [NiftyUtility validateNSDictionaryForDictionary:miscSettingsDictionary key:@"display_color_settings"];
     if (display_color_settings != nil) {

@@ -319,6 +319,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 GlobalDataSingleton.getInstance()?.setIsDisallowsCellularAccess(row.value!)
             })
+            <<< SwitchRow("isNeedConfirmDeleteBook") {
+                $0.title = NSLocalizedString("SettingTableViewController_IsNeedConfirmDeleteBook", comment: "小説を削除する時に確認する")
+                $0.value = GlobalDataSingleton.getInstance()?.isNeedConfirmDeleteBook()
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                GlobalDataSingleton.getInstance()?.setIsNeedConfirmDeleteBook(row.value!)
+            })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 }.onCellSelection({ (butonCellof, buttonRow) in
