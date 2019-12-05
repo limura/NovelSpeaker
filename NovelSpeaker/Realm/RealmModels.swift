@@ -1842,6 +1842,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     @objc dynamic var isPageTurningSoundEnabled = false
     @objc dynamic var m_bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
     @objc dynamic var IsDisallowsCellularAccess = false
+    @objc dynamic var IsNeedConfirmDeleteBook = false
     @objc dynamic var fgColor = Data()
     @objc dynamic var bgColor = Data()
     

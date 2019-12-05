@@ -651,6 +651,9 @@ class NovelSpeakerUtility: NSObject {
                 if let is_disallows_cellular_access = dic.value(forKey: "is_disallows_cellular_access") as? NSNumber {
                     globalState.IsDisallowsCellularAccess = is_disallows_cellular_access.boolValue
                 }
+                if let is_need_confirm_delete_book = dic.value(forKey: "is_need_confirm_delete_book") as? NSNumber {
+                    globalState.IsNeedConfirmDeleteBook = is_need_confirm_delete_book.boolValue
+                }
                 if let display_color_settings = dic.value(forKey: "display_color_settings") as? NSDictionary {
                     if let background = display_color_settings.value(forKey: "background") as? NSDictionary, let red = background.value(forKey: "red") as? NSNumber, let green = background.value(forKey: "green") as? NSNumber, let blue = background.value(forKey: "blue") as? NSNumber, let alpha = background.value(forKey: "alpha") as? NSNumber {
                         globalState.backgroundColor = UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
@@ -1225,6 +1228,12 @@ class NovelSpeakerUtility: NSObject {
                 if let isOpenRecentNovelInStartTime = dic.object(forKey: "isOpenRecentNovelInStartTime") as? NSNumber {
                     globalState.isOpenRecentNovelInStartTime = isOpenRecentNovelInStartTime.boolValue
                 }
+                if let isDisallowsCellularAccess = dic.object(forKey: "isDisallowsCellularAccess") as? NSNumber {
+                    globalState.IsDisallowsCellularAccess = isDisallowsCellularAccess.boolValue
+                }
+                if let isNeedConfirmDeleteBook = dic.object(forKey: "isNeedConfirmDeleteBook") as? NSNumber {
+                    globalState.IsNeedConfirmDeleteBook = isNeedConfirmDeleteBook.boolValue
+                }
                 if let isLicenseReaded = dic.object(forKey: "isLicenseReaded") as? NSNumber {
                     globalState.isLicenseReaded = isLicenseReaded.boolValue
                 }
@@ -1688,6 +1697,8 @@ class NovelSpeakerUtility: NSObject {
                 "webImportBookmarkArray": Array(globalState.webImportBookmarkArray),
                 "readedPrivacyPolicy": globalState.readedPrivacyPolicy,
                 "isOpenRecentNovelInStartTime": globalState.isOpenRecentNovelInStartTime,
+                "isDisallowsCellularAccess": globalState.IsDisallowsCellularAccess,
+                "isNeedConfirmDeleteBook": globalState.IsNeedConfirmDeleteBook,
                 "isLicenseReaded": globalState.isLicenseReaded,
                 "isDuckOthersEnabled": globalState.isDuckOthersEnabled,
                 "isMixWithOthersEnabled": globalState.isMixWithOthersEnabled,

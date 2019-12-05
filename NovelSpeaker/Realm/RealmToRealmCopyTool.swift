@@ -152,6 +152,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.readedPrivacyPolicy = obj.readedPrivacyPolicy
             newObj.isOpenRecentNovelInStartTime = obj.isOpenRecentNovelInStartTime
             newObj.IsDisallowsCellularAccess = obj.IsDisallowsCellularAccess
+            newObj.IsNeedConfirmDeleteBook = obj.IsNeedConfirmDeleteBook
             newObj.isLicenseReaded = obj.isLicenseReaded
             newObj.isDuckOthersEnabled = obj.isDuckOthersEnabled
             newObj.isMixWithOthersEnabled = obj.isMixWithOthersEnabled

@@ -522,10 +522,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            <<< SwitchRow("isNeedConfirmDeleteBook") {
-                $0.title = NSLocalizedString("SettingTableViewController_IsNeedConfirmDeleteBook", comment: "小説を削除する時に確認する")
-                $0.value = GlobalDataSingleton.getInstance()?.isNeedConfirmDeleteBook()
-                $0.cell.textLabel?.numberOfLines = 0
+            <<< SwitchRow("isNeedConfirmDeleteBook") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsNeedConfirmDeleteBook", comment: "小説を削除する時に確認する")
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                    row.value = globalState.IsNeedConfirmDeleteBook
+                }
+                row.cell.textLabel?.numberOfLines = 0
             }.onChange({ (row) in
                 GlobalDataSingleton.getInstance()?.setIsNeedConfirmDeleteBook(row.value!)
             })

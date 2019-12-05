@@ -751,62 +751,72 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return false
         }
     }
-
-    // 削除されたりした時に呼ばれるぽい
-    func treeView(_ treeView: RATreeView, commit editingStyle: UITableViewCell.EditingStyle, forRowForItem item: Any) {
-        if editingStyle == UITableViewCell.EditingStyle.delete {
-            guard let data = item as? BookShelfRATreeViewCellData, let novelID = data.novelID else { return }
-            let parent = self.treeView?.parent(forItem: item)
-            var isNeedReload:Bool = false
-            var expandedItemList:[BookShelfRATreeViewCellData] = []
-            if parent == nil {
-                // parent が居ない場合は一つだけしか無いはずなので普通に消して良い
-                for (idx, cellData) in self.displayDataArray.enumerated() {
-                    if let thisNovelID = cellData.novelID, thisNovelID == novelID {
-                        self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
-                        self.displayDataArray.remove(at: idx)
-                        break
-                    }
-                }
-            }else if let _ = parent as? BookShelfRATreeViewCellData{
-                // parent があるということはフォルダ分けされているので削除対象が複数のフォルダ内にある可能性があるため、
-                // データを消して再度フォルダ分けからやり直す必要がある
-                isNeedReload = true
-                for item in self.displayDataArray {
-                    if let treeView = self.treeView, let cell = treeView.cell(forItem: item), treeView.isCellExpanded(cell) {
-                        expandedItemList.append(item)
-                    }
+    
+    func deleteNovel(item: Any, novelID: String) {
+        let parent = self.treeView?.parent(forItem: item)
+        var isNeedReload:Bool = false
+        var expandedItemList:[BookShelfRATreeViewCellData] = []
+        if parent == nil {
+            // parent が居ない場合は一つだけしか無いはずなので普通に消して良い
+            for (idx, cellData) in self.displayDataArray.enumerated() {
+                if let thisNovelID = cellData.novelID, thisNovelID == novelID {
+                    self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
+                    self.displayDataArray.remove(at: idx)
+                    break
                 }
             }
-            DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogNoButton(
-                    viewController: self,
-                    title: NSLocalizedString("BookShelfRATreeViewController_NovelDeletingTitle", comment: "小説を削除しています……"),
-                    message: nil,
-                    completion: { (dialog) in
-                    DispatchQueue.global(qos: .utility).async {
-                        autoreleasepool {
-                            if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
-                                RealmUtil.Write { (realm) in
-                                    novel.delete(realm: realm)
-                                }
+        }else if let _ = parent as? BookShelfRATreeViewCellData{
+            // parent があるということはフォルダ分けされているので削除対象が複数のフォルダ内にある可能性があるため、
+            // データを消して再度フォルダ分けからやり直す必要がある
+            isNeedReload = true
+            for item in self.displayDataArray {
+                if let treeView = self.treeView, let cell = treeView.cell(forItem: item), treeView.isCellExpanded(cell) {
+                    expandedItemList.append(item)
+                }
+            }
+        }
+        DispatchQueue.main.async {
+            NiftyUtilitySwift.EasyDialogNoButton(
+                viewController: self,
+                title: NSLocalizedString("BookShelfRATreeViewController_NovelDeletingTitle", comment: "小説を削除しています……"),
+                message: nil,
+                completion: { (dialog) in
+                DispatchQueue.global(qos: .utility).async {
+                    autoreleasepool {
+                        if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
+                            RealmUtil.Write { (realm) in
+                                novel.delete(realm: realm)
                             }
                         }
-                        DispatchQueue.main.async {
-                            dialog.dismiss(animated: false, completion: nil)
-                            if isNeedReload, let treeView = self.treeView {
-                                self.reloadAllData()
-                                for currentItem in self.displayDataArray {
-                                    for item in expandedItemList {
-                                        if let currentItemTitle = currentItem.title, let itemTitle = item.title, currentItemTitle == itemTitle {
-                                            treeView.expandRow(forItem: currentItem)
-                                        }
+                    }
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false, completion: nil)
+                        if isNeedReload, let treeView = self.treeView {
+                            self.reloadAllData()
+                            for currentItem in self.displayDataArray {
+                                for item in expandedItemList {
+                                    if let currentItemTitle = currentItem.title, let itemTitle = item.title, currentItemTitle == itemTitle {
+                                        treeView.expandRow(forItem: currentItem)
                                     }
                                 }
                             }
                         }
                     }
+                }
+            })
+        }
+    }
+
+    // 削除されたりした時に呼ばれるぽい
+    func treeView(_ treeView: RATreeView, commit editingStyle: UITableViewCell.EditingStyle, forRowForItem item: Any) {
+        if editingStyle == UITableViewCell.EditingStyle.delete {
+            guard let data = item as? BookShelfRATreeViewCellData, let novelID = data.novelID, let title = data.title else { return }
+            if RealmGlobalState.GetInstance()?.IsNeedConfirmDeleteBook ?? false {
+                NiftyUtilitySwift.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("BookShelfTableViewController_WarningForDeleteBookTitle", comment: "本の削除"), message: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookMessage", comment: "本を削除しますか？\n") + title, button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookOKButtonTitle", comment: "削除"), button2Action: {
+                    self.deleteNovel(item: item, novelID: novelID)
                 })
+            }else{
+                deleteNovel(item: item, novelID: novelID)
             }
         }
         else if editingStyle == UITableViewCell.EditingStyle.insert {
