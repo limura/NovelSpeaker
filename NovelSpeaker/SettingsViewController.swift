@@ -61,23 +61,32 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 })
                 row.cell.accessoryType = .disclosureIndicator
             }.onCellSelection({ (butonCellof, buttonRow) in
-                NiftyUtilitySwift.FetchNewImportantImformation(fetched: { (text) in
+                NiftyUtilitySwift.FetchNewImportantImformation(fetched: { (text, holeText) in
                     var informationText = NSLocalizedString("SettingsTableViewController_Information_NoImportantInformationAlived", comment: "今現在、重要なお知らせはありません。")
                     if text.count > 0 {
                         informationText = text
                     }
+                    DispatchQueue.main.async {
+                        NiftyUtilitySwift.SaveCheckedImportantInformation(text: text)
+                        self.tabBarController?.tabBar.items?[3].badgeValue = nil
+                        if let row = self.form.rowBy(tag: "SettingsTableViewController_Information_TAG") as? LabelRow {
+                            row.value = ""
+                            row.updateCell()
+                        }
+                    }
                     EasyDialog.Builder(self)
                     .title(title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"))
                     .textView(content: informationText, heightMultiplier: 0.6)
+                        .addButton(title: NSLocalizedString("SettingsTableViewController_Information_ShowOutdatedInformation", comment: "過去のお知らせを確認する"), callback: { (dialog) in
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: false, completion: {
+                                    NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, title: NSLocalizedString("SettingsTableViewController_Information_PastInformationTitle", comment: "過去のお知らせ"), message: holeText.replacingOccurrences(of: "#", with: "\n"), completion: nil)
+                                })
+                            }
+                        })
                     .addButton(title: NSLocalizedString("OK_button", comment: "OK"),
                                callback: { (dialog) in
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.SaveCheckedImportantInformation(text: text)
-                            self.tabBarController?.tabBar.items?[3].badgeValue = nil
-                            if let row = self.form.rowBy(tag: "SettingsTableViewController_Information_TAG") as? LabelRow {
-                                row.value = ""
-                                row.updateCell()
-                            }
                             dialog.dismiss(animated: false, completion: nil)
                         }
                     }).build().show()
