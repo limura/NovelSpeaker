@@ -10,6 +10,16 @@
 
 @implementation PickerViewDialog
 
++ (UIView*)searchRootView:(UIView*)view {
+    while (view != nil) {
+        if (view.superview == nil) {
+            return view;
+        }
+        view = view.superview;
+    }
+    return nil;
+}
+
 // 新しく PickerViewDialog の UIView を作成します。
 + (instancetype)createNewDialog:(NSArray*)displayTextArray firstSelectedString:(NSString*)firstSelectedString parentView:(UIView*)parentView resultReceiver:(void (^)(NSString*))resultReceiver {
     // .xib から nib を作ってそれの UIView を取り出して返す
@@ -27,9 +37,14 @@
     CGSize screenSize = [UIScreen mainScreen].bounds.size;
     view.bounds = CGRectMake(0, 0, screenSize.width, screenSize.height);
     view.frame = CGRectMake(0, screenSize.height, screenSize.width, screenSize.height);
-    
-    [[PickerViewDialog getToplevelView:parentView] addSubview:view];
-    
+    view.accessibilityViewIsModal = true;
+    UIView* rootView = [PickerViewDialog searchRootView:parentView];
+    if (rootView != nil) {
+        parentView = rootView;
+    }
+    [parentView addSubview:view];
+    UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, view);
+
     return view;
 }
 
