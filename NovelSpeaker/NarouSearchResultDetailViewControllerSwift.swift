@@ -39,7 +39,7 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
                 cell.detailTextLabel?.text = "-"
             }
         }).onCellSelection({ (buttonCellOf, row) in
-            let builder = EasyDialog.Builder(self)
+            let builder = NiftyUtilitySwift.EasyDialogBuilder(self)
             .text(content: NSLocalizedString("NarouSearchViewController_SearchTitle_Searching", comment:"Searching"))
             .text(content: NSLocalizedString("NarouSearchViewController_SearchMessage_NowSearching", comment:"Now searching"))
             let dialog = builder.build()
@@ -185,7 +185,7 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
 
     @objc func downloadButtonClicked(){
         if let errString = GlobalDataSingleton.getInstance().addDownloadQueue(forNarou: self.NarouContentDetail) {
-            EasyDialog.Builder(self)
+            NiftyUtilitySwift.EasyDialogBuilder(self)
             .label(text: NSLocalizedString("NarouSearchResultDetailViewController_FailedInAdditionToDownloadQueue", comment:"ダウンロードキューへの追加に失敗"))
             .text(content: errString)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
@@ -195,7 +195,7 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
             return
         }
         if let title = self.NarouContentDetail?.title {
-            EasyDialog.Builder(self)
+            NiftyUtilitySwift.EasyDialogBuilder(self)
             .text(content: String.init(format: NSLocalizedString("NarouSearchResultDetailViewController_AddSuccess_Title", comment:"作品名: %@"), title))
             .text(content: NSLocalizedString("NarouSearchResultDetailViewController_AddSuccess_ItWasAddedToDownloadQueue", comment:"ダウンロードキューに追加されました"))
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
@@ -210,7 +210,7 @@ class NarouSearchResultDetailViewControllerSwift: FormViewController {
         guard let userid = self.NarouContentDetail?.userid else {
             return
         }
-        EasyDialog.Builder(self)
+        NiftyUtilitySwift.EasyDialogBuilder(self)
         .label(text: NSLocalizedString("NarouSearchResultDetailViewController_GoToMypage", comment:"作者のマイページへ移動"))
         .text(content: NSLocalizedString("NarouSearchResultDetailViewController_GoToMyPageMessage", comment:"作者のマイページへ移動します。よろしいですか？"))
         .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel")) { (dialog) in

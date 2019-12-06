@@ -228,7 +228,7 @@ class NovelSpeakerBackup: NSObject {
     
     /// novelspeaker-backup+zip へのパス(URL)を受け取って、それを適用します。成否を返します。
     @objc public static func parseBackupFile(url: URL, toplevelViewController:UIViewController, finally:((Bool)->Void)? = nil) -> Bool {
-        let dialog = EasyDialog.Builder(toplevelViewController)
+        let dialog = NiftyUtilitySwift.EasyDialogBuilder(toplevelViewController)
         .label(text: NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元"), textAlignment: .center, tag: 100)
         .build()
         DispatchQueue.main.async {

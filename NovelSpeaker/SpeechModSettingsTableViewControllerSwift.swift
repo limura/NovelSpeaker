@@ -169,7 +169,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, CreateNe
     }
     
     @objc func filterButtonClicked(){
-        EasyDialog.Builder(self)
+        NiftyUtilitySwift.EasyDialogBuilder(self)
             .title(title: NSLocalizedString("SpeechModSettingsTableView_SearchTitle", comment: "検索"))
             .textField(tag: 100, placeholder: NSLocalizedString("SpeechModSettingsTableView_SearchPlaceholder", comment: "検索対象の文字列を入力します"), content: m_FilterString, keyboardType: UIKeyboardType.default, secure: false, focusKeyboard: true)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { dialog in
