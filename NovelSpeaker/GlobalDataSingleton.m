@@ -3888,7 +3888,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults registerDefaults:@{USER_DEFAULTS_WEB_IMPORT_BOOKMARK_ARRAY: @[
         //@"Google\nhttps://www.google.co.jp",
         @"小説家になろう\nhttps://syosetu.com/",
-        @"青空文庫\nhttp://www.aozora.gr.jp/",
+        @"青空文庫\nhttps://www.aozora.gr.jp/",
         //@"コンプリート・シャーロック・ホームズ\nhttp://www.221b.jp/", // 1秒おきに見に行かせると 403 になるっぽい？
         @"ハーメルン\nhttps://syosetu.org/",
         @"暁\nhttps://www.akatsuki-novels.com/",
