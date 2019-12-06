@@ -377,7 +377,16 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
                     dialog.dismiss(animated: false, completion: nil)
                 }
             }.addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
-                GlobalDataSingleton.getInstance().delURL(fromWebImportBookmark: url)
+                let targetUrl = url.absoluteString.replacingOccurrences(of: "^http://", with: "https://", options: [.regularExpression, .caseInsensitive], range: nil)
+                let bookmarks = self.getBookmark()
+                for bookmark in bookmarks {
+                    for (_, url) in bookmark {
+                        let currentUrl = url.absoluteString.replacingOccurrences(of: "^http://", with: "https://", options: [.regularExpression, .caseInsensitive], range: nil)
+                        if currentUrl == targetUrl {
+                            GlobalDataSingleton.getInstance().delURL(fromWebImportBookmark: url)
+                        }
+                    }
+                }
                 self.updateBookmarkButtonState(url: url)
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
