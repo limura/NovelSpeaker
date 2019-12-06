@@ -273,7 +273,7 @@ class NovelDetailViewController: FormViewController {
                     })
                 }
                 DispatchQueue.main.async {
-                    EasyDialog.Builder(self)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
                     .title(title: NSLocalizedString("NovelDetailViewController_SpeechModAdded", comment: "この小説用に以下の読み替えを登録しました"))
                     .textView(content: message.trimmingCharacters(in: .whitespacesAndNewlines), heightMultiplier: 0.7)
                     .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in

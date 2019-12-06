@@ -127,7 +127,7 @@
 		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
 		2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */; };
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
-		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */; };
+		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		21A265692359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */; };
 		21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */; };
@@ -404,7 +404,7 @@
 		2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.2.tbd; path = usr/lib/libxml2.2.tbd; sourceTree = SDKROOT; };
 		2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
 		2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 8.xcdatamodel"; sourceTree = "<group>"; };
-		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-角丸.png"; sourceTree = "<group>"; };
+		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-RoundedCorners.png"; sourceTree = "<group>"; };
 		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavicationController+StatusBarHack.swift"; sourceTree = "<group>"; };
 		21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmToRealmCopyTool.swift; sourceTree = "<group>"; };
@@ -661,7 +661,7 @@
 				2133F28F1E80E175001A0BC5 /* AppIcon-monochrome-reverse */,
 				212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */,
 				21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
-				219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png */,
+				219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */,
 				212F011B1D907CF1009D69E6 /* Default568@2x.png */,
 				210958ED1A0E1C5500E9171F /* NEW!.png */,
 				210958F01A0E1C5C00E9171F /* NEW!@2x.png */,
@@ -1176,7 +1176,7 @@
 				212852DC19B1D101001A75DC /* Localizable.strings in Resources */,
 				216359A122B167A700264A89 /* LikeStar.png in Resources */,
 				21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */,
-				219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-角丸.png in Resources */,
+				219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png in Resources */,
 				213374402013816D0043D995 /* bookmark-false@3x.png in Resources */,
 				21D397A01FC95CBB0018F883 /* earth.png in Resources */,
 				2133F2AD1E80E175001A0BC5 /* Icon-Small.png in Resources */,
@@ -1518,7 +1518,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1.1.130;
+				CURRENT_PROJECT_VERSION = 1.1.132;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1554,7 +1554,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1.1.130;
+				CURRENT_PROJECT_VERSION = 1.1.132;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1679,12 +1679,12 @@
 			baseConfigurationReference = D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1.1.130;
+				CURRENT_PROJECT_VERSION = 1.1.132;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1711,12 +1711,12 @@
 			baseConfigurationReference = 355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = NovelSpeaker/NovelSpeaker.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1.1.130;
+				CURRENT_PROJECT_VERSION = 1.1.132;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

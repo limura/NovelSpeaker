@@ -448,7 +448,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
 
     func showVersionUpNotice(){
-        EasyDialog.Builder(self)
+        NiftyUtilitySwift.EasyDialogBuilder(self)
             .title(title: NSLocalizedString(
                 "BookShelfTableViewController_AnnounceNewViersion"
                 , comment: "アップデートされました"))
@@ -557,7 +557,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             dialog.dismiss(animated: false, completion: nil)
         }
         if let parent = self.parent {
-            EasyDialog.Builder(parent)
+            NiftyUtilitySwift.EasyDialogBuilder(parent)
             .title(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"))
             .label(text: NSLocalizedString("BookShelfTableViewController_SearchMessage", comment: "小説名 と 作者名 が対象となります"), textAlignment: .left)
             .textField(tag: 100, placeholder: nil, content: searchText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: UITextField.BorderStyle.none, clearButtonMode: .always, shouldReturnEventHandler: assignNewSearchText)
@@ -810,7 +810,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     // 削除されたりした時に呼ばれるぽい
     func treeView(_ treeView: RATreeView, commit editingStyle: UITableViewCell.EditingStyle, forRowForItem item: Any) {
         if editingStyle == UITableViewCell.EditingStyle.delete {
-            guard let data = item as? BookShelfRATreeViewCellData, let novelID = data.novelID, let title = data.title else { return }
+            guard let data = item as? BookShelfRATreeViewCellData, let novelID = data.novelID else { return }
+            let title:String
+            if let titleString = data.title {
+                title = titleString
+            }else{
+                title = "-"
+            }
             if RealmGlobalState.GetInstance()?.IsNeedConfirmDeleteBook ?? false {
                 NiftyUtilitySwift.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("BookShelfTableViewController_WarningForDeleteBookTitle", comment: "本の削除"), message: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookMessage", comment: "本を削除しますか？\n") + title, button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookOKButtonTitle", comment: "削除"), button2Action: {
                     self.deleteNovel(item: item, novelID: novelID)

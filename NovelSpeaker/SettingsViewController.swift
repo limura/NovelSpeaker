@@ -80,7 +80,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             row.updateCell()
                         }
                     }
-                    EasyDialog.Builder(self)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
                     .title(title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"))
                     .textView(content: informationText, heightMultiplier: 0.6)
                         .addButton(title: NSLocalizedString("SettingsTableViewController_Information_ShowOutdatedInformation", comment: "過去のお知らせを確認する"), callback: { (dialog) in
@@ -157,9 +157,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             
             <<< TimeIntervalCountDownRow() { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
-                let duration = GlobalDataSingleton.getInstance().getGlobalState().maxSpeechTimeInSec
-                //Date(timeIntervalSince1970: duration as! TimeInterval)
-                //Date(timeIntervalSinceReferenceDate: duration as! TimeInterval)
                 row.minuteInterval = 5
                 row.cell.textLabel?.numberOfLines = 0
                 autoreleasepool {
@@ -187,12 +184,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             
             <<< SwitchRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_BackgroundFetch", comment:"小説の自動更新")
-                $0.value = GlobalDataSingleton.getInstance().getBackgroundNovelFetchEnabled()
+                $0.value = RealmGlobalState.GetInstance()?.isBackgroundNovelFetchEnabled ?? false
                 $0.cell.textLabel?.numberOfLines = 0
             }.onChange({ row in
-                let judge = row.value
-                if judge! {
-                    EasyDialog.Builder(self)
+                guard let judge = row.value else { return }
+                if judge {
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
                         .title(title: NSLocalizedString("SettingTableViewController_ConfirmEnableBackgroundFetch_title", comment:"確認"))
                         .label(text: NSLocalizedString("SettingtableViewController_ConfirmEnableBackgroundFetch", comment:"この設定を有効にすると、ことせかい を使用していない時等に小説の更新を確認するようになるため、ネットワーク通信が発生するようになります。よろしいですか？"))
                         .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
@@ -410,7 +407,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 let judge = row.value
                 if judge! {
-                    EasyDialog.Builder(self)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
                         .title(title: NSLocalizedString("SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title", comment:"確認"))
                         .textView(content: NSLocalizedString("SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12", comment:"この設定を有効にすると、読み上げ中の読み上げ位置表示がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ)に読み替えるように設定することで回避するようになります。\nこの機能を実装した時点では、\"α\"(アルファ)は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われます。\n以上の事を理解した上でこの設定を有効にしますか？"), heightMultiplier: 0.6)
                         .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
@@ -530,7 +527,10 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
                 row.cell.textLabel?.numberOfLines = 0
             }.onChange({ (row) in
-                GlobalDataSingleton.getInstance()?.setIsNeedConfirmDeleteBook(row.value!)
+                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                RealmUtil.Write { (realm) in
+                    globalState.IsNeedConfirmDeleteBook = value
+                }
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
@@ -608,7 +608,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCellof, buttonRow) in
-                EasyDialog.Builder(self)
+                NiftyUtilitySwift.EasyDialogBuilder(self)
                 .label(text: NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について"))
                 .label(text: "Version: " + NiftyUtilitySwift.GetAppVersionString())
                     .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
@@ -625,7 +625,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     do {
                         let license = try String(contentsOfFile: path)
                         DispatchQueue.main.async {
-                            EasyDialog.Builder(self)
+                            NiftyUtilitySwift.EasyDialogBuilder(self)
                                 .textView(content: license, heightMultiplier: 0.7)
                                 .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                     NovelSpeakerUtility.SetLicenseReaded(isRead: true)
@@ -641,7 +641,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
                 DispatchQueue.main.async {
-                    EasyDialog.Builder(self)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
                         .textView(content: NSLocalizedString("SettingTableViewController_LISENSE_file_can_not_read", comment: "LICENSE.txt を読み込めませんでした。ことせかい の GitHub 側の LICENSE.txt を参照してください。"), heightMultiplier: 0.7)
                         .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                             DispatchQueue.main.async {
@@ -659,7 +659,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 if let privacyPolicyUrl = NovelSpeakerUtility.privacyPolicyURL {
                     func privacyPolycyLoadFailed(){
                         DispatchQueue.main.async {
-                            EasyDialog.Builder(self)
+                            NiftyUtilitySwift.EasyDialogBuilder(self)
                             .textView(content: NSLocalizedString("SettingTableViewController_PrivacyPolicy_can_not_load", comment: "最新のプライバシーポリシーを読み込めませんでした。\nSafariでの表示を試みます。"), heightMultiplier: 0.6)
                             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                 DispatchQueue.main.async {
@@ -673,7 +673,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data) in
                         if let currentPrivacyPolicy = String(data: data, encoding: .utf8) {
                             DispatchQueue.main.async {
-                                EasyDialog.Builder(self)
+                                NiftyUtilitySwift.EasyDialogBuilder(self)
                                 .textView(content: currentPrivacyPolicy, heightMultiplier: 0.6)
                                 .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                     DispatchQueue.main.async {
@@ -728,17 +728,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            /*
-            <<< SwitchRow("IsDummySilentSoundEnabled") {
-                $0.title = NSLocalizedString("SettingTableViewController_DummySilentSoundEnable", comment:"再生中に無音の音を鳴らしてバックグラウンド再生中に再生が停止しないように祈る")
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                $0.value = GlobalDataSingleton.getInstance()?.isDummySilentSoundEnabled()
-                $0.cell.textLabel?.numberOfLines = 0
-                }.onChange({ row in
-                    GlobalDataSingleton.getInstance()?.setIsDummySilentSoundEnabled(row.value!)
-                })
-             */
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
@@ -937,7 +926,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     func ChooseUseiCloudDataOrOverrideLocalData() {
         DispatchQueue.main.async {
-            EasyDialog.Builder(self)
+            NiftyUtilitySwift.EasyDialogBuilder(self)
             .label(text: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData", comment: "iCloud側に利用可能なデータが存在するようです。iCloud側のデータをそのまま利用するか、現在のデータでiCloud上のデータを上書きするかを選択してください。"))
             .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud", comment: "iCloudのデータをそのまま利用する"), callback: { (dialog) in
                 DispatchQueue.main.async {
@@ -1134,7 +1123,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     func AddDefaultSpeechModSetting(){
         NovelSpeakerUtility.OverrideDefaultSpeechModSettings()
         DispatchQueue.main.async {
-            EasyDialog.Builder(self)
+            NiftyUtilitySwift.EasyDialogBuilder(self)
                 .label(text: NSLocalizedString("SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary", comment: "標準の読み替え辞書を上書き追加しました。"))
                 .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: {dialog in
                     DispatchQueue.main.async {
@@ -1147,7 +1136,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     /// 標準で用意された読み上げ辞書で上書きして良いか確認した上で、上書き追加します。
     func ConfirmAddDefaultSpeechModSetting(){
         DispatchQueue.main.async {
-            EasyDialog.Builder(self)
+            NiftyUtilitySwift.EasyDialogBuilder(self)
                 .title(title: NSLocalizedString("SettingTableViewController_ConfirmAddDefaultSpeechModSetting", comment:"確認"))
                 .label(text: NSLocalizedString("SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage", comment:"用意された読み替え辞書を追加・上書きします。よろしいですか？"))
                 .addButton(title: NSLocalizedString("Cancel_button", comment:"Cancel"), callback: { dialog in
@@ -1186,7 +1175,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     /// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
     func ShareNcodeListURLScheme(){
         DispatchQueue.main.async {
-            EasyDialog.Builder(self)
+            NiftyUtilitySwift.EasyDialogBuilder(self)
             .text(content: NSLocalizedString("SettingsViewController_IsCreateFullBackup?", comment: "小説の本文まで含めた完全なバックアップファイルを生成しますか？\r\n登録小説数が多い場合は生成に膨大な時間と本体容量が必要となります。"))
             .addButton(title: NSLocalizedString("SettingsViewController_ChooseFullBackup", comment: "完全バックアップを生成する(時間がかかります)")) { (dialog) in
                 DispatchQueue.main.async {
@@ -1210,7 +1199,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     /// 現在の状態をファイルにして mail に添付します。
     func ShareBackupData(withAllStoryContent:Bool){
         let labelTag = 100
-        let dialog = EasyDialog.Builder(self)
+        let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
             .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
             .build()
         DispatchQueue.main.async {

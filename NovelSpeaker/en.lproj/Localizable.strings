@@ -580,7 +580,7 @@ Interface change
 Bug fix
 
 - Fixed an issue where the picker dialog that appeared in the \"Order\" etc. at the top right of the bookshelf could not be selected under VoiceOver.
-
+- Resolved an issue that could cause items that could not be deleted with bookmarks in the Web Import tab.
 
 # Version 1.1.57
 

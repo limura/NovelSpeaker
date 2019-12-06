@@ -2222,6 +2222,7 @@ Bug fix
 問題の修正
 
 - VoiceOver環境下において、本棚の右上にある「順番」などで出てくるピッカーダイアログが選択できなくなっていた問題を修正
+- Web取込タブ内のブックマークで削除できない項目が発生し得た問題を解消
 
 評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
 
@@ -2251,6 +2252,7 @@ Interface change
 Bug fix
 
 - Fixed an issue where the picker dialog that appeared in the "Order" etc. at the top right of the bookshelf could not be selected under VoiceOver.
+- Resolved an issue that could cause items that could not be deleted with bookmarks in the Web Import tab.
 
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す

@@ -41,7 +41,7 @@ class NiftyUtilitySwift: NSObject {
     
     @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
         DispatchQueue.main.async {
-            var easyDialog = EasyDialog.Builder(viewController)
+            var easyDialog = EasyDialogBuilder(viewController)
                 .textField(tag: 100, placeholder: title, content: title, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
                 // TODO: 怪しくheightを画面の縦方向からの比率で指定している。
                 // ここに 1.0 とか書くと他のViewの分の高さが入って全体は画面の縦幅よりも高くなるので全部が表示されない。
@@ -84,7 +84,7 @@ class NiftyUtilitySwift: NSObject {
     public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieArray: [String], depth: Int = 0, prevHtmlStoryArray:[HtmlStory?] = []) {
         BehaviorLogger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
-            let builder = EasyDialog.Builder(viewController)
+            let builder = EasyDialogBuilder(viewController)
             .text(content: NSLocalizedString("ImportFromWebPageViewController_loading", comment: "loading"))
             let dialog = builder.build()
             dialog.show {
@@ -102,7 +102,7 @@ class NiftyUtilitySwift: NSObject {
                             }
                             guard let content = story?.content, content.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 else {
                                 DispatchQueue.main.async {
-                                    EasyDialog.Builder(viewController)
+                                    EasyDialogBuilder(viewController)
                                         .title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
                                         .label(text: NSLocalizedString("NiftyUtilitySwift_ImportedButNoTextFound", comment: "読み込めはしたけれど、内容がありませんでした"))
                                         .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
@@ -130,7 +130,7 @@ class NiftyUtilitySwift: NSObject {
                                         }
                                     }
                                 }
-                                var builder = EasyDialog.Builder(viewController)
+                                var builder = EasyDialogBuilder(viewController)
                                 builder = builder.textField(tag: 100, placeholder: titleString, content: titleString, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
                                     //.title(title: titleString)
                                     // TODO: 怪しくheightを画面の縦方向からの比率で指定している。
@@ -267,9 +267,21 @@ class NiftyUtilitySwift: NSObject {
         return nil
     }
     
+    public static func searchToplevelViewController(targetViewController: UIViewController) -> UIViewController {
+        var currentViewController = targetViewController
+        while let parent = currentViewController.parent {
+            currentViewController = parent
+        }
+        return currentViewController
+    }
+    
+    public static func EasyDialogBuilder(_ viewController: UIViewController) -> EasyDialog.Builder {
+        return EasyDialog.Builder(searchToplevelViewController(targetViewController: viewController))
+    }
+    
     @discardableResult
     @objc public static func EasyDialogNoButton(viewController: UIViewController, title: String?, message: String?, completion:((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
-        var dialog = EasyDialog.Builder(viewController)
+        var dialog = EasyDialogBuilder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
         }
@@ -290,7 +302,7 @@ class NiftyUtilitySwift: NSObject {
     
     @discardableResult
     @objc public static func EasyDialogLongMessageDialog(viewController: UIViewController, message: String, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
-        let dialog = EasyDialog.Builder(viewController)
+        let dialog = EasyDialogBuilder(viewController)
             .textView(content: message, heightMultiplier: 0.7)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
                 dialog.dismiss(animated: false, completion: nil)
@@ -302,7 +314,7 @@ class NiftyUtilitySwift: NSObject {
 
     @discardableResult
     @objc public static func EasyDialogOneButton(viewController: UIViewController, title: String?, message: String?, buttonTitle: String?, buttonAction:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
-        var dialog = EasyDialog.Builder(viewController)
+        var dialog = EasyDialogBuilder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
         }
@@ -323,7 +335,7 @@ class NiftyUtilitySwift: NSObject {
     
     @discardableResult
     @objc public static func EasyDialogTwoButton(viewController: UIViewController, title: String?, message: String?, button1Title: String?, button1Action:(()->Void)?, button2Title: String?, button2Action:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
-        var dialog = EasyDialog.Builder(viewController)
+        var dialog = EasyDialogBuilder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
         }
@@ -351,7 +363,7 @@ class NiftyUtilitySwift: NSObject {
     
     @discardableResult
     @objc public static func EasyDialogForButton(viewController: UIViewController, title: String?, message: String?, button1Title: String?, button1Action:(()->Void)?, button2Title: String?, button2Action:(()->Void)?, button3Title: String?, button3Action:(()->Void)?, button4Title: String?, button4Action:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
-        var dialog = EasyDialog.Builder(viewController)
+        var dialog = EasyDialogBuilder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
         }
@@ -388,7 +400,7 @@ class NiftyUtilitySwift: NSObject {
     }
     
     @objc public static func EasyDialogTextInput(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, action:((String)->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) {
-        var dialog = EasyDialog.Builder(viewController)
+        var dialog = EasyDialogBuilder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
         }
@@ -409,7 +421,7 @@ class NiftyUtilitySwift: NSObject {
     }
     
     @objc public static func EasyDialogTextInput2Button(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, leftButtonText: String?, rightButtonText: String?, leftButtonAction:((String)->Void)?, rightButtonAction:((String)->Void)?, shouldReturnIsRightButtonClicked:Bool = false, completion: ((_ dialog:EasyDialog)->Void)? = nil) {
-        var dialog = EasyDialog.Builder(viewController)
+        var dialog = EasyDialogBuilder(viewController)
         if let title = title {
             dialog = dialog.title(title: title)
         }
@@ -453,7 +465,7 @@ class NiftyUtilitySwift: NSObject {
         builded.show { completion?(builded) }
     }
     @objc public static func EasyDialogMessageDialog(viewController: UIViewController, title: String?, message: String?, completion:(()->Void)?) {
-        var builder = EasyDialog.Builder(viewController)
+        var builder = EasyDialogBuilder(viewController)
         if let title = title {
             builder = builder.title(title: title)
         }
@@ -610,7 +622,7 @@ class NiftyUtilitySwift: NSObject {
     
     @objc public static func RestoreBackupFromJSONWithProgressDialog(jsonData:Data, dataDirectory:URL?, rootViewController:UIViewController){
         let globalDataSingleton = GlobalDataSingleton.getInstance()
-        var builder = EasyDialog.Builder(rootViewController)
+        var builder = EasyDialogBuilder(rootViewController)
         NiftyUtilitySwift.DispatchSyncMainQueue {
             builder = builder.label(text: NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元"), textAlignment: .center, tag: 100)
             let dialog = builder.build()
@@ -628,14 +640,14 @@ class NiftyUtilitySwift: NSObject {
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: {
                         if result == true {
-                            EasyDialog.Builder(rootViewController)
+                            EasyDialogBuilder(rootViewController)
                             .label(text: NSLocalizedString("GlobalDataSingleton_BackupDataLoaded", comment:"設定データを読み込みました。ダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。"), textAlignment: .center)
                             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                 dialog.dismiss(animated: false, completion: nil)
                             })
                             .build().show()
                         }else{
-                            EasyDialog.Builder(rootViewController)
+                            EasyDialogBuilder(rootViewController)
                             .label(text: NSLocalizedString("GlobalDataSingleton_RestoreBackupDataFailed", comment:"設定データの読み込みに失敗しました。"), textAlignment: .center)
                             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                 dialog.dismiss(animated: false, completion: nil)

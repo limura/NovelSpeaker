@@ -1473,7 +1473,7 @@ class NovelSpeakerUtility: NSObject {
 
     static func ProcessNovelSpeakerBackupFile(url:URL) -> Bool {
         guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return false }
-        var builder = EasyDialog.Builder(viewController)
+        var builder = NiftyUtilitySwift.EasyDialogBuilder(viewController)
         let titleTag = 100
         let messageTag = 101
         builder = builder.label(text: NSLocalizedString("NovelSpeakerUtility_RestoreBackupTitle", comment: "バックアップデータを読み込んでいます"), textAlignment: .center, tag: titleTag)

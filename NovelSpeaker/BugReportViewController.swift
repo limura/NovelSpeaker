@@ -34,7 +34,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     return
                 }
                 DispatchQueue.main.async {
-                    EasyDialog.Builder(self)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
                     .text(content: NSLocalizedString("BugReportViewController_PrivacyPolicyAgreementNeeded", comment: "ことせかい のプライバシーポリシーについての同意が必要です"))
                     .textView(content: currentPrivacyPolicy, heightMultiplier: 0.5)
                     .addButton(title: NSLocalizedString("Disagree_Button", comment:"同意しない"), callback: { dialog in
@@ -159,7 +159,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 let description = BugReportViewController.value.DescriptionOfNewFeature
                 let needResponse = BugReportViewController.value.IsNeedResponse
                 if BugReportViewController.value.DescriptionOfNewFeature == "" {
-                    EasyDialog.Builder(self)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
                         .title(title: NSLocalizedString("BugReportViewController_ErrorDialog", comment: "問題のある入力項目があります"))
                         .label(text: NSLocalizedString("BugReportViewController_NoDescriptionOfTheNewFeature", comment: "ご提案の内容が空になっています"), textAlignment: .left)
                         .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
@@ -225,7 +225,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 }.onChange({ (row) in
                     let judge = row.value
                     if judge! {
-                        EasyDialog.Builder(self)
+                        NiftyUtilitySwift.EasyDialogBuilder(self)
                             .title(title: NSLocalizedString("BugReportViewController_ConfirmEnableLogSend_title", comment:"確認"))
                             .textView(content: NSLocalizedString("BugReportViewController_ConfirmEnableLogSend", comment:"ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合にはOFFのままにしておく必要があります。\nなお、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), heightMultiplier: 0.6)
                             .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
@@ -278,7 +278,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     warningMessage += NSLocalizedString("BugReportViewController_NoDescriptonOfTheProblem", comment: "問題の説明欄が空欄になっています。")
                 }
                 if warningMessage.count > 0 {
-                    EasyDialog.Builder(self)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
                         .title(title: NSLocalizedString("BugReportViewController_ErrorDialog", comment: "問題のある入力項目があります"))
                         .label(text: warningMessage, textAlignment: .left)
                         .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
@@ -290,7 +290,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     return;
                 }
                 if BehaviorLogger.LOGGER_ENABLED {
-                    EasyDialog.Builder(self)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
                         .label(text: NSLocalizedString("BugReportViewController_AddBehaviourLogAnnounce", comment: "ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合には「いいえ」を選択する必要があります。\nまた、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), textAlignment: .left)
                         .addButton(title: NSLocalizedString("BugReportViewController_NO", comment: "いいえ"), callback: { (dialog) in
                             self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
