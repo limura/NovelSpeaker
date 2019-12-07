@@ -106,7 +106,7 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
         form +++ Section()
         <<< LabelRow("SampleLabel") { (row) in
             row.title = NSLocalizedString("NovelDisplayColorSettingViewController_SampleText", comment: "メロスは激怒した。必ず、かの邪智暴虐の王を除かなければならぬと決意した。メロスには政治がわからぬ。メロスは、村の牧人である。笛を吹き、羊と遊んで暮して来た。けれども邪悪に対しては、人一倍に敏感であった。\nきょう未明メロスは村を出発し、野を越え山越え、十里はなれた此のシラクスの市にやって来た。メロスには父も、母も無い。女房も無い。十六の、内気な妹と二人暮しだ。")
-            row.cell.textLabel?.font = .systemFont(ofSize: 14.0)
+            row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
             row.cell.textLabel?.numberOfLines = 0
             refreshColorFromSetting()
         }.cellUpdate({ (cellOf, row) in
