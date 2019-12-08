@@ -61,6 +61,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         treeView.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: 8).isActive = true
         treeView.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: 8).isActive = true
         treeView.translatesAutoresizingMaskIntoConstraints = false
+        treeView.estimatedRowHeight = 44
+        treeView.rowHeight = UITableView.automaticDimension
         self.treeView = treeView
         
         self.title = NSLocalizedString("BookShelfRATreeViewController_Title", comment: "本棚")
@@ -833,10 +835,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     // cell の高さを求められる時に呼ばれる
     let fontForFontSize = UIFont.preferredFont(forTextStyle: .body)
     func treeView(_ treeView: RATreeView, heightForRowForItem item: Any) -> CGFloat {
-        return self.fontForFontSize.pointSize + 10.5 + 12
+        return self.fontForFontSize.lineHeight + 10.5 + 12
     }
     func treeView(_ treeView: RATreeView, estimatedHeightForRowForItem item: Any) -> CGFloat {
-        return self.fontForFontSize.pointSize + 10.5 + 12
+        return self.fontForFontSize.lineHeight + 10.5 + 12
     }
 
 
