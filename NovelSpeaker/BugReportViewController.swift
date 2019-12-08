@@ -115,7 +115,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             }
             <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_InformationForNewFeatureSending", comment: "ことせかい は個人開発のアプリになりますので、開発力はとても低いです。提案された機能で簡単に実装できるものは実装されることが多いですが、実装しないと判断されるものも多くあります。それらについては以下のURL(サポートサイトの下部にリンクがあります)にて解説しておりますので、新機能をご提案なされる前に一度目を通しておいていただければ幸いです。")
-                $0.cell.textLabel?.font = .preferredFont(forTextStyle: UIFont.TextStyle.subheadline)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
                 $0.cell.textLabel?.numberOfLines = 0
             }
             <<< ButtonRow() {
@@ -150,7 +150,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 })
             <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_InformationForIsNeedResponse", comment: "返事が欲しいと設定されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる可能性があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合があります。")
-                $0.cell.textLabel?.font = .preferredFont(forTextStyle: UIFont.TextStyle.caption2)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption2)
                 $0.cell.textLabel?.numberOfLines = 0
             }
             <<< ButtonRow() {
@@ -180,7 +180,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 $0.cell.textLabel?.numberOfLines = 0
             } <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_InformationOfTheTime", comment: "不都合の発生日時はできるだけ正確に入力してください。単に1日前にずらしただけの情報では何の意味もありませんが、そのような値での報告が大変多く寄せられております。特に、操作ログを添付して頂ける場合には操作ログの該当の日時辺りのログを参照する事で確認作業が捗りますため、なるべく近い日時を入力してくださいますようお願い致します。")
-                $0.cell.textLabel?.font = .preferredFont(forTextStyle: UIFont.TextStyle.caption2)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption2)
                 $0.cell.textLabel?.numberOfLines = 0
 
             } <<< DateTimeRow() {
@@ -262,7 +262,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             })
             <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_InformationForIsNeedResponse", comment: "返事が許可されている場合には開発者から送信元のメールアドレスへ返信を行います。返信は遅くなる可能性があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合があります。")
-                $0.cell.textLabel?.font = .preferredFont(forTextStyle: UIFont.TextStyle.caption2)
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption2)
                 $0.cell.textLabel?.numberOfLines = 0
             } <<< ButtonRow() {
             $0.title = NSLocalizedString("BugReportViewController_SendBugReportButtonTitle", comment: "不都合報告mailを作成する")
