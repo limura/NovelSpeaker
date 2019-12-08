@@ -146,11 +146,17 @@
         label = (UILabel*)view;
     }else{
         label = [UILabel new];
-        [label setFont:[UIFont preferredFontForTextStyle:UIFontTextStyleCallout]];
+        [label setFont:[UIFont preferredFontForTextStyle:UIFontTextStyleTitle1]];
         [label setTextAlignment:NSTextAlignmentCenter];
     }
     [label setText:[self pickerView:pickerView titleForRow:row forComponent:component]];
     return label;
+}
+
+- (CGFloat)pickerView:(UIPickerView *)pickerView rowHeightForComponent:(NSInteger)component {
+    UIFont* font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle1];
+    NSLog(@"height: %f", [font xHeight]);
+    return [font xHeight] + 26;
 }
 
 - (void)doneButtonClicked{
