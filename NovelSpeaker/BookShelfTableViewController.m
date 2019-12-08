@@ -68,7 +68,6 @@
 
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     
-    // TODO: 保存された値を読みだすようにする
     m_SortType = [globalData GetBookSelfSortType];
     
     // 編集ボタンをつけます。
@@ -123,6 +122,9 @@
             [self PushNextView:currentContent isNeedSpeech:false];
         }
     }
+    self.tableView.estimatedRowHeight = 44;
+    self.tableView.rowHeight = UITableViewAutomaticDimension;
+    
     [self ReloadAllTableViewDataAndScrollToCurrentReadingContent];
 }
 
@@ -329,6 +331,11 @@
     NarouContent* narouContent = (NarouContent*)contentList[indexPath.row];
     [cell setTitleLabel:narouContent.title ncode:narouContent.ncode];
     return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UIFont* font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    return [font lineHeight] + 16;
 }
 
 - (void)ReloadAllTableViewDataAndScrollToCurrentReadingContent{

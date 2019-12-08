@@ -156,7 +156,7 @@
 - (CGFloat)pickerView:(UIPickerView *)pickerView rowHeightForComponent:(NSInteger)component {
     UIFont* font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle1];
     NSLog(@"height: %f", [font xHeight]);
-    return [font xHeight] + 26;
+    return [font lineHeight];
 }
 
 - (void)doneButtonClicked{
