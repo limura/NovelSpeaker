@@ -138,7 +138,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
         let destructiveButton: Button
         let regularButton: Button
         
-        public init(textColor: UIColor = UIColor.black, textFont: UIFont = UIFont.systemFont(ofSize: 16.0), titleColor: UIColor = UIColor.black, titleFont: UIFont = UIFont.boldSystemFont(ofSize: 18.0), alertBackgroudColor: UIColor = UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0), cornerRadius: CGFloat = 15.0, maskViewAlpha: CGFloat = 0.6, separatorColor: UIColor = UIColor.lightGray) {
+        public init(textColor: UIColor = UIColor.black, textFont: UIFont = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body), titleColor: UIColor = UIColor.black, titleFont: UIFont = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.title3), alertBackgroudColor: UIColor = UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1.0), cornerRadius: CGFloat = 15.0, maskViewAlpha: CGFloat = 0.6, separatorColor: UIColor = UIColor.lightGray) {
             
             if #available(iOS 13.0, *) {
                 if textColor == UIColor.black {
@@ -196,11 +196,11 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
                 self.font = font
             }
             
-            static let positive = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(19, green: 144, blue: 255), font: UIFont.boldSystemFont(ofSize: 16.0))
+            static let positive = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(19, green: 144, blue: 255), font: UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body))
             
-            static let destructive = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(255, green: 59, blue: 48), font: UIFont.systemFont(ofSize: 16.0))
+            static let destructive = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(255, green: 59, blue: 48), font: UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body))
             
-            static let regular = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(19, green: 144, blue: 255), font: UIFont.systemFont(ofSize: 16.0))
+            static let regular = Button(backgroundColor: colorFromDecimalRGB(245, green: 245, blue: 245), selectedBackgroundColor: colorFromDecimalRGB(230, green: 230, blue: 230), textColor: colorFromDecimalRGB(19, green: 144, blue: 255), font: UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body))
             
         }
     }
@@ -256,6 +256,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             label.textAlignment = .center
             label.font = theme.titleFont
             label.textColor = theme.titleColor
+            label.numberOfLines = 0
             views.append(label)
             return self
         }
@@ -604,7 +605,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
     private var forTextViewConstraintArray: [NSLayoutConstraint]!
     
     public func show(completion:(()->Void)? = nil) {
-        builder.targetViewController?.present(self, animated: true, completion: {
+        builder.targetViewController?.present(self, animated: false, completion: {
             self.builder.focusKeyboard()
             completion?()
         })
@@ -620,8 +621,10 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
                     NSLayoutConstraint.deactivate([forKeyboardConstraint])
                 }
                 // 新しい中央の場所をそれっぽく設定します
-                forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: -height / 2)
-                NSLayoutConstraint.activate([forKeyboardConstraint])
+                if let baseView = baseView {
+                    forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: -height / 2)
+                    NSLayoutConstraint.activate([forKeyboardConstraint])
+                }
                 // TextView は「ユーザが思い描いた感じで画面の大半を専有している」と仮定して、
                 // その高さを縮めないとキーボードを表示したために画面外に追いやられる部分がある、と思い込んで、
                 // とりあえず高さを 0.4倍 して表示しなおさせています。
@@ -658,8 +661,10 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             if forKeyboardConstraint != nil {
                 NSLayoutConstraint.deactivate([forKeyboardConstraint])
             }
-            forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: 0)
-            NSLayoutConstraint.activate([forKeyboardConstraint])
+            if let baseView = baseView {
+                forKeyboardConstraint = NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerY, relatedBy: NSLayoutConstraint.Relation.equal, toItem: view, attribute: NSLayoutConstraint.Attribute.centerY, multiplier: 1.0, constant: 0)
+                NSLayoutConstraint.activate([forKeyboardConstraint])
+            }
             if forTextViewConstraintArray != nil {
                 NSLayoutConstraint.deactivate(forTextViewConstraintArray)
             }
