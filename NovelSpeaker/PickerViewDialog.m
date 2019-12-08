@@ -139,6 +139,20 @@
     return [self GetRowText:row];
 }
 
+// UIPickerView に表示される要素を返す(DynamicType 用に font を設定します)
+- (UIView*)pickerView:(UIPickerView *)pickerView viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view {
+    UILabel* label = nil;
+    if ([view isKindOfClass:[UILabel class]]) {
+        label = (UILabel*)view;
+    }else{
+        label = [UILabel new];
+        [label setFont:[UIFont preferredFontForTextStyle:UIFontTextStyleCallout]];
+        [label setTextAlignment:NSTextAlignmentCenter];
+    }
+    [label setText:[self pickerView:pickerView titleForRow:row forComponent:component]];
+    return label;
+}
+
 - (void)doneButtonClicked{
     if (m_ResultReceiver) {
         m_ResultReceiver([self GetSelectedString]);

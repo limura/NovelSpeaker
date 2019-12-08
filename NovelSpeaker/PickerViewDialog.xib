@@ -41,16 +41,18 @@
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c0O-Y4-SkC">
-                    <rect key="frame" x="187.5" y="302.5" width="187.5" height="30"/>
+                    <rect key="frame" x="187.5" y="302.5" width="187.5" height="32"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
                     <state key="normal" title="OK"/>
                     <connections>
                         <action selector="okButtonClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="DDN-9c-8rO"/>
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nHk-ko-Gf4">
-                    <rect key="frame" x="0.0" y="302.5" width="187.5" height="30"/>
+                    <rect key="frame" x="0.0" y="302.5" width="187.5" height="32"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
                     <state key="normal" title="Cancel"/>
                     <connections>
                         <action selector="cancelButtonClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="fcH-TG-g6x"/>

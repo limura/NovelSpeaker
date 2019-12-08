@@ -312,6 +312,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             textField.borderStyle = borderStyle
             textField.clearButtonMode = clearButtonMode
             textField.shouldReturnEventHander = shouldReturnEventHandler
+            textField.font = theme.textFont
             if let tag = tag {
                 textField.tag = tag
             }
