@@ -318,11 +318,16 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
             + "<title>home</title>"
             + "<style type=\"text/css\">"
             + """
+html {
+  font: -apple-system-title1;
+}
+li {
+  padding: 0.12em;
+}
 @media (prefers-color-scheme: light) {
   body {
     background-color: #e0e0e0;
     color: black;
-    font-size: 2.4rem;
   }
   a:link { color: #0000ff; }
   a:visited { color: #000080; }
@@ -331,7 +336,6 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
   body {
     background-color: #202020;
     color: #a0a0a0;
-    font-size: 2.4rem;
   }
   a:link { color: #5050ff; }
   a:visited { color: #4040a0; }
