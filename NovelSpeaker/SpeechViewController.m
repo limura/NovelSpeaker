@@ -709,7 +709,8 @@
                     readLocation = 0;
                 }
             }
-            [self.textView select:self];
+            // 起動時などにセレクションメニュー(?選択範囲の上にでる「コピー」とかの奴)が出ないように select はしないでおきます
+            //[self.textView select:self];
             self.textView.selectedRange = NSMakeRange(readLocation, 1);
             [self TextViewScrollTo:readLocation];
         }
