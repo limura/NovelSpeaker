@@ -576,6 +576,7 @@ Interface change
 
 - add Settings -> \"Confirm when deleting a novel\"
 - add \"Check past notifications\" button on Settings -> Information dialog
+- Enhanced DynamicType support.
 
 Bug fix
 
