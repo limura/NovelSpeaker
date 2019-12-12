@@ -53,6 +53,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         registNotificationCenter()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.textView.becomeFirstResponder()
+    }
+    
     deinit {
         self.unregistNotificationCenter()
     }
@@ -177,12 +182,14 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             self.applyChapterListChange()
             DispatchQueue.main.async {
                 if let textViewText = self.textView.text, textViewText != content {
-                    if story.content.count > 0 {
-                        self.textView.text = story.content
-                    }else{
+                    if story.content.count <= 0 {
                         self.textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
+                        return
                     }
-                    self.textView.select(self)
+                    self.textView.text = story.content
+                    // textView.select() すると、選択範囲の上にメニューが出るようになるのでこの時点では select() はしない。
+                    // でも、textView.becomeFirstResponder() しておかないと選択範囲自体が表示されないようなので becomeFirstResponder() はどこかでしておかないと駄目っぽい。
+                    //self.textView.select(self)
                     self.textView.selectedRange = NSRange(location: readLocation, length: 1)
                     self.textViewScrollTo(readLocation: readLocation)
                 }
