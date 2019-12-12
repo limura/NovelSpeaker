@@ -197,7 +197,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 let data = BookShelfRATreeViewCellData()
                 data.childrens = nil
                 data.novelID = novel.novelID
-                data.title = nil
+                data.title = novel.title
                 result.append(data)
             }
             return result
@@ -231,6 +231,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     if lastDownloadDate <= prevDate && lastDownloadDate > filter.date {
                         let data = BookShelfRATreeViewCellData()
                         data.novelID = novel.novelID
+                        data.title = novel.title
                         folder.childrens?.append(data)
                     }
                 }
@@ -250,7 +251,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 let data = BookShelfRATreeViewCellData()
                 data.childrens = nil
                 data.novelID = novel.novelID
-                data.title = nil
+                data.title = novel.title
                 result.append(data)
             }
             return result
@@ -287,6 +288,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     for novel in novels {
                         let data = BookShelfRATreeViewCellData()
                         data.novelID = novel.novelID
+                        data.title = novel.title
                         folder.childrens?.append(data)
                     }
                 }
@@ -330,6 +332,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 for novel in noListedNovels {
                     let data = BookShelfRATreeViewCellData()
                     data.novelID = novel.novelID
+                    data.title = novel.title
                     folder.childrens?.append(data)
                 }
                 result.append(folder)
@@ -355,6 +358,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 for novel in novels {
                     let data = BookShelfRATreeViewCellData()
                     data.novelID = novel.novelID
+                    data.title = novel.title
                     folder.childrens?.append(data)
                     listedNovelIDSet.insert(novel.novelID)
                 }
@@ -835,7 +839,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     // cell の高さを求められる時に呼ばれる
     func treeView(_ treeView: RATreeView, heightForRowForItem item: Any) -> CGFloat {
         let fontForFontSize = UIFont.preferredFont(forTextStyle: .body)
-        print(String(format: "heightForRowForItem: %f", fontForFontSize.lineHeight))
         return fontForFontSize.lineHeight + 10.5 + 12
     }
     func treeView(_ treeView: RATreeView, estimatedHeightForRowForItem item: Any) -> CGFloat {
