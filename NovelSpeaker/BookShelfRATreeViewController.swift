@@ -833,12 +833,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     // cell の高さを求められる時に呼ばれる
-    let fontForFontSize = UIFont.preferredFont(forTextStyle: .body)
     func treeView(_ treeView: RATreeView, heightForRowForItem item: Any) -> CGFloat {
-        return self.fontForFontSize.lineHeight + 10.5 + 12
+        let fontForFontSize = UIFont.preferredFont(forTextStyle: .body)
+        print(String(format: "heightForRowForItem: %f", fontForFontSize.lineHeight))
+        return fontForFontSize.lineHeight + 10.5 + 12
     }
     func treeView(_ treeView: RATreeView, estimatedHeightForRowForItem item: Any) -> CGFloat {
-        return self.fontForFontSize.lineHeight + 10.5 + 12
+        let fontForFontSize = UIFont.preferredFont(forTextStyle: .body)
+        return fontForFontSize.lineHeight + 10.5 + 12
     }
 
 

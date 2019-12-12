@@ -94,6 +94,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(rightSwipe(_:)))
         rightSwipe.direction = .right
         view.addGestureRecognizer(rightSwipe)
+        
+        previousChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
+        nextChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
+        chapterPositionLabel.adjustsFontForContentSizeCategory = true
 
         setCustomUIMenu()
     }
