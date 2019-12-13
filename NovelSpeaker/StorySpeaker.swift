@@ -88,9 +88,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             guard let story = RealmStoryBulk.SearchStory(storyID: storyID) else { return }
             self.storyID = storyID
             updateReadDate(storyID: storyID)
-            if isNeedApplySpeechConfigs {
-                ApplySpeakConfigs(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), content: story.content, location: story.readLocation)
-            }
+            ApplySpeakConfigs(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), content: story.content, location: story.readLocation)
             //updatePlayngInfo(story: story)
             observeStory(storyID: self.storyID)
             for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
