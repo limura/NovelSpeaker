@@ -43,5 +43,28 @@ class RealmTests: XCTestCase {
             NiftyUtilitySwift.RunLoopSleep(deltaSecond: 1)
         }
     }
+    
+    func testBase64Test() {
+        let okText = "aG9nZQ==" // "hoge"
+        let ngTextList = [
+        "*aG9nZQ==",
+        "*aG9nZQ=",
+        "aG9nZQ=",
+        "?aG9nZQ=",
+        "!aG9nZQ==",
+        " aG9nZQ==",
+        "http://aG9nZQ==",
+        ]
+        let okData = Data(base64Encoded: okText)
+        XCTAssert(okData != nil, "okData is nil?")
+        if let okData = okData {
+            let okString = String(data: okData, encoding: .utf8)
+            XCTAssert(okString == "hoge", "okData is not \"hoge\"")
+        }
+        for item in ngTextList {
+            let ngData = Data(base64Encoded: item)
+            XCTAssert(ngData == nil, "ngData(\(item)) is not nil?")
+        }
+    }
 
 }

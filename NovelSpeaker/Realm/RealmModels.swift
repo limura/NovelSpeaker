@@ -701,17 +701,43 @@ struct Story: Codable {
     
     static var bulkCount = 100
     
+    // URL をファイル名として使いやすい文字列に変換します。具体的には、
+    // 1. "/" を "%2F" に変換する(a)
+    // 2. 変換後の文字列の長さが100未満であればそれを使う
+    // 3. Deflate で圧縮してbase64表現にしてみる(b)
+    //    (b) が (a) よりも短い文字列であれば (b) を使う。そうでなければ (a) を使う。
+    // というような事をします。
+    static func URIToUniqueID(urlString:String) -> String {
+        let tmpString = urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "/").inverted) ?? urlString
+        if tmpString.count < 100 {
+            return tmpString
+        }
+        guard let data = urlString.data(using: .utf8), let zipedData = NiftyUtility.dataDeflate(data, level: 9) else {
+            return tmpString
+        }
+        let base64ZipedData = zipedData.base64EncodedString()
+        if base64ZipedData.count < tmpString.count {
+            return base64ZipedData
+        }
+        return tmpString
+    }
+    static func UniqueIDToURI(uniqueID:String) -> String {
+        guard let zipedData = Data(base64Encoded: uniqueID), let data = NiftyUtility.dataInflate(zipedData), let uri = String(data: data, encoding: .utf8) else {
+            return uniqueID.removingPercentEncoding ?? uniqueID
+        }
+        return uri
+    }
     static func CreateUniqueID(novelID:String, chapterNumber:Int) -> String {
-        return "\(chapterNumber):\(novelID)"
+        return "\(chapterNumber):\(URIToUniqueID(urlString: novelID))"
     }
     static func CreateUniqueBulkID(novelID:String, chapterNumber:Int) -> String {
         let chapterNumberBulk = Int((chapterNumber - 1) / bulkCount) * bulkCount
-        return "\(chapterNumberBulk):\(novelID)"
+        return CreateUniqueID(novelID: novelID, chapterNumber: chapterNumberBulk)
     }
     static func StoryIDToNovelID(storyID:String) -> String {
         if let colonIndex = storyID.firstIndex(of: ":") {
             let index = storyID.index(colonIndex, offsetBy: 1)
-            return String(storyID[index...])
+            return UniqueIDToURI(uniqueID: String(storyID[index...]))
         }
         return ""
     }
@@ -732,43 +758,6 @@ struct Story: Codable {
         }
         guard let zipedData = asset.storedData() else {
             print("LoadStoryArray storedData() return nil. filePath: \(asset.filePath.absoluteString)")
-
-            let assetDir = asset.filePath.deletingLastPathComponent()
-            let documentDir = assetDir.deletingLastPathComponent()
-            let fileManager = FileManager.default
-            if fileManager.fileExists(atPath: documentDir.path) {
-                print("Document dir is exists")
-            }else{
-                print("Document is dir NOT exists: \(documentDir.path)")
-                do {
-                    try fileManager.createDirectory(atPath: documentDir.path, withIntermediateDirectories: true, attributes: nil)
-                    print("Create directory success")
-                    if fileManager.fileExists(atPath: documentDir.path) {
-                        print("Document dir is exists")
-                    }else{
-                        print("Document dir NOT exists: \(documentDir.path)")
-                    }
-                }catch let e{
-                    print("Create directory failed: \(e.localizedDescription)")
-                }
-            }
-            if fileManager.fileExists(atPath: assetDir.path) {
-                print("asset dir is exists")
-            }else{
-                print("asset dir is NOT exists: \(assetDir.path)")
-                do {
-                    try fileManager.createDirectory(atPath: assetDir.path, withIntermediateDirectories: true, attributes: nil)
-                    print("Create directory success")
-                }catch let e{
-                    print("Create directory failed: \(e.localizedDescription)")
-                }
-            }
-            if fileManager.fileExists(atPath: asset.filePath.path) {
-                print("target file is exists")
-            }else{
-                print("target file is NOT exists: \(asset.filePath.path)")
-            }
-
             return nil
         }
         guard let data = NiftyUtility.dataInflate(zipedData) else {
@@ -791,23 +780,7 @@ struct Story: Codable {
             print("WARN: [Story] を JSON に変換した後、zip で失敗した")
             return
         }
-        self.storyListAsset = CreamAsset.create(object: self, propName: id, data: zipedData)
-        if let asset = self.storyListAsset {
-            if let storedData = asset.storedData() {
-                print("OverrideStoryListAsset storedData return OK. data.count: \(storedData.count)")
-            }else{
-                print("OverrideStoryListAsset storedData return nil")
-                print("filePath: \(asset.filePath.absoluteString)")
-                do {
-                    try zipedData.write(to: asset.filePath)
-                    print("create ziped file success.")
-                }catch let e{
-                    print("create ziped file failed: \(e.localizedDescription)")
-                }
-            }
-        }else{
-            print("OverrideStoryListAsset is nil")
-        }
+        self.storyListAsset = CreamAsset.create(object: self, propName: "", data: zipedData)
     }
     /// Story を一つづつ登録する場合に使いますが、こちらは Realm.write で囲った物から呼び出される事を期待しています。
     /// 逆に言うと、Realm の write transaction を内部で呼び出しませんので、外部で呼び出す必要があります。
@@ -876,7 +849,7 @@ struct Story: Codable {
                 print("WARN: [Story] の JSONEncode に失敗(RemoveLastStoryWith)")
                 return
             }
-            lastStoryBulk.storyListAsset = CreamAsset.create(object: lastStoryBulk, propName: lastStoryBulk.id, data: data)
+            lastStoryBulk.storyListAsset = CreamAsset.create(object: lastStoryBulk, propName: "", data: data)
             realm.add(lastStoryBulk, update: .modified)
         }
     }
@@ -898,7 +871,7 @@ struct Story: Codable {
         }
     }
     static func RemoveAllStoryWith(realm:Realm, novelID:String) {
-        let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = FALSE AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
+        let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         realm.delete(storyBulkArray)
     }
     static func RemoveAllStory(novelID:String) {
@@ -922,7 +895,8 @@ struct Story: Codable {
 
     static func SearchStoryBulkWith(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
         realm.refresh()
-        guard let result = realm.object(ofType: RealmStoryBulk.self, forPrimaryKey: CreateUniqueBulkID(novelID: novelID, chapterNumber: chapterNumber)), result.isDeleted == false else { return nil }
+        let chapterNumberBulk = Int((chapterNumber - 1) / bulkCount) * bulkCount
+        guard let result = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@ AND chapterNumber = %@", novelID, chapterNumberBulk).first else { return nil }
         return result
     }
     static func SearchStoryBulk(novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
