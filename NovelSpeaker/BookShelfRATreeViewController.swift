@@ -600,16 +600,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func pushNextView(novelID:String, isNeedSpeech: Bool){
         autoreleasepool {
             guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
-            if let storyList = novel.linkedStorys {
-                print("\(novelID) has \(storyList.count) storys.")
-                for story in storyList {
-                    print("  \(story.storyID)")
-                }
-            }else{
-                print("\(novelID) has NO storys.")
-            }
-            print("readingChapter: \(novel.m_readingChapterStoryID)")
-            print("lastChapter: \(novel.m_lastChapterStoryID)")
             guard let story = novel.readingChapter ?? novel.firstChapter else {
                 let targetChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_readingChapterStoryID)
                 guard let novelCount = novel.linkedStorys?.count, novelCount > 0 else {

@@ -546,7 +546,7 @@ import UIKit
 
     // TODO: 書き込み失敗を無視している
     static func WriteWith(realm:Realm, withoutNotifying:[NotificationToken?], block:((_ realm:Realm)->Void)) {
-        realm.refresh()
+        //realm.refresh()
         let withoutNotifying = withoutNotifying.filter { (token) -> Bool in
             token != nil
             } as! [NotificationToken]
@@ -703,13 +703,14 @@ struct Story: Codable {
     
     // URL をファイル名として使いやすい文字列に変換します。具体的には、
     // 1. "/" を "%2F" に変換する(a)
-    // 2. 変換後の文字列の長さが100未満であればそれを使う
+    // 2. 変換後の文字列の長さが250未満であればそれを使う (FILE_MAX が 255 らしいので)
     // 3. Deflate で圧縮してbase64表現にしてみる(b)
     //    (b) が (a) よりも短い文字列であれば (b) を使う。そうでなければ (a) を使う。
     // というような事をします。
+    // PATH_MAX は 1024 らしいのだけれど、保存場所のpathがどのくらいの深さにあるのかわからんのでなんとも言えない。
     static func URIToUniqueID(urlString:String) -> String {
         let tmpString = urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "/").inverted) ?? urlString
-        if tmpString.count < 100 {
+        if tmpString.count < 250 {
             return tmpString
         }
         guard let data = urlString.data(using: .utf8), let zipedData = NiftyUtility.dataDeflate(data, level: 9) else {
@@ -721,6 +722,8 @@ struct Story: Codable {
         }
         return tmpString
     }
+    // deflate の後 base64 にされたものか、"/" を "%2F" に変換されたもののどちらかが入っているはずなので
+    // とりあえず base64 decode できるかを試して失敗したら "%2F" を元に戻したものを返します。
     static func UniqueIDToURI(uniqueID:String) -> String {
         guard let zipedData = Data(base64Encoded: uniqueID), let data = NiftyUtility.dataInflate(zipedData), let uri = String(data: data, encoding: .utf8) else {
             return uniqueID.removingPercentEncoding ?? uniqueID
@@ -815,7 +818,7 @@ struct Story: Codable {
             bulk.novelID = novelID
             bulk.chapterNumber = StoryIDToChapterNumber(storyID: bulk.id)
             if (story.chapterNumber - 1) != bulk.chapterNumber {
-                print("WARN: 未来の chapter が追加されている。ここで追加されるのは bulk の ID にある chapterNumber と差がないもののはずです。")
+                BehaviorLogger.AddLog(description: "WARN: 未来の chapter が追加されている。ここで追加されるのは bulk の ID にある chapterNumber と差がないもののはずです。", data: ["novelID": bulk.novelID, "bulkChapterNumber": bulk.chapterNumber, "bulkID": bulk.id])
             }
             bulk.OverrideStoryListAsset(storyArray: [story])
             realm.add(bulk, update: .modified)
@@ -894,26 +897,26 @@ struct Story: Codable {
     }
 
     static func SearchStoryBulkWith(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
-        realm.refresh()
+        //realm.refresh()
         let chapterNumberBulk = Int((chapterNumber - 1) / bulkCount) * bulkCount
         guard let result = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@ AND chapterNumber = %@", novelID, chapterNumberBulk).first else { return nil }
         return result
     }
     static func SearchStoryBulk(novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
-        realm.refresh()
+        //realm.refresh()
         return SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
     }
     static func SearchStoryBulk(storyID:String) -> RealmStoryBulk? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
-        realm.refresh()
+        //realm.refresh()
         let novelID = StoryIDToNovelID(storyID: storyID)
         let chapterNumber = StoryIDToChapterNumber(storyID: storyID)
         return SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
     }
     static func SearchStoryBulk(novelID:String) -> Results<RealmStoryBulk>?{
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
-        realm.refresh()
+        //realm.refresh()
         return realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
     }
     
@@ -932,7 +935,7 @@ struct Story: Codable {
     static func SearchAllStoryFor(novelID:String) -> [Story]? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
             var result = [Story]()
             for storyBulk in storyBulkArray {
@@ -949,7 +952,7 @@ struct Story: Codable {
     static func GetAllObjects() -> Results<RealmStoryBulk>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmStoryBulk.self).filter("isDeleted = false")
         }
     }
@@ -987,7 +990,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             return autoreleasepool {
                 //guard let realm = try? RealmUtil.GetRealm() else { return nil }
                 guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmSpeechQueue.self).filter({ (speechQueue) -> Bool in
                     return !speechQueue.isDeleted && speechQueue.targetStoryIDArray.contains(self.id)
                 })
@@ -998,7 +1001,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 guard let obj = realm.object(ofType: RealmNovel.self, forPrimaryKey: self.novelID) else { return nil }
                 if obj.isDeleted { return nil }
                 return obj
@@ -1036,7 +1039,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         return autoreleasepool {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
             guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             if let result = realm.object(ofType: RealmStory.self, forPrimaryKey: CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber)), result.isDeleted == false {
                 return result
             }
@@ -1048,7 +1051,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         return autoreleasepool {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
             guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmStory.self).filter("isDeleted = false")
         }
     }
@@ -1064,7 +1067,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         return autoreleasepool {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
             guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             if let result = realm.object(ofType: RealmStory.self, forPrimaryKey: storyID), result.isDeleted == false {
                 return result
             }
@@ -1075,7 +1078,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         return autoreleasepool {
             //guard let realm = try? RealmUtil.GetRealm() else { return nil }
             guard let realm = try? RealmUtil.GetRealmStoryRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmStory.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         }
     }
@@ -1174,7 +1177,7 @@ extension RealmStory: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmSpeechModSetting.self).filter({ (speechModSetting) -> Bool in
                     return !speechModSetting.isDeleted && speechModSetting.targetNovelIDArray.contains(self.novelID)
                 })
@@ -1185,7 +1188,7 @@ extension RealmStory: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmSpeechSectionConfig.self).filter({ (speechSectionConfig) -> Bool in
                     return !speechSectionConfig.isDeleted && speechSectionConfig.targetNovelIDArray.contains(self.novelID)
                 })
@@ -1196,7 +1199,7 @@ extension RealmStory: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmDisplaySetting.self).filter({ (displaySetting) -> Bool in
                     return !displaySetting.isDeleted && displaySetting.targetNovelIDArray.contains(self.novelID)
                 })
@@ -1208,7 +1211,7 @@ extension RealmStory: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmNovelTag.self).filter({ (novelTag) -> Bool in
                     return !novelTag.isDeleted && novelTag.targetNovelIDArray.contains(self.novelID)
                 })
@@ -1220,7 +1223,7 @@ extension RealmStory: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmSpeechOverrideSetting.self).filter({ (speechOverrideSetting) -> Bool in
                     return !speechOverrideSetting.isDeleted && speechOverrideSetting.targetNovelIDArray.contains(self.novelID)
                 })
@@ -1274,7 +1277,7 @@ extension RealmStory: CanWriteIsDeleted {
             }
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 guard let obj = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: self.defaultSpeakerID) else { return nil }
                 if obj.isDeleted { return nil }
                 return obj
@@ -1305,14 +1308,14 @@ extension RealmStory: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmNovel>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmNovel.self).filter("isDeleted = false")
         }
     }
 
     static func SearchNovelFrom(novelID:String) -> RealmNovel? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
-        realm.refresh()
+        //realm.refresh()
         if let result = realm.object(ofType: RealmNovel.self, forPrimaryKey: novelID), result.isDeleted == false {
             return result
         }
@@ -1472,7 +1475,7 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                     return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
                 })
@@ -1483,14 +1486,14 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
     static func GetAllObjects() -> Results<RealmSpeechModSetting>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false")
         }
     }
     static func SearchFrom(beforeString:String) -> RealmSpeechModSetting? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             if let result = realm.object(ofType: RealmSpeechModSetting.self, forPrimaryKey: beforeString), result.isDeleted == false {
                 return result
             }
@@ -1500,7 +1503,7 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
     static func SearchSettingsFor(novelID:String) -> LazyFilterSequence<Results<RealmSpeechModSetting>>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmSpeechModSetting.self).filter("isDeleted = false").filter({ (setting) -> Bool in
                 return setting.targetNovelIDArray.contains(anyTarget) || setting.targetNovelIDArray.contains(novelID)
             })
@@ -1565,7 +1568,7 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmSpeechWaitConfig>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmSpeechWaitConfig.self).filter("isDeleted = false")
         }
     }
@@ -1573,7 +1576,7 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
     static func SearchFrom(targetText:String) -> RealmSpeechWaitConfig? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             if let result = realm.object(ofType: RealmSpeechWaitConfig.self, forPrimaryKey: targetText), result.isDeleted == false {
                 return result
             }
@@ -1629,7 +1632,7 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmSpeakerSetting>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false")
         }
     }
@@ -1637,7 +1640,7 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     static func SearchFrom(name:String) -> RealmSpeakerSetting? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             if let result = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: name), result.isDeleted == false {
                 return result
             }
@@ -1695,7 +1698,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.speakerID).first
             }
         }
@@ -1704,7 +1707,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                     return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
                 })
@@ -1716,7 +1719,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
     static func SearchSettingsFor(novelID:String) -> Dictionary<String, RealmSpeechSectionConfig>.Values? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             var result:[String:RealmSpeechSectionConfig] = [:]
             // anyTarget の物を一旦設定して
             for target in realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false").filter({ (setting) -> Bool in
@@ -1737,7 +1740,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmSpeechSectionConfig>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmSpeechSectionConfig.self).filter("isDeleted = false")
         }
     }
@@ -1745,7 +1748,7 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
     static func SearchFrom(name:String) -> RealmSpeechSectionConfig? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             if let result = realm.object(ofType: RealmSpeechSectionConfig.self, forPrimaryKey: name), result.isDeleted == false {
                 return result
             }
@@ -1838,7 +1841,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false AND name = %@", self.defaultDisplaySettingID).first
             }
         }
@@ -1847,7 +1850,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeakerID).first
             }
         }
@@ -1856,7 +1859,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeechOverrideSettingID).first
             }
         }
@@ -1946,7 +1949,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
 
     static public func GetInstance() -> RealmGlobalState? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
-        realm.refresh()
+        //realm.refresh()
         guard let obj = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: UniqueID) else { return nil }
         if obj.isDeleted { return nil }
         return obj
@@ -1977,7 +1980,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                     return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
                 })
@@ -1988,7 +1991,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmDisplaySetting>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false")
         }
     }
@@ -1996,7 +1999,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
     static func SearchFrom(name:String) -> RealmDisplaySetting? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             if let result = realm.object(ofType: RealmDisplaySetting.self, forPrimaryKey: name), result.isDeleted == false {
                 return result
             }
@@ -2072,7 +2075,7 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                     return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
                 })
@@ -2091,7 +2094,7 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmNovelTag>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmNovelTag.self).filter("isDeleted = false")
         }
     }
@@ -2102,7 +2105,7 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     static func SearchWith(name:String, type:String) -> RealmNovelTag? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             guard let obj = realm.object(ofType: RealmNovelTag.self, forPrimaryKey: RealmNovelTag.CreateUniqueID(name: name, type: type)) else { return nil }
             if obj.isDeleted { return nil }
             return obj
@@ -2111,7 +2114,7 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     static func SearchWith(novelID:String, type:String) -> LazyFilterSequence<Results<RealmNovelTag>>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmNovelTag.self).filter("isDeleted = false AND type = %@", type).filter({ (tag) -> Bool in
                 return tag.targetNovelIDArray.contains(novelID)
             })
@@ -2204,7 +2207,7 @@ extension RealmNovelTag: CanWriteIsDeleted {
         get {
             return autoreleasepool {
                 guard let realm = try? RealmUtil.GetRealm() else { return nil }
-                realm.refresh()
+                //realm.refresh()
                 return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
                     return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
                 })
@@ -2215,14 +2218,14 @@ extension RealmNovelTag: CanWriteIsDeleted {
     static func GetAllObjects() -> Results<RealmSpeechOverrideSetting>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false")
         }
     }
     static func SearchObjectFrom(novelID:String) -> LazyFilterSequence<Results<RealmSpeechOverrideSetting>>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false").filter({ (setting) -> Bool in
                 return setting.targetNovelIDArray.contains(novelID)
             })
@@ -2231,7 +2234,7 @@ extension RealmNovelTag: CanWriteIsDeleted {
     static func SearchObjectFrom(name:String) -> RealmSpeechOverrideSetting? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
-            realm.refresh()
+            //realm.refresh()
             guard let obj = realm.object(ofType: RealmSpeechOverrideSetting.self, forPrimaryKey: name) else { return nil }
             if obj.isDeleted { return nil }
             return obj

@@ -488,22 +488,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            <<< SwitchRow("IsUseiCloud") {
-                $0.title = NSLocalizedString("SettingsViewController_IsUseiCloud_Title", comment: "iCloud 同期を使用する")
-                $0.value = RealmUtil.IsUseCloudRealm()
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onChange({ (row) in
-                guard let value = row.value else { return }
-                if value == true {
-                    if !RealmUtil.IsUseCloudRealm() {
-                        self.ConifirmiCloudEnable()
-                    }
-                }else{
-                    if RealmUtil.IsUseCloudRealm() {
-                        self.ConifirmiCloudDisable()
-                    }
-                }
-            })
             <<< SwitchRow("isDisallowsCellularAccess") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsDisallowsCellularAccess", comment: "携帯電話網ではダウンロードしないようにする")
                 autoreleasepool {
@@ -530,6 +514,22 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
                 RealmUtil.Write { (realm) in
                     globalState.IsNeedConfirmDeleteBook = value
+                }
+            })
+            <<< SwitchRow("IsUseiCloud") {
+                $0.title = NSLocalizedString("SettingsViewController_IsUseiCloud_Title", comment: "iCloud 同期を使用する")
+                $0.value = RealmUtil.IsUseCloudRealm()
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                guard let value = row.value else { return }
+                if value == true {
+                    if !RealmUtil.IsUseCloudRealm() {
+                        self.ConifirmiCloudEnable()
+                    }
+                }else{
+                    if RealmUtil.IsUseCloudRealm() {
+                        self.ConifirmiCloudDisable()
+                    }
                 }
             })
             <<< ButtonRow() {
