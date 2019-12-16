@@ -136,6 +136,7 @@ void uncaughtExceptionHandler(NSException *exception)
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     NSLog(@"application will terminate");
     [[GlobalDataSingleton GetInstance] saveContext];
+    [NovelDownloadQueue DownloadFlush];
     if ([RealmUtil IsUseCloudRealm]) {
         [RealmUtil CloudPull];
     }

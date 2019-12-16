@@ -136,6 +136,52 @@ fileprivate func delayQueue(queuedDate: Date, block:@escaping ()->Void) {
     }
 }
 
+// RealmStoryBulk を使う時に、Bulk で分割される分のStoryを「ちょうどよく」Writeするために write を保留するclass
+class StoryBulkWritePool {
+    let lockObj = NSObject()
+    let novelID:String
+    var storyArray:[Story] = []
+    
+    public init(novelID:String) {
+        self.novelID = novelID
+    }
+    
+    public func Flush() {
+        objc_sync_enter(lockObj)
+        RealmUtil.Write { (realm) in
+            RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+            if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
+                if let lastStory = storyArray.last {
+                    novel.m_lastChapterStoryID = lastStory.storyID
+                    novel.lastDownloadDate = lastStory.downloadDate
+                }
+                if let firstStory = storyArray.first, firstStory.chapterNumber == 1 {
+                    novel.m_readingChapterStoryID = firstStory.storyID
+                }
+                for story in storyArray {
+                    novel.AppendDownloadDate(date: story.downloadDate, realm: realm)
+                }
+                realm.add(novel, update: .modified)
+            }
+        }
+        storyArray.removeAll()
+        objc_sync_exit(lockObj)
+    }
+    
+    public func AddStory(story:Story) {
+        objc_sync_enter(lockObj)
+        storyArray.append(story)
+        if let story = storyArray.first {
+            let chapterNumber = story.chapterNumber
+            let maxLength = RealmStoryBulk.bulkCount - ((chapterNumber - 1) % RealmStoryBulk.bulkCount)
+            if NovelDownloadQueue.shared.currentDownloadingNovelCount <= 2 || storyArray.count >= maxLength || RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID) == novelID {
+                Flush()
+            }
+        }
+        objc_sync_exit(lockObj)
+    }
+}
+
 // 一つの小説をダウンロードしようとします。
 // startDownload() を呼び出す事でダウンロードを開始します。
 // ダウンロードが正常に終了したら successAction を、何らかの問題で失敗終了したら failedAction が呼び出されます。
@@ -149,17 +195,27 @@ class NovelDownloader : NSObject {
             return NovelDownloadQueue.shared.isDownloadStop
         }
     }
+    static var writePool:[String:StoryBulkWritePool] = [:]
+    static func FlushAllWritePool() {
+        for (_, pool) in writePool {
+            pool.Flush()
+        }
+    }
     
     // 指定された URL を読み込んで、内容があるようであれば指定された chapterNumber のものとして(上書き)保存します。
     // maxCount を超えておらず、次のURLが取得できたのならそのURLを chapterNumber + 1 のものとして再度 downloadOnce() を呼び出します。
     private static func downloadOnce(novelID:String, uriLoader:UriLoader, count:Int, downloadCount:Int, chapterNumber:Int, targetURL:URL, urlSecret:[String], successAction:@escaping ((_ novelID:String, _ downloadCount:Int)->Void), failedAction:@escaping ((_ novelID: String, _ downloadCount:Int, _ errorDescription:String)->Void)) {
         if isDownloadStop {
             print("NovelDownloader.downloadOnce(): isDownloadStop が true であったのでダウンロードを終了します。novelID: \(novelID)")
+            if let writePool = writePool.removeValue(forKey: novelID) {
+                writePool.Flush()
+            }
             successAction(novelID, downloadCount)
             return
         }
         if count > NovelDownloader.maxCount {
             print("NovelDownloader.downloadOnce(): ダウンロード回数が規定値(\(NovelDownloader.maxCount))を超えたのでダウンロードを終了します。novelID: \(novelID)")
+            if let pool = writePool[novelID] { pool.Flush() }
             successAction(novelID, downloadCount)
             return
         }
@@ -171,6 +227,7 @@ class NovelDownloader : NSObject {
                     guard let htmlStory = htmlStory else {
                         print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: htmlStory == nil")
                         failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_htmlStoryIsNil", comment: "小説のダウンロードに失敗しました。") + "(novelID: \(novelID))")
+                        if let pool = writePool[novelID] { pool.Flush() }
                         return
                     }
                     guard let content = htmlStory.content, content.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 else {
@@ -184,11 +241,13 @@ class NovelDownloader : NSObject {
                             print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: htmlStory.content の中身がなく、nextUrl もありませんでしたのでここで読み込みを終了します。\(novelID)")
                             failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_FailedByNoContent", comment: "取得された小説の本文がなかったため、読み込みを終了します。") + "(novelID: \(novelID))")
                         }
+                        if let pool = writePool[novelID] { pool.Flush() }
                         return
                     }
-                    guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
+                    if RealmNovel.SearchNovelFrom(novelID: novelID) == nil {
                         print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: 読み込みには成功したのですが、RealmNovel を検索したところ存在が確認できませんでした。ダウンロード中に本棚から削除された可能性があります。ダウンロードを停止します。(\(novelID))")
                         failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_FailedByNoRealmNovel", comment: "小説が本棚に登録されていなかったため、ダウンロードを終了します。") + "(novelID: \(novelID))")
+                        if let pool = writePool[novelID] { pool.Flush() }
                         return
                     }
                     var story = Story()
@@ -196,7 +255,7 @@ class NovelDownloader : NSObject {
                     story.chapterNumber = chapterNumber
                     story.url = targetURL.absoluteString
                     story.content = content.trimmingCharacters(in: .whitespacesAndNewlines)
-                    //story.downloadDate = queuedDate
+                    story.downloadDate = queuedDate
                     if let subtitle = htmlStory.subtitle {
                         let trimedSubtitle = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
                         if trimedSubtitle.count > 0 {
@@ -206,24 +265,21 @@ class NovelDownloader : NSObject {
                     if chapterNumber == 1 {
                         //story.lastReadDate = Date(timeIntervalSince1970: 60)
                     }
-                    let storyID = story.storyID
-                    RealmUtil.Write { (realm) in
-                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
-                        novel.m_lastChapterStoryID = storyID
-                        novel.lastDownloadDate = queuedDate
-                        if chapterNumber == 1 {
-                            novel.m_readingChapterStoryID = storyID
-                        }
-                        novel.AppendDownloadDate(date: queuedDate, realm: realm)
-                        realm.add(novel, update: .modified)
+                    if let pool = writePool[novelID] {
+                        pool.AddStory(story: story)
+                    }else{
+                        let pool = StoryBulkWritePool(novelID: novelID)
+                        pool.AddStory(story: story)
+                        writePool[novelID] = pool
                     }
-                    print("add new story: \(novelID), chapterNumber: \(chapterNumber), url: \(targetURL.absoluteString)")
+                    print("add new story to queue: \(novelID), chapterNumber: \(chapterNumber), url: \(targetURL.absoluteString)")
                     if let nextUrl = htmlStory.nextUrl {
                         delayQueue(queuedDate: queuedDate) {
                             downloadOnce(novelID: novelID, uriLoader: uriLoader, count: count + 1, downloadCount: downloadCount + 1, chapterNumber: chapterNumber + 1, targetURL: nextUrl, urlSecret: urlSecret, successAction: successAction, failedAction: failedAction)
                         }
                         return
                     }else{
+                        if let pool = writePool[novelID] { pool.Flush() }
                         print("download done: \(novelID), downloadCount: \(downloadCount + 1)")
                         successAction(novelID, downloadCount + 1)
                         return
@@ -367,7 +423,7 @@ class NovelDownloadQueue : NSObject {
     let autopagerizeSiteInfoCacheFileName = "AutopagerizeSiteInfoCache"
     let DownloadCountKey = "NovelDownloadQueue_DownloadCount"
     let AlreadyBackgroundFetchedNovelIDListKey = "NovelDownloadQueue_AlreadyBackgroundFetchedNovelIDList"
-    let backgroundFetchDeadlineTimeInSec:Double = 25.0
+    let backgroundFetchDeadlineTimeInSec:Double = 20.0
     var tmpUriLoader:UriLoader? = nil
 
     private override init() {
@@ -432,6 +488,12 @@ class NovelDownloadQueue : NSObject {
             }else{
                 ActivityIndicatorManager.disable(id: activityIndicatorID)
             }
+        }
+    }
+    
+    var currentDownloadingNovelCount:Int {
+        get {
+            return self.queueHolder.GetCurrentDownloadingNovelIDArray().count
         }
     }
     
@@ -520,6 +582,11 @@ class NovelDownloadQueue : NSObject {
     
     func downloadStop() {
         self.isDownloadStop = true
+    }
+    
+    @objc static func DownloadFlush() {
+        NovelDownloadQueue.shared.downloadStop()
+        NovelDownloader.FlushAllWritePool()
     }
     
     func GetCurrentDownloadingNovelIDArray() -> [String] {
@@ -621,8 +688,8 @@ class NovelDownloadQueue : NSObject {
         let deadlineTimeInterval = backgroundFetchDeadlineTimeInSec - (Date().timeIntervalSince1970 - startTime.timeIntervalSince1970)
         Timer.scheduledTimer(withTimeInterval: deadlineTimeInterval, repeats: false) { (timer) in
             self.downloadStop()
-            // downloadStop() した後、ダウンロードが終了するまで4秒待ちます。
-            Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false){ (timer) in
+            // downloadStop() した後、ダウンロードが終了するまで9秒待ちます。
+            Timer.scheduledTimer(withTimeInterval: 9.0, repeats: false){ (timer) in
                 let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
                 self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
                 self.downloadEndedNovelIDSet.removeAll()

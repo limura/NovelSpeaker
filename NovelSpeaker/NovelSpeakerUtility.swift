@@ -733,6 +733,7 @@ class NovelSpeakerUtility: NSObject {
                         currentReadingChapterReadLocation = 0
                     }
                     var no = 0
+                    var storyArray:[Story] = []
                     repeat {
                         no += 1
                         let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
@@ -745,8 +746,16 @@ class NovelSpeakerUtility: NSObject {
                         if currentReadingChapterNumber == no {
                             story.readLocation = currentReadingChapterReadLocation
                         }
-                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                        storyArray.append(story)
+                        if storyArray.count >= RealmStoryBulk.bulkCount {
+                            RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                            storyArray.removeAll()
+                        }
                     }while(true)
+                    if storyArray.count > 0 {
+                        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                        storyArray.removeAll()
+                    }
                     for _ in 0..<no {
                         realmNovel.AppendDownloadDate(date: realmNovel.lastDownloadDate, realm: realm)
                     }
@@ -811,6 +820,7 @@ class NovelSpeakerUtility: NSObject {
                 realm.add(realmNovel, update: .modified)
                 if let content_directory = novel.object(forKey: "content_directory") as? String, let contentDirectory = extractedDirectory?.appendingPathComponent(content_directory, isDirectory: true) {
                     var no = 0
+                    var storyArray:[Story] = []
                     repeat {
                         no += 1
                         let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
@@ -822,8 +832,16 @@ class NovelSpeakerUtility: NSObject {
                         if currentReadingChapterNumber == no, let current_reading_chapter_read_location = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
                             story.readLocation = current_reading_chapter_read_location.intValue
                         }
-                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                        storyArray.append(story)
+                        if storyArray.count >= RealmStoryBulk.bulkCount {
+                            RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                            storyArray.removeAll()
+                        }
                     }while(true)
+                    if storyArray.count > 0 {
+                        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                        storyArray.removeAll()
+                    }
                     for _ in 0..<no {
                         realmNovel.AppendDownloadDate(date: realmNovel.lastDownloadDate, realm: realm)
                     }
@@ -853,6 +871,7 @@ class NovelSpeakerUtility: NSObject {
                 realm.add(realmNovel, update: .modified)
 
                 var no = 0
+                var storyArray:[Story] = []
                 for storyText in storys {
                     guard let storyText = storyText as? String else { continue }
                     no += 1
@@ -860,7 +879,15 @@ class NovelSpeakerUtility: NSObject {
                     story.novelID = novelID
                     story.chapterNumber = no
                     story.content = storyText
-                    RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    storyArray.append(story)
+                    if storyArray.count >= RealmStoryBulk.bulkCount {
+                        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                        storyArray.removeAll()
+                    }
+                }
+                if storyArray.count > 0 {
+                    RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                    storyArray.removeAll()
                 }
             }
         }
@@ -1350,6 +1377,7 @@ class NovelSpeakerUtility: NSObject {
             var hasInvalidData = false
             if let storys = novelDic.object(forKey: "storys") as? NSArray {
                 RealmUtil.Write { (realm) in
+                    var storyArray:[Story] = []
                     for storyDic in storys {
                         guard let storyDic = storyDic as? NSDictionary,
                             let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber else { continue }
@@ -1383,7 +1411,15 @@ class NovelSpeakerUtility: NSObject {
                         if let subtitle = storyDic.object(forKey: "subtitle") as? String {
                             story.subtitle = subtitle
                         }
-                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                        storyArray.append(story)
+                        if storyArray.count >= RealmStoryBulk.bulkCount {
+                            RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                            storyArray.removeAll()
+                        }
+                    }
+                    if storyArray.count > 0 {
+                        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                        storyArray.removeAll()
                     }
                 }
             }

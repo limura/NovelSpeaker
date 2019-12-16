@@ -224,6 +224,7 @@ class CoreDataToRealmTool: NSObject {
         guard let storyArray = globalDataSingleton.geAllStory(forNcode: content.ncode) else {
             return
         }
+        var newStoryArray:[Story] = []
         for storyObj in storyArray {
             guard let storyCoreData = storyObj as? StoryCacheData, let chapterNumber = storyCoreData.chapter_number as? Int else {
                 continue
@@ -239,8 +240,9 @@ class CoreDataToRealmTool: NSObject {
                 story.readLocation = readLocation
             }
             print("CreateRealmStoryFromCoreDataWithNarouContent SetStory(story.chapterNumber: \(story.chapterNumber))")
-            RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+            newStoryArray.append(story)
         }
+        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: newStoryArray)
     }
     
     private static func NarouContentToNovelID(content:NarouContentCacheData) -> String {

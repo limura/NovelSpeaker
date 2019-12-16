@@ -656,6 +656,7 @@ struct Story: Codable {
     var readLocation = 0
     var novelID:String = ""
     var chapterNumber = 0
+    var downloadDate:Date = Date(timeIntervalSince1970: -1)
     
     static func ConvertToData(story:Story) -> Data {
         guard let data = try? JSONEncoder().encode(story) else { return Data() }
@@ -785,6 +786,50 @@ struct Story: Codable {
         }
         self.storyListAsset = CreamAsset.create(object: self, propName: "", data: zipedData)
     }
+    
+    /// Story を複数同時に登録する場合に使います。
+    /// 注意: storyArray は chapterNumber が小さい順に sort されており、かつ、chapterNumber に抜けが無い事が必要です。
+    /// SetStoryArrayWith() 内部ではその事実を"確認しません"。
+    static func SetStoryArrayWith(realm:Realm, storyArray:[Story]) {
+        var index = 0
+        while storyArray.count > index {
+            let story = storyArray[index]
+            let novelID = story.novelID
+            let chapterNumber = story.chapterNumber
+            let bulkOptional = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
+            let length = min(storyArray.count - index, bulkCount)
+            var targetStoryArray = Array(storyArray[index ..< index + length])
+            if length < bulkCount, let bulk = bulkOptional, let currentStoryArray = bulk.LoadStoryArray() {
+                var tmpStoryArray:[Story] = []
+                var lastChapterNumber = chapterNumber - 1
+                for story in currentStoryArray {
+                    if story.chapterNumber == chapterNumber {
+                        break
+                    }
+                    tmpStoryArray.append(story)
+                    lastChapterNumber = story.chapterNumber
+                }
+                if lastChapterNumber != chapterNumber - 1 {
+                    print("WARN: chapterNumber が期待していない値になっている。(既にある奴の末尾: \(lastChapterNumber), 追加される奴の先頭: \(chapterNumber), bulk.chapterNumber: \(bulk.chapterNumber), currentStoryArray.count: \(currentStoryArray.count)")
+                }
+                tmpStoryArray.append(contentsOf: targetStoryArray)
+                targetStoryArray = tmpStoryArray
+            }
+            let bulk:RealmStoryBulk
+            if let originalBulk = bulkOptional {
+                bulk = originalBulk
+            }else{
+                bulk = RealmStoryBulk()
+                bulk.id = CreateUniqueBulkID(novelID: novelID, chapterNumber: story.chapterNumber)
+                bulk.novelID = novelID
+                bulk.chapterNumber = StoryIDToChapterNumber(storyID: bulk.id)
+            }
+            bulk.OverrideStoryListAsset(storyArray: Array(targetStoryArray))
+            realm.add(bulk, update: .modified)
+            index += length
+        }
+    }
+    
     /// Story を一つづつ登録する場合に使いますが、こちらは Realm.write で囲った物から呼び出される事を期待しています。
     /// 逆に言うと、Realm の write transaction を内部で呼び出しませんので、外部で呼び出す必要があります。
     static func SetStoryWith(realm:Realm, story:Story) {

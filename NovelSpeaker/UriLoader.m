@@ -24,7 +24,7 @@
     m_MaxDepth = 1000;
     m_SiteInfoArray = [NSMutableArray new];
     m_CustomSiteInfoArray = [NSMutableArray new];
-    m_WebAccessQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.uriloader.webaccessqueue", DISPATCH_QUEUE_SERIAL);
+    m_WebAccessQueue = dispatch_queue_create("com.limuraproducts.novelspeaker.uriloader.webaccessqueue", DISPATCH_QUEUE_CONCURRENT);
     
     return self;
 }
