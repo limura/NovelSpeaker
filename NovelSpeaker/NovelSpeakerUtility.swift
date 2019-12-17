@@ -1411,6 +1411,9 @@ class NovelSpeakerUtility: NSObject {
                         if let subtitle = storyDic.object(forKey: "subtitle") as? String {
                             story.subtitle = subtitle
                         }
+                        if let downloadDateString = storyDic.object(forKey: "downloadDate") as? String, let downloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: downloadDateString) {
+                            story.downloadDate = downloadDate
+                        }
                         storyArray.append(story)
                         if storyArray.count >= RealmStoryBulk.bulkCount {
                             RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
@@ -1556,6 +1559,9 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if story.subtitle.count > 0 {
                     storyData["subtitle"] = story.subtitle
+                }
+                if story.downloadDate > Date(timeIntervalSince1970: 0) {
+                    storyData["downloadDate"] = NiftyUtilitySwift.Date2ISO8601String(date: story.downloadDate)
                 }
                 if let contentZiped = NiftyUtility.stringDeflate(story.content, level: 9) {
                     if let contentWriteTo = contentWriteTo {
