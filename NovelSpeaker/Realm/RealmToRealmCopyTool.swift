@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import IceCream
 
 class RealmToRealmCopyTool: NSObject {
     static func CopyStorys(from:Realm, to:Realm, progress:(String)->Void) throws {
@@ -21,7 +22,9 @@ class RealmToRealmCopyTool: NSObject {
             newObj.id = obj.id
             newObj.chapterNumber = obj.chapterNumber
             newObj.isDeleted = obj.isDeleted
-            newObj.storyListAsset = obj.storyListAsset // TODO: CreamAsset はこういうコピーをして良いのか確認した方がよさげ？
+            if let zipedData = obj.storyListAsset?.storedData(), let storyListAsset = CreamAsset.create(object: newObj, propName: "", data: zipedData) {
+                newObj.storyListAsset = storyListAsset
+            }
             to.add(newObj, update: .modified)
             try to.commitWrite()
         }
