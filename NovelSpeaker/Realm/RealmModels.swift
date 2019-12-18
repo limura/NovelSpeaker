@@ -701,6 +701,8 @@ struct Story: Codable {
     @objc dynamic var storyListAsset:CreamAsset?
     
     static var bulkCount = 100
+    static var storyCache:Story? = nil
+    static var bulkCache:RealmStoryBulk? = nil
     
     // URL をファイル名として使いやすい文字列に変換します。具体的には、
     // 1. "/" を "%2F" に変換する(a)
@@ -797,6 +799,9 @@ struct Story: Codable {
         var index = 0
         while storyArray.count > index {
             let story = storyArray[index]
+            if let cachedStory = storyCache, cachedStory.chapterNumber == story.chapterNumber && cachedStory.novelID == story.novelID {
+                storyCache = story
+            }
             let novelID = story.novelID
             let chapterNumber = story.chapterNumber
             let bulkOptional = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
@@ -821,6 +826,7 @@ struct Story: Codable {
             let bulk:RealmStoryBulk
             if let originalBulk = bulkOptional {
                 bulk = originalBulk
+                if let cachedBulk = bulkCache, cachedBulk.id == bulk.id { bulkCache = nil }
             }else{
                 bulk = RealmStoryBulk()
                 bulk.id = CreateUniqueBulkID(novelID: novelID, chapterNumber: story.chapterNumber)
@@ -840,7 +846,11 @@ struct Story: Codable {
         if story.chapterNumber <= 0 {
             print("story.chapterNumber <= 0! \(story.chapterNumber)")
         }
+        if let cachedStory = storyCache, cachedStory.chapterNumber == story.chapterNumber && cachedStory.novelID == story.novelID {
+            storyCache = story
+        }
         if let bulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: story.chapterNumber) {
+            if let cachedBulk = bulkCache, cachedBulk.id == bulk.id { bulkCache = nil }
             var storyArray:[Story]
             if var storyArrayTmp = bulk.LoadStoryArray() {
                 let bulkIndex = (story.chapterNumber - 1) % bulkCount
@@ -891,6 +901,12 @@ struct Story: Codable {
         if let checkTargetStoryID = checkTargetStoryID, let story = storyArray.last, story.storyID != checkTargetStoryID {
             return
         }
+        if let lastStory = storyArray.last, let cachedStory = storyCache, cachedStory.chapterNumber == lastStory.chapterNumber && cachedStory.novelID == lastStory.novelID {
+            storyCache = nil
+        }
+        if let cachedBulk = bulkCache, cachedBulk.id == lastStoryBulk.id {
+            bulkCache = nil
+        }
         
         if storyArray.count <= 1 {
             realm.delete(lastStoryBulk)
@@ -922,6 +938,12 @@ struct Story: Codable {
         }
     }
     static func RemoveAllStoryWith(realm:Realm, novelID:String) {
+        if let cachedStory = storyCache, cachedStory.novelID == novelID {
+            storyCache = nil
+        }
+        if let cachedBulk = bulkCache, cachedBulk.novelID == novelID {
+            bulkCache = nil
+        }
         let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         realm.delete(storyBulkArray)
     }
@@ -945,9 +967,10 @@ struct Story: Codable {
     }
 
     static func SearchStoryBulkWith(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
-        print("SearchStoryBulkWith(\"\(novelID)\", \"\(chapterNumber)\")")
         //realm.refresh()
         let chapterNumberBulk = Int((chapterNumber - 1) / bulkCount) * bulkCount
+        if let cachedBulk = bulkCache, cachedBulk.chapterNumber == chapterNumberBulk && cachedBulk.novelID == novelID { return cachedBulk }
+        print("SearchStoryBulkWith(\"\(novelID)\", \"\(chapterNumber)\")")
         guard let result = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@ AND chapterNumber = %@", novelID, chapterNumberBulk).first else { return nil }
         return result
     }
@@ -971,6 +994,9 @@ struct Story: Codable {
     }
     
     static func SearchStory(novelID:String, chapterNumber:Int) -> Story? {
+        if let cachedStory = storyCache, cachedStory.novelID == novelID && cachedStory.chapterNumber == chapterNumber {
+            return cachedStory
+        }
         guard let bulk = SearchStoryBulk(novelID: novelID, chapterNumber: chapterNumber), let storyArray = bulk.LoadStoryArray() else { return nil }
         let bulkIndex = (chapterNumber - 1) % bulkCount
         if bulkIndex < 0 || storyArray.count <= bulkIndex {
@@ -2317,4 +2343,34 @@ extension RealmSpeechOverrideSetting: CKRecordRecoverable {
 }
 extension RealmSpeechOverrideSetting: CanWriteIsDeleted {
 }
+
+/*
+@objc final class RealmBookmark: Object {
+    @objc dynamic var id = "" // primary key
+    @objc dynamic var isDeleted: Bool = false
+    @objc dynamic var createdDate = Date()
+    @objc dynamic var novelID:String = ""
+    @objc dynamic var chapterNumber:Int = 0
+    @objc dynamic var location:Int = 0
+    @objc dynamic var type:String = ""
+
+    func delete(realm:Realm) {
+        RealmUtil.Delete(realm: realm, model: self)
+    }
+    
+    override class func primaryKey() -> String? {
+        return "id"
+    }
+
+    override static func indexedProperties() -> [String] {
+        return ["id", "novelID", "chapterNumber"]
+    }
+}
+extension RealmBookmark: CKRecordConvertible {
+}
+extension RealmBookmark: CKRecordRecoverable {
+}
+extension RealmBookmark: CanWriteIsDeleted {
+}
+ */
 

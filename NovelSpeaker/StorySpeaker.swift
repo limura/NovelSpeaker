@@ -480,9 +480,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
         autoreleasepool {
             if var story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
-                RealmUtil.Write(withoutNotifying: [self.storyObserverToken]) { (realm) in
-                    story.readLocation = speaker.getCurrentReadingPoint().location
-                    RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                let newLocation = speaker.getCurrentReadingPoint().location
+                if story.readLocation != newLocation {
+                    RealmUtil.Write(withoutNotifying: [self.storyObserverToken]) { (realm) in
+                        story.readLocation = speaker.getCurrentReadingPoint().location
+                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    }
                 }
             }
         }
@@ -500,7 +503,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             let nextReadingPoint = readingPoint + length
             let contentLength = story.content.count
             if nextReadingPoint > contentLength {
-                if !LoadNextChapter() {
+                if !LoadNextChapter() && story.readLocation != contentLength {
                     RealmUtil.Write { (realm) in
                         story.readLocation = contentLength
                         RealmStoryBulk.SetStoryWith(realm: realm, story: story)
@@ -524,8 +527,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             while var story = targetStory {
                 let contentLength = story.content.count
                 if targetLength <= contentLength {
-                    story.readLocation = contentLength - targetLength
-                    RealmStoryBulk.SetStory(story: story)
+                    let newLocation = contentLength - targetLength
+                    if story.readLocation != newLocation {
+                        story.readLocation = newLocation
+                        RealmStoryBulk.SetStory(story: story)
+                    }
                     ringPageTurningSound()
                     SetStory(story: story)
                     return
@@ -537,8 +543,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         // 抜けてきたということは先頭まで行ってしまった。
         autoreleasepool {
             if var firstStory = RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
-                firstStory.readLocation = 0
-                RealmStoryBulk.SetStory(story: firstStory)
+                if firstStory.readLocation != 0 {
+                    firstStory.readLocation = 0
+                    RealmStoryBulk.SetStory(story: firstStory)
+                }
                 if firstStory.storyID != self.storyID {
                     ringPageTurningSound()
                 }
@@ -556,8 +564,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     func LoadNextChapter() -> Bool{
         return autoreleasepool {
             if var nextStory = SearchNextChapter(storyID: self.storyID) {
-                nextStory.readLocation = 0
-                RealmStoryBulk.SetStory(story: nextStory)
+                if nextStory.readLocation != 0 {
+                    nextStory.readLocation = 0
+                    RealmStoryBulk.SetStory(story: nextStory)
+                }
                 ringPageTurningSound()
                 SetStory(story: nextStory)
                 return true
@@ -578,8 +588,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     func LoadPreviousChapter() -> Bool{
         return autoreleasepool {
             if var previousStory = SearchPreviousChapter(storyID: storyID) {
-                previousStory.readLocation = 0
-                RealmStoryBulk.SetStory(story: previousStory)
+                if previousStory.readLocation != 0 {
+                    previousStory.readLocation = 0
+                    RealmStoryBulk.SetStory(story: previousStory)
+                }
                 ringPageTurningSound()
                 SetStory(story: previousStory)
                 return true
@@ -913,8 +925,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         autoreleasepool {
             if var nextStory = SearchNextChapter(storyID: self.storyID) {
                 self.ringPageTurningSound()
-                nextStory.readLocation = 0
-                RealmStoryBulk.SetStory(story: nextStory)
+                if nextStory.readLocation != 0 {
+                    nextStory.readLocation = 0
+                    RealmStoryBulk.SetStory(story: nextStory)
+                }
                 self.SetStory(story: nextStory)
                 self.StartSpeech(withMaxSpeechTimeReset: false)
             }else{
@@ -938,8 +952,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             autoreleasepool {
                 if var story = RealmStoryBulk.SearchStory(storyID: self.storyID), story.content.count > newValue && newValue >= 0 {
                     speaker.updateCurrentReadingPoint(NSRange(location: newValue, length: 0))
-                    story.readLocation = newValue
-                    RealmStoryBulk.SetStory(story: story)
+                    if story.readLocation != newValue {
+                        story.readLocation = newValue
+                        RealmStoryBulk.SetStory(story: story)
+                    }
                 }
             }
         }
