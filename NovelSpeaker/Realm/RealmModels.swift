@@ -754,6 +754,9 @@ struct Story: Codable {
         }
         return 0
     }
+    static func StoryIDToBulkID(storyID:String) -> String {
+        return CreateUniqueBulkID(novelID: StoryIDToNovelID(storyID: storyID), chapterNumber: StoryIDToChapterNumber(storyID: storyID))
+    }
     
     func LoadStoryArray() -> [Story]? {
         guard let asset = self.storyListAsset else {
@@ -942,6 +945,7 @@ struct Story: Codable {
     }
 
     static func SearchStoryBulkWith(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
+        print("SearchStoryBulkWith(\"\(novelID)\", \"\(chapterNumber)\")")
         //realm.refresh()
         let chapterNumberBulk = Int((chapterNumber - 1) / bulkCount) * bulkCount
         guard let result = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@ AND chapterNumber = %@", novelID, chapterNumberBulk).first else { return nil }
@@ -960,6 +964,7 @@ struct Story: Codable {
         return SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber)
     }
     static func SearchStoryBulk(novelID:String) -> Results<RealmStoryBulk>?{
+        print("SearchStoryBulk(\"\(novelID)\")")
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         //realm.refresh()
         return realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
@@ -978,6 +983,7 @@ struct Story: Codable {
     }
     
     static func SearchAllStoryFor(novelID:String) -> [Story]? {
+        print("SearchAllStoryFor(\"\(novelID)\")")
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
             //realm.refresh()
