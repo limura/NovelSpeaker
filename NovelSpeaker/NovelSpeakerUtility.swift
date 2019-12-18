@@ -1316,7 +1316,8 @@ class NovelSpeakerUtility: NSObject {
         var novelCount = 0
         for novelDic in bookshelf {
             novelCount += 1
-            progressUpdate(NSLocalizedString("NovelSpeakerUtility_ExportingNovelData", comment: "小説を抽出中") + " (\(novelCount)/\(novelArrayCount))")
+            let progressString = NSLocalizedString("NovelSpeakerUtility_ExportingNovelData", comment: "小説を抽出中") + " (\(novelCount)/\(novelArrayCount))"
+            progressUpdate(progressString)
             guard let novelDic = novelDic as? NSDictionary,
                 let novelID = novelDic.object(forKey: "novelID") as? String,
                 let type = novelDic.object(forKey: "type") as? NSNumber else { continue }
@@ -1378,7 +1379,11 @@ class NovelSpeakerUtility: NSObject {
             if let storys = novelDic.object(forKey: "storys") as? NSArray {
                 RealmUtil.Write { (realm) in
                     var storyArray:[Story] = []
+                    var index = 0
+                    let max = storys.count
                     for storyDic in storys {
+                        index += 1
+                        progressUpdate(progressString + " (\(index)/\(max))")
                         guard let storyDic = storyDic as? NSDictionary,
                             let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber else { continue }
                         let data:Data
@@ -1545,11 +1550,17 @@ class NovelSpeakerUtility: NSObject {
     }
 
     // MARK: バックアップデータ生成
-    fileprivate static func CreateBackupDataDictionary_Story(novelID:String, contentWriteTo:URL?) -> [[String:Any]] {
+    fileprivate static func CreateBackupDataDictionary_Story(novelID:String, contentWriteTo:URL?, progressString:String, progress:((_ description:String)->Void)?) -> [[String:Any]] {
         return autoreleasepool {
             var result:[[String:Any]] = []
             guard let storyArray = RealmStoryBulk.SearchAllStoryFor(novelID: novelID) else { return result }
+            var index = 0
+            let max = storyArray.count
             for story in storyArray {
+                index += 1
+                if let progress = progress {
+                    progress(progressString + " (\(index)/\(max))")
+                }
                 var storyData:[String:Any] = [
                     "chapterNumber": story.chapterNumber,
                     "readLocation": story.readLocation,
@@ -1588,8 +1599,9 @@ class NovelSpeakerUtility: NSObject {
             var novelCount = 1
             let novelArrayCount = novelArray.count
             for novel in novelArray {
+                let progressString = NSLocalizedString("NovelSpeakerUtility_ExportingNovelData", comment: "小説を抽出中") + " (\(novelCount)/\(novelArrayCount))"
                 if let progress = progress {
-                    progress(NSLocalizedString("NovelSpeakerUtility_ExportingNovelData", comment: "小説を抽出中") + " (\(novelCount)/\(novelArrayCount))")
+                    progress(progressString)
                 }
                 var novelData:[String:Any] = [
                     "novelID": novel.novelID,
@@ -1615,12 +1627,12 @@ class NovelSpeakerUtility: NSObject {
                 switch novel.type {
                 case .URL:
                     if !withAllStoryContent {
-                        novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: nil)
+                        novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: nil, progressString: progressString, progress: progress)
                         break
                     }
                     fallthrough
                 case .UserCreated:
-                    novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory)
+                    novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory, progressString: progressString, progress: progress)
                     if let contentDirectory = contentDirectory {
                         fileArray.append(contentDirectory)
                     }
