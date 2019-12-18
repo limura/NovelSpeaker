@@ -70,7 +70,7 @@ class SpeakerSettingsViewController: FormViewController {
             if let isHide = self.hideCache[targetID] {
                 self.hideCache[targetID] = !isHide
             }else{
-                self.hideCache[targetID] = false
+                self.hideCache[targetID] = true
             }
             for tag in [
                 "PitchSliderRow-\(targetID)",
@@ -99,7 +99,7 @@ class SpeakerSettingsViewController: FormViewController {
             $0.steps = 2501
             $0.title = NSLocalizedString("SpeakSettingsViewController_PitchTitle", comment: "高さ")
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-                return self.hideCache[targetID] ?? true
+                return self.hideCache[targetID] ?? false
             })
         }.onChange({ (row) in
             if let value = row.value {
@@ -124,7 +124,7 @@ class SpeakerSettingsViewController: FormViewController {
             $0.steps = 1001
             $0.title = NSLocalizedString("SpeakSettingsViewController_RateTitle", comment: "速度")
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-                return self.hideCache[targetID] ?? true
+                return self.hideCache[targetID] ?? false
             })
         }.onChange({ (row) in
             guard let rate = row.value else{
@@ -181,7 +181,7 @@ class SpeakerSettingsViewController: FormViewController {
                 $0.value = languageCodeArray.first ?? ""
             }
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-                return self.hideCache[targetID] ?? true
+                return self.hideCache[targetID] ?? false
             })
         }.onChange({ (row) in
             autoreleasepool {
@@ -223,7 +223,7 @@ class SpeakerSettingsViewController: FormViewController {
                 $0.value = voiceNameArray.first ?? ""
             }
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-                return self.hideCache[targetID] ?? true
+                return self.hideCache[targetID] ?? false
             })
         }.onChange({ (row) in
             autoreleasepool {
@@ -244,7 +244,7 @@ class SpeakerSettingsViewController: FormViewController {
         <<< ButtonRow("TestSpeechButtonRow-\(targetID)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-                return self.hideCache[targetID] ?? true
+                return self.hideCache[targetID] ?? false
             })
         }.onCellSelection({ (buttonCellOf, button) in
             autoreleasepool {
@@ -258,7 +258,7 @@ class SpeakerSettingsViewController: FormViewController {
             section <<< ButtonRow("RemoveButtonRow-\(targetID)") {
                 $0.title = NSLocalizedString("SpeakerSettingsViewController_RemoveButtonRow", comment: "この話者の設定を削除")
                 $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
-                    return self.hideCache[targetID] ?? true
+                    return self.hideCache[targetID] ?? false
                 })
             }.onCellSelection({ (buttonCellOf, button) in
                 var settingName = ""
