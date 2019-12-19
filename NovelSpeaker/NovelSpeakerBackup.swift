@@ -62,7 +62,7 @@ class NovelSpeakerBackup: NSObject {
     }
     
     /// novelspeaker-backup+zip のバイナリを生成して返します。一時的に zip 用のディレクトリやファイルが作成されます。
-    @objc public static func createBackupData(progress:((String)->Void)?) -> Data? {
+    @objc public static func createBackupData(progress:((String)->Void)?) -> URL? {
         func UpdateProgress(message:String) {
             if let progress = progress {
                 progress(message)
@@ -217,9 +217,9 @@ class NovelSpeakerBackup: NSObject {
 
         // 作られた zip file を読み込んで返す。ファイルは消します
         do {
-            let zipData = try Data(contentsOf: novelSpeakerBackupZipFilePath, options: .dataReadingMapped)
+            let _ = try Data(contentsOf: novelSpeakerBackupZipFilePath, options: .dataReadingMapped)
             //try FileManager.default.removeItem(at: zipFilePath) // dataReadingMapped なのでファイルが消せません……(´・ω・`)
-            return zipData
+            return novelSpeakerBackupZipFilePath
         }catch let error {
             print("read zipFile or file delete error", zipFilePath, error)
             return nil

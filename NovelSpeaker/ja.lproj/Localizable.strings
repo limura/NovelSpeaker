@@ -112,6 +112,10 @@
 "SettingsViewController_ChooseCancel" = "バックアップ生成をやめる";
 "SettingsViewController_ChooseFullBackup" = "完全バックアップを生成する(時間がかかります)";
 "SettingsViewController_ChooseSmallBackup" = "軽量バックアップを生成する(時間はかかりません)";
+"SettingsViewController_ShareBackupDataSelectHow_Title" = "バックアップデータの送信方式を選んで下さい";
+"SettingsViewController_ShareBackupDataSelectHow_Mail" = "メールに添付する";
+"SettingsViewController_ShareBackupDataSelectHow_ShareButton" = "ファイルとしてシェアする";
+"SettingsViewController_ShareBackupSelect_FailedAppendToMail" = "ファイルの添付に失敗しました。";
 "SettingTableViewController_IsDisallowsCellularAccess" = "携帯電話網ではダウンロードしないようにする";
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "小説を削除する時に確認する";
 "SettingTableViewController_RepeatTypeTitle" = "繰り返し再生";
@@ -324,17 +328,19 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.58
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.59
 
-- 設定 -> 小説を削除する時に確認する の設定項目を追加
-- 設定 -> お知らせ で出てくるダイアログに「過去のお知らせを確認する」ボタンを追加
-- DynamicType 対応部分を増やしました
-- VoiceOver環境下において、本棚の右上にある「順番」などで出てくるピッカーダイアログが選択できなくなっていた問題を修正
-- Web取込タブ内のブックマークで削除できない項目が発生し得た問題を解消
+- 設定 -> バックアップ用データの生成 にて、生成されたデータについて「ファイルとしてシェア」が選択できるように
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.59
+
+インタフェースの変更
+
+- 設定 -> バックアップ用データの生成 にて、生成されたデータについて「ファイルとしてシェア」が選択できるように
+
 # Version 1.1.58
 
 インタフェースの変更

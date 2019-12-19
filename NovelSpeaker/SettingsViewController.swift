@@ -568,6 +568,32 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.build().show()
         }
     }
+    
+    func ShareBackupData(dataFileURL:URL, fileName:String) {
+        DispatchQueue.main.async {
+            let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
+            dialog.title(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Title", comment: "バックアップデータの送信方式を選んで下さい"))
+            .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: nil)
+            .addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Mail", comment: "メールに添付する"), callback: { (dialog) in
+                dialog.dismiss(animated: false) {
+                    if let data = try? Data(contentsOf: dataFileURL, options: .dataReadingMapped) {
+                        self.sendMailWithBinary(data: data, fileName: fileName, mimeType: "application/octet-stream")
+                    }else{
+                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_ShareBackupSelect_FailedAppendToMail", comment: "メールへのファイルの添付に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                    }
+                }
+            }).addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_ShareButton", comment: "シェア")) { (dialog) in
+                dialog.dismiss(animated: false) {
+                    let activityViewController = UIActivityViewController(activityItems: [dataFileURL], applicationActivities: nil)
+                    let frame = UIScreen.main.bounds
+                    activityViewController.popoverPresentationController?.sourceView = self.view
+                    activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
+                    self.present(activityViewController, animated: true, completion: nil)
+                }
+            }.build().show()
+        }
+    }
+    
     /// 現在の設定をJSONファイルにして mail に添付します。
     func ShareBackupSmallData(){
         let backupDataJson = GlobalDataSingleton.getInstance().createBackupDataDictionary()
@@ -595,7 +621,15 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         let dateString = dateFormatter.string(from: Date())
         let fileName = String.init(format: "%@.novelspeaker-backup-json", dateString)
         DispatchQueue.main.async {
-            self.sendMailWithBinary(data: backupDataBinary, fileName: fileName, mimeType: "application/octet-stream")
+            let tempFilePath = NSTemporaryDirectory() + fileName
+            do {
+                let url = URL(fileURLWithPath: tempFilePath)
+                try backupDataBinary.write(to: url)
+                self.ShareBackupData(dataFileURL: url, fileName: fileName)
+                //self.sendMailWithBinary(data: backupDataBinary, fileName: fileName, mimeType: "application/octet-stream")
+            }catch{
+                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_ShareBackupSelect_FailedAppendToMail", comment: "メールへのファイルの添付に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+            }
         }
     }
     
@@ -611,7 +645,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             print("dialog.show()")
         }
         NiftyUtilitySwift.backgroundQueue.async {
-            let backupData = NovelSpeakerBackup.createBackupData(progress: { (message) in
+            let backupDataTmp = NovelSpeakerBackup.createBackupData(progress: { (message) in
                 DispatchQueue.main.async {
                     if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
                         label.text = NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……") + "\r\n"
@@ -619,18 +653,16 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            DispatchQueue.main.async {
-                dialog.dismiss(animated: false, completion: {
-                    if backupData == nil {
+            guard let backupData = backupDataTmp else {
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
                         NiftyUtilitySwift.EasyDialogBuilder(self)
                             .text(content: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"))
                             .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
                                 dialog.dismiss(animated: false, completion: nil)
                             }.build().show()
-                    }
-                })
-            }
-            if backupData == nil {
+                    })
+                }
                 return
             }
             // どうやら勝手に NSData から Data へ変換してくれているっぽい？
@@ -642,7 +674,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             //let fileName = String.init(format: "%@.novelspeaker-backup-json", dateString)
             let fileName = String.init(format: "%@.novelspeaker-backup+zip", dateString)
             DispatchQueue.main.async {
-                self.sendMailWithBinary(data: backupData!, fileName: fileName, mimeType: "application/octet-stream")
+                self.ShareBackupData(dataFileURL: backupData, fileName: fileName)
+                //self.sendMailWithBinary(data: backupData!, fileName: fileName, mimeType: "application/octet-stream")
             }
         }
     }

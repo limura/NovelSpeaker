@@ -113,6 +113,10 @@
 "SettingsViewController_ChooseCancel" = "Stop generating backups";
 "SettingsViewController_ChooseFullBackup" = "Generate a full backup (it will take time)";
 "SettingsViewController_ChooseSmallBackup" = "Generate a lightweight backup (it will not take time)";
+"SettingsViewController_ShareBackupDataSelectHow_Title" = "Select the backup data transmission method";
+"SettingsViewController_ShareBackupDataSelectHow_Mail" = "Attach to email";
+"SettingsViewController_ShareBackupDataSelectHow_ShareButton" = "Share as a file";
+"SettingsViewController_ShareBackupSelect_FailedAppendToMail" = "File attachment failed.";
 "SettingTableViewController_IsDisallowsCellularAccess" = "Do not download on the mobile phone network";
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "Confirm when deleting a novel";
 "SettingTableViewController_RepeatTypeTitle" = "Repeat type";
@@ -329,17 +333,20 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎Speech: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.58
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.59
 
-- add Settings -> \"Confirm when deleting a novel\"
-- add \"Check past notifications\" button on Settings -> Information dialog
-- Enhanced DynamicType support.
-- Fixed an issue where the picker dialog that appeared in the \"Order\" etc. at the top right of the bookshelf could not be selected under VoiceOver.
-- Resolved an issue that could cause items that could not be deleted with bookmarks in the Web Import tab.
+- Changed so that \"Share as file\" can be selected in Settings -> \"Create backup data\".
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.59
+
+Interface change
+
+- Changed so that \"Share as file\" can be selected in Settings -> \"Create backup data\".
+
+
 # Version 1.1.58
 
 Interface change
