@@ -573,7 +573,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         DispatchQueue.main.async {
             let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
             dialog.title(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Title", comment: "バックアップデータの送信方式を選んで下さい"))
-            .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: nil)
+                .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
+                    dialog.dismiss(animated: false, completion: nil)
+                })
             .addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Mail", comment: "メールに添付する"), callback: { (dialog) in
                 dialog.dismiss(animated: false) {
                     if let data = try? Data(contentsOf: dataFileURL, options: .dataReadingMapped) {
@@ -674,8 +676,10 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             //let fileName = String.init(format: "%@.novelspeaker-backup-json", dateString)
             let fileName = String.init(format: "%@.novelspeaker-backup+zip", dateString)
             DispatchQueue.main.async {
-                self.ShareBackupData(dataFileURL: backupData, fileName: fileName)
-                //self.sendMailWithBinary(data: backupData!, fileName: fileName, mimeType: "application/octet-stream")
+                dialog.dismiss(animated: false) {
+                    self.ShareBackupData(dataFileURL: backupData, fileName: fileName)
+                    //self.sendMailWithBinary(data: backupData!, fileName: fileName, mimeType: "application/octet-stream")
+                }
             }
         }
     }
