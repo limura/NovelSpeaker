@@ -993,7 +993,7 @@ class NovelSpeakerUtility: NSObject {
         }
         return true
     }
-    static func RestoreSpeechMod_V_2_0_0(dic:NSDictionary){
+    static func RestoreSpeechMod_V_2_0_0(dic:NSDictionary, progressUpdate:@escaping(String)->Void){
         for (before, speechModDic) in dic {
             guard let speechMod = speechModDic as? NSDictionary,
                 let before = before as? String,
@@ -1023,7 +1023,7 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
-    static func RestoreSpeechWaitConfig_V_2_0_0(waitArray:NSArray) {
+    static func RestoreSpeechWaitConfig_V_2_0_0(waitArray:NSArray, progressUpdate:@escaping(String)->Void) {
         for speechWaitDic in waitArray {
             guard let speechWait = speechWaitDic as? NSDictionary,
                 let delayTimeInSec = speechWait.object(forKey: "delayTimeInSec") as? NSNumber,
@@ -1045,7 +1045,7 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
-    static func RestoreSpeakerSettings_V_2_0_0(speakerArray:NSArray, defaultSpeakerSettingID:String) {
+    static func RestoreSpeakerSettings_V_2_0_0(speakerArray:NSArray, defaultSpeakerSettingID:String, progressUpdate:@escaping(String)->Void) {
         for speaker in speakerArray {
             guard let speaker = speaker as? NSDictionary,
                 let name = speaker.object(forKey: "name") as? String,
@@ -1094,7 +1094,7 @@ class NovelSpeakerUtility: NSObject {
             }
         }
     }
-    static func RestoreSpeechSectionConfig_V_2_0_0(sectionConfigArray:NSArray){
+    static func RestoreSpeechSectionConfig_V_2_0_0(sectionConfigArray:NSArray, progressUpdate:@escaping(String)->Void){
         for sectionConfig in sectionConfigArray {
             guard
                 let sectionConfigDic = sectionConfig as? NSDictionary,
@@ -1127,7 +1127,7 @@ class NovelSpeakerUtility: NSObject {
             }
         }
     }
-    static func RestoreDisplaySettings_V_2_0_0(displaySettingArray:NSArray,  defaultSpeakerSettingID:String) {
+    static func RestoreDisplaySettings_V_2_0_0(displaySettingArray:NSArray,  defaultSpeakerSettingID:String, progressUpdate:@escaping(String)->Void) {
         for displaySettingObj in displaySettingArray {
             guard let displaySettingDic = displaySettingObj as? NSDictionary,
                 let name = displaySettingDic.object(forKey: "name") as? String else { continue }
@@ -1168,7 +1168,7 @@ class NovelSpeakerUtility: NSObject {
             }
         }
     }
-    static func RestoreNovelTag_V_2_0_0(novelTagArray:NSArray) {
+    static func RestoreNovelTag_V_2_0_0(novelTagArray:NSArray, progressUpdate:@escaping(String)->Void) {
         for tagDic in novelTagArray {
             guard let tagDic = tagDic as? NSDictionary,
                 let name = tagDic.object(forKey: "name") as? String,
@@ -1196,7 +1196,7 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
-    static func RestoreSpeechOverrideSettings_V_2_0_0(speechOverrideSettingArray:NSArray, defaultSpeechOverrideSettingID:String) {
+    static func RestoreSpeechOverrideSettings_V_2_0_0(speechOverrideSettingArray:NSArray, defaultSpeechOverrideSettingID:String, progressUpdate:@escaping(String)->Void) {
         for overrideSettingDic in speechOverrideSettingArray {
             guard let overrideSettingDic = overrideSettingDic as? NSDictionary,
                 let name = overrideSettingDic.object(forKey: "name") as? String else { continue }
@@ -1236,7 +1236,7 @@ class NovelSpeakerUtility: NSObject {
     }
 
 
-    static func RestoreGlobalState_V_2_0_0(dic:NSDictionary) {
+    static func RestoreGlobalState_V_2_0_0(dic:NSDictionary, progressUpdate:@escaping(String)->Void) {
         autoreleasepool {
             guard let globalState = RealmGlobalState.GetInstance() else { return }
             RealmUtil.Write { (realm) in
@@ -1439,31 +1439,31 @@ class NovelSpeakerUtility: NSObject {
 
     static func ProcessNovelSpeakerBackupJSONData_V_2_0_0(toplevelDictionary:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> Bool {
         if let word_replacement_dictionary = toplevelDictionary.object(forKey: "word_replacement_dictionary") as? NSDictionary {
-            RestoreSpeechMod_V_2_0_0(dic: word_replacement_dictionary)
+            RestoreSpeechMod_V_2_0_0(dic: word_replacement_dictionary, progressUpdate: progressUpdate)
         }
         if let speech_wait_config = toplevelDictionary.object(forKey: "speech_wait_config") as? NSArray {
-            RestoreSpeechWaitConfig_V_2_0_0(waitArray: speech_wait_config)
+            RestoreSpeechWaitConfig_V_2_0_0(waitArray: speech_wait_config, progressUpdate: progressUpdate)
         }
         if let speech_section_config = toplevelDictionary.object(forKey: "speech_section_config") as? NSArray {
-            RestoreSpeechSectionConfig_V_2_0_0(sectionConfigArray:speech_section_config)
+            RestoreSpeechSectionConfig_V_2_0_0(sectionConfigArray:speech_section_config, progressUpdate: progressUpdate)
         }
         if let novel_tag = toplevelDictionary.object(forKey: "novel_tag") as? NSArray {
-            RestoreNovelTag_V_2_0_0(novelTagArray: novel_tag)
+            RestoreNovelTag_V_2_0_0(novelTagArray: novel_tag, progressUpdate: progressUpdate)
         }
         // misc_settings には defaultDisplaySettingID,defaultSpeakerID,defaultSpeechOverrideSettingID が入っているので
         // 先に取り出しておかないと良くないことがおきます(´・ω・`)
         if let globalStateDic = toplevelDictionary.object(forKey: "misc_settings") as? NSDictionary {
             if let defaultSpeakerID = globalStateDic.object(forKey: "defaultSpeakerID") as? String, let speaker_setting = toplevelDictionary.object(forKey: "speaker_setting") as? NSArray {
-                RestoreSpeakerSettings_V_2_0_0(speakerArray:speaker_setting, defaultSpeakerSettingID:defaultSpeakerID)
+                RestoreSpeakerSettings_V_2_0_0(speakerArray:speaker_setting, defaultSpeakerSettingID:defaultSpeakerID, progressUpdate: progressUpdate)
             }
             if let defaultDisplaySettingID = globalStateDic.object(forKey: "defaultDisplaySettingID") as? String, let display_setting = toplevelDictionary.object(forKey: "display_setting") as? NSArray {
-                RestoreDisplaySettings_V_2_0_0(displaySettingArray:display_setting, defaultSpeakerSettingID:defaultDisplaySettingID)
+                RestoreDisplaySettings_V_2_0_0(displaySettingArray:display_setting, defaultSpeakerSettingID:defaultDisplaySettingID, progressUpdate: progressUpdate)
             }
             if let defaultSpeechOverrideSettingID = globalStateDic.object(forKey: "defaultSpeechOverrideSettingID") as? String, let speech_override_setting = toplevelDictionary.object(forKey: "speech_override_setting") as? NSArray {
-                RestoreSpeechOverrideSettings_V_2_0_0(speechOverrideSettingArray:speech_override_setting, defaultSpeechOverrideSettingID:defaultSpeechOverrideSettingID)
+                RestoreSpeechOverrideSettings_V_2_0_0(speechOverrideSettingArray:speech_override_setting, defaultSpeechOverrideSettingID:defaultSpeechOverrideSettingID, progressUpdate: progressUpdate)
             }
             
-            RestoreGlobalState_V_2_0_0(dic:globalStateDic)
+            RestoreGlobalState_V_2_0_0(dic:globalStateDic, progressUpdate: progressUpdate)
         }
         if let bookshelf = toplevelDictionary.object(forKey: "bookshelf") as? NSArray {
             RestoreNovel_V_2_0_0(bookshelf:bookshelf, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
