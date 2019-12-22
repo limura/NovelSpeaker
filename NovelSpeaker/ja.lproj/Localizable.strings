@@ -158,6 +158,10 @@
 "NovelSpeakerUtility_RestoreBackupTitle" = "バックアップデータを読み込んでいます";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
 
+"SettingsViewController_ShareBackupDataSelectHow_Title" = "バックアップデータの送信方式を選んで下さい";
+"SettingsViewController_ShareBackupDataSelectHow_Mail" = "メールに添付する";
+"SettingsViewController_ShareBackupDataSelectHow_ShareButton" = "ファイルとしてシェアする";
+"SettingsViewController_ShareBackupSelect_FailedAppendToMail" = "ファイルの添付に失敗しました。";
 "SettingTableViewController_IsDisallowsCellularAccess" = "携帯電話網ではダウンロードしないようにする";
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "小説を削除する時に確認する";
 "SettingTableViewController_RepeatTypeTitle" = "繰り返し再生";
@@ -561,6 +565,13 @@
 - 話者関係の設定項目を変更
 - テキストファイル等の取込時にテキトーに章を分ける機能を追加
 - 小説毎の専用設定の概念を追加
+
+
+# Version 1.1.59
+
+インタフェースの変更
+
+- 設定 -> バックアップ用データの生成 にて、生成されたデータについて「ファイルとしてシェア」が選択できるように
 
 
 # Version 1.1.58

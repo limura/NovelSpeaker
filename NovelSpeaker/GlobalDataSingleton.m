@@ -5108,14 +5108,14 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
             return false;
         }
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             [NiftyUtilitySwift RestoreBackupFromJSONWithProgressDialogWithJsonData:data dataDirectory:nil rootViewController:toplevelViewController];
         });
         if (isSecurityScopeURL) { [url stopAccessingSecurityScopedResource]; }
         return true;
     }
     if ([[url pathExtension] isEqualToString:@"novelspeaker-backup+zip"]) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             [self RestoreBackupFromZIPData:url finally:^(BOOL finalResult) {
                 if (finalResult) {
                     dispatch_async(dispatch_get_main_queue(), ^{

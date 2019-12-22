@@ -1226,8 +1226,30 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             let dateString = dateFormatter.string(from: Date())
             let fileName = String.init(format: "%@.novelspeaker-backup+zip", dateString)
             DispatchQueue.main.async {
-                dialog.dismiss(animated: false, completion: nil)
-                self.sendMailWithBinary(data: backupData, fileName: fileName, mimeType: "application/octet-stream")
+                dialog.dismiss(animated: false, completion: {
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    .title(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Title", comment: "バックアップデータの送信方式を選んで下さい"))
+                    .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
+                            dialog.dismiss(animated: false, completion: nil)
+                        })
+                    .addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Mail", comment: "メールに添付する"), callback: { (dialog) in
+                        dialog.dismiss(animated: false) {
+                            if let data = try? Data(contentsOf: backupData, options: .dataReadingMapped) {
+                                self.sendMailWithBinary(data: data, fileName: fileName, mimeType: "application/octet-stream")
+                            }else{
+                                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_ShareBackupSelect_FailedAppendToMail", comment: "メールへのファイルの添付に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                            }
+                        }
+                    }).addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_ShareButton", comment: "シェア")) { (dialog) in
+                        dialog.dismiss(animated: false) {
+                            let activityViewController = UIActivityViewController(activityItems: [backupData], applicationActivities: nil)
+                            let frame = UIScreen.main.bounds
+                            activityViewController.popoverPresentationController?.sourceView = self.view
+                            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
+                            self.present(activityViewController, animated: true, completion: nil)
+                        }
+                    }.build().show()
+                })
             }
         }
     }

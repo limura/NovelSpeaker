@@ -1623,19 +1623,21 @@ class NovelSpeakerUtility: NSObject {
                     })),
                     "contentDirectory": "\(novelCount)"
                 ]
+                if !withAllStoryContent {
+                    result.append(novelData)
+                    continue
+                }
                 let contentDirectory = NiftyUtilitySwift.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
                 switch novel.type {
                 case .URL:
-                    if !withAllStoryContent {
-                        novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: nil, progressString: progressString, progress: progress)
-                        break
-                    }
-                    fallthrough
-                case .UserCreated:
                     novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory, progressString: progressString, progress: progress)
                     if let contentDirectory = contentDirectory {
                         fileArray.append(contentDirectory)
                     }
+                    break
+                case .UserCreated:
+                    novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory, progressString: progressString, progress: progress)
+                    break
                 }
                 result.append(novelData)
                 novelCount += 1
@@ -1826,7 +1828,7 @@ class NovelSpeakerUtility: NSObject {
         }
     }
 
-    static func CreateBackupData(withAllStoryContent:Bool, progress:((_ description:String)->Void)?) -> Data? {
+    static func CreateBackupData(withAllStoryContent:Bool, progress:((_ description:String)->Void)?) -> URL? {
         let directoryName = "NovelSpeakerBackup"
         // 一旦対象のディレクトリを作って、中身を全部消します。
         if let outputPath = NiftyUtilitySwift.CreateTemporaryDirectory(directoryName: directoryName) {
@@ -1853,15 +1855,29 @@ class NovelSpeakerUtility: NSObject {
             "speech_override_setting": CreateBackupDataDictionary_SpeechOverrideSetting(),
         ]
         defer { NiftyUtilitySwift.RemoveDirectory(directoryPath: outputPath) }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale.current
+        dateFormatter.dateFormat = "yyyyMMddHHmm"
+        let dateString = dateFormatter.string(from: Date())
         var ziptargetFiles:[URL] = bookshelfResult.1
+        let backupDataFilePath:URL
+        if withAllStoryContent {
+            backupDataFilePath = outputPath.appendingPathComponent("backup_data.json")
+            ziptargetFiles.append(backupDataFilePath)
+        }else{
+            backupDataFilePath = NiftyUtilitySwift.GetTemporaryFilePath(fileName: String.init(format: "%@.novelspeaker-backup-json", dateString))
+        }
+        
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: jsonDictionary, options: [.prettyPrinted])
-            let backupDataPath = outputPath.appendingPathComponent("backup_data.json")
-            try jsonData.write(to: backupDataPath)
-            ziptargetFiles.append(backupDataPath)
+            try jsonData.write(to: backupDataFilePath)
         }catch{
             print("JSONSerizization.data() failed. or jsonData.write() failed.")
             return nil
+        }
+        if !withAllStoryContent {
+            return backupDataFilePath
         }
         if let progress = progress {
             progress(NSLocalizedString("NovelSpeakerBackup_CompressingBackupDataProgress", comment: "バックアップデータを圧縮中"))
@@ -1878,14 +1894,14 @@ class NovelSpeakerUtility: NSObject {
             print("zip file create error", zipFilePath.absoluteString, err)
             return nil
         }
-        let zipData:Data
+        let backupFilePath = NiftyUtilitySwift.GetTemporaryFilePath(fileName: String.init(format: "%@.novelspeaker-backup+zip", dateString))
         do {
-            zipData = try Data(contentsOf: zipFilePath, options: .dataReadingMapped)
+            try FileManager.default.moveItem(at: zipFilePath, to: backupFilePath)
         }catch let err{
-            print("zip file read error", err)
+            print("zip file move error", zipFilePath.absoluteString, " to" , backupFilePath.absoluteString, err)
             return nil
         }
-        return zipData
+        return backupFilePath
     }
     
     static let LicenseReadKey = "NovelSpeaker_IsLicenseReaded"

@@ -160,6 +160,10 @@
 "NovelSpeakerUtility_RestoreBackupTitle" = "Loading backup data";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
 
+"SettingsViewController_ShareBackupDataSelectHow_Title" = "Select the backup data transmission method";
+"SettingsViewController_ShareBackupDataSelectHow_Mail" = "Attach to email";
+"SettingsViewController_ShareBackupDataSelectHow_ShareButton" = "Share as a file";
+"SettingsViewController_ShareBackupSelect_FailedAppendToMail" = "File attachment failed.";
 
 "SettingTableViewController_IsDisallowsCellularAccess" = "Do not download on the mobile phone network";
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "Confirm when deleting a novel";
@@ -557,6 +561,7 @@
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+
 # Version 1.9
 
 -Change internal database from CoreData to Realm
@@ -568,6 +573,13 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 -Change speaker setting items
 -Added a function to separate chapters into text files when importing text files etc.
 -Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
+
+
+# Version 1.1.59
+
+Interface change
+
+- Changed so that \"Share as file\" can be selected in Settings -> \"Create backup data\".
 
 
 # Version 1.1.58
