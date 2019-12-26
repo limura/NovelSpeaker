@@ -328,13 +328,20 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.59
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.60
 
-- 設定 -> バックアップ用データの生成 にて、生成されたデータについて「ファイルとしてシェア」が選択できるように
+- 設定 -> iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する の設定項目をリセット(OFFに)しました
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.60
+
+インタフェースの変更
+
+- 設定 -> iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する の設定項目をリセット(OFFに)しました
+
+
 # Version 1.1.59
 
 インタフェースの変更

@@ -2555,7 +2555,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 #define USER_DEFAULTS_IS_LICENSE_FILE_READED @"IsLICENSEFileIsReaded"
 #define USER_DEFAULTS_CURRENT_READED_PRIVACY_POLICY @"CurrentReadedPrivacyPolicy"
 #define USER_DEFAULTS_REPEAT_SPEECH_TYPE @"RepeatSpeechType"
-#define USER_DEFAULTS_IS_ESCAPE_ABOUT_SPEECH_POSITION_DISPLAY_BUG_ON_IOS12 @"IsEscapeAboutSpeechPositionDisplayBugOniOS12"
+#define USER_DEFAULTS_IS_ESCAPE_ABOUT_SPEECH_POSITION_DISPLAY_BUG_ON_IOS12 @"IsEscapeAboutSpeechPositionDisplayBugOniOS12_New01"
 #define USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED @"DummySilentSoundEnabled"
 #define USER_DEFAULTS_IS_MIX_WITH_OTHERS_ENABLED @"MixWithOthersEnabled"
 #define USER_DEFAULTS_IS_DUCK_OTHERS_ENABLED @"DuckOthersEnabled"
@@ -4738,10 +4738,12 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     if (repeat_speech_type != nil) {
         [self SetRepeatSpeechType:[repeat_speech_type integerValue]];
     }
+    /*
     NSNumber* is_escape_about_speech_position_display_bug_on_ios12_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_escape_about_speech_position_display_bug_on_ios12_enabled"];
     if (is_escape_about_speech_position_display_bug_on_ios12_enabled != nil) {
         [self SetEscapeAboutSpeechPositionDisplayBugOniOS12Enabled:[is_escape_about_speech_position_display_bug_on_ios12_enabled boolValue]];
     }
+     */
     NSNumber* is_mix_with_others_enabled = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"is_mix_with_others_enabled"];
     if (is_mix_with_others_enabled != nil) {
         [self SetIsMixWithOthersEnabled:[is_mix_with_others_enabled boolValue]];
