@@ -2345,6 +2345,7 @@ extension RealmSpeechOverrideSetting: CanWriteIsDeleted {
 }
 
 /*
+
 @objc final class RealmBookmark: Object {
     @objc dynamic var id = "" // primary key
     @objc dynamic var isDeleted: Bool = false
@@ -2352,8 +2353,87 @@ extension RealmSpeechOverrideSetting: CanWriteIsDeleted {
     @objc dynamic var novelID:String = ""
     @objc dynamic var chapterNumber:Int = 0
     @objc dynamic var location:Int = 0
-    @objc dynamic var type:String = ""
+    
+    enum BookmarkType:String {
+        case novelSpeechLocation = "novelSpeechLocation"
+        case userBookmark = "userBookmark"
+    }
+    
+    static func CreateUniqueID(type:BookmarkType, hint:String) -> String {
+        return "\(type.rawValue):\(hint)"
+    }
+    static func UniqueIDToHint(uniqueID:String) -> String {
+        if let colonIndex = uniqueID.firstIndex(of: ":") {
+            let index = uniqueID.index(colonIndex, offsetBy: 1)
+            return String(uniqueID[index...])
+        }
+        return ""
+    }
+    static func UniqueIDToType(uniqueID:String) -> BookmarkType? {
+        if let index = uniqueID.firstIndex(of: ":") {
+            switch String(uniqueID[..<index]) {
+            case BookmarkType.novelSpeechLocation.rawValue:
+                return BookmarkType.novelSpeechLocation
+            case BookmarkType.userBookmark.rawValue:
+                return BookmarkType.userBookmark
+            default:
+                return nil
+            }
+        }
+        return nil
+    }
 
+    static func SetBookmark(type:BookmarkType, hint:String, novelID:String, chapterNumber:Int, location:Int){
+        RealmUtil.Write { (realm) in
+            if let obj = SearchObjectFrom(type: type, hint: hint) {
+                obj.novelID = novelID
+                obj.chapterNumber = chapterNumber
+                obj.location = location
+                realm.add(obj, update: .modified)
+                return
+            }
+            let obj = RealmBookmark()
+            obj.id = CreateUniqueID(type: type, hint: hint)
+            obj.novelID = novelID
+            obj.chapterNumber = chapterNumber
+            obj.location = location
+            realm.add(obj, update: .modified)
+        }
+    }
+    
+    static func SetSpeechBookmark(novelID: String, chapterNumber:Int, location: Int) {
+        RealmUtil.Write { (realm) in
+            let obj:RealmBookmark
+            if let oldObj = SearchObjectFrom(type: .novelSpeechLocation, hint: novelID) {
+                obj = oldObj
+                if obj.location == location && obj.novelID == novelID && obj.chapterNumber == chapterNumber {
+                    return
+                }
+            }else{
+                obj = RealmBookmark()
+                obj.id = CreateUniqueID(type: .novelSpeechLocation, hint: novelID)
+            }
+            obj.novelID = novelID
+            obj.chapterNumber = chapterNumber
+            obj.location = location
+            realm.add(obj, update: .modified)
+        }
+    }
+    
+    static func GetSpeechBookmark(novelID: String) -> RealmBookmark? {
+        return SearchObjectFrom(type: .novelSpeechLocation, hint: novelID)
+    }
+
+    static func SearchObjectFrom(type:BookmarkType, hint:String) -> RealmBookmark? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        return realm.object(ofType: RealmBookmark.self, forPrimaryKey: CreateUniqueID(type: type, hint: hint))
+    }
+    
+    static func GetAllObjects() -> Results<RealmBookmark>? {
+        guard let realm = try? RealmUtil.GetRealm() else { return nil }
+        return realm.objects(RealmBookmark.self).filter("isDeleted = false")
+    }
+    
     func delete(realm:Realm) {
         RealmUtil.Delete(realm: realm, model: self)
     }
@@ -2363,7 +2443,7 @@ extension RealmSpeechOverrideSetting: CanWriteIsDeleted {
     }
 
     override static func indexedProperties() -> [String] {
-        return ["id", "novelID", "chapterNumber"]
+        return ["id", "storyID"]
     }
 }
 extension RealmBookmark: CKRecordConvertible {
@@ -2372,5 +2452,5 @@ extension RealmBookmark: CKRecordRecoverable {
 }
 extension RealmBookmark: CanWriteIsDeleted {
 }
- */
 
+*/
