@@ -154,10 +154,27 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 switch change {
                 case .initial(_):
                     break
-                case .update(_, let deletions, let insertions, _):
+                case .update(let objects, let deletions, let insertions, let modifications):
                     if deletions.count > 0 || insertions.count > 0 {
                         DispatchQueue.main.async {
                             self.reloadAllData()
+                            return
+                        }
+                    }
+                    if modifications.count > 0, let sortType = RealmGlobalState.GetInstance()?.bookShelfSortType, sortType == .lastReadDate {
+                        let gapDate = Date(timeIntervalSinceNow: -5) // 5秒前までなら今書き変わったと思い込む
+                        for index in modifications {
+                            if objects.count > index {
+                                let obj = objects[index]
+                                if obj.lastReadDate > gapDate {
+                                    if let novelID = self.displayDataArray.first?.novelID, novelID == obj.novelID {
+                                        // 既に先頭がその小説なら表示しなおす必要は無い
+                                        continue
+                                    }
+                                    self.reloadAllData()
+                                    return
+                                }
+                            }
                         }
                     }
                 case .error(_):
@@ -180,6 +197,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             fallthrough
         case .novelUpdatedAt:
             return Array(allNovels.sorted(byKeyPath: "lastDownloadDate", ascending: false))
+        case .lastReadDate:
+            return Array(allNovels.sorted(byKeyPath: "lastReadDate", ascending: false))
         case .writer:
             return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
         case .title:
@@ -392,6 +411,21 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
 
+    // 小説を開いた日時でフォルダ分けします(フォルダ分けしない版)
+    func createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> [BookShelfRATreeViewCellData] {
+        return autoreleasepool {
+            guard let novels = getNovelArray(sortType: NarouContentSortType.lastReadDate) else { return [] }
+            var result = [] as [BookShelfRATreeViewCellData]
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.childrens = nil
+                data.novelID = novel.novelID
+                data.title = novel.title
+                result.append(data)
+            }
+            return result
+        }
+    }
     
     func getBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
         var sortType:NarouContentSortType = .title
@@ -407,6 +441,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return createUpdateDateBookShelfRATreeViewCellDataTreeWithFolder()
         case .novelUpdatedAt:
             return createUpdateDateBookShelfRATreeViewCellDataTreeWithoutFolder()
+        case .lastReadDate:
+            return createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder()
         case .writer:
             return createWriterBookShelfRATreeViewCellDataTree()
         case .selfCreatedBookshelf:
@@ -493,13 +529,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     func getDisplayStringToSortTypeDictionary() -> [String:NarouContentSortType]{
         return [
-            NSLocalizedString("BookShelfTableViewController_SortTypeNcode", comment: "Ncode順"): NarouContentSortType.ncode
-            , NSLocalizedString("BookShelfTableViewController_SortTypeWriter", comment: "作者名順"): NarouContentSortType.writer
+            //NSLocalizedString("BookShelfTableViewController_SortTypeNcode", comment: "Ncode順"): NarouContentSortType.ncode
+            NSLocalizedString("BookShelfTableViewController_SortTypeWriter", comment: "作者名順"): NarouContentSortType.writer
             , NSLocalizedString("BookShelfTableViewController_SortTypeNovelName", comment: "小説名順"): NarouContentSortType.title
             , NSLocalizedString("BookShelfTableViewController_SortTypeUpdateDate", comment: "更新順"): NarouContentSortType.novelUpdatedAt
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeBookshelf", comment: "自作フォルダ順"): NarouContentSortType.selfCreatedBookshelf
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeKeywardTag", comment: "タグ名順"): NarouContentSortType.keywordTag
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeUpdateDateWithFilder", comment: "最終ダウンロード順(フォルダ分類版)"): NarouContentSortType.novelUpdatedAtWithFolder
+            , NSLocalizedString("BookShelfRATreeViewController_StoryTypeLastReadDate", comment: "小説を開いた日時順"): NarouContentSortType.lastReadDate
         ]
     }
 
