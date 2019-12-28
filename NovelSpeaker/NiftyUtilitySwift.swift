@@ -228,11 +228,26 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
+    @available(iOS 11.0, *)
+    static func PDFToStringArray(pdf:PDFDocument) -> [String] {
+        var result:[String] = []
+        var index = 0
+        while let page = pdf.page(at: index) {
+            if let pageText = page.string {
+                print("PDF page: ", pageText)
+                result.append(pageText)
+            }
+            index += 1
+        }
+        return result
+    }
+    
     @objc public static func BinaryPDFToString(data: Data) -> String? {
         if #available(iOS 11.0, *) {
-            let pdf = PDFDocument(data: data)
-            if let str = pdf?.string {
-                return str
+            guard let pdf = PDFDocument(data: data) else { return nil }
+            let stringArray = PDFToStringArray(pdf: pdf)
+            if stringArray.count > 0 {
+                return stringArray.joined(separator: "\n\n\n")
             }
         }
         return nil
@@ -240,9 +255,10 @@ class NiftyUtilitySwift: NSObject {
     
     @objc public static func FilePDFToString(url: URL) -> String? {
         if #available(iOS 11.0, *) {
-            let pdf = PDFDocument(url: url)
-            if let str = pdf?.string {
-                return str
+            guard let pdf = PDFDocument(url: url) else { return nil }
+            let stringArray = PDFToStringArray(pdf: pdf)
+            if stringArray.count > 0 {
+                return stringArray.joined(separator: "\n\n\n")
             }
         }
         return nil

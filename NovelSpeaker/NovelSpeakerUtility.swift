@@ -636,9 +636,11 @@ class NovelSpeakerUtility: NSObject {
                 if let repeat_speech_type = dic.value(forKey: "repeat_speech_type") as? NSNumber {
                     speechOverrideSetting.repeatSpeechType = RepeatSpeechType(rawValue: repeat_speech_type.uintValue) ?? RepeatSpeechType.noRepeat
                 }
+                /* /// この設定はバックアップデータからの読み込みを停止します
                 if let is_escape_about_speech_position_display_bug_on_ios12_enabled = dic.value(forKey: "is_escape_about_speech_position_display_bug_on_ios12_enabled") as? NSNumber {
                     globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = is_escape_about_speech_position_display_bug_on_ios12_enabled.boolValue
                 }
+                 */
                 if let is_mix_with_others_enabled = dic.value(forKey: "is_mix_with_others_enabled") as? NSNumber {
                     globalState.isMixWithOthersEnabled = is_mix_with_others_enabled.boolValue
                 }
@@ -1270,9 +1272,11 @@ class NovelSpeakerUtility: NSObject {
                 if let isMixWithOthersEnabled = dic.object(forKey: "isMixWithOthersEnabled") as? NSNumber {
                     globalState.isMixWithOthersEnabled = isMixWithOthersEnabled.boolValue
                 }
+                /* /// この設定はバックアップファイルからの読み込みを停止します
                 if let isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = dic.object(forKey: "isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled") as? NSNumber {
                     globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled.boolValue
                 }
+                */
                 if let isPlaybackDurationEnabled = dic.object(forKey: "isPlaybackDurationEnabled") as? NSNumber {
                     globalState.isPlaybackDurationEnabled = isPlaybackDurationEnabled.boolValue
                 }
