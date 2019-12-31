@@ -13,8 +13,8 @@ import UIKit
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 5
-    static let currentSchemaVersionForRealmStory : UInt64 = 5
+    static let currentSchemaVersion : UInt64 = 6
+    static let currentSchemaVersionForRealmStory : UInt64 = 6
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
@@ -332,7 +332,8 @@ import UIKit
             SyncObject<RealmGlobalState>(realmConfiguration: realmConfiguration),
             SyncObject<RealmDisplaySetting>(realmConfiguration: realmConfiguration),
             SyncObject<RealmNovelTag>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmSpeechOverrideSetting>(realmConfiguration: realmConfiguration)
+            SyncObject<RealmSpeechOverrideSetting>(realmConfiguration: realmConfiguration),
+            SyncObject<RealmBookmark>(realmConfiguration: realmConfiguration),
             ], databaseScope: .private, container: container)
     }
 
@@ -378,7 +379,8 @@ import UIKit
             RealmGlobalState.self,
             RealmDisplaySetting.self,
             RealmNovelTag.self,
-            RealmSpeechOverrideSetting.self
+            RealmSpeechOverrideSetting.self,
+            RealmBookmark.self,
         ]
         var count = 0
         realm.refresh()
@@ -442,6 +444,7 @@ import UIKit
                             FetchCloudData(syncObjectType: RealmNovel.self, predicate: NSPredicate(value: true))
                             FetchCloudData(syncObjectType: RealmDisplaySetting.self, predicate: NSPredicate(value: true))
                             FetchCloudData(syncObjectType: RealmNovelTag.self, predicate: NSPredicate(value: true))
+                            FetchCloudData(syncObjectType: RealmBookmark.self, predicate: NSPredicate(value: true))
 
                             return
                         }
@@ -653,7 +656,6 @@ struct Story: Codable {
     var url:String = ""
     var subtitle:String = ""
     var content:String = ""
-    var readLocation = 0
     var novelID:String = ""
     var chapterNumber = 0
     var downloadDate:Date = Date(timeIntervalSince1970: -1)
@@ -666,9 +668,43 @@ struct Story: Codable {
         guard let data = NiftyUtility.dataInflate(storyData), let story = try? JSONDecoder().decode(Story.self, from: data) else { return nil }
         return story
     }
+    var readLocation:Int {
+        get {
+            guard let bookmark = RealmBookmark.SearchObjectFrom(type: .novelSpeechLocation, hint: novelID), bookmark.chapterNumber == chapterNumber else { return 0 }
+            return bookmark.location
+        }
+    }
+    
     var storyID:String {
         get {
             return RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber)
+        }
+    }
+
+    static func SetReadLocationWith(realm:Realm, novelID:String, chapterNumber:Int, location:Int) {
+        let bookmark:RealmBookmark
+        if let bookmarkTmp = RealmBookmark.SearchObjectFrom(type: .novelSpeechLocation, hint: novelID) {
+            bookmark = bookmarkTmp
+        }else{
+            bookmark = RealmBookmark()
+            bookmark.novelID = novelID
+            bookmark.id = RealmBookmark.CreateUniqueID(type: .novelSpeechLocation, hint: novelID)
+        }
+        bookmark.chapterNumber = chapterNumber
+        bookmark.location = location
+        realm.add(bookmark, update: .modified)
+    }
+    static func SetReadLocation(novelID:String, chapterNumber:Int, location:Int) {
+        RealmUtil.Write { (realm) in
+            SetReadLocationWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber, location: location)
+        }
+    }
+    func SetCurrentReadLocationWith(realm:Realm, location:Int) {
+        Story.SetReadLocationWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber, location: location)
+    }
+    func SetCurrentReadLocation(location:Int){
+        RealmUtil.Write { (realm) in
+            SetCurrentReadLocationWith(realm: realm, location: location)
         }
     }
     func GetSubtitle() -> String {
@@ -2344,7 +2380,6 @@ extension RealmSpeechOverrideSetting: CKRecordRecoverable {
 extension RealmSpeechOverrideSetting: CanWriteIsDeleted {
 }
 
-/*
 
 @objc final class RealmBookmark: Object {
     @objc dynamic var id = "" // primary key
@@ -2453,4 +2488,3 @@ extension RealmBookmark: CKRecordRecoverable {
 extension RealmBookmark: CanWriteIsDeleted {
 }
 
-*/

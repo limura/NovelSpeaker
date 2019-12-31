@@ -236,9 +236,6 @@ class CoreDataToRealmTool: NSObject {
             if let ncode = content.ncode, let end = content.end as? Bool {
                 story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
             }
-            if let readLocation = storyCoreData.readLocation as? Int {
-                story.readLocation = readLocation
-            }
             print("CreateRealmStoryFromCoreDataWithNarouContent SetStory(story.chapterNumber: \(story.chapterNumber))")
             newStoryArray.append(story)
         }
@@ -300,6 +297,14 @@ class CoreDataToRealmTool: NSObject {
                 }
                 if let currentReadingChapter = novelCoreData.currentReadingStory?.chapter_number as? Int {
                     novel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: currentReadingChapter)
+                }
+                if let currentReadingStory = novelCoreData.currentReadingStory {
+                    if let chapterNumber = currentReadingStory.chapter_number {
+                        novel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: chapterNumber.intValue)
+                        if let readLocation = currentReadingStory.readLocation {
+                            Story.SetReadLocationWith(realm: realm, novelID: novel.novelID, chapterNumber: chapterNumber.intValue, location: readLocation.intValue)
+                        }
+                    }
                 }
                 // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
                 if let newFlug = novelCoreData.is_new_flug as? Bool {

@@ -25,6 +25,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     var storyForNovelArrayObserveToken: NotificationToken? = nil
     var globalStateObserveToken: NotificationToken? = nil
     var novelObserveToken: NotificationToken? = nil
+    var bookmarkObserveToken: NotificationToken? = nil
     var watchNovelIDArray:[String] = []
     
     deinit {
@@ -164,6 +165,12 @@ class BookShelfTreeViewCell: UITableViewCell {
                             self.applyLikeStarStatus(novelID: novelID)
                             return
                         }
+                        if property.name == "m_readingChapterStoryID" {
+                            DispatchQueue.main.async {
+                                self.applyCurrentReadingPointToIndicator(novelID: novelID)
+                            }
+                            return
+                        }
                     }
                 case .deleted:
                     break
@@ -199,6 +206,25 @@ class BookShelfTreeViewCell: UITableViewCell {
             })
         }
     }
+    func registerBookmarkObserver(novelID:String) {
+        self.bookmarkObserveToken = RealmBookmark.SearchObjectFrom(type: .novelSpeechLocation, hint: novelID)?.observe({ (change) in
+            switch change {
+            case .change(let propertys):
+                for property in propertys {
+                    if property.name == "location" {
+                        DispatchQueue.main.async {
+                            self.applyCurrentReadingPointToIndicator(novelID: novelID)
+                        }
+                        break
+                    }
+                }
+                break
+            default:
+                break
+            }
+        })
+    }
+    
     func checkAndUpdateNewImage(novelIDArray:[String]) {
         autoreleasepool {
             guard let novelArray = RealmNovel.GetAllObjects()?.filter("novelID IN %@", novelIDArray) else { return }
@@ -307,6 +333,7 @@ class BookShelfTreeViewCell: UITableViewCell {
             applyCurrentReadingPointToIndicator(novelID: novelID)
             registerStoryObserver(novelID: novelID)
             registerNovelObserver(novelID: novelID)
+            registerBookmarkObserver(novelID: novelID)
             applyLikeStarStatus(novelID: novelID)
             self.likeButton.isHidden = false
             self.storyForNovelArrayObserveToken = nil
@@ -315,6 +342,7 @@ class BookShelfTreeViewCell: UITableViewCell {
             self.likeButton.isHidden = true
             registerStoryForNovelArrayObserver(novelIDArray: watchNovelIDArray)
             self.storyObserveToken = nil
+            self.bookmarkObserveToken = nil
         }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
         self.watchNovelIDArray = watchNovelIDArray

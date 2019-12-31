@@ -44,11 +44,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     var globalStateObserveToken:NotificationToken? = nil
     var storyObserverToken:NotificationToken? = nil
     var storyObserverStoryID:String = ""
+    var storyObserverStoryBulkID:String = ""
     var defaultSpeakerSettingObserverToken:NotificationToken? = nil
     var speechSectionConfigArrayObserverToken:NotificationToken? = nil
     var defaultSpeechOverrideSettingObserverToken:NotificationToken? = nil
     var novelIDSpeechOverrideSettingArrayObserverToken:NotificationToken? = nil
     var speechModSettingArrayObserverToken:NotificationToken? = nil
+    var bookmarkObserverToken:NotificationToken? = nil
+    var bookmarkObserverNovelID:String = ""
     var maxSpeechInSecTimer:Timer? = nil
     var isMaxSpeechTimeExceeded = false
     var isNeedApplySpeechConfigs = true
@@ -92,6 +95,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             ApplySpeakConfigs(novelID: story.novelID, content: story.content, location: story.readLocation)
             //updatePlayngInfo(story: story)
             observeStory(storyID: self.storyID)
+            observeBookmark(novelID: story.novelID)
             for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
                 delegate.storySpeakerStoryChanged(story: story)
             }
@@ -149,9 +153,30 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             })
         }
     }
+    func observeBookmark(novelID:String) {
+        if bookmarkObserverNovelID == novelID { return }
+        bookmarkObserverNovelID = novelID
+        guard let bookmark = RealmBookmark.SearchObjectFrom(type: .novelSpeechLocation, hint: novelID) else { return }
+        self.bookmarkObserverToken = bookmark.observe { (change) in
+            switch change {
+            case .change(let properties):
+                for property in properties {
+                    if property.name == "location", let newObj = property.newValue as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID), self.speaker.getCurrentReadingPoint().location != newObj.location {
+                        self.speaker.updateCurrentReadingPoint(NSRange(location: newObj.location, length: 0))
+                    }
+                }
+            default:
+                break
+            }
+        }
+    }
+    
     func observeStory(storyID:String) {
         if storyObserverStoryID == storyID { return }
+        let targetBulkID = RealmStoryBulk.CreateUniqueBulkID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID))
+        if storyObserverStoryBulkID == targetBulkID { return }
         storyObserverStoryID = storyID
+        storyObserverStoryBulkID = targetBulkID
         autoreleasepool {
         guard let storyBulk = RealmStoryBulk.SearchStoryBulk(storyID: storyID) else { return }
             let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
@@ -162,10 +187,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 case .change(let properties):
                     for property in properties {
                         if property.name == "contentArray", let newValue = property.newValue as? List<Data>, let story = RealmStoryBulk.BulkToStory(bulk: newValue, chapterNumber: chapterNumber) {
-                            let currentReadingPoint = self.speaker.getCurrentReadingPoint()
-                            if currentReadingPoint.location != story.readLocation {
-                                self.speaker.updateCurrentReadingPoint(NSRange(location: story.readLocation, length: 0))
-                            }
                             if let text = self.speaker.getText(), text != story.content {
                                 self.speaker.setText(self.ForceOverrideHungSpeakString(text: story.content))
                             }
@@ -479,12 +500,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
         autoreleasepool {
-            if var story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
+            if let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
                 let newLocation = speaker.getCurrentReadingPoint().location
                 if story.readLocation != newLocation {
-                    RealmUtil.Write(withoutNotifying: [self.storyObserverToken]) { (realm) in
-                        story.readLocation = speaker.getCurrentReadingPoint().location
-                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        story.SetCurrentReadLocationWith(realm: realm, location: speaker.getCurrentReadingPoint().location)
                     }
                 }
             }
@@ -496,7 +516,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     
     func SkipForward(length:Int) {
         autoreleasepool {
-            guard var story = RealmStoryBulk.SearchStory(storyID: self.storyID) else {
+            guard let story = RealmStoryBulk.SearchStory(storyID: self.storyID) else {
                 return
             }
             let readingPoint = speaker.getCurrentReadingPoint().location
@@ -504,9 +524,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             let contentLength = story.content.count
             if nextReadingPoint > contentLength {
                 if !LoadNextChapter() && story.readLocation != contentLength {
-                    RealmUtil.Write { (realm) in
-                        story.readLocation = contentLength
-                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        story.SetCurrentReadLocationWith(realm: realm, location: contentLength)
                     }
                 }
             }else{
@@ -524,13 +543,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         var targetStory:Story? = nil
         autoreleasepool {
             targetStory = SearchPreviousChapter(storyID: self.storyID)
-            while var story = targetStory {
+            while let story = targetStory {
                 let contentLength = story.content.count
                 if targetLength <= contentLength {
                     let newLocation = contentLength - targetLength
                     if story.readLocation != newLocation {
-                        story.readLocation = newLocation
-                        RealmStoryBulk.SetStory(story: story)
+                        RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                            story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
+                        }
                     }
                     ringPageTurningSound()
                     SetStory(story: story)
@@ -542,10 +562,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         // 抜けてきたということは先頭まで行ってしまった。
         autoreleasepool {
-            if var firstStory = RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
+            if let firstStory = RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
                 if firstStory.readLocation != 0 {
-                    firstStory.readLocation = 0
-                    RealmStoryBulk.SetStory(story: firstStory)
+                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        firstStory.SetCurrentReadLocationWith(realm: realm, location: 0)
+                    }
                 }
                 if firstStory.storyID != self.storyID {
                     ringPageTurningSound()
@@ -563,10 +584,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     @discardableResult
     func LoadNextChapter() -> Bool{
         return autoreleasepool {
-            if var nextStory = SearchNextChapter(storyID: self.storyID) {
+            if let nextStory = SearchNextChapter(storyID: self.storyID) {
                 if nextStory.readLocation != 0 {
-                    nextStory.readLocation = 0
-                    RealmStoryBulk.SetStory(story: nextStory)
+                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
+                    }
                 }
                 ringPageTurningSound()
                 SetStory(story: nextStory)
@@ -587,10 +609,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     @discardableResult
     func LoadPreviousChapter() -> Bool{
         return autoreleasepool {
-            if var previousStory = SearchPreviousChapter(storyID: storyID) {
+            if let previousStory = SearchPreviousChapter(storyID: storyID) {
                 if previousStory.readLocation != 0 {
-                    previousStory.readLocation = 0
-                    RealmStoryBulk.SetStory(story: previousStory)
+                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        previousStory.SetCurrentReadLocationWith(realm: realm, location: 0)
+                    }
                 }
                 ringPageTurningSound()
                 SetStory(story: previousStory)
@@ -923,11 +946,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             }
         }
         autoreleasepool {
-            if var nextStory = SearchNextChapter(storyID: self.storyID) {
+            if let nextStory = SearchNextChapter(storyID: self.storyID) {
                 self.ringPageTurningSound()
                 if nextStory.readLocation != 0 {
-                    nextStory.readLocation = 0
-                    RealmStoryBulk.SetStory(story: nextStory)
+                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
+                    }
                 }
                 self.SetStory(story: nextStory)
                 self.StartSpeech(withMaxSpeechTimeReset: false)
@@ -950,11 +974,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         set {
             autoreleasepool {
-                if var story = RealmStoryBulk.SearchStory(storyID: self.storyID), story.content.count > newValue && newValue >= 0 {
+                if let story = RealmStoryBulk.SearchStory(storyID: self.storyID), story.content.count > newValue && newValue >= 0 {
                     speaker.updateCurrentReadingPoint(NSRange(location: newValue, length: 0))
                     if story.readLocation != newValue {
-                        story.readLocation = newValue
-                        RealmStoryBulk.SetStory(story: story)
+                        RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                            story.SetCurrentReadLocationWith(realm: realm, location: newValue)
+                        }
                     }
                 }
             }
