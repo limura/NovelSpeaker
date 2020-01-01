@@ -687,7 +687,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         if let image = UIImage.init(named: "NovelSpeakerIcon-167px.png") {
             let artWork = MPMediaItemArtwork.init(boundsSize: image.size) { (size) -> UIImage in
+                #if !os(watchOS)
                 return image.resize(newSize: size)
+                #else
+                return image.resize(size)
+                #endif
             }
             songInfo[MPMediaItemPropertyArtwork] = artWork
         }

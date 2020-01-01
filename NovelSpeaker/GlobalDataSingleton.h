@@ -111,10 +111,12 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// GlobalState を更新します。
 //- (BOOL)UpdateGlobalState:(GlobalStateCacheData*)globalState;
 
+#if TARGET_OS_WATCH == 0
 /// CoreData で保存している NarouContent のうち、Ncode で検索した結果
 /// 得られた NovelContent を取得します。
 /// 登録がなければ nil を返します
 - (NarouContentCacheData*) SearchNarouContentFromNcode:(NSString*) ncode;
+#endif
 
 /// 指定されたNarouContentの情報を更新します。
 /// CoreData側に登録されていなければ新規に作成し、
@@ -153,10 +155,12 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// 現在ダウンロード待ち中のNarouContentCacheDataのリストを取得します。
 //- (NSArray*) GetCurrentDownloadWaitingInfo;
 
+#if TARGET_OS_WATCH == 0
 /// CoreData で保存している Story のうち、Ncode と chapter_number で検索した結果
 /// 得られた Story を取得します。
 /// 登録がなければ nil を返します
 - (StoryCacheData*) SearchStory:(NSString*)ncode chapter_no:(int)chapter_number;
+#endif
 
 /// 指定された ncode の小説で、保存されている Story を全て取得します。
 - (NSArray*)GeAllStoryForNcode:(NSString*)ncode;
@@ -203,11 +207,15 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// 現在ダウンロード待ち中のものから、ncode を持つものをリストから外します。
 //- (BOOL)DeleteDownloadQueue:(NSString*)ncode;
 
+#if TARGET_OS_WATCH == 0
 /// 最後に読んでいた小説を取得します
 - (NarouContentCacheData*)GetCurrentReadingContent;
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 小説で読んでいた章を取得します
 - (StoryCacheData*)GetReadingChapter:(NarouContentCacheData*)content;
+#endif
 
 /// 読み込み中の場所を指定された小説と章で更新します。
 //- (BOOL)UpdateReadingPoint:(NarouContentCacheData*)content story:(StoryCacheData*)story;
@@ -483,10 +491,12 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// iOS 12 からの読み上げ中の読み上げ位置がずれる問題への対応で、空白文字をαに置き換える設定のEnable/Disableを設定します
 //- (void)SetEscapeAboutSpeechPositionDisplayBugOniOS12Enabled:(BOOL)isEnabled;
 
+#if TARGET_OS_WATCH == 0
 /// 読み上げ時に無音の音を再生し続けるか否かを取得します
 - (BOOL)IsDummySilentSoundEnabled;
 /// 読み上げ時に無音の音を再生し続けるか否かを設定します
 //- (void)SetIsDummySilentSoundEnabled:(BOOL)isEnabled;
+#endif
 
 /// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを取得します
 - (BOOL)IsMixWithOthersEnabled;
@@ -523,6 +533,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// 本棚で小説を削除する時に確認するか否かを設定します
 - (void)SetIsNeedConfirmDeleteBook:(BOOL)isNeedConfirm;
 
+#if TARGET_OS_WATCH == 0
 /// 小説を読む部分での表示色設定を読み出します(背景色分)。標準の場合は nil が返ります。
 - (UIColor*)GetReadingColorSettingForBackgroundColor;
 /// 小説を読む部分での表示色設定を設定します(背景色分)。標準設定に戻す場合は nil を指定します。
@@ -531,6 +542,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 - (UIColor*)GetReadingColorSettingForForegroundColor;
 /// 小説を読む部分での表示色設定を設定します(背景色分)。標準設定に戻す場合は nil を指定します。
 - (void)SetReadingColorSettingForForegroundColor:(UIColor*)foregroundColor;
+#endif
 
 /// 最新のプライバシーポリシーのURLを取得します
 //- (NSURL*)GetPrivacyPolicyURL;
@@ -554,10 +566,12 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 // バックアップ用のデータを JSON に encode したものを生成して取得します
 //- (NSData*)CreateBackupJSONData;
 
+#if TARGET_OS_WATCH == 0
 /// JSONData に入っているバックアップを書き戻します。
 /// dataDirectory が指示されていて、かつ、本棚データに content_directory が存在した場合は
 /// ダウンロードせずにそのディレクトリにあるファイル群を章のデータとして読み込みます。
 - (BOOL)RestoreBackupFromJSONData:(NSData*)jsonData dataDirectory:(NSURL*)dataDirectory progress:(void (^)(NSString*))progress;
+#endif
 
 
 /// 起動されるまでの間に新規にダウンロードされた小説の数を取得します

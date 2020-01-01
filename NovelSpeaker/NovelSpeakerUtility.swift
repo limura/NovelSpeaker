@@ -265,6 +265,7 @@ class NovelSpeakerUtility: NSObject {
         return tag.replacingOccurrences(of: "「", with: "").replacingOccurrences(of: "」", with: "").replacingOccurrences(of: "\"", with: "").replacingOccurrences(of: "”", with: "").replacingOccurrences(of: "#", with: "").replacingOccurrences(of: "＃", with: "")
     }
     
+    #if !os(watchOS)
     static func ProcessNovelSpeakerURLScheme(url:URL) -> Bool {
         guard let host = url.host else { return false }
         var cookieArray:[String]? = nil
@@ -310,7 +311,9 @@ class NovelSpeakerUtility: NSObject {
         }
         return true
     }
+    #endif
     
+    #if !os(watchOS)
     static func ProcessPDFFile(url:URL) -> Bool {
         guard let text = NiftyUtilitySwift.FilePDFToString(url: url) else {
             DispatchQueue.main.async {
@@ -330,6 +333,8 @@ class NovelSpeakerUtility: NSObject {
         }
         return true
     }
+    #endif
+    #if !os(watchOS)
     static func ProcessRTFFile(url:URL) -> Bool {
         guard let text = NiftyUtilitySwift.FileRTFToAttributedString(url: url)?.string else {
             DispatchQueue.main.async {
@@ -349,6 +354,8 @@ class NovelSpeakerUtility: NSObject {
         }
         return true
     }
+    #endif
+    #if !os(watchOS)
     static func ProcessRTFDFile(url:URL) -> Bool {
         guard let text = NiftyUtilitySwift.FileRTFDToAttributedString(url: url)?.string else {
             DispatchQueue.main.async {
@@ -368,6 +375,8 @@ class NovelSpeakerUtility: NSObject {
         }
         return true
     }
+    #endif
+    #if !os(watchOS)
     static func ProcessTextFile(url:URL) -> Bool {
         guard let data = try? Data(contentsOf: url), let text = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data)) else { return false }
         let fileName = url.deletingPathExtension().lastPathComponent
@@ -377,7 +386,9 @@ class NovelSpeakerUtility: NSObject {
         }
         return true
     }
+    #endif
 
+    #if !os(watchOS)
     @objc public static func ProcessURL(url:URL?) -> Bool {
         guard let url = url else { return false }
         let isSecurityScopedURL = url.startAccessingSecurityScopedResource()
@@ -400,7 +411,9 @@ class NovelSpeakerUtility: NSObject {
         }
         return ProcessTextFile(url:url)
     }
+    #endif
     
+    #if !os(watchOS)
     static func RestoreSpeechMod_V_1_0_0(dic:NSDictionary){
         autoreleasepool {
             guard let speechModArray = RealmSpeechModSetting.GetAllObjects() else { return }
@@ -1556,8 +1569,10 @@ class NovelSpeakerUtility: NSObject {
         }
         return true
     }
+    #endif
 
     // MARK: バックアップデータ生成
+    #if !os(watchOS)
     fileprivate static func CreateBackupDataDictionary_Story(novelID:String, contentWriteTo:URL?, progressString:String, progress:((_ description:String)->Void)?) -> [[String:Any]] {
         return autoreleasepool {
             var result:[[String:Any]] = []
@@ -1926,6 +1941,7 @@ class NovelSpeakerUtility: NSObject {
         }
         return backupFilePath
     }
+    #endif
     
     static let LicenseReadKey = "NovelSpeaker_IsLicenseReaded"
     static func IsLicenseReaded() -> Bool {
@@ -1936,7 +1952,8 @@ class NovelSpeakerUtility: NSObject {
     static func SetLicenseReaded(isRead:Bool) {
         UserDefaults.standard.set(isRead, forKey: LicenseReadKey)
     }
-    
+
+    #if !os(watchOS)
     @objc static func StartAllLongLivedOperationIDWatcher() {
         let activityIndicatorID = "AllLongLivedOperationIDWatcher"
         func AllLongLivedOperationIDWatcher() {
@@ -1953,6 +1970,7 @@ class NovelSpeakerUtility: NSObject {
         }
         AllLongLivedOperationIDWatcher()
     }
+    #endif
     
     static func CheckAndRecoverStoryCount(novelID:String) {
         autoreleasepool {

@@ -28,6 +28,35 @@
 		2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */; };
 		212323F522B7049E00543543 /* RealmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212323F422B7049E00543543 /* RealmTests.swift */; };
 		2123240E22B7101000543543 /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
+		2124B37B23BBE753002EBC31 /* Speaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 217F6E1B1942F14B008E432E /* Speaker.m */; };
+		2124B37D23BBE758002EBC31 /* SpeechConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FA19973CFB00560842 /* SpeechConfig.m */; };
+		2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
+		2124B38223BBED53002EBC31 /* NiftySpeaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FD199742CF00560842 /* NiftySpeaker.m */; };
+		2124B38523BBEE38002EBC31 /* NiftyUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */; };
+		2124B38723BBF220002EBC31 /* NiftyUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F01131D8FDEC5009D69E6 /* NiftyUtility.m */; };
+		2124B38823BBF234002EBC31 /* HtmlStory.m in Sources */ = {isa = PBXBuildFile; fileRef = 2127EACA1DB75989005B1636 /* HtmlStory.m */; };
+		2124B38923BBF249002EBC31 /* SpeechBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5F719973BA500560842 /* SpeechBlock.m */; };
+		2124B38A23BBF279002EBC31 /* StringSubstituter.m in Sources */ = {isa = PBXBuildFile; fileRef = 217BD9E319CE72BB008A0D9D /* StringSubstituter.m */; };
+		2124B38D23BBF2E7002EBC31 /* NovelSpeakerUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */; };
+		2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759F92287123500956B73 /* RealmModels.swift */; };
+		2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
+		2124B39023BBF392002EBC31 /* NovelSpeakerNotificationTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBA2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift */; };
+		2124B39123BBF4C3002EBC31 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
+		2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
+		2124B39423BBF9FC002EBC31 /* SpeakPitchConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */; };
+		2124B39523BBFA04002EBC31 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
+		2124B39623BBFA0B002EBC31 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
+		2124B39723BBFA10002EBC31 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
+		2124B39823BBFAF4002EBC31 /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
+		2124B39923BBFB7A002EBC31 /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
+		2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */; };
+		2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800B2290F3F900A183DF /* StorySpeaker.swift */; };
+		2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */; };
+		2124B39D23BBFC09002EBC31 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
+		2124B39E23BBFCDA002EBC31 /* SpeechModSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916374199F143E003FF7FC /* SpeechModSetting.m */; };
+		2124B3A023BC37EE002EBC31 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B39F23BC37EE002EBC31 /* CloudKit.framework */; };
+		2124B3A223BC37F7002EBC31 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B3A123BC37F7002EBC31 /* AVFoundation.framework */; };
+		2124B3A423BC37FD002EBC31 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B3A323BC37FD002EBC31 /* libz.tbd */; };
 		2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */; };
 		2126A2611D9A1B90008E534A /* Action.js in Resources */ = {isa = PBXBuildFile; fileRef = 2126A2601D9A1B90008E534A /* Action.js */; };
 		2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -125,6 +154,18 @@
 		21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
 		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
 		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
+		2193093323BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 2193093223BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2193093923BBE56800035EF0 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2193093723BBE56800035EF0 /* Interface.storyboard */; };
+		2193093B23BBE56A00035EF0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2193093A23BBE56A00035EF0 /* Assets.xcassets */; };
+		2193094223BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2193094123BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2193094723BBE56A00035EF0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2193094623BBE56A00035EF0 /* ContentView.swift */; };
+		2193094923BBE56A00035EF0 /* HostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2193094823BBE56A00035EF0 /* HostingController.swift */; };
+		2193094B23BBE56A00035EF0 /* ExtensionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2193094A23BBE56A00035EF0 /* ExtensionDelegate.swift */; };
+		2193094D23BBE56A00035EF0 /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2193094C23BBE56A00035EF0 /* NotificationController.swift */; };
+		2193094F23BBE56A00035EF0 /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2193094E23BBE56A00035EF0 /* NotificationView.swift */; };
+		2193095123BBE56A00035EF0 /* ComplicationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2193095023BBE56A00035EF0 /* ComplicationController.swift */; };
+		2193095323BBE56B00035EF0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2193095223BBE56B00035EF0 /* Assets.xcassets */; };
+		2193095623BBE56B00035EF0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2193095523BBE56B00035EF0 /* Preview Assets.xcassets */; };
 		2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */; };
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */; };
@@ -205,8 +246,11 @@
 		21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */; };
 		21FDF5642043CDB200DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */; };
 		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
+		8261A40E09A2B1556BFC551B /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B449E9CF2D2F189FB86B53B2 /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework */; };
 		9051B983E846E56867906F94 /* Pods_NovelSpeakerURLDownloadExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */; };
+		9CACC3CB8604EA2A797F6377 /* Pods_NovelSpeakerWatchApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F66E50ED8EA5D0894EBA9950 /* Pods_NovelSpeakerWatchApp.framework */; };
 		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
+		C2296499CD866B828ADB93C5 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -216,6 +260,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 2126A25A1D9A1B90008E534A;
 			remoteInfo = NovelSpeakerURLDownloadExtension;
+		};
+		2193093423BBE56800035EF0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2193093123BBE56800035EF0;
+			remoteInfo = "NovelSpeakerWatchApp WatchKit App";
+		};
+		2193094323BBE56A00035EF0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2193094023BBE56A00035EF0;
+			remoteInfo = "NovelSpeakerWatchApp WatchKit Extension";
 		};
 		21F054EF1917E0F200CC6BA9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -238,9 +296,32 @@
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2193095B23BBE56B00035EF0 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				2193093323BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2193095E23BBE56B00035EF0 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				2193094223BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		076557DFC0C8AD87421204E5 /* Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; sourceTree = "<group>"; };
 		0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; sourceTree = "<group>"; };
 		210958B81A0DF55600E9171F /* arrow_down@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@3x.png"; sourceTree = "<group>"; };
 		210958B91A0DF55600E9171F /* booksearch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = booksearch.png; sourceTree = "<group>"; };
@@ -274,6 +355,11 @@
 		212323F422B7049E00543543 /* RealmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmTests.swift; sourceTree = "<group>"; };
 		21245BD81A8FBA2A00D3B376 /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		21245BDA1A8FBB6800D3B376 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
+		2124B38623BBF118002EBC31 /* NovelSpeakerWatchApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerWatchApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		2124B39F23BC37EE002EBC31 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS6.1.sdk/System/Library/Frameworks/CloudKit.framework; sourceTree = DEVELOPER_DIR; };
+		2124B3A123BC37F7002EBC31 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS6.1.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
+		2124B3A323BC37FD002EBC31 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS6.1.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
+		2124B3A523BC3AF0002EBC31 /* NovelSpeakerWatchApp WatchKit Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "NovelSpeakerWatchApp WatchKit Extension.entitlements"; sourceTree = "<group>"; };
 		2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NovelSpeakerURLDownloadExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2126A25D1D9A1B90008E534A /* ActionRequestHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActionRequestHandler.h; sourceTree = "<group>"; };
 		2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ActionRequestHandler.m; sourceTree = "<group>"; };
@@ -324,6 +410,7 @@
 		2133F2A01E80E175001A0BC5 /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; path = iTunesArtwork; sourceTree = "<group>"; };
 		2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */ = {isa = PBXFileReference; lastKnownFileType = file; path = "iTunesArtwork@2x"; sourceTree = "<group>"; };
 		213515FB1F8CC06400F7AAD0 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		213700F72DBD6BF3B9237996 /* Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig"; sourceTree = "<group>"; };
 		213A4DC41A63CF8B00E9EC13 /* SpeechWaitConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpeechWaitConfig.h; path = DataModelMapping/SpeechWaitConfig.h; sourceTree = "<group>"; };
 		213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SpeechWaitConfig.m; path = DataModelMapping/SpeechWaitConfig.m; sourceTree = "<group>"; };
 		213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitConfigCacheData.h; sourceTree = "<group>"; };
@@ -397,6 +484,22 @@
 		2191639919A38414003FF7FC /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
 		2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataObjectHolder.h; sourceTree = "<group>"; };
 		2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataObjectHolder.m; sourceTree = "<group>"; };
+		2193092F23BBE56800035EF0 /* NovelSpeakerWatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeakerWatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2193093223BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NovelSpeakerWatchApp WatchKit App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2193093823BBE56800035EF0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
+		2193093A23BBE56A00035EF0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2193093C23BBE56A00035EF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2193094123BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "NovelSpeakerWatchApp WatchKit Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2193094623BBE56A00035EF0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2193094823BBE56A00035EF0 /* HostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingController.swift; sourceTree = "<group>"; };
+		2193094A23BBE56A00035EF0 /* ExtensionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionDelegate.swift; sourceTree = "<group>"; };
+		2193094C23BBE56A00035EF0 /* NotificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationController.swift; sourceTree = "<group>"; };
+		2193094E23BBE56A00035EF0 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
+		2193095023BBE56A00035EF0 /* ComplicationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationController.swift; sourceTree = "<group>"; };
+		2193095223BBE56B00035EF0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2193095523BBE56B00035EF0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		2193095723BBE56B00035EF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2193095823BBE56B00035EF0 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
 		2195FBBE1D2FBBCF00ADDCAB /* UriLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UriLoader.h; sourceTree = "<group>"; };
 		2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UriLoader.m; sourceTree = "<group>"; };
 		2195FBC11D2FCC6800ADDCAB /* SiteInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SiteInfo.h; sourceTree = "<group>"; };
@@ -504,21 +607,47 @@
 		21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSDataDetectEncodingExtension.m; sourceTree = "<group>"; };
 		21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
 		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
+		470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerURLDownloadExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7DA0062504DB8C705E4A8D40 /* Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig"; sourceTree = "<group>"; };
 		A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF64DABA0B88B85E7F1DE40E /* Pods-NovelSpeakerWatchApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp/Pods-NovelSpeakerWatchApp.debug.xcconfig"; sourceTree = "<group>"; };
+		B449E9CF2D2F189FB86B53B2 /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.release.xcconfig"; sourceTree = "<group>"; };
+		C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit App/Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig"; sourceTree = "<group>"; };
 		D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.debug.xcconfig"; sourceTree = "<group>"; };
+		E2EEF718C98FE410CD831ECB /* Pods-NovelSpeakerWatchApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp/Pods-NovelSpeakerWatchApp.release.xcconfig"; sourceTree = "<group>"; };
+		F66E50ED8EA5D0894EBA9950 /* Pods_NovelSpeakerWatchApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		181105F96F8BB3BAF6C2974A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8261A40E09A2B1556BFC551B /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2126A2581D9A1B90008E534A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				9051B983E846E56867906F94 /* Pods_NovelSpeakerURLDownloadExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2193093E23BBE56A00035EF0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2124B3A423BC37FD002EBC31 /* libz.tbd in Frameworks */,
+				2124B3A223BC37F7002EBC31 /* AVFoundation.framework in Frameworks */,
+				2124B3A023BC37EE002EBC31 /* CloudKit.framework in Frameworks */,
+				C2296499CD866B828ADB93C5 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -552,6 +681,14 @@
 				21F054EE1917E0F200CC6BA9 /* UIKit.framework in Frameworks */,
 				21F054ED1917E0F200CC6BA9 /* Foundation.framework in Frameworks */,
 				2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A40C6FA1867209260631F7CB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9CACC3CB8604EA2A797F6377 /* Pods_NovelSpeakerWatchApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -655,6 +792,42 @@
 			name = CustomViews;
 			sourceTree = "<group>";
 		};
+		2193093623BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */ = {
+			isa = PBXGroup;
+			children = (
+				2193093723BBE56800035EF0 /* Interface.storyboard */,
+				2193093A23BBE56A00035EF0 /* Assets.xcassets */,
+				2193093C23BBE56A00035EF0 /* Info.plist */,
+			);
+			path = "NovelSpeakerWatchApp WatchKit App";
+			sourceTree = "<group>";
+		};
+		2193094523BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */ = {
+			isa = PBXGroup;
+			children = (
+				2124B3A523BC3AF0002EBC31 /* NovelSpeakerWatchApp WatchKit Extension.entitlements */,
+				2193094623BBE56A00035EF0 /* ContentView.swift */,
+				2193094823BBE56A00035EF0 /* HostingController.swift */,
+				2193094A23BBE56A00035EF0 /* ExtensionDelegate.swift */,
+				2193094C23BBE56A00035EF0 /* NotificationController.swift */,
+				2193094E23BBE56A00035EF0 /* NotificationView.swift */,
+				2193095023BBE56A00035EF0 /* ComplicationController.swift */,
+				2193095223BBE56B00035EF0 /* Assets.xcassets */,
+				2193095723BBE56B00035EF0 /* Info.plist */,
+				2193095823BBE56B00035EF0 /* PushNotificationPayload.apns */,
+				2193095423BBE56B00035EF0 /* Preview Content */,
+			);
+			path = "NovelSpeakerWatchApp WatchKit Extension";
+			sourceTree = "<group>";
+		};
+		2193095423BBE56B00035EF0 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				2193095523BBE56B00035EF0 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
 		21B53A1819619BE7009658B7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -722,6 +895,7 @@
 			isa = PBXGroup;
 			children = (
 				21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */,
+				2124B38623BBF118002EBC31 /* NovelSpeakerWatchApp-Bridging-Header.h */,
 				21E76BF81FB487B1003C659F /* EasyDialogs.swift */,
 				2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */,
 				2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */,
@@ -801,6 +975,8 @@
 				21F054D21917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */,
 				2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
+				2193093623BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */,
+				2193094523BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */,
 				21F054CB1917E0F200CC6BA9 /* Frameworks */,
 				21F054CA1917E0F200CC6BA9 /* Products */,
 				A889DD6179ED1DDD1D382860 /* Pods */,
@@ -813,6 +989,9 @@
 				21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */,
 				21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */,
 				2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */,
+				2193092F23BBE56800035EF0 /* NovelSpeakerWatchApp.app */,
+				2193093223BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app */,
+				2193094123BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -820,7 +999,10 @@
 		21F054CB1917E0F200CC6BA9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2124B3A323BC37FD002EBC31 /* libz.tbd */,
+				2124B3A123BC37F7002EBC31 /* AVFoundation.framework */,
 				21C759FB2287127700956B73 /* CloudKit.framework */,
+				2124B39F23BC37EE002EBC31 /* CloudKit.framework */,
 				21429D85209F45FD001426F5 /* AudioToolbox.framework */,
 				216741A82047714D008A578D /* PDFKit.framework */,
 				215B4DE91FB928A900602DB6 /* WebKit.framework */,
@@ -840,6 +1022,9 @@
 				A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */,
 				AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */,
 				7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */,
+				F66E50ED8EA5D0894EBA9950 /* Pods_NovelSpeakerWatchApp.framework */,
+				B449E9CF2D2F189FB86B53B2 /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework */,
+				470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -944,6 +1129,12 @@
 				BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */,
 				BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */,
 				0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */,
+				AF64DABA0B88B85E7F1DE40E /* Pods-NovelSpeakerWatchApp.debug.xcconfig */,
+				E2EEF718C98FE410CD831ECB /* Pods-NovelSpeakerWatchApp.release.xcconfig */,
+				C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */,
+				7DA0062504DB8C705E4A8D40 /* Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig */,
+				213700F72DBD6BF3B9237996 /* Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig */,
+				076557DFC0C8AD87421204E5 /* Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -968,6 +1159,63 @@
 			productName = NovelSpeakerURLDownloadExtension;
 			productReference = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
+		};
+		2193092E23BBE56800035EF0 /* NovelSpeakerWatchApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2193096323BBE56B00035EF0 /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchApp" */;
+			buildPhases = (
+				35C447BA321F235FDA437964 /* [CP] Check Pods Manifest.lock */,
+				2193092D23BBE56800035EF0 /* Resources */,
+				2193095B23BBE56B00035EF0 /* Embed Watch Content */,
+				A40C6FA1867209260631F7CB /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2193093523BBE56800035EF0 /* PBXTargetDependency */,
+			);
+			name = NovelSpeakerWatchApp;
+			productName = NovelSpeakerWatchApp;
+			productReference = 2193092F23BBE56800035EF0 /* NovelSpeakerWatchApp.app */;
+			productType = "com.apple.product-type.application.watchapp2-container";
+		};
+		2193093123BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2193096223BBE56B00035EF0 /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchApp WatchKit App" */;
+			buildPhases = (
+				A19B7BCDA6400013EAA3C853 /* [CP] Check Pods Manifest.lock */,
+				2193093023BBE56800035EF0 /* Resources */,
+				2193095E23BBE56B00035EF0 /* Embed App Extensions */,
+				181105F96F8BB3BAF6C2974A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2193094423BBE56A00035EF0 /* PBXTargetDependency */,
+			);
+			name = "NovelSpeakerWatchApp WatchKit App";
+			productName = "NovelSpeakerWatchApp WatchKit App";
+			productReference = 2193093223BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app */;
+			productType = "com.apple.product-type.application.watchapp2";
+		};
+		2193094023BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2193096123BBE56B00035EF0 /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchApp WatchKit Extension" */;
+			buildPhases = (
+				9C146D81A0459185D0992D07 /* [CP] Check Pods Manifest.lock */,
+				2193093D23BBE56A00035EF0 /* Sources */,
+				2193093E23BBE56A00035EF0 /* Frameworks */,
+				2193093F23BBE56A00035EF0 /* Resources */,
+				1753FB5B659EC24D757D8530 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "NovelSpeakerWatchApp WatchKit Extension";
+			productName = "NovelSpeakerWatchApp WatchKit Extension";
+			productReference = 2193094123BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex */;
+			productType = "com.apple.product-type.watchkit2-extension";
 		};
 		21F054C81917E0F200CC6BA9 /* NovelSpeaker */ = {
 			isa = PBXNativeTarget;
@@ -1015,7 +1263,7 @@
 		21F054C11917E0F100CC6BA9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0830;
+				LastSwiftUpdateCheck = 1130;
 				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = "IIMURA Takuji";
 				TargetAttributes = {
@@ -1029,6 +1277,21 @@
 								enabled = 0;
 							};
 						};
+					};
+					2193092E23BBE56800035EF0 = {
+						CreatedOnToolsVersion = 11.3;
+						DevelopmentTeam = 4KZE8276ZF;
+						ProvisioningStyle = Automatic;
+					};
+					2193093123BBE56800035EF0 = {
+						CreatedOnToolsVersion = 11.3;
+						DevelopmentTeam = 4KZE8276ZF;
+						ProvisioningStyle = Automatic;
+					};
+					2193094023BBE56A00035EF0 = {
+						CreatedOnToolsVersion = 11.3;
+						DevelopmentTeam = 4KZE8276ZF;
+						ProvisioningStyle = Automatic;
 					};
 					21F054C81917E0F200CC6BA9 = {
 						DevelopmentTeam = 4KZE8276ZF;
@@ -1073,6 +1336,9 @@
 				21F054C81917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054E91917E0F200CC6BA9 /* NovelSpeakerTests */,
 				2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
+				2193092E23BBE56800035EF0 /* NovelSpeakerWatchApp */,
+				2193093123BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */,
+				2193094023BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */,
 			);
 		};
 /* End PBXProject section */
@@ -1086,6 +1352,31 @@
 				2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */,
 				2126A2611D9A1B90008E534A /* Action.js in Resources */,
 				212972171DA66FDB001ED63D /* Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2193092D23BBE56800035EF0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2193093023BBE56800035EF0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2193093B23BBE56A00035EF0 /* Assets.xcassets in Resources */,
+				2193093923BBE56800035EF0 /* Interface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2193093F23BBE56A00035EF0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2193095623BBE56B00035EF0 /* Preview Assets.xcassets in Resources */,
+				2193095323BBE56B00035EF0 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1194,6 +1485,50 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		1753FB5B659EC24D757D8530 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Realm-watchOS/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift-watchOS/RealmSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/Zip-watchOS/Zip.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Zip.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		35C447BA321F235FDA437964 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-NovelSpeakerWatchApp-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		455CC71F8AB9A5A5AC429D00 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1205,10 +1540,10 @@
 				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
 				"${BUILT_PRODUCTS_DIR}/MSColorPicker/MSColorPicker.framework",
 				"${BUILT_PRODUCTS_DIR}/RATreeView/RATreeView.framework",
-				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
-				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm-iOS/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift-iOS/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SZTextView/SZTextView.framework",
-				"${BUILT_PRODUCTS_DIR}/Zip/Zip.framework",
+				"${BUILT_PRODUCTS_DIR}/Zip-iOS/Zip.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -1262,6 +1597,50 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		9C146D81A0459185D0992D07 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-NovelSpeakerWatchApp WatchKit Extension-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A19B7BCDA6400013EAA3C853 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-NovelSpeakerWatchApp WatchKit App-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		E09854C708603E180E1222AF /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1288,6 +1667,45 @@
 			buildActionMask = 2147483647;
 			files = (
 				2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2193093D23BBE56A00035EF0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2193094923BBE56A00035EF0 /* HostingController.swift in Sources */,
+				2124B37B23BBE753002EBC31 /* Speaker.m in Sources */,
+				2124B39623BBFA0B002EBC31 /* StoryCacheData.m in Sources */,
+				2124B39E23BBFCDA002EBC31 /* SpeechModSetting.m in Sources */,
+				2124B39123BBF4C3002EBC31 /* GlobalDataSingleton.m in Sources */,
+				2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */,
+				2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */,
+				2124B39723BBFA10002EBC31 /* NarouContentCacheData.m in Sources */,
+				2193094723BBE56A00035EF0 /* ContentView.swift in Sources */,
+				2124B38723BBF220002EBC31 /* NiftyUtility.m in Sources */,
+				2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */,
+				2124B38223BBED53002EBC31 /* NiftySpeaker.m in Sources */,
+				2124B39423BBF9FC002EBC31 /* SpeakPitchConfigCacheData.m in Sources */,
+				2124B39523BBFA04002EBC31 /* SpeechWaitConfigCacheData.m in Sources */,
+				2193094D23BBE56A00035EF0 /* NotificationController.swift in Sources */,
+				2124B38D23BBF2E7002EBC31 /* NovelSpeakerUtility.swift in Sources */,
+				2193094B23BBE56A00035EF0 /* ExtensionDelegate.swift in Sources */,
+				2124B39923BBFB7A002EBC31 /* CoreDataObjectHolder.m in Sources */,
+				2124B39823BBFAF4002EBC31 /* GlobalStateCacheData.m in Sources */,
+				2124B38A23BBF279002EBC31 /* StringSubstituter.m in Sources */,
+				2124B37D23BBE758002EBC31 /* SpeechConfig.m in Sources */,
+				2124B38823BBF234002EBC31 /* HtmlStory.m in Sources */,
+				2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */,
+				2193094F23BBE56A00035EF0 /* NotificationView.swift in Sources */,
+				2124B38923BBF249002EBC31 /* SpeechBlock.m in Sources */,
+				2124B39023BBF392002EBC31 /* NovelSpeakerNotificationTool.swift in Sources */,
+				2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */,
+				2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */,
+				2124B39D23BBFC09002EBC31 /* UIImageExtension.m in Sources */,
+				2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */,
+				2124B38523BBEE38002EBC31 /* NiftyUtilitySwift.swift in Sources */,
+				2193095123BBE56A00035EF0 /* ComplicationController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1399,6 +1817,16 @@
 			target = 2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */;
 			targetProxy = 2126A2631D9A1B90008E534A /* PBXContainerItemProxy */;
 		};
+		2193093523BBE56800035EF0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2193093123BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */;
+			targetProxy = 2193093423BBE56800035EF0 /* PBXContainerItemProxy */;
+		};
+		2193094423BBE56A00035EF0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2193094023BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */;
+			targetProxy = 2193094323BBE56A00035EF0 /* PBXContainerItemProxy */;
+		};
 		21F054F01917E0F200CC6BA9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 21F054C81917E0F200CC6BA9 /* NovelSpeaker */;
@@ -1460,6 +1888,14 @@
 				2133F2221E7FFF0D001A0BC5 /* en */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		2193093723BBE56800035EF0 /* Interface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2193093823BBE56800035EF0 /* Base */,
+			);
+			name = Interface.storyboard;
 			sourceTree = "<group>";
 		};
 		21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */ = {
@@ -1571,6 +2007,191 @@
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		2193095923BBE56B00035EF0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = AF64DABA0B88B85E7F1DE40E /* Pods-NovelSpeakerWatchApp.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		2193095A23BBE56B00035EF0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E2EEF718C98FE410CD831ECB /* Pods-NovelSpeakerWatchApp.release.xcconfig */;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		2193095C23BBE56B00035EF0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C95005801A8D55EDF7F5FF67 /* Pods-NovelSpeakerWatchApp WatchKit App.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				IBSC_MODULE = NovelSpeakerWatchApp_WatchKit_Extension;
+				INFOPLIST_FILE = "NovelSpeakerWatchApp WatchKit App/Info.plist";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 6.1;
+			};
+			name = Debug;
+		};
+		2193095D23BBE56B00035EF0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7DA0062504DB8C705E4A8D40 /* Pods-NovelSpeakerWatchApp WatchKit App.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				IBSC_MODULE = NovelSpeakerWatchApp_WatchKit_Extension;
+				INFOPLIST_FILE = "NovelSpeakerWatchApp WatchKit App/Info.plist";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 6.1;
+			};
+			name = Release;
+		};
+		2193095F23BBE56B00035EF0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 213700F72DBD6BF3B9237996 /* Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "NovelSpeakerWatchApp WatchKit Extension/NovelSpeakerWatchApp WatchKit Extension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"NovelSpeakerWatchApp WatchKit Extension/Preview Content\"";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_PREVIEWS = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = "NovelSpeakerWatchApp WatchKit Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp.watchkitapp.watchkitextension;
+				PRODUCT_NAME = "${TARGET_NAME}";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeaker/NovelSpeakerWatchApp-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 6.1;
+			};
+			name = Debug;
+		};
+		2193096023BBE56B00035EF0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 076557DFC0C8AD87421204E5 /* Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "NovelSpeakerWatchApp WatchKit Extension/NovelSpeakerWatchApp WatchKit Extension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"NovelSpeakerWatchApp WatchKit Extension/Preview Content\"";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_PREVIEWS = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = "NovelSpeakerWatchApp WatchKit Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp.watchkitapp.watchkitextension;
+				PRODUCT_NAME = "${TARGET_NAME}";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeaker/NovelSpeakerWatchApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 6.1;
 			};
 			name = Release;
 		};
@@ -1689,7 +2310,12 @@
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_ROOT}/Headers/Public\" \"${PODS_ROOT}/Headers/Public/SZTextView\" \"${SDKROOT}/usr/include/libxml2\"";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
+					"\"${SDKROOT}/usr/include/libxml2\"",
+				);
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1721,7 +2347,12 @@
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_ROOT}/Headers/Public\" \"${PODS_ROOT}/Headers/Public/SZTextView\" \"${SDKROOT}/usr/include/libxml2\"";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
+					"\"${SDKROOT}/usr/include/libxml2\"",
+				);
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1808,7 +2439,17 @@
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Zip/Zip.framework/Headers\"",
 					"${SDKROOT}/usr/include/libxml2",
 				);
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_CONFIGURATION_BUILD_DIR}/Eureka/Eureka.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/IceCream/IceCream.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/RATreeView/RATreeView.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/Realm/Realm.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/RealmSwift/RealmSwift.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/SZTextView/SZTextView.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/Zip/Zip.framework/Headers\"";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/Eureka/Eureka.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/IceCream/IceCream.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RATreeView/RATreeView.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/Realm/Realm.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RealmSwift/RealmSwift.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/SZTextView/SZTextView.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/Zip/Zip.framework/Headers\"",
+				);
 				INFOPLIST_FILE = "NovelSpeakerTests/NovelSpeakerTests-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-v";
@@ -1830,6 +2471,33 @@
 			buildConfigurations = (
 				2126A2661D9A1B90008E534A /* Debug */,
 				2126A2671D9A1B90008E534A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2193096123BBE56B00035EF0 /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchApp WatchKit Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2193095F23BBE56B00035EF0 /* Debug */,
+				2193096023BBE56B00035EF0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2193096223BBE56B00035EF0 /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchApp WatchKit App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2193095C23BBE56B00035EF0 /* Debug */,
+				2193095D23BBE56B00035EF0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2193096323BBE56B00035EF0 /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2193095923BBE56B00035EF0 /* Debug */,
+				2193095A23BBE56B00035EF0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

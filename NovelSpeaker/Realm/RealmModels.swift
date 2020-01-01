@@ -1995,9 +1995,11 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
             if let color = try? JSONSerialization.jsonObject(with: bgColor, options: .allowFragments) as? NSDictionary, let red = color.object(forKey: "red") as? NSNumber, let green = color.object(forKey: "green") as? NSNumber, let blue = color.object(forKey: "blue") as? NSNumber, let alpha = color.object(forKey: "alpha") as? NSNumber {
                 return UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
             }
+            #if !os(watchOS)
             if #available(iOS 13.0, *) {
                 return UIColor.systemBackground
             }
+            #endif
             return UIColor.white
         }
         set(color) {
@@ -2026,9 +2028,11 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
             if let color = try? JSONSerialization.jsonObject(with: fgColor, options: .allowFragments) as? NSDictionary, let red = color.object(forKey: "red") as? NSNumber, let green = color.object(forKey: "green") as? NSNumber, let blue = color.object(forKey: "blue") as? NSNumber, let alpha = color.object(forKey: "alpha") as? NSNumber {
                 return UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
             }
+            #if !os(watchOS)
             if #available(iOS 13.0, *) {
                 return UIColor.label
             }
+            #endif
             return UIColor.black
         }
         set(color) {

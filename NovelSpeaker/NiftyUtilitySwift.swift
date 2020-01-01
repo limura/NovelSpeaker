@@ -7,9 +7,12 @@
 //
 
 import UIKit
-import PDFKit
 import RealmSwift
 import UserNotifications
+
+#if !os(watchOS)
+import PDFKit
+#endif
 
 class NiftyUtilitySwift: NSObject {
     static let textCountSeparatorArray:[String] = ["[[改ページ]]", "[改ページ]", "［＃改ページ］", "［＃改丁］", "\n\n\n", "\r\n\r\n\r\n", "\r\r\r"]
@@ -31,6 +34,7 @@ class NiftyUtilitySwift: NSObject {
         return nil
     }
     
+    #if !os(watchOS)
     static var toplevelViewController:UIViewController? = nil
     @objc static func RegisterToplevelViewController(viewController:UIViewController?) {
         toplevelViewController = viewController
@@ -38,7 +42,9 @@ class NiftyUtilitySwift: NSObject {
     @objc static func GetRegisterdToplevelViewController() -> UIViewController? {
         return toplevelViewController
     }
+    #endif
     
+    #if !os(watchOS)
     @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
         DispatchQueue.main.async {
             var easyDialog = EasyDialogBuilder(viewController)
@@ -80,7 +86,9 @@ class NiftyUtilitySwift: NSObject {
         }
 
     }
+    #endif
     
+    #if !os(watchOS)
     public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieArray: [String], depth: Int = 0, prevHtmlStoryArray:[HtmlStory?] = []) {
         BehaviorLogger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
@@ -227,7 +235,9 @@ class NiftyUtilitySwift: NSObject {
             }
         }
     }
+    #endif
     
+    #if !os(watchOS)
     @available(iOS 11.0, *)
     static func PDFToStringArray(pdf:PDFDocument) -> [String] {
         var result:[String] = []
@@ -241,7 +251,9 @@ class NiftyUtilitySwift: NSObject {
         }
         return result
     }
+    #endif
     
+    #if !os(watchOS)
     @objc public static func BinaryPDFToString(data: Data) -> String? {
         if #available(iOS 11.0, *) {
             guard let pdf = PDFDocument(data: data) else { return nil }
@@ -252,7 +264,9 @@ class NiftyUtilitySwift: NSObject {
         }
         return nil
     }
+    #endif
     
+    #if !os(watchOS)
     @objc public static func FilePDFToString(url: URL) -> String? {
         if #available(iOS 11.0, *) {
             guard let pdf = PDFDocument(url: url) else { return nil }
@@ -263,6 +277,7 @@ class NiftyUtilitySwift: NSObject {
         }
         return nil
     }
+    #endif
     
     @objc public static func FileRTFToAttributedString(url: URL) -> NSAttributedString? {
         do {
@@ -283,6 +298,7 @@ class NiftyUtilitySwift: NSObject {
         return nil
     }
     
+    #if !os(watchOS)
     public static func searchToplevelViewController(targetViewController: UIViewController) -> UIViewController {
         var currentViewController = targetViewController
         while let parent = currentViewController.parent {
@@ -290,11 +306,15 @@ class NiftyUtilitySwift: NSObject {
         }
         return currentViewController
     }
+    #endif
     
+    #if !os(watchOS)
     public static func EasyDialogBuilder(_ viewController: UIViewController) -> EasyDialog.Builder {
         return EasyDialog.Builder(searchToplevelViewController(targetViewController: viewController))
     }
+    #endif
     
+    #if !os(watchOS)
     @discardableResult
     @objc public static func EasyDialogNoButton(viewController: UIViewController, title: String?, message: String?, completion:((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         var dialog = EasyDialogBuilder(viewController)
@@ -310,12 +330,16 @@ class NiftyUtilitySwift: NSObject {
         }
         return builded
     }
+    #endif
     
+    #if !os(watchOS)
     @discardableResult
     @objc public static func EasyDialogMessageDialog(viewController: UIViewController, message: String, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         return EasyDialogOneButton(viewController: viewController, title: nil, message: message, buttonTitle: nil, buttonAction: nil, completion: completion)
     }
+    #endif
     
+    #if !os(watchOS)
     @discardableResult
     @objc public static func EasyDialogLongMessageDialog(viewController: UIViewController, message: String, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         let dialog = EasyDialogBuilder(viewController)
@@ -327,7 +351,9 @@ class NiftyUtilitySwift: NSObject {
         dialog.show { completion?(dialog) }
         return dialog
     }
+    #endif
 
+    #if !os(watchOS)
     @discardableResult
     @objc public static func EasyDialogOneButton(viewController: UIViewController, title: String?, message: String?, buttonTitle: String?, buttonAction:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         var dialog = EasyDialogBuilder(viewController)
@@ -348,7 +374,9 @@ class NiftyUtilitySwift: NSObject {
         builded.show { completion?(builded) }
         return builded
     }
+    #endif
     
+    #if !os(watchOS)
     @discardableResult
     @objc public static func EasyDialogTwoButton(viewController: UIViewController, title: String?, message: String?, button1Title: String?, button1Action:(()->Void)?, button2Title: String?, button2Action:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         var dialog = EasyDialogBuilder(viewController)
@@ -376,7 +404,9 @@ class NiftyUtilitySwift: NSObject {
         builded.show { completion?(builded) }
         return builded
     }
+    #endif
     
+    #if !os(watchOS)
     @discardableResult
     @objc public static func EasyDialogForButton(viewController: UIViewController, title: String?, message: String?, button1Title: String?, button1Action:(()->Void)?, button2Title: String?, button2Action:(()->Void)?, button3Title: String?, button3Action:(()->Void)?, button4Title: String?, button4Action:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
         var dialog = EasyDialogBuilder(viewController)
@@ -414,7 +444,9 @@ class NiftyUtilitySwift: NSObject {
         builded.show { completion?(builded) }
         return builded
     }
+    #endif
     
+    #if !os(watchOS)
     @objc public static func EasyDialogTextInput(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, action:((String)->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) {
         var dialog = EasyDialogBuilder(viewController)
         if let title = title {
@@ -435,7 +467,9 @@ class NiftyUtilitySwift: NSObject {
             }.build()
         builded.show { completion?(builded) }
     }
+    #endif
     
+    #if !os(watchOS)
     @objc public static func EasyDialogTextInput2Button(viewController: UIViewController, title: String?, message: String?, textFieldText: String?, placeHolder: String?, leftButtonText: String?, rightButtonText: String?, leftButtonAction:((String)->Void)?, rightButtonAction:((String)->Void)?, shouldReturnIsRightButtonClicked:Bool = false, completion: ((_ dialog:EasyDialog)->Void)? = nil) {
         var dialog = EasyDialogBuilder(viewController)
         if let title = title {
@@ -480,6 +514,8 @@ class NiftyUtilitySwift: NSObject {
         let builded = dialog.build()
         builded.show { completion?(builded) }
     }
+    #endif
+    #if !os(watchOS)
     @objc public static func EasyDialogMessageDialog(viewController: UIViewController, title: String?, message: String?, completion:(()->Void)?) {
         var builder = EasyDialogBuilder(viewController)
         if let title = title {
@@ -494,6 +530,7 @@ class NiftyUtilitySwift: NSObject {
             }
         }.build().show()
     }
+    #endif
 
     @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
         let session: URLSession = URLSession.shared
@@ -636,6 +673,7 @@ class NiftyUtilitySwift: NSObject {
         return formatter.date(from: iso8601String)
     }
     
+    #if !os(watchOS)
     @objc public static func RestoreBackupFromJSONWithProgressDialog(jsonData:Data, dataDirectory:URL?, rootViewController:UIViewController){
         let globalDataSingleton = GlobalDataSingleton.getInstance()
         var builder = EasyDialogBuilder(rootViewController)
@@ -675,6 +713,7 @@ class NiftyUtilitySwift: NSObject {
             }
         }
     }
+    #endif
     
     @objc static public func DispatchSyncMainQueue(block:(()->Void)?) -> Void {
         guard let block = block else {
@@ -733,6 +772,7 @@ class NiftyUtilitySwift: NSObject {
         defaults.set(text, forKey: USER_DEFAULTS_LAST_READ_IMPORTANT_INFORMATION_TEXT)
     }
     
+    #if !os(watchOS)
     @objc static public func getLogText(searchString:String?) -> String {
         let logStringArray = GlobalDataSingleton.getInstance().getLogStringArray()
         var logResult = ""
@@ -751,7 +791,9 @@ class NiftyUtilitySwift: NSObject {
         }
         return logResult
     }
+    #endif
     
+    #if !os(watchOS)
     static public func Share(message:String, viewController:UIViewController, barButton:UIBarButtonItem?) {
         let activityViewController = UIActivityViewController.init(activityItems: [message], applicationActivities: nil)
         
@@ -764,6 +806,7 @@ class NiftyUtilitySwift: NSObject {
         }
         viewController.present(activityViewController, animated: true, completion: nil)
     }
+    #endif
     
     @objc static public func IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled() -> Bool {
         return autoreleasepool {
@@ -876,6 +919,7 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
+    #if !os(watchOS)
     static func GetToplevelViewController(controller:UIViewController?) -> UIViewController? {
         guard let view = controller else {
             if let viewController = GetRegisterdToplevelViewController() {
@@ -897,6 +941,7 @@ class NiftyUtilitySwift: NSObject {
         }
         return view;
     }
+    #endif
     
     // https://qiita.com/mosson/items/c4c329d433d99e3583ec
     static func DetectEncoding(data:Data) -> String.Encoding {

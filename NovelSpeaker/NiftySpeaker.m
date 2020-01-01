@@ -10,7 +10,13 @@
 #import "GlobalDataSingleton.h"
 #import "SpeechBlock.h"
 #import "SpeechConfig.h"
+#import <TargetConditionals.h>
+#if TARGET_OS_IOS
 #import "NovelSpeaker-Swift.h"
+#endif
+#if TARGET_OS_WATCH
+#import "NovelSpeakerWatchApp_WatchKit_Extension-Swift.h"
+#endif
 
 #define iOS12WillSpeakRangeBugTargetRegexp @"[\\s•・*」]"
 #define iOS12WillSpeakRangeBugConvertToString @"α"

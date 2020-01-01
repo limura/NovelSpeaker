@@ -10,9 +10,11 @@
 
 @interface NiftyUtility : NSObject
 
+#if TARGET_OS_WATCH == 0
 /// UIButton に表示される文字列を変更します。
 /// 全ての State を同じ文字列で上書きします。
 + (void)setUIButtonText:(UIButton*)button text:(NSString*)text;
+#endif
 
 /// ダサい暗号化
 + (NSString*)stringEncrypt:(NSString*)string key:(NSString*)key;
@@ -40,8 +42,10 @@
 /// HTML のエスケープ文字を元に戻します。
 + (NSString*)decodeHtmlEscape:(NSString*)htmlString;
 
+#if TARGET_OS_WATCH == 0
 /// 最上位の UIViewController を取得します。nil が返る可能性があります
 + (UIViewController*)findToplevelViewController;
+#endif
 
 /// 空白や改行など表示されない文字を全て排除した文字列を生成する
 + (NSString*)removeWhiteSpace:(NSString*)str;

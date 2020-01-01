@@ -10,10 +10,13 @@
 #import "NSDataZlibExtension.h"
 #import <CommonCrypto/CommonHMAC.h>
 #import <UserNotifications/UserNotifications.h>
+#if TARGET_OS_WATCH == 0
 #import "UIViewControllerExtension.h"
+#endif
 
 @implementation NiftyUtility
 
+#if TARGET_OS_WATCH == 0
 /// UIButton に表示される文字列を変更します
 + (void)setUIButtonText:(UIButton*)button text:(NSString*)text {
     [button setTitle:text forState:UIControlStateNormal];
@@ -24,6 +27,7 @@
     [button setTitle:text forState:UIControlStateApplication];
     [button setTitle:text forState:UIControlStateHighlighted];
 }
+#endif
 
 // a を b で xor します。b が a より短い場合はループして適用します
 + (NSData*)xorData:(NSData*)aData b:(NSData*)bData {
@@ -157,11 +161,13 @@
     return htmlString;
 }
 
+#if TARGET_OS_WATCH == 0
 /// 最上位の UIViewController を取得します。nil が返る可能性があります
 + (UIViewController*)findToplevelViewController
 {
     return [UIViewController toplevelViewController];
 }
+#endif
 
 /// 空白や改行など表示されない文字を全て排除した文字列を生成する
 + (NSString*)removeWhiteSpace:(NSString*)str{

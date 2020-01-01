@@ -35,6 +35,7 @@
     return self;
 }
 
+#if TARGET_OS_WATCH == 0
 /// 自分の持つ情報を CoreData側 に書き込みます。
 - (BOOL)AssignToCoreData: (GlobalState*)coreDataState
 {
@@ -57,5 +58,6 @@
 //    return [globalData UpdateReadingPoint:content story:self.currentReadingStory];
     return false;
 }
+#endif
 
 @end

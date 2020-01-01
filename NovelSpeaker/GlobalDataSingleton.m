@@ -13,12 +13,16 @@
 #import "NSDataZlibExtension.h"
 #import "NSStringExtension.h"
 #import "NiftyUtility.h"
+#import "NSDataDetectEncodingExtension.h"
+#import "UriLoader.h"
+
+#if TARGET_OS_WATCH == 0
 #import "NovelSpeaker-Swift.h"
 #import "UIViewControllerExtension.h"
-#import "NSDataDetectEncodingExtension.h"
-#import "NovelSpeaker-Swift.h"
 #import "UIImageExtension.h"
-#import "UriLoader.h"
+#else
+#import "NovelSpeakerWatchApp-Bridging-Header.h"
+#endif
 
 #define APP_GROUP_USER_DEFAULTS_SUITE_NAME @"group.com.limuraproducts.novelspeaker"
 #define APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE @"URLDownloadQueue"
@@ -35,7 +39,9 @@
 //@synthesize managedObjectContext = _managedObjectContext;
 
 static GlobalDataSingleton* _singleton = nil;
+#if TARGET_OS_WATCH == 0
 static DummySoundLooper* dummySoundLooper = nil;
+#endif
 
 - (id)init
 {
@@ -71,6 +77,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     speechConfig.voiceIdentifier = [self GetVoiceIdentifier]; // これは現状では UserDefaults です。
     m_NiftySpeaker = [[NiftySpeaker alloc] initWithSpeechConfig:speechConfig];
 
+#if TARGET_OS_WATCH == 0
     [self audioSessionInit:NO];
     dummySoundLooper = [DummySoundLooper new];
     [dummySoundLooper setMediaFileForResource:@"Silent3sec" ofType:@"mp3"];
@@ -78,6 +85,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 
     // オーディオのルートが変わったよイベントを受け取るようにする
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeAudioSessionRoute:) name:AVAudioSessionRouteChangeNotification object:nil];
+#endif
     
     return self;
 }
@@ -129,6 +137,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [session setActive:isActive error:nil];
 }
 
+#if TARGET_OS_WATCH == 0
 - (void)audioSessionDidInterrupt:(NSNotification*)notification
 {
     if (notification == nil) {
@@ -151,7 +160,9 @@ static DummySoundLooper* dummySoundLooper = nil;
             break;
     }
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
 // 非公開インタフェースになりました。
 - (GlobalState*) GetCoreDataGlobalStateThreadUnsafe
@@ -185,7 +196,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return fetchResults[0];
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
 - (GlobalStateCacheData*) GetGlobalState
 {
@@ -198,7 +211,14 @@ static DummySoundLooper* dummySoundLooper = nil;
     }];
     return stateCache;
 }
+#else
+- (GlobalStateCacheData*)GetGlobalState
+{
+    return [GlobalStateCacheData new];
+}
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// GlobalState を更新します。
 - (BOOL)UpdateGlobalState:(GlobalStateCacheData*)globalState
 {
@@ -247,8 +267,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     [m_CoreDataObjectHolder save];
     return result;
 }
+#endif
 
-
+#if TARGET_OS_WATCH == 0
 /// CoreData で保存している NarouContent のうち、Ncode で検索した結果
 /// 得られた NovelContent を取得します。
 /// 登録がなければ nil を返します
@@ -280,7 +301,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return [fetchResults objectAtIndex:0];
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// CoreData で保存している NarouContent のうち、Ncode で検索した結果
 /// 得られた NovelContent を取得します。
 /// 登録がなければ nil を返します
@@ -301,6 +324,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return result;
 }
+#endif
 
 /*
 /// 指定されたNarouContentの情報を更新します。
@@ -333,12 +357,14 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
 */
 
+#if TARGET_OS_WATCH == 0
 /// 新しい NarouContent を生成して返します。
 - (NarouContent*) CreateNewNarouContentThreadUnsafe
 {
     NarouContent* content = [m_CoreDataObjectHolder CreateNewEntity:@"NarouContent"];
     return content;
 }
+#endif
 
 /// 保存されている NarouContent の数を取得します。
 - (NSUInteger) GetNarouContentCount
@@ -559,6 +585,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
  */
 
+#if TARGET_OS_WATCH == 0
 /// CoreData で保存している Story のうち、Ncode と chapter_no で検索した結果
 /// 得られた Story を取得します。
 /// 登録がなければ nil を返します
@@ -583,7 +610,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return fetchResults[0];
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// Story を検索します。(公開用method)
 - (StoryCacheData*) SearchStory:(NSString*)ncode chapter_no:(int)chapter_number
 {
@@ -598,6 +627,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }];
     return result;
 }
+#endif
 
 /// 指定された ncode の小説で、保存されている Story の chapter_no のみのリストを取得します(公開用method)
 - (NSArray*)GetAllStoryForNcodeThreadUnsafe:(NSString*)ncode
@@ -646,6 +676,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return result;
 }
 
+#if TARGET_OS_WATCH == 0
 /// Story を新しく生成します。必要な情報をすべて指定する必要があります
 - (Story*) CreateNewStoryThreadUnsafe:(NarouContent*)parentContent content:(NSString*)content chapter_number:(int)chapter_number;
 {
@@ -661,7 +692,9 @@ static DummySoundLooper* dummySoundLooper = nil;
 
     return story;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 指定されたStoryの情報を更新します。(dispatch_sync で囲っていない版)
 /// CoreData側に登録されていなければ新規に作成し、
 /// 既に登録済みであれば情報を更新します。
@@ -693,7 +726,9 @@ static DummySoundLooper* dummySoundLooper = nil;
 
     return result;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 指定されたStoryの情報を更新します。
 /// CoreData側に登録されていなければ新規に作成し、
 /// 既に登録済みであれば情報を更新します。
@@ -712,6 +747,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     
     return result;
 }
+#endif
 
 - (void)NarouContentListChangedAnnounce
 {
@@ -721,6 +757,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [notificationCenter postNotification:notification];
 }
 
+#if TARGET_OS_WATCH == 0
 /// 小説を一つ削除します
 - (BOOL)DeleteContent:(NarouContentCacheData*)content
 {
@@ -743,7 +780,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return result;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 章を一つ削除します
 - (BOOL)DeleteStory:(StoryCacheData *)story
 {
@@ -765,6 +804,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }];
     return result;
 }
+#endif
 
 /// 対象の小説でCoreDataに保存されている章の数を取得します。
 - (NSUInteger)CountContentChapter:(NarouContentCacheData*)content
@@ -782,6 +822,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return result;
 }
 
+#if TARGET_OS_WATCH == 0
 /// 最後に読んでいた小説を取得します
 - (NarouContentCacheData*)GetCurrentReadingContent
 {
@@ -795,7 +836,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return [self SearchNarouContentFromNcode:story.ncode];
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 小説で読んでいた章を取得します
 - (StoryCacheData*)GetReadingChapter:(NarouContentCacheData*)content
 {
@@ -814,7 +857,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     
     return nil;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 読み込み中の場所を指定された小説と章で更新します。
 - (BOOL)UpdateReadingPoint:(NarouContentCacheData*)content story:(StoryCacheData*)story
 {
@@ -857,7 +902,9 @@ static DummySoundLooper* dummySoundLooper = nil;
 
     return result;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 次の章を読み出します。
 /// 次の章がなければ nil を返します。
 - (StoryCacheData*)GetNextChapter:(StoryCacheData*)story
@@ -880,7 +927,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     }];
     return result;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 前の章を読み出します。
 /// 前の章がなければ nil を返します。
 - (StoryCacheData*)GetPreviousChapter:(StoryCacheData*)story
@@ -900,6 +949,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }];
     return result;
 }
+#endif
 
 /// Siri さんエンジンでの読み上げの rate から1秒間に読み上げられる文字数へ変換します。
 /// 当然、当てずっぽうの値です。
@@ -938,6 +988,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return [GlobalDataSingleton GuessSpeakLocationFromDulationWithConfig:[m_NiftySpeaker GetDefaultSpeechConfig] dulation:dulation];
 }
 
+#if TARGET_OS_WATCH == 0
 - (void)UpdatePlayingInfo:(StoryCacheData*)story
 {
     NSString* titleName = NSLocalizedString(@"GlobalDataSingleton_NoPlaing", @"再生していません");
@@ -970,6 +1021,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [songInfo setObject:artwork forKey:MPMediaItemPropertyArtwork];
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:songInfo];
 }
+#endif
 
 - (void)InsertDefaultSpeakPitchConfig
 {
@@ -1512,6 +1564,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [self UpdateSpeechModSettingMultiple:mutableArray];
 }
 
+#if TARGET_OS_WATCH == 0
 - (void)InsertDefaultSpeechWaitConfig
 {
     NSArray* currentSpeechWaitSettingList = [self GetAllSpeechWaitConfig];
@@ -1540,7 +1593,9 @@ static DummySoundLooper* dummySoundLooper = nil;
         [[GlobalDataSingleton GetInstance] AddSpeechWaitSetting:waitConfig];
     }
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 何も設定されていなければ標準のデータを追加します。
 - (void)InsertDefaultSetting
 {
@@ -1552,6 +1607,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     [self InsertDefaultSpeechWaitConfig];
 }
+#endif
 
 /// NiftySpeaker に現在の標準設定を登録します
 - (void)ApplyDefaultSpeechconfig:(NiftySpeaker*)niftySpeaker
@@ -1713,6 +1769,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return true;
 }
 
+#if TARGET_OS_WATCH == 0
 /// ncode の new flag を落とします。
 - (void)DropNewFlag:(NSString*)ncode
 {
@@ -1733,6 +1790,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     NSNotification* notification = [NSNotification notificationWithName:notificationName object:self];
     [notificationCenter postNotification:notification];
 }
+#endif
 
 /// &amp; を & とかに変換します
 - (NSString*)UnescapeHTMLEntities:(NSString*)str
@@ -1817,6 +1875,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return [m_NiftySpeaker GetCurrentReadingPoint];
 }
 
+#if TARGET_OS_WATCH == 0
 /// 読み上げ停止のタイマーを開始します
 - (void)StartMaxSpeechTimeInSecTimer
 {
@@ -1832,6 +1891,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     m_MaxSpeechTimeInSecTimer = [NSTimer scheduledTimerWithTimeInterval:[maxSpeechTimeInSec intValue] target:self selector:@selector(MaxSpeechTimeInSecEventHandler:) userInfo:nil repeats:NO];
     //[m_MaxSpeechTimeInSecTimer fire]; // fire すると時間経過に関係なくすぐにイベントが発生するっぽいです。単にタイマーを作った時点でもう時間計測は開始している模様
 }
+#endif
 
 /// 読み上げ停止のタイマーを停止します
 - (void)StopMaxSpeechTimeInSecTimer
@@ -1842,6 +1902,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     m_MaxSpeechTimeInSecTimer = nil;
 }
 
+#if TARGET_OS_WATCH == 0
 /// 読み上げ停止のタイマー呼び出しのイベントハンドラ
 - (void)MaxSpeechTimeInSecEventHandler:(NSTimer*)timer
 {
@@ -1860,6 +1921,7 @@ static DummySoundLooper* dummySoundLooper = nil;
         [[GlobalDataSingleton GetInstance] AddLogString:@"MaxSpeechTimeInSecEventHandler が呼び出されたけれど、m_MaxSpeechTimeInSecTimer が nil でした。"]; // NSLog
     }
 }
+#endif
 
 /*
 /// 読み上げを開始します。
@@ -1917,6 +1979,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return true;
 }
 
+#if TARGET_OS_WATCH == 0
 /// 現在の読み上げ位置で GlobalState を更新して保存します
 - (BOOL)SaveCurrentReadingPoint
 {
@@ -1938,6 +2001,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     //NSLog(@"save readLocation: %lu", (unsigned long)readingPointLocation);
     return [self UpdateReadingPoint:content story:globalState.currentReadingStory];
 }
+#endif
 
 /// 現在の読み上げ位置を少し戻します(ページの最初以上には戻しません)
 - (void)RewindCurrentReadingPoint:(NSUInteger)count
@@ -1959,6 +2023,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [m_NiftySpeaker UpdateCurrentReadingPoint:currentReadingPoint];
 }
 
+#if TARGET_OS_WATCH == 0
 /// 読み上げを停止します。
 - (BOOL)StopSpeech
 {
@@ -1974,6 +2039,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return result;
 }
+#endif
 
 /// 読み上げ時のイベントハンドラを追加します。
 - (BOOL)AddSpeakRangeDelegate:(id<SpeakRangeDelegate>)delegate
@@ -2265,6 +2331,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return result;
 }
 
+#if TARGET_OS_WATCH == 0
 /// 読み上げ時の「間」の設定を targetText指定 で読み出します(内部版)
 - (SpeechWaitConfig*)GetSpeechWaitSettingWithTargetTextThreadUnsafe:(NSString*)targetText
 {
@@ -2286,7 +2353,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return fetchResults[0];
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 読み上げ時の「間」の設定を追加します。(内部版)
 - (SpeechWaitConfig*) CreateNewSpeechWaitConfigThreadUnsafe:(SpeechWaitConfigCacheData*)data
 {
@@ -2295,6 +2364,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [m_CoreDataObjectHolder save];
     return config;
 }
+#endif
 
 /// 読み上げ時の「間」の設定を全て読み出します。
 - (NSArray*)GetAllSpeechWaitConfig
@@ -2312,6 +2382,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return fetchResults;
 }
 
+#if TARGET_OS_WATCH == 0
 /// 読み上げ時の「間」の設定を追加します。
 /// 既に同じ key (targetText) のものがあれば上書きになります。
 - (BOOL)AddSpeechWaitSetting:(SpeechWaitConfigCacheData*)waitConfigCacheData
@@ -2337,9 +2408,10 @@ static DummySoundLooper* dummySoundLooper = nil;
         m_isNeedReloadSpeakSetting = true;
     }
     return result;
-    
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 読み上げ時の「間」の設定を削除します。
 - (BOOL)DeleteSpeechWaitSetting:(NSString*)targetString
 {
@@ -2361,6 +2433,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return result;
 }
+#endif
 
 
 /// CoreData のマイグレーションが必要かどうかを確認します。
@@ -2607,6 +2680,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [userDefaults synchronize];
 }
 
+#if TARGET_OS_WATCH == 0
 /// 新しくユーザ定義の本を追加します。ncode に "_n" で始まるユーザ定義用の code が使われ、
 /// それ以外の項目は未設定のものが生成されます。
 /// 生成に失敗すると nil を返します。
@@ -2650,6 +2724,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     
     return content;
 }
+#endif
 
 /*
 /// 新しくユーザ定義の本を追加します。基本的には CreateNewUserBook と同じですが、NarouContent は保存され、さらに空の章を追加されている所が違います。
@@ -2765,6 +2840,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [userDefaults synchronize];
 }
 
+#if TARGET_OS_WATCH == 0
 // Background fetch イベントを処理します
 - (void)HandleBackgroundFetch:(UIApplication *)application
 performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler{
@@ -2909,6 +2985,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
      */
 }
+#endif
 
 // 設定されている読み上げに使う音声の identifier を取得します
 // XXX TODO: 本来なら core data 側でなんとかすべきです
@@ -2979,6 +3056,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return [userDefaults boolForKey:USER_DEFAULTS_BACKGROUND_NOVEL_FETCH_MODE];
 }
 
+#if TARGET_OS_WATCH == 0
 /// 新規小説の自動ダウンロード機能のON/OFFを切り替えます
 - (void)UpdateBackgroundNovelFetchMode:(BOOL)isEnabled{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
@@ -2995,6 +3073,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         });
     }
 }
+#endif
 
 /// AutoPagerize の SiteInfo を保存した日付を取得します
 - (NSDate*)GetAutoPagerizeCacheSavedDate {
@@ -3047,6 +3126,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [data writeToFile:filePath atomically:true];
 }
 
+#if TARGET_OS_WATCH == 0
 /// URLからダウンロードしたデータを deflate で圧縮して指定されたファイル名でキャッシュフォルダに上書き保存します
 /// これはブロッキングします
 - (BOOL)UpdateCachedAndZipedFileFromURL:(NSURL*)url fileName:(NSString*)fileName {
@@ -3060,6 +3140,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [self SaveDataToCacheFile:zipedData fileName:fileName];
     return true;
 }
+#endif
 
 /// キャッシュフォルダに保存してある deflate で圧縮されたファイルの中身を解凍し、NSData とてして取り出します。
 - (NSData*)GetCachedAndZipedFileData:(NSString*)fileName {
@@ -3078,6 +3159,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [self SaveDataToCacheFile:data fileName:CACHE_FILE_NAME_AUTOPAGERLIZE_SITEINFO];
 }
 
+#if TARGET_OS_WATCH == 0
 /// 内部に保存してある AutoPagerize の SiteInfo を最新版に更新します
 /// これはネットワークアクセスを行う動作になります
 - (BOOL)UpdateCachedAutoPagerizeSiteInfoData {
@@ -3092,7 +3174,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [self SaveAutoPagerizeSiteInfoData:zipedData];
     return true;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 内部に保存してある AutoPagerize の カスタムSiteInfo を最新版に更新します
 /// これはネットワークアクセスを行う動作になります
 - (BOOL)UpdateCachedCustomAutoPagerizeSiteInfoData {
@@ -3106,7 +3190,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [self SaveDataToCacheFile:zipedData fileName:CACHE_FILE_NAME_CUSTOM_AUTOPAGERLIZE_SITEINFO];
     return true;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 内部に保存してある AutoPagerize の SiteInfo を取り出します
 - (NSData*)GetCachedAutoPagerizeSiteInfoData {
     NSDate* lastUpdateDate = [self GetAutoPagerizeCacheSavedDate];
@@ -3130,7 +3216,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     return infratedSiteInfo;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 内部に保存してある AutoPagerize の カスタムSiteInfo を取り出します
 - (NSData*)GetCachedCustomAutoPagerizeSiteInfoData {
     NSDate* lastUpdateDate = [self GetCustomAutoPagerizeCacheSavedDate];
@@ -3149,6 +3237,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
     return siteInfo;
 }
+#endif
 
 /*
 /// http://...#cookie の形式の文字列を受け取り、ダウンロードqueueに追加します。
@@ -3269,6 +3358,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
  */
 
+#if TARGET_OS_WATCH == 0
 /// オーディオのルートが変わったよイベントのイベントハンドラ
 /// from: http://qiita.com/naonya3/items/433b3daaad75accf156b
 - (void)didChangeAudioSessionRoute:(NSNotification *)notification
@@ -3300,6 +3390,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         }
     }
 }
+#endif
 
 
 /// 小説内部での範囲選択時に出てくるメニューを「読み替え辞書に登録」だけにする(YES)か否(NO)かの設定値を取り出します
@@ -3411,6 +3502,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [self addStringQueueToNovelSpeakerAppGroupUserDefaults:APP_GROUP_USER_DEFAULTS_URL_DOWNLOAD_QUEUE text:[url absoluteString]];
 }
 
+#if TARGET_OS_WATCH == 0
 /// text を新規ユーザ小説として追加します
 - (void)AddNewContentForText:(NSString*)text
 {
@@ -3425,6 +3517,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [self UpdateStory:text chapter_number:1 parentContent:content];
     [self saveContext];
 }
+#endif
 
 /*
 /// AppGroup で指示されたqueueを処理します
@@ -3457,6 +3550,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
       }];
 }
 
+#if TARGET_OS_WATCH == 0
 /// BackgroundFetch を有効化します
 - (void)StartBackgroundFetch{
     NSTimeInterval hour = 60*60;
@@ -3466,12 +3560,15 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     UIApplication* application = [UIApplication sharedApplication];
     [application setMinimumBackgroundFetchInterval:hour];
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// BackgroundFetch を無効化します
 - (void)StopBackgroundFetch{
     UIApplication* application = [UIApplication sharedApplication];
     [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalNever];
 }
+#endif
 
 /// ルビがふられた物について、ルビの部分だけを読むか否かの設定を取得します
 - (BOOL)GetOverrideRubyIsEnabled {
@@ -3648,6 +3745,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     m_isNeedReloadSpeakSetting = true;
 }
 
+#if TARGET_OS_WATCH == 0
 /// 読み上げ時に無音の音を再生し続けるか否かを取得します
 - (BOOL)IsDummySilentSoundEnabled{
     return true;
@@ -3661,6 +3759,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults setBool:isEnabled forKey:USER_DEFAULTS_IS_DUMMY_SILENT_SOUND_ENABLED];
     [userDefaults synchronize];
 }
+#endif
 
 /// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを取得します
 - (BOOL)IsMixWithOthersEnabled{
@@ -3996,6 +4095,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 
+#if TARGET_OS_WATCH == 0
 // 本棚に入っている物をバックアップするためのJSONに変換する(ためのNSArray*にする)
 - (NSArray*)CreateBookselfBackupForJSONArray{
     NSArray* contentArray = [self GetAllNarouContent:NarouContentSortType_Ncode];
@@ -4987,7 +5087,9 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }];
     return result;
 }
+#endif
 
+#if TARGET_OS_WATCH == 0
 /// 指定されたファイルを自作小説として読み込む
 /// とりあえずはベタな plain text ファイルを一つの章として取り込みます
 - (BOOL)ImportNovelFromFile:(NSURL*)url{
@@ -5011,6 +5113,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [NiftyUtilitySwift checkTextImportConifirmToUserWithViewController:rootViewController title:title content:text hintString:nil];
     return true;
 }
+#endif
 
 /*
 - (BOOL)ImportNovelFromPDFFile:(NSURL*)url{
