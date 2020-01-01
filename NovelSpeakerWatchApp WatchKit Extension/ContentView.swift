@@ -11,15 +11,22 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var contentData = ContentData()
     var body: some View {
-        List {
+        ScrollView { VStack {
             if contentData.isiCloudEnabled {
                 ForEach(contentData.novelList, id: \.novelID) { novel in
-                    Text(novel.title)
+                    NavigationLink(destination:
+                        List {
+                            Text("Title:")
+                            Text(novel.title)
+                            Text("OK")
+                    }) {
+                        Text(novel.title)
+                    }
                 }
             }else{
                 Text(contentData.message)
             }
-        }
+        } }
     }
 }
 
@@ -39,6 +46,7 @@ class ContentData:ObservableObject {
         if let novelArray = RealmNovel.GetAllObjects(), novelArray.count > 1 {
             novelList = Array(novelArray)
             isiCloudEnabled = true
+            return
         }
         DispatchQueue.global(qos: .background).async {
             self.CheckiCloudSync()
