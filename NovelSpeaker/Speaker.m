@@ -65,7 +65,7 @@
     m_Voice = [AVSpeechSynthesisVoice voiceWithLanguage:language];
 }
 
-- (BOOL)SetVoiceWithIdentifier: (NSString*) voiceID
+- (BOOL)SetVoiceWithIdentifier:(NSString*) voiceID voiceLocale:(NSString*)voiceLocale
 {
     if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_9_0) {
         return false;
@@ -75,7 +75,11 @@
     }
     AVSpeechSynthesisVoice* voice = [AVSpeechSynthesisVoice voiceWithIdentifier:voiceID];
     if (voice == nil) {
-        NSLog(@"can not set voiceIdentifier: %@", voiceID);
+        NSLog(@"can not set voiceIdentifier: %@. try fallback to locale: %@", voiceID, voiceLocale);
+        voice = [AVSpeechSynthesisVoice voiceWithLanguage:voiceLocale];
+        if (voice == nil) {
+            NSLog(@"can not set voiceIdentifier on locale: %@.", voiceLocale);
+        }
         return false;
     }
     m_Voice = voice;

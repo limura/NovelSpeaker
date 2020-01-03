@@ -538,7 +538,7 @@ typedef enum {
     NSRange targetRange = NSMakeRange(location, [speakText length] - location);
     speakText = [speakText substringWithRange:targetRange];
     if (currentBlock.speechConfig.voiceIdentifier != nil) {
-        [m_Speaker SetVoiceWithIdentifier:currentBlock.speechConfig.voiceIdentifier];
+        [m_Speaker SetVoiceWithIdentifier:currentBlock.speechConfig.voiceIdentifier voiceLocale:currentBlock.speechConfig.voiceLocale];
     }
     [m_Speaker SetRate:currentBlock.speechConfig.rate];
     [m_Speaker SetPitch:currentBlock.speechConfig.pitch];

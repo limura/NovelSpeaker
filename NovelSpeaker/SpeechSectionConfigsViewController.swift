@@ -69,7 +69,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         speaker.stopSpeech()
         speaker.setPitch(speakerSetting.pitch)
         speaker.setRate(speakerSetting.rate)
-        speaker.setVoiceWithIdentifier(speakerSetting.voiceIdentifier)
+        speaker.setVoiceWithIdentifier(speakerSetting.voiceIdentifier, voiceLocale: speakerSetting.locale)
         speaker.speech(text)
     }
     func updateTitleCell(speechSectionConfig:RealmSpeechSectionConfig) {

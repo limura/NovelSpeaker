@@ -2490,7 +2490,7 @@ static DummySoundLooper* dummySoundLooper = nil;
         SpeechConfig* config = [self->m_NiftySpeaker GetDefaultSpeechConfig];
         [speaker SetPitch:config.pitch];
         [speaker SetRate:config.rate];
-        [speaker SetVoiceWithIdentifier:config.voiceIdentifier];
+        [speaker SetVoiceWithIdentifier:config.voiceIdentifier voiceLocale:config.voiceLocale];
         [speaker Speech:speechString];
     });
     return true;

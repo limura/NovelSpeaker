@@ -39,11 +39,11 @@ class SpeakerSettingsViewController: FormViewController {
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
-    func testSpeech(pitch:Float, rate: Float, identifier: String, text: String) {
+    func testSpeech(pitch:Float, rate: Float, identifier: String, locale: String, text: String) {
         speaker.stopSpeech()
         speaker.setPitch(pitch)
         speaker.setRate(rate)
-        speaker.setVoiceWithIdentifier(identifier)
+        speaker.setVoiceWithIdentifier(identifier, voiceLocale: locale)
         speaker.speech(text)
     }
     
@@ -251,7 +251,7 @@ class SpeakerSettingsViewController: FormViewController {
                 guard  let setting = RealmSpeakerSetting.SearchFrom(name: targetID) else {
                     return
                 }
-                self.testSpeech(pitch: setting.pitch, rate: setting.rate, identifier: setting.voiceIdentifier, text: self.testText)
+                self.testSpeech(pitch: setting.pitch, rate: setting.rate, identifier: setting.voiceIdentifier, locale: setting.locale, text: self.testText)
             }
         })
         if !isDefaultSpeakerSetting {

@@ -15,5 +15,6 @@
 @property (nonatomic) float pitch;
 @property (nonatomic) float rate;
 @property (nonatomic) NSTimeInterval beforeDelay;
+@property (nonatomic) NSString* voiceLocale;
 
 @end

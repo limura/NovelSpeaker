@@ -1738,6 +1738,7 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
             speechConfig.rate = self.rate
             speechConfig.beforeDelay = 0
             speechConfig.voiceIdentifier = self.voiceIdentifier
+            speechConfig.voiceLocale = self.locale
             return speechConfig
         }
     }
@@ -1764,7 +1765,7 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     func applyTo(speaker:Speaker) {
         speaker.setPitch(pitch)
         speaker.setRate(rate)
-        speaker.setVoiceWithIdentifier(voiceIdentifier)
+        speaker.setVoiceWithIdentifier(voiceIdentifier, voiceLocale:locale)
     }
     
     func delete(realm:Realm) {

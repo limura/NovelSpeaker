@@ -100,6 +100,8 @@
 		2133F2B21E80E175001A0BC5 /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A01E80E175001A0BC5 /* iTunesArtwork */; };
 		2133F2B31E80E175001A0BC5 /* iTunesArtwork@2x in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */; };
 		213515FC1F8CC06400F7AAD0 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 213515FB1F8CC06400F7AAD0 /* MessageUI.framework */; };
+		2138B14B23BEAE8200D8642C /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
+		2138B14E23BFD81500D8642C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2138B15023BFD81500D8642C /* InfoPlist.strings */; };
 		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
 		213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */; };
@@ -154,7 +156,7 @@
 		21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
 		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
 		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
-		2193093323BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 2193093223BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2193093323BBE56800035EF0 /* NovelSpeakerWatchApp.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 2193093223BBE56800035EF0 /* NovelSpeakerWatchApp.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2193093923BBE56800035EF0 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2193093723BBE56800035EF0 /* Interface.storyboard */; };
 		2193093B23BBE56A00035EF0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2193093A23BBE56A00035EF0 /* Assets.xcassets */; };
 		2193094223BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2193094123BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -302,7 +304,7 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				2193093323BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app in Embed Watch Content */,
+				2193093323BBE56800035EF0 /* NovelSpeakerWatchApp.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -411,6 +413,9 @@
 		2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */ = {isa = PBXFileReference; lastKnownFileType = file; path = "iTunesArtwork@2x"; sourceTree = "<group>"; };
 		213515FB1F8CC06400F7AAD0 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		213700F72DBD6BF3B9237996 /* Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig"; sourceTree = "<group>"; };
+		2138B15123BFD81B00D8642C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		2138B15223BFD82900D8642C /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		2138B15323BFD85800D8642C /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ja-JP"; path = "ja-JP.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		213A4DC41A63CF8B00E9EC13 /* SpeechWaitConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpeechWaitConfig.h; path = DataModelMapping/SpeechWaitConfig.h; sourceTree = "<group>"; };
 		213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SpeechWaitConfig.m; path = DataModelMapping/SpeechWaitConfig.m; sourceTree = "<group>"; };
 		213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitConfigCacheData.h; sourceTree = "<group>"; };
@@ -484,8 +489,8 @@
 		2191639919A38414003FF7FC /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
 		2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataObjectHolder.h; sourceTree = "<group>"; };
 		2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataObjectHolder.m; sourceTree = "<group>"; };
-		2193092F23BBE56800035EF0 /* NovelSpeakerWatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeakerWatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		2193093223BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NovelSpeakerWatchApp WatchKit App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2193092F23BBE56800035EF0 /* ことせかい.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ことせかい.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2193093223BBE56800035EF0 /* NovelSpeakerWatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeakerWatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2193093823BBE56800035EF0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		2193093A23BBE56A00035EF0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2193093C23BBE56A00035EF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -814,6 +819,7 @@
 				2193095023BBE56A00035EF0 /* ComplicationController.swift */,
 				2193095223BBE56B00035EF0 /* Assets.xcassets */,
 				2193095723BBE56B00035EF0 /* Info.plist */,
+				2138B15023BFD81500D8642C /* InfoPlist.strings */,
 				2193095823BBE56B00035EF0 /* PushNotificationPayload.apns */,
 				2193095423BBE56B00035EF0 /* Preview Content */,
 			);
@@ -989,8 +995,8 @@
 				21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */,
 				21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */,
 				2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */,
-				2193092F23BBE56800035EF0 /* NovelSpeakerWatchApp.app */,
-				2193093223BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app */,
+				2193092F23BBE56800035EF0 /* ことせかい.app */,
+				2193093223BBE56800035EF0 /* NovelSpeakerWatchApp.app */,
 				2193094123BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex */,
 			);
 			name = Products;
@@ -1176,7 +1182,7 @@
 			);
 			name = NovelSpeakerWatchApp;
 			productName = NovelSpeakerWatchApp;
-			productReference = 2193092F23BBE56800035EF0 /* NovelSpeakerWatchApp.app */;
+			productReference = 2193092F23BBE56800035EF0 /* ことせかい.app */;
 			productType = "com.apple.product-type.application.watchapp2-container";
 		};
 		2193093123BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */ = {
@@ -1195,7 +1201,7 @@
 			);
 			name = "NovelSpeakerWatchApp WatchKit App";
 			productName = "NovelSpeakerWatchApp WatchKit App";
-			productReference = 2193093223BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App.app */;
+			productReference = 2193093223BBE56800035EF0 /* NovelSpeakerWatchApp.app */;
 			productType = "com.apple.product-type.application.watchapp2";
 		};
 		2193094023BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */ = {
@@ -1376,6 +1382,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2193095623BBE56B00035EF0 /* Preview Assets.xcassets in Resources */,
+				2138B14E23BFD81500D8642C /* InfoPlist.strings in Resources */,
 				2193095323BBE56B00035EF0 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1684,6 +1691,7 @@
 				2124B39723BBFA10002EBC31 /* NarouContentCacheData.m in Sources */,
 				2193094723BBE56A00035EF0 /* ContentView.swift in Sources */,
 				2124B38723BBF220002EBC31 /* NiftyUtility.m in Sources */,
+				2138B14B23BEAE8200D8642C /* NSDataZlibExtension.m in Sources */,
 				2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */,
 				2124B38223BBED53002EBC31 /* NiftySpeaker.m in Sources */,
 				2124B39423BBF9FC002EBC31 /* SpeakPitchConfigCacheData.m in Sources */,
@@ -1890,6 +1898,16 @@
 			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
+		2138B15023BFD81500D8642C /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2138B15123BFD81B00D8642C /* en */,
+				2138B15223BFD82900D8642C /* ja */,
+				2138B15323BFD85800D8642C /* ja-JP */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
 		2193093723BBE56800035EF0 /* Interface.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -2029,7 +2047,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "ことせかい";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -2056,7 +2074,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "ことせかい";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -2082,7 +2100,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = NovelSpeakerWatchApp;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -2115,7 +2133,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = NovelSpeakerWatchApp;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -2148,7 +2166,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp.watchkitapp.watchkitextension;
-				PRODUCT_NAME = "${TARGET_NAME}";
+				PRODUCT_NAME = "NovelSpeakerWatchApp WatchKit Extension";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -2185,7 +2203,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.NovelSpeakerWatchApp.watchkitapp.watchkitextension;
-				PRODUCT_NAME = "${TARGET_NAME}";
+				PRODUCT_NAME = "NovelSpeakerWatchApp WatchKit Extension";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeaker/NovelSpeakerWatchApp-Bridging-Header.h";
