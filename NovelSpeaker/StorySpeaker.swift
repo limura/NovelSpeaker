@@ -504,7 +504,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 let newLocation = speaker.getCurrentReadingPoint().location
                 if story.readLocation != newLocation {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
-                        story.SetCurrentReadLocationWith(realm: realm, location: speaker.getCurrentReadingPoint().location)
+                        story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
                     }
                 }
             }

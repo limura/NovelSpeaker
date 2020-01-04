@@ -19,11 +19,17 @@ struct ContentView: View {
     var body: some View {
         VStack {
             if viewData.currentPage == .neediCloudSync {
-                CheckiCloudSyncView()
+                autoreleasepool {
+                    CheckiCloudSyncView()
+                }
             }else if viewData.currentPage == .bookshelf {
-                BookshelfView(novelList: self.viewData.novelList ?? [], viewData: self.viewData)
+                autoreleasepool {
+                    BookshelfView(novelList: self.viewData.novelList ?? [], viewData: self.viewData)
+                }
             }else {
-                StoryView(story: self.viewData.speechTargetStory ?? Story(), viewData: self.viewData)
+                autoreleasepool {
+                    StoryView(story: self.viewData.speechTargetStory ?? Story(), viewData: self.viewData)
+                }
             }
         }
     }

@@ -510,6 +510,10 @@ typedef enum {
 /// 読み上げ文の複数ブロックを m_MaxQueueBlockLength があふれるまで 読み上げqueue に突っ込みます。
 - (BOOL)EnqueueSpeechTextBlock
 {
+    // m_NowSpeechBlockSpeachRange.location で読み上げ開始位置を確認するけれど、
+    // 読み上げ中の読み上げ位置は m_NowSpeechBlockSpeachRange.length 側に確保しているとかなんとかで意味不明な状態になっているので
+    // この時点(読み上げ開始時点)で現在の読み上げ位置を読み出して、その位置として m_NowSpeechBlockSpeachRange.location を更新します。
+    [self UpdateCurrentReadingPoint:[self GetCurrentReadingPoint]];
     NSUInteger maxBlockCount = [m_SpeechBlockArray count];
     while (m_NowQueuedBlockIndex - m_NowSpeechBlockIndex < m_MaxQueueBlockLength &&
            m_NowQueuedBlockIndex < maxBlockCount) {
