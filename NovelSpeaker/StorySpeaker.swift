@@ -17,27 +17,12 @@ protocol StorySpeakerDeletgate {
     func storySpeakerStoryChanged(story:Story)
 }
 
-class AnnounceSpeakerHolder: NSObject {
-    let speaker = Speaker()
-    func Speech(text:String) {
-        autoreleasepool {
-            guard let defaultSpeechConfig = RealmGlobalState.GetInstance()?.defaultSpeaker else {
-                speaker.speech(text)
-                return
-            }
-            defaultSpeechConfig.applyTo(speaker: speaker)
-            speaker.speech(text)
-        }
-    }
-}
-
 class StorySpeaker: NSObject, SpeakRangeDelegate {
     static let shared = StorySpeaker()
     
     let speaker = NiftySpeaker()
     let dummySoundLooper = DummySoundLooper()
     let pageTurningSoundPlayer = DuplicateSoundPlayer()
-    let announceSpeakerHolder = AnnounceSpeakerHolder()
     var delegateArray = NSHashTable<AnyObject>.weakObjects()
 
     var storyID:String = ""
@@ -459,6 +444,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
     }
     
+    func AnnounceSpeech(text:String) {
+        speaker.stopSpeech()
+        speaker.announce(bySpeech: text)
+    }
+    
     func StartSpeech(withMaxSpeechTimeReset:Bool) {
         if (self.isMaxSpeechTimeExceeded && (!withMaxSpeechTimeReset)) {
             return
@@ -639,7 +629,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 self.isMaxSpeechTimeExceeded = true
                 self.StopSpeech()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                    self.announceSpeakerHolder.Speech(text: NSLocalizedString("GlobalDataSingleton_AnnounceStopedByTimer", comment: "最大連続再生時間を超えたので、読み上げを停止します。"))
+                    self.AnnounceSpeech(text: NSLocalizedString("GlobalDataSingleton_AnnounceStopedByTimer", comment: "最大連続再生時間を超えたので、読み上げを停止します。"))
                 })
             }
         }
@@ -847,7 +837,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         if event?.type == MPSeekCommandEventType.beginSeeking {
             print("MPCommandCenter: seekForwardEvent beginSeeking")
-            announceSpeakerHolder.Speech(text: NSLocalizedString("SpeechViewController_AnnounceSeekForward", comment: "早送り"))
+            AnnounceSpeech(text: NSLocalizedString("SpeechViewController_AnnounceSeekForward", comment: "早送り"))
             self.isSeeking = true
             Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { (timer) in
                 if !self.isSeeking {
@@ -869,7 +859,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             self.isSeeking = false
         }
         if event?.type == MPSeekCommandEventType.beginSeeking {
-            announceSpeakerHolder.Speech(text: NSLocalizedString("SpeechViewController_AnnounceSeekBackward", comment: "巻き戻し"))
+            AnnounceSpeech(text: NSLocalizedString("SpeechViewController_AnnounceSeekBackward", comment: "巻き戻し"))
             self.isSeeking = true
             Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { (timer) in
                 if !self.isSeeking {
@@ -961,7 +951,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 self.StartSpeech(withMaxSpeechTimeReset: false)
             }else{
                 self.StopSpeech()
-                self.announceSpeakerHolder.Speech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
+                self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
             }
         }
     }

@@ -405,6 +405,7 @@ typedef enum {
 {
     [self StopSpeech];
     m_NowQueuedBlockIndex = 0;
+    m_SpeechBlockArray = nil;
     m_SpeechBlockArray = [self ConvertTextToSpeechBlockArray:text];
     return true;
 }

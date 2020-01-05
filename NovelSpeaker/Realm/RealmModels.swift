@@ -1245,7 +1245,7 @@ extension RealmStory: CanWriteIsDeleted {
     case UserCreated = 2
 }
 
-@objc final class RealmNovel : Object {
+@objc final class RealmNovel : Object, Identifiable {
     @objc dynamic var novelID : String = RealmNovel.CreateUniqueID() // novelID は primary key です。
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var m_type : Int = NovelType.URL.rawValue
@@ -1264,6 +1264,8 @@ extension RealmStory: CanWriteIsDeleted {
     @objc dynamic var m_readingChapterStoryID : String = ""
     @objc dynamic var lastReadDate : Date = Date(timeIntervalSince1970: 0)
     let downloadDateArray = List<Date>()
+    
+    var id:String { get {return novelID} }
 
     var type : NovelType {
         get {

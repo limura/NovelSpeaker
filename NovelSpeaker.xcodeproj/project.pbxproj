@@ -104,6 +104,7 @@
 		2138B14E23BFD81500D8642C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2138B15023BFD81500D8642C /* InfoPlist.strings */; };
 		2138B15423C0804A00D8642C /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
 		2138B15523C0804D00D8642C /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
+		2138B15623C1FBF800D8642C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
 		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
 		213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */; };
@@ -1384,6 +1385,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2193095623BBE56B00035EF0 /* Preview Assets.xcassets in Resources */,
+				2138B15623C1FBF800D8642C /* Localizable.strings in Resources */,
 				2138B15423C0804A00D8642C /* nc48625.m4a in Resources */,
 				2138B15523C0804D00D8642C /* Silent3sec.mp3 in Resources */,
 				2138B14E23BFD81500D8642C /* InfoPlist.strings in Resources */,

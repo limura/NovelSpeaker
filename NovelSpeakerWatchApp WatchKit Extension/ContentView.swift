@@ -49,7 +49,25 @@ struct ContentView_Previews: PreviewProvider {
 
 struct CheckiCloudSyncView: View {
     var body: some View {
-        Text("iCloudからのデータ共有を待っています……")
+        List {
+            Text("iCloudからのデータ共有を待っています……")
+            Button<Text>(action: {
+                let synthe = AVSpeechSynthesizer()
+                let utt = AVSpeechUtterance(string: "こんにちは世界")
+                utt.voice = AVSpeechSynthesisVoice(language: "ja-JP")
+                synthe.speak(utt)
+            }) {
+                Text("speech")
+            }
+            Button<Text>(action: {
+                var story = Story()
+                story.content = "よく知られているように，テキストを改行する際の文字コードは環境に依存する．Windowsでは\r\n, Linuxでは\nとか．"
+                StorySpeaker.shared.SetStory(story: story)
+                StorySpeaker.shared.StartSpeech(withMaxSpeechTimeReset: false)
+            }) {
+                Text("speech(StorySpeaker)")
+            }
+        }
     }
 }
 
@@ -62,6 +80,15 @@ struct BookshelfView: View {
     }
     
     var body: some View {
+        List(bookshelfData) { (novel:RealmNovel) in
+            Button<Text>(action: {
+                guard let story = novel.readingChapter else { return }
+                self.viewData.ShowStory(story: story)
+            }) {
+                Text(novel.title)
+            }
+        }
+/*
         ScrollView { VStack {
             ForEach(self.bookshelfData.novelList, id: \.self) { novel in
                 Button<Text>(action: {
@@ -73,13 +100,32 @@ struct BookshelfView: View {
                 }
             }
         } }
+ */
     }
 }
 
+/*
 class BookshelfData:ObservableObject {
     @Published var novelList:[RealmNovel] = []
     init(novelList:[RealmNovel]) {
         self.novelList = novelList
+    }
+}*/
+
+class BookshelfData: ObservableObject, RandomAccessCollection {
+    typealias Element = RealmNovel
+    
+    @Published var novelList = [RealmNovel]()
+    
+    var startIndex: Int { novelList.startIndex }
+    var endIndex: Int { novelList.endIndex }
+    
+    init(novelList:[RealmNovel]) {
+        self.novelList = novelList
+    }
+    
+    subscript(position: Int) -> RealmNovel {
+        return novelList[position]
     }
 }
 

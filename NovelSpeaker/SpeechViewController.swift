@@ -373,7 +373,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
 
     func textViewScrollTo(readLocation:Int) {
-        guard let text = self.textView.text else {
+        guard let text = self.textView.text, readLocation >= 0 else {
             return
         }
         let textLength = text.count

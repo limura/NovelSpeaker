@@ -119,12 +119,14 @@
     //NSLog(@"#### AVSpeech Stop Immediate####");
         [m_Synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
     //}
-    
+
+    /*
     // なにやら読み上げが失敗するようになることがあるようなので、Stopのタイミングで AVSpeechSynthesizer object を作り直すようにします
     m_Synthesizer.delegate = nil; // 先に delegate は消しておきます
     m_Synthesizer = nil; // 走れ！走れ！AVSpeechSynthesizerのデストラクタよ走れ！
     m_Synthesizer = [AVSpeechSynthesizer new];
     m_Synthesizer.delegate = self;
+     */
     
     return true;
 }
