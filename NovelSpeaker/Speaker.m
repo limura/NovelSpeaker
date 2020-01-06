@@ -186,13 +186,15 @@
 	[self changeStatus:STSpeakingStatusStop];
 }
 
+// watchOS でこれを見えるようにした状態で AVSpeechSynthesizer に delegate を登録すると、読み上げ時にメモリを 30MBytes から 40MBytes 位持っていかれて、しかも開放してくれなくなるので封印します。(´・ω・`)
+#if TARGET_OS_IOS
 - (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer willSpeakRangeOfSpeechString:(NSRange)characterRange utterance:(AVSpeechUtterance *)utterance{
     if (self.speakRangeChangeDelegate == nil) {
         return;
     }
     [self.speakRangeChangeDelegate willSpeakRange:characterRange speakText:utterance.speechString];
-
 }
+#endif
 
 - (void)setAVAudioSessionInterruptionNotificationHandler
 {

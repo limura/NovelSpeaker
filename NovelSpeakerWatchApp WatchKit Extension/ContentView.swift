@@ -16,14 +16,23 @@ enum CurrentPageType {
 
 struct ContentView: View {
     @ObservedObject var viewData = ViewData()
+    var dummyStory = Story()
+
+    init() {
+        NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
+        dummyStory.content = String(repeating: "吾輩は猫である。「名前はまだない。」しかし、そのうち名前がつけられると信じている。ところであなたは宇宙人を信じるだろうか？", count: 10)
+    }
+
     var body: some View {
         VStack {
             if viewData.currentPage == .neediCloudSync {
                 autoreleasepool {
+                    //StoryView(story: self.dummyStory, viewData: self.viewData)
                     CheckiCloudSyncView()
                 }
             }else if viewData.currentPage == .bookshelf {
                 autoreleasepool {
+                    //StoryView(story: self.dummyStory, viewData: self.viewData)
                     BookshelfView(novelList: self.viewData.novelList ?? [], viewData: self.viewData)
                 }
             }else {
@@ -47,21 +56,41 @@ struct ContentView_Previews: PreviewProvider {
     }
 }
 
+class SpeechDelegateTest: NSObject, AVSpeechSynthesizerDelegate {
+    let synthe = AVSpeechSynthesizer()
+    override init() {
+        super.init()
+        synthe.delegate = self
+    }
+    
+    func speak(utt:AVSpeechUtterance) {
+        synthe.speak(utt)
+    }
+}
+
 struct CheckiCloudSyncView: View {
+    let speechText = String(repeating: "こんにちは世界", count: 1)
+    let delegateInstance = SpeechDelegateTest()
     var body: some View {
         List {
             Text("iCloudからのデータ共有を待っています……")
             Button<Text>(action: {
-                let synthe = AVSpeechSynthesizer()
-                let utt = AVSpeechUtterance(string: "こんにちは世界")
+                //let synthe = AVSpeechSynthesizer()
+                let utt = AVSpeechUtterance(string: self.speechText)
                 utt.voice = AVSpeechSynthesisVoice(language: "ja-JP")
-                synthe.speak(utt)
+                self.delegateInstance.speak(utt: utt)
             }) {
                 Text("speech")
             }
             Button<Text>(action: {
+                let speaker = Speaker()
+                speaker.speech(self.speechText)
+            }) {
+                Text("Speech(Speaker)")
+            }
+            Button<Text>(action: {
                 var story = Story()
-                story.content = "よく知られているように，テキストを改行する際の文字コードは環境に依存する．Windowsでは\r\n, Linuxでは\nとか．"
+                story.content = self.speechText
                 StorySpeaker.shared.SetStory(story: story)
                 StorySpeaker.shared.StartSpeech(withMaxSpeechTimeReset: false)
             }) {
@@ -193,11 +222,11 @@ class ViewData:ObservableObject {
     }
     
     func CheckiCloudSync() {
-        RealmUtil.CheckCloudDataIsValid { (result) in
-            guard result == true, let novels = RealmNovel.GetAllObjects() else { return }
-             DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            RealmUtil.CheckCloudDataIsValid { (result) in
+                guard result == true, let novels = RealmNovel.GetAllObjects() else { return }
                 self.ShowBookshelfView(novelList: Array(novels))
-             }
+            }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             if self.currentPage != CurrentPageType.neediCloudSync { return }
