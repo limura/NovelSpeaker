@@ -55,7 +55,6 @@
     utterance.voice = m_Voice;
     utterance.rate = m_Rate;
     utterance.pitchMultiplier = m_Pitch;
-    utterance.preUtteranceDelay = m_Interval;
     utterance.postUtteranceDelay = m_Interval;
     return utterance;
 }
