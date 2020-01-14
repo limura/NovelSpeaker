@@ -26,7 +26,8 @@
     m_Volume = 1.0f;
     m_AudioEngine = nil;
     m_AudioPlayerNode = nil;
-    m_AudioFormat = nil;
+    m_AudioFormat_After = nil;
+    m_AudioFormat_Before = nil;
     m_AudioConverter = nil;
     m_CurrentStatus = STSpeakingStatusNone;
 
@@ -54,22 +55,36 @@
     }
     utterance.voice = m_Voice;
     utterance.rate = m_Rate;
+    if (m_Volume > 0.0 && m_Volume < 1.0) {
+        utterance.volume = m_Volume;
+    }
     utterance.pitchMultiplier = m_Pitch;
     utterance.postUtteranceDelay = m_Interval;
     return utterance;
 }
 
 - (void)SetupAudioEngine:(AVAudioFormat*)format volume:(float)volume {
-    if (m_AudioFormat != nil
-        && m_AudioFormat.channelCount == format.channelCount
-        && m_AudioFormat.interleaved == format.interleaved
-        && fabs(m_AudioFormat.sampleRate - format.sampleRate) < DBL_EPSILON) {
+    // format を変更するための AVAudioConverter が用意されているならそのまま返します
+    if (m_AudioFormat_After != nil
+        && m_AudioFormat_Before != nil
+        && m_AudioFormat_Before.commonFormat == format.commonFormat
+        && m_AudioFormat_After.channelCount == format.channelCount
+        && m_AudioFormat_After.interleaved == format.interleaved
+        && fabs(m_AudioFormat_After.sampleRate - format.sampleRate) < DBL_EPSILON) {
         return;
     }
-    NSLog(@"create AudioEngine:\n\tchannelCount: %u -> %u\n\tinterleaved: %@ -> %@\n\tsampleRate: %f -> %f"
-          , m_AudioFormat.channelCount, format.channelCount
-          , m_AudioFormat.interleaved ? @"True" : @"False", format.interleaved ? @"True" : @"False"
-          , m_AudioFormat.sampleRate, format.sampleRate);
+    // format を変更する必要がなくて、AudioPlayerNode が用意されているならそのまま返します
+    if ((format.commonFormat == AVAudioPCMFormatFloat32
+        || format.commonFormat == AVAudioPCMFormatFloat64)
+        && m_AudioEngine != nil
+        && m_AudioPlayerNode != nil) {
+        return;
+    }
+    NSLog(@"create AudioEngine:\n\tchannelCount: %u -> %u\n\tinterleaved: %@ -> %@\n\tsampleRate: %f -> %f, volume: %f"
+          , m_AudioFormat_After.channelCount, format.channelCount
+          , m_AudioFormat_After.interleaved ? @"True" : @"False", format.interleaved ? @"True" : @"False"
+          , m_AudioFormat_After.sampleRate, format.sampleRate
+          , m_Volume);
     if (m_AudioEngine != nil) {
         [m_AudioEngine stop];
     }
@@ -77,11 +92,21 @@
     m_AudioPlayerNode = [AVAudioPlayerNode new];
     [m_AudioEngine attachNode:m_AudioPlayerNode];
     AVAudioMixerNode* mixerNode = [m_AudioEngine mainMixerNode];
-    AVAudioFormat* fromFormat = format;
-    AVAudioFormat* toFormat = [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatFloat32 sampleRate:fromFormat.sampleRate channels:fromFormat.channelCount interleaved:fromFormat.interleaved];
-    AVAudioConverter* converter = [[AVAudioConverter alloc] initFromFormat:fromFormat toFormat:toFormat];
-    m_AudioFormat = toFormat;
-    m_AudioConverter = converter;
+    // なんでだかわからないけれど、AVAudioEngine で playerNode と mixerNode を繋ぐ時、
+    // format として AVAudioPCMFormatInt16 を指定するとそこで落ちるため
+    // それらであれば AVAudioPCMFormatFloat32 に変換するように converter を用意します。
+    AVAudioFormat* toFormat = format;
+    if (format.commonFormat == AVAudioPCMFormatInt16
+        || format.commonFormat == AVAudioPCMFormatInt32) {
+        AVAudioFormat* fromFormat = format;
+        toFormat = [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatFloat32 sampleRate:fromFormat.sampleRate channels:fromFormat.channelCount interleaved:fromFormat.interleaved];
+        AVAudioConverter* converter = [[AVAudioConverter alloc] initFromFormat:fromFormat toFormat:toFormat];
+        m_AudioFormat_After = toFormat;
+        m_AudioFormat_Before = fromFormat;
+        m_AudioConverter = converter;
+    }else{
+        m_AudioConverter = nil;
+    }
     [m_AudioEngine connect:m_AudioPlayerNode to:mixerNode format:toFormat];
     [m_AudioPlayerNode setVolume:volume];
     [m_AudioEngine startAndReturnError:nil];
@@ -100,12 +125,18 @@
             if (pcmBuffer.frameLength <= 0) {
                 return;
             }
-            [self SetupAudioEngine:[pcmBuffer format] volume:m_Volume];
+            AVAudioFormat* format = [pcmBuffer format];
+            [self SetupAudioEngine:format volume:m_Volume];
             @autoreleasepool {
-                AVAudioPCMBuffer* newBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:m_AudioFormat frameCapacity:pcmBuffer.frameLength];
-                NSError* err;
-                [m_AudioConverter convertToBuffer:newBuffer fromBuffer:pcmBuffer error:&err];
-                [m_AudioPlayerNode scheduleBuffer:newBuffer completionHandler:nil];
+                AVAudioPCMBuffer* buffer = pcmBuffer;
+                if (m_AudioConverter != nil
+                    && format.commonFormat == m_AudioFormat_Before.commonFormat) {
+                    AVAudioPCMBuffer* newBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:m_AudioFormat_After frameCapacity:pcmBuffer.frameLength];
+                    NSError* err;
+                    [m_AudioConverter convertToBuffer:newBuffer fromBuffer:pcmBuffer error:&err];
+                    buffer = newBuffer;
+                }
+                [m_AudioPlayerNode scheduleBuffer:buffer completionHandler:nil];
             }
         }];
     } else {
@@ -173,6 +204,15 @@
 {
     m_Interval = interval;
 }
+
+/// 音声を読み上げる時の音量を指定します。
+/// 1.0以上の値を指定すると、iOS13以降又はwatchOS 6以降の機能を利用するため、
+/// それ以前のOSで1.0以上の値を指定しても無視され、1.0として扱われます。
+/// また、負の値を指定すると無視されます。
+- (void) SetVolume: (float) volume{
+    m_Volume = volume;
+}
+
 
 - (STSpeakingStatus) GetStatus
 {

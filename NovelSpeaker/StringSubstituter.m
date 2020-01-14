@@ -147,6 +147,7 @@
     result.speechConfig.beforeDelay = config.beforeDelay;
     result.speechConfig.pitch = config.pitch;
     result.speechConfig.rate = config.rate;
+    result.speechConfig.volume = config.volume;
     
     // 今まで読んできた中で書き換えの必要のない部分文字列
     NSMutableString* noConvString = [NSMutableString new];
