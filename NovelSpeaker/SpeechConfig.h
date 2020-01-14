@@ -14,6 +14,7 @@
 @property (nonatomic) NSString* voiceIdentifier;
 @property (nonatomic) float pitch;
 @property (nonatomic) float rate;
+@property (nonatomic) float volume;
 @property (nonatomic) NSTimeInterval beforeDelay;
 @property (nonatomic) NSString* voiceLocale;
 

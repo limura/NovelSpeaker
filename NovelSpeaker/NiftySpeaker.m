@@ -73,6 +73,7 @@ typedef enum {
     m_DefaultSpeechConfig.pitch = [globalState.defaultPitch floatValue];
     m_DefaultSpeechConfig.rate = [globalState.defaultRate floatValue];
     m_DefaultSpeechConfig.voiceIdentifier = [globalData GetVoiceIdentifier];
+    m_DefaultSpeechConfig.volume = [globalData GetDefaultVolume];
     m_DefaultSpeechConfig.beforeDelay = 0.0f;
     
     m_bIsSpeaking = false;
@@ -109,6 +110,7 @@ typedef enum {
     m_DefaultSpeechConfig.pitch = speechConfig.pitch;
     m_DefaultSpeechConfig.rate = speechConfig.rate;
     m_DefaultSpeechConfig.beforeDelay = speechConfig.beforeDelay;
+    m_DefaultSpeechConfig.volume = speechConfig.volume;
     m_DefaultSpeechConfig.voiceIdentifier = speechConfig.voiceIdentifier;
     
     m_bIsSpeaking = false;
@@ -150,6 +152,7 @@ typedef enum {
     result.speechConfig.beforeDelay = config.beforeDelay;
     result.speechConfig.pitch = config.pitch;
     result.speechConfig.rate = config.rate;
+    result.speechConfig.volume = config.volume;
     result.speechConfig.voiceIdentifier = config.voiceIdentifier;
     unsigned long p = 0;
     unsigned long displayTextLength = [displayText length];
@@ -222,6 +225,7 @@ typedef enum {
                 currentSetting.config = [SpeechConfig new];
                 currentSetting.config.pitch = m_DefaultSpeechConfig.pitch;
                 currentSetting.config.rate = m_DefaultSpeechConfig.pitch;
+                currentSetting.config.volume = m_DefaultSpeechConfig.volume;
                 currentSetting.config.beforeDelay = m_DefaultSpeechConfig.beforeDelay;
                 currentSetting.config.voiceIdentifier = m_DefaultSpeechConfig.voiceIdentifier;
                 currentSetting.type = 0;
@@ -261,6 +265,7 @@ typedef enum {
             startSetting.type &= ~SPEECH_SETTING_TYPE_TONE_CHANGE_OUT;
             startSetting.config.pitch = blockSeparator.speechConfig.pitch;
             startSetting.config.rate = blockSeparator.speechConfig.rate;
+            startSetting.config.volume = blockSeparator.speechConfig.volume;
             if(blockSeparator.speechConfig.voiceIdentifier != nil) {
                 startSetting.config.voiceIdentifier = blockSeparator.speechConfig.voiceIdentifier;
             }
@@ -280,6 +285,7 @@ typedef enum {
             endSetting.type &= ~SPEECH_SETTING_TYPE_TONE_CHANGE_IN;
             endSetting.config.pitch = blockSeparator.speechConfig.pitch;
             endSetting.config.rate = blockSeparator.speechConfig.rate;
+            endSetting.config.volume = blockSeparator.speechConfig.volume;
             [speechSettingMap setObject:endSetting forKey:endKey];
             //NSLog(@"set end: %lu -> delay: %.2f, pitch: %.2f, rate: %.2f", [endKey unsignedLongValue], endSetting.config.beforeDelay, endSetting.config.pitch, endSetting.config.rate);
             
@@ -328,6 +334,7 @@ typedef enum {
         nextConfig.beforeDelay = 0.0f;
         nextConfig.pitch = currentConfig.pitch;
         nextConfig.rate = currentConfig.rate;
+        nextConfig.volume = currentConfig.volume;
         nextConfig.voiceIdentifier = currentConfig.voiceIdentifier;
         
         delayTime = 0.0f;
@@ -358,6 +365,7 @@ typedef enum {
             SpeechConfig* tmpConfig = [SpeechConfig new];
             tmpConfig.rate = currentConfig.rate;
             tmpConfig.pitch = currentConfig.pitch;
+            tmpConfig.volume = currentConfig.volume;
             tmpConfig.beforeDelay = currentConfig.beforeDelay;
             tmpConfig.voiceIdentifier = currentConfig.voiceIdentifier;
             currentConfig = tmpConfig;
@@ -373,6 +381,7 @@ typedef enum {
             SpeechConfig* tmpConfig = [SpeechConfig new];
             tmpConfig.rate = config.rate;
             tmpConfig.pitch = config.pitch;
+            tmpConfig.volume = config.volume;
             tmpConfig.beforeDelay = delayTime;
             tmpConfig.voiceIdentifier = config.voiceIdentifier;
             config = tmpConfig;
@@ -387,10 +396,11 @@ typedef enum {
     {
         NSMutableString* logText = [NSMutableString new];
         for (SpeechBlock* block in speechBlockArray) {
-            [logText appendFormat:@"pitch: %f, rate: %f, delay: %f: %@\n",
+            [logText appendFormat:@"pitch: %f, rate: %f, delay: %f, volume: %f: %@\n",
              block.speechConfig.pitch,
              block.speechConfig.rate,
              block.speechConfig.beforeDelay,
+             block.speechConfig.volume,
              [block GetDisplayText]];
         }
         NSLog(@"%@", logText);
@@ -439,6 +449,7 @@ typedef enum {
         m_DefaultSpeechConfig = [SpeechConfig new];
         m_DefaultSpeechConfig.pitch = [globalState.defaultPitch floatValue];
         m_DefaultSpeechConfig.rate = [globalState.defaultRate floatValue];
+        m_DefaultSpeechConfig.volume = [globalData GetDefaultVolume];
         m_DefaultSpeechConfig.beforeDelay = 0.0f;
         m_DefaultSpeechConfig.voiceIdentifier = [globalData GetVoiceIdentifier];
         return true;
@@ -548,6 +559,7 @@ typedef enum {
     [m_Speaker SetRate:currentBlock.speechConfig.rate];
     [m_Speaker SetPitch:currentBlock.speechConfig.pitch];
     [m_Speaker SetDelay:currentBlock.speechConfig.beforeDelay];
+    [m_Speaker SetVolume:currentBlock.speechConfig.volume];
     //[m_Speaker Speech:speakText];
     NSString* dummySpeakText = speakText;
     if ([NiftyUtilitySwift IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled]) {

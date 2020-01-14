@@ -47,7 +47,8 @@ typedef enum {
     float m_Volume;
     AVAudioEngine* m_AudioEngine;
     AVAudioPlayerNode* m_AudioPlayerNode;
-    AVAudioFormat* m_AudioFormat;
+    AVAudioFormat* m_AudioFormat_After;
+    AVAudioFormat* m_AudioFormat_Before;
     AVAudioConverter* m_AudioConverter;
 }
 
@@ -78,6 +79,12 @@ typedef enum {
 /// 音声を読み上げるときの前から開ける時間を指定します
 /// この設定は次回以降の読み上げから有効になります
 - (void) SetDelay: (NSTimeInterval) interval;
+
+/// 音声を読み上げる時の音量を指定します。
+/// 1.0以上の値を指定すると、iOS13以降又はwatchOS 6以降の機能を利用するため、
+/// それ以前のOSで1.0以上の値を指定しても無視され、1.0として扱われます。
+/// また、負の値を指定すると無視されます。
+- (void) SetVolume: (float) volume;
 
 /// 現在の読み上げ状態を取得します
 - (STSpeakingStatus) GetStatus;

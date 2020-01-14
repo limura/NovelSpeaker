@@ -75,6 +75,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     speechConfig.rate = 1.0f;
     speechConfig.beforeDelay = 0.0f;
     speechConfig.voiceIdentifier = [self GetVoiceIdentifier]; // これは現状では UserDefaults です。
+    speechConfig.volume = [self GetDefaultVolume];
     m_NiftySpeaker = [[NiftySpeaker alloc] initWithSpeechConfig:speechConfig];
 
 #if TARGET_OS_WATCH == 0
@@ -1616,6 +1617,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     SpeechConfig* defaultSetting = [SpeechConfig new];
     defaultSetting.pitch = [globalState.defaultPitch floatValue];
     defaultSetting.rate = [globalState.defaultRate floatValue];
+    defaultSetting.volume = [self GetDefaultVolume];
     defaultSetting.beforeDelay = 0.0f;
     defaultSetting.voiceIdentifier = [self GetVoiceIdentifier];
     [niftySpeaker SetDefaultSpeechConfig:defaultSetting];
@@ -1632,6 +1634,7 @@ static DummySoundLooper* dummySoundLooper = nil;
             SpeechConfig* speechConfig = [SpeechConfig new];
             speechConfig.pitch = [pitchConfig.pitch floatValue];
             speechConfig.rate = [globalState.defaultRate floatValue];
+            speechConfig.volume = [self GetDefaultVolume];
             speechConfig.beforeDelay = 0.0f;
             speechConfig.voiceIdentifier = [self GetVoiceIdentifier];
             [niftySpeaker AddBlockStartSeparator:pitchConfig.startText endString:pitchConfig.endText speechConfig:speechConfig];
@@ -2642,6 +2645,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 #define USER_DEFAULTS_IS_OPEN_RECENT_NOVEL_IN_START_TIME @"IsOpenRecentNovelInStartTime"
 #define USER_DEFAULTS_IS_DISALLOW_CELLULAR_ACCESS @"IsDisallowCellarAccess"
 #define USER_DEFAULTS_IS_NEED_CONFIRM_DELETE_BOOK @"IsNeedConfirmDeleteBook"
+#define USER_DEFAULTS_DEFAULT_VOLUME @"DefaultVolume"
 #define USER_DEFAULTS_READING_COLOR_SETTING_FOR_BACKGROUND_COLOR @"ReadingColorSettingForBackgroundColor"
 #define USER_DEFAULTS_READING_COLOR_SETTING_FOR_FOREGROUND_COLOR @"ReadingColorSettingForForegroundColor"
 
@@ -3865,6 +3869,21 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
 }
 
+/// 読み上げ時の音量を取得します。
+- (float)GetDefaultVolume {
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_DEFAULT_VOLUME: [[NSNumber alloc] initWithFloat:1.0]}];
+    return [userDefaults floatForKey:USER_DEFAULTS_DEFAULT_VOLUME];
+}
+/// 読み上げ時の音量を設定します。
+- (void)SetDefaultVolume:(float)volume{
+    if (volume < 0.0) {
+        return;
+    }
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setFloat:volume forKey:USER_DEFAULTS_DEFAULT_VOLUME];
+    [userDefaults synchronize];
+}
 
 /// 小説を読む部分での表示色設定を読み出します(背景色分)。標準設定の場合は nil が返ります。
 - (UIColor*)GetReadingColorSettingForBackgroundColor{

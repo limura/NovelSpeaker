@@ -508,6 +508,11 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// 読み上げ時に他のアプリと共存して鳴らせるようにするか否かを設定します
 //- (void)SetIsDuckOthersEnabled:(BOOL)isEnabled;
 
+/// 読み上げ時の音量を取得します。
+- (float)GetDefaultVolume;
+/// 読み上げ時の音量を設定します。
+- (void)SetDefaultVolume:(float)volume;
+
 /// 利用許諾を読んだか否かを取得します
 - (BOOL)IsLicenseReaded;
 /// 利用許諾を読んだことにします
