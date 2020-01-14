@@ -23,8 +23,13 @@
     m_Rate = 0.7f;
     m_Pitch = 1.0f;
     m_Interval = 0.0;
+    m_Volume = 1.0f;
+    m_AudioEngine = nil;
+    m_AudioPlayerNode = nil;
+    m_AudioFormat = nil;
+    m_AudioConverter = nil;
     m_CurrentStatus = STSpeakingStatusNone;
-    
+
     m_Synthesizer.delegate = self;
 
     // AVAudioSessionInterruptionNotification のイベントハンドラを登録します
@@ -42,9 +47,7 @@
     }
 }
 
-- (BOOL) Speech: (NSString*) text
-{
-    // memo: AVSpeechSynthesizer:speakUtterance は再生queueに追加される形式のようなので、再生中でも追加してかまわないっぽいです
+- (AVSpeechUtterance*)CreateUtterance:(NSString*)text {
     AVSpeechUtterance *utterance = [AVSpeechUtterance speechUtteranceWithString:text];
     if (m_Voice == nil) {
         m_Voice = [AVSpeechSynthesisVoice voiceWithLanguage:@"ja-JP"];
@@ -53,7 +56,74 @@
     utterance.rate = m_Rate;
     utterance.pitchMultiplier = m_Pitch;
     utterance.postUtteranceDelay = m_Interval;
+    return utterance;
+}
+
+- (void)SetupAudioEngine:(AVAudioFormat*)format volume:(float)volume {
+    if (m_AudioFormat != nil
+        && m_AudioFormat.channelCount == format.channelCount
+        && m_AudioFormat.interleaved == format.interleaved
+        && fabs(m_AudioFormat.sampleRate - format.sampleRate) < DBL_EPSILON) {
+        return;
+    }
+    NSLog(@"create AudioEngine:\n\tchannelCount: %u -> %u\n\tinterleaved: %@ -> %@\n\tsampleRate: %f -> %f"
+          , m_AudioFormat.channelCount, format.channelCount
+          , m_AudioFormat.interleaved ? @"True" : @"False", format.interleaved ? @"True" : @"False"
+          , m_AudioFormat.sampleRate, format.sampleRate);
+    if (m_AudioEngine != nil) {
+        [m_AudioEngine stop];
+    }
+    m_AudioEngine = [AVAudioEngine new];
+    m_AudioPlayerNode = [AVAudioPlayerNode new];
+    [m_AudioEngine attachNode:m_AudioPlayerNode];
+    AVAudioMixerNode* mixerNode = [m_AudioEngine mainMixerNode];
+    AVAudioFormat* fromFormat = format;
+    AVAudioFormat* toFormat = [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatFloat32 sampleRate:fromFormat.sampleRate channels:fromFormat.channelCount interleaved:fromFormat.interleaved];
+    AVAudioConverter* converter = [[AVAudioConverter alloc] initFromFormat:fromFormat toFormat:toFormat];
+    m_AudioFormat = toFormat;
+    m_AudioConverter = converter;
+    [m_AudioEngine connect:m_AudioPlayerNode to:mixerNode format:toFormat];
+    [m_AudioPlayerNode setVolume:volume];
+    [m_AudioEngine startAndReturnError:nil];
+    [m_AudioPlayerNode play];
+}
+
+- (BOOL) SpeechToBuffer:(NSString*)text {
+    AVSpeechUtterance* utterance = [self CreateUtterance:text];
     
+    if (@available(iOS 13.0, *)) {
+        [m_Synthesizer writeUtterance:utterance toBufferCallback:^(AVAudioBuffer * _Nonnull buffer) {
+            if (![buffer isKindOfClass:[AVAudioPCMBuffer class]]) {
+                return;
+            }
+            AVAudioPCMBuffer* _Nonnull pcmBuffer = (AVAudioPCMBuffer* _Nonnull)buffer;
+            if (pcmBuffer.frameLength <= 0) {
+                return;
+            }
+            [self SetupAudioEngine:[pcmBuffer format] volume:m_Volume];
+            @autoreleasepool {
+                AVAudioPCMBuffer* newBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:m_AudioFormat frameCapacity:pcmBuffer.frameLength];
+                NSError* err;
+                [m_AudioConverter convertToBuffer:newBuffer fromBuffer:pcmBuffer error:&err];
+                [m_AudioPlayerNode scheduleBuffer:newBuffer completionHandler:nil];
+            }
+        }];
+    } else {
+        return [self Speech:text];
+    }
+    return TRUE;
+}
+
+- (BOOL) Speech: (NSString*) text
+{
+    if (@available(iOS 13.0, *)) {
+        if (m_Volume > 1.0) {
+            return [self SpeechToBuffer:text];
+        }
+    }
+    // memo: AVSpeechSynthesizer:speakUtterance は再生queueに追加される形式のようなので、再生中でも追加してかまわないっぽいです
+    AVSpeechUtterance* utterance = [self CreateUtterance:text];
+
     //NSLog(@"rate: %f, pitch: %f, post delay: %f text: %@", m_Rate, m_Pitch, m_Interval, text);
     [m_Synthesizer speakUtterance:utterance];
     

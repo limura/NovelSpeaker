@@ -44,6 +44,11 @@ typedef enum {
     float m_Rate;
     float m_Pitch;
     NSTimeInterval m_Interval;
+    float m_Volume;
+    AVAudioEngine* m_AudioEngine;
+    AVAudioPlayerNode* m_AudioPlayerNode;
+    AVAudioFormat* m_AudioFormat;
+    AVAudioConverter* m_AudioConverter;
 }
 
 /// delegate プロパティ
