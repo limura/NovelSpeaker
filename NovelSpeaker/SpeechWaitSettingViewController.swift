@@ -86,7 +86,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
         return section
         <<< LabelRow("TitleLabelRow-\(targetText)") {
             $0.title = speechWaitSetting.targetText.replacingOccurrences(of: "\n", with: NSLocalizedString("SpeechWaitConfigTableView_TargetText_Enter", comment: "<改行>"))
-            $0.value = "\(speechWaitSetting.delayTimeInSec)"
+            $0.value = "\(String(format: "%.1f", speechWaitSetting.delayTimeInSec))"
         }.onCellSelection({ (_, _) in
             if let isHide = self.hideCache[targetText] {
                 self.hideCache[targetText] = !isHide

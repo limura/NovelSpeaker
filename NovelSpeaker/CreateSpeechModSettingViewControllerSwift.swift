@@ -118,6 +118,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 // detailTextLabel だと書いている正規表現文字と被って表示されてしまうため、外します。
                 // cell.detailTextLabel?.text = row.validationErrors.first?.msg
             }
+            cell.textField.textAlignment = .left
             cell.textField.clearButtonMode = .always
         })
         <<< TextRow() {
@@ -139,6 +140,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             if !row.isValid {
                 cell.titleLabel?.textColor = .red
             }
+            cell.textField.textAlignment = .left
             cell.textField.clearButtonMode = .always
         })
         <<< SwitchRow() {
@@ -181,12 +183,14 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             }
             self.beforeTestText = value
         }).cellUpdate({ (cell, row) in
+            cell.textField.textAlignment = .left
             cell.textField.clearButtonMode = .always
         })
         <<< TextRow("AfterTestTextRow") {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AfterSampleTitle", comment: "読み替え後")
             $0.value = ""
             $0.cell.textField.isUserInteractionEnabled = false
+            $0.cell.textField.textAlignment = .left
         }
         <<< ButtonRow() {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TestButtonTitle", comment: "発音テスト")
