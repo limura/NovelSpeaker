@@ -21,6 +21,11 @@
 		210958EB1A0E1C5500E9171F /* NEW!.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958ED1A0E1C5500E9171F /* NEW!.png */; };
 		210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F01A0E1C5C00E9171F /* NEW!@2x.png */; };
 		210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F31A0E1C6100E9171F /* NEW!@3x.png */; };
+		210EFEDC23C80694007C3016 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
+		210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
+		210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */; };
+		210EFEE123C8A92D007C3016 /* SpeakerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* SpeakerSwift.swift */; };
+		210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
 		211BA5F819973BA500560842 /* SpeechBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5F719973BA500560842 /* SpeechBlock.m */; };
 		211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FA19973CFB00560842 /* SpeechConfig.m */; };
@@ -112,6 +117,8 @@
 		214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */; };
 		21429D84209F45E3001426F5 /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
 		21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21429D85209F45FD001426F5 /* AudioToolbox.framework */; };
+		214A400123D838C10034DFB2 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
+		214A400223D88EEC0034DFB2 /* SpeakerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* SpeakerSwift.swift */; };
 		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
@@ -347,6 +354,10 @@
 		210958F61A0E1C6A00E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!@3x.png"; sourceTree = "<group>"; };
 		210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 6.xcdatamodel"; sourceTree = "<group>"; };
 		210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryTextClassifier.swift; sourceTree = "<group>"; };
+		210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerTest.swift; sourceTree = "<group>"; };
+		210EFEE023C8A92D007C3016 /* SpeakerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerSwift.swift; sourceTree = "<group>"; };
+		210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBlockSpeaker.swift; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
 		211BA5F619973BA500560842 /* SpeechBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechBlock.h; sourceTree = "<group>"; };
 		211BA5F719973BA500560842 /* SpeechBlock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechBlock.m; sourceTree = "<group>"; };
@@ -708,6 +719,7 @@
 			children = (
 				217F6E1A1942F14B008E432E /* Speaker.h */,
 				217F6E1B1942F14B008E432E /* Speaker.m */,
+				210EFEE023C8A92D007C3016 /* SpeakerSwift.swift */,
 				211BA5F619973BA500560842 /* SpeechBlock.h */,
 				211BA5F719973BA500560842 /* SpeechBlock.m */,
 				211BA5F919973CFB00560842 /* SpeechConfig.h */,
@@ -717,6 +729,8 @@
 				217BD9E219CE72BB008A0D9D /* StringSubstituter.h */,
 				217BD9E319CE72BB008A0D9D /* StringSubstituter.m */,
 				2164800B2290F3F900A183DF /* StorySpeaker.swift */,
+				210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */,
+				210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */,
 			);
 			name = TextSpeech;
 			sourceTree = "<group>";
@@ -1086,6 +1100,7 @@
 				210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */,
 				21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */,
 				212323F422B7049E00543543 /* RealmTests.swift */,
+				210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -1692,6 +1707,8 @@
 				2124B39623BBFA0B002EBC31 /* StoryCacheData.m in Sources */,
 				2124B39E23BBFCDA002EBC31 /* SpeechModSetting.m in Sources */,
 				2124B39123BBF4C3002EBC31 /* GlobalDataSingleton.m in Sources */,
+				214A400223D88EEC0034DFB2 /* SpeakerSwift.swift in Sources */,
+				210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
 				2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */,
 				2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */,
 				2124B39723BBFA10002EBC31 /* NarouContentCacheData.m in Sources */,
@@ -1713,6 +1730,7 @@
 				2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */,
 				2193094F23BBE56A00035EF0 /* NotificationView.swift in Sources */,
 				2124B38923BBF249002EBC31 /* SpeechBlock.m in Sources */,
+				214A400123D838C10034DFB2 /* SpeechBlockSpeaker.swift in Sources */,
 				2124B39023BBF392002EBC31 /* NovelSpeakerNotificationTool.swift in Sources */,
 				2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */,
 				2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */,
@@ -1763,6 +1781,7 @@
 				21647FFC228CF44900A183DF /* UpdateLogViewController.swift in Sources */,
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
+				210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */,
 				21CA0FCB218DE6520059FACB /* DuplicateSoundPlayer.swift in Sources */,
 				21C372DD21DFC41600FB2D52 /* UIImageExtension.m in Sources */,
 				2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */,
@@ -1774,6 +1793,8 @@
 				21C759FA2287123500956B73 /* RealmModels.swift in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				21648002228F180E00A183DF /* BookShelfRATreeViewController.swift in Sources */,
+				210EFEE123C8A92D007C3016 /* SpeakerSwift.swift in Sources */,
+				210EFEDC23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
 				21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */,
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
 				21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */,
@@ -1817,6 +1838,7 @@
 				217E683E199A80A200C656AA /* NiftySpeakerTests.m in Sources */,
 				21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */,
 				2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */,
+				210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */,
 				212323F522B7049E00543543 /* RealmTests.swift in Sources */,
 				21AFDF36216CF977002F34D9 /* SpeechBlockTests.m in Sources */,
 				217BD9E619E038BE008A0D9D /* StringSubstituterTests.m in Sources */,

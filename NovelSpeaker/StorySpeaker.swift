@@ -17,10 +17,10 @@ protocol StorySpeakerDeletgate {
     func storySpeakerStoryChanged(story:Story)
 }
 
-class StorySpeaker: NSObject, SpeakRangeDelegate {
+class StorySpeaker: NSObject, SpeakRangeDelegate, SpeakRangeProtocol {
     static let shared = StorySpeaker()
     
-    let speaker = NiftySpeaker()
+    let speaker = SpeechBlockSpeaker()
     let dummySoundLooper = DummySoundLooper()
     let pageTurningSoundPlayer = DuplicateSoundPlayer()
     var delegateArray = NSHashTable<AnyObject>.weakObjects()
@@ -44,7 +44,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     private override init() {
         super.init()
         EnableMPRemoteCommandCenterEvents()
-        speaker.add(self)
+        speaker.delegate = self
         audioSessionInit(isActive: false)
         observeGlobalState()
         dummySoundLooper.setMediaFile(forResource: "Silent3sec", ofType: "mp3")
@@ -58,26 +58,23 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         unregistAudioNotifications()
     }
     
-    func ApplySpeakConfigs(novelID:String, content:String, location:Int) {
-        speaker.clearSpeakSettings()
-        applySpeechConfig(novelID: novelID, speaker: self.speaker)
-        observeSpeechConfig(novelID: novelID)
-        applySpeechModSetting(novelID: novelID, targetText: content, speaker: self.speaker)
-        observeSpeechModSetting(novelID: novelID)
-        speaker.setText(ForceOverrideHungSpeakString(text: content))
-        speaker.updateCurrentReadingPoint(NSRange(location: location, length: 0))
+    func ApplyStoryToSpeaker(story:Story) {
+        speaker.SetStory(story: story)
+        observeSpeechConfig(novelID: story.novelID)
+        observeSpeechModSetting(novelID: story.novelID)
+        speaker.SetSpeechLocation(location: story.readLocation)
         self.isNeedApplySpeechConfigs = false
     }
 
     // 読み上げに用いられる小説の章を設定します。
     // 読み上げが行われていた場合、読み上げは停止します。
     func SetStory(story:Story) {
-        speaker.stopSpeech()
+        speaker.StopSpeech()
         let storyID = story.storyID
         autoreleasepool {
             self.storyID = storyID
             updateReadDate(storyID: storyID)
-            ApplySpeakConfigs(novelID: story.novelID, content: story.content, location: story.readLocation)
+            ApplyStoryToSpeaker(story: story)
             //updatePlayngInfo(story: story)
             observeStory(storyID: self.storyID)
             observeBookmark(novelID: story.novelID)
@@ -126,7 +123,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                             self.DisableMPRemoteCommandCenterEvents()
                             self.EnableMPRemoteCommandCenterEvents()
                             autoreleasepool {
-                                if property.name == "isPlaybackDurationEnabled" && self.speaker.isSpeaking(), let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
+                                if property.name == "isPlaybackDurationEnabled" && self.speaker.isSpeaking, let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
                                     self.updatePlayngInfo(story: story)
                                 }
                             }
@@ -146,8 +143,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             switch change {
             case .change(let properties):
                 for property in properties {
-                    if property.name == "location", let newObj = property.newValue as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID), self.speaker.getCurrentReadingPoint().location != newObj.location {
-                        self.speaker.updateCurrentReadingPoint(NSRange(location: newObj.location, length: 0))
+                    if property.name == "location", let newObj = property.newValue as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID), self.speaker.currentLocation != newObj.location {
+                        self.speaker.SetSpeechLocation(location: newObj.location)
                     }
                 }
             default:
@@ -172,8 +169,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 case .change(let properties):
                     for property in properties {
                         if property.name == "contentArray", let newValue = property.newValue as? List<Data>, let story = RealmStoryBulk.BulkToStory(bulk: newValue, chapterNumber: chapterNumber) {
-                            if let text = self.speaker.getText(), text != story.content {
-                                self.speaker.setText(self.ForceOverrideHungSpeakString(text: story.content))
+                            let text = self.speaker.displayText
+                            if text != story.content {
+                                DispatchQueue.global(qos: .background).async {
+                                    self.speaker.SetStory(story: story)
+                                }
                             }
                         }
                     }
@@ -217,7 +217,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 // ヘッドフォンが抜けた
                 StopSpeech()
                 SkipBackward(length: 25)
-                self.readLocation = speaker.getCurrentReadingPoint().location
+                self.readLocation = speaker.currentLocation
             }
         }
     }
@@ -335,7 +335,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                         guard let modSettingArray = StringSubstituter.findRegexpSpeechModConfigs(targetText, pattern: setting.before, to: setting.after) else { continue }
                         for modSetting in modSettingArray {
                             guard let modSetting = modSetting as? SpeechModSetting else { continue }
-                            speaker.addSpeechModText(modSetting.beforeString, to: modSetting.afterString)
+                            speaker.addSpeechModText(modSetting.before, to: modSetting.after)
                         }
                     }else{
                         speaker.addSpeechModText(setting.before, to: setting.after)
@@ -445,8 +445,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func AnnounceSpeech(text:String) {
-        speaker.stopSpeech()
-        speaker.announce(bySpeech: text)
+        speaker.StopSpeech()
+        speaker.AnnounceText(text: text)
     }
     
     func StartSpeech(withMaxSpeechTimeReset:Bool) {
@@ -458,7 +458,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 updatePlayngInfo(story: story)
                 // story をここでも参照するので怪しくこの if の中に入れます
                 if self.isNeedApplySpeechConfigs {
-                    self.ApplySpeakConfigs(novelID: story.novelID, content: story.content, location: story.readLocation)
+                    self.ApplyStoryToSpeaker(story: story)
                 }
             }
         }
@@ -475,11 +475,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             startMaxSpeechInSecTimer()
         }
         dummySoundLooper.startPlay()
-        speaker.startSpeech()
+        speaker.StartSpeech()
     }
     // 読み上げを停止します。読み上げ位置が更新されます。
     func StopSpeech() {
-        speaker.stopSpeech()
+        speaker.StopSpeech()
         dummySoundLooper.stopPlay()
         stopMaxSpeechInSecTimer()
         let audioSession = AVAudioSession.sharedInstance()
@@ -491,7 +491,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
         autoreleasepool {
             if let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
-                let newLocation = speaker.getCurrentReadingPoint().location
+                let newLocation = speaker.currentLocation
                 if story.readLocation != newLocation {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
@@ -509,7 +509,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             guard let story = RealmStoryBulk.SearchStory(storyID: self.storyID) else {
                 return
             }
-            let readingPoint = speaker.getCurrentReadingPoint().location
+            let readingPoint = speaker.currentLocation
             let nextReadingPoint = readingPoint + length
             let contentLength = story.content.count
             if nextReadingPoint > contentLength {
@@ -519,14 +519,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                     }
                 }
             }else{
-                speaker.updateCurrentReadingPoint(NSRange(location: nextReadingPoint, length: 0))
+                speaker.SetSpeechLocation(location: nextReadingPoint)
             }
         }
     }
     func SkipBackward(length:Int){
-        let readingPoint = speaker.getCurrentReadingPoint().location
+        let readingPoint = speaker.currentLocation
         if readingPoint >= length {
-            speaker.updateCurrentReadingPoint(NSRange(location: readingPoint - length, length: 0))
+            speaker.SetSpeechLocation(location: readingPoint - length)
             return
         }
         var targetLength = length - readingPoint
@@ -787,7 +787,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     @objc func togglePlayPauseEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: togglePlayPauseEvent")
-        if speaker.isSpeaking() {
+        if speaker.isSpeaking {
             print("togglePlayPause stopSpeech")
             StopSpeech()
         }else{
@@ -900,6 +900,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             return .success
         }
     }
+
+    // MARK: SpeakRangeProtocl implement
+    func willSpeakRange(range:NSRange) {
+        for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
+            delegate.storySpeakerUpdateReadingPoint(storyID: self.storyID, range: range)
+        }
+    }
     
     // MARK: SpeakRangeDeleate implement
     func willSpeak(_ range: NSRange, speakText text: String!) {
@@ -909,7 +916,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func finishSpeak() {
-        self.readLocation = speaker.getCurrentReadingPoint().location
+        self.readLocation = speaker.currentLocation
         let repeatSpeechType:RepeatSpeechType? =
             autoreleasepool { () -> RepeatSpeechType? in
             return RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting?.repeatSpeechType
@@ -958,18 +965,18 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     
     var isPlayng : Bool {
         get {
-            return speaker.isSpeaking()
+            return speaker.isSpeaking
         }
     }
     
     var readLocation : Int {
         get {
-            return speaker.getCurrentReadingPoint().location
+            return speaker.currentLocation
         }
         set {
             autoreleasepool {
                 if let story = RealmStoryBulk.SearchStory(storyID: self.storyID), story.content.count > newValue && newValue >= 0 {
-                    speaker.updateCurrentReadingPoint(NSRange(location: newValue, length: 0))
+                    speaker.SetSpeechLocation(location: newValue)
                     if story.readLocation != newValue {
                         RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                             story.SetCurrentReadLocationWith(realm: realm, location: newValue)
