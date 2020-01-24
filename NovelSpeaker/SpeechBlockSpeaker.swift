@@ -16,8 +16,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
     var delegate:SpeakRangeProtocol? = nil
     var m_IsSpeaking = false
     // 現在のblockの先頭部分が全体のDisplayStringに対してどれだけのオフセットを持っているかの値
-    var currentBlockDisplayStringOffset = 0
+    var currentDisplayStringOffset = 0
     // Blockの先頭からの読み上げ開始位置のズレ(読み上げを開始する時はBlockの途中から始まる可能性があり、そのズレを表す)
+    var currentBlockDisplayOffset = 0
     var currentBlockSpeechOffset = 0
     // 現在の先頭からの読み上げ中の位置(willSpeakRange で知らされる location と同じ値)
     var currentSpeakingLocation = 0
@@ -104,10 +105,11 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
         guard currentSpeechBlockIndex < speechBlockArray.count else { return false }
         let currentBlock = speechBlockArray[currentSpeechBlockIndex]
         currentSpeechBlockIndex += 1
-        currentBlockDisplayStringOffset += currentBlock.displayText.count
+        currentDisplayStringOffset += currentBlock.displayText.count
+        currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
-        currentSpeakingLocation = currentBlockDisplayStringOffset
-        self.delegate?.willSpeakRange(range: NSMakeRange(currentBlockDisplayStringOffset, 1))
+        currentSpeakingLocation = currentDisplayStringOffset
+        self.delegate?.willSpeakRange(range: NSMakeRange(currentDisplayStringOffset, 1))
         // 次のblock を取り出せないなら終わったという意味で false を返す
         guard currentSpeechBlockIndex < speechBlockArray.count else { return false }
         return true
@@ -122,7 +124,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
         speaker.pitch = block.pitch
         speaker.rate = block.rate
         speaker.delay = block.delay
-        let speechText = block.GenerateSpeechTextFrom(displayLocation: currentBlockSpeechOffset)
+        let speechText = block.GenerateSpeechTextFrom(displayLocation: currentBlockDisplayOffset)
         speaker.Speech(text: speechText)
         //print("Speech: \(speechText)")
     }
@@ -130,17 +132,19 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
     func SetTextWitoutSettings(content:String) {
         let dummySpeaker = RealmSpeakerSetting()
         speechBlockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: [], moreSplitMinimumLetterCount: 99999, defaultSpeaker: SpeakerSetting(from: dummySpeaker), sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
-        currentBlockDisplayStringOffset = 0
+        currentDisplayStringOffset = 0
         currentSpeechBlockIndex = 0
         currentSpeakingLocation = 0
+        currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
     }
     
     func SetText(content:String, withMoreSplitTargets: [String], moreSplitMinimumLetterCount: Int, defaultSpeaker: SpeakerSetting, sectionConfigList: [SpeechSectionConfig], waitConfigList: [SpeechWaitConfig], sortedSpeechModArray: [SpeechModSetting]) {
         speechBlockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, sortedSpeechModArray: sortedSpeechModArray)
-        currentBlockDisplayStringOffset = 0
+        currentDisplayStringOffset = 0
         currentSpeechBlockIndex = 0
         currentSpeakingLocation = 0
+        currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
     }
     
@@ -152,15 +156,16 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
         // これらは [] で INT_MAX でも良いはずなのだけれど、
         // 。を _。 に変換されたりするような長さが変わる文字がいっぱいあると表示上の位置ズレが大きくなるため、
         // block をある程度分割しておく事にします。
-        let withMoreSplitTargets:[String] = ["。", "、", "\n\n"]
-        let moreSplitMinimumLetterCount:Int = 20
-        //let withMoreSplitTargets:[String] = []
-        //let moreSplitMinimumLetterCount:Int = Int(INT_MAX)
+        //let withMoreSplitTargets:[String] = ["。", "、", "\n\n"]
+        //let moreSplitMinimumLetterCount:Int = 20
+        let withMoreSplitTargets:[String] = []
+        let moreSplitMinimumLetterCount:Int = Int(INT_MAX)
         #endif
         speechBlockArray = StoryTextClassifier.CategorizeStoryText(story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
-        currentBlockDisplayStringOffset = 0
+        currentDisplayStringOffset = 0
         currentSpeechBlockIndex = 0
         currentSpeakingLocation = 0
+        currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
     }
     
@@ -179,18 +184,20 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
     func SetSpeechLocation(location:Int) -> Bool {
         var currentLocation = location
         if currentLocation < 0 { return false }
+        currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
         currentSpeechBlockIndex = 0
-        currentBlockDisplayStringOffset = 0
+        currentDisplayStringOffset = 0
         for speechBlock in speechBlockArray {
             let blockDisplayTextLength = speechBlock.displayText.count
             if currentLocation >= blockDisplayTextLength {
                 currentSpeechBlockIndex += 1
-                currentBlockDisplayStringOffset += blockDisplayTextLength
+                currentDisplayStringOffset += blockDisplayTextLength
                 currentLocation -= blockDisplayTextLength
                 continue
             }
-            currentBlockSpeechOffset = currentLocation
+            currentBlockDisplayOffset = currentLocation
+            currentBlockSpeechOffset = speechBlock.ComputeSpeechLocationFrom(displayLocation: currentLocation)
             currentSpeakingLocation = location
             return true
         }
@@ -200,7 +207,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
     func willSpeakRange(range: NSRange) {
         guard let delegate = delegate else { return }
         let block = speechBlockArray[currentSpeechBlockIndex]
-        let location = block.ComputeDisplaLocationFrom(speechLocation: range.location + currentBlockSpeechOffset) + currentBlockDisplayStringOffset
+        let location = block.ComputeDisplayLocationFrom(speechLocation: range.location + currentBlockSpeechOffset) + currentDisplayStringOffset
         currentSpeakingLocation = location
         delegate.willSpeakRange(range: NSMakeRange(location, range.length))
     }

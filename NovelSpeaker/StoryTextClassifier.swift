@@ -178,7 +178,7 @@ class CombinedSpeechBlock {
         }
         return speechText
     }
-    func ComputeDisplaLocationFrom(speechLocation:Int) -> Int {
+    func ComputeDisplayLocationFrom(speechLocation:Int) -> Int {
         var speechLocation = speechLocation
         var displayLocation = 0
         for block in speechBlockArray {
@@ -200,6 +200,30 @@ class CombinedSpeechBlock {
             break
         }
         return displayLocation
+    }
+    
+    func ComputeSpeechLocationFrom(displayLocation:Int) -> Int {
+        var displayLocation = displayLocation
+        var speechLocation = 0
+        for block in speechBlockArray {
+            let blockSpeechText:String
+            if let s = block.speechText {
+                blockSpeechText = s
+            }else{
+                blockSpeechText = block.displayText
+            }
+            if displayLocation > block.displayText.count {
+                displayLocation -= block.displayText.count
+                speechLocation += blockSpeechText.count
+                continue
+            }
+            let displayTextLength = Float(block.displayText.count)
+            let speechTextLength = Float(blockSpeechText.count)
+            let speechStartLocation = Int(Float(displayLocation) * speechTextLength / displayTextLength)
+            speechLocation += speechStartLocation
+            break
+        }
+        return speechLocation
     }
 }
 
