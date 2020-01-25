@@ -900,6 +900,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, SpeakRangeProtocol {
             return .success
         }
     }
+    
+    func GenerateSpeechTextFrom(displayTextRange:NSRange) -> String {
+        return speaker.GenerateSpeechTextFrom(displayTextRange: displayTextRange)
+    }
 
     // MARK: SpeakRangeProtocl implement
     func willSpeakRange(range:NSRange) {

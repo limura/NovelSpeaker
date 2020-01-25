@@ -178,6 +178,53 @@ class CombinedSpeechBlock {
         }
         return speechText
     }
+    func GenerateSpeechTextFrom(range:NSRange) -> String {
+        let startLocation = range.location
+        let endLocation = range.location + range.length
+        var location = 0
+        if startLocation < 0 || endLocation < startLocation { return "" }
+        var result = Substring()
+        for block in speechBlockArray {
+            let displayTextLength = block.displayText.count
+            if displayTextLength <= 0 { continue }
+            if location + displayTextLength <= startLocation || location > endLocation {
+                location += displayTextLength
+                continue
+            }
+            let speechText:String
+            if let s = block.speechText {
+                speechText = s
+            }else{
+                speechText = block.displayText
+            }
+            let speechTextLength = speechText.count
+            var blockStartLocation = startLocation - location
+            var blockEndLocation = endLocation - location
+            if blockStartLocation < 0 {
+                blockStartLocation = 0
+            }
+            if blockEndLocation > displayTextLength {
+                blockEndLocation = displayTextLength
+            }
+            print("location: \(location), blockStartLocation: \(blockStartLocation), blockEndLocation: \(blockEndLocation), displayTextLength: \(displayTextLength)")
+            // 最初の時と最後の時以外はそのまま全部突っ込む。
+            // これは、これ以後の計算は「だいたい合ってる」でしかなく、1文字分位は切り捨てられてしまったりするので
+            // 1文字だけの場合とか、1文字から3文字に変わってる時とかに計算がずれてしまうため。
+            if blockStartLocation > 0 || blockEndLocation < displayTextLength {
+                let speechStartLocation = Int(Float(blockStartLocation) * Float(speechTextLength) / Float(displayTextLength))
+                let speechEndLocation = Int(Float(blockEndLocation) * Float(speechTextLength) / Float(displayTextLength))
+                let speechStartIndex = speechText.index(speechText.startIndex, offsetBy: speechStartLocation)
+                let speechEndIndex = speechText.index(speechText.startIndex, offsetBy: speechEndLocation)
+                print(" --> speechText[\(speechStartLocation)..<\(speechEndLocation)]")
+                result += speechText[speechStartIndex..<speechEndIndex]
+            }else{
+                print(" --> hall text.")
+                result += speechText
+            }
+            location += displayTextLength
+        }
+        return String(result)
+    }
     func ComputeDisplayLocationFrom(speechLocation:Int) -> Int {
         var speechLocation = speechLocation
         var displayLocation = 0

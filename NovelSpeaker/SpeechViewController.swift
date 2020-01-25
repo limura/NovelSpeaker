@@ -360,16 +360,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
 
     @objc func checkSpeechText(sender: UIMenuItem) {
-        guard let range = self.textView.selectedTextRange, let text = self.textView.text(in: range), let storyID = self.storyID else { return }
-        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
-        let dummySpeaker = NiftySpeaker()
-        dummySpeaker.clearSpeakSettings()
-        self.storySpeaker.applySpeechConfig(novelID: novelID, speaker: dummySpeaker)
-        self.storySpeaker.applySpeechModSetting(novelID: novelID, targetText: text, speaker: dummySpeaker)
-        dummySpeaker.setText(text)
-        if let speechText = dummySpeaker.getSpeechText() {
-            NiftyUtilitySwift.EasyDialogLongMessageDialog(viewController: self, message: speechText)
-        }
+        guard let range = self.textView.selectedTextRange else { return }
+        let startOffset = self.textView.offset(from: self.textView.beginningOfDocument, to: range.start)
+        let endOffset = self.textView.offset(from: self.textView.beginningOfDocument, to: range.end)
+        let speechText = storySpeaker.GenerateSpeechTextFrom(displayTextRange: NSMakeRange(startOffset, endOffset - startOffset))
+        NiftyUtilitySwift.EasyDialogLongMessageDialog(viewController: self, message: speechText)
     }
 
     func textViewScrollTo(readLocation:Int) {

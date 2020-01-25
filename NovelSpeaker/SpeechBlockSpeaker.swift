@@ -98,6 +98,31 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
         return displayLocation
     }
     
+    func GenerateSpeechTextFrom(displayTextRange:NSRange) -> String {
+        var result = ""
+        var location = 0
+        for block in speechBlockArray {
+            let currentBlockDisplayTextLength = block.displayText.count
+            if currentBlockDisplayTextLength <= 0 { continue }
+            if location + currentBlockDisplayTextLength <= displayTextRange.location
+                || location > (displayTextRange.location + displayTextRange.length) {
+                location += currentBlockDisplayTextLength
+                continue
+            }
+            var currentBlockStartLocation = displayTextRange.location - location
+            var currentBlockEndLocation = displayTextRange.location + displayTextRange.length - location
+            if currentBlockStartLocation < 0 {
+                currentBlockStartLocation = 0
+            }
+            if currentBlockEndLocation > currentBlockDisplayTextLength {
+                currentBlockEndLocation = currentBlockDisplayTextLength
+            }
+            result += block.GenerateSpeechTextFrom(range: NSMakeRange(currentBlockStartLocation, currentBlockEndLocation - currentBlockStartLocation))
+            location += currentBlockDisplayTextLength
+        }
+        return result
+    }
+    
     // 読み上げ中のSpeechBlockを次の物を指すように変化させます。
     // 次の物がなければ false を返します。
     func setNextSpeechBlock() -> Bool {
