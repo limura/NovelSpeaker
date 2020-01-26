@@ -8,12 +8,12 @@
 
 import Foundation
 
-class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
-    let speaker = SpeakerSwift()
+class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
+    let speaker = Speaker()
     
     var speechBlockArray:[CombinedSpeechBlock] = []
     var currentSpeechBlockIndex:Int = 0
-    var delegate:SpeakRangeProtocol? = nil
+    var delegate:SpeakRangeDelegate? = nil
     var m_IsSpeaking = false
     // 現在のblockの先頭部分が全体のDisplayStringに対してどれだけのオフセットを持っているかの値
     var currentDisplayStringOffset = 0

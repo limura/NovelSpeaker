@@ -24,7 +24,7 @@
 		210EFEDC23C80694007C3016 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
 		210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */; };
 		210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */; };
-		210EFEE123C8A92D007C3016 /* SpeakerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* SpeakerSwift.swift */; };
+		210EFEE123C8A92D007C3016 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
 		210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
 		2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */; };
@@ -110,7 +110,7 @@
 		21429D84209F45E3001426F5 /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
 		21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21429D85209F45FD001426F5 /* AudioToolbox.framework */; };
 		214A400123D838C10034DFB2 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
-		214A400223D88EEC0034DFB2 /* SpeakerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* SpeakerSwift.swift */; };
+		214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
 		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
@@ -346,7 +346,7 @@
 		210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryTextClassifier.swift; sourceTree = "<group>"; };
 		210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerTest.swift; sourceTree = "<group>"; };
-		210EFEE023C8A92D007C3016 /* SpeakerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerSwift.swift; sourceTree = "<group>"; };
+		210EFEE023C8A92D007C3016 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBlockSpeaker.swift; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
 		211BA5F619973BA500560842 /* SpeechBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechBlock.h; sourceTree = "<group>"; };
@@ -709,7 +709,6 @@
 			children = (
 				217F6E1A1942F14B008E432E /* Speaker.h */,
 				217F6E1B1942F14B008E432E /* Speaker.m */,
-				210EFEE023C8A92D007C3016 /* SpeakerSwift.swift */,
 				211BA5F619973BA500560842 /* SpeechBlock.h */,
 				211BA5F719973BA500560842 /* SpeechBlock.m */,
 				211BA5F919973CFB00560842 /* SpeechConfig.h */,
@@ -718,9 +717,10 @@
 				211BA5FD199742CF00560842 /* NiftySpeaker.m */,
 				217BD9E219CE72BB008A0D9D /* StringSubstituter.h */,
 				217BD9E319CE72BB008A0D9D /* StringSubstituter.m */,
-				2164800B2290F3F900A183DF /* StorySpeaker.swift */,
+				210EFEE023C8A92D007C3016 /* Speaker.swift */,
 				210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */,
 				210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */,
+				2164800B2290F3F900A183DF /* StorySpeaker.swift */,
 			);
 			name = TextSpeech;
 			sourceTree = "<group>";
@@ -1696,7 +1696,7 @@
 				2124B39623BBFA0B002EBC31 /* StoryCacheData.m in Sources */,
 				2124B39E23BBFCDA002EBC31 /* SpeechModSetting.m in Sources */,
 				2124B39123BBF4C3002EBC31 /* GlobalDataSingleton.m in Sources */,
-				214A400223D88EEC0034DFB2 /* SpeakerSwift.swift in Sources */,
+				214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */,
 				210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
 				2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */,
 				2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */,
@@ -1776,7 +1776,7 @@
 				21C759FA2287123500956B73 /* RealmModels.swift in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				21648002228F180E00A183DF /* BookShelfRATreeViewController.swift in Sources */,
-				210EFEE123C8A92D007C3016 /* SpeakerSwift.swift in Sources */,
+				210EFEE123C8A92D007C3016 /* Speaker.swift in Sources */,
 				210EFEDC23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
 				21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */,
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,

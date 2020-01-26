@@ -17,7 +17,7 @@ protocol StorySpeakerDeletgate {
     func storySpeakerStoryChanged(story:Story)
 }
 
-class StorySpeaker: NSObject, SpeakRangeProtocol {
+class StorySpeaker: NSObject, SpeakRangeDelegate {
     static let shared = StorySpeaker()
     
     let speaker = SpeechBlockSpeaker()

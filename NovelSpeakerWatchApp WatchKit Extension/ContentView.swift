@@ -84,7 +84,7 @@ struct CheckiCloudSyncView: View {
                 Text("speech")
             }
             Button<Text>(action: {
-                let speaker = SpeakerSwift()
+                let speaker = Speaker()
                 speaker.Speech(text: self.speechText)
             }) {
                 Text("Speech(Speaker)")

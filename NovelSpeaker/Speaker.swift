@@ -9,18 +9,18 @@
 import Foundation
 import AVFoundation
 
-protocol SpeakRangeProtocol {
+protocol SpeakRangeDelegate {
     func willSpeakRange(range:NSRange)
     func finishSpeak()
 }
 
-class SpeakerSwift: NSObject, AVSpeechSynthesizerDelegate {
+class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     let synthesizer:AVSpeechSynthesizer = AVSpeechSynthesizer()
     var m_Voice:AVSpeechSynthesisVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
     var m_Pitch:Float = 1.0
     var m_Rate:Float = AVSpeechUtteranceDefaultSpeechRate
     var m_Delay:TimeInterval = 0.0
-    var m_Delegate:SpeakRangeProtocol? = nil
+    var m_Delegate:SpeakRangeDelegate? = nil
     
     override init() {
         super.init()
@@ -93,7 +93,7 @@ class SpeakerSwift: NSObject, AVSpeechSynthesizerDelegate {
         get { return m_Delay }
         set(value) { m_Delay = value }
     }
-    var delegate:SpeakRangeProtocol? {
+    var delegate:SpeakRangeDelegate? {
         get { return m_Delegate }
         set(value) { m_Delegate = value }
     }
