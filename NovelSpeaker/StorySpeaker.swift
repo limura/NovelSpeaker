@@ -17,7 +17,7 @@ protocol StorySpeakerDeletgate {
     func storySpeakerStoryChanged(story:Story)
 }
 
-class StorySpeaker: NSObject, SpeakRangeDelegate, SpeakRangeProtocol {
+class StorySpeaker: NSObject, SpeakRangeProtocol {
     static let shared = StorySpeaker()
     
     let speaker = SpeechBlockSpeaker()
@@ -241,18 +241,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, SpeakRangeProtocol {
         }
     }
     
-    func applySpeechConfig(novelID:String, speaker:NiftySpeaker) {
-        autoreleasepool {
-            guard let defaultSpeakerSetting = RealmNovel.SearchNovelFrom(novelID: novelID)?.defaultSpeaker else { return }
-            speaker.setDefaultSpeechConfig(defaultSpeakerSetting.speechConfig)
-            guard let speechSectionConfigArray = RealmSpeechSectionConfig.SearchSettingsFor(novelID: novelID) else { return }
-            for sectionConfig in speechSectionConfigArray {
-                guard let speakerSetting = sectionConfig.speaker else { continue }
-                speaker.addBlockStartSeparator(sectionConfig.startText, end: sectionConfig.endText, speechConfig: speakerSetting.speechConfig)
-            }
-        }
-    }
-    
     func observeSpeechConfig(novelID:String) {
         autoreleasepool {
             guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
@@ -273,88 +261,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, SpeakRangeProtocol {
                     }
                     for sectionConfig in sectionConfigArray {
                         if sectionConfig.targetNovelIDArray.count <= 0 || sectionConfig.targetNovelIDArray.contains(novelID) {
-                            self.isNeedApplySpeechConfigs = true
-                            return
-                        }
-                    }
-                case .error(_):
-                    break
-                }
-            })
-        }
-    }
-    
-    func applySpeechModSetting(novelID:String, targetText:String, speaker:NiftySpeaker) {
-        var isOverrideRubyEnabled = false
-        var notRubyCharactorStringArray = ""
-        var isIgnoreURIStringSpeechEnabled = false
-        
-        autoreleasepool {
-            if let globalState = RealmGlobalState.GetInstance() {
-                if let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
-                    isOverrideRubyEnabled = speechOverrideSetting.isOverrideRubyIsEnabled
-                    notRubyCharactorStringArray = speechOverrideSetting.notRubyCharactorStringArray
-                    isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
-                }
-            }
-        }
-        autoreleasepool {
-            if let settingArray = RealmSpeechOverrideSetting.SearchObjectFrom(novelID: novelID) {
-                for speechOverrideSetting in settingArray {
-                    isOverrideRubyEnabled = speechOverrideSetting.isOverrideRubyIsEnabled
-                    notRubyCharactorStringArray = speechOverrideSetting.notRubyCharactorStringArray
-                    isIgnoreURIStringSpeechEnabled = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
-                }
-            }
-        }
-
-        if isOverrideRubyEnabled {
-            if let rubyDictionary = StringSubstituter.findNarouRubyNotation(targetText, notRubyString: notRubyCharactorStringArray) {
-                for key in rubyDictionary.keys {
-                    if let from = key as? String, let to = rubyDictionary[key] as? String {
-                        speaker.addSpeechModText(from, to: to)
-                    }
-                }
-            }
-        }
-        
-        if isIgnoreURIStringSpeechEnabled {
-            if let uriStringArray = StringSubstituter.findURIStrings(targetText) {
-                for uriString in uriStringArray {
-                    if let uriString = uriString as? String {
-                        speaker.addSpeechModText(uriString, to: " ")
-                    }
-                }
-            }
-        }
-        
-        autoreleasepool {
-            if let speechModSettingArray = RealmSpeechModSetting.SearchSettingsFor(novelID: novelID) {
-                for setting in speechModSettingArray {
-                    if setting.isUseRegularExpression {
-                        guard let modSettingArray = StringSubstituter.findRegexpSpeechModConfigs(targetText, pattern: setting.before, to: setting.after) else { continue }
-                        for modSetting in modSettingArray {
-                            guard let modSetting = modSetting as? SpeechModSetting else { continue }
-                            speaker.addSpeechModText(modSetting.before, to: modSetting.after)
-                        }
-                    }else{
-                        speaker.addSpeechModText(setting.before, to: setting.after)
-                    }
-                }
-            }
-        }
-        autoreleasepool {
-            self.speechModSettingArrayObserverToken = RealmSpeechModSetting.GetAllObjects()?.observe({ (change) in
-                switch change {
-                case .initial(_):
-                    break
-                case .update(let speechModSettingArray, let deletions, _, _):
-                    if deletions.count > 0 {
-                        self.isNeedApplySpeechConfigs = true
-                        return
-                    }
-                    for setting in speechModSettingArray {
-                        if setting.targetNovelIDArray.count <= 0 || setting.targetNovelIDArray.contains(novelID) {
                             self.isNeedApplySpeechConfigs = true
                             return
                         }

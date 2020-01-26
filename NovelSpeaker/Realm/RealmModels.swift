@@ -1658,28 +1658,6 @@ extension RealmSpeechModSetting: CanWriteIsDeleted {
     @objc dynamic var delayTimeInSec : Float = 0.0
     @objc dynamic var createdDate = Date()
     
-    func ApplyDelaySettingTo(niftySpeaker:NiftySpeaker) {
-        realm?.refresh()
-        if realm?.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID)?.isSpeechWaitSettingUseExperimentalWait ?? false {
-            if delayTimeInSec <= 0.0 {
-                return
-            }
-            var waitString = "。"
-            var x : Float = 0.0
-            while x < delayTimeInSec {
-                x += 0.1
-                waitString += "_。"
-            }
-            if targetText.contains("\n") {
-                niftySpeaker.addSpeechModText(targetText.replacingOccurrences(of: "\n", with: "\r"), to: waitString)
-                niftySpeaker.addSpeechModText(targetText.replacingOccurrences(of: "\n", with: "\r\n"), to: waitString)
-            }
-            niftySpeaker.addSpeechModText(targetText, to: waitString)
-        }else{
-            niftySpeaker.addDelayBlockSeparator(targetText, delay: TimeInterval(delayTimeInSec))
-        }
-    }
-    
     static func GetAllObjects() -> Results<RealmSpeechWaitConfig>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
@@ -1733,18 +1711,6 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     @objc dynamic var locale : String = "ja-JP"
     @objc dynamic var createdDate = Date()
     
-    var speechConfig : SpeechConfig {
-        get {
-            let speechConfig = SpeechConfig()
-            speechConfig.pitch = self.pitch
-            speechConfig.rate = self.rate
-            speechConfig.beforeDelay = 0
-            speechConfig.voiceIdentifier = self.voiceIdentifier
-            speechConfig.voiceLocale = self.locale
-            return speechConfig
-        }
-    }
-    
     static func GetAllObjects() -> Results<RealmSpeakerSetting>? {
         return autoreleasepool {
             guard let realm = try? RealmUtil.GetRealm() else { return nil }
@@ -1762,12 +1728,6 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
             }
             return nil
         }
-    }
-    
-    func applyTo(speaker:Speaker) {
-        speaker.setPitch(pitch)
-        speaker.setRate(rate)
-        speaker.setVoiceWithIdentifier(voiceIdentifier, voiceLocale:locale)
     }
     
     func delete(realm:Realm) {

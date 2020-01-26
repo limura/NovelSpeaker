@@ -9,6 +9,7 @@
 import UIKit
 import Zip
 import RealmSwift
+import AVFoundation
 
 class NovelSpeakerUtility: NSObject {
     static let privacyPolicyURL = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/master/PrivacyPolicy.txt")

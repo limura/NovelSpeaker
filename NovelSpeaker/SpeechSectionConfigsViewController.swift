@@ -11,7 +11,7 @@ import Eureka
 import RealmSwift
 
 class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSelectorDelegate {
-    let speaker = Speaker()
+    let speaker = SpeechBlockSpeaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     var hideCache:[String:Bool] = [:]
     public var targetNovelID = RealmSpeechSectionConfig.anyTarget
@@ -66,11 +66,10 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
     }
 
     func testSpeech(text: String, speakerSetting:RealmSpeakerSetting) {
-        speaker.stopSpeech()
-        speaker.setPitch(speakerSetting.pitch)
-        speaker.setRate(speakerSetting.rate)
-        speaker.setVoiceWithIdentifier(speakerSetting.voiceIdentifier, voiceLocale: speakerSetting.locale)
-        speaker.speech(text)
+        speaker.StopSpeech()
+        let defaultSpeaker = SpeakerSetting(from: speakerSetting)
+        speaker.SetText(content: text, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
+        speaker.StartSpeech()
     }
     func updateTitleCell(speechSectionConfig:RealmSpeechSectionConfig) {
         let name = speechSectionConfig.name

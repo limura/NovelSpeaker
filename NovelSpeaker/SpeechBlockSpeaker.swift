@@ -172,7 +172,16 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeProtocol {
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
     }
-    
+
+    func SetText(content:String, withMoreSplitTargets: [String], moreSplitMinimumLetterCount: Int, defaultSpeaker: SpeakerSetting, sectionConfigList: [SpeechSectionConfig], waitConfigList: [SpeechWaitConfig], speechModArray: [SpeechModSetting]) {
+        speechBlockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, speechModArray: speechModArray)
+        currentDisplayStringOffset = 0
+        currentSpeechBlockIndex = 0
+        currentSpeakingLocation = 0
+        currentBlockDisplayOffset = 0
+        currentBlockSpeechOffset = 0
+    }
+
     func SetStory(story:Story) {
         #if os(watchOS)
         let withMoreSplitTargets:[String] = ["。", "、", ".", ",", ":", "\n\n"]

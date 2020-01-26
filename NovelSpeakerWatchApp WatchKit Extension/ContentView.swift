@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 enum CurrentPageType {
     case neediCloudSync
@@ -83,8 +84,8 @@ struct CheckiCloudSyncView: View {
                 Text("speech")
             }
             Button<Text>(action: {
-                let speaker = Speaker()
-                speaker.speech(self.speechText)
+                let speaker = SpeakerSwift()
+                speaker.Speech(text: self.speechText)
             }) {
                 Text("Speech(Speaker)")
             }

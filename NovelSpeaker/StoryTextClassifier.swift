@@ -8,6 +8,7 @@
 
 import Foundation
 import RealmSwift
+import AVFoundation
 
 struct SpeechBlockInfo {
     let speechText:String
@@ -206,7 +207,6 @@ class CombinedSpeechBlock {
             if blockEndLocation > displayTextLength {
                 blockEndLocation = displayTextLength
             }
-            print("location: \(location), blockStartLocation: \(blockStartLocation), blockEndLocation: \(blockEndLocation), displayTextLength: \(displayTextLength)")
             // 最初の時と最後の時以外はそのまま全部突っ込む。
             // これは、これ以後の計算は「だいたい合ってる」でしかなく、1文字分位は切り捨てられてしまったりするので
             // 1文字だけの場合とか、1文字から3文字に変わってる時とかに計算がずれてしまうため。
@@ -215,10 +215,8 @@ class CombinedSpeechBlock {
                 let speechEndLocation = Int(Float(blockEndLocation) * Float(speechTextLength) / Float(displayTextLength))
                 let speechStartIndex = speechText.index(speechText.startIndex, offsetBy: speechStartLocation)
                 let speechEndIndex = speechText.index(speechText.startIndex, offsetBy: speechEndLocation)
-                print(" --> speechText[\(speechStartLocation)..<\(speechEndLocation)]")
                 result += speechText[speechStartIndex..<speechEndIndex]
             }else{
-                print(" --> hall text.")
                 result += speechText
             }
             location += displayTextLength
@@ -707,7 +705,7 @@ class StoryTextClassifier {
         }else if let globalStateDefaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker {
             defaultSpeaker = globalStateDefaultSpeaker
         }else{
-            return []
+            defaultSpeaker = RealmSpeakerSetting()
         }
         
         let sectionConfigList:[SpeechSectionConfig]
@@ -738,69 +736,73 @@ class StoryTextClassifier {
         // 正規表現周りでゴニョゴニョする奴や、
         // URLを読まないようにするなどといった動的に読み替え辞書を生成するのはここでやります。
         if let modSettingListFromSetting = RealmSpeechModSetting.SearchSettingsFor(novelID: story.novelID)?.map({ SpeechModSetting(from: $0) }) {
-            var modSettingList:[SpeechModSetting] = []
-            modSettingList.append(contentsOf: modSettingListFromSetting)
-
-            var isOverrideRubyEnabled = false
-            var notRubyCharactorStringArray = ""
-            var isIgnoreURIStringSpeechEnabled = false
-            if let globalState = RealmGlobalState.GetInstance() {
-                if globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled == true {
-                    let modSetting = SpeechModSetting(
-                        before: "\\s+",
-                        after: "α",
-                        isUseRegularExpression: true)
-                    modSettingList.append(modSetting)
-                }
-                if let defaultSpeechOverrideSetting = globalState.defaultSpeechOverrideSetting {
-                    isOverrideRubyEnabled = defaultSpeechOverrideSetting.isOverrideRubyIsEnabled
-                    notRubyCharactorStringArray = defaultSpeechOverrideSetting.notRubyCharactorStringArray
-                    isIgnoreURIStringSpeechEnabled = defaultSpeechOverrideSetting.isIgnoreURIStringSpeechEnabled
-                }
-            }
-            if let overrideSettingArray = RealmSpeechOverrideSetting.SearchObjectFrom(novelID: story.novelID) {
-                for overrideSetting in overrideSettingArray {
-                    isOverrideRubyEnabled = overrideSetting.isOverrideRubyIsEnabled
-                    notRubyCharactorStringArray = overrideSetting.notRubyCharactorStringArray
-                    isIgnoreURIStringSpeechEnabled = overrideSetting.isIgnoreURIStringSpeechEnabled
-                }
-            }
-            if isIgnoreURIStringSpeechEnabled {
-                let modSetting = SpeechModSetting(
-                    before: "[a-z][0-9a-z-+.]*:(//((%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:])*@)?(\\[(::(ffff:([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}|(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,5})?)|([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,4})?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,3})?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,2})?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3}))?)?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::([0-9a-f]|[1-9a-f][0-9a-f]{1,3})?|(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){3})))))|v[0-9a-f]\\.([0-9a-z-._~!$&'()*+,;=:])+)\\]|(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=])*)(:[1-9][0-9]*)?)?(/(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:@])*)*(\\?(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:@/?])*)?(#(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:@/?])*)?",
-                    after: "",
-                    isUseRegularExpression: true)
-                modSettingList.append(modSetting)
-            }
-            if isOverrideRubyEnabled {
-                let rubySettingArray = GenerateRubyModString(text: story.content, notRubyString: notRubyCharactorStringArray)
-                modSettingList.append(contentsOf: rubySettingArray)
-            }
-            
-            var beforeHit:[String:Bool] = [:]
-            for modSetting in modSettingList {
-                if modSetting.isUseRegularExpression {
-                    let content = story.content
-                    if let regexp = try? NSRegularExpression(pattern: modSetting.before, options: []) {
-                        regexp.enumerateMatches(in: content, options: [], range: NSMakeRange(0, content.count)) { (result, flags, stop) in
-                            guard let result = result, let contentRange = Range(result.range, in: content) else { return }
-                            let before = String(content[contentRange])
-                            if beforeHit[before] == true { return }
-                            let after = regexp.stringByReplacingMatches(in: before, options: [], range: NSMakeRange(0, before.count), withTemplate: modSetting.after)
-                            let setting = SpeechModSetting(before: before, after: after, isUseRegularExpression: false)
-                            speechModSettingList.append(setting)
-                            beforeHit[before] = true
-                        }
-                    }
-                }else{
-                    speechModSettingList.append(modSetting)
-                }
-            }
-            speechModSettingList.append(contentsOf: modSettingList)
+            speechModSettingList.append(contentsOf: modSettingListFromSetting)
         }
         
-        let sortedSpeechModArray = UniqSpeechModArray(speechModArray: SpeechModArraySort(speechModArray: speechModSettingList))
+        var isOverrideRubyEnabled = false
+        var notRubyCharactorStringArray = ""
+        var isIgnoreURIStringSpeechEnabled = false
+        if let globalState = RealmGlobalState.GetInstance() {
+            if globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled == true {
+                let modSetting = SpeechModSetting(
+                    before: "\\s+",
+                    after: "α",
+                    isUseRegularExpression: true)
+                speechModSettingList.append(modSetting)
+            }
+            if let defaultSpeechOverrideSetting = globalState.defaultSpeechOverrideSetting {
+                isOverrideRubyEnabled = defaultSpeechOverrideSetting.isOverrideRubyIsEnabled
+                notRubyCharactorStringArray = defaultSpeechOverrideSetting.notRubyCharactorStringArray
+                isIgnoreURIStringSpeechEnabled = defaultSpeechOverrideSetting.isIgnoreURIStringSpeechEnabled
+            }
+        }
+        if let overrideSettingArray = RealmSpeechOverrideSetting.SearchObjectFrom(novelID: story.novelID) {
+            for overrideSetting in overrideSettingArray {
+                isOverrideRubyEnabled = overrideSetting.isOverrideRubyIsEnabled
+                notRubyCharactorStringArray = overrideSetting.notRubyCharactorStringArray
+                isIgnoreURIStringSpeechEnabled = overrideSetting.isIgnoreURIStringSpeechEnabled
+            }
+        }
+        if isIgnoreURIStringSpeechEnabled {
+            let modSetting = SpeechModSetting(
+                before: "[a-z][0-9a-z-+.]*:(//((%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:])*@)?(\\[(::(ffff:([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}|(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,5})?)|([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,4})?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,3})?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){0,2})?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::(([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3}))?)?|:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})(::([0-9a-f]|[1-9a-f][0-9a-f]{1,3})?|(:([0-9a-f]|[1-9a-f][0-9a-f]{1,3})){3})))))|v[0-9a-f]\\.([0-9a-z-._~!$&'()*+,;=:])+)\\]|(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=])*)(:[1-9][0-9]*)?)?(/(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:@])*)*(\\?(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:@/?])*)?(#(%[0-9a-f][0-9a-f]|[0-9a-z-._~!$&'()*+,;=:@/?])*)?",
+                after: "",
+                isUseRegularExpression: true)
+            speechModSettingList.append(modSetting)
+        }
+        if isOverrideRubyEnabled {
+            let rubySettingArray = GenerateRubyModString(text: story.content, notRubyString: notRubyCharactorStringArray)
+            speechModSettingList.append(contentsOf: rubySettingArray)
+        }
         
-        return CategorizeStoryText(content: story.content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: SpeakerSetting(from: defaultSpeaker), sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, sortedSpeechModArray: sortedSpeechModArray)
+        return CategorizeStoryText(content: story.content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: SpeakerSetting(from: defaultSpeaker), sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, speechModArray: speechModSettingList)
+    }
+    
+    // speechModArray の正規表現周りを計算して単なる読み替え設定にして、
+    // 読み替え前の文字列長でソートされた状態にする部分だけを別関数としておきます
+    static func CategorizeStoryText(content:String, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, defaultSpeaker:SpeakerSetting, sectionConfigList:[SpeechSectionConfig], waitConfigList:[SpeechWaitConfig], speechModArray:[SpeechModSetting]) -> [CombinedSpeechBlock] {
+        
+        var speechModSettingList:[SpeechModSetting] = []
+        var beforeHit:[String:Bool] = [:]
+        for modSetting in speechModArray {
+            if modSetting.isUseRegularExpression {
+                if let regexp = try? NSRegularExpression(pattern: modSetting.before, options: []) {
+                    regexp.enumerateMatches(in: content, options: [], range: NSMakeRange(0, content.count)) { (result, flags, stop) in
+                        guard let result = result, let contentRange = Range(result.range, in: content) else { return }
+                        let before = String(content[contentRange])
+                        if beforeHit[before] == true { return }
+                        let after = regexp.stringByReplacingMatches(in: before, options: [], range: NSMakeRange(0, before.count), withTemplate: modSetting.after)
+                        let setting = SpeechModSetting(before: before, after: after, isUseRegularExpression: false)
+                        speechModSettingList.append(setting)
+                        beforeHit[before] = true
+                    }
+                }
+            }else{
+                speechModSettingList.append(modSetting)
+            }
+        }
+        let sortedSpeechModArray = UniqSpeechModArray(speechModArray: SpeechModArraySort(speechModArray: speechModSettingList))
+
+        return CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, sortedSpeechModArray: sortedSpeechModArray)
     }
 }

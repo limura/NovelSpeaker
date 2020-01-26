@@ -12,7 +12,7 @@ import Eureka
 class SpeechWaitSettingViewControllerSwift: FormViewController {
     final let TestTextAreaTag = "TestTextAreaTag"
     var testText:String = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
-    let speaker = NiftySpeaker()
+    let speaker = SpeechBlockSpeaker()
     var hideCache:[String:Bool] = [:]
 
     func testSpeech(text: String, delaySetting:RealmSpeechWaitConfig) {
@@ -25,14 +25,11 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                 print("can not get defaultSpeakerSetting")
                 return
             }
-            
-            speaker.stopSpeech()
-            speaker.clearSpeakSettings()
-            speaker.setDefaultSpeechConfig(speakerSetting.speechConfig)
-            delaySetting.ApplyDelaySettingTo(niftySpeaker: speaker)
-            speaker.setText(text)
-            speaker.updateCurrentReadingPoint(NSRange(location: 0, length: 0))
-            speaker.startSpeech()
+            speaker.StopSpeech()
+            let defaultSpeaker = SpeakerSetting(from: speakerSetting)
+            let waitConfig = SpeechWaitConfig(from: delaySetting)
+            speaker.SetText(content: text, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: [waitConfig], sortedSpeechModArray: [])
+            speaker.StartSpeech()
         }
     }
     

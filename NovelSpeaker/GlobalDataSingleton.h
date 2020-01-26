@@ -13,7 +13,7 @@
 #import "NarouContentCacheData.h"
 #import "StoryCacheData.h"
 #import "GlobalStateCacheData.h"
-#import "NiftySpeaker.h"
+//#import "NiftySpeaker.h"
 #import "SpeakPitchConfigCacheData.h"
 #import "SpeechModSettingCacheData.h"
 #import "CoreDataObjectHolder.h"
@@ -60,7 +60,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
     //bool m_isNeedQuit;
     
     // 読み上げを管理します。
-    NiftySpeaker* m_NiftySpeaker;
+    //NiftySpeaker* m_NiftySpeaker;
     
     // 次回読み上げ時に読み上げ設定を読み直すべきか否か
     BOOL m_isNeedReloadSpeakSetting;

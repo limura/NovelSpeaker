@@ -8,9 +8,10 @@
 
 import UIKit
 import Eureka
+import AVFoundation
 
 class SpeakerSettingsViewController: FormViewController {
-    let speaker = Speaker()
+    let speaker = SpeechBlockSpeaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     var isRateSettingSync = true
     var hideCache:[String:Bool] = [:]
@@ -40,11 +41,15 @@ class SpeakerSettingsViewController: FormViewController {
     }
     
     func testSpeech(pitch:Float, rate: Float, identifier: String, locale: String, text: String) {
-        speaker.stopSpeech()
-        speaker.setPitch(pitch)
-        speaker.setRate(rate)
-        speaker.setVoiceWithIdentifier(identifier, voiceLocale: locale)
-        speaker.speech(text)
+        let speakerSetting = RealmSpeakerSetting()
+        speakerSetting.pitch = pitch
+        speakerSetting.rate = rate
+        speakerSetting.voiceIdentifier = identifier
+        speakerSetting.locale = locale
+        let defaultSpeaker = SpeakerSetting(from: speakerSetting)
+        speaker.StopSpeech()
+        speaker.SetText(content: text, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
+        speaker.StartSpeech()
     }
     
     func createSpeakSettingRows(currentSetting:RealmSpeakerSetting) -> Section {

@@ -20,7 +20,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
     var afterText = ""
     var isUseRegexp = false
     var targetNovelIDSet:Set<String> = Set<String>()
-    let speaker = NiftySpeaker()
+    let speaker = SpeechBlockSpeaker()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -299,33 +299,24 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             return
         }
 
-        speaker.stopSpeech()
-        speaker.clearSpeakSettings()
-        autoreleasepool {
-            if let globalState = RealmGlobalState.GetInstance(), let defaultSpeaker = globalState.defaultSpeaker {
-                speaker.setDefaultSpeechConfig(defaultSpeaker.speechConfig)
-            }
-        }
-        if isUseRegexp {
-            if let modArray = StringSubstituter.findRegexpSpeechModConfigs(testText, pattern: before, to: after) {
-                for mod in modArray {
-                    if let mod = mod as? SpeechModSettingCacheData {
-                        speaker.addSpeechModText(mod.beforeString, to: mod.afterString)
-                    }
-                }
-            }
+        speaker.StopSpeech()
+        let defaultSpeaker:SpeakerSetting
+        if let globalState = RealmGlobalState.GetInstance(), let realmDefaultSpeaker = globalState.defaultSpeaker {
+            defaultSpeaker = SpeakerSetting(from: realmDefaultSpeaker)
         }else{
-            speaker.addSpeechModText(before, to: after)
+            let realmDefaultSpeaker = RealmSpeakerSetting()
+            defaultSpeaker = SpeakerSetting(from: realmDefaultSpeaker)
         }
-        speaker.setText(testText)
-        speaker.updateCurrentReadingPoint(NSRange(location: 0, length: 0))
-        if let displayText = speaker.getSpeechText(), let row = self.form.rowBy(tag: "AfterTestTextRow") {
+        let modSettingArray = [SpeechModSetting(before: before, after: after, isUseRegularExpression: isUseRegexp)]
+        speaker.SetText(content: testText, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: [], speechModArray: modSettingArray)
+        let displayText = speaker.speechText
+        if let row = self.form.rowBy(tag: "AfterTestTextRow") {
             if let textRow = row as? TextRow {
                 textRow.value = displayText
                 textRow.updateCell()
             }
         }
-        speaker.startSpeech()
+        speaker.StartSpeech()
     }
     
     func SelectedNovelIDSetToNovelNameString(selectedNovelIDSet: Set<String>) -> String {

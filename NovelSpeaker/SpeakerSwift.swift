@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import AVFoundation
 
 protocol SpeakRangeProtocol {
     func willSpeakRange(range:NSRange)

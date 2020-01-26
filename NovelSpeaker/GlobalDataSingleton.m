@@ -68,6 +68,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     
     m_CoreDataObjectHolder = [[CoreDataObjectHolder alloc] initWithModelName:@"SettingDataModel" fileName:@"SettingDataModel" folderType:DOCUMENTS_FOLDER_TYPE mergePolicy:NSMergeByPropertyObjectTrumpMergePolicy];
 
+    /*
     // NiftySpeaker は default config が必要ですが、これには core data の値を使いません。
     // (というか使わないでおかないとここで取得しようとした時にマイグレーションが発生してしまいます)
     SpeechConfig* speechConfig = [SpeechConfig new];
@@ -77,6 +78,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     speechConfig.voiceIdentifier = [self GetVoiceIdentifier]; // これは現状では UserDefaults です。
     speechConfig.volume = [self GetDefaultVolume];
     m_NiftySpeaker = [[NiftySpeaker alloc] initWithSpeechConfig:speechConfig];
+     */
 
 #if TARGET_OS_WATCH == 0
     [self audioSessionInit:NO];
@@ -967,6 +969,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return charCount;
 }
 
+/*
 + (NSUInteger)GuessSpeakLocationFromDulationWithConfig:(SpeechConfig*)speechConfig dulation:(float)dulation {
     float rate = 0.5f;
     if (speechConfig != nil) {
@@ -983,12 +986,16 @@ static DummySoundLooper* dummySoundLooper = nil;
     float charCount = [GlobalDataSingleton SpeechRateToCharCountInSecond:speechConfig.rate];
     return textLength / charCount;
 }
+ */
 
+/*
 /// 現在の読み上げ設定による、dulation(秒数)からの読み上げ位置を推測します
 - (NSUInteger)GuessSpeakLocationFromDulation:(float)dulation {
     return [GlobalDataSingleton GuessSpeakLocationFromDulationWithConfig:[m_NiftySpeaker GetDefaultSpeechConfig] dulation:dulation];
 }
+ */
 
+/*
 #if TARGET_OS_WATCH == 0
 - (void)UpdatePlayingInfo:(StoryCacheData*)story
 {
@@ -1023,6 +1030,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:songInfo];
 }
 #endif
+ */
 
 - (void)InsertDefaultSpeakPitchConfig
 {
@@ -1610,6 +1618,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
 #endif
 
+/*
 /// NiftySpeaker に現在の標準設定を登録します
 - (void)ApplyDefaultSpeechconfig:(NiftySpeaker*)niftySpeaker
 {
@@ -1754,10 +1763,12 @@ static DummySoundLooper* dummySoundLooper = nil;
         }
     }
 }
+ */
 
 /// 読み上げ設定を読み直します。
 - (BOOL)ReloadSpeechSetting
 {
+    /*
     [m_NiftySpeaker ClearSpeakSettings];
     [self ApplyDefaultSpeechconfig:m_NiftySpeaker];
     [self ApplySpeakPitchConfig:m_NiftySpeaker];
@@ -1769,6 +1780,7 @@ static DummySoundLooper* dummySoundLooper = nil;
         [self ApplyRemoveURIModConfig:m_NiftySpeaker];
     }
     [self ApplySpeechModConfig:m_NiftySpeaker];
+     */
     return true;
 }
 
@@ -1866,6 +1878,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
  */
 
+/*
 /// 読み上げ位置を設定します。
 - (BOOL)SetSpeechRange:(NSRange)range
 {
@@ -1877,7 +1890,9 @@ static DummySoundLooper* dummySoundLooper = nil;
 {
     return [m_NiftySpeaker GetCurrentReadingPoint];
 }
+ */
 
+/*
 #if TARGET_OS_WATCH == 0
 /// 読み上げ停止のタイマーを開始します
 - (void)StartMaxSpeechTimeInSecTimer
@@ -1925,6 +1940,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
 }
 #endif
+ */
 
 /*
 /// 読み上げを開始します。
@@ -1969,6 +1985,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
  */
 
+/*
 /// 読み上げを「バックグラウンド再生としては止めずに」読み上げ部分だけ停止します
 - (BOOL)StopSpeechWithoutDiactivate
 {
@@ -2063,7 +2080,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 {
     return [m_NiftySpeaker isSpeaking];
 }
-
+*/
 
 /// 保存されているコンテンツの再読み込みを開始します。
 - (BOOL)ReloadBookShelfContents
@@ -2482,6 +2499,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return num;
 }
 
+/*
 /// 指定された文字列を読み上げでアナウンスします。
 /// ただし、読み上げを行っていない場合に限ります。
 /// 読み上げを行った場合には true を返します。
@@ -2498,6 +2516,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     });
     return true;
 }
+ */
 
 /// 最初のページを表示したかどうかのbool値を取得します。
 - (BOOL)IsFirstPageShowed
@@ -3004,13 +3023,19 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
          @"com.apple.ttsbundle.siri_male_ja-JP_compact", // hattori
          @"com.apple.ttsbundle.Otoya-premium", // otoya premium
          ];
-        NSArray* voiceArray = [NiftySpeaker getSupportedSpeaker:@"ja-JP"];
+        NSArray* voiceList = [AVSpeechSynthesisVoice speechVoices];
+        NSMutableArray* voiceArray = [NSMutableArray new];
+        for (AVSpeechSynthesisVoice* voice in voiceList) {
+            if ([voice.language compare:@"ja-JP"] == NSOrderedSame) {
+                [voiceArray addObject:voice];
+            }
+        }
         if (voiceArray != nil) {
             for (NSString* recomendId in recomendIdArray) {
                 for (AVSpeechSynthesisVoice* voice in voiceArray) {
                     if ([voice.identifier compare:recomendId] == NSOrderedSame) {
                         voiceIdentifier = voice.identifier;
-                        [self SetVoiceIdentifier:voiceIdentifier];
+                        //[self SetVoiceIdentifier:voiceIdentifier];
                         return voiceIdentifier;
                     }
                 }
@@ -3020,6 +3045,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     return voiceIdentifier;
 }
 
+/*
 // 読み上げに使う音声の identifier を保存します。
 // XXX TODO: 本来なら core data 側でなんとかすべきです
 - (void)SetVoiceIdentifier:(NSString*)identifier {
@@ -3035,6 +3061,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [userDefaults synchronize];
     m_isNeedReloadSpeakSetting = true;
 }
+ */
 
 /// 本棚のソートタイプを取得します
 - (NarouContentSortType)GetBookSelfSortType {
@@ -3362,6 +3389,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
  */
 
+/*
 #if TARGET_OS_WATCH == 0
 /// オーディオのルートが変わったよイベントのイベントハンドラ
 /// from: http://qiita.com/naonya3/items/433b3daaad75accf156b
@@ -3395,7 +3423,7 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
 }
 #endif
-
+*/
 
 /// 小説内部での範囲選択時に出てくるメニューを「読み替え辞書に登録」だけにする(YES)か否(NO)かの設定値を取り出します
 - (BOOL)GetMenuItemIsAddSpeechModSettingOnly {
@@ -4820,10 +4848,12 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         [self UpdateGlobalState:globalState];
     }
     
+    /*
     NSString* default_voice_identifier = [NiftyUtility validateNSDictionaryForString:miscSettingsDictionary key:@"default_voice_identifier"];
     if (default_voice_identifier != nil && [default_voice_identifier length] > 0 && [NiftySpeaker isValidVoiceIdentifier:default_voice_identifier]) {
         [self SetVoiceIdentifier:default_voice_identifier];
     }
+     */
     NSNumber* content_sort_type = [NiftyUtility validateNSDictionaryForNumber:miscSettingsDictionary key:@"content_sort_type"];
     if (content_sort_type != nil) {
         NSUInteger uint = [content_sort_type unsignedIntegerValue];

@@ -8,6 +8,7 @@
 // バックグラウンド時に(聞き取れないような)音声を延々と流し続けるためのclass
 
 import UIKit
+import AVFoundation
 
 class DummySoundLooper: NSObject {
     var audioPlayer:AVAudioPlayer? = nil
