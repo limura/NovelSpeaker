@@ -328,13 +328,28 @@ erver certificate.";
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.60
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.61
 
-- Settings -> \"Apply a tentative correspondence to the case where the reading position displayed on iOS 12 is incorrect\" settings have been reset (turned off)
+- The English notation was corrected and reflected.
+
+This English notation was corrected on GitHub by @Matthewzhou809 in the form of a pull request.
+NovelSpeaker is an open source project published on GitHub, so contributions such as pull requests like this one are very helpful.
+Thank you @Matthewzhou809! ヾ(*´∀｀*)ノ
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.61
+
+Interface change
+
+- The English notation was corrected and reflected.
+
+This English notation was corrected on GitHub by @Matthewzhou809 in the form of a pull request.
+NovelSpeaker is an open source project published on GitHub, so contributions such as pull requests like this one are very helpful.
+Thank you @Matthewzhou809! ヾ(*´∀｀*)ノ
+
+
 # Version 1.1.60
 
 Interface change
