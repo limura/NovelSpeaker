@@ -557,6 +557,8 @@
 "UpdateLogViewController_UpdateLog" = "
 # Version 1.9
 
+インタフェースの変更
+
 - 内部データベースを CoreData から Realm に変更
 - ほぼ全てのViewController(画面)をObjective-CからSwiftに書き換え
 - なろう検索 タブの機能を削除
@@ -567,6 +569,14 @@
 - テキストファイル等の取込時にテキトーに章を分ける機能を追加
 - 小説毎の専用設定の概念を追加
 
+# Version 1.1.61
+
+インタフェースの変更
+
+・英語表記を添削していただいたので反映しました。
+
+
+# Version 1.1.60
 
 # Version 1.1.59
 
