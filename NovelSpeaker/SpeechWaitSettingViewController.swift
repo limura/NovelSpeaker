@@ -157,7 +157,11 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                     return
                 }
                 RealmUtil.Write { (realm) in
-                    setting.delayTimeInSec = Float(value)
+                    var floatValue = Float(value)
+                    if fabsf(floatValue - 0.0) < Float.ulpOfOne {
+                        floatValue = 0.0
+                    }
+                    setting.delayTimeInSec = floatValue
                 }
                 self.updateTestText(targetString: setting.targetText)
                 self.updateTitleCell(speechWaitConfig: setting)

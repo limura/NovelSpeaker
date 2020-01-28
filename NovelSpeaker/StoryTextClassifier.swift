@@ -132,7 +132,7 @@ class CombinedSpeechBlock {
         func checkDoubleEqual(a:Double, b:Double) -> Bool {
             return fabs(a - b) < Double.ulpOfOne
         }
-        guard checkDoubleEqual(a: delay, b: block.delay)
+        guard checkDoubleEqual(a: 0.0, b: block.delay) // delay があるなら合成してはいけません
             && checkFloatEqual(a: pitch, b: block.pitch)
             && checkFloatEqual(a: rate, b: block.rate)
             && voice == block.voice
@@ -411,6 +411,7 @@ class StoryTextClassifier {
             }
         }
         var speakerEndTextFirstCharacter:Character? = nil
+        var currentWaitconfig:SpeechWaitConfig? = nil
         indexLoop: while index < content.endIndex {
             let c = content[index]
             if currentCharacterTarget.contains(c) != true
@@ -420,7 +421,7 @@ class StoryTextClassifier {
             }
             guard let currentSpeakerSetting = speakerList.last else { break }
             let targetString = content[index..<content.endIndex]
-            var currentWaitconfig:SpeechWaitConfig? = nil
+            currentWaitconfig = nil
             if let waitConfigList = indexedWaitConfigList[c] {
                 for waitSetting in waitConfigList {
                     if waitSetting.delayTimeInSec > 0 && waitSetting.targetText.count > 0 && targetString.starts(with: waitSetting.targetText) {
@@ -519,7 +520,7 @@ class StoryTextClassifier {
             let block = createBlockInfo(speechText: speechText, displayText: displayText, speakerSetting: currentSpeaker, waitConfig: nil)
             result.append(block)
             #else
-            let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeaker, waitConfig: nil)
+            let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeaker, waitConfig: currentWaitconfig)
             result.append(contentsOf: newBlockArray)
             #endif
         }
