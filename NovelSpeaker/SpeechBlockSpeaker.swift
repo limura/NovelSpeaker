@@ -181,26 +181,18 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
     }
-
-    func SetStory(story:Story) {
-        #if os(watchOS)
-        let withMoreSplitTargets:[String] = ["。", "、", ".", ",", ":", "\n\n"]
-        let moreSplitMinimumLetterCount:Int = 20
-        #else
-        // これらは [] で INT_MAX でも良いはずなのだけれど、
-        // 。を _。 に変換されたりするような長さが変わる文字がいっぱいあると表示上の位置ズレが大きくなるため、
-        // block をある程度分割しておく事にします。
-        //let withMoreSplitTargets:[String] = ["。", "、", "\n\n"]
-        //let moreSplitMinimumLetterCount:Int = 20
-        let withMoreSplitTargets:[String] = []
-        let moreSplitMinimumLetterCount:Int = Int(INT_MAX)
-        #endif
+    
+    func SetStory(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {
         speechBlockArray = StoryTextClassifier.CategorizeStoryText(story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
         currentDisplayStringOffset = 0
         currentSpeechBlockIndex = 0
         currentSpeakingLocation = 0
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
+    }
+
+    func SetStory(story:Story) {
+        SetStory(story: story, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max)
     }
     
     func StartSpeech() {
@@ -236,6 +228,28 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             return true
         }
         return false
+    }
+    
+    /// 読み上げ開始位置を speechBlockArray の index で指示します
+    @discardableResult
+    func SetSpeechBlockIndex(index:Int) -> Bool {
+        if index < 0 || speechBlockArray.count <= index { return false }
+        currentBlockDisplayOffset = 0
+        currentBlockSpeechOffset = 0
+        currentSpeechBlockIndex = 0
+        currentDisplayStringOffset = 0
+        var index = index
+        for speechBlock in speechBlockArray {
+            if index < 0 {
+                break
+            }
+            let blockDisplayTextLength = speechBlock.displayText.count
+            currentDisplayStringOffset += blockDisplayTextLength
+            currentSpeechBlockIndex += 1
+            index -= 1
+        }
+        currentSpeakingLocation = currentDisplayStringOffset
+        return true
     }
     
     func willSpeakRange(range: NSRange) {

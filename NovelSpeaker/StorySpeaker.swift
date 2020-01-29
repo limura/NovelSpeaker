@@ -40,6 +40,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     var maxSpeechInSecTimer:Timer? = nil
     var isMaxSpeechTimeExceeded = false
     var isNeedApplySpeechConfigs = true
+    
+    // SpeechBlockSpeaker 内部で分割されているblockの大きさを制御する値なのだけれど、
+    // 残念なことに StorySpeaker は次の Story を自動で読み込んで SpeechBlockSpeakr に渡す事をするため、
+    // この制御値を保存しておく必要があります。
+    var withMoreSplitTargets:[String] = []
+    var moreSplitMinimumLetterCount:Int = Int.max
 
     private override init() {
         super.init()
@@ -58,8 +64,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         unregistAudioNotifications()
     }
     
-    func ApplyStoryToSpeaker(story:Story) {
-        speaker.SetStory(story: story)
+    func ApplyStoryToSpeaker(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {
+        speaker.SetStory(story: story, withMoreSplitTargets:withMoreSplitTargets, moreSplitMinimumLetterCount:moreSplitMinimumLetterCount)
         observeSpeechConfig(novelID: story.novelID)
         observeSpeechModSetting(novelID: story.novelID)
         speaker.SetSpeechLocation(location: story.readLocation)
@@ -74,7 +80,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         autoreleasepool {
             self.storyID = storyID
             updateReadDate(storyID: storyID)
-            ApplyStoryToSpeaker(story: story)
+            ApplyStoryToSpeaker(story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
             //updatePlayngInfo(story: story)
             observeStory(storyID: self.storyID)
             observeBookmark(novelID: story.novelID)
@@ -364,7 +370,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 updatePlayngInfo(story: story)
                 // story をここでも参照するので怪しくこの if の中に入れます
                 if self.isNeedApplySpeechConfigs {
-                    self.ApplyStoryToSpeaker(story: story)
+                    self.ApplyStoryToSpeaker(story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
                 }
             }
         }
@@ -894,6 +900,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                     }
                 }
             }
+        }
+    }
+    
+    var speechBlockArray : [CombinedSpeechBlock] {
+        get {
+            return speaker.speechBlockArray
         }
     }
 }

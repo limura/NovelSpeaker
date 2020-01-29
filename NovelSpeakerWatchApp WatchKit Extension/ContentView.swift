@@ -22,6 +22,9 @@ struct ContentView: View {
     init() {
         NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
         dummyStory.content = String(repeating: "吾輩は猫である。「名前はまだない。」しかし、そのうち名前がつけられると信じている。ところであなたは宇宙人を信じるだろうか？", count: 10)
+
+        StorySpeaker.shared.withMoreSplitTargets = ["。", "、", ".", ",", ":", "\n\n"]
+        StorySpeaker.shared.moreSplitMinimumLetterCount = 20
     }
 
     var body: some View {
