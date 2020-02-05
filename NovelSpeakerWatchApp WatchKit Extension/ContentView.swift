@@ -30,19 +30,11 @@ struct ContentView: View {
     var body: some View {
         VStack {
             if viewData.currentPage == .neediCloudSync {
-                autoreleasepool {
-                    //StoryView(story: self.dummyStory, viewData: self.viewData)
-                    CheckiCloudSyncView()
-                }
+                CheckiCloudSyncView()
             }else if viewData.currentPage == .bookshelf {
-                autoreleasepool {
-                    //StoryView(story: self.dummyStory, viewData: self.viewData)
-                    BookshelfView(novelList: self.viewData.novelList ?? [], viewData: self.viewData)
-                }
+                BookshelfView(novelList: self.viewData.novelList ?? [], viewData: self.viewData)
             }else {
-                autoreleasepool {
-                    StoryView(story: self.viewData.speechTargetStory ?? Story(), viewData: self.viewData)
-                }
+                StoryView(story: self.viewData.speechTargetStory ?? Story(), viewData: self.viewData)
             }
         }
     }
@@ -77,7 +69,7 @@ struct CheckiCloudSyncView: View {
     let delegateInstance = SpeechDelegateTest()
     var body: some View {
         List {
-            Text("iCloudからのデータ共有を待っています……")
+            Text("iCloudからのデータ共有を待っています……\nAppleWatchで ことせかい を使う場合、親機にあたる iPhone等 の ことせかい で本棚に小説を一つ以上登録する必要があります。\nまた、大量の本を本棚に登録している場合、同期が完了するまでにかなりの時間を要する可能性があります。")
             Button<Text>(action: {
                 //let synthe = AVSpeechSynthesizer()
                 let utt = AVSpeechUtterance(string: self.speechText)
@@ -99,6 +91,18 @@ struct CheckiCloudSyncView: View {
                 StorySpeaker.shared.StartSpeech(withMaxSpeechTimeReset: false)
             }) {
                 Text("speech(StorySpeaker)")
+            }
+            Button<Text>(action: {
+                let nowPlaying = URL(fileURLWithPath: "nowplaying:///")
+                WKExtension.shared().openSystemURL(nowPlaying)
+            }) {
+                Text("Open(NowPlaying)")
+            }
+            Button<Text>(action: {
+                let nowPlaying = URL(fileURLWithPath: "sms:1234567")
+                WKExtension.shared().openSystemURL(nowPlaying)
+            }) {
+                Text("Open(sms)")
             }
         }
     }
@@ -228,7 +232,7 @@ class ViewData:ObservableObject {
     func CheckiCloudSync() {
         DispatchQueue.main.async {
             RealmUtil.CheckCloudDataIsValid { (result) in
-                guard result == true, let novels = RealmNovel.GetAllObjects() else { return }
+                guard result == true, let novels = RealmNovel.GetAllObjects(), novels.count > 1 else { return }
                 self.ShowBookshelfView(novelList: Array(novels))
             }
         }
