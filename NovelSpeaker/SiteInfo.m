@@ -86,7 +86,10 @@
     if (titleString == nil) {
         return nil;
     }
-    return [[NSString alloc] initWithFormat:@"%@", [SiteInfo RemoveHtmlTag:titleString]];
+    titleString = [SiteInfo RemoveHtmlTag:titleString];
+    titleString = [SiteInfo RemoveHtmlCharacterRefernce:titleString];
+    titleString = [titleString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    return titleString;
 }
 
 /// 著者を抽出します
@@ -221,6 +224,18 @@
     NSString* htmlTags = @"<[^>]*>";
     NSRange range;
     while (html != nil && (range = [html rangeOfString:htmlTags options:NSRegularExpressionSearch]).location != NSNotFound) {
+        html = [html stringByReplacingCharactersInRange:range withString:@""];
+    }
+    return html;
+}
+
++ (NSString*)RemoveHtmlCharacterRefernce:(NSString*)html {
+    if (html == nil) {
+        return nil;
+    }
+    NSString* characterReference = @"&#[0-9a-fA-F]{1,2};";
+    NSRange range;
+    while (html != nil && (range = [html rangeOfString:characterReference options:NSRegularExpressionSearch]).location != NSNotFound) {
         html = [html stringByReplacingCharactersInRange:range withString:@""];
     }
     return html;

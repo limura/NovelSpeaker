@@ -1,0 +1,1916 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		210958C31A0DF55600E9171F /* arrow_down@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958B81A0DF55600E9171F /* arrow_down@3x.png */; };
+		210958C41A0DF55600E9171F /* booksearch.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958B91A0DF55600E9171F /* booksearch.png */; };
+		210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958BA1A0DF55600E9171F /* booksearch@2x.png */; };
+		210958C61A0DF55600E9171F /* booksearch@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958BB1A0DF55600E9171F /* booksearch@3x.png */; };
+		210958C71A0DF55600E9171F /* gear@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958BC1A0DF55600E9171F /* gear@3x.png */; };
+		210958C81A0DF55600E9171F /* icloud1.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958BD1A0DF55600E9171F /* icloud1.png */; };
+		210958C91A0DF55600E9171F /* icloud1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958BE1A0DF55600E9171F /* icloud1@2x.png */; };
+		210958CA1A0DF55600E9171F /* icloud1@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958BF1A0DF55600E9171F /* icloud1@3x.png */; };
+		210958CB1A0DF55600E9171F /* soundbook.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958C01A0DF55600E9171F /* soundbook.png */; };
+		210958CC1A0DF55600E9171F /* soundbook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958C11A0DF55600E9171F /* soundbook@2x.png */; };
+		210958CD1A0DF55600E9171F /* soundbook@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958C21A0DF55600E9171F /* soundbook@3x.png */; };
+		210958EB1A0E1C5500E9171F /* NEW!.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958ED1A0E1C5500E9171F /* NEW!.png */; };
+		210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F01A0E1C5C00E9171F /* NEW!@2x.png */; };
+		210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958F31A0E1C6100E9171F /* NEW!@3x.png */; };
+		210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */; };
+		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
+		2117251019B2064400FB97D2 /* BookShelfTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */; };
+		2117251E19B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2117252019B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib */; };
+		211BA5F819973BA500560842 /* SpeechBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5F719973BA500560842 /* SpeechBlock.m */; };
+		211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FA19973CFB00560842 /* SpeechConfig.m */; };
+		211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 211BA5FD199742CF00560842 /* NiftySpeaker.m */; };
+		2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */; };
+		2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */; };
+		2126A2611D9A1B90008E534A /* Action.js in Resources */ = {isa = PBXBuildFile; fileRef = 2126A2601D9A1B90008E534A /* Action.js */; };
+		2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2126A26D1D9D1B92008E534A /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
+		2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */ = {isa = PBXBuildFile; fileRef = 2127EACA1DB75989005B1636 /* HtmlStory.m */; };
+		212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */; };
+		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
+		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
+		212972171DA66FDB001ED63D /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 212972141DA66F2C001ED63D /* Info.plist */; };
+		212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */; };
+		212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F01131D8FDEC5009D69E6 /* NiftyUtility.m */; };
+		212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */; };
+		212F011C1D907CF1009D69E6 /* Default568@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F011B1D907CF1009D69E6 /* Default568@2x.png */; };
+		212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F359B1A8F8857009D0E60 /* GlobalState.m */; };
+		212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */; };
+		212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */; };
+		2133743F2013816D0043D995 /* bookmark-false@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743C2013816C0043D995 /* bookmark-false@2x.png */; };
+		213374402013816D0043D995 /* bookmark-false@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743D2013816C0043D995 /* bookmark-false@3x.png */; };
+		213374412013816D0043D995 /* bookmark-false.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743E2013816C0043D995 /* bookmark-false.png */; };
+		2133F21C1E7D5674001A0BC5 /* CustomAutopagerizeItems.json in Resources */ = {isa = PBXBuildFile; fileRef = 2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */; };
+		2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2211E7FFF0B001A0BC5 /* Localizable.strings */; };
+		2133F2261E800F4A001A0BC5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F054E41917E0F200CC6BA9 /* Images.xcassets */; };
+		2133F2A21E80E175001A0BC5 /* Icon-60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2901E80E175001A0BC5 /* Icon-60@2x.png */; };
+		2133F2A31E80E175001A0BC5 /* Icon-60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2911E80E175001A0BC5 /* Icon-60@3x.png */; };
+		2133F2A41E80E175001A0BC5 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2921E80E175001A0BC5 /* Icon-72.png */; };
+		2133F2A51E80E175001A0BC5 /* Icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2931E80E175001A0BC5 /* Icon-72@2x.png */; };
+		2133F2A61E80E175001A0BC5 /* Icon-76.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2941E80E175001A0BC5 /* Icon-76.png */; };
+		2133F2A71E80E175001A0BC5 /* Icon-76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2951E80E175001A0BC5 /* Icon-76@2x.png */; };
+		2133F2A81E80E175001A0BC5 /* Icon-83.5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2961E80E175001A0BC5 /* Icon-83.5@2x.png */; };
+		2133F2A91E80E175001A0BC5 /* Icon-Small-40.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2971E80E175001A0BC5 /* Icon-Small-40.png */; };
+		2133F2AA1E80E175001A0BC5 /* Icon-Small-40@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2981E80E175001A0BC5 /* Icon-Small-40@2x.png */; };
+		2133F2AB1E80E175001A0BC5 /* Icon-Small-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2991E80E175001A0BC5 /* Icon-Small-50.png */; };
+		2133F2AC1E80E175001A0BC5 /* Icon-Small-50@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29A1E80E175001A0BC5 /* Icon-Small-50@2x.png */; };
+		2133F2AD1E80E175001A0BC5 /* Icon-Small.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29B1E80E175001A0BC5 /* Icon-Small.png */; };
+		2133F2AE1E80E175001A0BC5 /* Icon-Small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29C1E80E175001A0BC5 /* Icon-Small@2x.png */; };
+		2133F2AF1E80E175001A0BC5 /* Icon-Small@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29D1E80E175001A0BC5 /* Icon-Small@3x.png */; };
+		2133F2B01E80E175001A0BC5 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29E1E80E175001A0BC5 /* Icon.png */; };
+		2133F2B11E80E175001A0BC5 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133F29F1E80E175001A0BC5 /* Icon@2x.png */; };
+		2133F2B21E80E175001A0BC5 /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A01E80E175001A0BC5 /* iTunesArtwork */; };
+		2133F2B31E80E175001A0BC5 /* iTunesArtwork@2x in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */; };
+		213515FC1F8CC06400F7AAD0 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 213515FB1F8CC06400F7AAD0 /* MessageUI.framework */; };
+		213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */; };
+		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
+		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
+		213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */; };
+		213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */; };
+		213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */; };
+		213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */; };
+		214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */; };
+		21429D84209F45E3001426F5 /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
+		21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21429D85209F45FD001426F5 /* AudioToolbox.framework */; };
+		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
+		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
+		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
+		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
+		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
+		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
+		216741A92047714D008A578D /* PDFKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 216741A82047714D008A578D /* PDFKit.framework */; };
+		216A545D20EE257000D75458 /* NovelSpeakerBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216A545C20EE257000D75458 /* NovelSpeakerBackup.swift */; };
+		216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */; };
+		21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */; };
+		21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
+		2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */; };
+		2173A6BF21CC529F002E9EA8 /* FloatingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */; };
+		2173A6C121CC530E002E9EA8 /* FloatingButton.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2173A6C021CC530E002E9EA8 /* FloatingButton.xib */; };
+		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
+		217BD9E419CE72BB008A0D9D /* StringSubstituter.m in Sources */ = {isa = PBXBuildFile; fileRef = 217BD9E319CE72BB008A0D9D /* StringSubstituter.m */; };
+		217BD9E619E038BE008A0D9D /* StringSubstituterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 217BD9E519E038BE008A0D9D /* StringSubstituterTests.m */; };
+		217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 217E683A1998F6A000C656AA /* MediaPlayer.framework */; };
+		217E683E199A80A200C656AA /* NiftySpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 217E683D199A80A200C656AA /* NiftySpeakerTests.m */; };
+		217F6E1C1942F14B008E432E /* Speaker.m in Sources */ = {isa = PBXBuildFile; fileRef = 217F6E1B1942F14B008E432E /* Speaker.m */; };
+		21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21814C5B1E8D68A90096CB42 /* NSStringExtension.m */; };
+		21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */; };
+		21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */; };
+		21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
+		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
+		21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */; };
+		2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191635A199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m */; };
+		21916360199E01A7003FF7FC /* SpeakSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */; };
+		21916364199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916362199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m */; };
+		2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */; };
+		2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */; };
+		21916372199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */; };
+		21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916374199F143E003FF7FC /* SpeechModSetting.m */; };
+		21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
+		2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */; };
+		2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */; };
+		2191639A19A38414003FF7FC /* NarouContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639919A38414003FF7FC /* NarouContent.m */; };
+		2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
+		2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */; };
+		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
+		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */; };
+		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
+		21A265692359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */; };
+		21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */; };
+		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
+		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
+		21AFDF36216CF977002F34D9 /* SpeechBlockTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */; };
+		21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */; };
+		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
+		21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F9196037BB009658B7 /* AVFoundation.framework */; };
+		21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = 21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */; };
+		21B53A1C19619C00009658B7 /* sound.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1919619C00009658B7 /* sound.png */; };
+		21B53A1D19619C00009658B7 /* sound@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1A19619C00009658B7 /* sound@2x.png */; };
+		21B53A2219619C50009658B7 /* gear.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A1F19619C50009658B7 /* gear.png */; };
+		21B53A2319619C50009658B7 /* gear@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2019619C50009658B7 /* gear@2x.png */; };
+		21B53A2819619D23009658B7 /* app_globe.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2519619D23009658B7 /* app_globe.png */; };
+		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
+		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
+		21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */; };
+		21C372DD21DFC41600FB2D52 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
+		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
+		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
+		21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9A196456490039A706 /* NarouSearchViewController.m */; };
+		21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
+		21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FA31967FD390039A706 /* NarouDownloadQueue.m */; };
+		21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD3196831070039A706 /* DownloadStatusViewController.m */; };
+		21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74FD6196843280039A706 /* BookShelfTableViewController.m */; };
+		21CA0FCB218DE6520059FACB /* DuplicateSoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */; };
+		21CAC8192125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */; };
+		21CAC81A2125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */; };
+		21CAC81C21273C0A00F74092 /* UpdateMemo.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21CAC81B21273C0A00F74092 /* UpdateMemo.txt */; };
+		21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */; };
+		21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */; };
+		21D3979E1FC95CBB0018F883 /* earth@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D3979B1FC95CB90018F883 /* earth@2x.png */; };
+		21D3979F1FC95CBB0018F883 /* earth@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D3979C1FC95CBA0018F883 /* earth@3x.png */; };
+		21D397A01FC95CBB0018F883 /* earth.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D3979D1FC95CBA0018F883 /* earth.png */; };
+		21D397A71FC960E10018F883 /* bookmark-true@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D397A11FC960DD0018F883 /* bookmark-true@3x.png */; };
+		21D397A81FC960E10018F883 /* bookmark-true@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D397A21FC960DE0018F883 /* bookmark-true@2x.png */; };
+		21D397AC1FC960E10018F883 /* bookmark-true.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D397A61FC960E10018F883 /* bookmark-true.png */; };
+		21D397B01FC97A380018F883 /* home@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D397AD1FC97A360018F883 /* home@2x.png */; };
+		21D397B11FC97A380018F883 /* home@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D397AE1FC97A370018F883 /* home@3x.png */; };
+		21D397B21FC97A380018F883 /* home.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D397AF1FC97A370018F883 /* home.png */; };
+		21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */; };
+		21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */; };
+		21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */; };
+		21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21DD0BF420B595F500DC3C39 /* LICENSE.txt */; };
+		21E46D431A94B7F400CE39B0 /* EasyShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E46D421A94B7F400CE39B0 /* EasyShare.m */; };
+		21E704CF1AF741350071F31E /* UpdateLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E704CE1AF741350071F31E /* UpdateLogViewController.m */; };
+		21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BF81FB487B1003C659F /* EasyDialogs.swift */; };
+		21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */; };
+		21EA62E420554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */; };
+		21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21EA62E5205560B80084B366 /* EurekaCustomRows.swift */; };
+		21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */; };
+		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
+		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
+		21F054D11917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
+		21F054D71917E0F200CC6BA9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21F054D51917E0F200CC6BA9 /* InfoPlist.strings */; };
+		21F054D91917E0F200CC6BA9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054D81917E0F200CC6BA9 /* main.m */; };
+		21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054DC1917E0F200CC6BA9 /* AppDelegate.m */; };
+		21F054E01917E0F200CC6BA9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21F054DE1917E0F200CC6BA9 /* Main.storyboard */; };
+		21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054E21917E0F200CC6BA9 /* SpeechViewController.m */; };
+		21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F054E41917E0F200CC6BA9 /* Images.xcassets */; };
+		21F054EC1917E0F200CC6BA9 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054EB1917E0F200CC6BA9 /* XCTest.framework */; };
+		21F054ED1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
+		21F054EE1917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
+		21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21F054F41917E0F200CC6BA9 /* InfoPlist.strings */; };
+		21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */; };
+		21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */; };
+		21F563C71FD801970037F5D7 /* >.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563C11FD801950037F5D7 /* >.png */; };
+		21F563C81FD801970037F5D7 /* >@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563C21FD801960037F5D7 /* >@2x.png */; };
+		21F563CA1FD801970037F5D7 /* >@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563C41FD801970037F5D7 /* >@3x.png */; };
+		21F563CF1FD802400037F5D7 /* <.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CC1FD8023E0037F5D7 /* <.png */; };
+		21F563D01FD802400037F5D7 /* <@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CD1FD8023F0037F5D7 /* <@2x.png */; };
+		21F563D11FD802400037F5D7 /* <@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CE1FD8023F0037F5D7 /* <@3x.png */; };
+		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
+		21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */; };
+		21FDF5642043CDB200DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */; };
+		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
+		4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B19196247FB00C36AD1 /* NarouLoader.m */; };
+		4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */; };
+		9051B983E846E56867906F94 /* Pods_NovelSpeakerURLDownloadExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */; };
+		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2126A2631D9A1B90008E534A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2126A25A1D9A1B90008E534A;
+			remoteInfo = NovelSpeakerURLDownloadExtension;
+		};
+		21F054EF1917E0F200CC6BA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 21F054C81917E0F200CC6BA9;
+			remoteInfo = NovelSpeaker;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2126A2691D9A1B90008E534A /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; sourceTree = "<group>"; };
+		210958B81A0DF55600E9171F /* arrow_down@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@3x.png"; sourceTree = "<group>"; };
+		210958B91A0DF55600E9171F /* booksearch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = booksearch.png; sourceTree = "<group>"; };
+		210958BA1A0DF55600E9171F /* booksearch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "booksearch@2x.png"; sourceTree = "<group>"; };
+		210958BB1A0DF55600E9171F /* booksearch@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "booksearch@3x.png"; sourceTree = "<group>"; };
+		210958BC1A0DF55600E9171F /* gear@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gear@3x.png"; sourceTree = "<group>"; };
+		210958BD1A0DF55600E9171F /* icloud1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icloud1.png; sourceTree = "<group>"; };
+		210958BE1A0DF55600E9171F /* icloud1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icloud1@2x.png"; sourceTree = "<group>"; };
+		210958BF1A0DF55600E9171F /* icloud1@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icloud1@3x.png"; sourceTree = "<group>"; };
+		210958C01A0DF55600E9171F /* soundbook.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = soundbook.png; sourceTree = "<group>"; };
+		210958C11A0DF55600E9171F /* soundbook@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "soundbook@2x.png"; sourceTree = "<group>"; };
+		210958C21A0DF55600E9171F /* soundbook@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "soundbook@3x.png"; sourceTree = "<group>"; };
+		210958EC1A0E1C5500E9171F /* en */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = en; path = "en.lproj/NEW!.png"; sourceTree = "<group>"; };
+		210958EF1A0E1C5C00E9171F /* en */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = en; path = "en.lproj/NEW!@2x.png"; sourceTree = "<group>"; };
+		210958F21A0E1C6100E9171F /* en */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = en; path = "en.lproj/NEW!@3x.png"; sourceTree = "<group>"; };
+		210958F41A0E1C6400E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!.png"; sourceTree = "<group>"; };
+		210958F51A0E1C6700E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!@2x.png"; sourceTree = "<group>"; };
+		210958F61A0E1C6A00E9171F /* ja */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ja; path = "ja.lproj/NEW!@3x.png"; sourceTree = "<group>"; };
+		210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextSizeSettingViewController.h; sourceTree = "<group>"; };
+		210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextSizeSettingViewController.m; sourceTree = "<group>"; };
+		210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 6.xcdatamodel"; sourceTree = "<group>"; };
+		210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
+		2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BookShelfTableViewCell.xib; sourceTree = "<group>"; };
+		2117251F19B2093600FB97D2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/SpeakSettingSampleTextTableViewCell.xib; sourceTree = "<group>"; };
+		211BA5F619973BA500560842 /* SpeechBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechBlock.h; sourceTree = "<group>"; };
+		211BA5F719973BA500560842 /* SpeechBlock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechBlock.m; sourceTree = "<group>"; };
+		211BA5F919973CFB00560842 /* SpeechConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechConfig.h; sourceTree = "<group>"; };
+		211BA5FA19973CFB00560842 /* SpeechConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechConfig.m; sourceTree = "<group>"; };
+		211BA5FC199742CF00560842 /* NiftySpeaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftySpeaker.h; sourceTree = "<group>"; };
+		211BA5FD199742CF00560842 /* NiftySpeaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftySpeaker.m; sourceTree = "<group>"; };
+		212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 5.xcdatamodel"; sourceTree = "<group>"; };
+		2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PickerViewDialog.h; sourceTree = "<group>"; };
+		2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PickerViewDialog.m; sourceTree = "<group>"; };
+		21245BD81A8FBA2A00D3B376 /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
+		21245BDA1A8FBB6800D3B376 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
+		2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NovelSpeakerURLDownloadExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2126A25D1D9A1B90008E534A /* ActionRequestHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActionRequestHandler.h; sourceTree = "<group>"; };
+		2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ActionRequestHandler.m; sourceTree = "<group>"; };
+		2126A2601D9A1B90008E534A /* Action.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Action.js; sourceTree = "<group>"; };
+		2127EAC91DB75989005B1636 /* HtmlStory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HtmlStory.h; sourceTree = "<group>"; };
+		2127EACA1DB75989005B1636 /* HtmlStory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HtmlStory.m; sourceTree = "<group>"; };
+		212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_2to3.xcmappingmodel; sourceTree = "<group>"; };
+		212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_3to4.xcmappingmodel; sourceTree = "<group>"; };
+		212852DD19B1D101001A75DC /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		212852E019B1ECAD001A75DC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		212972131DA66F2C001ED63D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = ja; path = ja.lproj/Info.plist; sourceTree = "<group>"; };
+		212972151DA66F2E001ED63D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = en; path = en.lproj/Info.plist; sourceTree = "<group>"; };
+		212972161DA66F97001ED63D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Base; path = Base.lproj/Info.plist; sourceTree = "<group>"; };
+		212F00D31D8DD700009D69E6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/DefaultSpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
+		212F01121D8FDEC5009D69E6 /* NiftyUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftyUtility.h; sourceTree = "<group>"; };
+		212F01131D8FDEC5009D69E6 /* NiftyUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftyUtility.m; sourceTree = "<group>"; };
+		212F01161D906F4E009D69E6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/DefaultSpeakSettingEditTableViewCell.strings; sourceTree = "<group>"; };
+		212F01181D906F56009D69E6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/DefaultSpeakSettingEditTableViewCell.strings; sourceTree = "<group>"; };
+		212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-167px.png"; sourceTree = "<group>"; };
+		212F011B1D907CF1009D69E6 /* Default568@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default568@2x.png"; sourceTree = "<group>"; };
+		212F359A1A8F8857009D0E60 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
+		212F359B1A8F8857009D0E60 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
+		212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_5to7.xcmappingmodel; sourceTree = "<group>"; };
+		212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_6to7.xcmappingmodel; sourceTree = "<group>"; };
+		212F951D1EB0EB8B005EF253 /* NovelSpeakerURLDownloadExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerURLDownloadExtension-Bridging-Header.h"; sourceTree = "<group>"; };
+		2133743C2013816C0043D995 /* bookmark-false@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@2x.png"; sourceTree = "<group>"; };
+		2133743D2013816C0043D995 /* bookmark-false@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@3x.png"; sourceTree = "<group>"; };
+		2133743E2013816C0043D995 /* bookmark-false.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false.png"; sourceTree = "<group>"; };
+		2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = CustomAutopagerizeItems.json; sourceTree = "<group>"; };
+		2133F2201E7FFF0B001A0BC5 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		2133F2221E7FFF0D001A0BC5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		2133F2901E80E175001A0BC5 /* Icon-60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-60@2x.png"; sourceTree = "<group>"; };
+		2133F2911E80E175001A0BC5 /* Icon-60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-60@3x.png"; sourceTree = "<group>"; };
+		2133F2921E80E175001A0BC5 /* Icon-72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-72.png"; sourceTree = "<group>"; };
+		2133F2931E80E175001A0BC5 /* Icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-72@2x.png"; sourceTree = "<group>"; };
+		2133F2941E80E175001A0BC5 /* Icon-76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-76.png"; sourceTree = "<group>"; };
+		2133F2951E80E175001A0BC5 /* Icon-76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-76@2x.png"; sourceTree = "<group>"; };
+		2133F2961E80E175001A0BC5 /* Icon-83.5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-83.5@2x.png"; sourceTree = "<group>"; };
+		2133F2971E80E175001A0BC5 /* Icon-Small-40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small-40.png"; sourceTree = "<group>"; };
+		2133F2981E80E175001A0BC5 /* Icon-Small-40@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small-40@2x.png"; sourceTree = "<group>"; };
+		2133F2991E80E175001A0BC5 /* Icon-Small-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small-50.png"; sourceTree = "<group>"; };
+		2133F29A1E80E175001A0BC5 /* Icon-Small-50@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small-50@2x.png"; sourceTree = "<group>"; };
+		2133F29B1E80E175001A0BC5 /* Icon-Small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small.png"; sourceTree = "<group>"; };
+		2133F29C1E80E175001A0BC5 /* Icon-Small@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small@2x.png"; sourceTree = "<group>"; };
+		2133F29D1E80E175001A0BC5 /* Icon-Small@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-Small@3x.png"; sourceTree = "<group>"; };
+		2133F29E1E80E175001A0BC5 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		2133F29F1E80E175001A0BC5 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
+		2133F2A01E80E175001A0BC5 /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; path = iTunesArtwork; sourceTree = "<group>"; };
+		2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */ = {isa = PBXFileReference; lastKnownFileType = file; path = "iTunesArtwork@2x"; sourceTree = "<group>"; };
+		213515FB1F8CC06400F7AAD0 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		213A4DB01A61749600E9EC13 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
+		213A4DB11A61749B00E9EC13 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MaxSpeechTimeTableViewCell.xib; sourceTree = "<group>"; };
+		213A4DB31A6174AD00E9EC13 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/MaxSpeechTimeTableViewCell.strings; sourceTree = "<group>"; };
+		213A4DC41A63CF8B00E9EC13 /* SpeechWaitConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpeechWaitConfig.h; path = DataModelMapping/SpeechWaitConfig.h; sourceTree = "<group>"; };
+		213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SpeechWaitConfig.m; path = DataModelMapping/SpeechWaitConfig.m; sourceTree = "<group>"; };
+		213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitConfigCacheData.h; sourceTree = "<group>"; };
+		213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitConfigCacheData.m; sourceTree = "<group>"; };
+		213A4DCA1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitSettingTableViewController.h; sourceTree = "<group>"; };
+		213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingTableViewController.m; sourceTree = "<group>"; };
+		213A4DCD1A63FA5100E9EC13 /* SpeechWaitSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitSettingViewController.h; sourceTree = "<group>"; };
+		213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitSettingViewController.m; sourceTree = "<group>"; };
+		213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeIntervalCountDownRow.swift; sourceTree = "<group>"; };
+		214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiftyUtilitySwift.swift; sourceTree = "<group>"; };
+		21429D82209F4516001426F5 /* nc48625.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = nc48625.m4a; sourceTree = "<group>"; };
+		21429D85209F45FD001426F5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMultithreadTests.m; sourceTree = "<group>"; };
+		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
+		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
+		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
+		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
+		216741A82047714D008A578D /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = System/Library/Frameworks/PDFKit.framework; sourceTree = SDKROOT; };
+		216A545C20EE257000D75458 /* NovelSpeakerBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSpeakerBackup.swift; sourceTree = "<group>"; };
+		216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSelectViewController.swift; sourceTree = "<group>"; };
+		21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewCell.h; sourceTree = "<group>"; };
+		21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewCell.m; sourceTree = "<group>"; };
+		21724EED1974163700DF6DC4 /* StoryCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoryCacheData.h; sourceTree = "<group>"; };
+		21724EEE1974163700DF6DC4 /* StoryCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoryCacheData.m; sourceTree = "<group>"; };
+		2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncHttpSession.swift; sourceTree = "<group>"; };
+		2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingButton.swift; sourceTree = "<group>"; };
+		2173A6C021CC530E002E9EA8 /* FloatingButton.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FloatingButton.xib; sourceTree = "<group>"; };
+		2177634F19756781004F22FD /* GlobalStateCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalStateCacheData.h; sourceTree = "<group>"; };
+		2177635019756781004F22FD /* GlobalStateCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalStateCacheData.m; sourceTree = "<group>"; };
+		21778D701A6168C30042F2F1 /* SettingDataModel 7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 7.xcdatamodel"; sourceTree = "<group>"; };
+		217BD9E219CE72BB008A0D9D /* StringSubstituter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StringSubstituter.h; sourceTree = "<group>"; };
+		217BD9E319CE72BB008A0D9D /* StringSubstituter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StringSubstituter.m; sourceTree = "<group>"; };
+		217BD9E519E038BE008A0D9D /* StringSubstituterTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StringSubstituterTests.m; sourceTree = "<group>"; };
+		217E683A1998F6A000C656AA /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		217E683D199A80A200C656AA /* NiftySpeakerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftySpeakerTests.m; sourceTree = "<group>"; };
+		217F6E1A1942F14B008E432E /* Speaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Speaker.h; sourceTree = "<group>"; };
+		217F6E1B1942F14B008E432E /* Speaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Speaker.m; sourceTree = "<group>"; };
+		21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeaker.entitlements; sourceTree = "<group>"; };
+		21814C591E8CE8A00096CB42 /* NovelSpeakerURLDownloadExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerURLDownloadExtension.entitlements; sourceTree = "<group>"; };
+		21814C5A1E8D68A90096CB42 /* NSStringExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringExtension.h; sourceTree = "<group>"; };
+		21814C5B1E8D68A90096CB42 /* NSStringExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStringExtension.m; sourceTree = "<group>"; };
+		21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-small-40@3x.png"; sourceTree = "<group>"; };
+		21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDisplayColorSettingViewController.swift; sourceTree = "<group>"; };
+		21890CF11D92F38800869046 /* NSDataZlibExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataZlibExtension.h; sourceTree = "<group>"; };
+		21890CF21D92F38800869046 /* NSDataZlibExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataZlibExtension.m; sourceTree = "<group>"; };
+		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		21916354199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DefaultSpeakSettingEditTableViewCell.h; sourceTree = "<group>"; };
+		21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DefaultSpeakSettingEditTableViewCell.m; sourceTree = "<group>"; };
+		21916359199DFECA003FF7FC /* SpeakSettingEditTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakSettingEditTableViewCell.h; sourceTree = "<group>"; };
+		2191635A199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakSettingEditTableViewCell.m; sourceTree = "<group>"; };
+		2191635E199E01A6003FF7FC /* SpeakSettingsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakSettingsTableViewController.h; sourceTree = "<group>"; };
+		2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakSettingsTableViewController.m; sourceTree = "<group>"; };
+		21916361199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakSettingSampleTextTableViewCell.h; sourceTree = "<group>"; };
+		21916362199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakSettingSampleTextTableViewCell.m; sourceTree = "<group>"; };
+		21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 3.xcdatamodel"; sourceTree = "<group>"; };
+		2191636A199E65B9003FF7FC /* SpeakPitchConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakPitchConfig.h; sourceTree = "<group>"; };
+		2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakPitchConfig.m; sourceTree = "<group>"; };
+		2191636D199E6610003FF7FC /* SpeakPitchConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakPitchConfigCacheData.h; sourceTree = "<group>"; };
+		2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakPitchConfigCacheData.m; sourceTree = "<group>"; };
+		21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateNewSpeakPitchSettingViewController.h; sourceTree = "<group>"; };
+		21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateNewSpeakPitchSettingViewController.m; sourceTree = "<group>"; };
+		21916373199F143E003FF7FC /* SpeechModSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechModSetting.h; sourceTree = "<group>"; };
+		21916374199F143E003FF7FC /* SpeechModSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSetting.m; sourceTree = "<group>"; };
+		21916376199F1463003FF7FC /* SpeechModSettingCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechModSettingCacheData.h; sourceTree = "<group>"; };
+		21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechModSettingCacheData.m; sourceTree = "<group>"; };
+		2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateSpeechModSettingViewController.h; sourceTree = "<group>"; };
+		2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateSpeechModSettingViewController.m; sourceTree = "<group>"; };
+		2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataMigrationViewController.h; sourceTree = "<group>"; };
+		2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMigrationViewController.m; sourceTree = "<group>"; };
+		2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 4.xcdatamodel"; sourceTree = "<group>"; };
+		2191639819A38414003FF7FC /* NarouContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NarouContent.h; path = DataModelMapping/NarouContent.h; sourceTree = "<group>"; };
+		2191639919A38414003FF7FC /* NarouContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NarouContent.m; path = DataModelMapping/NarouContent.m; sourceTree = "<group>"; };
+		2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataObjectHolder.h; sourceTree = "<group>"; };
+		2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataObjectHolder.m; sourceTree = "<group>"; };
+		2195FBBE1D2FBBCF00ADDCAB /* UriLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UriLoader.h; sourceTree = "<group>"; };
+		2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UriLoader.m; sourceTree = "<group>"; };
+		2195FBC11D2FCC6800ADDCAB /* SiteInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SiteInfo.h; sourceTree = "<group>"; };
+		2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SiteInfo.m; sourceTree = "<group>"; };
+		2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.2.tbd; path = usr/lib/libxml2.2.tbd; sourceTree = SDKROOT; };
+		2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
+		2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 8.xcdatamodel"; sourceTree = "<group>"; };
+		219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-RoundedCorners.png"; sourceTree = "<group>"; };
+		219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavicationController+StatusBarHack.swift"; sourceTree = "<group>"; };
+		21A4F6DA19B1B30C007CCD32 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		21A4F71C19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
+		21A4F71D19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		21A4F71E19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		21A4F73719B1B66E007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/SpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
+		21A4F74119B1B758007CCD32 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
+		21AED5D119B2142E00CE846D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SpeakSettingSampleTextTableViewCell.xib; sourceTree = "<group>"; };
+		21AED5D219B2146F00CE846D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SpeakSettingEditTableViewCell.xib; sourceTree = "<group>"; };
+		21AED5D419B335CF00CE846D /* ReleaseMemo.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReleaseMemo.md; sourceTree = "<group>"; };
+		21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummySoundLooper.swift; sourceTree = "<group>"; };
+		21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Silent3sec.mp3; sourceTree = "<group>"; };
+		21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechBlockTests.m; sourceTree = "<group>"; };
+		21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechRegexPitchSetting.h; sourceTree = "<group>"; };
+		21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechRegexPitchSetting.m; sourceTree = "<group>"; };
+		21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = SettingDataModel.xcdatamodel; sourceTree = "<group>"; };
+		21B539F719603737009658B7 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		21B539F9196037BB009658B7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		21B53A1919619C00009658B7 /* sound.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sound.png; sourceTree = "<group>"; };
+		21B53A1A19619C00009658B7 /* sound@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sound@2x.png"; sourceTree = "<group>"; };
+		21B53A1F19619C50009658B7 /* gear.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gear.png; sourceTree = "<group>"; };
+		21B53A2019619C50009658B7 /* gear@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gear@2x.png"; sourceTree = "<group>"; };
+		21B53A2519619D23009658B7 /* app_globe.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = app_globe.png; sourceTree = "<group>"; };
+		21B53A2619619D23009658B7 /* app_globe@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_globe@2x.png"; sourceTree = "<group>"; };
+		21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalDataSingleton.h; sourceTree = "<group>"; };
+		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
+		21B96ED32338124100112B5F /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ja-JP"; path = "ja-JP.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaxSpeechTimeTableViewCell.h; sourceTree = "<group>"; };
+		21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MaxSpeechTimeTableViewCell.m; sourceTree = "<group>"; };
+		21C372DB21DFC41600FB2D52 /* UIImageExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIImageExtension.h; sourceTree = "<group>"; };
+		21C372DC21DFC41600FB2D52 /* UIImageExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIImageExtension.m; sourceTree = "<group>"; };
+		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
+		21C74F941964502A0039A706 /* arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@2x.png"; sourceTree = "<group>"; };
+		21C74F99196456490039A706 /* NarouSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchViewController.h; sourceTree = "<group>"; };
+		21C74F9A196456490039A706 /* NarouSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchViewController.m; sourceTree = "<group>"; };
+		21C74F9C1965A5300039A706 /* NarouContentCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContentCacheData.h; sourceTree = "<group>"; };
+		21C74F9D1965A5300039A706 /* NarouContentCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouContentCacheData.m; sourceTree = "<group>"; };
+		21C74FA21967FD390039A706 /* NarouDownloadQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouDownloadQueue.h; sourceTree = "<group>"; };
+		21C74FA31967FD390039A706 /* NarouDownloadQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouDownloadQueue.m; sourceTree = "<group>"; };
+		21C74FD2196831070039A706 /* DownloadStatusViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadStatusViewController.h; sourceTree = "<group>"; };
+		21C74FD3196831070039A706 /* DownloadStatusViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadStatusViewController.m; sourceTree = "<group>"; };
+		21C74FD5196843280039A706 /* BookShelfTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookShelfTableViewController.h; sourceTree = "<group>"; };
+		21C74FD6196843280039A706 /* BookShelfTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookShelfTableViewController.m; sourceTree = "<group>"; };
+		21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSoundPlayer.swift; sourceTree = "<group>"; };
+		21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-monochrome-64x64-reverse.png"; sourceTree = "<group>"; };
+		21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-monochrome-320x320-reverse.png"; sourceTree = "<group>"; };
+		21CAC81B21273C0A00F74092 /* UpdateMemo.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UpdateMemo.txt; sourceTree = "<group>"; };
+		21D317E51B6BBF3600023B3B /* EditUserBookViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditUserBookViewController.h; sourceTree = "<group>"; };
+		21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditUserBookViewController.m; sourceTree = "<group>"; };
+		21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogViewControllerSwift.swift; sourceTree = "<group>"; };
+		21D3979B1FC95CB90018F883 /* earth@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "earth@2x.png"; sourceTree = "<group>"; };
+		21D3979C1FC95CBA0018F883 /* earth@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "earth@3x.png"; sourceTree = "<group>"; };
+		21D3979D1FC95CBA0018F883 /* earth.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = earth.png; sourceTree = "<group>"; };
+		21D397A11FC960DD0018F883 /* bookmark-true@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-true@3x.png"; sourceTree = "<group>"; };
+		21D397A21FC960DE0018F883 /* bookmark-true@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-true@2x.png"; sourceTree = "<group>"; };
+		21D397A61FC960E10018F883 /* bookmark-true.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-true.png"; sourceTree = "<group>"; };
+		21D397AD1FC97A360018F883 /* home@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "home@2x.png"; sourceTree = "<group>"; };
+		21D397AE1FC97A370018F883 /* home@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "home@3x.png"; sourceTree = "<group>"; };
+		21D397AF1FC97A370018F883 /* home.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = home.png; sourceTree = "<group>"; };
+		21D8FC4D19FC985B00CCF1B6 /* LPPerformanceChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LPPerformanceChecker.h; sourceTree = "<group>"; };
+		21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LPPerformanceChecker.m; sourceTree = "<group>"; };
+		21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModel4to5.xcmappingmodel; sourceTree = "<group>"; };
+		21D8FC5319FCB07B00CCF1B6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/coreDataMigration.storyboard; sourceTree = "<group>"; };
+		21D8FC5619FCB09B00CCF1B6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/coreDataMigration.strings; sourceTree = "<group>"; };
+		21D8FC5819FCB09E00CCF1B6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/coreDataMigration.strings; sourceTree = "<group>"; };
+		21DD0BF420B595F500DC3C39 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 2.xcdatamodel"; sourceTree = "<group>"; };
+		21E46D411A94B7F400CE39B0 /* EasyShare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EasyShare.h; sourceTree = "<group>"; };
+		21E46D421A94B7F400CE39B0 /* EasyShare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EasyShare.m; sourceTree = "<group>"; };
+		21E704CD1AF741350071F31E /* UpdateLogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateLogViewController.h; sourceTree = "<group>"; };
+		21E704CE1AF741350071F31E /* UpdateLogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateLogViewController.m; sourceTree = "<group>"; };
+		21E76BF81FB487B1003C659F /* EasyDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EasyDialogs.swift; sourceTree = "<group>"; };
+		21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModSettingsTableViewControllerSwift.swift; sourceTree = "<group>"; };
+		21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarouSearchResultDetailViewControllerSwift.swift; sourceTree = "<group>"; };
+		21EA62E5205560B80084B366 /* EurekaCustomRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EurekaCustomRows.swift; sourceTree = "<group>"; };
+		21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
+		21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIViewControllerExtension.m; sourceTree = "<group>"; };
+		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21F054CC1917E0F200CC6BA9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		21F054D01917E0F200CC6BA9 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		21F054D41917E0F200CC6BA9 /* NovelSpeaker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NovelSpeaker-Info.plist"; sourceTree = "<group>"; };
+		21F054D61917E0F200CC6BA9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		21F054D81917E0F200CC6BA9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		21F054DA1917E0F200CC6BA9 /* NovelSpeaker-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeaker-Prefix.pch"; sourceTree = "<group>"; };
+		21F054DB1917E0F200CC6BA9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		21F054DC1917E0F200CC6BA9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		21F054DF1917E0F200CC6BA9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		21F054E11917E0F200CC6BA9 /* SpeechViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpeechViewController.h; sourceTree = "<group>"; };
+		21F054E21917E0F200CC6BA9 /* SpeechViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpeechViewController.m; sourceTree = "<group>"; };
+		21F054E41917E0F200CC6BA9 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NovelSpeakerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		21F054EB1917E0F200CC6BA9 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		21F054F31917E0F200CC6BA9 /* NovelSpeakerTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "NovelSpeakerTests-Info.plist"; sourceTree = "<group>"; };
+		21F054F51917E0F200CC6BA9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NovelSpeakerTests.m; sourceTree = "<group>"; };
+		21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeaker-Bridging-Header.h"; sourceTree = "<group>"; };
+		21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomUITextView.swift; sourceTree = "<group>"; };
+		21F563C11FD801950037F5D7 /* >.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ">.png"; sourceTree = "<group>"; };
+		21F563C21FD801960037F5D7 /* >@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ">@2x.png"; sourceTree = "<group>"; };
+		21F563C41FD801970037F5D7 /* >@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ">@3x.png"; sourceTree = "<group>"; };
+		21F563CC1FD8023E0037F5D7 /* <.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "<.png"; sourceTree = "<group>"; };
+		21F563CD1FD8023F0037F5D7 /* <@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "<@2x.png"; sourceTree = "<group>"; };
+		21F563CE1FD8023F0037F5D7 /* <@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "<@3x.png"; sourceTree = "<group>"; };
+		21F7DE43197EB33900BD2899 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Story.h; path = DataModelMapping/Story.h; sourceTree = "<group>"; };
+		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
+		21FDF56020392E1E00DE1692 /* NSDataDetectEncodingExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSDataDetectEncodingExtension.h; sourceTree = "<group>"; };
+		21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSDataDetectEncodingExtension.m; sourceTree = "<group>"; };
+		21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
+		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
+		4E776B18196247FB00C36AD1 /* NarouLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouLoader.h; sourceTree = "<group>"; };
+		4E776B19196247FB00C36AD1 /* NarouLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouLoader.m; sourceTree = "<group>"; };
+		4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouSearchResultTableViewController.h; sourceTree = "<group>"; };
+		4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NarouSearchResultTableViewController.m; sourceTree = "<group>"; };
+		5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerURLDownloadExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeaker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerTests/Pods-NovelSpeakerTests.release.xcconfig"; sourceTree = "<group>"; };
+		D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2126A2581D9A1B90008E534A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9051B983E846E56867906F94 /* Pods_NovelSpeakerURLDownloadExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21F054C61917E0F200CC6BA9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */,
+				216741A92047714D008A578D /* PDFKit.framework in Frameworks */,
+				215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */,
+				213515FC1F8CC06400F7AAD0 /* MessageUI.framework in Frameworks */,
+				2126A26D1D9D1B92008E534A /* libxml2.2.tbd in Frameworks */,
+				21890CF51D9309F000869046 /* libz.tbd in Frameworks */,
+				217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */,
+				21B539FA196037BC009658B7 /* AVFoundation.framework in Frameworks */,
+				21B539F819603737009658B7 /* CoreData.framework in Frameworks */,
+				21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */,
+				21F054D11917E0F200CC6BA9 /* UIKit.framework in Frameworks */,
+				21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */,
+				A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21F054E71917E0F200CC6BA9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21F054EC1917E0F200CC6BA9 /* XCTest.framework in Frameworks */,
+				21F054EE1917E0F200CC6BA9 /* UIKit.framework in Frameworks */,
+				21F054ED1917E0F200CC6BA9 /* Foundation.framework in Frameworks */,
+				2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		211BA5F219973AAD00560842 /* TextSpeech */ = {
+			isa = PBXGroup;
+			children = (
+				217F6E1A1942F14B008E432E /* Speaker.h */,
+				217F6E1B1942F14B008E432E /* Speaker.m */,
+				211BA5F619973BA500560842 /* SpeechBlock.h */,
+				211BA5F719973BA500560842 /* SpeechBlock.m */,
+				211BA5F919973CFB00560842 /* SpeechConfig.h */,
+				211BA5FA19973CFB00560842 /* SpeechConfig.m */,
+				211BA5FC199742CF00560842 /* NiftySpeaker.h */,
+				211BA5FD199742CF00560842 /* NiftySpeaker.m */,
+				217BD9E219CE72BB008A0D9D /* StringSubstituter.h */,
+				217BD9E319CE72BB008A0D9D /* StringSubstituter.m */,
+			);
+			name = TextSpeech;
+			sourceTree = "<group>";
+		};
+		2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */ = {
+			isa = PBXGroup;
+			children = (
+				2126A2601D9A1B90008E534A /* Action.js */,
+				21814C591E8CE8A00096CB42 /* NovelSpeakerURLDownloadExtension.entitlements */,
+				2126A25D1D9A1B90008E534A /* ActionRequestHandler.h */,
+				2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */,
+				212972141DA66F2C001ED63D /* Info.plist */,
+				2133F2211E7FFF0B001A0BC5 /* Localizable.strings */,
+				212F951D1EB0EB8B005EF253 /* NovelSpeakerURLDownloadExtension-Bridging-Header.h */,
+			);
+			path = NovelSpeakerURLDownloadExtension;
+			sourceTree = "<group>";
+		};
+		2133F28F1E80E175001A0BC5 /* AppIcon-monochrome-reverse */ = {
+			isa = PBXGroup;
+			children = (
+				2133F2901E80E175001A0BC5 /* Icon-60@2x.png */,
+				2133F2911E80E175001A0BC5 /* Icon-60@3x.png */,
+				2133F2921E80E175001A0BC5 /* Icon-72.png */,
+				2133F2931E80E175001A0BC5 /* Icon-72@2x.png */,
+				2133F2941E80E175001A0BC5 /* Icon-76.png */,
+				2133F2951E80E175001A0BC5 /* Icon-76@2x.png */,
+				2133F2961E80E175001A0BC5 /* Icon-83.5@2x.png */,
+				2133F2971E80E175001A0BC5 /* Icon-Small-40.png */,
+				2133F2981E80E175001A0BC5 /* Icon-Small-40@2x.png */,
+				21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */,
+				2133F2991E80E175001A0BC5 /* Icon-Small-50.png */,
+				2133F29A1E80E175001A0BC5 /* Icon-Small-50@2x.png */,
+				2133F29B1E80E175001A0BC5 /* Icon-Small.png */,
+				2133F29C1E80E175001A0BC5 /* Icon-Small@2x.png */,
+				2133F29D1E80E175001A0BC5 /* Icon-Small@3x.png */,
+				21CAC8172125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png */,
+				21CAC8182125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png */,
+				2133F29E1E80E175001A0BC5 /* Icon.png */,
+				2133F29F1E80E175001A0BC5 /* Icon@2x.png */,
+				2133F2A01E80E175001A0BC5 /* iTunesArtwork */,
+				2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */,
+			);
+			path = "AppIcon-monochrome-reverse";
+			sourceTree = "<group>";
+		};
+		21724EE119721D3600DF6DC4 /* MappingModel */ = {
+			isa = PBXGroup;
+			children = (
+				212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */,
+				212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */,
+				21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */,
+				212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */,
+				212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */,
+			);
+			name = MappingModel;
+			sourceTree = "<group>";
+		};
+		21724EE51972C7B400DF6DC4 /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+				21724EE81972CCFE00DF6DC4 /* BookShelfTableViewCell.h */,
+				21724EE91972CCFE00DF6DC4 /* BookShelfTableViewCell.m */,
+				2117250F19B2064400FB97D2 /* BookShelfTableViewCell.xib */,
+				21916354199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.h */,
+				21916355199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m */,
+				212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */,
+				21916359199DFECA003FF7FC /* SpeakSettingEditTableViewCell.h */,
+				2191635A199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m */,
+				21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */,
+				21916361199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.h */,
+				21916362199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m */,
+				2117252019B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib */,
+				21BDC2D81A2B6F42002804DD /* MaxSpeechTimeTableViewCell.h */,
+				21BDC2D91A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m */,
+				213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */,
+				2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */,
+				2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */,
+				2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */,
+				213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */,
+				21EA62E5205560B80084B366 /* EurekaCustomRows.swift */,
+				2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */,
+				2173A6C021CC530E002E9EA8 /* FloatingButton.xib */,
+			);
+			name = CustomViews;
+			sourceTree = "<group>";
+		};
+		21B53A1819619BE7009658B7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2133F28F1E80E175001A0BC5 /* AppIcon-monochrome-reverse */,
+				212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */,
+				21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
+				219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */,
+				212F011B1D907CF1009D69E6 /* Default568@2x.png */,
+				210958ED1A0E1C5500E9171F /* NEW!.png */,
+				210958F01A0E1C5C00E9171F /* NEW!@2x.png */,
+				210958F31A0E1C6100E9171F /* NEW!@3x.png */,
+				21C74F931964502A0039A706 /* arrow_down.png */,
+				21C74F941964502A0039A706 /* arrow_down@2x.png */,
+				210958B81A0DF55600E9171F /* arrow_down@3x.png */,
+				21F563CC1FD8023E0037F5D7 /* <.png */,
+				21F563CD1FD8023F0037F5D7 /* <@2x.png */,
+				21F563CE1FD8023F0037F5D7 /* <@3x.png */,
+				21F563C11FD801950037F5D7 /* >.png */,
+				21F563C21FD801960037F5D7 /* >@2x.png */,
+				21F563C41FD801970037F5D7 /* >@3x.png */,
+				21B53A2519619D23009658B7 /* app_globe.png */,
+				21B53A2619619D23009658B7 /* app_globe@2x.png */,
+				210958B91A0DF55600E9171F /* booksearch.png */,
+				210958BA1A0DF55600E9171F /* booksearch@2x.png */,
+				210958BB1A0DF55600E9171F /* booksearch@3x.png */,
+				21D3979D1FC95CBA0018F883 /* earth.png */,
+				21D3979B1FC95CB90018F883 /* earth@2x.png */,
+				21D3979C1FC95CBA0018F883 /* earth@3x.png */,
+				2133743E2013816C0043D995 /* bookmark-false.png */,
+				2133743C2013816C0043D995 /* bookmark-false@2x.png */,
+				2133743D2013816C0043D995 /* bookmark-false@3x.png */,
+				21D397A61FC960E10018F883 /* bookmark-true.png */,
+				21D397A21FC960DE0018F883 /* bookmark-true@2x.png */,
+				21D397A11FC960DD0018F883 /* bookmark-true@3x.png */,
+				21D397AF1FC97A370018F883 /* home.png */,
+				21D397AD1FC97A360018F883 /* home@2x.png */,
+				21D397AE1FC97A370018F883 /* home@3x.png */,
+				21B53A1F19619C50009658B7 /* gear.png */,
+				21B53A2019619C50009658B7 /* gear@2x.png */,
+				210958BC1A0DF55600E9171F /* gear@3x.png */,
+				210958BD1A0DF55600E9171F /* icloud1.png */,
+				210958BE1A0DF55600E9171F /* icloud1@2x.png */,
+				210958BF1A0DF55600E9171F /* icloud1@3x.png */,
+				210958C01A0DF55600E9171F /* soundbook.png */,
+				210958C11A0DF55600E9171F /* soundbook@2x.png */,
+				210958C21A0DF55600E9171F /* soundbook@3x.png */,
+				21B53A1919619C00009658B7 /* sound.png */,
+				21B53A1A19619C00009658B7 /* sound@2x.png */,
+				2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */,
+				21429D82209F4516001426F5 /* nc48625.m4a */,
+				21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */,
+				21DD0BF420B595F500DC3C39 /* LICENSE.txt */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		21D8FC4C19FC97DB00CCF1B6 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				21E76BF81FB487B1003C659F /* EasyDialogs.swift */,
+				2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */,
+				2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */,
+				21D8FC4D19FC985B00CCF1B6 /* LPPerformanceChecker.h */,
+				21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */,
+				21E46D411A94B7F400CE39B0 /* EasyShare.h */,
+				21E46D421A94B7F400CE39B0 /* EasyShare.m */,
+				2195FBBE1D2FBBCF00ADDCAB /* UriLoader.h */,
+				2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */,
+				2195FBC11D2FCC6800ADDCAB /* SiteInfo.h */,
+				2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */,
+				212F01121D8FDEC5009D69E6 /* NiftyUtility.h */,
+				212F01131D8FDEC5009D69E6 /* NiftyUtility.m */,
+				214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */,
+				21890CF11D92F38800869046 /* NSDataZlibExtension.h */,
+				21890CF21D92F38800869046 /* NSDataZlibExtension.m */,
+				21FDF56020392E1E00DE1692 /* NSDataDetectEncodingExtension.h */,
+				21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */,
+				2127EAC91DB75989005B1636 /* HtmlStory.h */,
+				2127EACA1DB75989005B1636 /* HtmlStory.m */,
+				21814C5A1E8D68A90096CB42 /* NSStringExtension.h */,
+				21814C5B1E8D68A90096CB42 /* NSStringExtension.m */,
+				21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */,
+				21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */,
+				21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */,
+				21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */,
+				2167419F2043D592008A578D /* BehaviorLogger.swift */,
+				216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */,
+				216A545C20EE257000D75458 /* NovelSpeakerBackup.swift */,
+				21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */,
+				21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */,
+				2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */,
+				21C372DB21DFC41600FB2D52 /* UIImageExtension.h */,
+				21C372DC21DFC41600FB2D52 /* UIImageExtension.m */,
+				21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */,
+			);
+			name = Tools;
+			sourceTree = "<group>";
+		};
+		21E294E91970E2D00012A3AA /* DataModel */ = {
+			isa = PBXGroup;
+			children = (
+				21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */,
+				21724EE119721D3600DF6DC4 /* MappingModel */,
+				212F359A1A8F8857009D0E60 /* GlobalState.h */,
+				212F359B1A8F8857009D0E60 /* GlobalState.m */,
+				2177634F19756781004F22FD /* GlobalStateCacheData.h */,
+				2177635019756781004F22FD /* GlobalStateCacheData.m */,
+				2191639819A38414003FF7FC /* NarouContent.h */,
+				2191639919A38414003FF7FC /* NarouContent.m */,
+				21C74F9C1965A5300039A706 /* NarouContentCacheData.h */,
+				21C74F9D1965A5300039A706 /* NarouContentCacheData.m */,
+				2191636A199E65B9003FF7FC /* SpeakPitchConfig.h */,
+				2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */,
+				2191636D199E6610003FF7FC /* SpeakPitchConfigCacheData.h */,
+				2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */,
+				21916373199F143E003FF7FC /* SpeechModSetting.h */,
+				21916374199F143E003FF7FC /* SpeechModSetting.m */,
+				21916376199F1463003FF7FC /* SpeechModSettingCacheData.h */,
+				21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */,
+				21F7DE43197EB33900BD2899 /* Story.h */,
+				21F7DE44197EB33900BD2899 /* Story.m */,
+				21724EED1974163700DF6DC4 /* StoryCacheData.h */,
+				21724EEE1974163700DF6DC4 /* StoryCacheData.m */,
+				213A4DC41A63CF8B00E9EC13 /* SpeechWaitConfig.h */,
+				213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */,
+				213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */,
+				213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */,
+			);
+			name = DataModel;
+			sourceTree = "<group>";
+		};
+		21F054C01917E0F100CC6BA9 = {
+			isa = PBXGroup;
+			children = (
+				21F054D21917E0F200CC6BA9 /* NovelSpeaker */,
+				21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */,
+				2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
+				21F054CB1917E0F200CC6BA9 /* Frameworks */,
+				21F054CA1917E0F200CC6BA9 /* Products */,
+				A889DD6179ED1DDD1D382860 /* Pods */,
+			);
+			sourceTree = "<group>";
+		};
+		21F054CA1917E0F200CC6BA9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */,
+				21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */,
+				2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		21F054CB1917E0F200CC6BA9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				21429D85209F45FD001426F5 /* AudioToolbox.framework */,
+				216741A82047714D008A578D /* PDFKit.framework */,
+				215B4DE91FB928A900602DB6 /* WebKit.framework */,
+				213515FB1F8CC06400F7AAD0 /* MessageUI.framework */,
+				21890CF41D9309F000869046 /* libz.tbd */,
+				2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */,
+				2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */,
+				21245BDA1A8FBB6800D3B376 /* Social.framework */,
+				21245BD81A8FBA2A00D3B376 /* Twitter.framework */,
+				217E683A1998F6A000C656AA /* MediaPlayer.framework */,
+				21B539F9196037BB009658B7 /* AVFoundation.framework */,
+				21B539F719603737009658B7 /* CoreData.framework */,
+				21F054CC1917E0F200CC6BA9 /* Foundation.framework */,
+				21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */,
+				21F054D01917E0F200CC6BA9 /* UIKit.framework */,
+				21F054EB1917E0F200CC6BA9 /* XCTest.framework */,
+				A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */,
+				AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */,
+				7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		21F054D21917E0F200CC6BA9 /* NovelSpeaker */ = {
+			isa = PBXGroup;
+			children = (
+				21AED5D419B335CF00CE846D /* ReleaseMemo.md */,
+				21CAC81B21273C0A00F74092 /* UpdateMemo.txt */,
+				21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */,
+				21B53A2B19619E01009658B7 /* GlobalDataSingleton.h */,
+				21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */,
+				21C74FA21967FD390039A706 /* NarouDownloadQueue.h */,
+				21C74FA31967FD390039A706 /* NarouDownloadQueue.m */,
+				4E776B18196247FB00C36AD1 /* NarouLoader.h */,
+				4E776B19196247FB00C36AD1 /* NarouLoader.m */,
+				21B53951195FE709009658B7 /* SpeechRegexPitchSetting.h */,
+				21B53952195FE709009658B7 /* SpeechRegexPitchSetting.m */,
+				21F054DB1917E0F200CC6BA9 /* AppDelegate.h */,
+				21F054DC1917E0F200CC6BA9 /* AppDelegate.m */,
+				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
+				21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */,
+				219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */,
+				211BA5F219973AAD00560842 /* TextSpeech */,
+				21D8FC4C19FC97DB00CCF1B6 /* Tools */,
+				4E776B17196247BE00C36AD1 /* ViewControllers */,
+				21E294E91970E2D00012A3AA /* DataModel */,
+				21B53A1819619BE7009658B7 /* Resources */,
+				21F054E41917E0F200CC6BA9 /* Images.xcassets */,
+				21F054D31917E0F200CC6BA9 /* Supporting Files */,
+			);
+			path = NovelSpeaker;
+			sourceTree = "<group>";
+		};
+		21F054D31917E0F200CC6BA9 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				21F054D41917E0F200CC6BA9 /* NovelSpeaker-Info.plist */,
+				21F054D51917E0F200CC6BA9 /* InfoPlist.strings */,
+				21F054D81917E0F200CC6BA9 /* main.m */,
+				21F054DA1917E0F200CC6BA9 /* NovelSpeaker-Prefix.pch */,
+				212852DE19B1D101001A75DC /* Localizable.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */ = {
+			isa = PBXGroup;
+			children = (
+				21F054F71917E0F200CC6BA9 /* NovelSpeakerTests.m */,
+				21F054F21917E0F200CC6BA9 /* Supporting Files */,
+				217E683D199A80A200C656AA /* NiftySpeakerTests.m */,
+				217BD9E519E038BE008A0D9D /* StringSubstituterTests.m */,
+				2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */,
+				210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */,
+				21AFDF35216CF977002F34D9 /* SpeechBlockTests.m */,
+			);
+			path = NovelSpeakerTests;
+			sourceTree = "<group>";
+		};
+		21F054F21917E0F200CC6BA9 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				21F054F31917E0F200CC6BA9 /* NovelSpeakerTests-Info.plist */,
+				21F054F41917E0F200CC6BA9 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4E776B17196247BE00C36AD1 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				21724EE51972C7B400DF6DC4 /* CustomViews */,
+				21C74FD5196843280039A706 /* BookShelfTableViewController.h */,
+				21C74FD6196843280039A706 /* BookShelfTableViewController.m */,
+				21F054E11917E0F200CC6BA9 /* SpeechViewController.h */,
+				21F054E21917E0F200CC6BA9 /* SpeechViewController.m */,
+				4E776B1B1962566F00C36AD1 /* NarouSearchResultTableViewController.h */,
+				4E776B1C1962566F00C36AD1 /* NarouSearchResultTableViewController.m */,
+				21C74F99196456490039A706 /* NarouSearchViewController.h */,
+				21C74F9A196456490039A706 /* NarouSearchViewController.m */,
+				21C74FD2196831070039A706 /* DownloadStatusViewController.h */,
+				21C74FD3196831070039A706 /* DownloadStatusViewController.m */,
+				2191635E199E01A6003FF7FC /* SpeakSettingsTableViewController.h */,
+				2191635F199E01A7003FF7FC /* SpeakSettingsTableViewController.m */,
+				213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */,
+				210958F71A0E2E3E00E9171F /* TextSizeSettingViewController.h */,
+				210958F81A0E2E3E00E9171F /* TextSizeSettingViewController.m */,
+				21916370199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.h */,
+				21916371199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m */,
+				21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */,
+				2191637C199F473D003FF7FC /* CreateSpeechModSettingViewController.h */,
+				2191637D199F473D003FF7FC /* CreateSpeechModSettingViewController.m */,
+				2191638F19A0AAC8003FF7FC /* CoreDataMigrationViewController.h */,
+				2191639019A0AAC8003FF7FC /* CoreDataMigrationViewController.m */,
+				213A4DCA1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.h */,
+				213A4DCB1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m */,
+				213A4DCD1A63FA5100E9EC13 /* SpeechWaitSettingViewController.h */,
+				213A4DCE1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m */,
+				21D397991FC93DA40018F883 /* DebugLogViewControllerSwift.swift */,
+				21E704CD1AF741350071F31E /* UpdateLogViewController.h */,
+				21E704CE1AF741350071F31E /* UpdateLogViewController.m */,
+				21D317E51B6BBF3600023B3B /* EditUserBookViewController.h */,
+				21D317E61B6BBF3600023B3B /* EditUserBookViewController.m */,
+				215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */,
+				216741A2204421F1008A578D /* BugReportViewController.swift */,
+				21EA62E320554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift */,
+				216FF44D2098C5D3003BA9C7 /* FontSelectViewController.swift */,
+				21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */,
+			);
+			name = ViewControllers;
+			sourceTree = "<group>";
+		};
+		A889DD6179ED1DDD1D382860 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */,
+				355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */,
+				5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */,
+				BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */,
+				BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */,
+				0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2126A2681D9A1B90008E534A /* Build configuration list for PBXNativeTarget "NovelSpeakerURLDownloadExtension" */;
+			buildPhases = (
+				83E287011980B0B51F2387CD /* [CP] Check Pods Manifest.lock */,
+				2126A2571D9A1B90008E534A /* Sources */,
+				2126A2581D9A1B90008E534A /* Frameworks */,
+				2126A2591D9A1B90008E534A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NovelSpeakerURLDownloadExtension;
+			productName = NovelSpeakerURLDownloadExtension;
+			productReference = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		21F054C81917E0F200CC6BA9 /* NovelSpeaker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21F054FB1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeaker" */;
+			buildPhases = (
+				E09854C708603E180E1222AF /* [CP] Check Pods Manifest.lock */,
+				21F054C51917E0F200CC6BA9 /* Sources */,
+				21F054C61917E0F200CC6BA9 /* Frameworks */,
+				21F054C71917E0F200CC6BA9 /* Resources */,
+				2126A2691D9A1B90008E534A /* Embed App Extensions */,
+				455CC71F8AB9A5A5AC429D00 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2126A2641D9A1B90008E534A /* PBXTargetDependency */,
+			);
+			name = NovelSpeaker;
+			productName = NovelSpeaker;
+			productReference = 21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */;
+			productType = "com.apple.product-type.application";
+		};
+		21F054E91917E0F200CC6BA9 /* NovelSpeakerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21F054FE1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeakerTests" */;
+			buildPhases = (
+				79969131A327B7D119614886 /* [CP] Check Pods Manifest.lock */,
+				21F054E61917E0F200CC6BA9 /* Sources */,
+				21F054E71917E0F200CC6BA9 /* Frameworks */,
+				21F054E81917E0F200CC6BA9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				21F054F01917E0F200CC6BA9 /* PBXTargetDependency */,
+			);
+			name = NovelSpeakerTests;
+			productName = NovelSpeakerTests;
+			productReference = 21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		21F054C11917E0F100CC6BA9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0830;
+				LastUpgradeCheck = 0900;
+				ORGANIZATIONNAME = "IIMURA Takuji";
+				TargetAttributes = {
+					2126A25A1D9A1B90008E534A = {
+						CreatedOnToolsVersion = 8.0;
+						DevelopmentTeam = 4KZE8276ZF;
+						LastSwiftMigration = 0900;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 0;
+							};
+						};
+					};
+					21F054C81917E0F200CC6BA9 = {
+						DevelopmentTeam = 4KZE8276ZF;
+						LastSwiftMigration = 1000;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 0;
+							};
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
+					};
+					21F054E91917E0F200CC6BA9 = {
+						DevelopmentTeam = 4KZE8276ZF;
+						LastSwiftMigration = 0940;
+						TestTargetID = 21F054C81917E0F200CC6BA9;
+					};
+				};
+			};
+			buildConfigurationList = 21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				ja,
+				"ja-JP",
+			);
+			mainGroup = 21F054C01917E0F100CC6BA9;
+			productRefGroup = 21F054CA1917E0F200CC6BA9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				21F054C81917E0F200CC6BA9 /* NovelSpeaker */,
+				21F054E91917E0F200CC6BA9 /* NovelSpeakerTests */,
+				2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2126A2591D9A1B90008E534A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2133F2261E800F4A001A0BC5 /* Images.xcassets in Resources */,
+				2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */,
+				2126A2611D9A1B90008E534A /* Action.js in Resources */,
+				212972171DA66FDB001ED63D /* Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21F054C71917E0F200CC6BA9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21429D84209F45E3001426F5 /* nc48625.m4a in Resources */,
+				2133F2A31E80E175001A0BC5 /* Icon-60@3x.png in Resources */,
+				21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */,
+				21D3979F1FC95CBB0018F883 /* earth@3x.png in Resources */,
+				21FDF5642043CDB200DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */,
+				2133F2AC1E80E175001A0BC5 /* Icon-Small-50@2x.png in Resources */,
+				2133743F2013816D0043D995 /* bookmark-false@2x.png in Resources */,
+				210958F11A0E1C6100E9171F /* NEW!@3x.png in Resources */,
+				21D397B01FC97A380018F883 /* home@2x.png in Resources */,
+				21F563D11FD802400037F5D7 /* <@3x.png in Resources */,
+				2133F2A71E80E175001A0BC5 /* Icon-76@2x.png in Resources */,
+				210958C31A0DF55600E9171F /* arrow_down@3x.png in Resources */,
+				2133F2A91E80E175001A0BC5 /* Icon-Small-40.png in Resources */,
+				210958CC1A0DF55600E9171F /* soundbook@2x.png in Resources */,
+				21CAC8192125F01400F74092 /* NovelSpeakerIcon-monochrome-64x64-reverse.png in Resources */,
+				210958CA1A0DF55600E9171F /* icloud1@3x.png in Resources */,
+				21F563D01FD802400037F5D7 /* <@2x.png in Resources */,
+				2173A6C121CC530E002E9EA8 /* FloatingButton.xib in Resources */,
+				21B53A021960509A009658B7 /* SettingDataModel.xcdatamodeld in Resources */,
+				21B53A2219619C50009658B7 /* gear.png in Resources */,
+				2133F2A81E80E175001A0BC5 /* Icon-83.5@2x.png in Resources */,
+				212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */,
+				2133F2A21E80E175001A0BC5 /* Icon-60@2x.png in Resources */,
+				210958C41A0DF55600E9171F /* booksearch.png in Resources */,
+				2133F2B11E80E175001A0BC5 /* Icon@2x.png in Resources */,
+				21F563C71FD801970037F5D7 /* >.png in Resources */,
+				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
+				21F563CF1FD802400037F5D7 /* <.png in Resources */,
+				21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */,
+				210958EB1A0E1C5500E9171F /* NEW!.png in Resources */,
+				21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */,
+				21D397B21FC97A380018F883 /* home.png in Resources */,
+				2133F2AF1E80E175001A0BC5 /* Icon-Small@3x.png in Resources */,
+				2133F2B01E80E175001A0BC5 /* Icon.png in Resources */,
+				2133F2AE1E80E175001A0BC5 /* Icon-Small@2x.png in Resources */,
+				21CAC81C21273C0A00F74092 /* UpdateMemo.txt in Resources */,
+				213A4DAC1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib in Resources */,
+				21D397A81FC960E10018F883 /* bookmark-true@2x.png in Resources */,
+				21F563C81FD801970037F5D7 /* >@2x.png in Resources */,
+				212F011C1D907CF1009D69E6 /* Default568@2x.png in Resources */,
+				2133F2A41E80E175001A0BC5 /* Icon-72.png in Resources */,
+				21F054E51917E0F200CC6BA9 /* Images.xcassets in Resources */,
+				210958C61A0DF55600E9171F /* booksearch@3x.png in Resources */,
+				2133F2B31E80E175001A0BC5 /* iTunesArtwork@2x in Resources */,
+				210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */,
+				213374412013816D0043D995 /* bookmark-false.png in Resources */,
+				210958C81A0DF55600E9171F /* icloud1.png in Resources */,
+				2117251E19B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib in Resources */,
+				21B53A2819619D23009658B7 /* app_globe.png in Resources */,
+				210958C71A0DF55600E9171F /* gear@3x.png in Resources */,
+				219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */,
+				21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */,
+				21F563CA1FD801970037F5D7 /* >@3x.png in Resources */,
+				2133F2A61E80E175001A0BC5 /* Icon-76.png in Resources */,
+				21B53A1C19619C00009658B7 /* sound.png in Resources */,
+				21D397AC1FC960E10018F883 /* bookmark-true.png in Resources */,
+				210958CB1A0DF55600E9171F /* soundbook.png in Resources */,
+				210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */,
+				21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */,
+				21D3979E1FC95CBB0018F883 /* earth@2x.png in Resources */,
+				210958C91A0DF55600E9171F /* icloud1@2x.png in Resources */,
+				2133F2AB1E80E175001A0BC5 /* Icon-Small-50.png in Resources */,
+				21F054D71917E0F200CC6BA9 /* InfoPlist.strings in Resources */,
+				21F054E01917E0F200CC6BA9 /* Main.storyboard in Resources */,
+				212F00D21D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib in Resources */,
+				2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */,
+				21D397B11FC97A380018F883 /* home@3x.png in Resources */,
+				21C74F961964502A0039A706 /* arrow_down.png in Resources */,
+				2133F21C1E7D5674001A0BC5 /* CustomAutopagerizeItems.json in Resources */,
+				2133F2AA1E80E175001A0BC5 /* Icon-Small-40@2x.png in Resources */,
+				21CAC81A2125F01400F74092 /* NovelSpeakerIcon-monochrome-320x320-reverse.png in Resources */,
+				2117251019B2064400FB97D2 /* BookShelfTableViewCell.xib in Resources */,
+				210958CD1A0DF55600E9171F /* soundbook@3x.png in Resources */,
+				21D397A71FC960E10018F883 /* bookmark-true@3x.png in Resources */,
+				21B53A1D19619C00009658B7 /* sound@2x.png in Resources */,
+				2133F2B21E80E175001A0BC5 /* iTunesArtwork in Resources */,
+				2133F2A51E80E175001A0BC5 /* Icon-72@2x.png in Resources */,
+				212852DC19B1D101001A75DC /* Localizable.strings in Resources */,
+				21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */,
+				219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png in Resources */,
+				213374402013816D0043D995 /* bookmark-false@3x.png in Resources */,
+				21D397A01FC95CBB0018F883 /* earth.png in Resources */,
+				2133F2AD1E80E175001A0BC5 /* Icon-Small.png in Resources */,
+				21A4F73619B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21F054E81917E0F200CC6BA9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		455CC71F8AB9A5A5AC429D00 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework",
+				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
+				"${BUILT_PRODUCTS_DIR}/MSColorPicker/MSColorPicker.framework",
+				"${BUILT_PRODUCTS_DIR}/SZTextView/SZTextView.framework",
+				"${BUILT_PRODUCTS_DIR}/Zip/Zip.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Eureka.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FTLinearActivityIndicator.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSColorPicker.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SZTextView.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Zip.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		79969131A327B7D119614886 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-NovelSpeakerTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		83E287011980B0B51F2387CD /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-NovelSpeakerURLDownloadExtension-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E09854C708603E180E1222AF /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-NovelSpeaker-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2126A2571D9A1B90008E534A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21F054C51917E0F200CC6BA9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21916360199E01A7003FF7FC /* SpeakSettingsTableViewController.m in Sources */,
+				21F054E31917E0F200CC6BA9 /* SpeechViewController.m in Sources */,
+				213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */,
+				21916372199E74C2003FF7FC /* CreateNewSpeakPitchSettingViewController.m in Sources */,
+				21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */,
+				2173A6BF21CC529F002E9EA8 /* FloatingButton.swift in Sources */,
+				212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */,
+				21916364199E533F003FF7FC /* SpeakSettingSampleTextTableViewCell.m in Sources */,
+				216741A3204421F1008A578D /* BugReportViewController.swift in Sources */,
+				2191637E199F473D003FF7FC /* CreateSpeechModSettingViewController.m in Sources */,
+				212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */,
+				2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */,
+				212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
+				213A4DCC1A63F4DA00E9EC13 /* SpeechWaitSettingTableViewController.m in Sources */,
+				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
+				21C74FA41967FD390039A706 /* NarouDownloadQueue.m in Sources */,
+				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
+				21E46D431A94B7F400CE39B0 /* EasyShare.m in Sources */,
+				216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */,
+				217BD9E419CE72BB008A0D9D /* StringSubstituter.m in Sources */,
+				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
+				2191635C199DFECA003FF7FC /* SpeakSettingEditTableViewCell.m in Sources */,
+				210958F91A0E2E3E00E9171F /* TextSizeSettingViewController.m in Sources */,
+				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
+				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
+				21EA62E6205560B80084B366 /* EurekaCustomRows.swift in Sources */,
+				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
+				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
+				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
+				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
+				21724EEB1972CCFE00DF6DC4 /* BookShelfTableViewCell.m in Sources */,
+				216741A02043D592008A578D /* BehaviorLogger.swift in Sources */,
+				21C74F9B196456490039A706 /* NarouSearchViewController.m in Sources */,
+				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
+				21E704CF1AF741350071F31E /* UpdateLogViewController.m in Sources */,
+				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
+				21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */,
+				21BDC2DB1A2B6F42002804DD /* MaxSpeechTimeTableViewCell.m in Sources */,
+				21D317E71B6BBF3600023B3B /* EditUserBookViewController.m in Sources */,
+				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
+				211BA5F819973BA500560842 /* SpeechBlock.m in Sources */,
+				21CA0FCB218DE6520059FACB /* DuplicateSoundPlayer.swift in Sources */,
+				21C372DD21DFC41600FB2D52 /* UIImageExtension.m in Sources */,
+				216A545D20EE257000D75458 /* NovelSpeakerBackup.swift in Sources */,
+				2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */,
+				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
+				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
+				21C74FD7196843280039A706 /* BookShelfTableViewController.m in Sources */,
+				2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */,
+				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
+				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
+				21C74FD4196831070039A706 /* DownloadStatusViewController.m in Sources */,
+				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
+				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
+				4E776B1A196247FB00C36AD1 /* NarouLoader.m in Sources */,
+				21916357199DFDF3003FF7FC /* DefaultSpeakSettingEditTableViewCell.m in Sources */,
+				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
+				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
+				4E776B1D1962566F00C36AD1 /* NarouSearchResultTableViewController.m in Sources */,
+				21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */,
+				21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */,
+				21B53953195FE709009658B7 /* SpeechRegexPitchSetting.m in Sources */,
+				21A265692359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift in Sources */,
+				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
+				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
+				213A4DCF1A63FA5100E9EC13 /* SpeechWaitSettingViewController.m in Sources */,
+				211BA5FB19973CFB00560842 /* SpeechConfig.m in Sources */,
+				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
+				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
+				211BA5FE199742CF00560842 /* NiftySpeaker.m in Sources */,
+				214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */,
+				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
+				21EA62E420554CCA0084B366 /* NarouSearchResultDetailViewControllerSwift.swift in Sources */,
+				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
+				21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */,
+				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
+				215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */,
+				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
+				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
+				2191639119A0AAC8003FF7FC /* CoreDataMigrationViewController.m in Sources */,
+				217F6E1C1942F14B008E432E /* Speaker.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21F054E61917E0F200CC6BA9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				217E683E199A80A200C656AA /* NiftySpeakerTests.m in Sources */,
+				21F054F81917E0F200CC6BA9 /* NovelSpeakerTests.m in Sources */,
+				2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */,
+				21AFDF36216CF977002F34D9 /* SpeechBlockTests.m in Sources */,
+				217BD9E619E038BE008A0D9D /* StringSubstituterTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2126A2641D9A1B90008E534A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */;
+			targetProxy = 2126A2631D9A1B90008E534A /* PBXContainerItemProxy */;
+		};
+		21F054F01917E0F200CC6BA9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 21F054C81917E0F200CC6BA9 /* NovelSpeaker */;
+			targetProxy = 21F054EF1917E0F200CC6BA9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		210958ED1A0E1C5500E9171F /* NEW!.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				210958EC1A0E1C5500E9171F /* en */,
+				210958F41A0E1C6400E9171F /* ja */,
+			);
+			name = "NEW!.png";
+			sourceTree = "<group>";
+		};
+		210958F01A0E1C5C00E9171F /* NEW!@2x.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				210958EF1A0E1C5C00E9171F /* en */,
+				210958F51A0E1C6700E9171F /* ja */,
+			);
+			name = "NEW!@2x.png";
+			sourceTree = "<group>";
+		};
+		210958F31A0E1C6100E9171F /* NEW!@3x.png */ = {
+			isa = PBXVariantGroup;
+			children = (
+				210958F21A0E1C6100E9171F /* en */,
+				210958F61A0E1C6A00E9171F /* ja */,
+			);
+			name = "NEW!@3x.png";
+			sourceTree = "<group>";
+		};
+		2117252019B2093600FB97D2 /* SpeakSettingSampleTextTableViewCell.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2117251F19B2093600FB97D2 /* ja */,
+				21AED5D119B2142E00CE846D /* en */,
+			);
+			name = SpeakSettingSampleTextTableViewCell.xib;
+			sourceTree = "<group>";
+		};
+		212852DE19B1D101001A75DC /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				212852DD19B1D101001A75DC /* ja */,
+				212852E019B1ECAD001A75DC /* en */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		212972141DA66F2C001ED63D /* Info.plist */ = {
+			isa = PBXVariantGroup;
+			children = (
+				212972131DA66F2C001ED63D /* ja */,
+				212972151DA66F2E001ED63D /* en */,
+				212972161DA66F97001ED63D /* Base */,
+			);
+			name = Info.plist;
+			sourceTree = "<group>";
+		};
+		212F00D01D8DD6E4009D69E6 /* DefaultSpeakSettingEditTableViewCell.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				212F00D31D8DD700009D69E6 /* Base */,
+				212F01161D906F4E009D69E6 /* en */,
+				212F01181D906F56009D69E6 /* ja */,
+			);
+			name = DefaultSpeakSettingEditTableViewCell.xib;
+			sourceTree = "<group>";
+		};
+		2133F2211E7FFF0B001A0BC5 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2133F2201E7FFF0B001A0BC5 /* ja */,
+				2133F2221E7FFF0D001A0BC5 /* en */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		213A4DAE1A61749200E9EC13 /* MaxSpeechTimeTableViewCell.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				213A4DB01A61749600E9EC13 /* en */,
+				213A4DB11A61749B00E9EC13 /* Base */,
+				213A4DB31A6174AD00E9EC13 /* ja */,
+			);
+			name = MaxSpeechTimeTableViewCell.xib;
+			sourceTree = "<group>";
+		};
+		21A4F73819B1B66E007CCD32 /* SpeakSettingEditTableViewCell.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21A4F73719B1B66E007CCD32 /* ja */,
+				21AED5D219B2146F00CE846D /* en */,
+			);
+			name = SpeakSettingEditTableViewCell.xib;
+			sourceTree = "<group>";
+		};
+		21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21D8FC5319FCB07B00CCF1B6 /* Base */,
+				21D8FC5619FCB09B00CCF1B6 /* en */,
+				21D8FC5819FCB09E00CCF1B6 /* ja */,
+			);
+			name = coreDataMigration.storyboard;
+			sourceTree = "<group>";
+		};
+		21F054D51917E0F200CC6BA9 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21F054D61917E0F200CC6BA9 /* en */,
+				21A4F6DA19B1B30C007CCD32 /* Base */,
+				21A4F71D19B1B465007CCD32 /* ja */,
+				21B96ED32338124100112B5F /* ja-JP */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		21F054DE1917E0F200CC6BA9 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21F054DF1917E0F200CC6BA9 /* Base */,
+				21A4F71C19B1B465007CCD32 /* ja */,
+				21A4F74119B1B758007CCD32 /* en */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		21F054F41917E0F200CC6BA9 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21F054F51917E0F200CC6BA9 /* en */,
+				21A4F71E19B1B465007CCD32 /* ja */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		2126A2661D9A1B90008E534A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Monocrome";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1.1.138;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.1.62;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerURLDownloadExtension/NovelSpeakerURLDownloadExtension-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2126A2671D9A1B90008E534A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Monocrome";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1.1.138;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.1.62;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerURLDownloadExtension/NovelSpeakerURLDownloadExtension-Bridging-Header.h";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		21F054F91917E0F200CC6BA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		21F054FA1917E0F200CC6BA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		21F054FC1917E0F200CC6BA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1.1.138;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
+					"\"${SDKROOT}/usr/include/libxml2\"",
+				);
+				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.1.62;
+				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" -Xfrontend -warn-long-expression-type-checking=100 -Xfrontend -warn-long-function-bodies=100";
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeaker/NovelSpeaker-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		21F054FD1917E0F200CC6BA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1.1.138;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
+					"\"${SDKROOT}/usr/include/libxml2\"",
+				);
+				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.1.62;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeaker/NovelSpeaker-Bridging-Header.h";
+				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		21F054FF1917E0F200CC6BA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5DC92FC920405146CC0DE447 /* Pods-NovelSpeakerTests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "NovelSpeakerTests/NovelSpeakerTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_LDFLAGS = "-v";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.limurasoftware.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerTests/NovelSpeakerTests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NovelSpeaker.app/NovelSpeaker";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		21F055001917E0F200CC6BA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF9489BB6AB0C8427A6AA72A /* Pods-NovelSpeakerTests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
+				INFOPLIST_FILE = "NovelSpeakerTests/NovelSpeakerTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_LDFLAGS = "-v";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.limurasoftware.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerTests/NovelSpeakerTests-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NovelSpeaker.app/NovelSpeaker";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2126A2681D9A1B90008E534A /* Build configuration list for PBXNativeTarget "NovelSpeakerURLDownloadExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2126A2661D9A1B90008E534A /* Debug */,
+				2126A2671D9A1B90008E534A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21F054C41917E0F100CC6BA9 /* Build configuration list for PBXProject "novelspeaker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21F054F91917E0F200CC6BA9 /* Debug */,
+				21F054FA1917E0F200CC6BA9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21F054FB1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeaker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21F054FC1917E0F200CC6BA9 /* Debug */,
+				21F054FD1917E0F200CC6BA9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21F054FE1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeakerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21F054FF1917E0F200CC6BA9 /* Debug */,
+				21F055001917E0F200CC6BA9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		21B53954196010FD009658B7 /* SettingDataModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */,
+				21778D701A6168C30042F2F1 /* SettingDataModel 7.xcdatamodel */,
+				210958FA1A0E39E200E9171F /* SettingDataModel 6.xcdatamodel */,
+				212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */,
+				2191639419A3830D003FF7FC /* SettingDataModel 4.xcdatamodel */,
+				21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */,
+				21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */,
+				21B53955196010FD009658B7 /* SettingDataModel.xcdatamodel */,
+			);
+			currentVersion = 21778D701A6168C30042F2F1 /* SettingDataModel 7.xcdatamodel */;
+			path = SettingDataModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 21F054C11917E0F100CC6BA9 /* Project object */;
+}
