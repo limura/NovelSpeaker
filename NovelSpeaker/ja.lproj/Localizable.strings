@@ -14,6 +14,8 @@
 "Agree_Button" = "同意する";
 //"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
 
+"WatchOS_StoryViewData_NowloadingText" = "読込中……";
+
 "SpeakPitchSettingView_NoTitleStringAlert" = "タイトルにする文字列を入れてください。";
 "SpeakPitchSettingView_AlreadyExistingSetting" = "既に存在する設定です。";
 "SpeakPitchSettingView_AppendFailed." = "音声設定の追加に失敗しました。";

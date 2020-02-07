@@ -17,48 +17,50 @@ struct StoryView: View {
     }
     
     var body: some View {
-        VStack {
-            HStack {
-                Button(action: {
-                    StorySpeaker.shared.StopSpeech()
-                    guard let novelList = RealmNovel.GetAllObjects() else { return }
-                    self.viewData.ShowBookshelfView(novelList: Array(novelList))
-                }) {
-                    Text("<")
-                    .font(.caption)
-                    .border(Color.black, width: 0.0)
-                    .cornerRadius(1.0)
+        ZStack(alignment: .center) {
+            VStack {
+                List(storyViewData.combinedBlockArray) { block in
+                    Text(block.displayText)
                 }
-                Button(action: {
-                    let speaker = StorySpeaker.shared
-                    if speaker.isPlayng {
-                        speaker.StopSpeech()
-                    }else{
-                        speaker.StartSpeech(withMaxSpeechTimeReset: true)
+            }
+            VStack {
+                HStack {
+                    SystemIconButtonView(systemIconName: "chevron.left.circle.fill", iconSize: CGFloat(18), foregroundColor: Color.blue) {
+                        StorySpeaker.shared.StopSpeech()
+                        guard let novelList = RealmNovel.GetAllObjects() else { return }
+                        self.viewData.ShowBookshelfView(novelList: Array(novelList))
                     }
-                }) {
-                    Text(storyViewData.isSpeaking ? "Stop" : "Speech")
-                    .font(.caption)
-                    .lineLimit(1)
-                    //.border(Color.black, width: 0.0)
+                    Spacer()
                 }
+                Spacer()
+                SpeechContorlView(storyViewData: storyViewData)
             }
-            List(storyViewData.combinedBlockArray) { block in
-                Text(block.displayText)
-            }
+            Text(NSLocalizedString("WatchOS_StoryViewData_NowloadingText", comment: "読込中……"))
+            .font(.title)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .background(Color.black)
+            .opacity(self.storyViewData.isLoadingIndicatorVisible ? 1 : 0)
         }
         .navigationBarTitle(self.storyViewData.titleText)
+        .edgesIgnoringSafeArea(.bottom)
+        .gesture(
+            DragGesture()
+            .onEnded({ (gestureValue) in
+                print("\(gestureValue.startLocation.x),\(gestureValue.startLocation.y) -> \(gestureValue.location.x),\(gestureValue.location.y)")
+            })
+        )
     }
 }
 
 class StoryViewData:ObservableObject,StorySpeakerDeletgate {
-    @Published var titleText = NSLocalizedString("StoryViewData_NowloadingText", comment: "読込中……")
+    @Published var titleText = NSLocalizedString("Watch_OS_StoryViewData_NowloadingText", comment: "読込中……")
     @Published var isSpeaking = StorySpeaker.shared.isPlayng
     
     @Published var combinedBlockArray:[CombinedSpeechBlock] = [
-        CombinedSpeechBlock(block: SpeechBlockInfo(speechText: NSLocalizedString("StoryViewData_NowloadingText", comment: "読込中……"), displayText: NSLocalizedString("StoryViewData_NowloadingText", comment: "読込中……"), voice: nil, pitch: 1.0, rate: 1.0, delay: 0.0))
+        CombinedSpeechBlock(block: SpeechBlockInfo(speechText: NSLocalizedString("WatchOS_StoryViewData_NowloadingText", comment: "読込中……"), displayText: NSLocalizedString("WatchOS_StoryViewData_NowloadingText", comment: "読込中……"), voice: nil, pitch: 1.0, rate: 1.0, delay: 0.0))
     ]
     @Published var displayIndex:Int = 0
+    @Published var isLoadingIndicatorVisible = false
     
     init() {
         StorySpeaker.shared.AddDelegate(delegate: self)
@@ -78,21 +80,36 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     }
     
     func realoadTitleText(title:String) {
-        titleText = title
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            self.titleText = title
+        }
     }
     func storySpeakerStartSpeechEvent(storyID:String) {
-        isSpeaking = true
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            self.isSpeaking = true
+        }
     }
     func storySpeakerStopSpeechEvent(storyID:String) {
-        isSpeaking = false
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            self.isSpeaking = false
+        }
     }
     func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange) {
-        displayIndex = StorySpeaker.shared.currentBlockIndex
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            self.displayIndex = StorySpeaker.shared.currentBlockIndex
+        }
     }
     func storySpeakerStoryChanged(story:Story) {
-        displayIndex = 0
-        combinedBlockArray = StorySpeaker.shared.speechBlockArray
-        displayIndex = StorySpeaker.shared.currentBlockIndex
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            self.displayIndex = 0
+            self.combinedBlockArray = StorySpeaker.shared.speechBlockArray
+            self.displayIndex = StorySpeaker.shared.currentBlockIndex
+        }
+    }
+    func setLoadingIndicator(isVisible:Bool) {
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            self.isLoadingIndicatorVisible = isVisible
+        }
     }
 }
 

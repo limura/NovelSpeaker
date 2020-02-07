@@ -14,6 +14,8 @@
 "Agree_Button" = "Agree";
 //"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
 
+"WatchOS_StoryViewData_NowloadingText" = "Loading...";
+
 "SpeakPitchSettingView_NoTitleStringAlert" = "No title string.";
 "SpeakPitchSettingView_AlreadyExistingSetting" = "Setting already exists.";
 "SpeakPitchSettingView_AppendFailed." = "Voice setting append failed.";

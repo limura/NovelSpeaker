@@ -115,6 +115,7 @@
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
 		215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BFB3E23ED5DAB0078E158 /* StoryView.swift */; };
+		215BFB4223EDB15F0078E158 /* SystemIconButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BFB4123EDB15F0078E158 /* SystemIconButtonView.swift */; };
 		2163599D22B1428400264A89 /* AssignNovelFolderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */; };
 		216359A122B167A700264A89 /* LikeStar.png in Resources */ = {isa = PBXBuildFile; fileRef = 2163599E22B167A700264A89 /* LikeStar.png */; };
 		216359A222B167A700264A89 /* LikeStar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2163599F22B167A700264A89 /* LikeStar@2x.png */; };
@@ -132,6 +133,7 @@
 		2164800A229092A200A183DF /* SpeechViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21648009229092A200A183DF /* SpeechViewController.swift */; };
 		2164800C2290F3F900A183DF /* StorySpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800B2290F3F900A183DF /* StorySpeaker.swift */; };
 		2164800E22910E6300A183DF /* UIImageExtensionSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */; };
+		21652E6B23EDB8F300B64F9E /* SpeechContorlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */; };
 		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
@@ -434,6 +436,7 @@
 		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		215BFB3E23ED5DAB0078E158 /* StoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryView.swift; sourceTree = "<group>"; };
+		215BFB4123EDB15F0078E158 /* SystemIconButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemIconButtonView.swift; sourceTree = "<group>"; };
 		2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignNovelFolderViewController.swift; sourceTree = "<group>"; };
 		2163599E22B167A700264A89 /* LikeStar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = LikeStar.png; path = Resources/LikeStar.png; sourceTree = "<group>"; };
 		2163599F22B167A700264A89 /* LikeStar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "LikeStar@2x.png"; path = "Resources/LikeStar@2x.png"; sourceTree = "<group>"; };
@@ -451,6 +454,7 @@
 		21648009229092A200A183DF /* SpeechViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechViewController.swift; sourceTree = "<group>"; };
 		2164800B2290F3F900A183DF /* StorySpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorySpeaker.swift; sourceTree = "<group>"; };
 		2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensionSwift.swift; sourceTree = "<group>"; };
+		21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechContorlView.swift; sourceTree = "<group>"; };
 		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
@@ -779,6 +783,16 @@
 			path = "AppIcon-monochrome-reverse";
 			sourceTree = "<group>";
 		};
+		215BFB4023EDB1490078E158 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				215BFB3E23ED5DAB0078E158 /* StoryView.swift */,
+				215BFB4123EDB15F0078E158 /* SystemIconButtonView.swift */,
+				21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		21724EE119721D3600DF6DC4 /* MappingModel */ = {
 			isa = PBXGroup;
 			children = (
@@ -819,8 +833,8 @@
 		2193094523BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */ = {
 			isa = PBXGroup;
 			children = (
+				215BFB4023EDB1490078E158 /* Views */,
 				2124B3A523BC3AF0002EBC31 /* NovelSpeakerWatchApp WatchKit Extension.entitlements */,
-				215BFB3E23ED5DAB0078E158 /* StoryView.swift */,
 				2193094623BBE56A00035EF0 /* ContentView.swift */,
 				2193094823BBE56A00035EF0 /* HostingController.swift */,
 				2193094A23BBE56A00035EF0 /* ExtensionDelegate.swift */,
@@ -1699,12 +1713,14 @@
 				2124B39623BBFA0B002EBC31 /* StoryCacheData.m in Sources */,
 				2124B39E23BBFCDA002EBC31 /* SpeechModSetting.m in Sources */,
 				2124B39123BBF4C3002EBC31 /* GlobalDataSingleton.m in Sources */,
+				21652E6B23EDB8F300B64F9E /* SpeechContorlView.swift in Sources */,
 				214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */,
 				210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
 				215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */,
 				2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */,
 				2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */,
 				2124B39723BBFA10002EBC31 /* NarouContentCacheData.m in Sources */,
+				215BFB4223EDB15F0078E158 /* SystemIconButtonView.swift in Sources */,
 				2193094723BBE56A00035EF0 /* ContentView.swift in Sources */,
 				2124B38723BBF220002EBC31 /* NiftyUtility.m in Sources */,
 				2138B14B23BEAE8200D8642C /* NSDataZlibExtension.m in Sources */,

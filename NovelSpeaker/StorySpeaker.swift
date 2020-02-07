@@ -111,7 +111,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         center.removeObserver(self)
     }
     func observeGlobalState() {
-        autoreleasepool {
+        DispatchQueue.main.async {
             guard let globalState = RealmGlobalState.GetInstance() else {
                 return
             }
@@ -142,51 +142,55 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
     }
     func observeBookmark(novelID:String) {
-        if bookmarkObserverNovelID == novelID { return }
-        bookmarkObserverNovelID = novelID
-        guard let bookmark = RealmBookmark.SearchObjectFrom(type: .novelSpeechLocation, hint: novelID) else { return }
-        self.bookmarkObserverToken = bookmark.observe { (change) in
-            switch change {
-            case .change(let properties):
-                for property in properties {
-                    if property.name == "location", let newObj = property.newValue as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID), self.speaker.currentLocation != newObj.location {
-                        self.speaker.SetSpeechLocation(location: newObj.location)
+        DispatchQueue.main.async {
+            if self.bookmarkObserverNovelID == novelID { return }
+            self.bookmarkObserverNovelID = novelID
+            guard let bookmark = RealmBookmark.SearchObjectFrom(type: .novelSpeechLocation, hint: novelID) else { return }
+            self.bookmarkObserverToken = bookmark.observe { (change) in
+                switch change {
+                case .change(let properties):
+                    for property in properties {
+                        if property.name == "location", let newObj = property.newValue as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID), self.speaker.currentLocation != newObj.location {
+                            self.speaker.SetSpeechLocation(location: newObj.location)
+                        }
                     }
+                default:
+                    break
                 }
-            default:
-                break
             }
         }
     }
     
     func observeStory(storyID:String) {
-        if storyObserverStoryID == storyID { return }
-        let targetBulkID = RealmStoryBulk.CreateUniqueBulkID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID))
-        if storyObserverStoryBulkID == targetBulkID { return }
-        storyObserverStoryID = storyID
-        storyObserverStoryBulkID = targetBulkID
-        autoreleasepool {
-        guard let storyBulk = RealmStoryBulk.SearchStoryBulk(storyID: storyID) else { return }
-            let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
-            self.storyObserverToken = storyBulk.observe({ (change) in
-                switch change {
-                case .error(_):
-                    break
-                case .change(let properties):
-                    for property in properties {
-                        if property.name == "contentArray", let newValue = property.newValue as? List<Data>, let story = RealmStoryBulk.BulkToStory(bulk: newValue, chapterNumber: chapterNumber) {
-                            let text = self.speaker.displayText
-                            if text != story.content {
-                                DispatchQueue.global(qos: .background).async {
-                                    self.speaker.SetStory(story: story)
+        DispatchQueue.main.async {
+            if self.storyObserverStoryID == storyID { return }
+            let targetBulkID = RealmStoryBulk.CreateUniqueBulkID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID))
+            if self.storyObserverStoryBulkID == targetBulkID { return }
+            self.storyObserverStoryID = storyID
+            self.storyObserverStoryBulkID = targetBulkID
+            autoreleasepool {
+            guard let storyBulk = RealmStoryBulk.SearchStoryBulk(storyID: storyID) else { return }
+                let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
+                self.storyObserverToken = storyBulk.observe({ (change) in
+                    switch change {
+                    case .error(_):
+                        break
+                    case .change(let properties):
+                        for property in properties {
+                            if property.name == "contentArray", let newValue = property.newValue as? List<Data>, let story = RealmStoryBulk.BulkToStory(bulk: newValue, chapterNumber: chapterNumber) {
+                                let text = self.speaker.displayText
+                                if text != story.content {
+                                    DispatchQueue.global(qos: .background).async {
+                                        self.speaker.SetStory(story: story)
+                                    }
                                 }
                             }
                         }
+                    case .deleted:
+                        break
                     }
-                case .deleted:
-                    break
-                }
-            })
+                })
+            }
         }
     }
     
@@ -248,38 +252,40 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func observeSpeechConfig(novelID:String) {
-        autoreleasepool {
-            guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
-            self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { (change) in
-                self.isNeedApplySpeechConfigs = true
+        DispatchQueue.main.async {
+            autoreleasepool {
+                guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
+                self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { (change) in
+                    self.isNeedApplySpeechConfigs = true
+                }
             }
-        }
-        autoreleasepool {
-            guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
-            self.speechSectionConfigArrayObserverToken = allSpeechSectionConfigArray.observe({ (change) in
-                switch change {
-                case .initial(_):
-                    break
-                case .update(let sectionConfigArray, let deletions, _, _):
-                    if deletions.count > 0 {
-                        self.isNeedApplySpeechConfigs = true
-                        return
-                    }
-                    for sectionConfig in sectionConfigArray {
-                        if sectionConfig.targetNovelIDArray.count <= 0 || sectionConfig.targetNovelIDArray.contains(novelID) {
+            autoreleasepool {
+                guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
+                self.speechSectionConfigArrayObserverToken = allSpeechSectionConfigArray.observe({ (change) in
+                    switch change {
+                    case .initial(_):
+                        break
+                    case .update(let sectionConfigArray, let deletions, _, _):
+                        if deletions.count > 0 {
                             self.isNeedApplySpeechConfigs = true
                             return
                         }
+                        for sectionConfig in sectionConfigArray {
+                            if sectionConfig.targetNovelIDArray.count <= 0 || sectionConfig.targetNovelIDArray.contains(novelID) {
+                                self.isNeedApplySpeechConfigs = true
+                                return
+                            }
+                        }
+                    case .error(_):
+                        break
                     }
-                case .error(_):
-                    break
-                }
-            })
+                })
+            }
         }
     }
     
     func observeSpeechModSetting(novelID:String) {
-        autoreleasepool {
+        DispatchQueue.main.async {
             if let globalState = RealmGlobalState.GetInstance(), let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
                 self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ (change) in
                     switch change {
@@ -298,7 +304,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 })
             }
         }
-        autoreleasepool {
+        DispatchQueue.main.async {
             self.novelIDSpeechOverrideSettingArrayObserverToken = RealmSpeechOverrideSetting.GetAllObjects()?.observe({ (change) in
                 switch change {
                 case .initial(_):
@@ -401,9 +407,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             print("audioSession.setActive(false) failed.")
         }
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
-        autoreleasepool {
+        NiftyUtilitySwift.DispatchSyncMainQueue {
             if let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
-                let newLocation = speaker.currentLocation
+                let newLocation = self.speaker.currentLocation
                 if story.readLocation != newLocation {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
@@ -417,21 +423,21 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func SkipForward(length:Int) {
-        autoreleasepool {
+        NiftyUtilitySwift.DispatchSyncMainQueue {
             guard let story = RealmStoryBulk.SearchStory(storyID: self.storyID) else {
                 return
             }
-            let readingPoint = speaker.currentLocation
+            let readingPoint = self.speaker.currentLocation
             let nextReadingPoint = readingPoint + length
             let contentLength = story.content.count
             if nextReadingPoint > contentLength {
-                if !LoadNextChapter() && story.readLocation != contentLength {
+                if !self.LoadNextChapter() && story.readLocation != contentLength {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         story.SetCurrentReadLocationWith(realm: realm, location: contentLength)
                     }
                 }
             }else{
-                speaker.SetSpeechLocation(location: nextReadingPoint)
+                self.speaker.SetSpeechLocation(location: nextReadingPoint)
             }
         }
     }
@@ -443,8 +449,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         var targetLength = length - readingPoint
         var targetStory:Story? = nil
-        autoreleasepool {
-            targetStory = SearchPreviousChapter(storyID: self.storyID)
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            targetStory = self.SearchPreviousChapter(storyID: self.storyID)
             while let story = targetStory {
                 let contentLength = story.content.count
                 if targetLength <= contentLength {
@@ -454,16 +460,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                             story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
                         }
                     }
-                    ringPageTurningSound()
-                    SetStory(story: story)
+                    self.ringPageTurningSound()
+                    self.SetStory(story: story)
                     return
                 }
-                targetStory = SearchPreviousChapter(storyID: story.storyID)
+                targetStory = self.SearchPreviousChapter(storyID: story.storyID)
                 targetLength -= contentLength
             }
         }
         // 抜けてきたということは先頭まで行ってしまった。
-        autoreleasepool {
+        NiftyUtilitySwift.DispatchSyncMainQueue {
             if let firstStory = RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
                 if firstStory.readLocation != 0 {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
@@ -471,9 +477,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                     }
                 }
                 if firstStory.storyID != self.storyID {
-                    ringPageTurningSound()
+                    self.ringPageTurningSound()
                 }
-                SetStory(story: firstStory)
+                self.SetStory(story: firstStory)
             }
         }
     }
@@ -485,19 +491,22 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     @discardableResult
     func LoadNextChapter() -> Bool{
-        return autoreleasepool {
-            if let nextStory = SearchNextChapter(storyID: self.storyID) {
+        var result:Bool = false
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            if let nextStory = self.SearchNextChapter(storyID: self.storyID) {
                 if nextStory.readLocation != 0 {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                     }
                 }
-                ringPageTurningSound()
-                SetStory(story: nextStory)
-                return true
+                self.ringPageTurningSound()
+                self.SetStory(story: nextStory)
+                result = true
+            }else{
+                result = false
             }
-            return false
         }
+        return result
     }
 
     func SearchPreviousChapter(storyID:String) -> Story? {
@@ -510,19 +519,22 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     @discardableResult
     func LoadPreviousChapter() -> Bool{
-        return autoreleasepool {
-            if let previousStory = SearchPreviousChapter(storyID: storyID) {
+        var result = false
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            if let previousStory = self.SearchPreviousChapter(storyID: self.storyID) {
                 if previousStory.readLocation != 0 {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         previousStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                     }
                 }
-                ringPageTurningSound()
-                SetStory(story: previousStory)
-                return true
+                self.ringPageTurningSound()
+                self.SetStory(story: previousStory)
+                result = true
+            }else{
+                result = false
             }
-            return false
         }
+        return result
     }
     
     func ringPageTurningSound() {
@@ -862,8 +874,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 break
             }
         }
-        autoreleasepool {
-            if let nextStory = SearchNextChapter(storyID: self.storyID) {
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            if let nextStory = self.SearchNextChapter(storyID: self.storyID) {
                 self.ringPageTurningSound()
                 if nextStory.readLocation != 0 {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
@@ -890,9 +902,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             return speaker.currentLocation
         }
         set {
-            autoreleasepool {
+            NiftyUtilitySwift.DispatchSyncMainQueue {
                 if let story = RealmStoryBulk.SearchStory(storyID: self.storyID), story.content.count > newValue && newValue >= 0 {
-                    speaker.SetSpeechLocation(location: newValue)
+                    self.speaker.SetSpeechLocation(location: newValue)
                     if story.readLocation != newValue {
                         RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                             story.SetCurrentReadLocationWith(realm: realm, location: newValue)
