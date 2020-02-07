@@ -908,4 +908,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             return speaker.speechBlockArray
         }
     }
+    
+    var currentBlock:CombinedSpeechBlock {
+        get { return speaker.currentBlock }
+    }
+    
+    var currentBlockIndex:Int {
+        get { return speaker.currentBlockIndex }
+    }
 }

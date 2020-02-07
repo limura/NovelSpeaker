@@ -24,7 +24,7 @@ struct ContentView: View {
         dummyStory.content = String(repeating: "吾輩は猫である。「名前はまだない。」しかし、そのうち名前がつけられると信じている。ところであなたは宇宙人を信じるだろうか？", count: 10)
 
         StorySpeaker.shared.withMoreSplitTargets = ["。", "、", ".", ",", ":", "\n\n"]
-        StorySpeaker.shared.moreSplitMinimumLetterCount = 20
+        StorySpeaker.shared.moreSplitMinimumLetterCount = 30 // 40mm のタイプだと1行に11文字位表示できるぽいので3行だと30文字で切るのが良さげ？
     }
 
     var body: some View {
@@ -163,41 +163,6 @@ class BookshelfData: ObservableObject, RandomAccessCollection {
     
     subscript(position: Int) -> RealmNovel {
         return novelList[position]
-    }
-}
-
-struct StoryView: View {
-    let story:Story
-    let viewData:ViewData
-    init(story:Story, viewData:ViewData) {
-        self.story = story
-        self.viewData = viewData
-        StorySpeaker.shared.SetStory(story: story)
-    }
-    
-    var body: some View {
-        ScrollView { VStack {
-            Button<Text>(action: {
-                print("Speech button clicked.")
-                StorySpeaker.shared.StartSpeech(withMaxSpeechTimeReset: false)
-            }) {
-                Text("Speech")
-            }
-            Button<Text>(action: {
-                print("Stop button clicked.")
-                StorySpeaker.shared.StopSpeech()
-            }) {
-                Text("Stop")
-            }
-            Button<Text>(action: {
-                print("Back button clicked.")
-                guard let novelList = RealmNovel.GetAllObjects() else { return }
-                self.viewData.ShowBookshelfView(novelList: Array(novelList))
-            }) {
-                Text("Back")
-            }
-            Text(self.story.content)
-        } }
     }
 }
 

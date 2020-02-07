@@ -114,6 +114,7 @@
 		2150EB0B1BE7C11F00EB6631 /* CoreDataMultithreadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
+		215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BFB3E23ED5DAB0078E158 /* StoryView.swift */; };
 		2163599D22B1428400264A89 /* AssignNovelFolderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */; };
 		216359A122B167A700264A89 /* LikeStar.png in Resources */ = {isa = PBXBuildFile; fileRef = 2163599E22B167A700264A89 /* LikeStar.png */; };
 		216359A222B167A700264A89 /* LikeStar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2163599F22B167A700264A89 /* LikeStar@2x.png */; };
@@ -432,6 +433,7 @@
 		2150EB0A1BE7C11F00EB6631 /* CoreDataMultithreadTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataMultithreadTests.m; sourceTree = "<group>"; };
 		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		215BFB3E23ED5DAB0078E158 /* StoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryView.swift; sourceTree = "<group>"; };
 		2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignNovelFolderViewController.swift; sourceTree = "<group>"; };
 		2163599E22B167A700264A89 /* LikeStar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = LikeStar.png; path = Resources/LikeStar.png; sourceTree = "<group>"; };
 		2163599F22B167A700264A89 /* LikeStar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "LikeStar@2x.png"; path = "Resources/LikeStar@2x.png"; sourceTree = "<group>"; };
@@ -818,6 +820,7 @@
 			isa = PBXGroup;
 			children = (
 				2124B3A523BC3AF0002EBC31 /* NovelSpeakerWatchApp WatchKit Extension.entitlements */,
+				215BFB3E23ED5DAB0078E158 /* StoryView.swift */,
 				2193094623BBE56A00035EF0 /* ContentView.swift */,
 				2193094823BBE56A00035EF0 /* HostingController.swift */,
 				2193094A23BBE56A00035EF0 /* ExtensionDelegate.swift */,
@@ -1698,6 +1701,7 @@
 				2124B39123BBF4C3002EBC31 /* GlobalDataSingleton.m in Sources */,
 				214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */,
 				210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
+				215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */,
 				2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */,
 				2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */,
 				2124B39723BBFA10002EBC31 /* NarouContentCacheData.m in Sources */,

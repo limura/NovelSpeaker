@@ -284,4 +284,12 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     var currentLocation:Int {
         get { return currentSpeakingLocation }
     }
+    
+    var currentBlockIndex:Int {
+        get { return currentSpeechBlockIndex }
+    }
+    
+    var currentBlock:CombinedSpeechBlock {
+        get { return speechBlockArray[currentSpeechBlockIndex] }
+    }
 }

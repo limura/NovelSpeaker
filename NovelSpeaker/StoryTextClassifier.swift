@@ -75,7 +75,7 @@ struct SpeechModSetting {
 // 読み替え前と読み替え後が同じ文字列になる場合は nil を入れる事で消費メモリに少し優しくなります。
 // また、読み替え前と読み替え後が違う場合の物を個別に登録する事で、
 // 読み上げ時の読み上げ中の位置の取得や、読み上げ開始位置の指定をした時の文字の位置をより正しく計算できるようになります。
-class CombinedSpeechBlock {
+class CombinedSpeechBlock: Identifiable {
     struct speechBlock {
         let displayText:String
         let speechText:String? // displayText と同じ場合は nil を入れるという事にします。
