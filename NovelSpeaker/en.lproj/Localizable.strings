@@ -14,7 +14,8 @@
 "Agree_Button" = "Agree";
 //"DisplayDateFormat" = "YYYY-MM-dd HH:mm:ss";
 
-"WatchOS_StoryViewData_NowloadingText" = "Loading...";
+"WatchOS_NowloadingText" = "Loading...";
+"WatchOS_NovelSupportMenuView_StorySelector" = "Chapter selection";
 
 "SpeakPitchSettingView_NoTitleStringAlert" = "No title string.";
 "SpeakPitchSettingView_AlreadyExistingSetting" = "Setting already exists.";

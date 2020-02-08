@@ -171,6 +171,7 @@
 		2193095123BBE56A00035EF0 /* ComplicationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2193095023BBE56A00035EF0 /* ComplicationController.swift */; };
 		2193095323BBE56B00035EF0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2193095223BBE56B00035EF0 /* Assets.xcassets */; };
 		2193095623BBE56B00035EF0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2193095523BBE56B00035EF0 /* Preview Assets.xcassets */; };
+		21949BD523EDE75A00BCC5B9 /* NovelSupportMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21949BD423EDE75A00BCC5B9 /* NovelSupportMenuView.swift */; };
 		2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */; };
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */; };
@@ -515,6 +516,7 @@
 		2193095523BBE56B00035EF0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		2193095723BBE56B00035EF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2193095823BBE56B00035EF0 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
+		21949BD423EDE75A00BCC5B9 /* NovelSupportMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSupportMenuView.swift; sourceTree = "<group>"; };
 		2195FBBE1D2FBBCF00ADDCAB /* UriLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UriLoader.h; sourceTree = "<group>"; };
 		2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UriLoader.m; sourceTree = "<group>"; };
 		2195FBC11D2FCC6800ADDCAB /* SiteInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SiteInfo.h; sourceTree = "<group>"; };
@@ -789,6 +791,7 @@
 				215BFB3E23ED5DAB0078E158 /* StoryView.swift */,
 				215BFB4123EDB15F0078E158 /* SystemIconButtonView.swift */,
 				21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */,
+				21949BD423EDE75A00BCC5B9 /* NovelSupportMenuView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1714,6 +1717,7 @@
 				2124B39E23BBFCDA002EBC31 /* SpeechModSetting.m in Sources */,
 				2124B39123BBF4C3002EBC31 /* GlobalDataSingleton.m in Sources */,
 				21652E6B23EDB8F300B64F9E /* SpeechContorlView.swift in Sources */,
+				21949BD523EDE75A00BCC5B9 /* NovelSupportMenuView.swift in Sources */,
 				214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */,
 				210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
 				215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */,

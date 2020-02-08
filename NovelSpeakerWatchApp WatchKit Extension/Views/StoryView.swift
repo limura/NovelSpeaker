@@ -25,17 +25,20 @@ struct StoryView: View {
             }
             VStack {
                 HStack {
-                    SystemIconButtonView(systemIconName: "chevron.left.circle.fill", iconSize: CGFloat(18), foregroundColor: Color.blue) {
+                    SystemIconButtonView(systemIconName: "chevron.left.circle.fill", iconSize: CGFloat(20), foregroundColor: Color.blue.opacity(0.7)) {
                         StorySpeaker.shared.StopSpeech()
                         guard let novelList = RealmNovel.GetAllObjects() else { return }
                         self.viewData.ShowBookshelfView(novelList: Array(novelList))
                     }
                     Spacer()
+                    SystemIconButtonView(systemIconName: "ellipsis.circle.fill", iconSize: CGFloat(20), foregroundColor: Color.white.opacity(0.7)) {
+                        // TODO: 後で追加する。 viewData に NovelSupportMenuView を表示するように頼む。
+                    }
                 }
                 Spacer()
                 SpeechContorlView(storyViewData: storyViewData)
             }
-            Text(NSLocalizedString("WatchOS_StoryViewData_NowloadingText", comment: "読込中……"))
+            Text(NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"))
             .font(.title)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .background(Color.black)
@@ -57,7 +60,7 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     @Published var isSpeaking = StorySpeaker.shared.isPlayng
     
     @Published var combinedBlockArray:[CombinedSpeechBlock] = [
-        CombinedSpeechBlock(block: SpeechBlockInfo(speechText: NSLocalizedString("WatchOS_StoryViewData_NowloadingText", comment: "読込中……"), displayText: NSLocalizedString("WatchOS_StoryViewData_NowloadingText", comment: "読込中……"), voice: nil, pitch: 1.0, rate: 1.0, delay: 0.0))
+        CombinedSpeechBlock(block: SpeechBlockInfo(speechText: NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"), displayText: NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"), voice: nil, pitch: 1.0, rate: 1.0, delay: 0.0))
     ]
     @Published var displayIndex:Int = 0
     @Published var isLoadingIndicatorVisible = false
