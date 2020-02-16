@@ -16,6 +16,7 @@
 
 "WatchOS_NowloadingText" = "Loading...";
 "WatchOS_NovelSupportMenuView_StorySelector" = "Chapter selection";
+"WatchOS_NovelSupportMenuView_VolumeControl" = "Volume control";
 
 "SpeakPitchSettingView_NoTitleStringAlert" = "No title string.";
 "SpeakPitchSettingView_AlreadyExistingSetting" = "Setting already exists.";

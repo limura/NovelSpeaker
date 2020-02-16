@@ -23,12 +23,13 @@ struct ContentView: View {
         NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
         dummyStory.content = String(repeating: "吾輩は猫である。「名前はまだない。」しかし、そのうち名前がつけられると信じている。ところであなたは宇宙人を信じるだろうか？", count: 10)
 
-        StorySpeaker.shared.withMoreSplitTargets = ["。", "、", ".", ",", ":", "\n\n"]
+        //StorySpeaker.shared.withMoreSplitTargets = ["。", "、", ".", ",", ":", "\n\n"]
+        StorySpeaker.shared.withMoreSplitTargets = ["。", ".", "\n"]
         StorySpeaker.shared.moreSplitMinimumLetterCount = 30 // 40mm のタイプだと1行に11文字位表示できるぽいので3行だと30文字で切るのが良さげ？
     }
 
     var body: some View {
-        VStack {
+        Group {
             if viewData.currentPage == .neediCloudSync {
                 CheckiCloudSyncView()
             }else if viewData.currentPage == .bookshelf {

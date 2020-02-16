@@ -22,6 +22,7 @@ struct StoryView: View {
                 List(storyViewData.combinedBlockArray) { block in
                     Text(block.displayText)
                 }
+                SpeechContorlView(storyViewData: storyViewData)
             }
             VStack {
                 HStack {
@@ -36,8 +37,8 @@ struct StoryView: View {
                     }
                 }
                 Spacer()
-                SpeechContorlView(storyViewData: storyViewData)
             }
+            NovelSupportMenuView(storyViewData: self.storyViewData)
             Text(NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"))
             .font(.title)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
@@ -64,6 +65,8 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     ]
     @Published var displayIndex:Int = 0
     @Published var isLoadingIndicatorVisible = false
+    @Published var isSupportMenuVisible = false
+    @Published var storyID = ""
     
     init() {
         StorySpeaker.shared.AddDelegate(delegate: self)
@@ -73,6 +76,7 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     }
     
     func SetCurrentStory(story:Story) {
+        storyID = story.storyID
         DispatchQueue.main.async {
             StorySpeaker.shared.SetStory(story: story)
             self.combinedBlockArray = StorySpeaker.shared.speechBlockArray
@@ -107,6 +111,7 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
             self.displayIndex = 0
             self.combinedBlockArray = StorySpeaker.shared.speechBlockArray
             self.displayIndex = StorySpeaker.shared.currentBlockIndex
+            self.storyID = story.storyID
         }
     }
     func setLoadingIndicator(isVisible:Bool) {
