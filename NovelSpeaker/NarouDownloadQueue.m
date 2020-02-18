@@ -218,6 +218,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
             [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:true];
         });
         [self ChapterDownload:targetContent];
+        [self announceDownloadStatusEnd:targetContent];
         isDownloadKicked = true;
     }
 }
@@ -411,7 +412,6 @@ static float SLEEP_TIME_SECOND = 10.5f;
             return [self URLDownload:localContent];
         }
         if ([localContent isUserCreatedContent]) {
-            [self announceDownloadStatusEnd:localContent];
             return false;
         }
         
