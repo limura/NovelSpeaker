@@ -411,6 +411,7 @@ static float SLEEP_TIME_SECOND = 10.5f;
             return [self URLDownload:localContent];
         }
         if ([localContent isUserCreatedContent]) {
+            [self announceDownloadStatusEnd:localContent];
             return false;
         }
         
