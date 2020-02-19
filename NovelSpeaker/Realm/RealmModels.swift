@@ -1558,6 +1558,13 @@ extension RealmStory: CanWriteIsDeleted {
         RealmUtil.Delete(realm: realm, model: self)
     }
     
+    override var description:String
+    {
+        get {
+            return title
+        }
+    }
+    
     override class func primaryKey() -> String? {
         return "novelID"
     }
