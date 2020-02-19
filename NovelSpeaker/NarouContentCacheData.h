@@ -52,4 +52,7 @@
 /// ユーザによる自作コンテンツ等の host に当たるものが無い場合は nil を返します
 - (NSString*)GetDomainString;
 
+/// "%@" で表示される奴
+- (NSString*)description;
+
 @end

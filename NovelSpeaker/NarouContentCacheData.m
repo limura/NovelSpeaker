@@ -179,5 +179,11 @@
     return @"syosetu.com";
 }
 
+/// "%@" で表示される奴
+- (NSString *)description
+{
+    if(self.title == nil) { return @"-"; }
+    return self.title;
+}
 
 @end

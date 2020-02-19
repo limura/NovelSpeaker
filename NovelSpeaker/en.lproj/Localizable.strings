@@ -282,6 +282,9 @@ erver certificate.";
 "BugReportViewController_ConfirmEnableLogSend_title" = "Confirm";
 "BugReportViewController_ConfirmEnableLogSend" = "Would you like to attach operation logs saved in NovelSpeaker to the report mail?\n\nThe infos of the downloaded novel (URL etc.) is included in the operation log. You may turn it off for your own privacy.\nHowever, if the operation log is not attached, diagnostics maybe difficult, therefore the problem may remain unresolved. (There are cases where regardless of attachment, it may be unresolved)\nThe operation log may be transmitted through pressing \"Setting\" -> \"Read ruby only\" about 10 times,  \"Debug log display\" will appear at the bottom of \"Setting\" Since it will be the same thing as the attachment, please refer to it if you want to check the contents in advance.";
 "BugReportViewController_IsEnableLogSend" = "Attach operation logs saved inside";
+"BugReportViewController_TargetNovelName" = "Select the novels in which the error occurs (if any)";
+"BugReportViewController_TargetNovelName_SelectorTitle" = "Select the novels in which the error occurs";
+"BugReportViewController_SendBugReport_TargetNovelNameList" = "Novel information that caused the problem:";
 
 "NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
 "NarouSearchResultDetailViewControllerSwift_Writer" = "Writer";
@@ -327,19 +330,32 @@ erver certificate.";
 "BookShelfTableViewController_WarningForDeleteBookTitle" = "Delete a book";
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
-"BookShelfTableViewController_Resume:" = "▶︎Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 1.1.61
+"BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.63
 
-- The English notation was corrected and reflected.
+- Add \"Select the novels in which the error occurs (if any)\" to \"Settings\" -> \"Send inquiries to developers via E-mail\"
+- As for the name of the novel when you take it in, please take it in by removing the blank before and after.
+- Resolved an issue that may cause the indicator to persist while downloading a novel.
+- Corrects an issue that may have caused nothing to happen after selecting \"Create inconvenience report mail\" in \"Settings\" -> \"Send inquiries to developers via E-mail\".
 
-This English notation was corrected on GitHub by @Matthewzhou809 in the form of a pull request.
-NovelSpeaker is an open source project published on GitHub, so contributions such as pull requests like this one are very helpful.
-Thank you @Matthewzhou809! ヾ(*´∀｀*)ノ
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
-# Version 1.1.61
+# Version 1.1.63
+
+Interface change
+
+- Add \"Select the novels in which the error occurs (if any)\" to \"Settings\" -> \"Send inquiries to developers via E-mail\"
+
+Bug fix
+
+- As for the name of the novel when you take it in, please take it in by removing the blank before and after.
+- Resolved an issue that may cause the indicator to persist while downloading a novel.
+- Corrects an issue that may have caused nothing to happen after selecting \"Create inconvenience report mail\" in \"Settings\" -> \"Send inquiries to developers via E-mail\".
+
+
+# Version 1.1.62
 
 Interface change
 

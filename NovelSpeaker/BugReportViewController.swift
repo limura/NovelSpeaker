@@ -17,6 +17,7 @@ struct BugReportViewInputData {
     var IsNeedResponse = NSLocalizedString("BugReportViewController_IsNeedResponse_Maybe", comment: "あっても良い")
     var DescriptionOfNewFeature = ""
     var IsEnabledLogSend = false
+    var TargetNovelNameSet:Set<NarouContentCacheData> = Set<NarouContentCacheData>()
 }
 
 class BugReportViewController: FormViewController, MFMailComposeViewControllerDelegate {
@@ -218,6 +219,20 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     BugReportViewController.value.ProblemOccurenceProcedure = value
                 }
             })
+            <<< MultipleSelectorRow<NarouContentCacheData>("TargetNovelAlertRow") {
+                $0.title = NSLocalizedString("BugReportViewController_TargetNovelName", comment: "問題が発生する小説(もしあれば)")
+                $0.selectorTitle = NSLocalizedString("BugReportViewController_TargetNovelName_SelectorTitle", comment: "問題が発生する小説")
+                $0.options = GlobalDataSingleton.getInstance()?.getAllNarouContent(.title) as? [NarouContentCacheData]
+                $0.value = BugReportViewController.value.TargetNovelNameSet
+            }.onPresent { from, to in
+                to.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: from, action: #selector(self.multipleSelectorDone(_:)))
+            }.onChange { row in
+                if let value = row.value {
+                    BugReportViewController.value.TargetNovelNameSet = value
+                }else{
+                    BugReportViewController.value.TargetNovelNameSet = []
+                }
+            }
             <<< SwitchRow("IsEnableLogSend") {
                 $0.title = NSLocalizedString("BugReportViewController_IsEnableLogSend", comment: "内部に保存されている操作ログを添付する")
                 $0.value = BugReportViewController.value.IsEnabledLogSend
@@ -293,26 +308,27 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     NiftyUtilitySwift.EasyDialogBuilder(self)
                         .label(text: NSLocalizedString("BugReportViewController_AddBehaviourLogAnnounce", comment: "ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合には「いいえ」を選択する必要があります。\nまた、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), textAlignment: .left)
                         .addButton(title: NSLocalizedString("BugReportViewController_NO", comment: "いいえ"), callback: { (dialog) in
-                            self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: false, completion: nil)
-                            }
+                            self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, completion: {
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: false, completion: nil)
+                                }
+                            })
                         })
                         .addButton(title: NSLocalizedString("BugReportViewController_YES", comment: "はい"), callback: { (dialog) in
-                            self.sendBugReportMail(log: BehaviorLogger.LoadLog(), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: false, completion: nil)
-                            }
+                            self.sendBugReportMail(log: BehaviorLogger.LoadLog(), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, completion: {
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: false, completion: nil)
+                                }
+                            })
                         })
                     .build().show()
                 }else{
                     if BugReportViewController.value.IsEnabledLogSend {
-                        self.sendBugReportMail(log: NiftyUtilitySwift.getLogText(searchString: nil), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
+                        self.sendBugReportMail(log: NiftyUtilitySwift.getLogText(searchString: nil), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet)
                     }else{
-                        self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse)
+                        self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet)
                     }
                 }
-                self.navigationController?.popViewController(animated: true)
             })
         
 
@@ -352,6 +368,9 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         // Dispose of any resources that can be recreated.
     }
     
+    @objc func multipleSelectorDone(_ item:UIBarButtonItem) {
+        _ = navigationController?.popViewController(animated: true)
+    }
 
     /*
     // MARK: - Navigation
@@ -388,7 +407,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     }
 
     @discardableResult
-    func sendBugReportMail(log:String?, description:String, procedure:String, date:Date, needResponse:String) -> Bool {
+    func sendBugReportMail(log:String?, description:String, procedure:String, date:Date, needResponse:String, targetNovelSet:Set<NarouContentCacheData>, completion:(() -> Void)? = nil) -> Bool {
         if !MFMailComposeViewController.canSendMail() {
             return false;
         }
@@ -396,6 +415,9 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         if let infoDictionary = Bundle.main.infoDictionary, let bundleVersion = infoDictionary["CFBundleVersion"] as? String, let shortVersion = infoDictionary["CFBundleShortVersionString"] as? String {
             appVersionString = String.init(format: "%@(%@)", shortVersion, bundleVersion)
         }
+        let novelData = targetNovelSet.map { (content) -> String in
+            return content.title + "\n" + content.ncode
+        }.joined(separator: "\n---\n")
         
         let picker = MFMailComposeViewController()
         picker.mailComposeDelegate = self;
@@ -411,13 +433,14 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             + "\n" + NSLocalizedString("BugReportViewController_TimeOfOccurrence", comment: "問題発生日時") + ": " + date.description(with: Locale.init(identifier: "ja_JP"))
             + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Description", comment: "不都合の概要") + ":\n" + description
             + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Procedure", comment: "不都合の再現方法") + ":\n" + procedure
+            + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_TargetNovelNameList", comment: "問題の起こった小説:") + "\n\n" + novelData
             , isHTML: false)
         if let log = log {
             if let data = log.data(using: .utf8) {
                 picker.addAttachmentData(data, mimeType: "text/plain", fileName: "operation_log.txt")
             }
         }
-        present(picker, animated: true, completion: nil)
+        present(picker, animated: true, completion: completion)
         return true;
     }
     // MFMailComposeViewController でmailアプリ終了時に呼び出されるのでこのタイミングで viewController を取り戻します

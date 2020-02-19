@@ -283,6 +283,9 @@
 "BugReportViewController_ConfirmEnableLogSend_title" = "確認";
 "BugReportViewController_ConfirmEnableLogSend" = "ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)の個人情報に繋がりそうな情報が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合にはOFFのままにしておく必要があります。\nなお、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)\nまた、送信される操作ログは、「設定」→「ルビはルビだけ読む」を10回程ON/OFFすると「設定」の最下部に表示されるデバッグメニュー内の「デバッグログの表示」で表示される物と同じ物になりますので、内容を事前に確認したい場合はそちらをご参照ください。";
 "BugReportViewController_IsEnableLogSend" = "内部に保存されている操作ログを添付する";
+"BugReportViewController_TargetNovelName" = "問題が発生する小説(もしあれば)";
+"BugReportViewController_TargetNovelName_SelectorTitle" = "問題が発生する小説";
+"BugReportViewController_SendBugReport_TargetNovelNameList" = "問題の起こった小説:";
 
 "NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
 "NarouSearchResultDetailViewControllerSwift_Writer" = "作者";
@@ -327,14 +330,30 @@
 "BookShelfTableViewController_WarningForDeleteBookTitle" = "小説の削除";
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
-"BookShelfTableViewController_Resume:" = "▶︎再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.62
+"BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.63
 
+- 設定→開発者に問い合わせる で不都合報告を選択している時に現れる選択項目に「問題が発生する小説(もしあれば)」を追加
 - 小説を取り込む時の小説名について、前後の空白を削除して取り込むように
+- 小説のダウンロード中のインジケータが消えない場合がある問題を解消
+- 設定→開発者に問い合わせる で「不都合報告メールを作成する」を選んだ後に何も起こらない可能性があった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.63
+
+インタフェースの変更
+
+- 設定→開発者に問い合わせる で不都合報告を選択している時に現れる選択項目に「問題が発生する小説(もしあれば)」を追加
+
+問題の修正
+
+- 小説を取り込む時の小説名について、前後の空白を削除して取り込むように
+- 小説のダウンロード中のインジケータが消えない場合がある問題を解消
+- 設定→開発者に問い合わせる で「不都合報告メールを作成する」を選んだ後に何も起こらない可能性があった問題を修正
+
+
 # Version 1.1.62
 
 インタフェースの変更
