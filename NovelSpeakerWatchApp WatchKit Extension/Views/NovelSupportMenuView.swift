@@ -23,12 +23,17 @@ struct VolumeControlView: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
+            Text("")
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .background(Color.black)
             SystemIconButtonView(systemIconName: "chevron.left.circle.fill", iconSize: CGFloat(20), foregroundColor: Color.blue.opacity(0.7)) {
                 self.viewData.viewState = .Normal
             }
             WKInterfaceVolumeControlView()
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .opacity(viewData.viewState == .VolumeControl ? 1 : 0)
         }
-        .background(Color.black)
+        .opacity(viewData.viewState == .VolumeControl ? 1 : 0)
     }
 }
 
@@ -77,7 +82,6 @@ struct StorySelectorView: View {
             SystemIconButtonView(systemIconName: "chevron.left.circle.fill", iconSize: CGFloat(20), foregroundColor: Color.blue.opacity(0.7)) {
                 self.viewData.viewState = .Normal
             }
-            WKInterfaceVolumeControlView()
         }
     }
 }
