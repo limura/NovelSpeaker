@@ -11,13 +11,40 @@ import SwiftUI
 struct StoryView: View {
     @ObservedObject var storyViewData = StoryViewData()
     let viewData:ViewData
+    /*
+    let simpleTableView = SimpleTableView<String>(converter: {
+        AnyView(Text($0))
+    })
+     */
+    let simpleTableView = ScrollableVStack<String>(converter: { content, _ in AnyView(Text(content))
+    })
+    
     init(story:Story, viewData:ViewData) {
         self.viewData = viewData
         storyViewData.SetCurrentStory(story: story)
+
+        self.simpleTableView.AddContent(content: "あいうえお1\nあいうえお1\nあいうえお1")
+        self.simpleTableView.AddContent(content: "あいうえお2\nあいうえお2\nあいうえお2")
+        self.simpleTableView.AddContent(content: "あいうえお3\nあいうえお3\nあいうえお3")
+        self.simpleTableView.AddContent(content: "あいうえお4\nあいうえお4\nあいうえお4")
+        self.simpleTableView.AddContent(content: "あいうえお5\nあいうえお5\nあいうえお5")
+        self.simpleTableView.AddContent(content: "あいうえお6\nあいうえお6\nあいうえお6")
+        self.simpleTableView.AddContent(content: "あいうえお7\nあいうえお7\nあいうえお7")
+        self.simpleTableView.AddContent(content: "あいうえお8\nあいうえお8\nあいうえお8")
+        self.simpleTableView.AddContent(content: "あいうえお9\nあいうえお9\nあいうえお9")
+        self.simpleTableView.AddContent(content: "あいうえお10\nあいうえお10\nあいうえお10")
+        self.simpleTableView.AddContent(content: "あいうえお11\nあいうえお11\nあいうえお11")
+        self.simpleTableView.AddContent(content: "あいうえお12\nあいうえお12\nあいうえお12")
+        self.simpleTableView.AddContent(content: "あいうえお13\nあいうえお13\nあいうえお13")
+        self.simpleTableView.AddContent(content: "あいうえお14\nあいうえお14\nあいうえお14")
+        self.simpleTableView.AddContent(content: "あいうえお15\nあいうえお15\nあいうえお15")
+        self.simpleTableView.AddContent(content: "あいうえお16\nあいうえお16\nあいうえお16")
+        self.simpleTableView.AddContent(content: "あいうえお17\nあいうえお17\nあいうえお17")
     }
     
     var body: some View {
         ZStack(alignment: .center) {
+            /*
             VStack {
                 List(storyViewData.combinedBlockArray) { block in
                     Text(block.displayText)
@@ -39,6 +66,8 @@ struct StoryView: View {
                 Spacer()
             }
             NovelSupportMenuView(storyViewData: self.storyViewData)
+            */
+            self.simpleTableView
             Text(NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"))
             .font(.title)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)

@@ -18,6 +18,16 @@ enum CurrentPageType {
 struct ContentView: View {
     @ObservedObject var viewData = ViewData()
     var dummyStory = Story()
+    let textList = ScrollableVStack<String>(converter: { content, parent in
+        AnyView(
+            Text(content)
+            .fixedSize(horizontal: false, vertical: true)
+            /*
+            Button(content, action: {
+                parent.ScrollToIndex(at: 3)
+            })*/
+        )
+    })
 
     init() {
         NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
@@ -26,12 +36,38 @@ struct ContentView: View {
         //StorySpeaker.shared.withMoreSplitTargets = ["。", "、", ".", ",", ":", "\n\n"]
         StorySpeaker.shared.withMoreSplitTargets = ["。", ".", "\n"]
         StorySpeaker.shared.moreSplitMinimumLetterCount = 30 // 40mm のタイプだと1行に11文字位表示できるぽいので3行だと30文字で切るのが良さげ？
+        textList.AddContent(content: "テスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1")
+        textList.AddContent(content: "テスト2\nテスト2")
+        textList.AddContent(content: "テスト3")
+        textList.AddContent(content: "テスト4")
+        textList.AddContent(content: "テスト5")
+        textList.AddContent(content: "テスト6")
+        textList.AddContent(content: "テスト7")
+        textList.AddContent(content: "テスト8")
+        textList.AddContent(content: "テスト9")
+        textList.AddContent(content: "テスト10")
+        textList.AddContent(content: "テスト11")
+        textList.AddContent(content: "テスト12")
+        textList.AddContent(content: "テスト13")
+        textList.AddContent(content: "テスト14")
+        textList.AddContent(content: "テスト15")
+        textList.AddContent(content: "テスト16")
+        textList.AddContent(content: "テスト17")
+        textList.AddContent(content: "テスト18")
+        textList.AddContent(content: "テスト19")
+        textList.AddContent(content: "テスト20")
     }
 
     var body: some View {
         Group {
             if viewData.currentPage == .neediCloudSync {
-                CheckiCloudSyncView()
+                ZStack {
+                    textList
+                    Button("reset") {
+                        self.textList.ScrollToIndex(at: 10)
+                    }
+                }
+                //CheckiCloudSyncView()
             }else if viewData.currentPage == .bookshelf {
                 BookshelfView(novelList: self.viewData.novelList ?? [], viewData: self.viewData)
             }else {
