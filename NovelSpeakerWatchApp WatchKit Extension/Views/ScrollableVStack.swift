@@ -83,7 +83,7 @@ struct ScrollableVStack<Content:Hashable>: View {
     func RemoveFromIndex(at:Int){
         data.contentArray.remove(at: at)
     }
-    func ScrollToIndex(at:Int){
+    func ScrollToIndex(at:Int, isAnimationEnable:Bool = false){
         var yOffset:CGFloat = 0.0
         for (i,v) in data.contentArray.enumerated() {
             if i == at {
@@ -91,7 +91,7 @@ struct ScrollableVStack<Content:Hashable>: View {
             }
             yOffset += v.size.height
         }
-        scrollTo(height: -yOffset)
+        scrollTo(height: -yOffset, isAnimationEnable: isAnimationEnable)
     }
     func GetCurrentDisplayedIndex() -> Int? {
         var yOffset:CGFloat = 0.0
@@ -114,27 +114,34 @@ struct ScrollableVStack<Content:Hashable>: View {
         return nil
     }
     
-    func scrollTo(height:CGFloat) {
+    func scrollTo(height:CGFloat, isAnimationEnable:Bool = false) {
         let displayHeight = self.data.toplevelSize.height
         let contentHeight = self.data.contentArray.reduce(0, { $0 + $1.size.height })
         let scrollPositionMin = -(contentHeight - (contentHeight < displayHeight ? 0 : displayHeight))
         //print("scrollTo(): height: \(height), displayHeight: \(displayHeight), scrollOffset: \(data.scrollOffset), dragHeight: \(data.dragHeight), contentHeight: \(contentHeight), scrollPositionMin: \(scrollPositionMin)")
-        withAnimation {
-            self.data.dragHeight = .zero
+        let newScrollOffset:CGFloat
+        if height < scrollPositionMin {
+            newScrollOffset = scrollPositionMin
+        }else if height > 0 {
+            newScrollOffset = .zero
+        }else{
+            newScrollOffset = height
+        }
 
-            if height < scrollPositionMin {
-                self.data.scrollOffset = scrollPositionMin
-            }else if height > 0 {
-                self.data.scrollOffset = .zero
-            }else{
-                self.data.scrollOffset = height
+        if isAnimationEnable {
+            withAnimation {
+                self.data.dragHeight = .zero
+                self.data.scrollOffset = newScrollOffset
             }
+        }else{
+            self.data.dragHeight = .zero
+            self.data.scrollOffset = newScrollOffset
         }
     }
     
     func onDragEnded(value:DragGesture.Value) {
         //print("onDragEnded: value: \(value), outerGeometry: \(outerGeometry)")
-        scrollTo(height: self.data.scrollOffset + value.predictedEndTranslation.height)
+        scrollTo(height: self.data.scrollOffset + value.predictedEndTranslation.height, isAnimationEnable: true)
     }
     
     var body: some View {
@@ -145,9 +152,6 @@ struct ScrollableVStack<Content:Hashable>: View {
             .content.offset(x: 0, y: self.data.scrollOffset + self.data.dragHeight + self.data.contentArray.reduce(0, { $0 + $1.size.height }) / 2 - geometry.size.height / 2)
             .onAppear(perform: {
                 self.data.toplevelSize = geometry.size
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    self.scrollTo(height: 1440)
-                }
             })
             .gesture(DragGesture()
                 .onChanged({ self.data.dragHeight = $0.translation.height })
