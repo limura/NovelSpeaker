@@ -350,12 +350,6 @@
 		210EFEE023C8A92D007C3016 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBlockSpeaker.swift; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
-		211BA5F619973BA500560842 /* SpeechBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechBlock.h; sourceTree = "<group>"; };
-		211BA5F719973BA500560842 /* SpeechBlock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechBlock.m; sourceTree = "<group>"; };
-		211BA5F919973CFB00560842 /* SpeechConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechConfig.h; sourceTree = "<group>"; };
-		211BA5FA19973CFB00560842 /* SpeechConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechConfig.m; sourceTree = "<group>"; };
-		211BA5FC199742CF00560842 /* NiftySpeaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftySpeaker.h; sourceTree = "<group>"; };
-		211BA5FD199742CF00560842 /* NiftySpeaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftySpeaker.m; sourceTree = "<group>"; };
 		212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 5.xcdatamodel"; sourceTree = "<group>"; };
 		2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PickerViewDialog.h; sourceTree = "<group>"; };
 		2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PickerViewDialog.m; sourceTree = "<group>"; };
@@ -466,11 +460,7 @@
 		2177634F19756781004F22FD /* GlobalStateCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalStateCacheData.h; sourceTree = "<group>"; };
 		2177635019756781004F22FD /* GlobalStateCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalStateCacheData.m; sourceTree = "<group>"; };
 		21778D701A6168C30042F2F1 /* SettingDataModel 7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 7.xcdatamodel"; sourceTree = "<group>"; };
-		217BD9E219CE72BB008A0D9D /* StringSubstituter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StringSubstituter.h; sourceTree = "<group>"; };
-		217BD9E319CE72BB008A0D9D /* StringSubstituter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StringSubstituter.m; sourceTree = "<group>"; };
 		217E683A1998F6A000C656AA /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
-		217F6E1A1942F14B008E432E /* Speaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Speaker.h; sourceTree = "<group>"; };
-		217F6E1B1942F14B008E432E /* Speaker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Speaker.m; sourceTree = "<group>"; };
 		21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeaker.entitlements; sourceTree = "<group>"; };
 		21814C591E8CE8A00096CB42 /* NovelSpeakerURLDownloadExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerURLDownloadExtension.entitlements; sourceTree = "<group>"; };
 		21814C5A1E8D68A90096CB42 /* NSStringExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringExtension.h; sourceTree = "<group>"; };
@@ -709,16 +699,6 @@
 		211BA5F219973AAD00560842 /* TextSpeech */ = {
 			isa = PBXGroup;
 			children = (
-				217F6E1A1942F14B008E432E /* Speaker.h */,
-				217F6E1B1942F14B008E432E /* Speaker.m */,
-				211BA5F619973BA500560842 /* SpeechBlock.h */,
-				211BA5F719973BA500560842 /* SpeechBlock.m */,
-				211BA5F919973CFB00560842 /* SpeechConfig.h */,
-				211BA5FA19973CFB00560842 /* SpeechConfig.m */,
-				211BA5FC199742CF00560842 /* NiftySpeaker.h */,
-				211BA5FD199742CF00560842 /* NiftySpeaker.m */,
-				217BD9E219CE72BB008A0D9D /* StringSubstituter.h */,
-				217BD9E319CE72BB008A0D9D /* StringSubstituter.m */,
 				210EFEE023C8A92D007C3016 /* Speaker.swift */,
 				210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */,
 				210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */,
