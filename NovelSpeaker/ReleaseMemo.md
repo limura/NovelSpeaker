@@ -2330,7 +2330,7 @@ Interface change
 それでは、これからも ことせかい をよろしくお願いいたします。
 
 
-# Version 1.1.62
+# Version 1.1.61
 
 Interface change
 
@@ -2339,7 +2339,7 @@ Interface change
 This English notation was corrected on GitHub by @Matthewzhou809 in the form of a pull request. Thank you @Matthewzhou809! ヾ(*´∀｀*)ノ
 NovelSpeaker is an open source project published on GitHub, so contributions such as pull requests like this one are very helpful.
 
-# Version 1.1.63
+# Version 1.1.62
 
 インタフェースの変更
 
@@ -2363,7 +2363,7 @@ NovelSpeaker is an open source project published on GitHub, so contributions suc
 
 それでは、これからも ことせかい をよろしくお願いいたします。
 
-# Version 1.1.63
+# Version 1.1.62
 
 Interface change
 
@@ -2375,6 +2375,24 @@ Bug fix
 - Resolved an issue that may cause the indicator to persist while downloading a novel.
 - Corrects an issue that may have caused nothing to happen after selecting "Create inconvenience report mail" in "Settings" - > "Send inquiries to developers via E-mail".
 
+# Version 1.1.63
+
+問題の修正
+
+- 一部のWebサイトからの取込時に、不必要な改行が追加されるのを抑制
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の不都合報告フォームからの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正を完全に説明しようとするとややこしいのでほわっとした説明になりますことをご容赦ください。
+今回の修正は、Wikipediaの取込をしようとした時等に発生していた、細切れになって改行が入りまくってしまうものについて、そのような事になりにくくするような修正になります。これはWebページからの取込方法を定義しているデータベース定義の記述方式によっては同様の問題が発生する事になっていたのですが、書き方としては正規の手法なのにおかしな動作になってしまうというのを、より正しい(?)形で取り込めるようにした、というものになります。現時点ではWikipedia位しかこの問題が発生しする書き方をされたデータベース定義は無い……と思うのですが、将来的には増えるかもわかりませんので気づいた所で対応しておきました、という事でした。
+
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 1.1.63
+
+Bug fix
+
+- Suppress unnecessary line breaks when importing from some websites
 
 
 TODO:
