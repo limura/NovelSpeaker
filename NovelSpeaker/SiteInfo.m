@@ -277,6 +277,15 @@
                 if (docString == nil) {
                     continue;
                 }
+                if (node->parent != nil && node->parent->type == XML_ELEMENT_NODE && node->parent->name != NULL) {
+                    if (node->next == nil && node->prev == nil) {
+                        docString = [[NSString alloc] initWithFormat:@"<%s>%@</%s>", node->parent->name, docString, node->parent->name];
+                    }else if (node->next == nil) {
+                        docString = [[NSString alloc] initWithFormat:@"%@</%s>", docString, node->parent->name];
+                    }else if (node->prev == nil) {
+                        docString = [[NSString alloc] initWithFormat:@"<%s>%@", node->parent->name, docString];
+                    }
+                }
                 [stringArray addObject:docString];
             }
         }
@@ -294,7 +303,6 @@
     NSMutableString* htmlString = [NSMutableString new];
     for (NSString* str in stringArray) {
         [htmlString appendString:str];
-        [htmlString appendString:@"<br><br>"];
     }
     return htmlString;
 }

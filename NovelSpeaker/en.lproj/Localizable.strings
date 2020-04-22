@@ -558,11 +558,7 @@
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.63
 
-- Add \"Select the novels in which the error occurs (if any)\" to \"Settings\" -> \"Send inquiries to developers via E-mail\"
-- As for the name of the novel when you take it in, please take it in by removing the blank before and after.
-- Resolved an issue that may cause the indicator to persist while downloading a novel.
-- Corrects an issue that may have caused nothing to happen after selecting \"Create inconvenience report mail\" in \"Settings\" -> \"Send inquiries to developers via E-mail\".
-
+- Suppress unnecessary line breaks when importing from some websites
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -581,6 +577,13 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 
 # Version 1.1.63
 
+Bug fix
+
+- Suppress unnecessary line breaks when importing from some websites
+
+
+# Version 1.1.62
+
 Interface change
 
 - Add \"Select the novels in which the error occurs (if any)\" to \"Settings\" -> \"Send inquiries to developers via E-mail\"
@@ -592,7 +595,7 @@ Bug fix
 - Corrects an issue that may have caused nothing to happen after selecting \"Create inconvenience report mail\" in \"Settings\" -> \"Send inquiries to developers via E-mail\".
 
 
-# Version 1.1.62
+# Version 1.1.61
 
 Interface change
 
