@@ -244,7 +244,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 //- (BOOL)SetSpeechRange:(NSRange)range;
 
 /// 現在の読み上げ位置を取り出します
-- (NSRange)GetCurrentReadingPoint;
+//- (NSRange)GetCurrentReadingPoint;
 
 /// 読み上げを開始します。
 //- (BOOL)StartSpeech:(BOOL)withMaxSpeechTimeReset;

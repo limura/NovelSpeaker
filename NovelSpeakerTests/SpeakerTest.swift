@@ -11,57 +11,17 @@ import RealmSwift
 @testable import NovelSpeaker
 
 class SpeakerTest: XCTestCase {
+    var speaker = SpeechBlockSpeaker()
+
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        speaker = SpeechBlockSpeaker()
     }
 
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
-    
-    func testStorySpeakerBlock() {
-        let targetText = """
-あいうえお「あいうえお。あいうえお」あいうえお。あいうえお！あいうえお、あいうえお。
-あいうえお。あいうえお！あいうえお あいうえお！あいうえお あいうえお！あいうえお あいうえお！あいうえお、あいうえお。
-「俺様『は』負けない」「と思う「んだわ。」』です。
-ルビを|降ってみる(ふってみる)のテスト(ルビ)、ああ播磨灘(はりまなだ)、|ルビにはならない何か(・・・・・・・・)。終了！
-"""
-        let defaultSpeakerSetting = RealmSpeakerSetting()
-        defaultSpeakerSetting.name = "defaultSpeakerConfig"
-        let sectionConfig1 = SpeechSectionConfig(startText: "「", endText: "」", speakerSetting: RealmSpeakerSetting())
-        sectionConfig1.speakerSetting.name = "sectionConfig1"
-        let sectionConfig2 = SpeechSectionConfig(startText: "『", endText: "』", speakerSetting: RealmSpeakerSetting())
-        sectionConfig2.speakerSetting.name = "sectionConfig2"
-        let sectionConfigArray = [sectionConfig1, sectionConfig2]
-        
-        let waitConfig1 = RealmSpeechWaitConfig()
-        waitConfig1.targetText = "。"
-        waitConfig1.delayTimeInSec = 0.2
-        let waitConfig2 = RealmSpeechWaitConfig()
-        waitConfig2.targetText = "、"
-        waitConfig2.delayTimeInSec = 0.1
-        let waitConfigArray = [waitConfig1, waitConfig2]
-        
-        let modSetting1 = RealmSpeechModSetting()
-        modSetting1.before = "うえお"
-        modSetting1.after = "植尾"
-        let modSetting2 = RealmSpeechModSetting()
-        modSetting2.before = "あい"
-        modSetting2.after = "愛"
-        let modSetting3 = RealmSpeechModSetting()
-        modSetting3.before = "！"
-        modSetting3.after = "_。_。"
-        var modSettingArray =  [modSetting1, modSetting2, modSetting3]
-        modSettingArray.append(contentsOf: StoryTextClassifier.GenerateRubyModString(text:targetText, notRubyString:"・、 　！!"))
 
-        let result = StoryTextClassifier.CategorizeStoryText(content:targetText,    withMoreSplitTargets:["。", "、", "！"], moreSplitMinimumLetterCount:20, defaultSpeaker:defaultSpeakerSetting, sectionConfigList:sectionConfigArray, waitConfigList:waitConfigArray, sortedSpeechModArray:modSettingArray)
-        for item in result {
-            print("\(item.voice?.identifier ?? "unknown or nil"), \(item.delay): \(item.displayText) -> \(item.speechText)")
-            print("---")
-        }
-    }
-    
-    let speaker = SpeechBlockSpeaker()
     func testSpeechBlockSpeaker() {
         var story = Story()
         story.content = """
@@ -75,6 +35,28 @@ class SpeakerTest: XCTestCase {
         wait(for: [exp], timeout: 10.0)
         DispatchQueue.main.asyncAfter(deadline: .now() + 9.0) {
             exp.fulfill()
+        }
+    }
+    
+    func testSpeechLocation() {
+        let speaker = StorySpeaker.shared
+        var story = Story()
+        story.content = """
+        「ふぁ……」
+         
+        　まだ日も昇らないうちから、バルトロメイは目を覚まし、寝台から体を起こす。
+        　軍に所属している者の朝は早い。少なくとも新兵訓練を受けた者は、日が昇る前から教官に叩き起こされるのが常である。そして、その後も部隊に入ってから何度も訓練を重ね、実戦においては満足に睡眠を取ることも難しい場合もあるため、このように早起きが習慣となってしまうのだ。
+        　昨日は酒を飲んだためか、やや頭に鈍痛が残っているのが分かる。しかし、かといってこれ以上眠ることはできないだろう。軍人としての性もそうだが、四十を迎えた体ではなかなか二度寝も難しいのだ。
+        """
+        speaker.withMoreSplitTargets = ["。", ".", "\n"]
+        speaker.moreSplitMinimumLetterCount = 30
+        speaker.SetStory(story: story)
+        let blockArray = speaker.speechBlockArray
+        print("currentBlockIndex: \(speaker.currentBlockIndex)")
+        speaker.speaker.SetSpeechLocation(location: 30)
+        print("currentBlockIndex: \(speaker.currentBlockIndex)")
+        for block in blockArray {
+            print("---\n\(block.displayText)\n---\n")
         }
     }
 }

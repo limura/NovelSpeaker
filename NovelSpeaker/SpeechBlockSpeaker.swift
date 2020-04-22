@@ -134,7 +134,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
         currentSpeakingLocation = currentDisplayStringOffset
-        self.delegate?.willSpeakRange(range: NSMakeRange(currentDisplayStringOffset, 1))
         // 次のblock を取り出せないなら終わったという意味で false を返す
         guard currentSpeechBlockIndex < speechBlockArray.count else { return false }
         return true
@@ -149,6 +148,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         speaker.pitch = block.pitch
         speaker.rate = block.rate
         speaker.delay = block.delay
+        self.delegate?.willSpeakRange(range: NSMakeRange(currentDisplayStringOffset, 1))
         let speechText = block.GenerateSpeechTextFrom(displayLocation: currentBlockDisplayOffset)
         speaker.Speech(text: speechText)
         //print("Speech: \(speechText)")
@@ -225,8 +225,10 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             currentBlockDisplayOffset = currentLocation
             currentBlockSpeechOffset = speechBlock.ComputeSpeechLocationFrom(displayLocation: currentLocation)
             currentSpeakingLocation = location
+            print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex)")
             return true
         }
+        print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex) (return false)")
         return false
     }
     
@@ -249,6 +251,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             index -= 1
         }
         currentSpeakingLocation = currentDisplayStringOffset
+        print("SetSpeechBlockIndex(\(index)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex)")
         return true
     }
     

@@ -39,6 +39,8 @@ struct SpeechContorlView: View {
                     speaker.SkipBackward(length: 30)
                     if isPlaying {
                         speaker.StartSpeech(withMaxSpeechTimeReset: true)
+                    }else{
+                        self.storyViewData.displayIndex = speaker.currentBlockIndex
                     }
                     self.storyViewData.setLoadingIndicator(isVisible: false)
                 }
@@ -72,6 +74,8 @@ struct SpeechContorlView: View {
                     speaker.SkipForward(length: 30)
                     if isPlaying {
                         speaker.StartSpeech(withMaxSpeechTimeReset: true)
+                    }else{
+                        self.storyViewData.displayIndex = speaker.currentBlockIndex
                     }
                     self.storyViewData.setLoadingIndicator(isVisible: false)
                 }

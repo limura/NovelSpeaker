@@ -272,6 +272,16 @@ class CombinedSpeechBlock: Identifiable {
     }
 }
 
+extension CombinedSpeechBlock: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(self.speechText)
+    }
+    
+    static func == (lhs:CombinedSpeechBlock, rhs:CombinedSpeechBlock) -> Bool {
+        return lhs.speechText == rhs.speechText
+    }
+}
+
 class StoryTextClassifier {
     // RealmSpeechSectionConfig を SpeechSectionConfig に変換します。
     // 単に speakerID を RealmSpeakerSetting に変えるだけです。

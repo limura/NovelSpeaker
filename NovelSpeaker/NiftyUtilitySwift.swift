@@ -536,9 +536,13 @@ class NiftyUtilitySwift: NSObject {
         let session: URLSession = URLSession.shared
         DispatchQueue.global(qos: .utility).async {
             session.dataTask(with: url) { data, response, error in
-                if let data = data, let response = response as? HTTPURLResponse, Int(response.statusCode / 100) % 10 == 2, let successAction = successAction {
-                    successAction(data)
-                    return
+                if let data = data, let response = response as? HTTPURLResponse, let successAction = successAction {
+                    var statusCodeDiv100:Int = response.statusCode / 100
+                    statusCodeDiv100 %= 10
+                    if statusCodeDiv100 == 2 {
+                        successAction(data)
+                        return
+                    }
                 }
                 if let failedAction = failedAction {
                     failedAction(error)

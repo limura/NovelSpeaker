@@ -8,49 +8,56 @@
 
 import SwiftUI
 
-struct StoryView: View {
-    @ObservedObject var storyViewData = StoryViewData()
+protocol StoryDisplayIndexUpdateDelegate {
+    func DisplayIndexUpdate(index:Int)
+}
+
+protocol CombinedSpeechBlockUpdateDelegate {
+    func CombinedSpeechBlockUpdate(index:Int)
+}
+
+struct StoryView: View, StoryDisplayIndexUpdateDelegate, CombinedSpeechBlockUpdateDelegate {
+    @ObservedObject var storyViewData:StoryViewData
     let viewData:ViewData
-    /*
-    let simpleTableView = SimpleTableView<String>(converter: {
-        AnyView(Text($0))
-    })
-     */
-    let simpleTableView = ScrollableVStack<String>(converter: { content, _ in AnyView(Text(content))
-    })
+    let speechBlockListView:ScrollableVStack<CombinedSpeechBlock>
     
     init(story:Story, viewData:ViewData) {
+        // ScrollableVStack は後で色々とmethodを呼び出さねばならないため、
+        // メンバ変数に保存しておく必要があります。(´・ω・`)
+        let sViewData = StoryViewData()
+        self.speechBlockListView = ScrollableVStack<CombinedSpeechBlock>(data: sViewData.combinedBlockArray, converter: { content, _ in
+            AnyView(
+                Text(content.displayText)
+                .fixedSize(horizontal: false, vertical: true)
+            )
+        })
         self.viewData = viewData
-        storyViewData.SetCurrentStory(story: story)
-
-        self.simpleTableView.AddContent(content: "あいうえお1\nあいうえお1\nあいうえお1")
-        self.simpleTableView.AddContent(content: "あいうえお2\nあいうえお2\nあいうえお2")
-        self.simpleTableView.AddContent(content: "あいうえお3\nあいうえお3\nあいうえお3")
-        self.simpleTableView.AddContent(content: "あいうえお4\nあいうえお4\nあいうえお4")
-        self.simpleTableView.AddContent(content: "あいうえお5\nあいうえお5\nあいうえお5")
-        self.simpleTableView.AddContent(content: "あいうえお6\nあいうえお6\nあいうえお6")
-        self.simpleTableView.AddContent(content: "あいうえお7\nあいうえお7\nあいうえお7")
-        self.simpleTableView.AddContent(content: "あいうえお8\nあいうえお8\nあいうえお8")
-        self.simpleTableView.AddContent(content: "あいうえお9\nあいうえお9\nあいうえお9")
-        self.simpleTableView.AddContent(content: "あいうえお10\nあいうえお10\nあいうえお10")
-        self.simpleTableView.AddContent(content: "あいうえお11\nあいうえお11\nあいうえお11")
-        self.simpleTableView.AddContent(content: "あいうえお12\nあいうえお12\nあいうえお12")
-        self.simpleTableView.AddContent(content: "あいうえお13\nあいうえお13\nあいうえお13")
-        self.simpleTableView.AddContent(content: "あいうえお14\nあいうえお14\nあいうえお14")
-        self.simpleTableView.AddContent(content: "あいうえお15\nあいうえお15\nあいうえお15")
-        self.simpleTableView.AddContent(content: "あいうえお16\nあいうえお16\nあいうえお16")
-        self.simpleTableView.AddContent(content: "あいうえお17\nあいうえお17\nあいうえお17")
+        self.storyViewData = sViewData
+        self.storyViewData.displayIndexUpdateFunc = self
+        self.storyViewData.combinedSpeechBlockUpdateFunc = self
+        self.storyViewData.SetCurrentStory(story: story)
     }
     
+    func DisplayIndexUpdate(index:Int){
+        self.speechBlockListView.ScrollToIndex(at: index, isAnimationEnable: true)
+    }
+    func CombinedSpeechBlockUpdate(index:Int){
+        self.speechBlockListView.UpdateData(data: self.storyViewData.combinedBlockArray)
+        self.speechBlockListView.ScrollToIndex(at: index, isAnimationEnable: true)
+    }
+
     var body: some View {
         ZStack(alignment: .center) {
-            /*
             VStack {
+                self.speechBlockListView
+                /*
                 List(storyViewData.combinedBlockArray) { block in
                     Text(block.displayText)
                 }
+                */
                 SpeechContorlView(storyViewData: storyViewData)
             }
+            /*
             VStack {
                 HStack {
                     SystemIconButtonView(systemIconName: "chevron.left.circle.fill", iconSize: CGFloat(20), foregroundColor: Color.blue.opacity(0.7)) {
@@ -67,7 +74,6 @@ struct StoryView: View {
             }
             NovelSupportMenuView(storyViewData: self.storyViewData)
             */
-            self.simpleTableView
             Text(NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"))
             .font(.title)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
@@ -89,10 +95,25 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     @Published var titleText = NSLocalizedString("Watch_OS_StoryViewData_NowloadingText", comment: "読込中……")
     @Published var isSpeaking = StorySpeaker.shared.isPlayng
     
+    var combinedSpeechBlockUpdateFunc:CombinedSpeechBlockUpdateDelegate? = nil
     @Published var combinedBlockArray:[CombinedSpeechBlock] = [
         CombinedSpeechBlock(block: SpeechBlockInfo(speechText: NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"), displayText: NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"), voice: nil, pitch: 1.0, rate: 1.0, delay: 0.0))
-    ]
-    @Published var displayIndex:Int = 0
+    ] {
+        // TODO: ScrollableVStack は data:[Content] を更新しても検知できない
+        // ので、悲しいけど didSet を使って CombinedSpeechBlockUpdate() を呼んで
+        // ScrollableVStack.UpdateData() を呼んでもらいます。(´・ω・`)
+        didSet {
+            self.combinedSpeechBlockUpdateFunc?.CombinedSpeechBlockUpdate(index: StorySpeaker.shared.currentBlockIndex)
+        }
+    }
+    var displayIndexUpdateFunc:StoryDisplayIndexUpdateDelegate? = nil
+    @Published var displayIndex:Int = 0 {
+        // displayIndex が変更された時にはその位置を表示するように移動させる……んだけどコレはなんともSwiftUIぽくない感じだ('A`)
+        didSet {
+            print("displayIndex update to: \(self.displayIndex), \(self.combinedBlockArray[self.displayIndex].displayText)")
+            self.displayIndexUpdateFunc?.DisplayIndexUpdate(index: self.displayIndex)
+        }
+    }
     @Published var isLoadingIndicatorVisible = false
     @Published var isSupportMenuVisible = false
     @Published var storyID = ""
@@ -123,6 +144,8 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     func storySpeakerStartSpeechEvent(storyID:String) {
         NiftyUtilitySwift.DispatchSyncMainQueue {
             self.isSpeaking = true
+            print("storySPeakerStartSpeechEvent set displayIndex to \(StorySpeaker.shared.currentBlockIndex)")
+            self.displayIndex = StorySpeaker.shared.currentBlockIndex
         }
     }
     func storySpeakerStopSpeechEvent(storyID:String) {
@@ -132,6 +155,7 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     }
     func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange) {
         NiftyUtilitySwift.DispatchSyncMainQueue {
+            print("storySpeakerUpdateReadingPoint set displayIndex to \(StorySpeaker.shared.currentBlockIndex)")
             self.displayIndex = StorySpeaker.shared.currentBlockIndex
         }
     }
@@ -139,6 +163,7 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
         NiftyUtilitySwift.DispatchSyncMainQueue {
             self.displayIndex = 0
             self.combinedBlockArray = StorySpeaker.shared.speechBlockArray
+            print("storySpeakerStoryChanged set displayIndex to \(StorySpeaker.shared.currentBlockIndex)")
             self.displayIndex = StorySpeaker.shared.currentBlockIndex
             self.storyID = story.storyID
         }

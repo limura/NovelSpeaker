@@ -18,16 +18,7 @@ enum CurrentPageType {
 struct ContentView: View {
     @ObservedObject var viewData = ViewData()
     var dummyStory = Story()
-    let textList = ScrollableVStack<String>(converter: { content, parent in
-        AnyView(
-            Text(content)
-            .fixedSize(horizontal: false, vertical: true)
-            /*
-            Button(content, action: {
-                parent.ScrollToIndex(at: 3)
-            })*/
-        )
-    })
+    @State var textDataArray:[String] = ["テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1", "テスト2-テスト2-テスト2-テスト2-テスト2-テスト2-テスト2-テスト2-テスト2", "テスト3", "テスト4", "テスト5", "テスト6", "テスト7", "テスト8", "テスト9", "テスト10", "テスト11", "テスト12"]
 
     init() {
         NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
@@ -36,37 +27,33 @@ struct ContentView: View {
         //StorySpeaker.shared.withMoreSplitTargets = ["。", "、", ".", ",", ":", "\n\n"]
         StorySpeaker.shared.withMoreSplitTargets = ["。", ".", "\n"]
         StorySpeaker.shared.moreSplitMinimumLetterCount = 30 // 40mm のタイプだと1行に11文字位表示できるぽいので3行だと30文字で切るのが良さげ？
-        textList.AddContent(content: "テスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1\nテスト1")
-        textList.AddContent(content: "テスト2\nテスト2")
-        textList.AddContent(content: "テスト3")
-        textList.AddContent(content: "テスト4")
-        textList.AddContent(content: "テスト5")
-        textList.AddContent(content: "テスト6")
-        textList.AddContent(content: "テスト7")
-        textList.AddContent(content: "テスト8")
-        textList.AddContent(content: "テスト9")
-        textList.AddContent(content: "テスト10")
-        textList.AddContent(content: "テスト11")
-        textList.AddContent(content: "テスト12")
-        textList.AddContent(content: "テスト13")
-        textList.AddContent(content: "テスト14")
-        textList.AddContent(content: "テスト15")
-        textList.AddContent(content: "テスト16")
-        textList.AddContent(content: "テスト17")
-        textList.AddContent(content: "テスト18")
-        textList.AddContent(content: "テスト19")
-        textList.AddContent(content: "テスト20")
+        self.textDataArray = ["テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1-テスト1", "テスト2-テスト2-テスト2-テスト2-テスト2-テスト2-テスト2-テスト2-テスト2", "テスト3", "テスト4", "テスト5", "テスト6", "テスト7", "テスト8", "テスト9", "テスト10", "テスト11", "テスト12"]
+    }
+    
+    func buttonClicked(parent:ScrollableVStack<String>) {
+        if self.textDataArray.count % 3 == 0 {
+            parent.ScrollToIndex(at: 1, isAnimationEnable: true)
+            print("scroll to 0")
+        }else{
+            parent.ScrollToIndex(at: self.textDataArray.count - 1, isAnimationEnable: true)
+            print("scroll to \(self.textDataArray.count - 1)")
+        }
+        self.textDataArray.append("New data \(self.textDataArray.count)")
     }
 
     var body: some View {
         Group {
             if viewData.currentPage == .neediCloudSync {
-                ZStack {
-                    textList
-                    Button("reset") {
-                        self.textList.ScrollToIndex(at: 10)
-                    }
-                }
+                ScrollableVStack<String>(data: self.textDataArray, converter: { content, parent -> AnyView in
+                    AnyView(
+                        Text(content)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .onTapGesture {
+                            self.buttonClicked(parent: parent)
+                        }
+                    )
+                })
                 //CheckiCloudSyncView()
             }else if viewData.currentPage == .bookshelf {
                 BookshelfView(novelList: self.viewData.novelList ?? [], viewData: self.viewData)

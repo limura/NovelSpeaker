@@ -198,9 +198,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         guard let type = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? NSNumber else {
             return
         }
-        if type.intValue == Int(AVAudioSession.InterruptionType.began.rawValue) {
+        let typeIntValue = type.intValue
+        let beganType = Int(AVAudioSession.InterruptionType.began.rawValue)
+        let endedType = Int(AVAudioSession.InterruptionType.ended.rawValue)
+        if typeIntValue == beganType {
             self.dummySoundLooper.stopPlay()
-        }else if type.intValue == Int(AVAudioSession.InterruptionType.ended.rawValue) {
+        }else if typeIntValue == endedType {
             self.dummySoundLooper.startPlay()
         }
     }
