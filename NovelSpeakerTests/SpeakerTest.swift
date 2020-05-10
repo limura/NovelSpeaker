@@ -56,7 +56,7 @@ class SpeakerTest: XCTestCase {
         speaker.speaker.SetSpeechLocation(location: 30)
         print("currentBlockIndex: \(speaker.currentBlockIndex)")
         for block in blockArray {
-            print("---\n\(block.displayText)\n---\n")
+            print("---\n\(block.displayText)\n")
         }
     }
 }
