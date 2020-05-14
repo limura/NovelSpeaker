@@ -790,6 +790,19 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: "次回起動時に CoreData(旧データベース) の情報に書き戻すように設定しました。", buttonTitle: nil, buttonAction: nil)
                 }
             })
+        <<< ButtonRow() {
+            $0.title = "テスト用検索タブ"
+            $0.cell.textLabel?.numberOfLines = 0
+        }.onCellSelection({ (_, _) in
+            let nextViewController = NovelSearchViewController()
+            self.navigationController?.pushViewController(nextViewController, animated: true)
+        }).cellUpdate({ (cell, button) in
+            cell.textLabel?.textAlignment = .left
+            cell.accessoryType = .disclosureIndicator
+            cell.editingAccessoryType = cell.accessoryType
+            cell.textLabel?.textColor = nil
+        })
+        
     }
 
     func AssignMessageTo(tag:Int, text:String, dialog:EasyDialog) {

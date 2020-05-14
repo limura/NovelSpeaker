@@ -54,7 +54,6 @@ class SyncHttpSession: NSObject {
         let result = SyncHTTPSessionResult()
         if let url = url {
             let semaphore = DispatchSemaphore.init(value: 0)
-            var resultResponse:HTTPURLResponse? = nil
             var request = URLRequest(url: url)
             if let headerDictionary = headerDictionary {
                 for (key, value) in headerDictionary {

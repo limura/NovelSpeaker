@@ -57,7 +57,6 @@
 		2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */; };
 		2126A2611D9A1B90008E534A /* Action.js in Resources */ = {isa = PBXBuildFile; fileRef = 2126A2601D9A1B90008E534A /* Action.js */; };
 		2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		2126A26D1D9D1B92008E534A /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
 		2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */ = {isa = PBXBuildFile; fileRef = 2127EACA1DB75989005B1636 /* HtmlStory.m */; };
 		212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */; };
 		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
@@ -150,6 +149,8 @@
 		21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */; };
 		21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
 		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
+		219106DF2468371A00BBA5AF /* NovelSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219106DE2468371A00BBA5AF /* NovelSearchViewController.swift */; };
+		219106E02469081100BBA5AF /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */; };
 		2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */; };
 		2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */; };
 		21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916374199F143E003FF7FC /* SpeechModSetting.m */; };
@@ -470,6 +471,7 @@
 		21890CF11D92F38800869046 /* NSDataZlibExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataZlibExtension.h; sourceTree = "<group>"; };
 		21890CF21D92F38800869046 /* NSDataZlibExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataZlibExtension.m; sourceTree = "<group>"; };
 		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		219106DE2468371A00BBA5AF /* NovelSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSearchViewController.swift; sourceTree = "<group>"; };
 		21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 3.xcdatamodel"; sourceTree = "<group>"; };
 		2191636A199E65B9003FF7FC /* SpeakPitchConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakPitchConfig.h; sourceTree = "<group>"; };
 		2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeakPitchConfig.m; sourceTree = "<group>"; };
@@ -660,7 +662,7 @@
 				216741A92047714D008A578D /* PDFKit.framework in Frameworks */,
 				215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */,
 				213515FC1F8CC06400F7AAD0 /* MessageUI.framework in Frameworks */,
-				2126A26D1D9D1B92008E534A /* libxml2.2.tbd in Frameworks */,
+				219106E02469081100BBA5AF /* libxml2.tbd in Frameworks */,
 				21890CF51D9309F000869046 /* libz.tbd in Frameworks */,
 				217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */,
 				21C759FC2287127800956B73 /* CloudKit.framework in Frameworks */,
@@ -1121,6 +1123,7 @@
 				2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */,
 				2169D65B22C26028008787A4 /* NovelKeywordTagSelecterViewController.swift */,
 				21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */,
+				219106DE2468371A00BBA5AF /* NovelSearchViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1547,6 +1550,7 @@
 				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework",
 				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
+				"${BUILT_PRODUCTS_DIR}/Fuzi/Fuzi.framework",
 				"${BUILT_PRODUCTS_DIR}/MSColorPicker/MSColorPicker.framework",
 				"${BUILT_PRODUCTS_DIR}/RATreeView/RATreeView.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm-iOS/Realm.framework",
@@ -1558,6 +1562,7 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Eureka.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FTLinearActivityIndicator.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Fuzi.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSColorPicker.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RATreeView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
@@ -1800,6 +1805,7 @@
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,
 				21F37B7D1EC2379100BE0452 /* CustomUITextView.swift in Sources */,
 				21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */,
+				219106DF2468371A00BBA5AF /* NovelSearchViewController.swift in Sources */,
 				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
 				215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */,
 				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,

@@ -530,6 +530,20 @@
 "RealmToRealmCopyTool_Progress_Novel" = "Migrating novel information";
 "RealmToRealmCopyTool_Progress_Story" = "Migrating the novel text";
 
+"NovelSearchViewController_SearchResultZero" = "No results were found";
+"NovelSearchViewController_SearchButtonText" = "Search";
+"NovelSearchViewController_SearchingMessage" = "Searching...";
+"NovelSearchViewController_SearchFailed_Title" = "Search failed";
+"NovelSearchViewController_SearchField_Message" = "The search has failed.\nMaybe the specification change (change of HTML content) on the side of the website used for the search seems to have affected. Please import on the \"Web import\" side or wait for the data for the \"Web search\" tab to be updated.";
+"NovelSearchViewController_SearchFailedTitle" = "Search failed";
+"https://limuraproducts.ddns.net/NovelSpeaker/SearchInfoData/ja-JP.json" = "https://limuraproducts.ddns.net/NovelSpeaker/SearchInfoData/en-US.json";
+"NovelSearchViewController_SearchInfoLoadError_Title" = "Failed to load search settings";
+"NovelSearchViewController_SearchInfoLoadError_Message" = "Failed to read the search settings. This can happen if the network connection is poor. Please check the communication status.";
+"NovelSearchViewController_SearchWebSiteTitle" = "Web site to search";
+"NovelSearchViewController_LoadingTitle" = "Loading...";
+"NovelSearchViewController_Title" = "Search novels";
+"NovelSearchViewController_SearchResultView_Title" = "Search results";
+"NovelSearchViewController_LoadNextPage" = "Continue searching";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
 "NovelDisplayColorSettingViewController_SampleText" = "If I speak in the tongues of men or of angels, but do not have love, I am only a resounding gong or a clanging cymbal. If I have the gift of prophecy and can fathom all mysteries and all knowledge, and if I have a faith that can move mountains, but do not have love, I am nothing. If I give all I possess to the poor and give over my body to hardship that I may boast,[b] but do not have love, I gain nothing.";

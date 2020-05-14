@@ -12,6 +12,7 @@ import UserNotifications
 
 #if !os(watchOS)
 import PDFKit
+import Fuzi
 #endif
 
 class NiftyUtilitySwift: NSObject {
@@ -531,24 +532,35 @@ class NiftyUtilitySwift: NSObject {
         }.build().show()
     }
     #endif
-
-    @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
+    
+    @objc public static func httpRequest(url: URL, isPostRequest: Bool = false, postData:Data? = nil, timeoutInterval:TimeInterval = 10, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
         let session: URLSession = URLSession.shared
+        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: timeoutInterval)
+        if isPostRequest {
+            request.httpMethod = "POST"
+            request.httpBody = postData
+        }
         DispatchQueue.global(qos: .utility).async {
-            session.dataTask(with: url) { data, response, error in
-                if let data = data, let response = response as? HTTPURLResponse, let successAction = successAction {
+            session.dataTask(with: request) { data, response, error in
+                if let data = data, let response = response as? HTTPURLResponse {
                     var statusCodeDiv100:Int = response.statusCode / 100
                     statusCodeDiv100 %= 10
                     if statusCodeDiv100 == 2 {
-                        successAction(data)
+                        successAction?(data)
                         return
                     }
                 }
-                if let failedAction = failedAction {
-                    failedAction(error)
-                }
+                failedAction?(error)
             }.resume()
         }
+    }
+
+    @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
+        httpRequest(url: url, isPostRequest: false, postData: nil, successAction: successAction, failedAction: failedAction)
+    }
+    
+    @objc public static func httpPost(url: URL, data:Data, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
+        httpRequest(url: url, isPostRequest: true, postData: data, successAction: successAction, failedAction: failedAction)
     }
     
     // cachedHTTPGet で使われるキャッシュの情報
@@ -999,4 +1011,77 @@ class NiftyUtilitySwift: NSObject {
         }
         return result
     }
+
+    /// 怪しく <ruby>xxx<rp>(</rp><rt>yyy</rt><rp>)</rt></ruby> や、<ruby>xxx<rt>yyy</rt></ruby> という文字列を
+    /// |xxx(yyy) という文字列に変換します。
+    /// つまり、xxx(yyy) となるはずのものを、|xxx(yyy) となるように変換するわけです。
+    static let ConvertRubyTagToVerticalBarRubyText_ConvFromString = "<ruby>(<rb>)?([^<]+)\\s*(</rb>)?\\s*(<rp>[^<]*</rp>)?\\s*(<rt>[^<]+</rt>)\\s*(<rp>[^<]*</rp>)?</ruby>"
+    static let ConvertRubyTagToVerticalBarRubyText_RegexpConvFrom = try? NSRegularExpression(pattern: ConvertRubyTagToVerticalBarRubyText_ConvFromString, options: [.caseInsensitive])
+    static func ConvertRubyTagToVerticalBarRubyText(htmlString:String) -> String {
+        let convTo = "|$1$2$3($5)"
+        guard let regexp = ConvertRubyTagToVerticalBarRubyText_RegexpConvFrom else { return htmlString }
+        return regexp.stringByReplacingMatches(in: htmlString, options: [], range: NSMakeRange(0, htmlString.count), withTemplate: convTo)
+    }
+    
+    // HTML から String に変換する時に必要なくなるタグ等を削除します。
+    static let RemoveNoNeedTagRegexpArray = [
+        //try? NSRegularExpression(pattern: "<script.*?/script>", options: [.caseInsensitive, .dotMatchesLineSeparators]), // AttributedString に変換する場合、そちらで <script> は虫されるのでここで消しておく必要は多分ない
+        try? NSRegularExpression(pattern: "<iframe.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
+        try? NSRegularExpression(pattern: "<link.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
+        try? NSRegularExpression(pattern: "<meta.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
+    ]
+    static func RemoveNoNeedTag(htmlString:String) -> String {
+        var result = htmlString
+        for regexp in RemoveNoNeedTagRegexpArray {
+            guard let regexp = regexp else { continue }
+            result = regexp.stringByReplacingMatches(in: result, options: [], range: NSMakeRange(0, result.count), withTemplate: "")
+        }
+        return result
+    }
+    
+    static func HTMLUtf8DataToString(htmlUtf8Data:Data) -> String? {
+        var result:String? = nil
+        DispatchSyncMainQueue {
+            if let attributedString = try? NSAttributedString(data: htmlUtf8Data, options: [.documentType:NSAttributedString.DocumentType.html, .characterEncoding:String.Encoding.utf8.rawValue], documentAttributes: nil) {
+                result = attributedString.string
+            }
+        }
+        return result
+    }
+    
+    static func HTMLToString(htmlString:String) -> String? {
+        let removeRubyed = ConvertRubyTagToVerticalBarRubyText(htmlString: htmlString)
+        let removeNoUseTaged = RemoveNoNeedTag(htmlString: removeRubyed)
+        guard let data = removeNoUseTaged.data(using: .utf8) else { return removeNoUseTaged }
+        return HTMLUtf8DataToString(htmlUtf8Data: data)
+    }
+    
+    #if !os(watchOS)
+    static func FilterXpathWithConvertString(xmlDocument:XMLDocument, xpath:String) -> String {
+        var resultHTML = ""
+        for element in xmlDocument.xpath(xpath) {
+            var elementXML = element.rawXML
+            if let parent = element.parent, parent.type == .Element, let parentTag = parent.tag {
+                if element.nextSibling == nil && element.previousSibling == nil {
+                    elementXML = "<\(parentTag)>\(elementXML)</\(parentTag)>"
+                }else if element.nextSibling == nil {
+                    elementXML += "\(elementXML)</\(parentTag)>"
+                }else if element.previousSibling == nil {
+                    elementXML += "<\(parentTag)>\(elementXML)"
+                }
+            }
+            resultHTML += elementXML
+        }
+        if let result = HTMLToString(htmlString: resultHTML) {
+            return result
+        }
+        return xmlDocument.xpath(xpath).map({ $0.stringValue }).joined(separator: "")
+    }
+    
+    static func FilterXpathWithExtructFirstHrefLink(xmlDocument:XMLDocument, xpath:String, baseURL:URL) -> URL? {
+        guard let urlNode = xmlDocument.firstChild(xpath: xpath) else { return nil }
+        let urlString = urlNode.attr("href") ?? urlNode.stringValue
+        return URL(string: urlString, relativeTo: baseURL)
+    }
+    #endif
 }

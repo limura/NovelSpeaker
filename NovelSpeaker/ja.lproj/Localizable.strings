@@ -521,6 +521,20 @@
 "RealmToRealmCopyTool_Progress_Novel" = "小説情報を移行中";
 "RealmToRealmCopyTool_Progress_Story" = "小説本文を移行中";
 
+"NovelSearchViewController_SearchResultZero" = "検索結果はありませんでした";
+"NovelSearchViewController_SearchButtonText" = "検索";
+"NovelSearchViewController_SearchingMessage" = "検索中";
+"NovelSearchViewController_SearchFailed_Title" = "検索失敗";
+"NovelSearchViewController_SearchField_Message" = "検索に失敗しました。\n恐らくは検索に利用されたWebサイト様側の仕様変更(HTML内容の変更)が影響していると思われます。「Web取込」側で取込を行うか、「Web検索」タブ用のデータが更新されるのをお待ち下さい。";
+"NovelSearchViewController_SearchFailedTitle" = "検索に失敗しました";
+"https://limuraproducts.ddns.net/NovelSpeaker/SearchInfoData/ja-JP.json" = "https://limuraproducts.ddns.net/NovelSpeaker/SearchInfoData/ja-JP.json";
+"NovelSearchViewController_SearchInfoLoadError_Title" = "検索設定の読み込みに失敗";
+"NovelSearchViewController_SearchInfoLoadError_Message" = "検索設定の読み込みに失敗しました。ネットワーク接続がうまくいっていない場合にこの問題が生じる可能性があります。通信状況を確認してみてください。";
+"NovelSearchViewController_SearchWebSiteTitle" = "検索先のWebサイト";
+"NovelSearchViewController_LoadingTitle" = "読込中……";
+"NovelSearchViewController_Title" = "小説を検索";
+"NovelSearchViewController_SearchResultView_Title" = "検索結果";
+"NovelSearchViewController_LoadNextPage" = "検索を続けます";
 
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 

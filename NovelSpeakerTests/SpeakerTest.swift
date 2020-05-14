@@ -9,6 +9,7 @@
 import XCTest
 import RealmSwift
 @testable import NovelSpeaker
+import Fuzi
 
 class SpeakerTest: XCTestCase {
     var speaker = SpeechBlockSpeaker()
@@ -57,6 +58,39 @@ class SpeakerTest: XCTestCase {
         print("currentBlockIndex: \(speaker.currentBlockIndex)")
         for block in blockArray {
             print("---\n\(block.displayText)\n")
+        }
+    }
+
+    func testXML(){
+        let htmlText =
+"""
+<html><body>
+<div class="a">
+    a
+    <div class="b">
+        b<span>b</span><span>b b</span><span>b<br />b</span>
+        <div class="c">c</div>
+        d<ruby>あごだしラーメン<rp>(</rp><rt>ルビ</rt><rp>)</rp></ruby>d
+        <script>function hoge(){ console.log("hoge"); }</script>
+    </div>
+    e
+    <div class="b">
+        f
+        <div class="c">g</div>
+        h&nbsp;h&lt;h&gt;&copy;&amp;&quot;
+    </div>
+    i
+</div>
+</body></html>
+"""
+        let htmlDocument = try! HTMLDocument(data: htmlText.data(using: .utf8)!)
+        for block in htmlDocument.xpath("//div[@class='b']") {
+            guard let blockXML = try? XMLDocument(string: block.rawXML) else { continue }
+            print("block.rawXML: \(block.rawXML)\nstringValue: \(block.stringValue)\nhtlToText: \(NiftyUtilitySwift.HTMLToString(htmlString:block.rawXML) ?? "nil")")
+            let classCString = blockXML.xpath("//div[@class='c']").map({ $0.stringValue }).joined(separator: "")
+            print("classCString: \(classCString)")
+            let evaled = block.eval(xpath: "//div[@class='c']")
+            print("evaled.stringValue: \(evaled?.stringValue ?? "nil")")
         }
     }
 }
