@@ -13,6 +13,7 @@ import UserNotifications
 #if !os(watchOS)
 import PDFKit
 import Fuzi
+import Erik
 #endif
 
 class NiftyUtilitySwift: NSObject {
@@ -533,15 +534,45 @@ class NiftyUtilitySwift: NSObject {
     }
     #endif
     
-    @objc public static func httpRequest(url: URL, isPostRequest: Bool = false, postData:Data? = nil, timeoutInterval:TimeInterval = 10, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
+    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
+        print("httpHeadlessRequest in.")
+        let requestID = "HTTPRequest" + url.absoluteString
+        DispatchQueue.main.async {
+            ActivityIndicatorManager.enable(id: requestID)
+            HeadlessHttpClient.shared.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, successResultHandler: { (html) in
+                ActivityIndicatorManager.disable(id: requestID)
+                if let html = html, let htmlData = html.data(using: .utf8) {
+                    successAction?(htmlData)
+                    return
+                }
+                failedAction?(nil)
+            }) { (err) in
+                ActivityIndicatorManager.disable(id: requestID)
+                failedAction?(err)
+            }
+        }
+    }
+    
+    @objc public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
+        if isNeedHeadless {
+            httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, successAction: successAction, failedAction: failedAction)
+            return
+        }
         let session: URLSession = URLSession.shared
         var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: timeoutInterval)
-        if isPostRequest {
+        if let postData = postData {
             request.httpMethod = "POST"
             request.httpBody = postData
         }
+        if let cookieString = cookieString {
+            request.addValue(cookieString, forHTTPHeaderField: "Cookie")
+        }
+        request.mainDocumentURL = mainDocumentURL
+        let requestID = "HTTPRequest" + url.absoluteString
         DispatchQueue.global(qos: .utility).async {
+            ActivityIndicatorManager.enable(id: requestID)
             session.dataTask(with: request) { data, response, error in
+                ActivityIndicatorManager.disable(id: requestID)
                 if let data = data, let response = response as? HTTPURLResponse {
                     var statusCodeDiv100:Int = response.statusCode / 100
                     statusCodeDiv100 %= 10
@@ -554,13 +585,13 @@ class NiftyUtilitySwift: NSObject {
             }.resume()
         }
     }
-
+    
     @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
-        httpRequest(url: url, isPostRequest: false, postData: nil, successAction: successAction, failedAction: failedAction)
+        httpRequest(url: url, postData: nil, successAction: successAction, failedAction: failedAction)
     }
     
     @objc public static func httpPost(url: URL, data:Data, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
-        httpRequest(url: url, isPostRequest: true, postData: data, successAction: successAction, failedAction: failedAction)
+        httpRequest(url: url, postData: data, successAction: successAction, failedAction: failedAction)
     }
     
     // cachedHTTPGet で使われるキャッシュの情報

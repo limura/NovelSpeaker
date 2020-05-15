@@ -535,6 +535,7 @@
 "NovelSearchViewController_Title" = "小説を検索";
 "NovelSearchViewController_SearchResultView_Title" = "検索結果";
 "NovelSearchViewController_LoadNextPage" = "検索を続けます";
+"NovelSearchViewController_RadioSelectTarget_None" = "選択しない";
 
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 

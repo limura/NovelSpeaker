@@ -221,6 +221,7 @@
 		21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */; };
 		21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21DD0BF420B595F500DC3C39 /* LICENSE.txt */; };
 		21DFB3FC22ADA1390006A933 /* ActivityIndicatorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */; };
+		21E6B41E246D55DC00605874 /* HeadlessHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */; };
 		21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BF81FB487B1003C659F /* EasyDialogs.swift */; };
 		21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */; };
 		21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */; };
@@ -573,6 +574,7 @@
 		21DD0BF420B595F500DC3C39 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorManager.swift; sourceTree = "<group>"; };
 		21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 2.xcdatamodel"; sourceTree = "<group>"; };
+		21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessHTTPClient.swift; sourceTree = "<group>"; };
 		21E76BF81FB487B1003C659F /* EasyDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EasyDialogs.swift; sourceTree = "<group>"; };
 		21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModSettingsTableViewControllerSwift.swift; sourceTree = "<group>"; };
 		21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSpeakerUtility.swift; sourceTree = "<group>"; };
@@ -943,6 +945,7 @@
 				21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */,
 				21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */,
 				21A265682359E8EA0031CF53 /* UINavicationController+StatusBarHack.swift */,
+				21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1548,9 +1551,11 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Erik/Erik.framework",
 				"${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework",
 				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
 				"${BUILT_PRODUCTS_DIR}/Fuzi/Fuzi.framework",
+				"${BUILT_PRODUCTS_DIR}/Kanna/Kanna.framework",
 				"${BUILT_PRODUCTS_DIR}/MSColorPicker/MSColorPicker.framework",
 				"${BUILT_PRODUCTS_DIR}/RATreeView/RATreeView.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm-iOS/Realm.framework",
@@ -1560,9 +1565,11 @@
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Erik.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Eureka.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FTLinearActivityIndicator.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Fuzi.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kanna.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSColorPicker.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RATreeView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
@@ -1759,6 +1766,7 @@
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
+				21E6B41E246D55DC00605874 /* HeadlessHTTPClient.swift in Sources */,
 				216741A02043D592008A578D /* BehaviorLogger.swift in Sources */,
 				21A2CDBB2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,

@@ -20,6 +20,7 @@ target 'NovelSpeaker' do
   #pod 'MessagePacker'
   pod 'AnyCodable-FlightSchool'
   pod 'Fuzi'
+  pod 'Erik'
 
   target 'NovelSpeakerTests' do
     inherit! :search_paths

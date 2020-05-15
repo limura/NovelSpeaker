@@ -68,7 +68,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         // このタイミングで StorySpeaker のインスタンスを作っておきます。
         // Realm observe が走るので、main thread で作っておかねばならぬらしい(´・ω・`)
         let speaker = StorySpeaker.shared
-        print("hello StorySpeaker: \(speaker.storyID)")
         
         self.title = NSLocalizedString("BookShelfRATreeViewController_Title", comment: "本棚")
         

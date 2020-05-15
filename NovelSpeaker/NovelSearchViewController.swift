@@ -56,6 +56,8 @@ class TextQuery: SearchQuery {
             }else{
                 self.inputText = ""
             }
+        }.cellUpdate { (cell, row) in
+            cell.textField.clearButtonMode = .always
         }
     }
     func CreateQuery() -> String {
@@ -115,12 +117,14 @@ class MultiSelectQuery: SearchQuery {
 class RadioQuery: SearchQuery {
     let displayText:String
     let queryName:String
+    let defaultValue:String
     let radioList:[String:String]
     var enableTarget:String? = nil
-    init(displayText:String, queryName:String, radioList:[String:String]){
+    init(displayText:String, queryName:String, defaultValue:String, radioList:[String:String]){
         self.displayText = displayText
         self.queryName = queryName
         self.radioList = radioList
+        self.defaultValue = defaultValue
     }
     static func GenerateQuery(value:[String:Any]) -> RadioQuery? {
         guard let type = value["queryType"] as? String, type == "radio", let displayText = value["displayText"] as? String, let queryName = value["queryName"] as? String, let radioArray = value["radio"] as? [String:Any] else { return nil }
@@ -129,7 +133,13 @@ class RadioQuery: SearchQuery {
             guard let value = value as? String else { continue }
             radioList[key] = value
         }
-        return RadioQuery(displayText: displayText, queryName: queryName, radioList: radioList)
+        let defaultValue:String
+        if let valueDefault = value["defaultValue"] as? String {
+            defaultValue = valueDefault
+        }else{
+            defaultValue = ""
+        }
+        return RadioQuery(displayText: displayText, queryName: queryName, defaultValue: defaultValue, radioList: radioList)
     }
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
         return AlertRow<String>() {
@@ -137,12 +147,19 @@ class RadioQuery: SearchQuery {
             $0.selectorTitle = displayText
             $0.options = ([String](self.radioList.keys)).sorted()
             $0.value = nil
+            if defaultValue.count > 0, let key = self.radioList.filter({$0.value == defaultValue}).first?.key {
+                $0.value = key
+                self.enableTarget = key
+            }else{
+                $0.options?.append(NSLocalizedString("NovelSearchViewController_RadioSelectTarget_None", comment: "選択しない"))
+            }
             $0.cell.textLabel?.numberOfLines = 0
         }.onChange { (row) in
             self.enableTarget = row.value
         }
     }
     func CreateQuery() -> String {
+        print("searching enableTarget: \(enableTarget ?? "nil")")
         let value:String
         if let target = enableTarget, let ganreValue = self.radioList[target] {
             value = ganreValue
@@ -224,7 +241,9 @@ class SearchResult {
     func ConvertHTMLToSearchResultDataArray(data:Data, baseURL: URL) -> ([SearchResultBlock], URL?) {
         var result:[SearchResultBlock] = []
         guard let doc = try? HTMLDocument(data: data) else { return ([], nil) }
+        print("ConvertHTMLToSearchResultDataArray: phase 1: baseURL: \(baseURL.absoluteString), data.count: \(data.count), \(String(bytes: data, encoding: .utf8) ?? "nil")")
         for blockHTML in doc.xpath(self.blockXpath) {
+            print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.rawXML)")
             // TODO: 何かうまい方法があれば書き直す
             // 何故か blockHTML.xpath() をすると doc(文章全体) に対して xpath が適用されてしまうので、
             // 仕方がないので blockHTML.rawXML(これは文字列を再生成しているみたいなので負荷が気になる)を
@@ -236,9 +255,7 @@ class SearchResult {
             }else{
                 title = ""
             }
-            print("ConvertHTMLToSearchResultDataArray phase 2, block checking: title: \(title), xpath: \(titleXpath ?? "nil")")
             guard let urlXpath = self.urlXpath, let url = NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlDocument: block, xpath: urlXpath, baseURL: baseURL) else { continue }
-            print("ConvertHTMLToSearchResultDataArray phase 2, block checking: url: \(url.absoluteURL)")
             let resultBlock = SearchResultBlock(title: title, url: url)
             result.append(resultBlock)
         }
@@ -293,15 +310,17 @@ class SearchResultViewController: FormViewController {
     func loadNextLink(nextURL:URL, section:Section, row:ButtonRow) {
         DispatchQueue.main.async {
             row.title = NSLocalizedString("NovelSearchViewController_LoadingTitle", comment: "loading...")
-            NiftyUtilitySwift.httpGet(url: nextURL, successAction: { (data) in
+            NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, successAction: { (data) in
                 DispatchQueue.main.async {
-                    self.removeLoadingRow()
-                    guard let searchResult = self.searchResult else { return }
+                    guard let searchResult = self.searchResult else {
+                        self.removeLoadingRow()
+                        return
+                    }
                     let (resultBlockArray, nextURL) = searchResult.ConvertHTMLToSearchResultDataArray(data: data, baseURL: nextURL)
+                    self.removeLoadingRow()
                     self.resultBlockArray.append(contentsOf: resultBlockArray)
                     self.nextURL = nextURL
                     for novel in resultBlockArray {
-                        //print("form create about: \(novel.title)")
                         section <<< novel.CreateForm(parent: self)
                     }
                     if let nextURL = nextURL {
@@ -327,7 +346,6 @@ class SearchResultViewController: FormViewController {
             return
         }
         for novel in resultBlockArray {
-            //print("form create about: \(novel.title)")
             section <<< novel.CreateForm(parent: self)
         }
         if let nextURL = self.nextURL {
@@ -341,8 +359,10 @@ protocol ParentViewController:UIViewController,MultipleSelectorDoneEnabled {
 
 class WebSiteSection {
     var title:String = ""
-    var httpMethod:String = "GET"
+    var HTTPMethod:String = "GET"
     var url:String = ""
+    var isNeedHeadless:Bool = false
+    var mainDocumentURL:String = ""
     var values:[SearchQuery] = []
     var result:SearchResult? = nil
     var parentViewController:ParentViewController
@@ -355,11 +375,17 @@ class WebSiteSection {
         if let title = jsonDecodable["title"]?.value as? String {
             self.title = title
         }
-        if let httpMethod = jsonDecodable["httpMethod"]?.value as? String, httpMethod == "GET" || httpMethod == "POST" {
-            self.httpMethod = httpMethod
+        if let HTTPMethod = jsonDecodable["HTTPMethod"]?.value as? String, HTTPMethod == "GET" || HTTPMethod == "POST" {
+            self.HTTPMethod = HTTPMethod
         }
         if let url = jsonDecodable["url"]?.value as? String {
             self.url = url
+        }
+        if let isNeedHeadless = jsonDecodable["isNeedHeadless"]?.value as? Bool {
+            self.isNeedHeadless = isNeedHeadless
+        }
+        if let mainDocumentURL = jsonDecodable["mainDocumentURL"]?.value as? String {
+            self.mainDocumentURL = mainDocumentURL
         }
         if let valueArray = jsonDecodable["values"]?.value as? [Any] {
             var values:[SearchQuery] = []
@@ -379,6 +405,10 @@ class WebSiteSection {
                     if let query = RadioQuery.GenerateQuery(value: value) {
                         values.append(query)
                     }
+                case "hidden":
+                    if let query = HiddenQuery.GenerateQuery(value: value) {
+                        values.append(query)
+                    }
                 default:
                     // nothing to do!
                     break
@@ -393,7 +423,7 @@ class WebSiteSection {
     }
     
     func GenerateQueryURL() -> URL? {
-        if httpMethod == "POST" {
+        if HTTPMethod == "POST" {
             return URL(string: self.url)
         }
         let query = values.map({$0.CreateQuery()}).joined(separator: "&")
@@ -403,7 +433,7 @@ class WebSiteSection {
     }
     
     func GenerateQueryData() -> Data? {
-        if httpMethod != "POST" {
+        if HTTPMethod != "POST" {
             return nil
         }
         let query = values.map({$0.CreateQuery()}).joined(separator: "&")
@@ -426,7 +456,7 @@ class WebSiteSection {
             guard let url = self.GenerateQueryURL() else { return }
             DispatchQueue.main.async {
                 NiftyUtilitySwift.EasyDialogNoButton(viewController: self.parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
-                    NiftyUtilitySwift.httpRequest(url: url, isPostRequest: self.httpMethod == "POST", postData: self.GenerateQueryData(), timeoutInterval: 10, successAction: { (data) in
+                    NiftyUtilitySwift.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), successAction: { (data) in
                         DispatchQueue.main.async {
                             dialog.dismiss(animated: false) {
                                 guard let result = self.result else {
@@ -524,7 +554,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
             "block": "//div[@class='searchkekka_box']",
             "nextLink": "//div[@class='pager']/a[@class='nextlink']/@href",
             "title": "//div[@class='novel_h']/a",
-            "url": "//div[@class='novel_h']/a/@href",
+            "url": "//div[@class='novel_h']/a/@href"
         }
     },
     {
@@ -562,20 +592,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
             "block": "//section[@id='searchResult-works']/div[contains(@class,'widget-work')]",
             "nextLink": "//p[@class='widget-pagerNext']/a/@href",
             "title": "//h3[@class='widget-workCard-title']/a[contains(@class,'widget-workCard-titleLabel')]",
-            "url": "//h3[@class='widget-workCard-title']/a[contains(@class,'widget-workCard-titleLabel')]/@href",
-        }
-    },
-    {
-        "title": "黑岩阅读",
-        "HTTPMethod": "POST",
-        "url": "https://w.heiyan.com/search/",
-        "values": [
-            {"queryType": "text", "displayText": "书名 作者名 关键字", "queryName": "queryString"}
-        ],
-        "result": {
-            "block": "//ul[@id='list-container']",
-            "title": "//h5/a[@class='name']",
-            "url": "//h5/a[@class='name']/@href",
+            "url": "//h3[@class='widget-workCard-title']/a[contains(@class,'widget-workCard-titleLabel')]/@href"
         }
     },
     {
@@ -601,7 +618,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
             {"queryType": "hidden", "queryName": "state", "value": "0"},
             {"queryType": "hidden", "queryName": "grotesque", "value": "0"},
             {"queryType": "hidden", "queryName": "event", "value": "0"},
-            {"queryType": "radio", "displayText": "カテゴリ", "queryName": "category",
+            {"queryType": "radio", "displayText": "カテゴリ", "queryName": "category", "defaultValue": "2",
                 "radio": {
                     "なし": "1",
                     "冒険": "2",
@@ -622,10 +639,83 @@ class NovelSearchViewController: FormViewController,ParentViewController {
         "result": {
             "block": "//section/div[@class='novel-list']/div[@class='item']",
             "nextLink": "//ul[@id='paginate']/li[@class='next']/a[@rel='next']",
-            "title": "//section/div[@class='novel-list']/div[@class='item']//div[@class='subject']/a",
-            "url": "//section/div[@class='novel-list']/div[@class='item']//div[@class='subject']/a/@href"
+            "title": "//div[@class='subject']/a",
+            "url": "//div[@class='subject']/a/@href"
         }
-    }
+    },
+    {
+        "title": "青空文庫",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://www.google.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "as_q"},
+            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
+            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
+            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
+            {"queryType": "hidden", "queryName": "num", "value": "100"},
+            {"queryType": "hidden", "queryName": "complete", "value": "0"},
+            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
+            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "www.aozora.gr.jp"}
+        ],
+        "result": {
+            "block": "//div[@id='rso']//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]",
+            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
+            "title": "//div/text()",
+            "url": "//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]/@href"
+        }
+    },
+    {
+        "title": "Yahoo! ニュース",
+        "HTTPMethod": "GET",
+        "url": "https://news.yahoo.co.jp/search/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワードを入力(何も入れないと失敗します)", "queryName": "p"},
+            {"queryType": "hidden", "queryName": "ei", "value": "utf-8"},
+            {"queryType": "hidden", "queryName": "fr", "value": "news_sw"}
+        ],
+        "result": {
+            "block": "//div[@id='NSm']/div",
+            "nextLink": "//div[@id='Sp1']/p/span[@class='m']/a",
+            "title": "//h2/a",
+            "url": "//h2/a/@href"
+        }
+    },
+    {
+        "title": "はてなブックマーク(のリンク先の記事)",
+        "HTTPMethod": "GET",
+        "url": "https://b.hatena.ne.jp/search/text?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列(何も入れないと失敗します)", "queryName": "q"},
+            {"queryType": "radio", "queryName": "users", "displayText": "ブックマーク数", "defaultValue": "50",
+                "radio": {
+                    "  1 user": "1",
+                    "  3 user": "3",
+                    " 50 user": "50",
+                    "100 user": "100",
+                    "500 user": "500"
+                }
+            }
+        ],
+        "result": {
+            "block": "//li[contains(@class,'bookmark-item')]",
+            "nextLink": "//div[contains(@class,'centerarticle-pager')]/span[contains(@class,'centerarticle-pager-next')]/a",
+            "title": "//h3/a",
+            "url": "//h3/a/@href"
+        }
+    },
+    {
+        "title": "BBC NEWS Japan(新着記事)",
+        "HTTPMethod": "GET",
+        "url": "https://www.bbc.com/japanese",
+        "values": [
+        ],
+        "result": {
+            "block": "//li[@role='listitem']/div[contains(@class,'StoryPromoWrapper')]",
+            "title": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/')]/text()",
+            "url": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/') and text()]/@href"
+        }
+    },
 ]
 """
     var searchInfoArray:[WebSiteSection] = []
