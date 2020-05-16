@@ -1,0 +1,156 @@
+[
+    {
+        "title": "Become a novelist",
+        "HTTPMethod": "GET",
+        "url": "https://yomou.syosetu.com/search.php?",
+        "values": [
+            {"queryType": "text", "displayText": "Search word", "queryName": "word"},
+            {"queryType": "text", "displayText": "Exclusion word", "queryName": "notword"},
+            {"queryType": "multiSelect", "displayText": "Genre", "queryName": "genre", "separator": "-",
+                "multiSelect": {
+                    "Isekai": "101",
+                    "Real world": "102",
+                    "High fantasy": "201",
+                    "Low fantasy": "202",
+                    "Pure literature": "301",
+                    "Human drama": "302",
+                    "History": "303",
+                    "Reasoning": "304",
+                    "Horror": "305",
+                    "Action": "306",
+                    "Vomedy": "307",
+                    "VR Game": "401",
+                    "Space": "402",
+                    "Science fiction": "403",
+                    "Panic": "404",
+                    "Fairy tale": "9901",
+                    "Poetry": "9902",
+                    "Essay": "9903",
+                    "Replay": "9904",
+                    "Other": "9999",
+                    "Non-genre": "9801"
+                }
+            },
+            {"queryType": "radio", "displayText": "Sort search results", "queryName": "order",
+                "radio": {
+                    "New arrival order": "new",
+                    "Order with the most bookmarks": "favnovelcnt",
+                    "Order with most reviews": "reviewcnt",
+                    "Highest overall point": "hyoka",
+                    "Lowest overall point": "hyokaasc",
+                    "Highest daily points": "dailypoint",
+                    "Highest weekly points": "weeklypoint",
+                    "Highest monthly points": "monthlypoint",
+                    "Highest quarter points": "quarterpoint",
+                    "Highest yearly points": "yearlypoint",
+                    "Order with the most impressions": "impressioncnt",
+                    "Highest number of evaluators": "hyokacnt",
+                    "Lowest number of evaluators": "hyokacntasc",
+                    "Weekly unique users": "weekly",
+                    "In order of the number of characters in the novel text": "lengthdesc",
+                    "Ascending order of number of characters in novel text": "lengthasc",
+                    "Newest post order": "ncodedesc",
+                    "Update order old": "old"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='searchkekka_box']",
+            "nextLink": "//div[@class='pager']/a[@class='nextlink']/@href",
+            "title": "//div[@class='novel_h']/a",
+            "url": "//div[@class='novel_h']/a/@href"
+        }
+    },
+    {
+        "title": "Kakuyomu",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://www.google.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "Search string", "queryName": "as_q"},
+            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
+            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
+            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
+            {"queryType": "hidden", "queryName": "num", "value": "20"},
+            {"queryType": "hidden", "queryName": "complete", "value": "0"},
+            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
+            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "https://kakuyomu.jp/works/"}
+        ],
+        "result": {
+            "block": "//div[@id='rso']//a[contains(@href,'https://kakuyomu.jp/works/')and not(contains(@href,'webcache.google'))]",
+            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
+            "title": "//div/text()",
+            "url": "//a[contains(@href,'https://kakuyomu.jp/works/') and not(contains(@href,'webcache.google'))]/@href"
+        }
+    },
+    {
+        "title": "Nazology",
+        "HTTPMethod": "GET",
+        "url": "https://nazology.net/?",
+        "values": [
+            {"queryType": "text", "displayText": "Search string", "queryName": "s"}
+        ],
+        "result": {
+            "block": "//div[@id='main']/div[@class='container']/article[@class='post-article']",
+            "nextLink": "//div[@class='pageination']//li[@class='paging-last']/a/@href",
+            "title": "//a[contains(@href,'/archives/')]//h2",
+            "url": "//a[contains(@href,'/archives/')]/@href"
+        }
+    },
+    {
+        "title": "Pokemon novel square",
+        "HTTPMethod": "GET",
+        "url": "https://pokemon.sorakaze.info/novels?",
+        "values": [
+            {"queryType": "hidden", "queryName": "type", "value": "0"},
+            {"queryType": "hidden", "queryName": "state", "value": "0"},
+            {"queryType": "hidden", "queryName": "grotesque", "value": "0"},
+            {"queryType": "hidden", "queryName": "event", "value": "0"},
+            {"queryType": "radio", "displayText": "Category", "queryName": "category", "defaultValue": "2",
+                "radio": {
+                    "None": "1",
+                    "Adventure": "2",
+                    "Literature": "3",
+                    "Ecology": "4",
+                    "Pokemon Mysterious Dungeon": "5",
+                    "Comedy": "7",
+                    "Ranger": "8",
+                    "Pokemon ☆ SPECIAL": "9",
+                    "Campus": "10",
+                    "Reasoning / Horror": "11",
+                    "Pokemon anime": "12",
+                    "Fantasy": "13",
+                    "Science fiction": "14"
+                }
+            }
+        ],
+        "result": {
+            "block": "//section/div[@class='novel-list']/div[@class='item']",
+            "nextLink": "//ul[@id='paginate']/li[@class='next']/a[@rel='next']",
+            "title": "//div[@class='subject']/a",
+            "url": "//div[@class='subject']/a/@href"
+        }
+    },
+    {
+        "title": "Blue sky library",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://www.google.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "Search string", "queryName": "as_q"},
+            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
+            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
+            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
+            {"queryType": "hidden", "queryName": "num", "value": "20"},
+            {"queryType": "hidden", "queryName": "complete", "value": "0"},
+            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
+            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "www.aozora.gr.jp"}
+        ],
+        "result": {
+            "block": "//div[@id='rso']//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]",
+            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
+            "title": "//div/text()",
+            "url": "//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]/@href"
+        }
+    }
+]

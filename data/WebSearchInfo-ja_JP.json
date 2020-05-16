@@ -98,7 +98,7 @@
         }
     },
     {
-        "title": "ポケモン小説スクウェア",
+        "title": "ポケモン小説スクエア",
         "HTTPMethod": "GET",
         "url": "https://pokemon.sorakaze.info/novels?",
         "values": [
@@ -203,5 +203,5 @@
             "title": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/')]/text()",
             "url": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/') and text()]/@href"
         }
-    },
+    }
 ]
