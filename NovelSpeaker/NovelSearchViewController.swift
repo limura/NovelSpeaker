@@ -559,39 +559,23 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     {
         "title": "カクヨム",
         "HTTPMethod": "GET",
-        "url": "https://kakuyomu.jp/search?",
+        "isNeedHeadless": true,
+        "url": "https://www.google.com/search?",
         "values": [
-            {"queryType": "text", "displayText": "次のキーワードを含む", "queryName": "q"},
-            {"queryType": "text", "displayText": "次のキーワードを含まない", "queryName": "ex_q"},
-            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre_name",
-                "radio": {
-                    "異世界ファンタジー": "fantasy",
-                    "現代ファンタジー": "action",
-                    "SF": "sf",
-                    "恋愛": "love_story",
-                    "ラブコメ": "romance",
-                    "現代ドラマ": "drama",
-                    "ホラー": "horror",
-                    "ミステリー": "mystery",
-                    "エッセイ・ノンフィクション": "nonfiction",
-                    "歴史・時代・伝奇": "history",
-                    "創作論・評論": "criticism",
-                    "詩・童話・その他": "others"
-                }
-            },
-            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "order",
-                "radio": {
-                    "更新順": "last_episode_published_at",
-                    "新作順": "published_at",
-                    "人気順": "popular"
-                }
-            }
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "as_q"},
+            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
+            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
+            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
+            {"queryType": "hidden", "queryName": "num", "value": "20"},
+            {"queryType": "hidden", "queryName": "complete", "value": "0"},
+            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
+            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "https://kakuyomu.jp/works/"}
         ],
         "result": {
-            "block": "//section[@id='searchResult-works']/div[contains(@class,'widget-work')]",
-            "nextLink": "//p[@class='widget-pagerNext']/a/@href",
-            "title": "//h3[@class='widget-workCard-title']/a[contains(@class,'widget-workCard-titleLabel')]",
-            "url": "//h3[@class='widget-workCard-title']/a[contains(@class,'widget-workCard-titleLabel')]/@href"
+            "block": "//div[@id='rso']//a[contains(@href,'https://kakuyomu.jp/works/')and not(contains(@href,'webcache.google'))]",
+            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
+            "title": "//div/text()",
+            "url": "//a[contains(@href,'https://kakuyomu.jp/works/') and not(contains(@href,'webcache.google'))]/@href"
         }
     },
     {
@@ -652,7 +636,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
             {"queryType": "hidden", "queryName": "hl", "value": "ja"},
             {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
             {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
-            {"queryType": "hidden", "queryName": "num", "value": "100"},
+            {"queryType": "hidden", "queryName": "num", "value": "20"},
             {"queryType": "hidden", "queryName": "complete", "value": "0"},
             {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
             {"queryType": "hidden", "queryName": "as_sitesearch", "value": "www.aozora.gr.jp"}
