@@ -203,5 +203,27 @@
             "title": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/')]/text()",
             "url": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/') and text()]/@href"
         }
+    },
+    {
+        "title": "暁",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://www.google.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "as_q"},
+            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
+            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
+            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
+            {"queryType": "hidden", "queryName": "num", "value": "20"},
+            {"queryType": "hidden", "queryName": "complete", "value": "0"},
+            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
+            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "https://www.akatsuki-novels.com/stories/index/novel_id"}
+        ],
+        "result": {
+            "block": "//div[@id='rso']//a[contains(@href,'https://www.akatsuki-novels.com/stories/index/novel_id') and not(contains(@href,'webcache.google'))]",
+            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
+            "title": "//div/text()",
+            "url": "//a[contains(@href,'https://www.akatsuki-novels.com/stories/index/novel_id') and not(contains(@href,'webcache.google'))]/@href"
+        }
     }
 ]
