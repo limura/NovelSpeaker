@@ -255,6 +255,9 @@ class SearchResult {
             }else{
                 title = ""
             }
+            if title.count <= 0 {
+                continue
+            }
             guard let urlXpath = self.urlXpath, let url = NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlDocument: block, xpath: urlXpath, baseURL: baseURL) else { continue }
             let resultBlock = SearchResultBlock(title: title, url: url)
             result.append(resultBlock)
