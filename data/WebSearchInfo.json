@@ -1,0 +1,207 @@
+[
+    {
+        "title": "小説家になろう",
+        "HTTPMethod": "GET",
+        "url": "https://yomou.syosetu.com/search.php?",
+        "values": [
+            {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "notword"},
+            {"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "genre", "separator": "-",
+                "multiSelect": {
+                    "異世界": "101",
+                    "現実世界": "102",
+                    "ハイファンタジー": "201",
+                    "ローファンタジー": "202",
+                    "純文学": "301",
+                    "ヒューマンドラマ": "302",
+                    "歴史": "303",
+                    "推理": "304",
+                    "ホラー": "305",
+                    "アクション": "306",
+                    "コメディー": "307",
+                    "VRゲーム": "401",
+                    "宇宙": "402",
+                    "空想科学": "403",
+                    "パニック": "404",
+                    "童話": "9901",
+                    "詩": "9902",
+                    "エッセイ": "9903",
+                    "リプレイ": "9904",
+                    "その他": "9999",
+                    "ノンジャンル": "9801"
+                }
+            },
+            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "order",
+                "radio": {
+                    "新着更新順": "new",
+                    "ブックマーク数の多い順": "favnovelcnt",
+                    "レビュー数の多い順": "reviewcnt",
+                    "総合ポイントの高い順": "hyoka",
+                    "総合ポイントの低い順": "hyokaasc",
+                    "日間ポイントの高い順": "dailypoint",
+                    "週間ポイントの高い順": "weeklypoint",
+                    "月間ポイントの高い順": "monthlypoint",
+                    "四半期ポイントの高い順": "quarterpoint",
+                    "年間ポイントの高い順": "yearlypoint",
+                    "感想の多い順": "impressioncnt",
+                    "評価者数の多い順": "hyokacnt",
+                    "評価者数の少ない順": "hyokacntasc",
+                    "週間ユニークユーザの多い順": "weekly",
+                    "小説本文の文字数が多い順": "lengthdesc",
+                    "小説本文の文字数が少ない順": "lengthasc",
+                    "新着投稿順": "ncodedesc",
+                    "更新が古い順": "old"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='searchkekka_box']",
+            "nextLink": "//div[@class='pager']/a[@class='nextlink']/@href",
+            "title": "//div[@class='novel_h']/a",
+            "url": "//div[@class='novel_h']/a/@href"
+        }
+    },
+    {
+        "title": "カクヨム",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://www.google.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "as_q"},
+            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
+            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
+            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
+            {"queryType": "hidden", "queryName": "num", "value": "20"},
+            {"queryType": "hidden", "queryName": "complete", "value": "0"},
+            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
+            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "https://kakuyomu.jp/works/"}
+        ],
+        "result": {
+            "block": "//div[@id='rso']//a[contains(@href,'https://kakuyomu.jp/works/')and not(contains(@href,'webcache.google'))]",
+            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
+            "title": "//div/text()",
+            "url": "//a[contains(@href,'https://kakuyomu.jp/works/') and not(contains(@href,'webcache.google'))]/@href"
+        }
+    },
+    {
+        "title": "ナゾロジー",
+        "HTTPMethod": "GET",
+        "url": "https://nazology.net/?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "s"}
+        ],
+        "result": {
+            "block": "//div[@id='main']/div[@class='container']/article[@class='post-article']",
+            "nextLink": "//div[@class='pageination']//li[@class='paging-last']/a/@href",
+            "title": "//a[contains(@href,'/archives/')]//h2",
+            "url": "//a[contains(@href,'/archives/')]/@href"
+        }
+    },
+    {
+        "title": "ポケモン小説スクウェア",
+        "HTTPMethod": "GET",
+        "url": "https://pokemon.sorakaze.info/novels?",
+        "values": [
+            {"queryType": "hidden", "queryName": "type", "value": "0"},
+            {"queryType": "hidden", "queryName": "state", "value": "0"},
+            {"queryType": "hidden", "queryName": "grotesque", "value": "0"},
+            {"queryType": "hidden", "queryName": "event", "value": "0"},
+            {"queryType": "radio", "displayText": "カテゴリ", "queryName": "category", "defaultValue": "2",
+                "radio": {
+                    "なし": "1",
+                    "冒険": "2",
+                    "文学": "3",
+                    "生態": "4",
+                    "ポケダン": "5",
+                    "コメディ": "7",
+                    "レンジャー": "8",
+                    "ポケスペ": "9",
+                    "学園": "10",
+                    "推理・ホラー": "11",
+                    "アニポケ": "12",
+                    "ファンタジー": "13",
+                    "SF": "14"
+                }
+            }
+        ],
+        "result": {
+            "block": "//section/div[@class='novel-list']/div[@class='item']",
+            "nextLink": "//ul[@id='paginate']/li[@class='next']/a[@rel='next']",
+            "title": "//div[@class='subject']/a",
+            "url": "//div[@class='subject']/a/@href"
+        }
+    },
+    {
+        "title": "青空文庫",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://www.google.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "as_q"},
+            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
+            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
+            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
+            {"queryType": "hidden", "queryName": "num", "value": "20"},
+            {"queryType": "hidden", "queryName": "complete", "value": "0"},
+            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
+            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "www.aozora.gr.jp"}
+        ],
+        "result": {
+            "block": "//div[@id='rso']//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]",
+            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
+            "title": "//div/text()",
+            "url": "//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]/@href"
+        }
+    },
+    {
+        "title": "Yahoo! ニュース",
+        "HTTPMethod": "GET",
+        "url": "https://news.yahoo.co.jp/search/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワードを入力(何も入れないと失敗します)", "queryName": "p"},
+            {"queryType": "hidden", "queryName": "ei", "value": "utf-8"},
+            {"queryType": "hidden", "queryName": "fr", "value": "news_sw"}
+        ],
+        "result": {
+            "block": "//div[@id='NSm']/div",
+            "nextLink": "//div[@id='Sp1']/p/span[@class='m']/a",
+            "title": "//h2/a",
+            "url": "//h2/a/@href"
+        }
+    },
+    {
+        "title": "はてなブックマーク(のリンク先の記事)",
+        "HTTPMethod": "GET",
+        "url": "https://b.hatena.ne.jp/search/text?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列(何も入れないと失敗します)", "queryName": "q"},
+            {"queryType": "radio", "queryName": "users", "displayText": "ブックマーク数", "defaultValue": "50",
+                "radio": {
+                    "  1 user": "1",
+                    "  3 user": "3",
+                    " 50 user": "50",
+                    "100 user": "100",
+                    "500 user": "500"
+                }
+            }
+        ],
+        "result": {
+            "block": "//li[contains(@class,'bookmark-item')]",
+            "nextLink": "//div[contains(@class,'centerarticle-pager')]/span[contains(@class,'centerarticle-pager-next')]/a",
+            "title": "//h3/a",
+            "url": "//h3/a/@href"
+        }
+    },
+    {
+        "title": "BBC NEWS Japan(新着記事)",
+        "HTTPMethod": "GET",
+        "url": "https://www.bbc.com/japanese",
+        "values": [
+        ],
+        "result": {
+            "block": "//li[@role='listitem']/div[contains(@class,'StoryPromoWrapper')]",
+            "title": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/')]/text()",
+            "url": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/') and text()]/@href"
+        }
+    },
+]
