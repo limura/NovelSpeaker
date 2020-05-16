@@ -288,7 +288,7 @@ class SearchResultViewController: FormViewController {
     
     func generateLoadNextButton(nextURL:URL, section:Section) -> ButtonRow {
         return ButtonRow(self.loadingCellTag) {
-            $0.title = NSLocalizedString("NovelSearchViewController_LoadNextPage", comment: "さらに検索する")
+            $0.title = NSLocalizedString("NovelSearchViewController_LoadNextPage", comment: "続きを検索しています……")
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection { (buttonCellOf, row) in
             //self.loadNextLink(nextURL: nextURL, section: section, row: row)
@@ -309,7 +309,6 @@ class SearchResultViewController: FormViewController {
     
     func loadNextLink(nextURL:URL, section:Section, row:ButtonRow) {
         DispatchQueue.main.async {
-            row.title = NSLocalizedString("NovelSearchViewController_LoadingTitle", comment: "loading...")
             NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, successAction: { (data) in
                 DispatchQueue.main.async {
                     guard let searchResult = self.searchResult else {
