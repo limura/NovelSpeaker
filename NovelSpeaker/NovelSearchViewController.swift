@@ -159,7 +159,6 @@ class RadioQuery: SearchQuery {
         }
     }
     func CreateQuery() -> String {
-        print("searching enableTarget: \(enableTarget ?? "nil")")
         let value:String
         if let target = enableTarget, let ganreValue = self.radioList[target] {
             value = ganreValue
