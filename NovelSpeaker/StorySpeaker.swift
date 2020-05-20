@@ -54,6 +54,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         audioSessionInit(isActive: false)
         observeGlobalState()
         dummySoundLooper.setMediaFile(forResource: "Silent3sec", ofType: "mp3")
+        registerAudioNotifications()
         if !pageTurningSoundPlayer.setMediaFile(forResource: "nc48625", ofType: "m4a", maxDuplicateCount: 1) {
             print("pageTurningSoundPlayer load media failed.")
         }
@@ -102,11 +103,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func registerAudioNotifications() {
+        print("registerAudioNotifications() call. \(self)")
         let center = NotificationCenter.default
         center.addObserver(self, selector: #selector(audioSessionDidInterrupt(notification:)), name: AVAudioSession.interruptionNotification, object: nil)
         center.addObserver(self, selector: #selector(didChangeAudioSessionRoute(notification:)), name:    AVAudioSession.routeChangeNotification, object: nil)
     }
     func unregistAudioNotifications() {
+        print("unregistAudioNotifications() call. \(self)")
         let center = NotificationCenter.default
         center.removeObserver(self)
     }

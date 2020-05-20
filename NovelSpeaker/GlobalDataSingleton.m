@@ -81,6 +81,7 @@ static DummySoundLooper* dummySoundLooper = nil;
      */
 
 #if TARGET_OS_WATCH == 0
+    /*
     [self audioSessionInit:NO];
     dummySoundLooper = [DummySoundLooper new];
     [dummySoundLooper setMediaFileForResource:@"Silent3sec" ofType:@"mp3"];
@@ -88,6 +89,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 
     // オーディオのルートが変わったよイベントを受け取るようにする
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeAudioSessionRoute:) name:AVAudioSessionRouteChangeNotification object:nil];
+     */
 #endif
     
     return self;
@@ -140,6 +142,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [session setActive:isActive error:nil];
 }
 
+/*
 #if TARGET_OS_WATCH == 0
 - (void)audioSessionDidInterrupt:(NSNotification*)notification
 {
@@ -164,6 +167,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
 }
 #endif
+ */
 
 #if TARGET_OS_WATCH == 0
 /// CoreData で保存している GlobalState object (一つしかないはず) を取得します
