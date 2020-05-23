@@ -15,7 +15,7 @@ protocol SpeakRangeDelegate {
 }
 
 class Speaker: NSObject, AVSpeechSynthesizerDelegate {
-    let synthesizer:AVSpeechSynthesizer = AVSpeechSynthesizer()
+    var synthesizerMap:[String:AVSpeechSynthesizer] = [:]
     var m_Voice:AVSpeechSynthesisVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
     var m_Pitch:Float = 1.0
     var m_Rate:Float = AVSpeechUtteranceDefaultSpeechRate
@@ -30,7 +30,19 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     
     deinit {
         RemoveNotificationHandler()
-        synthesizer.delegate = nil
+        for (_, synthe) in synthesizerMap {
+            synthe.delegate = nil
+        }
+    }
+    
+    var synthesizer:AVSpeechSynthesizer {
+        get {
+            if let v = self.synthesizerMap[self.m_Voice.identifier] { return v }
+            let synthe = AVSpeechSynthesizer()
+            synthe.delegate = self
+            self.synthesizerMap[self.m_Voice.identifier] = synthe
+            return synthe
+        }
     }
     
     func Speech(text:String) {
@@ -61,9 +73,11 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     func SetVoiceWith(identifier:String, language:String) {
         if let voice = AVSpeechSynthesisVoice(identifier: identifier) {
             m_Voice = voice
+            return
         }
         if let voice = AVSpeechSynthesisVoice(language: language) {
             m_Voice = voice
+            return
         }
     }
     func SetVoiceWith(language:String) {
