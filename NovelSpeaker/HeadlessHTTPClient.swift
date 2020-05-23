@@ -53,11 +53,12 @@ class HeadlessHttpClient {
         }
     }
     
-    func generateUrlRequest(url:URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, mainDocumentURL:URL? = nil) -> URLRequest {
+    func generateUrlRequest(url:URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true) -> URLRequest {
         var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: timeoutInterval)
         if let cookieString = cookieString {
             request.setValue(cookieString, forHTTPHeaderField: "Cookie")
         }
+        request.allowsCellularAccess = allowsCellularAccess
         request.mainDocumentURL = mainDocumentURL
         if let postData = postData {
             request.httpMethod = "POST"
@@ -66,7 +67,7 @@ class HeadlessHttpClient {
         return request
     }
     
-    public func HttpRequest(url:URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, mainDocumentURL:URL? = nil, successResultHandler:((String?) -> Void)? = nil, errorResultHandler:((Error) -> Void)? = nil) {
+    public func HttpRequest(url:URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successResultHandler:((String?) -> Void)? = nil, errorResultHandler:((Error) -> Void)? = nil) {
         DispatchQueue.main.async {
             let request = self.generateUrlRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL)
             self.erik.load(urlRequest: request) { (document, err) in

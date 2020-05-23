@@ -311,7 +311,13 @@ class SearchResultViewController: FormViewController {
     
     func loadNextLink(nextURL:URL, section:Section, row:ButtonRow) {
         DispatchQueue.main.async {
-            NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, successAction: { (data) in
+            let allowsCellularAccess:Bool
+            if let globalData = RealmGlobalState.GetInstance(), globalData.IsDisallowsCellularAccess {
+                allowsCellularAccess = false
+            }else{
+                allowsCellularAccess = true
+            }
+            NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, successAction: { (data) in
                 DispatchQueue.main.async {
                     guard let searchResult = self.searchResult else {
                         self.removeLoadingRow()
@@ -456,8 +462,14 @@ class WebSiteSection {
         }.onCellSelection({ (buttonCellOf, buttonRow) in
             guard let url = self.GenerateQueryURL() else { return }
             DispatchQueue.main.async {
+                let allowsCellularAccess:Bool
+                if let globalData = RealmGlobalState.GetInstance(), globalData.IsDisallowsCellularAccess {
+                    allowsCellularAccess = false
+                }else{
+                    allowsCellularAccess = true
+                }
                 NiftyUtilitySwift.EasyDialogNoButton(viewController: self.parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
-                    NiftyUtilitySwift.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), successAction: { (data) in
+                    NiftyUtilitySwift.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, successAction: { (data) in
                         DispatchQueue.main.async {
                             dialog.dismiss(animated: false) {
                                 guard let result = self.result else {

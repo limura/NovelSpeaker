@@ -537,9 +537,15 @@ class NiftyUtilitySwift: NSObject {
     static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
         print("httpHeadlessRequest in.")
         let requestID = "HTTPRequest" + url.absoluteString
+        let allowsCellularAccess:Bool
+        if let globalData = RealmGlobalState.GetInstance(), globalData.IsDisallowsCellularAccess {
+            allowsCellularAccess = false
+        }else{
+            allowsCellularAccess = true
+        }
         DispatchQueue.main.async {
             ActivityIndicatorManager.enable(id: requestID)
-            HeadlessHttpClient.shared.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, successResultHandler: { (html) in
+            HeadlessHttpClient.shared.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (html) in
                 ActivityIndicatorManager.disable(id: requestID)
                 if let html = html, let htmlData = html.data(using: .utf8) {
                     successAction?(htmlData)
@@ -553,7 +559,7 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
-    @objc public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
+    @objc public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
         if isNeedHeadless {
             httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, successAction: successAction, failedAction: failedAction)
             return
@@ -567,6 +573,7 @@ class NiftyUtilitySwift: NSObject {
         if let cookieString = cookieString {
             request.addValue(cookieString, forHTTPHeaderField: "Cookie")
         }
+        request.allowsCellularAccess = allowsCellularAccess
         request.mainDocumentURL = mainDocumentURL
         let requestID = "HTTPRequest" + url.absoluteString
         DispatchQueue.global(qos: .utility).async {
