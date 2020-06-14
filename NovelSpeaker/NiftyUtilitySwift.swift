@@ -534,6 +534,7 @@ class NiftyUtilitySwift: NSObject {
     }
     #endif
     
+    #if !os(watchOS)
     static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
         print("httpHeadlessRequest in.")
         let requestID = "HTTPRequest" + url.absoluteString
@@ -558,12 +559,15 @@ class NiftyUtilitySwift: NSObject {
             }
         }
     }
+    #endif
     
     @objc public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
+        #if !os(watchOS)
         if isNeedHeadless {
             httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, successAction: successAction, failedAction: failedAction)
             return
         }
+        #endif
         let session: URLSession = URLSession.shared
         var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: timeoutInterval)
         if let postData = postData {
@@ -577,9 +581,13 @@ class NiftyUtilitySwift: NSObject {
         request.mainDocumentURL = mainDocumentURL
         let requestID = "HTTPRequest" + url.absoluteString
         DispatchQueue.global(qos: .utility).async {
+            #if !os(watchOS)
             ActivityIndicatorManager.enable(id: requestID)
+            #endif
             session.dataTask(with: request) { data, response, error in
+                #if !os(watchOS)
                 ActivityIndicatorManager.disable(id: requestID)
+                #endif
                 if let data = data, let response = response as? HTTPURLResponse {
                     var statusCodeDiv100:Int = response.statusCode / 100
                     statusCodeDiv100 %= 10

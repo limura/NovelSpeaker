@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2100A42C2496441500F54A5D /* MultiVoiceSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */; };
 		210958C31A0DF55600E9171F /* arrow_down@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958B81A0DF55600E9171F /* arrow_down@3x.png */; };
 		210958C41A0DF55600E9171F /* booksearch.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958B91A0DF55600E9171F /* booksearch.png */; };
 		210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958BA1A0DF55600E9171F /* booksearch@2x.png */; };
@@ -1714,6 +1715,7 @@
 				215BFB4223EDB15F0078E158 /* SystemIconButtonView.swift in Sources */,
 				2193094723BBE56A00035EF0 /* ContentView.swift in Sources */,
 				2124B38723BBF220002EBC31 /* NiftyUtility.m in Sources */,
+				2100A42C2496441500F54A5D /* MultiVoiceSpeaker.swift in Sources */,
 				2138B14B23BEAE8200D8642C /* NSDataZlibExtension.m in Sources */,
 				2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */,
 				2124B39423BBF9FC002EBC31 /* SpeakPitchConfigCacheData.m in Sources */,
