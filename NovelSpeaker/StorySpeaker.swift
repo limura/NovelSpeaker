@@ -21,6 +21,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     static let shared = StorySpeaker()
     
     let speaker = SpeechBlockSpeaker()
+    let announceSpeaker = Speaker()
     let dummySoundLooper = DummySoundLooper()
     let pageTurningSoundPlayer = DuplicateSoundPlayer()
     var delegateArray = NSHashTable<AnyObject>.weakObjects()
@@ -58,6 +59,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         if !pageTurningSoundPlayer.setMediaFile(forResource: "nc48625", ofType: "m4a", maxDuplicateCount: 1) {
             print("pageTurningSoundPlayer load media failed.")
         }
+        ApplyDefaultSpeakerSettingToAnnounceSpeaker()
     }
     
     deinit {
@@ -71,6 +73,19 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         observeSpeechModSetting(novelID: story.novelID)
         speaker.SetSpeechLocation(location: story.readLocation)
         self.isNeedApplySpeechConfigs = false
+    }
+    
+    func ApplyDefaultSpeakerSettingToAnnounceSpeaker() {
+        let defaultSpeaker:RealmSpeakerSetting
+        if let globalStateDefaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker {
+            defaultSpeaker = globalStateDefaultSpeaker
+        }else{
+            defaultSpeaker = RealmSpeakerSetting()
+        }
+        announceSpeaker.SetVoiceWith(identifier: defaultSpeaker.voiceIdentifier, language: defaultSpeaker.locale)
+        announceSpeaker.pitch = defaultSpeaker.pitch
+        announceSpeaker.rate = defaultSpeaker.rate
+        announceSpeaker.Speech(text: " ")
     }
 
     // 読み上げに用いられる小説の章を設定します。
@@ -103,13 +118,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func registerAudioNotifications() {
-        print("registerAudioNotifications() call. \(self)")
         let center = NotificationCenter.default
         center.addObserver(self, selector: #selector(audioSessionDidInterrupt(notification:)), name: AVAudioSession.interruptionNotification, object: nil)
         center.addObserver(self, selector: #selector(didChangeAudioSessionRoute(notification:)), name:    AVAudioSession.routeChangeNotification, object: nil)
     }
     func unregistAudioNotifications() {
-        print("unregistAudioNotifications() call. \(self)")
         let center = NotificationCenter.default
         center.removeObserver(self)
     }
@@ -369,8 +382,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func AnnounceSpeech(text:String) {
-        speaker.StopSpeech()
-        speaker.AnnounceText(text: text)
+        if isNeedApplySpeechConfigs {
+            ApplyDefaultSpeakerSettingToAnnounceSpeaker()
+        }
+        announceSpeaker.Stop()
+        announceSpeaker.Speech(text: text)
     }
     
     func StartSpeech(withMaxSpeechTimeReset:Bool) {
@@ -402,8 +418,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         speaker.StartSpeech()
     }
     // 読み上げを停止します。読み上げ位置が更新されます。
-    func StopSpeech() {
-        speaker.StopSpeech()
+    func StopSpeech(stopSpeechHandler:(()->Void)? = nil) {
+        speaker.StopSpeech(stopSpeechHandler: stopSpeechHandler)
         dummySoundLooper.stopPlay()
         stopMaxSpeechInSecTimer()
         let audioSession = AVAudioSession.sharedInstance()
@@ -423,6 +439,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 }
             }
         }
+        self.willSpeakRange(range: NSMakeRange(self.speaker.currentLocation, 0))
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerStopSpeechEvent(storyID: self.storyID)
         }
@@ -444,6 +461,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 }
             }else{
                 self.speaker.SetSpeechLocation(location: nextReadingPoint)
+                let newLocation = self.speaker.currentLocation
+                if story.readLocation != newLocation {
+                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
+                    }
+                }
             }
         }
     }
@@ -451,6 +474,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         let readingPoint = speaker.currentLocation
         if readingPoint >= length {
             speaker.SetSpeechLocation(location: readingPoint - length)
+            NiftyUtilitySwift.DispatchSyncMainQueue {
+                if let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
+                    let newLocation = self.speaker.currentLocation
+                    if story.readLocation != newLocation {
+                        RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                            story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
+                        }
+                    }
+                }
+            }
             return
         }
         var targetLength = length - readingPoint
@@ -473,9 +506,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 targetStory = self.SearchPreviousChapter(storyID: story.storyID)
                 targetLength -= contentLength
             }
-        }
-        // 抜けてきたということは先頭まで行ってしまった。
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+            // 抜けてきたということは先頭まで行ってしまった。
             if let firstStory = RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
                 if firstStory.readLocation != 0 {
                     RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
@@ -759,6 +790,20 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     var isSeeking = false
+    var seekSpeechStopDate:Date? = nil
+    func seekForwardInterval(){
+        self.StopSpeech {
+            self.SkipForward(length: 50)
+            NiftyUtilitySwift.DispatchSyncMainQueue {
+                self.StartSpeech(withMaxSpeechTimeReset: true)
+            }
+            if self.isSeeking == false { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                if self.isSeeking == false { return }
+                self.seekForwardInterval()
+            }
+        }
+    }
     @objc func seekForwardEvent(event:MPSeekCommandEvent?) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: seekForwardEvent")
         if event?.type == MPSeekCommandEventType.endSeeking {
@@ -766,22 +811,27 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             self.isSeeking = false
         }
         if event?.type == MPSeekCommandEventType.beginSeeking {
-            print("MPCommandCenter: seekForwardEvent beginSeeking")
-            AnnounceSpeech(text: NSLocalizedString("SpeechViewController_AnnounceSeekForward", comment: "早送り"))
             self.isSeeking = true
-            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { (timer) in
-                if !self.isSeeking {
-                    timer.invalidate()
-                    return
-                }
-                self.StopSpeech()
-                self.SkipForward(length: 50)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: {
-                    self.StartSpeech(withMaxSpeechTimeReset: true)
-                })
+            self.seekForwardInterval()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_AnnounceSeekForward", comment: "早送り"))
             }
         }
         return .success
+    }
+    
+    func seekBackwardInterval(){
+        self.StopSpeech {
+            self.SkipBackward(length: 60)
+            NiftyUtilitySwift.DispatchSyncMainQueue {
+                self.StartSpeech(withMaxSpeechTimeReset: true)
+            }
+            if self.isSeeking == false { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                if self.isSeeking == false { return }
+                self.seekBackwardInterval()
+            }
+        }
     }
     @objc func seekBackwardEvent(event:MPSeekCommandEvent?) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: seekBackwardEvent")
@@ -789,18 +839,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             self.isSeeking = false
         }
         if event?.type == MPSeekCommandEventType.beginSeeking {
-            AnnounceSpeech(text: NSLocalizedString("SpeechViewController_AnnounceSeekBackward", comment: "巻き戻し"))
             self.isSeeking = true
-            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { (timer) in
-                if !self.isSeeking {
-                    timer.invalidate()
-                    return
-                }
-                self.StopSpeech()
-                self.SkipBackward(length: 50)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05, execute: {
-                    self.StartSpeech(withMaxSpeechTimeReset: true)
-                })
+            self.seekBackwardInterval()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_AnnounceSeekBackward", comment: "巻き戻し"))
             }
         }
         return .success
@@ -837,13 +879,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
 
     // MARK: SpeakRangeProtocl implement
     func willSpeakRange(range:NSRange) {
-        for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
-            delegate.storySpeakerUpdateReadingPoint(storyID: self.storyID, range: range)
-        }
-    }
-    
-    // MARK: SpeakRangeDeleate implement
-    func willSpeak(_ range: NSRange, speakText text: String!) {
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerUpdateReadingPoint(storyID: self.storyID, range: range)
         }

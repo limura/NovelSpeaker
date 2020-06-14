@@ -13,7 +13,8 @@ import AVFoundation
 struct SpeechBlockInfo {
     let speechText:String
     let displayText:String
-    let voice:AVSpeechSynthesisVoice?
+    let voiceIdentifier:String?
+    let locale:String?
     let pitch:Float
     let rate:Float
     let delay:TimeInterval
@@ -81,13 +82,15 @@ class CombinedSpeechBlock: Identifiable {
         let speechText:String? // displayText と同じ場合は nil を入れるという事にします。
     }
     var speechBlockArray:[speechBlock] = []
-    let voice:AVSpeechSynthesisVoice?
+    let voiceIdentifier:String?
+    let locale:String?
     let pitch:Float
     let rate:Float
     let delay:TimeInterval
     
     init(block:SpeechBlockInfo) {
-        voice = block.voice
+        voiceIdentifier = block.voiceIdentifier
+        locale = block.locale
         pitch = block.pitch
         rate = block.rate
         delay = block.delay
@@ -135,7 +138,7 @@ class CombinedSpeechBlock: Identifiable {
         guard checkDoubleEqual(a: 0.0, b: block.delay) // delay があるなら合成してはいけません
             && checkFloatEqual(a: pitch, b: block.pitch)
             && checkFloatEqual(a: rate, b: block.rate)
-            && voice == block.voice
+            && voiceIdentifier == block.voiceIdentifier
             else { return false }
         let speechText:String?
         if block.displayText == block.speechText {
@@ -403,7 +406,7 @@ class StoryTextClassifier {
         }
 
         func createBlockInfo(speechText:String, displayText:String, speakerSetting:SpeakerSetting, waitConfig:SpeechWaitConfig?) -> SpeechBlockInfo {
-            return SpeechBlockInfo(speechText: speechText, displayText: displayText, voice: searchVoiceFrom(speakerSetting: speakerSetting), pitch: speakerSetting.pitch, rate: speakerSetting.rate, delay: TimeInterval(waitConfig?.delayTimeInSec ?? 0.0))
+            return SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, delay: TimeInterval(waitConfig?.delayTimeInSec ?? 0.0))
         }
         
         var index = content.startIndex
@@ -444,14 +447,8 @@ class StoryTextClassifier {
                 if targetString.starts(with: endText) {
                     index = content.index(index, offsetBy: endText.count)
                     let displayText = String(content[currentTextStartIndex..<index])
-                    #if false
-                    let speechText = ApplySpeechModTo(text: displayText, indexedSpeechModArray: indexedSpeechModArray)
-                    let block = createBlockInfo(speechText: speechText, displayText: displayText, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: currentWaitconfig)
-                    result.append(block)
-                    #else
                     let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: currentWaitconfig)
                     result.append(contentsOf: newBlockArray)
-                    #endif
                     currentTextStartIndex = index
                     speakerList.removeLast()
                     if speakerList.count > 1 {
@@ -469,14 +466,8 @@ class StoryTextClassifier {
                     if targetString.starts(with: sectionConfig.startText) {
                         if currentTextStartIndex < index {
                             let displayText = String(content[currentTextStartIndex..<index])
-                            #if false
-                            let speechText = ApplySpeechModTo(text: displayText, indexedSpeechModArray: indexedSpeechModArray)
-                            let block = createBlockInfo(speechText: speechText, displayText: displayText, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: currentWaitconfig)
-                            result.append(block)
-                            #else
                             let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: currentWaitconfig)
                             result.append(contentsOf: newBlockArray)
-                            #endif
                         }
                         currentTextStartIndex = index
                         index = content.index(index, offsetBy: sectionConfig.startText.count)
@@ -493,14 +484,8 @@ class StoryTextClassifier {
                     if targetString.starts(with: char) {
                         index = content.index(index, offsetBy: char.count)
                         let displayText = String(content[currentTextStartIndex..<index])
-                        #if false
-                        let speechText = ApplySpeechModTo(text: displayText, indexedSpeechModArray: indexedSpeechModArray)
-                        let block = createBlockInfo(speechText: speechText, displayText: displayText, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: currentWaitconfig)
-                        result.append(block)
-                        #else
                         let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: currentWaitconfig)
                         result.append(contentsOf: newBlockArray)
-                        #endif
                         currentTextStartIndex = index
                         continue indexLoop
                     }
@@ -509,14 +494,8 @@ class StoryTextClassifier {
             if let waitConfig = currentWaitconfig {
                 index = content.index(index, offsetBy: waitConfig.targetText.count)
                 let displayText = String(content[currentTextStartIndex..<index])
-                #if false
-                let speechText = ApplySpeechModTo(text: displayText, indexedSpeechModArray: indexedSpeechModArray)
-                let block = createBlockInfo(speechText: speechText, displayText: displayText, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: waitConfig)
-                result.append(block)
-                #else
                 let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: waitConfig)
                 result.append(contentsOf: newBlockArray)
-                #endif
                 currentTextStartIndex = index
                 continue indexLoop
             }
@@ -525,16 +504,9 @@ class StoryTextClassifier {
         if currentTextStartIndex < content.endIndex {
             let currentSpeaker = speakerList.last?.speakerSetting ?? defaultSpeaker
             let displayText = String(content[currentTextStartIndex..<content.endIndex])
-            #if false
-            let speechText = ApplySpeechModTo(text: displayText, indexedSpeechModArray: indexedSpeechModArray)
-            let block = createBlockInfo(speechText: speechText, displayText: displayText, speakerSetting: currentSpeaker, waitConfig: nil)
-            result.append(block)
-            #else
             let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeaker, waitConfig: currentWaitconfig)
             result.append(contentsOf: newBlockArray)
-            #endif
         }
-        voiceCache = [:]
         let combinedResult = ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: result, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
         //print("diffDate: \(Date().timeIntervalSince(startDate))")
         return combinedResult
@@ -606,28 +578,6 @@ class StoryTextClassifier {
         return result
     }
     
-    static var voiceCache:[String:AVSpeechSynthesisVoice] = [:]
-    static func searchVoiceFrom(identifier:String, fallbackLanguage:String) -> AVSpeechSynthesisVoice{
-        let key = "identifier:\(identifier), \(fallbackLanguage)"
-        if let voice = voiceCache[key] {
-            return voice
-        }
-        if let voice = AVSpeechSynthesisVoice(identifier: identifier) {
-            voiceCache[key] = voice
-            return voice
-        }
-        if let voice = AVSpeechSynthesisVoice(language: fallbackLanguage) {
-            voiceCache[key] = voice
-            return voice
-        }
-        let voice = AVSpeechSynthesisVoice()
-        voiceCache[key] = voice
-        return voice
-    }
-    static func searchVoiceFrom(speakerSetting:SpeakerSetting) -> AVSpeechSynthesisVoice {
-        searchVoiceFrom(identifier: speakerSetting.voiceIdentifier, fallbackLanguage: speakerSetting.locale)
-    }
-
     static func generateBlockFromSpeechMod(text:String, indexedSpeechModArray:[Character:[SpeechModSetting]], speakerSetting: SpeakerSetting, waitConfig: SpeechWaitConfig?) -> [SpeechBlockInfo] {
         var result:[SpeechBlockInfo] = []
         var index = text.startIndex
@@ -644,13 +594,13 @@ class StoryTextClassifier {
                     if currentStartIndex != index {
                         let displayText = String(text[currentStartIndex..<index])
                         let speechText = displayText
-                        let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voice: searchVoiceFrom(speakerSetting: speakerSetting), pitch: speakerSetting.pitch, rate: speakerSetting.rate, delay: TimeInterval(waitConfig?.delayTimeInSec ?? 0.0))
+                        let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, delay: TimeInterval(waitConfig?.delayTimeInSec ?? 0.0))
                         result.append(blockInfo)
                     }
                     let nextIndex = text.index(index, offsetBy: speechMod.before.count)
                     let displayText = String(text[index..<nextIndex])
                     let speechText = speechMod.after
-                    let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voice: searchVoiceFrom(speakerSetting: speakerSetting), pitch: speakerSetting.pitch, rate: speakerSetting.rate, delay: TimeInterval(waitConfig?.delayTimeInSec ?? 0.0))
+                    let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, delay: TimeInterval(waitConfig?.delayTimeInSec ?? 0.0))
                     result.append(blockInfo)
                     index = nextIndex
                     currentStartIndex = nextIndex
@@ -662,7 +612,7 @@ class StoryTextClassifier {
         if currentStartIndex != index {
             let displayText = String(text[currentStartIndex..<index])
             let speechText = displayText
-            let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voice: searchVoiceFrom(speakerSetting: speakerSetting), pitch: speakerSetting.pitch, rate: speakerSetting.rate, delay: TimeInterval(waitConfig?.delayTimeInSec ?? 0.0))
+            let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, delay: TimeInterval(waitConfig?.delayTimeInSec ?? 0.0))
             result.append(blockInfo)
         }
         return result

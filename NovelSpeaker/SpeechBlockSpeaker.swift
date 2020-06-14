@@ -9,7 +9,7 @@
 import Foundation
 
 class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
-    let speaker = Speaker()
+    let speaker = MultiVoiceSpeaker()
     
     var speechBlockArray:[CombinedSpeechBlock] = []
     var currentSpeechBlockIndex:Int = 0
@@ -22,6 +22,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     var currentBlockSpeechOffset = 0
     // 現在の先頭からの読み上げ中の位置(willSpeakRange で知らされる location と同じ値)
     var currentSpeakingLocation = 0
+    
+    // StopSpeech() で実際に読み上げが止まった時のハンドラ
+    var stopSpeechHandler:(()->Void)? = nil
     
     override init() {
         super.init()
@@ -142,53 +145,49 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     func enqueueSpeechBlock(){
         guard currentSpeechBlockIndex < speechBlockArray.count else { return }
         let block = speechBlockArray[currentSpeechBlockIndex]
-        if let voice = block.voice {
-            speaker.voice = voice
-        }
-        speaker.pitch = block.pitch
-        speaker.rate = block.rate
-        speaker.delay = block.delay
         self.delegate?.willSpeakRange(range: NSMakeRange(currentDisplayStringOffset, 1))
         let speechText = block.GenerateSpeechTextFrom(displayLocation: currentBlockDisplayOffset)
-        speaker.Speech(text: speechText)
+        speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, delay: block.delay)
         //print("Speech: \(speechText)")
+    }
+    
+    func setSpeechBlockArray(blockArray:[CombinedSpeechBlock]) {
+        speechBlockArray = blockArray
+        currentDisplayStringOffset = 0
+        currentSpeechBlockIndex = 0
+        currentSpeakingLocation = 0
+        currentBlockDisplayOffset = 0
+        currentBlockSpeechOffset = 0
+        
+        var voiceIdentifierDictionary:[String?:String?] = [:]
+        for block in speechBlockArray {
+            voiceIdentifierDictionary[block.voiceIdentifier] = block.locale
+        }
+        for (voiceIdentifier, locale) in voiceIdentifierDictionary {
+            print("register: \(voiceIdentifier ?? "nil"), \(locale ?? "nil")")
+            speaker.RegisterVoiceIdentifier(voiceIdentifier: voiceIdentifier, locale: locale)
+        }
     }
     
     func SetTextWitoutSettings(content:String) {
         let dummySpeaker = RealmSpeakerSetting()
-        speechBlockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: [], moreSplitMinimumLetterCount: 99999, defaultSpeaker: SpeakerSetting(from: dummySpeaker), sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
-        currentDisplayStringOffset = 0
-        currentSpeechBlockIndex = 0
-        currentSpeakingLocation = 0
-        currentBlockDisplayOffset = 0
-        currentBlockSpeechOffset = 0
+        let blockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: [], moreSplitMinimumLetterCount: 99999, defaultSpeaker: SpeakerSetting(from: dummySpeaker), sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
+        setSpeechBlockArray(blockArray: blockArray)
     }
     
     func SetText(content:String, withMoreSplitTargets: [String], moreSplitMinimumLetterCount: Int, defaultSpeaker: SpeakerSetting, sectionConfigList: [SpeechSectionConfig], waitConfigList: [SpeechWaitConfig], sortedSpeechModArray: [SpeechModSetting]) {
-        speechBlockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, sortedSpeechModArray: sortedSpeechModArray)
-        currentDisplayStringOffset = 0
-        currentSpeechBlockIndex = 0
-        currentSpeakingLocation = 0
-        currentBlockDisplayOffset = 0
-        currentBlockSpeechOffset = 0
+        let blockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, sortedSpeechModArray: sortedSpeechModArray)
+        setSpeechBlockArray(blockArray: blockArray)
     }
 
     func SetText(content:String, withMoreSplitTargets: [String], moreSplitMinimumLetterCount: Int, defaultSpeaker: SpeakerSetting, sectionConfigList: [SpeechSectionConfig], waitConfigList: [SpeechWaitConfig], speechModArray: [SpeechModSetting]) {
-        speechBlockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, speechModArray: speechModArray)
-        currentDisplayStringOffset = 0
-        currentSpeechBlockIndex = 0
-        currentSpeakingLocation = 0
-        currentBlockDisplayOffset = 0
-        currentBlockSpeechOffset = 0
+        let blockArray = StoryTextClassifier.CategorizeStoryText(content: content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: defaultSpeaker, sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, speechModArray: speechModArray)
+        setSpeechBlockArray(blockArray: blockArray)
     }
     
     func SetStory(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {
-        speechBlockArray = StoryTextClassifier.CategorizeStoryText(story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
-        currentDisplayStringOffset = 0
-        currentSpeechBlockIndex = 0
-        currentSpeakingLocation = 0
-        currentBlockDisplayOffset = 0
-        currentBlockSpeechOffset = 0
+        let blockArray = StoryTextClassifier.CategorizeStoryText(story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
+        setSpeechBlockArray(blockArray: blockArray)
     }
 
     func SetStory(story:Story) {
@@ -200,8 +199,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         enqueueSpeechBlock()
     }
     
-    func StopSpeech() {
+    func StopSpeech(stopSpeechHandler:(()->Void)? = nil) {
         m_IsSpeaking = false
+        self.stopSpeechHandler = stopSpeechHandler
         speaker.Stop()
     }
 
@@ -267,6 +267,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // 読み上げを停止させられている場合は何もしません。
         // これは、Stop() した時でも finishSpeak() が呼び出されるためです。
         if m_IsSpeaking != true {
+            self.stopSpeechHandler?()
+            self.stopSpeechHandler = nil
             return
         }
         if setNextSpeechBlock() != true {
@@ -277,13 +279,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         enqueueSpeechBlock()
     }
 
-    func AnnounceText(text:String) {
-        if m_IsSpeaking {
-            return
-        }
-        speaker.Speech(text: text)
-    }
-    
     var currentLocation:Int {
         get { return currentSpeakingLocation }
     }

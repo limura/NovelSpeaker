@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import AVFoundation
 import RealmSwift
 @testable import NovelSpeaker
 import Fuzi
@@ -59,6 +60,75 @@ class SpeakerTest: XCTestCase {
         for block in blockArray {
             print("---\n\(block.displayText)\n")
         }
+    }
+    
+    func testVoice() {
+        for voice in AVSpeechSynthesisVoice.speechVoices() {
+            if voice.language != "ja-JP" { continue }
+            print("voice", voice.name, voice.language, voice.identifier)
+        }
+        class SpeakerWait : SpeakRangeDelegate{
+            let speaker:Speaker = Speaker()
+            var isWaiting:Bool = false
+            var expectation:XCTestExpectation = XCTestExpectation()
+            
+            init() {
+                speaker.delegate = self
+            }
+            
+            func willSpeakRange(range:NSRange) {}
+            func finishSpeak() {
+                print("finishSpeak: \(self.speaker.voice.name)")
+                isWaiting = false
+                expectation.fulfill()
+            }
+            func setVoiceWith(identifier:String, language:String){
+                speaker.SetVoiceWith(identifier:identifier, language:language)
+            }
+            func Speech(text:String, expectation:XCTestExpectation){
+                self.expectation = expectation
+                speaker.Speech(text:text)
+            }
+        }
+        
+        func speakWithWait(speaker:SpeakerWait, text:String, expectationID: String) {
+            let expectation = XCTestExpectation(description: expectationID)
+            speaker.Speech(text: text, expectation: expectation)
+            wait(for: [expectation], timeout: 10)
+        }
+
+        let speaker1 = SpeakerWait()
+        let speaker2 = SpeakerWait()
+        speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.siri_male_ja-JP_compact", language: "ja-JP")
+        speaker2.setVoiceWith(identifier: "com.apple.ttsbundle.Otoya-compact", language: "ja-JP")
+
+        speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.siri_male_ja-JP_compact", language: "ja-JP")
+        speakWithWait(speaker: speaker1, text: " ", expectationID: "x")
+        speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.Otoya-compact", language: "ja-JP")
+        speakWithWait(speaker: speaker1, text: " ", expectationID: "y")
+        speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.siri_male_ja-JP_compact", language: "ja-JP")
+        speakWithWait(speaker: speaker1, text: "こんにちは。", expectationID: "1")
+        speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.Otoya-compact", language: "ja-JP")
+        speakWithWait(speaker: speaker1, text: "京子です。", expectationID: "2")
+        speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.siri_male_ja-JP_compact", language: "ja-JP")
+        speakWithWait(speaker: speaker1, text: "2回目の", expectationID: "3")
+        speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.Otoya-compact", language: "ja-JP")
+        speakWithWait(speaker: speaker1, text: "発話です", expectationID: "4")
+        speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.siri_male_ja-JP_compact", language: "ja-JP")
+        speakWithWait(speaker: speaker1, text: "3回目の", expectationID: "5")
+        speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.Otoya-compact", language: "ja-JP")
+        speakWithWait(speaker: speaker1, text: "発話ですよ", expectationID: "6")
+    }
+    
+    func testSkip() {
+        let story = RealmStoryBulk.SearchStory(novelID: "https://ncode.syosetu.com/n6475db/", chapterNumber:431) ?? Story()
+        let speaker = StorySpeaker.shared
+        speaker.SetStory(story: story)
+        print("location: \(speaker.readLocation)")
+        speaker.SkipForward(length: 50)
+        print("location: \(speaker.readLocation)")
+        speaker.SkipBackward(length: 50)
+        print("location: \(speaker.readLocation)")
     }
 
     func testXML(){

@@ -114,6 +114,7 @@
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
 		215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BFB3E23ED5DAB0078E158 /* StoryView.swift */; };
 		215BFB4223EDB15F0078E158 /* SystemIconButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BFB4123EDB15F0078E158 /* SystemIconButtonView.swift */; };
+		21621086247A62C6002EAA61 /* MultiVoiceSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */; };
 		2163599D22B1428400264A89 /* AssignNovelFolderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */; };
 		216359A122B167A700264A89 /* LikeStar.png in Resources */ = {isa = PBXBuildFile; fileRef = 2163599E22B167A700264A89 /* LikeStar.png */; };
 		216359A222B167A700264A89 /* LikeStar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2163599F22B167A700264A89 /* LikeStar@2x.png */; };
@@ -430,6 +431,7 @@
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		215BFB3E23ED5DAB0078E158 /* StoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryView.swift; sourceTree = "<group>"; };
 		215BFB4123EDB15F0078E158 /* SystemIconButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemIconButtonView.swift; sourceTree = "<group>"; };
+		21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiVoiceSpeaker.swift; sourceTree = "<group>"; };
 		2163599C22B1428400264A89 /* AssignNovelFolderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignNovelFolderViewController.swift; sourceTree = "<group>"; };
 		2163599E22B167A700264A89 /* LikeStar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = LikeStar.png; path = Resources/LikeStar.png; sourceTree = "<group>"; };
 		2163599F22B167A700264A89 /* LikeStar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "LikeStar@2x.png"; path = "Resources/LikeStar@2x.png"; sourceTree = "<group>"; };
@@ -704,6 +706,7 @@
 			isa = PBXGroup;
 			children = (
 				210EFEE023C8A92D007C3016 /* Speaker.swift */,
+				21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */,
 				210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */,
 				210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */,
 				2164800B2290F3F900A183DF /* StorySpeaker.swift */,
@@ -1791,6 +1794,7 @@
 				21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */,
 				2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */,
 				21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */,
+				21621086247A62C6002EAA61 /* MultiVoiceSpeaker.swift in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
 				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
 				21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */,
