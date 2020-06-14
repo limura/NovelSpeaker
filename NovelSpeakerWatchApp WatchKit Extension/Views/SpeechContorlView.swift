@@ -35,14 +35,18 @@ struct SpeechContorlView: View {
                     let speaker = StorySpeaker.shared
                     let isPlaying = speaker.isPlayng
                     self.storyViewData.setLoadingIndicator(isVisible: true)
-                    speaker.StopSpeech()
-                    speaker.SkipBackward(length: 30)
-                    if isPlaying {
-                        speaker.StartSpeech(withMaxSpeechTimeReset: true)
-                    }else{
-                        self.storyViewData.displayIndex = speaker.currentBlockIndex
+                    speaker.StopSpeech {
+                        speaker.SkipBackward(length: 30)
+                        if isPlaying {
+                            speaker.StartSpeech(withMaxSpeechTimeReset: true)
+                        }else{
+                            self.storyViewData.displayIndex = speaker.currentBlockIndex
+                        }
+                        self.storyViewData.setLoadingIndicator(isVisible: false)
                     }
-                    self.storyViewData.setLoadingIndicator(isVisible: false)
+                    if isPlaying != true {
+                        self.storyViewData.setLoadingIndicator(isVisible: false)
+                    }
                 }
                 Spacer()
                 Button(action: {
@@ -70,14 +74,18 @@ struct SpeechContorlView: View {
                     let speaker = StorySpeaker.shared
                     let isPlaying = speaker.isPlayng
                     self.storyViewData.setLoadingIndicator(isVisible: true)
-                    speaker.StopSpeech()
-                    speaker.SkipForward(length: 30)
-                    if isPlaying {
-                        speaker.StartSpeech(withMaxSpeechTimeReset: true)
-                    }else{
-                        self.storyViewData.displayIndex = speaker.currentBlockIndex
+                    speaker.StopSpeech {
+                        speaker.SkipForward(length: 30)
+                        if isPlaying {
+                            speaker.StartSpeech(withMaxSpeechTimeReset: true)
+                        }else{
+                            self.storyViewData.displayIndex = speaker.currentBlockIndex
+                        }
+                        self.storyViewData.setLoadingIndicator(isVisible: false)
                     }
-                    self.storyViewData.setLoadingIndicator(isVisible: false)
+                    if isPlaying != true {
+                        self.storyViewData.setLoadingIndicator(isVisible: false)
+                    }
                 }
                 Spacer()
                 SystemIconButtonView(systemIconName: "forward.end.fill", iconSize: CGFloat(geometry.size.width / 7)) {
