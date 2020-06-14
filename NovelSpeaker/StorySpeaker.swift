@@ -774,23 +774,31 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         return .success
     }
+    var skipForwardCount = 0
     @objc func skipForwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: skipForwardEvent")
-        StopSpeech()
-        SkipForward(length: 100)
-        StartSpeech(withMaxSpeechTimeReset: true)
+        skipForwardCount += 100
+        StopSpeech {
+            let count = self.skipForwardCount
+            self.skipForwardCount = 0
+            self.SkipForward(length: count)
+            self.StartSpeech(withMaxSpeechTimeReset: true)
+        }
         return .success
     }
     @objc func skipBackwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: skipBackwardEvent")
-        StopSpeech()
-        SkipBackward(length: 100)
-        StartSpeech(withMaxSpeechTimeReset: true)
+        skipForwardCount += 100
+        StopSpeech {
+            let count = self.skipForwardCount
+            self.skipForwardCount = 0
+            self.SkipBackward(length: count)
+            self.StartSpeech(withMaxSpeechTimeReset: true)
+        }
         return .success
     }
     
     var isSeeking = false
-    var seekSpeechStopDate:Date? = nil
     func seekForwardInterval(){
         self.StopSpeech {
             self.SkipForward(length: 50)
