@@ -735,48 +735,6 @@ class NiftyUtilitySwift: NSObject {
         return formatter.date(from: iso8601String)
     }
     
-    #if !os(watchOS)
-    @objc public static func RestoreBackupFromJSONWithProgressDialog(jsonData:Data, dataDirectory:URL?, rootViewController:UIViewController){
-        let globalDataSingleton = GlobalDataSingleton.getInstance()
-        var builder = EasyDialogBuilder(rootViewController)
-        NiftyUtilitySwift.DispatchSyncMainQueue {
-            builder = builder.label(text: NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元"), textAlignment: .center, tag: 100)
-            let dialog = builder.build()
-            dialog.show()
-            
-            DispatchQueue.global(qos: .background).async {
-                let result = globalDataSingleton?.restoreBackup(fromJSONData: jsonData, dataDirectory: dataDirectory, progress: { (progressText) in
-                    DispatchQueue.main.async {
-                        if let label = dialog.view.viewWithTag(100) as? UILabel, let progressText = progressText{
-                            label.text = NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元")
-                            + "\r\n" + progressText
-                        }
-                    }
-                })
-                DispatchQueue.main.async {
-                    dialog.dismiss(animated: false, completion: {
-                        if result == true {
-                            EasyDialogBuilder(rootViewController)
-                            .label(text: NSLocalizedString("GlobalDataSingleton_BackupDataLoaded", comment:"設定データを読み込みました。ダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。"), textAlignment: .center)
-                            .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                                dialog.dismiss(animated: false, completion: nil)
-                            })
-                            .build().show()
-                        }else{
-                            EasyDialogBuilder(rootViewController)
-                            .label(text: NSLocalizedString("GlobalDataSingleton_RestoreBackupDataFailed", comment:"設定データの読み込みに失敗しました。"), textAlignment: .center)
-                            .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                                dialog.dismiss(animated: false, completion: nil)
-                            })
-                            .build().show()
-                        }
-                    })
-                }
-            }
-        }
-    }
-    #endif
-    
     @objc static public func DispatchSyncMainQueue(block:(()->Void)?) -> Void {
         guard let block = block else {
             return
