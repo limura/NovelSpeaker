@@ -80,7 +80,7 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
     func selectColor(target:ColorPickerTarget, row:ButtonRow) {
         self.colorPickerTarget = target
         let colorSelectionViewController = MSColorSelectionViewController()
-        let navController = UINavicationController_StatusBarHack(rootViewController: colorSelectionViewController)
+        let navController = UINavigationController(rootViewController: colorSelectionViewController)
         navController.modalPresentationStyle = .popover
         navController.popoverPresentationController?.delegate = self
         navController.popoverPresentationController?.sourceView = row.cell.contentView
