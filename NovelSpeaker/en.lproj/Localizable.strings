@@ -386,6 +386,9 @@
 "BugReportViewController_ConfirmEnableLogSend_title" = "Confirm";
 "BugReportViewController_ConfirmEnableLogSend" = "Would you like to attach operation logs saved in NovelSpeaker to the report mail?\n\nThe infos of the downloaded novel (URL etc.) is included in the operation log. You may turn it off for your own privacy.\nHowever, if the operation log is not attached, diagnostics maybe difficult, therefore the problem may remain unresolved. (There are cases where regardless of attachment, it may be unresolved)\nThe operation log may be transmitted through pressing \"Setting\" -> \"Read ruby only\" about 10 times,  \"Debug log display\" will appear at the bottom of \"Setting\" Since it will be the same thing as the attachment, please refer to it if you want to check the contents in advance.";
 "BugReportViewController_IsEnableLogSend" = "Attach operation logs saved inside";
+"BugReportViewController_IsEnableBackupFileSend" = "Attach a lightweight backup file";
+"BugReportViewController_ConfirmEnableBackupFileSend_title" = "Confirm";
+"BugReportViewController_ConfirmEnableBackupFileSend" = "Would you like to attach lightweight backup file saved in NovelSpeaker to the report mail?\n\nThe infos of the downloaded novel (URL etc.) is included in the lightweight backup file. You may turn it off for your own privacy.\nHowever, if the lightweight backup file is not attached, diagnostics maybe difficult, therefore the problem may remain unresolved. (There are cases where regardless of attachment, it may be unresolved)\nThe lightweight backup file may be transmitted through pressing \"Setting\" -> \"Read ruby only\" about 10 times,  \"Debug log display\" will appear at the bottom of \"Setting\" Since it will be the same thing as the attachment, please refer to it if you want to check the contents in advance.";
 "BugReportViewController_TargetNovelName" = "Select the novels in which the error occurs (if any)";
 "BugReportViewController_TargetNovelName_SelectorTitle" = "Select the novels in which the error occurs";
 "BugReportViewController_SendBugReport_TargetNovelNameList" = "Novel information that caused the problem:";
@@ -570,9 +573,9 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.63
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.64
 
-- Suppress unnecessary line breaks when importing from some websites
+- Added \"Attach lightweight backup file\" to the selection items that appear when selecting inconvenience report in Settings -> Contact developer
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -588,6 +591,10 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 -Change speaker setting items
 -Added a function to separate chapters into text files when importing text files etc.
 -Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
+
+# Version 1.1.64
+
+- Added \"Attach lightweight backup file\" to the selection items that appear when selecting inconvenience report in Settings -> Contact developer
 
 # Version 1.1.63
 

@@ -376,6 +376,9 @@
 "BugReportViewController_ConfirmEnableLogSend_title" = "確認";
 "BugReportViewController_ConfirmEnableLogSend" = "ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)の個人情報に繋がりそうな情報が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合にはOFFのままにしておく必要があります。\nなお、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)\nまた、送信される操作ログは、「設定」→「ルビはルビだけ読む」を10回程ON/OFFすると「設定」の最下部に表示されるデバッグメニュー内の「デバッグログの表示」で表示される物と同じ物になりますので、内容を事前に確認したい場合はそちらをご参照ください。";
 "BugReportViewController_IsEnableLogSend" = "内部に保存されている操作ログを添付する";
+"BugReportViewController_IsEnableBackupFileSend" = "軽量バックアップファイルを添付する";
+"BugReportViewController_ConfirmEnableBackupFileSend_title" = "確認";
+"BugReportViewController_ConfirmEnableBackupFileSend" = "ことせかい の軽量バックアップファイルを不都合報告mailに添付しますか？\n\n軽量バックアップファイルにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合にはOFFのままにしておく必要があります。\nなお、軽量バックアップファイルが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)";
 "BugReportViewController_TargetNovelName" = "問題が発生する小説(もしあれば)";
 "BugReportViewController_TargetNovelName_SelectorTitle" = "問題が発生する小説";
 "BugReportViewController_SendBugReport_TargetNovelNameList" = "問題の起こった小説:";
@@ -561,13 +564,18 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.63
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.64
 
-- 一部のWebサイトからの取込時に、不必要な改行が追加されるのを抑制
+- 設定->開発者に問い合わせる で不都合報告を選択している時に現れる選択項目に「軽量バックアップファイルを添付する」を追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.64
+
+- 設定->開発者に問い合わせる で不都合報告を選択している時に現れる選択項目に「軽量バックアップファイルを添付する」を追加
+
+
 # Version 1.1.63
 
 問題の修正
