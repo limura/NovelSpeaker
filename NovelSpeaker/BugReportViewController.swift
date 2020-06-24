@@ -472,10 +472,43 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 picker.addAttachmentData(data, mimeType: "text/plain", fileName: "operation_log.txt")
             }
         }
-        if isNeedBackupFile == true, let backupDataDictionary = GlobalDataSingleton.getInstance().createBackupDataDictionary(), let backupData = try? JSONSerialization.data(withJSONObject: backupDataDictionary as Any, options: .prettyPrinted) {
-            picker.addAttachmentData(backupData, mimeType: "application/json", fileName: "backup_file.novelspeaker-backup-json")
+        if isNeedBackupFile == true {
+            DispatchQueue.main.async {
+                let labelTag = 100
+                let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
+                    .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
+                    .build()
+                dialog.show()
+                DispatchQueue.global(qos: .utility).async {
+                    if let backupDataURL = NovelSpeakerUtility.CreateBackupData(withAllStoryContent: false, progress: { (description) in
+                        DispatchQueue.main.async {
+                            if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
+                                label.text = NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……") + "\r\n"
+                                    + description
+                            }
+                        }
+                    }), let backupData = try? Data(contentsOf: backupDataURL) {
+                        print("backupDataURL: \(backupDataURL.absoluteString)")
+                        let mimeType:String
+                        if backupDataURL.pathExtension == "novelspeaker-backup-json" {
+                            mimeType = "application/json"
+                        }else{
+                            mimeType = "application/zip"
+                        }
+                        picker.addAttachmentData(backupData, mimeType: mimeType, fileName: backupDataURL.lastPathComponent)
+                    }
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false) {
+                            DispatchQueue.main.async {
+                                self.present(picker, animated: true, completion: completion)
+                            }
+                        }
+                    }
+                }
+            }
+        }else{
+            present(picker, animated: true, completion: completion)
         }
-        present(picker, animated: true, completion: completion)
         return true;
     }
     // MFMailComposeViewController でmailアプリ終了時に呼び出されるのでこのタイミングで viewController を取り戻します
