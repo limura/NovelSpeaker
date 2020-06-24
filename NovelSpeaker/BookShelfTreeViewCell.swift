@@ -159,7 +159,7 @@ class BookShelfTreeViewCell: UITableViewCell {
                 switch change {
                 case .error(_):
                     break
-                case .change(let properties):
+                case .change(_, let properties):
                     for property in properties {
                         if property.name == "likeLevel" {
                             self.applyLikeStarStatus(novelID: novelID)
@@ -209,7 +209,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     func registerBookmarkObserver(novelID:String) {
         self.bookmarkObserveToken = RealmBookmark.SearchObjectFrom(type: .novelSpeechLocation, hint: novelID)?.observe({ (change) in
             switch change {
-            case .change(let propertys):
+            case .change(_, let propertys):
                 for property in propertys {
                     if property.name == "location" {
                         DispatchQueue.main.async {
@@ -286,7 +286,7 @@ class BookShelfTreeViewCell: UITableViewCell {
                 switch changes {
                 case .error(_):
                     break
-                case .change(let properties):
+                case .change(_, let properties):
                     for property in properties {
                         if property.name == "isReadingProgressDisplayEnabled" {
                             if let isDisplayEnabled = property.newValue as? Bool {

@@ -133,7 +133,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             }
             self.globalStateObserveToken = globalState.observe({ (change) in
                 switch change {
-                case .change(let propertys):
+                case .change(_, let propertys):
                     for property in propertys {
                         if property.name == "isMixWithOthersEnabled" || property.name == "isDuckOthersEnabled" {
                             guard let oldValue = property.oldValue as? Bool, let newValue = property.newValue as? Bool else { continue }
@@ -164,7 +164,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             guard let bookmark = RealmBookmark.SearchObjectFrom(type: .novelSpeechLocation, hint: novelID) else { return }
             self.bookmarkObserverToken = bookmark.observe { (change) in
                 switch change {
-                case .change(let properties):
+                case .change(_, let properties):
                     for property in properties {
                         if property.name == "location", let newObj = property.newValue as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID), self.speaker.currentLocation != newObj.location {
                             self.speaker.SetSpeechLocation(location: newObj.location)
@@ -191,7 +191,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                     switch change {
                     case .error(_):
                         break
-                    case .change(let properties):
+                    case .change(_, let properties):
                         for property in properties {
                             if property.name == "contentArray", let newValue = property.newValue as? List<Data>, let story = RealmStoryBulk.BulkToStory(bulk: newValue, chapterNumber: chapterNumber) {
                                 let text = self.speaker.displayText
@@ -310,7 +310,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                     switch change {
                     case .error(_):
                         break
-                    case .change(let properties):
+                    case .change(_, let properties):
                         for property in properties {
                             if ["isOverrideRubyIsEnabled", "notRubyCharactorStringArray", "isIgnoreURIStringSpeechEnabled"].contains(property.name) {
                                 self.isNeedApplySpeechConfigs = true

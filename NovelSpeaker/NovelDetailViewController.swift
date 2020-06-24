@@ -51,7 +51,7 @@ class NovelDetailViewController: FormViewController {
                 switch change {
                 case .error(_):
                     break
-                case .change(let properties):
+                case .change(_, let properties):
                     for property in properties {
                         if property.name == "defaultSpeakerID", let newValue = property.newValue as? String, let oldValue = property.oldValue as? String, newValue != oldValue {
                             DispatchQueue.main.async {

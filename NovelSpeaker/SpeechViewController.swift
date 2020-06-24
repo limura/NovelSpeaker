@@ -227,7 +227,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                 switch change {
                 case .error(_):
                     break
-                case .change(let properties):
+                case .change(_, let properties):
                     for property in properties {
                         if property.name == "title", let newValue = property.newValue as? String {
                             DispatchQueue.main.async {
@@ -251,7 +251,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                 switch change {
                 case .error(_):
                     break
-                case .change(let properties):
+                case .change(_, let properties):
                     for property in properties {
                         // content が書き換わった時のみを監視します。
                         // でないと lastReadDate とかが書き換わった時にも表示の更新が走ってしまいます。
@@ -314,7 +314,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             guard let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { return }
             displaySettingObserverToken = displaySetting.observe({ (change) in
                 switch change {
-                case .change(let properties):
+                case .change(_, let properties):
                     for propaty in properties {
                         if propaty.name == "textSizeValue" || propaty.name == "fontID" {
                             DispatchQueue.main.async {
