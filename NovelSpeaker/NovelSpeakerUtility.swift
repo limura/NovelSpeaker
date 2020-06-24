@@ -1647,21 +1647,26 @@ class NovelSpeakerUtility: NSObject {
                     })),
                     "contentDirectory": "\(novelCount)"
                 ]
-                if !withAllStoryContent {
+                if !withAllStoryContent && novel.m_type != NovelType.UserCreated.rawValue {
                     result.append(novelData)
                     continue
                 }
-                let contentDirectory = NiftyUtilitySwift.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
+                let contentDirectory:URL?
+                if !withAllStoryContent && novel.m_type == NovelType.UserCreated.rawValue {
+                    contentDirectory = nil
+                }else{
+                    contentDirectory = NiftyUtilitySwift.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
+                }
                 switch novel.type {
                 case .URL:
                     novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory, progressString: progressString, progress: progress)
-                    if let contentDirectory = contentDirectory {
-                        fileArray.append(contentDirectory)
-                    }
                     break
                 case .UserCreated:
                     novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory, progressString: progressString, progress: progress)
                     break
+                }
+                if let contentDirectory = contentDirectory {
+                    fileArray.append(contentDirectory)
                 }
                 result.append(novelData)
                 novelCount += 1
