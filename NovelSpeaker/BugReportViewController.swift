@@ -491,7 +491,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                         print("backupDataURL: \(backupDataURL.absoluteString)")
                         let mimeType:String
                         if backupDataURL.pathExtension == "novelspeaker-backup-json" {
-                            mimeType = "application/json"
+                            mimeType = "application/json; charset=utf-8"
                         }else{
                             mimeType = "application/zip"
                         }

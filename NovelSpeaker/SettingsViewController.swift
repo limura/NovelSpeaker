@@ -1233,11 +1233,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
                 return
             }
-            let dateFormatter = DateFormatter()
-            dateFormatter.locale = Locale.current
-            dateFormatter.dateFormat = "yyyyMMddHHmm"
-            let dateString = dateFormatter.string(from: Date())
-            let fileName = String.init(format: "%@.novelspeaker-backup+zip", dateString)
+            let fileName = backupData.lastPathComponent
             DispatchQueue.main.async {
                 dialog.dismiss(animated: false, completion: {
                     NiftyUtilitySwift.EasyDialogBuilder(self)
@@ -1247,8 +1243,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         })
                     .addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Mail", comment: "メールに添付する"), callback: { (dialog) in
                         dialog.dismiss(animated: false) {
+                            let mimeType:String
+                            if backupData.pathExtension == "novelspeaker-backup-json" {
+                                mimeType = "application/json; charset=utf-8"
+                            }else{
+                                mimeType = "application/zip"
+                            }
                             if let data = try? Data(contentsOf: backupData, options: .dataReadingMapped) {
-                                self.sendMailWithBinary(data: data, fileName: fileName, mimeType: "application/octet-stream")
+                                self.sendMailWithBinary(data: data, fileName: fileName, mimeType: mimeType)
                             }else{
                                 NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_ShareBackupSelect_FailedAppendToMail", comment: "メールへのファイルの添付に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
                             }
