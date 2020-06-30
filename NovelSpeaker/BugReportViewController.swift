@@ -62,8 +62,23 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         CheckAndDisplayPrivacyPolicy()
     }
     
+    func checkCanSendEmailWithMFMailComposeViewController(){
+        print("checkCanSendEmailWithMFMailComposeViewController")
+        if MFMailComposeViewController.canSendMail() {
+            print("can send mail")
+            return
+        }
+        print("can not send mail")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("BugReportViewController_NoEMailApp_Title", comment: "メールが送信できません"), message: NSLocalizedString("BugReportViewController_NoEMailApp_Message", comment: "メールを送信する事ができないようです。\nメールアプリにメールアドレスを設定していないか、メールアプリが削除されていると思われます。\nことせかい へのお問い合わせにはe-mailをご利用頂く事が必要となりますので適切に設定して頂けますようお願い致します。"), buttonTitle: nil) {
+                _ = self.navigationController?.popViewController(animated: true)
+            }
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        checkCanSendEmailWithMFMailComposeViewController()
         BehaviorLogger.AddLog(description: "BugReportViewController viewDidLoad", data: [:])
 
         // 日付は LOGGER_ENABLED であれば ViewDidLoad のたびに上書きで不正な値にしておきます。
