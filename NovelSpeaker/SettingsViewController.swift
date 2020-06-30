@@ -569,7 +569,21 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
     
+    func ShareToFile(dataFileURL:URL, fileName:String) {
+        DispatchQueue.main.async {
+            let activityViewController = UIActivityViewController(activityItems: [dataFileURL], applicationActivities: nil)
+            let frame = UIScreen.main.bounds
+            activityViewController.popoverPresentationController?.sourceView = self.view
+            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
+            self.present(activityViewController, animated: true, completion: nil)
+        }
+    }
+    
     func ShareBackupData(dataFileURL:URL, fileName:String) {
+        if !MFMailComposeViewController.canSendMail() {
+            ShareToFile(dataFileURL: dataFileURL, fileName: fileName)
+            return
+        }
         DispatchQueue.main.async {
             let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
             dialog.title(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Title", comment: "バックアップデータの送信方式を選んで下さい"))
@@ -586,11 +600,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             }).addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_ShareButton", comment: "シェア")) { (dialog) in
                 dialog.dismiss(animated: false) {
-                    let activityViewController = UIActivityViewController(activityItems: [dataFileURL], applicationActivities: nil)
-                    let frame = UIScreen.main.bounds
-                    activityViewController.popoverPresentationController?.sourceView = self.view
-                    activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
-                    self.present(activityViewController, animated: true, completion: nil)
+                    self.ShareToFile(dataFileURL: dataFileURL, fileName: fileName)
                 }
             }.build().show()
         }

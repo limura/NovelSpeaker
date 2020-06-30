@@ -336,14 +336,23 @@ erver certificate.";
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.64
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.65
 
-- Added \"Attach lightweight backup file\" to the selection items that appear when selecting inconvenience report in Settings -> Contact developer
+- Change the behavior when the standard mail application is unavailable
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+#Version 1.1.65
+
+Interface change
+
+- Change the behavior when the standard mail application is unavailable
+
+
 # Version 1.1.64
+
+Interface change
 
 - Added \"Attach lightweight backup file\" to the selection items that appear when selecting inconvenience report in Settings -> Contact developer
 
