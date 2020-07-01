@@ -339,6 +339,7 @@ erver certificate.";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.65
 
 - Change the behavior when the standard mail application is unavailable
+- Addressed an issue where the application may be forced to terminate in the case of a web page with multiple requests for which the SSL certificate is judged to be invalid on the web import tab
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -349,6 +350,9 @@ Interface change
 
 - Change the behavior when the standard mail application is unavailable
 
+Bug fix
+
+- Addressed an issue where the application may be forced to terminate in the case of a web page with multiple requests for which the SSL certificate is judged to be invalid on the web import tab
 
 # Version 1.1.64
 
