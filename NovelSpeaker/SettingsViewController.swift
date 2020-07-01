@@ -1209,6 +1209,43 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.build().show()
         }
     }
+    
+    func ShareToFile(dataFileURL:URL, fileName:String) {
+        DispatchQueue.main.async {
+            let activityViewController = UIActivityViewController(activityItems: [dataFileURL], applicationActivities: nil)
+            let frame = UIScreen.main.bounds
+            activityViewController.popoverPresentationController?.sourceView = self.view
+            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
+            self.present(activityViewController, animated: true, completion: nil)
+        }
+    }
+    
+    func ShareBackupData(dataFileURL:URL, fileName:String) {
+        if !MFMailComposeViewController.canSendMail() {
+            ShareToFile(dataFileURL: dataFileURL, fileName: fileName)
+            return
+        }
+        DispatchQueue.main.async {
+            let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
+            dialog.title(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Title", comment: "バックアップデータの送信方式を選んで下さい"))
+                .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
+                    dialog.dismiss(animated: false, completion: nil)
+                })
+            .addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Mail", comment: "メールに添付する"), callback: { (dialog) in
+                dialog.dismiss(animated: false) {
+                    if let data = try? Data(contentsOf: dataFileURL, options: .dataReadingMapped) {
+                        self.sendMailWithBinary(data: data, fileName: fileName, mimeType: "application/octet-stream")
+                    }else{
+                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_ShareBackupSelect_FailedAppendToMail", comment: "メールへのファイルの添付に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                    }
+                }
+            }).addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_ShareButton", comment: "シェア")) { (dialog) in
+                dialog.dismiss(animated: false) {
+                    self.ShareToFile(dataFileURL: dataFileURL, fileName: fileName)
+                }
+            }.build().show()
+        }
+    }
     /// 現在の状態をファイルにして mail に添付します。
     func ShareBackupData(withAllStoryContent:Bool){
         let labelTag = 100
@@ -1234,38 +1271,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 return
             }
             let fileName = backupData.lastPathComponent
-            DispatchQueue.main.async {
-                dialog.dismiss(animated: false, completion: {
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
-                    .title(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Title", comment: "バックアップデータの送信方式を選んで下さい"))
-                    .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
-                            dialog.dismiss(animated: false, completion: nil)
-                        })
-                    .addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Mail", comment: "メールに添付する"), callback: { (dialog) in
-                        dialog.dismiss(animated: false) {
-                            let mimeType:String
-                            if backupData.pathExtension == "novelspeaker-backup-json" {
-                                mimeType = "application/json; charset=utf-8"
-                            }else{
-                                mimeType = "application/zip"
-                            }
-                            if let data = try? Data(contentsOf: backupData, options: .dataReadingMapped) {
-                                self.sendMailWithBinary(data: data, fileName: fileName, mimeType: mimeType)
-                            }else{
-                                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_ShareBackupSelect_FailedAppendToMail", comment: "メールへのファイルの添付に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
-                            }
-                        }
-                    }).addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_ShareButton", comment: "シェア")) { (dialog) in
-                        dialog.dismiss(animated: false) {
-                            let activityViewController = UIActivityViewController(activityItems: [backupData], applicationActivities: nil)
-                            let frame = UIScreen.main.bounds
-                            activityViewController.popoverPresentationController?.sourceView = self.view
-                            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
-                            self.present(activityViewController, animated: true, completion: nil)
-                        }
-                    }.build().show()
-                })
-            }
+            self.ShareBackupData(dataFileURL: backupData, fileName: fileName)
         }
     }
     

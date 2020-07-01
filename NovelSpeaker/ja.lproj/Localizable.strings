@@ -382,6 +382,8 @@
 "BugReportViewController_TargetNovelName" = "問題が発生する小説(もしあれば)";
 "BugReportViewController_TargetNovelName_SelectorTitle" = "問題が発生する小説";
 "BugReportViewController_SendBugReport_TargetNovelNameList" = "問題の起こった小説:";
+"BugReportViewController_NoEMailApp_Title" = "メールが送信できません";
+"BugReportViewController_NoEMailApp_Message" = "メールを送信する事ができないようです。\nメールアプリにメールアドレスが設定されていないか、メールアプリが削除されている(又はアプリ内から利用できない状態である)と思われます。\nことせかい へのお問い合わせにはe-mailをご利用頂く事が必要となりますので適切に設定して頂けますようお願い致します。";
 
 "NarouSearchResultDetailViewControllerSwift_DownloadButton" = "Download";
 "NarouSearchResultDetailViewControllerSwift_Writer" = "作者";
@@ -564,14 +566,23 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.64
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.65
 
-- 設定->開発者に問い合わせる で不都合報告を選択している時に現れる選択項目に「軽量バックアップファイルを添付する」を追加
+- 標準のメールアプリが利用できない状態の場合の動作を変更
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.65
+
+インタフェースの変更
+
+- 標準のメールアプリが利用できない状態の場合の動作を変更
+
+
 # Version 1.1.64
+
+インタフェースの変更
 
 - 設定->開発者に問い合わせる で不都合報告を選択している時に現れる選択項目に「軽量バックアップファイルを添付する」を追加
 
