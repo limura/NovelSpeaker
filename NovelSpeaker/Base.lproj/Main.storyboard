@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -304,7 +304,7 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="44" width="375" height="574"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <mutableString key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
+                                <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
 MIT License
 
@@ -1061,7 +1061,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
-</mutableString>
+</string>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
@@ -1115,11 +1115,11 @@ DEALINGS IN THE SOFTWARE.
             </objects>
             <point key="canvasLocation" x="1726" y="98"/>
         </scene>
-        <!--なろう検索-->
+        <!--Web検索-->
         <scene sceneID="fIy-nG-msd">
             <objects>
                 <navigationController definesPresentationContext="YES" id="LfY-GE-Mgm" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="なろう検索" image="booksearch.png" id="ZSv-78-9lg"/>
+                    <tabBarItem key="tabBarItem" title="Web検索" image="booksearch.png" id="ZSv-78-9lg"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="6vb-08-2I9">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -1133,55 +1133,17 @@ DEALINGS IN THE SOFTWARE.
             </objects>
             <point key="canvasLocation" x="-822.39999999999998" y="98.050974512743636"/>
         </scene>
-        <!--小説家になろうで検索-->
+        <!--Web検索-->
         <scene sceneID="ctc-as-wQE">
             <objects>
-                <viewController id="vgt-bB-KL1" customClass="NarouSearchViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="vgt-bB-KL1" customClass="NovelSearchViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="zZP-gD-Q37">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Uo9-50-Oxt">
-                                <rect key="frame" x="162" y="585" width="51" height="33"/>
-                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                <state key="normal" title="Button"/>
-                                <connections>
-                                    <action selector="webImportUsageButtonClicked:" destination="vgt-bB-KL1" eventType="touchUpInside" id="P5N-Zc-4ie"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8Uc-qt-6vk">
-                                <rect key="frame" x="162" y="544" width="51" height="33"/>
-                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                <state key="normal" title="Button"/>
-                                <connections>
-                                    <action selector="goToNarouSearchButtonClicked:" destination="vgt-bB-KL1" eventType="touchUpInside" id="TcU-nR-26p"/>
-                                </connections>
-                            </button>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7aO-uI-UZW">
-                                <rect key="frame" x="0.0" y="44" width="375" height="492"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
-                                <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                            </textView>
-                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        <constraints>
-                            <constraint firstItem="8Uc-qt-6vk" firstAttribute="top" secondItem="7aO-uI-UZW" secondAttribute="bottom" constant="8" id="3Ah-q7-48r"/>
-                            <constraint firstItem="7aO-uI-UZW" firstAttribute="trailing" secondItem="fgh-3a-YAA" secondAttribute="trailing" id="CI0-9Y-7EX"/>
-                            <constraint firstItem="Uo9-50-Oxt" firstAttribute="bottom" secondItem="fgh-3a-YAA" secondAttribute="bottom" id="Cda-th-Ehc"/>
-                            <constraint firstItem="Uo9-50-Oxt" firstAttribute="centerX" secondItem="zZP-gD-Q37" secondAttribute="centerX" id="VXm-UK-O7e"/>
-                            <constraint firstItem="8Uc-qt-6vk" firstAttribute="centerX" secondItem="zZP-gD-Q37" secondAttribute="centerX" id="Z4z-3U-pOb"/>
-                            <constraint firstItem="7aO-uI-UZW" firstAttribute="top" secondItem="fgh-3a-YAA" secondAttribute="top" id="fXh-P2-TTm"/>
-                            <constraint firstItem="Uo9-50-Oxt" firstAttribute="top" secondItem="8Uc-qt-6vk" secondAttribute="bottom" constant="8" id="j2K-NO-SCC"/>
-                            <constraint firstItem="7aO-uI-UZW" firstAttribute="leading" secondItem="fgh-3a-YAA" secondAttribute="leading" id="sB3-Dp-nz5"/>
-                        </constraints>
                         <viewLayoutGuide key="safeArea" id="fgh-3a-YAA"/>
                     </view>
-                    <navigationItem key="navigationItem" title="小説家になろうで検索" id="aTj-OP-UCn"/>
-                    <connections>
-                        <outlet property="textView" destination="7aO-uI-UZW" id="CYQ-V3-Cpd"/>
-                    </connections>
+                    <navigationItem key="navigationItem" title="Web検索" id="aTj-OP-UCn"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GIB-KR-GU5" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -1495,8 +1457,8 @@ DEALINGS IN THE SOFTWARE.
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="FvL-jm-emj"/>
-        <segue reference="DiM-k6-LVA"/>
+        <segue reference="uw4-9z-dhB"/>
+        <segue reference="whQ-HQ-5wp"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="&lt;.png" width="36" height="36"/>
