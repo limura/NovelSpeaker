@@ -1437,6 +1437,13 @@ extension RealmStory: CanWriteIsDeleted {
         return nil
     }
     
+    static func SearchNovelFrom(novelIDArray:[String]) -> Results<RealmNovel>? {
+        return autoreleasepool {
+            guard let realm = try? RealmUtil.GetRealm() else { return nil }
+            return realm.objects(RealmNovel.self).filter("novelID IN %@", novelIDArray)
+        }
+    }
+    
     @discardableResult
     static func AddNewNovelOnlyText(content:String, title:String) -> String {
         autoreleasepool {

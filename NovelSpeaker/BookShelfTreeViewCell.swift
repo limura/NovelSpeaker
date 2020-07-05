@@ -25,6 +25,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     var storyForNovelArrayObserveToken: NotificationToken? = nil
     var globalStateObserveToken: NotificationToken? = nil
     var novelObserveToken: NotificationToken? = nil
+    var novelArrayObserveToken: NotificationToken? = nil
     var bookmarkObserveToken: NotificationToken? = nil
     var watchNovelIDArray:[String] = []
     
@@ -152,6 +153,25 @@ class BookShelfTreeViewCell: UITableViewCell {
         }
     }
     
+    func registerNovelArrayObserver(novelIDArray:[String]) {
+        autoreleasepool {
+            self.novelArrayObserveToken = RealmNovel.SearchNovelFrom(novelIDArray: novelIDArray)?.observe({ (change) in
+                switch change {
+                case .error(_):
+                    break
+                case .update(_, let deleteIndexArray, let insertionIndexArray, let modificationIndexArray):
+                    if deleteIndexArray.count > 0 || insertionIndexArray.count > 0 || modificationIndexArray.count > 0 {
+                        DispatchQueue.main.async {
+                            self.checkAndUpdateNewImage(novelIDArray: novelIDArray)
+                        }
+                    }
+                case .initial(_):
+                    break
+                }
+            })
+        }
+    }
+    
     func registerNovelObserver(novelID:String) {
         autoreleasepool {
             guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
@@ -163,13 +183,16 @@ class BookShelfTreeViewCell: UITableViewCell {
                     for property in properties {
                         if property.name == "likeLevel" {
                             self.applyLikeStarStatus(novelID: novelID)
-                            return
                         }
                         if property.name == "m_readingChapterStoryID" {
                             DispatchQueue.main.async {
                                 self.applyCurrentReadingPointToIndicator(novelID: novelID)
                             }
-                            return
+                        }
+                        if property.name == "lastReadDate" {
+                            DispatchQueue.main.async {
+                                self.checkAndUpdateNewImage(novelIDArray: [novelID])
+                            }
                         }
                     }
                 case .deleted:
@@ -185,15 +208,11 @@ class BookShelfTreeViewCell: UITableViewCell {
                 switch (change) {
                 case .initial(_):
                     break
-                case .update(_, _, let insertions, let modifications):
+                case .update(_, _, let insertions, _):
                     // 「更新有」の反映
                     if insertions.count > 0 {
                         DispatchQueue.main.async {
                             self.activateNewImageView()
-                        }
-                    }else if modifications.count > 0{
-                        DispatchQueue.main.async {
-                            self.checkAndUpdateNewImage(novelIDArray: [novelID])
                         }
                     }
                     // 読んだ位置の更新
@@ -244,22 +263,11 @@ class BookShelfTreeViewCell: UITableViewCell {
                 switch (change) {
                 case .initial(_):
                     break
-                case .update(let objs, _, let insertions, let modifications):
+                case .update(_, _, let insertions, _):
                     // New! の 表示/非表示 周り
                     if insertions.count > 0 {
                         DispatchQueue.main.async {
                             self.activateNewImageView()
-                        }
-                    }else if modifications.count > 0 {
-                        var novelIDSet = Set<String>()
-                        for index in modifications {
-                            if objs.count > index {
-                                let story = objs[index]
-                                novelIDSet.insert(story.novelID)
-                            }
-                        }
-                        DispatchQueue.main.async {
-                            self.checkAndUpdateNewImage(novelIDArray: Array(novelIDSet))
                         }
                     }
                 case .error(_):
@@ -341,6 +349,7 @@ class BookShelfTreeViewCell: UITableViewCell {
             self.readProgressView.isHidden = true
             self.likeButton.isHidden = true
             registerStoryForNovelArrayObserver(novelIDArray: watchNovelIDArray)
+            registerNovelArrayObserver(novelIDArray: watchNovelIDArray)
             self.storyObserveToken = nil
             self.bookmarkObserveToken = nil
         }
