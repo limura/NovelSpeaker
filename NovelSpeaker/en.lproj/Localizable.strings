@@ -340,14 +340,25 @@ erver certificate.";
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.65
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.66
 
-- Change the behavior when the standard mail application is unavailable
-- Addressed an issue where the application may be forced to terminate in the case of a web page with multiple requests for which the SSL certificate is judged to be invalid on the web import tab
+- When the web import fails, if the mail can be sent, the \"import failure report mail\" can be sent.
+- While downloading a novel, the indicator of the currently read novel may disappear, so change it so that it does not disappear.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.66
+
+Interface change
+
+- When the web import fails, if the mail can be sent, the \"import failure report mail\" can be sent.
+
+Bug fix
+
+- While downloading a novel, the indicator of the currently read novel may disappear, so change it so that it does not disappear.
+
+
 #Version 1.1.65
 
 Interface change
