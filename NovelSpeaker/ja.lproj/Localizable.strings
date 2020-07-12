@@ -334,6 +334,10 @@
 "NiftyUtilitySwift_AddNewNovelToBookshelfTitle" = "本棚に小説を追加しました";
 "NiftyUtilitySwift_AddNewNovelToBookshelfMessage" = "続く章があればダウンロードを続けます。";
 "NiftyUtilitySwift_ImportSeparatedContent" = "テキトーに分割して取り込む";
+"NiftyUtilitySwift_ImportError_SendProblemReportMessage" = "\n\n問題の起こった小説について開発者にメールで報告する事もできます。ただ、この表示が出ているという事は恐らくは対応が難しい問題であると考えられますため、報告しても取り込む事ができるようにならない可能性の方が高いとお考えください。次に、送信される情報には今回取り込もうとしたWebサイトにまつわる情報が格納されていますため、そのような情報を送信しては困る場合には問題を報告しないでください。\nまた、この報告への返信は基本的には致しておりません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。";
+"NiftyUtilitySwift_ImportError_SendProblemReportButton" = "報告メールを作成";
+"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title" = "ことせかい 取り込み失敗レポート";
+"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\n";
 
 "BugReportViewController_SectionHeader" = "不都合の報告";
 "BugReportViewController_BugReportTitle" = "不都合がある場合にはこのフォームで不都合報告ができます。";
@@ -566,18 +570,34 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.65
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.66
 
-- 標準のメールアプリが利用できない状態の場合の動作を変更
+- Web取込に失敗した時に、mail を送れる状態であるなら「取り込み失敗報告メール」を送信できるように
+- 小説の取り込み中に、現在読込中の小説のインジケータが消える場合があったため消えないように変更
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.66
+
+インタフェースの変更
+
+- Web取込に失敗した時に、mail を送れる状態であるなら「取り込み失敗報告メール」を送信できるように
+
+問題の修正
+
+- 小説の取り込み中に、現在読込中の小説のインジケータが消える場合があったため消えないように変更
+
+
 # Version 1.1.65
 
 インタフェースの変更
 
 - 標準のメールアプリが利用できない状態の場合の動作を変更
+
+問題の修正
+
+- Web取込タブにおいて、SSL証明書が不正と判定されるリクエストが複数あるWebページの場合にアプリが強制終了する場合がある問題に対応
 
 
 # Version 1.1.64

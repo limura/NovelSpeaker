@@ -343,7 +343,10 @@
 "NiftyUtilitySwift_AddNewNovelToBookshelfTitle" = "Add new novel to bookshelf";
 "NiftyUtilitySwift_AddNewNovelToBookshelfMessage" = "Continue downloading if there is a chapter that follows.";
 "NiftyUtilitySwift_ImportSeparatedContent" = "Split the text and import";
-
+"NiftyUtilitySwift_ImportError_SendProblemReportMessage" = "\n\nYou can also email the developer about the problematic novel. Please note that the information sent will contain information about the website you are trying to import this time, so if you are having trouble sending such information please do not report a problem.\n Also, we do not basically reply to this report. If you want a reply, please contact us from \"Settings\" -> \"Contact developer\".";
+"NiftyUtilitySwift_ImportError_SendProblemReportButton" = "Create report email";
+"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title" = "NovelSpeaker Import failure report";
+"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "Please send this without editing.\nPlease note that we do not basically reply to this email.\n\n";
 
 "BugReportViewController_SectionHeader" = "Problem report";
 "BugReportViewController_BugReportTitle" = "In case of inconvenience, you can input from this form and report it.";
@@ -575,9 +578,10 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.65
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.66
 
-- Change the behavior when the standard mail application is unavailable
+- When the web import fails, if the mail can be sent, the \"import failure report mail\" can be sent.
+- While downloading a novel, the indicator of the currently read novel may disappear, so change it so that it does not disappear.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -594,12 +598,26 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 -Added a function to separate chapters into text files when importing text files etc.
 -Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
 
+# Version 1.1.66
+
+Interface change
+
+- When the web import fails, if the mail can be sent, the \"import failure report mail\" can be sent.
+
+Bug fix
+
+- While downloading a novel, the indicator of the currently read novel may disappear, so change it so that it does not disappear.
+
+
 #Version 1.1.65
 
 Interface change
 
 - Change the behavior when the standard mail application is unavailable
 
+Bug fix
+
+- Addressed an issue where the application may be forced to terminate in the case of a web page with multiple requests for which the SSL certificate is judged to be invalid on the web import tab
 
 # Version 1.1.64
 

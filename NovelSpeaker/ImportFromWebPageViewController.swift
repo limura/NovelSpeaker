@@ -524,7 +524,6 @@ li {
                         }
                     })*/
                     .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                        completionHandler(.rejectProtectionSpace, nil)
                         DispatchQueue.main.async {
                             dialog.dismiss(animated: false, completion: nil)
                         }
@@ -538,6 +537,7 @@ li {
                         */
                     })
                     .build().show()
+                completionHandler(.rejectProtectionSpace, nil)
                 return
             case .fatalTrustFailure: // リカバリしちゃ駄目なTrustFailure
                 print("SecTrustEvaluate: .fatalTrustFailure")
