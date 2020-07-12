@@ -70,6 +70,44 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
+    static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieArray: [String]) {
+        if MFMailComposeViewController.canSendMail() {
+            var errorMessage = error
+            errorMessage += NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
+            EasyDialogBuilder(viewController)
+            .title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
+            .textView(content: errorMessage, heightMultiplier: 0.55)
+            .addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportButton", comment: "報告メールを作成"), callback: { (dialog) in
+                dialog.dismiss(animated: false) {
+                    DispatchQueue.main.async {
+                        let picker = MFMailComposeViewController()
+                        //picker.mailComposeDelegate = self;
+                        picker.setToRecipients(["limuraproducts@gmail.com"])
+                        picker.setSubject(NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title", comment:"ことせかい 取り込み失敗レポート"))
+                        let messageBody = NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n") + error
+                        picker.setMessageBody(messageBody, isHTML: false)
+                        let sendData:[String:[String]] = [
+                            "url": [url?.absoluteString ?? "-"],
+                            "cookieArray": cookieArray
+                        ]
+                        if let data = try? JSONEncoder().encode(sendData) {
+                            picker.addAttachmentData(data, mimeType: "application/json", fileName: "import_description.json")
+                        }
+                        DummyMailComposeViewController.shared.currentViewController = viewController
+                        picker.mailComposeDelegate = DummyMailComposeViewController.shared
+                        viewController.present(picker, animated: true, completion: nil)
+                    }
+                }
+            })
+            .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+                dialog.dismiss(animated: false, completion: nil)
+                })
+            .build().show()
+        }else{
+            NiftyUtilitySwift.EasyDialogMessageDialog(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"), message: error, completion: nil)
+        }
+    }
+    
     @objc public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieArray: [String], depth: Int = 0) {
         BehaviorLogger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
@@ -95,15 +133,9 @@ class NiftyUtilitySwift: NSObject {
                         }
                         guard let content = story?.content else {
                             DispatchQueue.main.async {
-                                EasyDialogBuilder(viewController)
-                                    .title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
-                                    .label(text: NSLocalizedString("NiftyUtilitySwift_ImportedButNoTextFound", comment: "読み込めはしたけれど、内容がありませんでした"))
-                                    .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                                        DispatchQueue.main.async {
-                                            dialog.dismiss(animated: false, completion: nil)
-                                        }
-                                    })
-                                    .build().show()
+                                dialog.dismiss(animated: false) {
+                                    checkUrlAndConifirmToUser_ErrorHandle(error: NSLocalizedString("NiftyUtilitySwift_ImportedButNoTextFound", comment: "読み込めはしたけれど、内容がありませんでした"), viewController: viewController, url: url, cookieArray: cookieArray)
+                                }
                             }
                             return
                         }
@@ -166,40 +198,7 @@ class NiftyUtilitySwift: NSObject {
                         if let err = error {
                             errorMessage = err
                         }
-                        if MFMailComposeViewController.canSendMail() {
-                            errorMessage += NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
-                            EasyDialogBuilder(viewController)
-                            .title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
-                            .textView(content: errorMessage, heightMultiplier: 0.55)
-                            .addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportButton", comment: "報告メールを作成"), callback: { (dialog) in
-                                dialog.dismiss(animated: false) {
-                                    DispatchQueue.main.async {
-                                        let picker = MFMailComposeViewController()
-                                        //picker.mailComposeDelegate = self;
-                                        picker.setToRecipients(["limuraproducts@gmail.com"])
-                                        picker.setSubject(NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title", comment:"ことせかい 取り込み失敗レポート"))
-                                        let messageBody = NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\n")
-                                        picker.setMessageBody(messageBody, isHTML: false)
-                                        let sendData:[String:[String]] = [
-                                            "url": [url?.absoluteString ?? "-"],
-                                            "cookieArray": cookieArray
-                                        ]
-                                        if let data = try? JSONEncoder().encode(sendData) {
-                                            picker.addAttachmentData(data, mimeType: "application/json", fileName: "import_description.json")
-                                        }
-                                        DummyMailComposeViewController.shared.currentViewController = viewController
-                                        picker.mailComposeDelegate = DummyMailComposeViewController.shared
-                                        viewController.present(picker, animated: true, completion: nil)
-                                    }
-                                }
-                            })
-                            .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                                dialog.dismiss(animated: false, completion: nil)
-                                })
-                            .build().show()
-                        }else{
-                            NiftyUtilitySwift.EasyDialogMessageDialog(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"), message: errorMessage, completion: nil)
-                        }
+                        checkUrlAndConifirmToUser_ErrorHandle(error: errorMessage, viewController: viewController, url: url, cookieArray: cookieArray)
                     })
                 }
             })

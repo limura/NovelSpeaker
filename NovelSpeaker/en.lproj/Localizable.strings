@@ -243,7 +243,7 @@ erver certificate.";
 "NiftyUtilitySwift_ImportError_SendProblemReportMessage" = "\n\nYou can also email the developer about the problematic novel. Please note that the information sent will contain information about the website you are trying to import this time, so if you are having trouble sending such information please do not report a problem.\n Also, we do not basically reply to this report. If you want a reply, please contact us from \"Settings\" -> \"Contact developer\".";
 "NiftyUtilitySwift_ImportError_SendProblemReportButton" = "Create report email";
 "NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title" = "NovelSpeaker Import failure report";
-"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "Please send this without editing.\nPlease note that we do not basically reply to this email.\n\n";
+"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "Please send this without editing.\nPlease note that we do not basically reply to this email.\n\nError message:\n";
 
 "BugReportViewController_SectionHeader" = "Problem report";
 "BugReportViewController_BugReportTitle" = "In case of inconvenience, you can input from this form and report it.";
