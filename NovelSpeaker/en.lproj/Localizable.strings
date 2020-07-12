@@ -240,6 +240,10 @@ erver certificate.";
 "NiftyUtilitySwift_CanNotAddToBookshelfBody" = "Add to bookshelf failed.";
 "NiftyUtilitySwift_ImportError" = "Import error";
 "NiftyUtilitySwift_ImportedButNoTextFound" = "The import of the document was completed, but the content was empty. It may happen, for example, in the case of an HTML document in which all contents are generated in JavaScript. Although NovelSpeaker developers may not be able to do, from the opinion request form etc. of NovelSpeaker's support site side, please report with the URL where this error occurred along with the procedure until an error occurs You may be able to solve it.";
+"NiftyUtilitySwift_ImportError_SendProblemReportMessage" = "\n\nYou can also email the developer about the problematic novel. Please note that the information sent will contain information about the website you are trying to import this time, so if you are having trouble sending such information please do not report a problem.\n Also, we do not basically reply to this report. If you want a reply, please contact us from \"Settings\" -> \"Contact developer\".";
+"NiftyUtilitySwift_ImportError_SendProblemReportButton" = "Create report email";
+"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title" = "NovelSpeaker Import failure report";
+"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "Please send this without editing.\nPlease note that we do not basically reply to this email.\n\n";
 
 "BugReportViewController_SectionHeader" = "Problem report";
 "BugReportViewController_BugReportTitle" = "In case of inconvenience, you can input from this form and report it.";

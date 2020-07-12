@@ -241,6 +241,10 @@
 "NiftyUtilitySwift_CanNotAddToBookshelfBody" = "本棚への追加に失敗しました。";
 "NiftyUtilitySwift_ImportError" = "取り込み失敗";
 "NiftyUtilitySwift_ImportedButNoTextFound" = "取り込みは完了しましたが、内容が空でした。全ての内容がJavaScriptで生成されるHTML文書の場合などに起こることがあるかもしれません。ことせかい の開発側でできることはあまりないかもしれませんが、一応、ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません";
+"NiftyUtilitySwift_ImportError_SendProblemReportMessage" = "\n\n問題の起こった小説について開発者にメールで報告する事もできます。なお、送信される情報には今回取り込もうとしたWebサイトにまつわる情報が格納されていますため、そのような情報を送信しては困る場合には問題を報告しないでください。\nまた、この報告への返信は基本的には致しておりません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。";
+"NiftyUtilitySwift_ImportError_SendProblemReportButton" = "報告メールを作成";
+"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title" = "ことせかい 取り込み失敗レポート";
+"NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\n";
 
 "BugReportViewController_SectionHeader" = "不都合の報告";
 "BugReportViewController_BugReportTitle" = "不都合がある場合にはこのフォームで不都合報告ができます。";
