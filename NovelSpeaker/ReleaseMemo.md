@@ -2445,6 +2445,34 @@ Bug fix
 
 - Addressed an issue where the application may be forced to terminate in the case of a web page with multiple requests for which the SSL certificate is judged to be invalid on the web import tab
 
+
+# Version 1.1.66
+
+インタフェースの変更
+
+- Web取込に失敗した時に、mail を送れる状態であるなら「取り込み失敗報告メール」を送信できるように
+
+問題の修正
+
+- 小説の取り込み中に、現在読込中の小説のインジケータが消える場合があったため消えないように変更
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は小説の更新時の更新確認中のインジケータ(本棚の小説名の右側に出てくるクルクル回る奴)の表示が更新確認中にも関わらず消える場合があるという問題の解消と、Web取込が失敗した時に出るダイアログにWeb取込に失敗した事を開発者に報告するためのメール生成を行うためのボタンを追加したという二種類の変更となります。後者のボタンの方は簡単に追加できたので追加してみたものなのですが、このメールが送れる状態というものについては恐らくはWeb取込の仕組みでは簡単には取り込む事ができない物になっているため、対応は難しいとお考え頂けますと幸いです。
+
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 1.1.66
+
+Interface change
+
+- When the web import fails, if the mail can be sent, the "import failure report mail" can be sent.
+
+Bug fix
+
+- While downloading a novel, the indicator of the currently read novel may disappear, so change it so that it does not disappear.
+
+
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
