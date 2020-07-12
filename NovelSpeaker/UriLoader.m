@@ -326,17 +326,9 @@
         }
     }
     SyncHTTPSessionResult* result = [httpSession GetBinaryWithUrlString:[targetUrl absoluteString] headerDictionary:headerDictionary];
-    //NSLog(@"NSURLConnection return: data(%lu bytes)", (unsigned long)[[result getData] length]);
-    if (result == nil || [result getData] == nil) {
-        if (out_errorString != nil) {
-            [out_errorString setString:NSLocalizedString(@"UriLoader_NSURLConnectionRequestFailed", @"Webサーバからの取得に失敗しました。(接続失敗？)")];
-        }
-        return nil;
-    }
-    NSData* data = [result getData];
 
     NSHTTPURLResponse* httpResponse = [result getResponse];
-    if ((int)(httpResponse.statusCode / 100) != 2) {
+    if (httpResponse != nil && (int)(httpResponse.statusCode / 100) != 2) {
         NSLog(@"HTTP status code is not 2?? (%ld) url: %@", (long)httpResponse.statusCode, [targetUrl absoluteString]);
         if (out_errorString != nil) {
             [out_errorString setString:[[NSString alloc] initWithFormat:NSLocalizedString(@"UriLoader_HTTPResponseIsInvalid", @"サーバから返されたステータスコードが正常値(200 OK等)ではなく、%ld を返されました。ログインが必要なサイトである場合などに発生する場合があります。ことせかい アプリ側でできることはあまり無いかもしれませんが、ことせかい のサポートサイトに設置してあります、ご意見ご要望フォームにこの問題の起こったURLとこの症状が起こった前にやったことを添えて報告して頂けると、あるいはなんとかできるかもしれません。"), httpResponse.statusCode]];
@@ -350,7 +342,14 @@
         }
         return nil;
     }
-    
+    NSLog(@"NSURLConnection return: data(%lu bytes)", (unsigned long)[[result getData] length]);
+    if (result == nil || [result getData] == nil) {
+        if (out_errorString != nil) {
+            [out_errorString setString:NSLocalizedString(@"UriLoader_NSURLConnectionRequestFailed", @"Webサーバからの取得に失敗しました。(接続失敗？)")];
+        }
+        return nil;
+    }
+    NSData* data = [result getData];
     // pdf だったら怪しく文字列化して謎HTMLに変換してその後の処理を行います。
     if ([UriLoader CheckContentTypeSame:@"application/pdf" httpResponse:httpResponse]) {
         NSString* text = [NiftyUtilitySwift BinaryPDFToStringWithData:data];
