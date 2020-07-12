@@ -290,6 +290,9 @@ static float SLEEP_TIME_SECOND = 10.5f;
             return false;
         }
         
+        m_CurrentDownloadContentAllData = localContent;
+        m_CurrentDownloadContentAllData.current_download_complete_count = 0;
+        
         NSString* urlString = localContent.ncode;
         int startCount = 1;
         // 最終ダウンロードURLがあるならターゲットをそれに更新する。
