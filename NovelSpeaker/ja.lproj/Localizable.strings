@@ -276,8 +276,8 @@
 "BugReportViewController_NoDescriptionOfTheNewFeature" = "ご提案の内容が空になっています";
 "BugReportViewController_SendNewFeatureButtonTitle" = "ご提案mailを作成する";
 "BugReportViewController_NewFeatureTextArePlaceHolder" = "既存の機能の改善案や新機能のご提案など、不都合以外のお問い合わせを書いてください。";
-"BugReportViewController_NewFeatureSectionHeader" = "新機能等のご提案";
-"BugReportViewController_TypeSelect_NewFeature" = "新機能等のご提案";
+"BugReportViewController_NewFeatureSectionHeader" = "新機能等のご提案・その他のお問い合わせ";
+"BugReportViewController_TypeSelect_NewFeature" = "新機能等のご提案・その他のお問い合わせ";
 "BugReportViewController_TypeSelect_BugReport" = "不都合報告";
 "BugReportViewController_TypeSelectTitle" = "お問い合わせの種類";
 "BugReportViewController_InformationOfTheProblemWriting" = "お手数ではございますが、不都合の再現手順についてはご自身でもう一度アプリを起動したところから同じ操作をして不都合が発生することをお確かめの上、ご報告ください。ご報告頂いた不都合再現手順では再現しない不都合報告が大変多く寄せられております。また、「〜すると〜になることがある」といっただけの内容よりも、「Web取込機能で取得した〜というWebサイトの〜という小説の〜章目の〜という辺りを読み上げている時に〜が起こった」といったような、実際に問題が起きた状態を詳らかにした情報を書いてください。開発者の手元で再現できないご報告は誠に残念ですが対応できかねます。不都合の再現手順に自信が無い場合は「この報告への返事が欲しい」をONにして送信して頂けますと、後ほど開発者の側から詳しいヒアリングのお返事をさしあげられるため、おすすめです。ただ、開発者側としましては返信を認めるのにも結構な時間を取られてしまっております。返信の要が減るだけでもとても助かりますので、以下の「問題の説明」の入力欄に「不都合が再現しなかった場合のみメールでの返信を希望します」と書き添えておいて頂けると助かります。";
