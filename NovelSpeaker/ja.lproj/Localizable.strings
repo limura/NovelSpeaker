@@ -334,7 +334,7 @@
 "NiftyUtilitySwift_AddNewNovelToBookshelfTitle" = "本棚に小説を追加しました";
 "NiftyUtilitySwift_AddNewNovelToBookshelfMessage" = "続く章があればダウンロードを続けます。";
 "NiftyUtilitySwift_ImportSeparatedContent" = "テキトーに分割して取り込む";
-"NiftyUtilitySwift_ImportError_SendProblemReportMessage" = "\n\nなお、問題の起こったこの小説のURLについてこのダイアログの中から開発者にメールで報告する事もできます。ただ、この表示が出ているという事は恐らくは対応が難しい問題であると考えられますため、報告しても取り込む事ができるようにならない可能性の方が高いとお考えください。次に、送信される情報には今回取り込もうとしたWebサイトにまつわる情報が格納されていますため、そのような情報を送信しては困る場合には問題を報告しないでください。\nまた、このダイアログからの報告への返信は基本的には致しておりません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。";
+"NiftyUtilitySwift_ImportError_SendProblemReportMessage" = "\n\nなお、問題の起こったこの小説のURLについてこのダイアログの中から開発者にメールで報告する事もできます。ただ、この表示が出ているという事は恐らくは対応が難しい問題であると考えられますため、報告しても取り込む事ができるようにならない可能性の方が高いとお考えください。次に、送信される情報には今回取り込もうとしたWebサイトにまつわる情報が格納されていますため、そのような情報を送信しては困る場合には問題を報告しないでください。\nまた、このダイアログからの報告への返信は基本的には致しておりません。どうしても返信が欲しい場合には、お手数をおかけてしまい申し訳ありませんが「設定」→「開発者に問い合わせる」を用いて不都合報告として文面を作成し、「報告への返事」を「必須」にした上でご連絡ください。";
 "NiftyUtilitySwift_ImportError_SendProblemReportButton" = "報告メールを作成";
 "NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title" = "ことせかい 取り込み失敗レポート";
 "NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n";
