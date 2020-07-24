@@ -272,8 +272,8 @@
 "BugReportViewController_InformationForIsNeedResponse" = "返信が許可されている場合には開発者から送信元のメールアドレスへ返信を行う場合があります。返信は遅くなる場合があります。また、@gmail.com からのメールを受け取れるようにしていない場合など、返信が届かない場合もあります。";
 "BugReportViewController_HiddenImportantInformationSectionHeader" = "お知らせ";
 "BugReportViewController_SendNewFeatureMailInformation" = "\n\n===============\nここより下の行は編集しないでください。\n";
-"BugReportViewController_SendNewFeatureMailSubject" = "ことせかい 新機能等の提案やその他のお問い合わせ";
-"BugReportViewController_NoDescriptionOfTheNewFeature" = "ご提案の内容が空になっています";
+"BugReportViewController_SendNewFeatureMailSubject" = "ことせかい 新機能等のご提案・その他のお問い合わせ";
+"BugReportViewController_NoDescriptionOfTheNewFeature" = "お問い合わせ内容が空になっています";
 "BugReportViewController_SendNewFeatureButtonTitle" = "ご提案mailを作成する";
 "BugReportViewController_NewFeatureTextArePlaceHolder" = "既存の機能の改善案や新機能のご提案など、不都合以外のお問い合わせを書いてください。";
 "BugReportViewController_NewFeatureSectionHeader" = "新機能等のご提案・その他のお問い合わせ";
