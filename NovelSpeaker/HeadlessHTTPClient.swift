@@ -67,7 +67,7 @@ class HeadlessHttpClient {
         return request
     }
     
-    public func HttpRequest(url:URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successResultHandler:((String?) -> Void)? = nil, errorResultHandler:((Error) -> Void)? = nil) {
+    public func HttpRequest(url:URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successResultHandler:((Document) -> Void)? = nil, errorResultHandler:((Error) -> Void)? = nil) {
         DispatchQueue.main.async {
             let request = self.generateUrlRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL)
             self.erik.load(urlRequest: request) { (document, err) in
@@ -80,8 +80,29 @@ class HeadlessHttpClient {
                     errorResultHandler?(err)
                     return
                 }
-                successResultHandler?(doc.innerHTML)
+                successResultHandler?(doc)
             }
+        }
+    }
+    
+    public func GetCurrentContent(completionHandler:((Document?, Error?)->Void)?) {
+        self.erik.currentContent(completionHandler: { (doc, err) in
+            completionHandler?(doc, err)
+        })
+    }
+    
+    public func GetCurrentURL() -> URL? {
+        return self.erik.url
+    }
+    
+    public func GetCurrentCookieString(resultHandler:((String?, Error?)->Void)?) {
+        self.erik.evaluate(javaScript: "document.cookie") { (data, error) in
+            if let error = error {
+                resultHandler?(nil, error)
+            }else if let resultString = data as? String {
+                resultHandler?(resultString, nil)
+            }
+            resultHandler?(nil, SloppyError(msg: "cookie not found."))
         }
     }
 }

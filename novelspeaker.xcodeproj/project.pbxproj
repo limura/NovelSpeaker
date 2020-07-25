@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		2100A42C2496441500F54A5D /* MultiVoiceSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */; };
+		2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDE824B985A100E275D1 /* StoryFetcher.swift */; };
+		2104EDEC24B9D6C800E275D1 /* SloppyError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDEB24B9D6C800E275D1 /* SloppyError.swift */; };
+		2104EDED24B9D6C800E275D1 /* SloppyError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDEB24B9D6C800E275D1 /* SloppyError.swift */; };
+		2104EDEF24B9E33F00E275D1 /* StoryFetcherTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */; };
 		210958C31A0DF55600E9171F /* arrow_down@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958B81A0DF55600E9171F /* arrow_down@3x.png */; };
 		210958C41A0DF55600E9171F /* booksearch.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958B91A0DF55600E9171F /* booksearch.png */; };
 		210958C51A0DF55600E9171F /* booksearch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958BA1A0DF55600E9171F /* booksearch@2x.png */; };
@@ -177,6 +181,7 @@
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
+		219CCF4924BC7FFA00AE35A9 /* StoryFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDE824B985A100E275D1 /* StoryFetcher.swift */; };
 		21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */; };
 		21A291F622A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F522A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift */; };
 		21A291F822A3F9DA000AA58C /* NovelDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F722A3F9DA000AA58C /* NovelDetailViewController.swift */; };
@@ -328,6 +333,9 @@
 /* Begin PBXFileReference section */
 		076557DFC0C8AD87421204E5 /* Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; sourceTree = "<group>"; };
 		0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; sourceTree = "<group>"; };
+		2104EDE824B985A100E275D1 /* StoryFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryFetcher.swift; sourceTree = "<group>"; };
+		2104EDEB24B9D6C800E275D1 /* SloppyError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SloppyError.swift; sourceTree = "<group>"; };
+		2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryFetcherTest.swift; sourceTree = "<group>"; };
 		210958B81A0DF55600E9171F /* arrow_down@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@3x.png"; sourceTree = "<group>"; };
 		210958B91A0DF55600E9171F /* booksearch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = booksearch.png; sourceTree = "<group>"; };
 		210958BA1A0DF55600E9171F /* booksearch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "booksearch@2x.png"; sourceTree = "<group>"; };
@@ -945,6 +953,8 @@
 				21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */,
 				21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */,
 				21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */,
+				2104EDE824B985A100E275D1 /* StoryFetcher.swift */,
+				2104EDEB24B9D6C800E275D1 /* SloppyError.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1086,6 +1096,7 @@
 				210E8CEF2120F1EC005933D7 /* NovelSpeakerTests-Bridging-Header.h */,
 				212323F422B7049E00543543 /* RealmTests.swift */,
 				210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */,
+				2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -1505,12 +1516,14 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Fuzi-watchOS/Fuzi.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm-watchOS/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift-watchOS/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/Zip-watchOS/Zip.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Fuzi.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Zip.framework",
@@ -1552,7 +1565,7 @@
 				"${BUILT_PRODUCTS_DIR}/Erik/Erik.framework",
 				"${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework",
 				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
-				"${BUILT_PRODUCTS_DIR}/Fuzi/Fuzi.framework",
+				"${BUILT_PRODUCTS_DIR}/Fuzi-iOS/Fuzi.framework",
 				"${BUILT_PRODUCTS_DIR}/Kanna/Kanna.framework",
 				"${BUILT_PRODUCTS_DIR}/MSColorPicker/MSColorPicker.framework",
 				"${BUILT_PRODUCTS_DIR}/RATreeView/RATreeView.framework",
@@ -1708,6 +1721,7 @@
 				2124B39723BBFA10002EBC31 /* NarouContentCacheData.m in Sources */,
 				215BFB4223EDB15F0078E158 /* SystemIconButtonView.swift in Sources */,
 				2193094723BBE56A00035EF0 /* ContentView.swift in Sources */,
+				219CCF4924BC7FFA00AE35A9 /* StoryFetcher.swift in Sources */,
 				2124B38723BBF220002EBC31 /* NiftyUtility.m in Sources */,
 				2100A42C2496441500F54A5D /* MultiVoiceSpeaker.swift in Sources */,
 				2138B14B23BEAE8200D8642C /* NSDataZlibExtension.m in Sources */,
@@ -1727,6 +1741,7 @@
 				2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */,
 				2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */,
 				2124B39D23BBFC09002EBC31 /* UIImageExtension.m in Sources */,
+				2104EDED24B9D6C800E275D1 /* SloppyError.swift in Sources */,
 				21CE8EA6241677ED00C9DB7F /* ScrollableVStack.swift in Sources */,
 				2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */,
 				2124B38523BBEE38002EBC31 /* NiftyUtilitySwift.swift in Sources */,
@@ -1753,6 +1768,7 @@
 				2164800C2290F3F900A183DF /* StorySpeaker.swift in Sources */,
 				216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */,
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
+				2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */,
 				212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */,
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
 				21A291F622A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift in Sources */,
@@ -1804,6 +1820,7 @@
 				21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */,
 				21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
+				2104EDEC24B9D6C800E275D1 /* SloppyError.swift in Sources */,
 				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
 				214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */,
 				212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */,
@@ -1826,6 +1843,7 @@
 			files = (
 				210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */,
 				212323F522B7049E00543543 /* RealmTests.swift in Sources */,
+				2104EDEF24B9E33F00E275D1 /* StoryFetcherTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

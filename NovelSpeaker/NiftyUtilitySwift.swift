@@ -9,10 +9,10 @@
 import UIKit
 import RealmSwift
 import UserNotifications
+import Fuzi
 
 #if !os(watchOS)
 import PDFKit
-import Fuzi
 import Erik
 import MessageUI
 #endif
@@ -99,7 +99,9 @@ class NiftyUtilitySwift: NSObject {
             currentViewController?.dismiss(animated: true, completion: nil)
         }
     }
+    #endif
 
+    #if !os(watchOS)
     static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieArray: [String]) {
         if MFMailComposeViewController.canSendMail() {
             var errorMessage = error
@@ -574,8 +576,8 @@ class NiftyUtilitySwift: NSObject {
     #endif
     
     #if !os(watchOS)
-    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
-        print("httpHeadlessRequest in.")
+    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
+        print("httpHeadlessRequest in. url:", url.absoluteString)
         let requestID = "HTTPRequest" + url.absoluteString
         let allowsCellularAccess:Bool
         if let globalData = RealmGlobalState.GetInstance(), globalData.IsDisallowsCellularAccess {
@@ -585,13 +587,9 @@ class NiftyUtilitySwift: NSObject {
         }
         DispatchQueue.main.async {
             ActivityIndicatorManager.enable(id: requestID)
-            HeadlessHttpClient.shared.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (html) in
+            HeadlessHttpClient.shared.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (doc) in
                 ActivityIndicatorManager.disable(id: requestID)
-                if let html = html, let htmlData = html.data(using: .utf8) {
-                    successAction?(htmlData)
-                    return
-                }
-                failedAction?(nil)
+                successAction?(doc)
             }) { (err) in
                 ActivityIndicatorManager.disable(id: requestID)
                 failedAction?(err)
@@ -603,7 +601,12 @@ class NiftyUtilitySwift: NSObject {
     @objc public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
         #if !os(watchOS)
         if isNeedHeadless {
-            httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, successAction: successAction, failedAction: failedAction)
+            httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, successAction: { (doc) in
+                if let html = doc.innerHTML, let data = html.data(using: .utf8) {
+                    successAction?(data)
+                    return
+                }
+            }, failedAction: failedAction)
             return
         }
         #endif
@@ -627,15 +630,20 @@ class NiftyUtilitySwift: NSObject {
                 #if !os(watchOS)
                 ActivityIndicatorManager.disable(id: requestID)
                 #endif
-                if let data = data, let response = response as? HTTPURLResponse {
+                if let response = response as? HTTPURLResponse {
                     var statusCodeDiv100:Int = response.statusCode / 100
                     statusCodeDiv100 %= 10
-                    if statusCodeDiv100 == 2 {
-                        successAction?(data)
+                    if statusCodeDiv100 != 2 {
+                        failedAction?(SloppyError(msg:
+                            String(format: NSLocalizedString("UriLoader_HTTPResponseIsInvalid", comment: "サーバから返されたステータスコードが正常値(200 OK等)ではなく、%ld を返されました。ログインが必要なサイトである場合などに発生する場合があります。ことせかい アプリ側でできることはあまり無いかもしれませんが、ことせかい のサポートサイトに設置してあります、ご意見ご要望フォームにこの問題の起こったURLとこの症状が起こった前にやったことを添えて報告して頂けると、あるいはなんとかできるかもしれません。"), response.statusCode)))
                         return
                     }
                 }
-                failedAction?(error)
+                if let data = data {
+                    successAction?(data)
+                    return
+                }
+                failedAction?(SloppyError(msg: String(format: NSLocalizedString("NiftyUtilitySwift_URLSessionRequestFailedAboutError", comment: "サーバからのデータの取得に失敗しました。(末尾に示されているエラー内容とエラーの起こったURLとエラーが起こるまでの操作手順を添えて、サポートサイト下部にありますご意見ご要望フォームか、設定→開発者に問い合わせるよりお問い合わせ頂けますと、あるいは何かできるかもしれません。\nエラー内容: %@)"), error?.localizedDescription ?? "unknown error(nil)")))
             }.resume()
         }
     }
@@ -1069,9 +1077,10 @@ class NiftyUtilitySwift: NSObject {
     // HTML から String に変換する時に必要なくなるタグ等を削除します。
     static let RemoveNoNeedTagRegexpArray = [
         //try? NSRegularExpression(pattern: "<script.*?/script>", options: [.caseInsensitive, .dotMatchesLineSeparators]), // AttributedString に変換する場合、そちらで <script> は虫されるのでここで消しておく必要は多分ない
-        try? NSRegularExpression(pattern: "<iframe.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
+        try? NSRegularExpression(pattern: "<iframe.*?/iframe>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<link.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<meta.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
+        try? NSRegularExpression(pattern: "<noscript.*?/noscript>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
     ]
     static func RemoveNoNeedTag(htmlString:String) -> String {
         var result = htmlString
@@ -1099,8 +1108,7 @@ class NiftyUtilitySwift: NSObject {
         return HTMLUtf8DataToString(htmlUtf8Data: data)
     }
     
-    #if !os(watchOS)
-    static func FilterXpathWithConvertString(xmlDocument:XMLDocument, xpath:String) -> String {
+    static func FilterXpathToHtml(xmlDocument:XMLDocument, xpath:String) -> String {
         var resultHTML = ""
         for element in xmlDocument.xpath(xpath) {
             var elementXML = element.rawXML
@@ -1108,12 +1116,23 @@ class NiftyUtilitySwift: NSObject {
                 if element.nextSibling == nil && element.previousSibling == nil {
                     elementXML = "<\(parentTag)>\(elementXML)</\(parentTag)>"
                 }else if element.nextSibling == nil {
-                    elementXML += "\(elementXML)</\(parentTag)>"
+                    elementXML = "\(elementXML)</\(parentTag)>"
                 }else if element.previousSibling == nil {
-                    elementXML += "<\(parentTag)>\(elementXML)"
+                    elementXML = "<\(parentTag)>\(elementXML)"
                 }
             }
             resultHTML += elementXML
+        }
+        return resultHTML
+    }
+    
+    static func FilterXpathWithConvertString(xmlDocument:XMLDocument, xpath:String, injectStyle:String? = nil) -> String {
+        let filterdHTML = FilterXpathToHtml(xmlDocument: xmlDocument, xpath: xpath)
+        let resultHTML:String
+        if let injectStyle = injectStyle, injectStyle.count > 0 {
+            resultHTML = "<style>" + injectStyle + "</style>" + filterdHTML
+        }else{
+            resultHTML = filterdHTML
         }
         if let result = HTMLToString(htmlString: resultHTML) {
             return result
@@ -1126,5 +1145,4 @@ class NiftyUtilitySwift: NSObject {
         let urlString = urlNode.attr("href") ?? urlNode.stringValue
         return URL(string: urlString, relativeTo: baseURL)
     }
-    #endif
 }

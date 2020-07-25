@@ -128,7 +128,9 @@ fileprivate func delayQueue(queuedDate: Date, block:@escaping ()->Void) {
     let now = Date()
     let diffTime = queuedDate.timeIntervalSince1970 - now.timeIntervalSince1970 + queueDelayTime
     if diffTime < 0 {
-        block()
+        DispatchQueue.global(qos: .utility).async {
+            block()
+        }
     }else{
         DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + diffTime) {
             block()
