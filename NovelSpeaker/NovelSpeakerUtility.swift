@@ -858,7 +858,7 @@ class NovelSpeakerUtility: NSObject {
                     no -= 1
                     if no > 0, var story = RealmStoryBulk.SearchStory(novelID: novelID, chapterNumber: no), let last_download_url = novel.object(forKey: "last_download_url") as? String {
                         story.url = last_download_url
-                        RealmStoryBulk.SetStory(story: story)
+                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
                     }
                 }else{
                     NovelDownloadQueue.shared.addQueue(novelID: novelID)
