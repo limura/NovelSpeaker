@@ -340,14 +340,20 @@ erver certificate.";
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.66
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.67
 
-- When the web import fails, if the mail can be sent, the \"import failure report mail\" can be sent.
-- While downloading a novel, the indicator of the currently read novel may disappear, so change it so that it does not disappear.
+- Corrected the problem that the text may not be imported normally if the garbage file is mixed in the folder storing the novel text of the complete backup file.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.67
+
+Bug fix
+
+- Corrected the problem that the text may not be imported normally if the garbage file is mixed in the folder storing the novel text of the complete backup file.
+
+
 # Version 1.1.66
 
 Interface change

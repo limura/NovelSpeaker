@@ -340,14 +340,25 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.66
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.67
 
-- Web取込に失敗した時に、mail を送れる状態であるなら「取り込み失敗報告メール」を送信できるように
-- 小説の取り込み中に、現在読込中の小説のインジケータが消える場合があったため消えないように変更
+- 「設定」->「開発者に問い合わせる」で選択できる「新機能等のご提案」を「新機能等のご提案・その他のお問い合わせ」に名称変更
+- 完全バックアップファイルの小説本文を保存しているフォルダの中にゴミファイルが混ざっていると正常に本文を取り込めない場合がある問題について修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.67
+
+インタフェースの変更
+
+- 「設定」->「開発者に問い合わせる」で選択できる「新機能等のご提案」を「新機能等のご提案・その他のお問い合わせ」に名称変更
+
+問題の修正
+
+- 完全バックアップファイルの小説本文を保存しているフォルダの中にゴミファイルが混ざっていると正常に本文を取り込めない場合がある問題について修正
+
+
 # Version 1.1.66
 
 インタフェースの変更
