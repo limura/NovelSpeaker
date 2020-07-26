@@ -2473,6 +2473,32 @@ Bug fix
 - While downloading a novel, the indicator of the currently read novel may disappear, so change it so that it does not disappear.
 
 
+# Version 1.1.67
+
+インタフェースの変更
+
+- 「設定」->「開発者に問い合わせる」で選択できる「新機能等のご提案」を「新機能等のご提案・その他のお問い合わせ」に名称変更
+
+問題の修正
+
+- 完全バックアップファイルの小説本文を保存しているフォルダの中にゴミファイルが混ざっていると正常に本文を取り込めない場合がある問題について修正
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は先日Q&Aに追加致しましたpixiv小説様からの取り込み用のSiriショートカットを使った時に誤動作で本文部分が取り込まれないという問題に対応するための物になります。ただ、この問題はこちらの手元の環境では再現しておりません問題に対応したものになりますので、もしかすると問題は解消できていないかもしれません。
+
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 1.1.67
+
+Interface change
+
+- Renamed "Suggestions for new features" that can be selected in "Settings" -> "Contact developer" to "Suggestions for new features and other inquiries" (Japanese locale only)
+
+Bug fix
+
+- Corrected the problem that the text may not be imported normally if the garbage file is mixed in the folder storing the novel text of the complete backup file.
+
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
