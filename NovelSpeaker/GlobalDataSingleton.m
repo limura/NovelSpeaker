@@ -4248,23 +4248,22 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
         NSRange extensionLocation = [lastPathComponent rangeOfString:@".txt"];
         if (extensionLocation.location == NSNotFound) {
             NSLog(@"\".txt\" not found: %@", [fileURL absoluteString]);
-            return false;
+            continue;
         }
         NSString* chapterNumberString = [lastPathComponent substringToIndex:extensionLocation.location];
         long chapterNumber = [chapterNumberString integerValue];
         if (chapterNumber <= 0) {
             NSLog(@"invalid fileNumber: %ld (%@)", chapterNumber, [fileURL absoluteString]);
-            return false;
+            continue;
         }
-        if (maxStoryNum < chapterNumber) {
-            maxStoryNum = chapterNumber;
-        }
-        
         NSError* error = nil;
         NSString* story = [[NSString alloc] initWithContentsOfURL:fileURL encoding:NSUTF8StringEncoding error:&error];
         if (error != nil) {
             NSLog(@"file read error: %@", error);
-            return false;
+            continue;
+        }
+        if (maxStoryNum < chapterNumber) {
+            maxStoryNum = chapterNumber;
         }
         [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
             [self UpdateStory:story chapter_number:(int)chapterNumber parentContent:content];
