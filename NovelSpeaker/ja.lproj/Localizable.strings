@@ -541,7 +541,7 @@
 "NovelSearchViewController_SearchInfoLoadError_Title" = "検索設定の読み込みに失敗";
 "NovelSearchViewController_SearchInfoLoadError_Message" = "検索設定の読み込みに失敗しました。ネットワーク接続がうまくいっていない場合にこの問題が生じる可能性があります。通信状況を確認してみてください。";
 "NovelSearchViewController_SearchWebSiteTitle" = "検索先のWebサイト";
-"NovelSearchViewController_Title" = "小説を検索";
+"NovelSearchViewController_Title" = "Web検索";
 "NovelSearchViewController_SearchResultView_Title" = "検索結果";
 "NovelSearchViewController_LoadNextPage" = "続きを検索しています……";
 "NovelSearchViewController_RadioSelectTarget_None" = "選択しない";

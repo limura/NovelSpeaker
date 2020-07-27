@@ -549,7 +549,7 @@
 "NovelSearchViewController_SearchInfoLoadError_Title" = "Failed to load search settings";
 "NovelSearchViewController_SearchInfoLoadError_Message" = "Failed to read the search settings. This can happen if the network connection is poor. Please check the communication status.";
 "NovelSearchViewController_SearchWebSiteTitle" = "Web site to search";
-"NovelSearchViewController_Title" = "Search novels";
+"NovelSearchViewController_Title" = "Search";
 "NovelSearchViewController_SearchResultView_Title" = "Search results";
 "NovelSearchViewController_LoadNextPage" = "Searching for more...";
 "NovelSearchViewController_RadioSelectTarget_None" = "Deselect";
