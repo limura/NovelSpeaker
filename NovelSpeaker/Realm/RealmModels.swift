@@ -1384,6 +1384,9 @@ extension RealmStory: CanWriteIsDeleted {
             return m_urlSecret.components(separatedBy: ";")
         }
     }
+    var urlSecretString:String {
+        get { return m_urlSecret }
+    }
     
     var defaultSpeaker : RealmSpeakerSetting? {
         get {

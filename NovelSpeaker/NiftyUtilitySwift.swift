@@ -576,9 +576,8 @@ class NiftyUtilitySwift: NSObject {
     #endif
     
     #if !os(watchOS)
-    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
-        print("httpHeadlessRequest in. url:", url.absoluteString)
-        let requestID = "HTTPRequest" + url.absoluteString
+    static var headlessHttpClientObj:HeadlessHttpClient? = nil
+    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
         let allowsCellularAccess:Bool
         if let globalData = RealmGlobalState.GetInstance(), globalData.IsDisallowsCellularAccess {
             allowsCellularAccess = false
@@ -586,12 +585,18 @@ class NiftyUtilitySwift: NSObject {
             allowsCellularAccess = true
         }
         DispatchQueue.main.async {
-            ActivityIndicatorManager.enable(id: requestID)
-            HeadlessHttpClient.shared.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (doc) in
-                ActivityIndicatorManager.disable(id: requestID)
+            let client:HeadlessHttpClient
+            if let httpClient = httpClient {
+                client = httpClient
+            }else if let staticClient = headlessHttpClientObj {
+                client = staticClient
+            }else{
+                client = HeadlessHttpClient()
+                headlessHttpClientObj = client
+            }
+            client.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (doc) in
                 successAction?(doc)
             }) { (err) in
-                ActivityIndicatorManager.disable(id: requestID)
                 failedAction?(err)
             }
         }

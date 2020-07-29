@@ -179,6 +179,7 @@ class StoryHtmlDecoder {
     var siteInfoArray:[StorySiteInfo] = []
     var customSiteInfoArray:[StorySiteInfo] = []
     let fallbackSiteInfoArray:[StorySiteInfo]
+    let lock = NSLock()
 
     // シングルトンにしている。
     // TODO: WARN: LoadSiteInfo() に当たるような内部情報を弄る操作についてロックを「していない」ので注意すべし
@@ -203,6 +204,8 @@ class StoryHtmlDecoder {
     @discardableResult
     func AddSiteInfoFromData(data:Data) -> Bool {
         guard let infoArray = DecodeSiteInfoData(data: data) else { return false }
+        self.lock.lock()
+        defer { self.lock.unlock() }
         siteInfoArray.append(contentsOf: infoArray)
         siteInfoArray.sort { (a, b) -> Bool in
             guard let aPattern = a.url?.pattern else { return false }
@@ -214,6 +217,8 @@ class StoryHtmlDecoder {
     @discardableResult
     func AddCustomSiteInfoFromData(data:Data) -> Bool {
         guard let siteInfoArray = DecodeSiteInfoData(data: data) else { return false}
+        self.lock.lock()
+        defer { self.lock.unlock() }
         customSiteInfoArray.append(contentsOf: siteInfoArray)
         customSiteInfoArray.sort { (a, b) -> Bool in
             guard let aPattern = a.url?.pattern else { return false }
@@ -224,12 +229,16 @@ class StoryHtmlDecoder {
     }
     
     func ClearSiteInfo() {
+        self.lock.lock()
+        defer { self.lock.unlock() }
         siteInfoArray.removeAll()
         customSiteInfoArray.removeAll()
     }
     
     func SearchSiteInfoArrayFrom(urlString: String) -> [StorySiteInfo] {
         var result:[StorySiteInfo] = []
+        self.lock.lock()
+        defer { self.lock.unlock() }
         for siteInfo in customSiteInfoArray {
             if siteInfo.isMatchUrl(urlString: urlString) {
                 result.append(siteInfo)
@@ -289,7 +298,13 @@ class StoryHtmlDecoder {
 }
 
 class StoryFetcher {
-    static func DecodeDocument(currentState:StoryState, data:Data?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+    let httpClient:HeadlessHttpClient
+    
+    init(httpClient:HeadlessHttpClient) {
+        self.httpClient = httpClient
+    }
+    
+    func DecodeDocument(currentState:StoryState, data:Data?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
         guard let data = data, let htmlDocument = try? HTMLDocument(data: data) else {
             failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_Parse", comment: "HTMLの解析に失敗しました。(有効なHTMLまたはXHTML文書ではないようです。いまのところ、ことせかい はPDF等のHTMLやXHTMLではない文書は読み込む事ができません)"))
             return
@@ -302,7 +317,7 @@ class StoryFetcher {
             let nextButton:Element? = siteInfo.nextButton != nil ? currentState.document?.querySelectorAll(siteInfo.nextButton!).first : nil
             let firstPageButton:Element? = siteInfo.firstPageButton != nil ? currentState.document?.querySelectorAll(siteInfo.firstPageButton!).first : nil
             if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil {
-                print("no content or nextUrl and other found:", siteInfo.pageElement)
+                print("no content or nextUrl and other:", siteInfo.pageElement)
                 continue
             }
             #else
@@ -341,7 +356,7 @@ class StoryFetcher {
     // 具体的には、
     // 本文の読み込みに成功するとその時の StoryState を引数として successAction を呼び出します。
     // successAction が呼び出されたら、
-    static func FetchNext(currentState:StoryState, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?){
+    func FetchNext(currentState:StoryState, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?){
         // 入力に有効な content があるならそこで探索は終わり
         if let content = currentState.content, content.count > 0 {
             successAction?(currentState)
@@ -354,11 +369,11 @@ class StoryFetcher {
             print("fetchUrl:", url.absoluteString, "isNeedHeadless:", currentState.isNeedHeadless ? "true" : "false")
             #if !os(watchOS)
             if currentState.isNeedHeadless {
-                NiftyUtilitySwift.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, successAction: { (doc) in
+                NiftyUtilitySwift.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, successAction: { (doc) in
                     let data = doc.innerHTML?.data(using: .utf8)
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton)
-                    DecodeDocument(currentState: newState, data: data, successAction: { (state) in
-                        FetchNext(currentState: state, successAction: successAction, failedAction: failedAction)
+                    self.DecodeDocument(currentState: newState, data: data, successAction: { (state) in
+                        self.FetchNext(currentState: state, successAction: successAction, failedAction: failedAction)
                     }, failedAction: failedAction)
                 }) { (error) in
                     failedAction?(currentState.url, error?.localizedDescription ?? "httpHeadlessRequest return unknown error(nil)")
@@ -373,8 +388,8 @@ class StoryFetcher {
                 #else
                 let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately)
                 #endif
-                DecodeDocument(currentState: newState, data: data, successAction: { (state) in
-                    FetchNext(currentState: state, successAction: successAction, failedAction: failedAction)
+                self.DecodeDocument(currentState: newState, data: data, successAction: { (state) in
+                    self.FetchNext(currentState: state, successAction: successAction, failedAction: failedAction)
                 }, failedAction: failedAction)
             }) { (error) in
                 failedAction?(currentState.url, error?.localizedDescription ?? "httpRequest return unknown error(nil)")
@@ -403,7 +418,7 @@ class StoryFetcher {
                     completionHandler?(nil, err)
                     return
                 }
-                HeadlessHttpClient.shared.GetCurrentContent { (document, error) in
+                self.httpClient.GetCurrentContent { (document, error) in
                     if let err = error {
                         completionHandler?(nil, err)
                         return
@@ -417,16 +432,16 @@ class StoryFetcher {
                         return
                     }
                     let currentUrl:URL
-                    if let erikUrl = HeadlessHttpClient.shared.GetCurrentURL() {
+                    if let erikUrl = self.httpClient.GetCurrentURL() {
                         currentUrl = erikUrl
                     }else{
                         currentUrl = currentState.url
                     }
                     print("HeadlessHttpClient.shared.GetCurrentContent currentUrl:", currentUrl.absoluteString)
                     print("HeadlessHttpClient.shared.GetCurrentContent data.count:", data.count)
-                    HeadlessHttpClient.shared.GetCurrentCookieString { (cookieString, err) in
+                    self.httpClient.GetCurrentCookieString { (cookieString, err) in
                         let newState:StoryState = StoryState(url: currentUrl, cookieString: cookieString ?? currentState.cookieString, content: nil, nextUrl: nil, firstPageLink: nil, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: true, document: document, nextButton: nil, firstPageButton: nil)
-                        DecodeDocument(currentState: newState, data: data, successAction: { (state) in
+                        self.DecodeDocument(currentState: newState, data: data, successAction: { (state) in
                             completionHandler?(state, nil)
                         }) { (_, err) in
                             completionHandler?(nil, SloppyError(msg: err))
@@ -485,8 +500,8 @@ class StoryFetcher {
         #endif
     }
     
-    static func FetchFirst(url:URL, cookieString:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
-        let dummyState = CreateFirstStoryState(url: url, cookieString: cookieString)
+    func FetchFirst(url:URL, cookieString:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        let dummyState = StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString)
         FetchNext(currentState: dummyState, successAction: successAction, failedAction: failedAction)
     }
 }

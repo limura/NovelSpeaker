@@ -14,9 +14,9 @@ class HeadlessHttpClient {
     var webView : WKWebView!
     var erik:Erik!
     
-    static let shared = HeadlessHttpClient()
+    //static let shared = HeadlessHttpClient()
 
-    private init(config:WKWebViewConfiguration? = nil) {
+    init(config:WKWebViewConfiguration? = nil) {
         ReloadWebView(config: config)
     }
     deinit {
@@ -39,6 +39,7 @@ class HeadlessHttpClient {
             if let window = UIApplication.shared.keyWindow {
                 self.webView.alpha = 0.0001
                 window.insertSubview(self.webView, at: 0)
+                print("Erik initialize done.")
             } else {
                 print("Erik initialize failed.")
             }
@@ -69,8 +70,11 @@ class HeadlessHttpClient {
     
     public func HttpRequest(url:URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successResultHandler:((Document) -> Void)? = nil, errorResultHandler:((Error) -> Void)? = nil) {
         DispatchQueue.main.async {
+            let requestID = "HTTPRequest" + url.absoluteString
+            ActivityIndicatorManager.enable(id: requestID)
             let request = self.generateUrlRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL)
             self.erik.load(urlRequest: request) { (document, err) in
+                ActivityIndicatorManager.disable(id: requestID)
                 if let err = err {
                     errorResultHandler?(err)
                     return

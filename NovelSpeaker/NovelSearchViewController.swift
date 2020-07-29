@@ -511,7 +511,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = NSLocalizedString("NovelSearchViewController_Title", comment: "小説を検索")
+        self.title = NSLocalizedString("NovelSearchViewController_Title", comment: "Web検索")
         loadSearchInfo()
     }
     
