@@ -207,7 +207,7 @@ class CoreDataToRealmTool: NSObject {
                     wait.targetText = targetText.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
                 }
                 
-                realm.add(wait)
+                realm.add(wait, update: .modified)
             }
         }
     }

@@ -546,7 +546,7 @@ class NovelSpeakerUtility: NSObject {
                             speaker.voiceIdentifier = defaultSpeaker.voiceIdentifier
                             speaker.rate = defaultSpeaker.rate
                             RealmUtil.Write { (realm) in
-                                realm.add(speaker)
+                                realm.add(speaker, update: .modified)
                             }
                             if let section = speechSectionArray.filter("startText = %@ AND endText = %@", start_text, end_text).first {
                                 RealmUtil.Write { (realm) in
@@ -586,7 +586,7 @@ class NovelSpeakerUtility: NSObject {
                         speechWaitConfig.delayTimeInSec = delayTimeInSec
                         speechWaitConfig.targetText = targetText
                         RealmUtil.Write { (realm) in
-                            realm.add(speechWaitConfig)
+                            realm.add(speechWaitConfig, update: .modified)
                         }
                     }
                 }
