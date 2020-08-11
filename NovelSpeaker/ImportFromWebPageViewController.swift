@@ -362,13 +362,6 @@ li {
         }
     }
     
-    func cookiesToCookieStringArray(cookiesString:String?) -> [String] {
-        guard let cookiesString = cookiesString else {
-            return []
-        }
-        return cookiesString.components(separatedBy: ";")
-    }
-    
     @IBAction func backButtonClicked(_ sender: Any) {
         if let wkWebView = self.wkWebView {
             wkWebView.goBack()
@@ -401,8 +394,7 @@ li {
             print("url is nil")
             return
         }
-        let cookieArray = cookiesToCookieStringArray(cookiesString: self.cookiesString)
-        NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieArray: cookieArray)
+        NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: self.cookiesString ?? "")
     }
     @IBAction func bookmarkButtonClicked(_ sender: Any) {
         guard let url = self.wkWebView?.url else {

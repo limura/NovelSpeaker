@@ -1420,7 +1420,7 @@ extension RealmStory: CanWriteIsDeleted {
     }
     
     public static func CreateUniqueID() -> String {
-        return "https://example.com/\(NSUUID().uuidString)"
+        return "https://novelspeaker.example.com/UserCreatedContent/\(NSUUID().uuidString)"
     }
     
     static func GetAllObjects() -> Results<RealmNovel>? {
@@ -1434,6 +1434,11 @@ extension RealmStory: CanWriteIsDeleted {
     static func SearchNovelFrom(novelID:String) -> RealmNovel? {
         guard let realm = try? RealmUtil.GetRealm() else { return nil }
         //realm.refresh()
+        if let result = realm.object(ofType: RealmNovel.self, forPrimaryKey: novelID), result.isDeleted == false {
+            return result
+        }
+        // 登録したばかりの小説は読み込めない場合があるみたいなので、refresh() してからもう一回やってみます
+        realm.refresh()
         if let result = realm.object(ofType: RealmNovel.self, forPrimaryKey: novelID), result.isDeleted == false {
             return result
         }
@@ -1488,6 +1493,41 @@ extension RealmStory: CanWriteIsDeleted {
                 }
                 realm.add(novel, update: .modified)
             }
+        }
+    }
+    
+    static func AddNewNovelWithFirstStoryState(state:StoryState) -> String? {
+        return autoreleasepool {
+            let novelID = state.url.absoluteString
+            guard novelID.count > 0 else { return nil }
+            guard let content = state.content, content.count > 0 else { return nil }
+            if SearchNovelFrom(novelID: novelID) != nil { return nil }
+            
+            let novel = RealmNovel()
+            novel.novelID = novelID
+            novel.url = novelID
+            novel.m_urlSecret = state.cookieString ?? ""
+            novel.title = (state.title ?? novelID).trimmingCharacters(in: .whitespacesAndNewlines)
+            if let writer = state.author {
+                novel.writer = writer
+            }
+            novel.type = .URL
+            novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)
+            var story = Story()
+            story.content = content
+            story.novelID = novel.novelID
+            story.chapterNumber = 1
+            story.url = novelID
+            RealmUtil.Write { (realm) in
+                realm.add(novel, update: .modified)
+                RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+            }
+            RealmUtil.Write { (realm) in
+                for tagName in state.tagArray {
+                    RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: "keyword")
+                }
+            }
+            return novelID
         }
     }
     

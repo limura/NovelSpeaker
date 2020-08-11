@@ -140,7 +140,7 @@ fileprivate func delayQueue(queuedDate: Date, block:@escaping ()->Void) {
 
 // RealmStoryBulk を使う時に、Bulk で分割される分のStoryを「ちょうどよく」Writeするために write を保留するclass
 class StoryBulkWritePool {
-    let lockObj = NSObject()
+    let lock = NSLock()
     let novelID:String
     var storyArray:[Story] = []
     
@@ -149,7 +149,8 @@ class StoryBulkWritePool {
     }
     
     public func Flush() {
-        objc_sync_enter(lockObj)
+        lock.lock()
+        defer { lock.unlock() }
         RealmUtil.Write { (realm) in
             RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
             if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
@@ -167,20 +168,18 @@ class StoryBulkWritePool {
             }
         }
         storyArray.removeAll()
-        objc_sync_exit(lockObj)
     }
     
     public func AddStory(story:Story) {
-        objc_sync_enter(lockObj)
+        lock.lock()
         storyArray.append(story)
-        if let story = storyArray.first {
-            let chapterNumber = story.chapterNumber
-            let maxLength = RealmStoryBulk.bulkCount - ((chapterNumber - 1) % RealmStoryBulk.bulkCount)
-            if NovelDownloadQueue.shared.currentDownloadingNovelCount <= 2 || storyArray.count >= maxLength || RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID) == novelID {
-                Flush()
-            }
+        let storyArrayCount:Int = storyArray.count
+        lock.unlock()
+        let chapterNumber = story.chapterNumber
+        let maxLength = RealmStoryBulk.bulkCount - ((chapterNumber - 1) % RealmStoryBulk.bulkCount)
+        if NovelDownloadQueue.shared.currentDownloadingNovelCount <= 2 || storyArrayCount >= maxLength || RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID) == novelID {
+            Flush()
         }
-        objc_sync_exit(lockObj)
     }
 }
 
@@ -296,8 +295,139 @@ class NovelDownloader : NSObject {
         })
     }
     
+    static func startDownload(novelID:String, fetcher:StoryFetcher, currentState:StoryState? = nil, chapterNumber:Int = 0, downloadCount:Int = 0, successAction:@escaping ((_ novelID:String, _ downloadCount:Int)->Void), failedAction:@escaping ((_ novelID: String, _ downloadCount:Int, _ errorDescription:String)->Void)) {
+        BehaviorLogger.AddLogSimple(description: "startDownload: \(novelID), chapter: \(chapterNumber)")
+        if isDownloadStop {
+            if let pool = writePool[novelID] { pool.Flush() }
+            print("NovelDownloader.downloadOnce(): isDownloadStop が true であったのでダウンロードを終了します。novelID: \(novelID)")
+            successAction(novelID, 0)
+            return
+        }
+        if downloadCount > NovelDownloader.maxCount {
+            if let pool = writePool[novelID] { pool.Flush() }
+            BehaviorLogger.AddLogSimple(description: "NovelDownloader.downloadOnce(): ダウンロード回数が規定値(\(NovelDownloader.maxCount))を超えたのでダウンロードを終了します。novelID: \(novelID)")
+            successAction(novelID, downloadCount)
+            return
+        }
+        func failedSearchNovel(hint:String) {
+            if let pool = writePool[novelID] { pool.Flush() }
+            let msg = NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "\n(novelID: \"\(novelID)\", hint: \(hint))"
+            BehaviorLogger.AddLogSimple(description: msg)
+            failedAction(novelID, 0, msg)
+        }
+        guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
+            failedSearchNovel(hint: "SearchNovelFrom() failed.")
+            return
+        }
+        var chapterNumber = chapterNumber
+        var lastDownloadURLTmp:URL? = nil
+        if chapterNumber == 0 { // 初期状態なら
+            // 読み込まれている分は飛ばして最後のURLから再開
+            if let lastChapter = novel.lastChapter, let lastDownloadURLString = novel.lastDownloadURL, let targetURL = URL(string: lastDownloadURLString) {
+                chapterNumber = lastChapter.chapterNumber
+                lastDownloadURLTmp = targetURL
+                // 章が読み込まれていないのなら最初の章を読み込む
+            }else if let targetURL = URL(string: novelID) {
+                chapterNumber = 1
+                lastDownloadURLTmp = targetURL
+            }else{
+                // 章もなければ novelID もURLではない。エラーだ。(´・ω・`)
+                failedSearchNovel(hint: "invalid novelID or no story")
+                return
+            }
+        }
+        let queuedDate = Date()
+        let state:StoryState
+        if let currentState = currentState {
+            state = currentState
+        }else if let lastDownloadURL = lastDownloadURLTmp {
+            print("lastDownloadURL:", lastDownloadURL.absoluteString)
+            state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: lastDownloadURL, cookieString: novel.urlSecretString)
+        }else{
+            failedSearchNovel(hint: "currentState and lastDownloadURL is nil.")
+            return
+        }
+        fetcher.FetchNext(currentState: state, successAction: { (state) in
+            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
+                failedSearchNovel(hint: "SearchNovel failed in FetchNext success handler")
+                return
+            }
+            let lastChapter = novel.lastChapter
+            if chapterNumber == 1 && lastChapter == nil {
+                // 章が一つもダウンロードされていないようなので、
+                // 恐らくは小説名なども登録されていないと思われるため、
+                // このタイミングで小説名等をNovelに書き込む。
+                autoreleasepool {
+                    RealmUtil.Write { (realm) in
+                        if let title = state.title, novel.title.count <= 0 {
+                            novel.title = title
+                        }
+                        if let author = state.author, novel.writer.count <= 0 {
+                            novel.writer = author
+                        }
+                        realm.add(novel, update: .modified)
+                        for keyword in state.tagArray {
+                            RealmNovelTag.AddTag(realm: realm, name: keyword, novelID: novelID, type: RealmNovelTag.TagType.Keyword)
+                        }
+                    }
+                }
+            }
+            var nextChapterNumber = chapterNumber
+            // まだ読み込まれていない章であれば追加するために writePool に入れておきます。
+            if let content = state.content, (lastChapter?.chapterNumber ?? 0) < chapterNumber {
+                if content.count <= 0 {
+                    // 登録できそうな章ではあったけれど内容が無い場合は登録しません。
+                    // その場合は nextChapterNumber が増えることもありません。
+                }else{
+                    var story = Story()
+                    story.novelID = novelID
+                    story.chapterNumber = chapterNumber
+                    story.content = content
+                    if let subtitle = state.subtitle {
+                        story.subtitle = subtitle
+                    }
+                    story.url = state.url.absoluteString
+                    story.downloadDate = queuedDate
+                    // storyの書き込み自体は writePool に突っ込んで後でやってもらうことにします。
+                    if let pool = writePool[novelID] {
+                        pool.AddStory(story: story)
+                    }else{
+                        let pool = StoryBulkWritePool(novelID: novelID)
+                        pool.AddStory(story: story)
+                        writePool[novelID] = pool
+                    }
+                    print("story \(chapterNumber) add queue.")
+                    nextChapterNumber += 1
+                }
+            }else{
+                // 既に存在する章だったようなので読み飛ばします
+                print("story \(chapterNumber) not add queue (maybe, no content or already exists story)")
+                nextChapterNumber += 1
+            }
+            if !state.IsNextAlive {
+                print("NovelDownloader.startDownload() IsNextAlive is false quit. \(state.url.absoluteString)")
+                successAction(novelID, 0)
+                return
+            }
+            let dummyDate:Date
+            if state.isCanFetchNextImmediately {
+                dummyDate = Date(timeIntervalSince1970: 0)
+            }else{
+                dummyDate = queuedDate
+            }
+            delayQueue(queuedDate: dummyDate, block: {
+                startDownload(novelID: novelID, fetcher: fetcher, currentState: state.CreateNextState(), chapterNumber: nextChapterNumber, downloadCount: downloadCount + 1, successAction: successAction, failedAction: failedAction)
+            })
+        }) { (url, errorString) in
+            if let pool = writePool[novelID] { pool.Flush() }
+            let msg = NSLocalizedString("NovelDownloader_htmlStoryIsNil", comment: "小説のダウンロードに失敗しました。") + "(novelID: \"\(novelID)\", url: \(url.absoluteString), errString: \(errorString))"
+            BehaviorLogger.AddLogSimple(description: msg)
+            failedAction(novelID, 0, msg)
+        }
+    }
+    
     // ダウンロードの開始点。最初の FetchOneUrl() は次の章への link の読み込みだけなので downloadOnce() に頼むだけで保存はしません。
-    static func startDownload(novelID:String, uriLoader:UriLoader, successAction:@escaping ((_ novelID:String, _ downloadCount:Int)->Void), failedAction:@escaping ((_ novelID: String, _ downloadCount:Int, _ errorDescription:String)->Void)) {
+    static func startDownload_Old(novelID:String, uriLoader:UriLoader, successAction:@escaping ((_ novelID:String, _ downloadCount:Int)->Void), failedAction:@escaping ((_ novelID: String, _ downloadCount:Int, _ errorDescription:String)->Void)) {
         if isDownloadStop {
             print("NovelDownloader.downloadOnce(): isDownloadStop が true であったのでダウンロードを終了します。novelID: \(novelID)")
             successAction(novelID, 0)
@@ -418,7 +548,7 @@ class NovelDownloadQueue : NSObject {
     public var isDownloadStop = true
     let semaphore = DispatchSemaphore(value: 0)
     
-    let cacheFileExpireTimeinterval:Double = 60*60*24
+    let cacheFileExpireTimeinterval:Double = 60*60*6
     let novelSpeakerSiteInfoUrl = "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
     let novelSpeakerSiteInfoCacheFileName = "NovelSpeakerSiteInfoCache"
     let autopagerizeSiteInfoUrl = "http://wedata.net/databases/AutoPagerize/items.json"
@@ -427,10 +557,33 @@ class NovelDownloadQueue : NSObject {
     let AlreadyBackgroundFetchedNovelIDListKey = "NovelDownloadQueue_AlreadyBackgroundFetchedNovelIDList"
     let backgroundFetchDeadlineTimeInSec:Double = 20.0
     var tmpUriLoader:UriLoader? = nil
+    let fetcherPoolLock = NSLock()
+    var fetcherPool:[UUID:(Bool, StoryFetcher)] = [:]
+    var siteInfoLoadDate:Date = Date(timeIntervalSince1970: 0)
+    let siteInfoReloadTimeinterval:Double = 60*60*6
 
     private override init() {
         super.init()
         startQueueWatcher()
+    }
+    
+    func reloadSiteInfoIfNeeded() {
+        // SiteInfo を読み出そうとすると Realm object を生成してしまうため、
+        // CoreDataからのマイグレーションが必要な場合は何もしない事にします。
+        if CoreDataToRealmTool.IsNeedMigration() { return }
+        let semaphore = DispatchSemaphore(value: 0)
+        let expireDate = Date(timeIntervalSinceNow: -siteInfoReloadTimeinterval)
+        if expireDate > siteInfoLoadDate || RealmGlobalState.GetInstance()?.isForceSiteInfoReloadIsEnabled ?? false {
+            StoryHtmlDecoder.shared.ClearSiteInfo()
+            StoryHtmlDecoder.shared.LoadSiteInfo { (err) in
+                if let err = err {
+                    print("reloadSiteInfoIfNeeded LoadSiteInfo failed.", err.localizedDescription)
+                }
+                semaphore.signal()
+            }
+            siteInfoLoadDate = Date()
+            semaphore.wait()
+        }
     }
     
     func clearSiteInfoCache() {
@@ -499,56 +652,80 @@ class NovelDownloadQueue : NSObject {
         }
     }
     
+    func GetFreeFetcher() -> (UUID, StoryFetcher) {
+        fetcherPoolLock.lock()
+        defer { fetcherPoolLock.unlock() }
+        if let result = fetcherPool.reduce(nil, { (result, tuple) -> (UUID, StoryFetcher)? in
+            let (uuid, (isActive, fetcher)) = tuple
+            if let result = result { return result }
+            if !isActive { return (uuid, fetcher) }
+            return nil
+        }) {
+            let (uuid, fetcher) = result
+            fetcherPool[uuid] = (true, fetcher)
+            return result
+        }
+        let uuid = UUID()
+        let fetcher = StoryFetcher()
+        fetcherPool[uuid] = (true, fetcher)
+        return (uuid, fetcher)
+    }
+    func FreeFetcher(uuid:UUID) {
+        fetcherPoolLock.lock()
+        defer { fetcherPoolLock.unlock() }
+        if let (_, fetcher) = fetcherPool[uuid] {
+            fetcherPool[uuid] = (false, fetcher)
+        }
+    }
+    func ClearUnusedFetcher() {
+        fetcherPoolLock.lock()
+        defer { fetcherPoolLock.unlock() }
+        var removeList:[UUID] = []
+        for key in fetcherPool {
+            if key.value.0 == false {
+                removeList.append(key.key)
+            }
+        }
+        for uuid in removeList {
+            fetcherPool.removeValue(forKey: uuid)
+        }
+    }
+    
     func dispatch() {
-        var tmpUriLoaderLoadDate = Date()
         while self.isDownloadStop == false && self.queueHolder.GetCurrentDownloadingNovelIDArray().count < self.maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
-            autoreleasepool {
-                var cacheExpireTimeinterval:Double = 0
+            StoryHtmlDecoder.shared.WaitLoadSiteInfoReady {
                 autoreleasepool {
-                    if let instance = RealmGlobalState.GetInstance(), instance.isForceSiteInfoReloadIsEnabled {
-                        cacheExpireTimeinterval = 0
-                    }else{
-                        cacheExpireTimeinterval = cacheFileExpireTimeinterval
-                    }
-                }
-                let uriLoader:UriLoader
-                if let aliveUriLoader = tmpUriLoader, (Date().timeIntervalSince1970 - tmpUriLoaderLoadDate.timeIntervalSince1970) < cacheExpireTimeinterval {
-                    uriLoader = aliveUriLoader
-                }else{
-                    uriLoader = self.createUriLoader()
-                    tmpUriLoaderLoadDate = Date()
-                    if let deleteTarget = tmpUriLoader {
-                        deleteTarget.clearSiteInfoCache()
-                    }
-                    tmpUriLoader = uriLoader
-                }
-                let queuedDate = Date()
-                print("startDownload: \(nextTargetNovelID)")
-                NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
-                NovelDownloader.startDownload(novelID: nextTargetNovelID, uriLoader: uriLoader, successAction: { (novelID, downloadCount) in
-                    self.queueHolder.downloadDone(novelID: nextTargetNovelID)
-                    self.lock.lock()
-                    defer { self.lock.unlock() }
-                    if downloadCount > 0 {
-                        self.downloadSuccessNovelIDSet.insert(nextTargetNovelID)
-                    }
-                    self.downloadEndedNovelIDSet.insert(nextTargetNovelID)
-                    self.updateNetworkActivityIndicatorStatus()
+                    let queuedDate = Date()
+                    print("startDownload: \(nextTargetNovelID)")
                     NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
-                    delayQueue(queuedDate: queuedDate, block: {
-                        self.semaphore.signal()
+                    let (fetcherUUID, fetcher) = self.GetFreeFetcher()
+                    NovelDownloader.startDownload(novelID: nextTargetNovelID, fetcher: fetcher, successAction: { (novelID, downloadCount) in
+                        self.queueHolder.downloadDone(novelID: nextTargetNovelID)
+                        self.FreeFetcher(uuid: fetcherUUID)
+                        self.lock.lock()
+                        defer { self.lock.unlock() }
+                        if downloadCount > 0 {
+                            self.downloadSuccessNovelIDSet.insert(nextTargetNovelID)
+                        }
+                        self.downloadEndedNovelIDSet.insert(nextTargetNovelID)
+                        self.updateNetworkActivityIndicatorStatus()
+                        NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+                        delayQueue(queuedDate: queuedDate, block: {
+                            self.semaphore.signal()
+                        })
+                    }, failedAction: { (novelID, downloadCount, errorMessage) in
+                        self.queueHolder.downloadDone(novelID: nextTargetNovelID)
+                        self.FreeFetcher(uuid: fetcherUUID)
+                        self.lock.lock()
+                        defer { self.lock.unlock() }
+                        self.downloadEndedNovelIDSet.insert(nextTargetNovelID)
+                        self.updateNetworkActivityIndicatorStatus()
+                        NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+                        delayQueue(queuedDate: queuedDate, block: {
+                            self.semaphore.signal()
+                        })
                     })
-                }, failedAction: { (novelID, downloadCount, errorMessage) in
-                    self.queueHolder.downloadDone(novelID: nextTargetNovelID)
-                    self.lock.lock()
-                    defer { self.lock.unlock() }
-                    self.downloadEndedNovelIDSet.insert(nextTargetNovelID)
-                    self.updateNetworkActivityIndicatorStatus()
-                    NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
-                    delayQueue(queuedDate: queuedDate, block: {
-                        self.semaphore.signal()
-                    })
-                })
+                }
             }
         }
         self.updateNetworkActivityIndicatorStatus()
@@ -558,6 +735,7 @@ class NovelDownloadQueue : NSObject {
     func startQueueWatcher() {
         DispatchQueue.global(qos: .utility).async {
             while true {
+                self.reloadSiteInfoIfNeeded()
                 self.semaphore.wait()
                 self.dispatch()
             }
@@ -600,6 +778,11 @@ class NovelDownloadQueue : NSObject {
 
     @objc func StartBackgroundFetchIfNeeded() {
         autoreleasepool {
+            if CoreDataToRealmTool.IsNeedMigration() {
+                // 起動時に background fetch を叩くのだけれど、Realm への移行が行われる段階の時は Realm object を作ってしまうとファイルができてしまうので実行させません。
+                // TODO: つまり、移行が終わったら StartBackgroundFetchIfNeeded() を呼び出す必要があるのだけれどそれをやっていないはず。
+                return
+            }
             guard let globalState = RealmGlobalState.GetInstance() else { return }
             if !globalState.isBackgroundNovelFetchEnabled {
                 DispatchQueue.main.async {

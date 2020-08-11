@@ -100,13 +100,20 @@ class HeadlessHttpClient {
     }
     
     public func GetCurrentCookieString(resultHandler:((String?, Error?)->Void)?) {
-        self.erik.evaluate(javaScript: "document.cookie") { (data, error) in
+        ExecuteJavaScript(javaScript: "document.cookie", resultHandler: resultHandler)
+    }
+    // 怪しく末尾までスクロールさせます
+    public func ScrollToButtom(resultHandler:((String?, Error?)->Void)?){
+        ExecuteJavaScript(javaScript: "window.scroll(0, document.documentElement.scrollHeight)", resultHandler: resultHandler)
+    }
+    public func ExecuteJavaScript(javaScript:String, resultHandler:((String?, Error?)->Void)?){
+        self.erik.evaluate(javaScript: javaScript) { (data, error) in
             if let error = error {
                 resultHandler?(nil, error)
             }else if let resultString = data as? String {
                 resultHandler?(resultString, nil)
             }
-            resultHandler?(nil, SloppyError(msg: "cookie not found."))
+            resultHandler?(nil, SloppyError(msg: "execute JavaScript(\"\(javaScript)\") error."))
         }
     }
 }

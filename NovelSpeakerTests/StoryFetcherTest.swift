@@ -114,8 +114,8 @@ class StoryFetcherTest: XCTestCase {
         guard let data = siteInfoData, let url = URL(string: urlString) else { return }
         guard let url2 = URL(string: urlString2) else { return }
         XCTAssert(StoryHtmlDecoder.shared.AddCustomSiteInfoFromData(data: data), "AddCustomSiteInfoFromData failed.")
-        let storyFetcher2 = StoryFetcher(httpClient:HeadlessHttpClient())
-        let storyFetcher1 = StoryFetcher(httpClient:HeadlessHttpClient())
+        let storyFetcher2 = StoryFetcher()
+        let storyFetcher1 = StoryFetcher()
         func oneTry(state:StoryState, tryCount:Int, storyFetcher:StoryFetcher) -> StoryState?{
             var story:StoryState? = nil
             let expect = expectation(description: String(format: "StoryFetcher.Fetch count: %d", tryCount))

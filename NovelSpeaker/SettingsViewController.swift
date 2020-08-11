@@ -511,9 +511,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
                 row.cell.textLabel?.numberOfLines = 0
             }.onChange({ (row) in
-                guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                RealmUtil.Write { (realm) in
-                    globalState.IsNeedConfirmDeleteBook = value
+                autoreleasepool {
+                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                    RealmUtil.Write { (realm) in
+                        globalState.IsNeedConfirmDeleteBook = value
+                    }
                 }
             })
             <<< SwitchRow("IsUseiCloud") {

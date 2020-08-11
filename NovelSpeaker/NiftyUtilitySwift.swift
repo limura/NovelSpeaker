@@ -102,7 +102,7 @@ class NiftyUtilitySwift: NSObject {
     #endif
 
     #if !os(watchOS)
-    static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieArray: [String]) {
+    static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieString:String) {
         if MFMailComposeViewController.canSendMail() {
             var errorMessage = error
             errorMessage += NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
@@ -118,9 +118,9 @@ class NiftyUtilitySwift: NSObject {
                         picker.setSubject(NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title", comment:"ことせかい 取り込み失敗レポート"))
                         let messageBody = NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n") + error
                         picker.setMessageBody(messageBody, isHTML: false)
-                        let sendData:[String:[String]] = [
-                            "url": [url?.absoluteString ?? "-"],
-                            "cookieArray": cookieArray
+                        let sendData:[String:String] = [
+                            "url": url?.absoluteString ?? "-",
+                            "cookie": cookieString
                         ]
                         if let data = try? JSONEncoder().encode(sendData) {
                             picker.addAttachmentData(data, mimeType: "application/json", fileName: "import_description.json")
@@ -140,141 +140,99 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
-    public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieArray: [String], depth: Int = 0, prevHtmlStoryArray:[HtmlStory?] = []) {
+    static func ImportStoryStateConifirmToUser(viewController:UIViewController, state:StoryState) {
+        guard let content = state.content else {
+            checkUrlAndConifirmToUser_ErrorHandle(error: NSLocalizedString("NiftyUtilitySwift_ImportStoryStateConifirmToUser_NoContent", comment: "本文がありませんでした。"), viewController: viewController, url: state.url, cookieString: state.cookieString ?? "")
+            return
+        }
+        let titleString:String
+        if let title = state.title {
+            titleString = title
+        }else{
+            titleString = "-"
+        }
+        let multiPageString:String
+        if state.IsNextAlive {
+            multiPageString = NSLocalizedString("NiftyUtilitySwift_FollowingPageAreAvailable", comment: "続ページ：有り")
+        }else {
+            multiPageString = NSLocalizedString("NiftyUtilitySwift_FollowingPageAreNotAvailable", comment: "続ページ：無し")
+        }
+        DispatchQueue.main.async {
+            var builder = EasyDialogBuilder(viewController)
+            builder = builder.textField(tag: 100, placeholder: titleString, content: titleString, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
+                // TODO: 怪しくheightを画面の縦方向からの比率で指定している。
+                // ここに 1.0 とか書くと他のViewの分の高さが入って全体は画面の縦幅よりも高くなるので全部が表示されない。
+                // つまり、この謎の数字 0.53 というのは、できれば書きたくない値であり、この値でも大きすぎるかもしれず、
+                // 小さすぎるかもしれず、適切な大きさ(baseViewが表示領域の縦幅に入る状態)になるように縮む必要があるのだが、
+                // EasyDialog をそのように修正するのが面倒なのでやっていないという事なのであった。('A`)
+                .textView(content: content, heightMultiplier: 0.53)
+                .label(text: multiPageString)
+                .addButton(title: NSLocalizedString("NiftyUtilitySwift_CancelImport", comment: "取り込まない"), callback: { (dialog) in
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false, completion: nil)
+                    }
+                })
+            builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
+                    let titleTextField = dialog.view.viewWithTag(100) as! UITextField
+                    let titleString = titleTextField.text ?? titleString
+                    DispatchQueue.main.async {
+                        
+                        dialog.dismiss(animated: false, completion: {
+                            guard let novelID = RealmNovel.AddNewNovelWithFirstStoryState(state:state.TitleChanged(title:titleString)) else {
+                                DispatchQueue.main.async {
+                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"), message: NSLocalizedString("NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryMessage", comment: "既に登録されている小説などの原因が考えられます。"), buttonTitle: nil, buttonAction: nil)
+                                }
+                                return
+                            }
+                            NovelDownloadQueue.shared.addQueue(novelID: novelID)
+                            DispatchQueue.main.async {
+                                if let floatingButton = FloatingButton.createNewFloatingButton() {
+                                    floatingButton.assignToView(view: viewController.view, text: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), animated: true, buttonClicked: {})
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                                        floatingButton.hideAnimate()
+                                    })
+                                }else{
+                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), message: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfMessage", comment: "続く章があればダウンロードを続けます。"), buttonTitle: nil, buttonAction: nil)
+                                }
+                            }
+                        })
+                    }
+                })
+            if state.IsNextAlive != true, let separatedText = CheckShouldSeparate(text: content), separatedText.reduce(0, { (result, body) -> Int in
+                return result + (body.count > 0 ? 1 : 0)
+            }) > 1 {
+                builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportSeparatedContent", comment: "テキトーに分割して取り込む"), callback: { (dialog) in
+                    let titleTextField = dialog.view.viewWithTag(100) as! UITextField
+                    let titleString = titleTextField.text ?? titleString
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false, completion: nil)
+                    }
+                    RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: titleString)
+                })
+            }
+            builder.build().show()
+        }
+    }
+    
+    public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieString:String) {
         BehaviorLogger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
             let builder = EasyDialogBuilder(viewController)
             .text(content: NSLocalizedString("ImportFromWebPageViewController_loading", comment: "loading"))
             let dialog = builder.build()
+            let fetcher = StoryFetcher()
             dialog.show {
-                let uriLoader = NovelDownloadQueue.shared.createUriLoader()
-                uriLoader.fetchOneUrl(url, cookieArray: cookieArray, successAction: { (story: HtmlStory?) in
+                fetcher.FetchFirstContent(url: url, cookieString: cookieString) { (url, state, errorString) in
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: {
-                            // firstPageLink があった場合はそっちを読み直します
-                            if let firstPageLink = story?.firstPageLink {
-                                // ただし、depth が 5 を越えたら読み直さず先に進みます
-                                if depth < 5 {
-                                    NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: viewController, url: firstPageLink, cookieArray: cookieArray, depth: depth+1, prevHtmlStoryArray: prevHtmlStoryArray + [story])
-                                    return
-                                }
-                            }
-                            guard let content = story?.content, content.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 else {
-                                DispatchQueue.main.async {
-                                    checkUrlAndConifirmToUser_ErrorHandle(error: NSLocalizedString("NiftyUtilitySwift_ImportedButNoTextFound", comment: "読み込めはしたけれど、内容がありませんでした"), viewController: viewController, url: url, cookieArray: cookieArray)
-                                }
+                            if let state = state, (state.content?.count ?? 0) > 0 {
+                                ImportStoryStateConifirmToUser(viewController: viewController, state: state)
                                 return
                             }
-                            DispatchQueue.main.async {
-                                var multiPageString = NSLocalizedString("NiftyUtilitySwift_FollowingPageAreNotAvailable", comment: "続ページ：無し")
-                                if (story?.nextUrl) != nil {
-                                    multiPageString = NSLocalizedString("NiftyUtilitySwift_FollowingPageAreAvailable", comment: "続ページ：有り")
-                                }
-                                var titleString = NSLocalizedString("NiftyUtilitySwift_TitleUnknown", comment: "不明なタイトル")
-                                if let title = story?.title {
-                                    titleString = title
-                                }else{
-                                    for story in prevHtmlStoryArray {
-                                        if let title = story?.title {
-                                            titleString = title
-                                            break
-                                        }
-                                    }
-                                }
-                                var builder = EasyDialogBuilder(viewController)
-                                builder = builder.textField(tag: 100, placeholder: titleString, content: titleString, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
-                                    //.title(title: titleString)
-                                    // TODO: 怪しくheightを画面の縦方向からの比率で指定している。
-                                    // ここに 1.0 とか書くと他のViewの分の高さが入って全体は画面の縦幅よりも高くなるので全部が表示されない。
-                                    // つまり、この謎の数字 0.53 というのは、できれば書きたくない値であり、この値でも大きすぎるかもしれず、
-                                    // 小さすぎるかもしれず、適切な大きさ(baseViewが表示領域の縦幅に入る状態)になるように縮む必要があるのだが、
-                                    // EasyDialog をそのように修正するのが面倒なのでやっていないという事なのであった。('A`)
-                                    .textView(content: content, heightMultiplier: 0.53)
-                                    .label(text: multiPageString)
-                                    .addButton(title: NSLocalizedString("NiftyUtilitySwift_CancelImport", comment: "取り込まない"), callback: { (dialog) in
-                                        DispatchQueue.main.async {
-                                            dialog.dismiss(animated: false, completion: nil)
-                                        }
-                                    })
-                                builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
-                                        let titleTextField = dialog.view.viewWithTag(100) as! UITextField
-                                        let titleString = titleTextField.text ?? titleString
-                                        DispatchQueue.main.async {
-                                            dialog.dismiss(animated: false, completion: nil)
-                                        }
-                                        let cookieParameter = cookieArray.joined(separator: ";")
-                                        if let story = story {
-                                            var topUrl = url
-                                            var author = story.author
-                                            var keywordSet = Set<String>()
-                                            for key in story.keyword {
-                                                if let key = key as? String {
-                                                    keywordSet.insert(NovelSpeakerUtility.CleanTagString(tag: key))
-                                                }
-                                            }
-                                            for prevStory in prevHtmlStoryArray {
-                                                if let urlString = prevStory?.url, let url = URL(string: urlString) {
-                                                    // こうやって topUrl を上書きしていくと、最後にダウンロードしたURLよりも、その一つ前にダウンロードしたものが優先されるようになる
-                                                    topUrl = url
-                                                }
-                                                let prevAuthor = story.author.trimmingCharacters(in: .whitespacesAndNewlines)
-                                                if prevAuthor.count > 0 {
-                                                    author = prevAuthor
-                                                }
-                                                if let prevStoryKeywords = prevStory?.keyword {
-                                                    for key in prevStoryKeywords {
-                                                        if let key = key as? String {
-                                                            keywordSet.insert(NovelSpeakerUtility.CleanTagString(tag: key))
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            if let novelID = RealmNovel.AddNewNovelWithFirstStory(url: topUrl, htmlStory: story, cookieParameter: cookieParameter, title: titleString, author: author, tagArray: Array(keywordSet), firstContent: content){
-                                                NovelDownloadQueue.shared.addQueue(novelID: novelID)
-                                                DispatchQueue.main.async {
-                                                    if let floatingButton = FloatingButton.createNewFloatingButton() {
-                                                        floatingButton.assignToView(view: viewController.view, text: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), animated: true, buttonClicked: {})
-                                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-                                                            floatingButton.hideAnimate()
-                                                        })
-                                                    }else{
-                                                        NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), message: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfMessage", comment: "続く章があればダウンロードを続けます。"), buttonTitle: nil, buttonAction: nil)
-                                                    }
-                                                }
-                                            }else{
-                                                DispatchQueue.main.async {
-                                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"), message: NSLocalizedString("NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryMessage", comment: "既に登録されている小説などの原因が考えられます。"), buttonTitle: nil, buttonAction: nil)
-                                                }
-                                            }
-                                        }
-                                    })
-                                if story?.nextUrl == nil, let separatedText = CheckShouldSeparate(text: content), separatedText.reduce(0, { (result, body) -> Int in
-                                    return result + (body.count > 0 ? 1 : 0)
-                                }) > 1 {
-                                    builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportSeparatedContent", comment: "テキトーに分割して取り込む"), callback: { (dialog) in
-                                        let titleTextField = dialog.view.viewWithTag(100) as! UITextField
-                                        let titleString = titleTextField.text ?? titleString
-                                        DispatchQueue.main.async {
-                                            dialog.dismiss(animated: false, completion: nil)
-                                        }
-                                        RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: titleString)
-                                    })
-                                }
-                                builder.build().show()
-                            }
+                            checkUrlAndConifirmToUser_ErrorHandle(error: errorString ?? NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー"), viewController: viewController, url: url, cookieString: cookieString)
                         })
                     }
-                }, failedAction: { (url:URL?, error:String?) in
-                    DispatchQueue.main.async {
-                        dialog.dismiss(animated: false, completion: {
-                            var errorMessage = NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー")
-                            if let err = error {
-                                errorMessage = err
-                            }
-                            checkUrlAndConifirmToUser_ErrorHandle(error: errorMessage, viewController: viewController, url: url, cookieArray: cookieArray)
-                        })
-                    }
-                })
+                }
             }
         }
     }

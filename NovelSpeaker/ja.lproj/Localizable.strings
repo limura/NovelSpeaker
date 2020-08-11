@@ -303,7 +303,7 @@
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "ダウンロードしたもののタイトルを取得できなかったので、以下のURLのまま本棚に登録します。\n%@";
 "NarouDownloadQueue_URLDownloadFailedWithException" = "URLの取得に失敗しました。\n%@";
 
-"ImportFromWebPageViewController_loading" = "読み込み中……";
+"ImportFromWebPageViewController_loading" = "読み込み中です。\nWebサイトによってはかなりの時間がかかる場合があります。";
 "ImportFromWebPageViewController_CreateBookmark" = "ブックマーク名を入力";
 "ImportFromWebPageViewController_InvalidServerCertificate_CanContinue" = "このページのサーバ証明書に何らかの問題を確認しました。閲覧・利用は推奨できませんが、一応表示をしますか？(どうしても必要だというので無いのであれば、戻って別のページを閲覧することをおすすめします)";
 "ImportFromWebPageViewController_InvalidServerCertificate" = "このページのサーバ証明書には問題があります。閲覧を停止します。";

@@ -7,7 +7,6 @@
 //
 
 import XCTest
-import RealmSwift
 @testable import NovelSpeaker
 
 class RealmTests: XCTestCase {
@@ -66,5 +65,4 @@ class RealmTests: XCTestCase {
             XCTAssert(ngData == nil, "ngData(\(item)) is not nil?")
         }
     }
-
 }

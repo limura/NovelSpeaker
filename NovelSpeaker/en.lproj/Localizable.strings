@@ -312,7 +312,7 @@
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "Could not get the title of the downloaded thing, will leave it as URL.\n%@";
 "NarouDownloadQueue_URLDownloadFailedWithException" = "Failed to download URL \"%@\".";
 
-"ImportFromWebPageViewController_loading" = "loading...";
+"ImportFromWebPageViewController_loading" = "Now loading....\nSome websites may take a considerable amount of time.";
 "ImportFromWebPageViewController_CreateBookmark" = "Input bookmark name";
 "ImportFromWebPageViewController_InvalidServerCertificate_CanContinue" = "Proceed with invalid server certificate?";
 "ImportFromWebPageViewController_InvalidServerCertificate" = "Invalid server certificate.";

@@ -300,17 +300,19 @@ class NovelSpeakerUtility: NSObject {
             let match = matches[0]
             guard let urlRange = Range(match.range(at: 1), in: absoluteString) else { return false }
             targetUrlString = String(absoluteString[urlRange])
-            if let cookieRange = Range(match.range(at: 2), in: absoluteString), let cookieString =    String(absoluteString[cookieRange]).removingPercentEncoding {
-                cookieArray = cookieString.components(separatedBy: ";")
+            let cookieString:String
+            if let cookieRange = Range(match.range(at: 2), in: absoluteString), let cookieStringCandidate =    String(absoluteString[cookieRange]).removingPercentEncoding {
+                cookieString = cookieStringCandidate
+            }else{
+                cookieString = ""
             }
-        }else{
-            return false
+            guard let targetURL = URL(string: targetUrlString), let rootViewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return false }
+            DispatchQueue.main.async {
+                NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: rootViewController, url: targetURL, cookieString: cookieString)
+            }
+            return true
         }
-        DispatchQueue.main.async {
-            guard let targetURL = URL(string: targetUrlString), let rootViewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
-            NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: rootViewController, url: targetURL, cookieArray: cookieArray ?? [])
-        }
-        return true
+        return false
     }
     #endif
     
@@ -870,7 +872,7 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreBookshelf_user_V_1_0_0(novel:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
         autoreleasepool {
             guard let id = novel.object(forKey: "id") as? String, let title = novel.object(forKey: "title") as? String, let storys = novel.object(forKey: "storys") as? NSArray else { return }
-            let novelID = "https://example.com/" + id
+            let novelID = "https://novelspeaker.example.com/UserCreatedContent/" + id
             let realmNovel = RealmNovel.SearchNovelFrom(novelID: novelID) ?? RealmNovel()
             if realmNovel.novelID != novelID {
                 realmNovel.novelID = novelID
@@ -955,7 +957,7 @@ class NovelSpeakerUtility: NSObject {
                     if coreDataNarouContent.isURLContent() {
                         globalState.currentReadingNovelID = targetNovelID
                     }else if targetNovelID.hasPrefix("_u") {
-                        globalState.currentReadingNovelID = "https://example.com/" + targetNovelID
+                        globalState.currentReadingNovelID = "https://novelspeaker.example.com/UserCreatedContent/" + targetNovelID
                     }else{
                         globalState.currentReadingNovelID = CoreDataToRealmTool.NcodeToUrlString(ncode: targetNovelID, no: 1, end: false)
                     }
@@ -994,7 +996,7 @@ class NovelSpeakerUtility: NSObject {
                     if coreDataNarouContent.isURLContent() {
                         globalState.currentReadingNovelID = targetNovelID
                     }else if targetNovelID.hasPrefix("_u") {
-                        globalState.currentReadingNovelID = "https://example.com/" + targetNovelID
+                        globalState.currentReadingNovelID = "https://novelspeaker.example.com/UserCreatedContent/" + targetNovelID
                     }else{
                         globalState.currentReadingNovelID = CoreDataToRealmTool.NcodeToUrlString(ncode: targetNovelID, no: 1, end: false)
                     }

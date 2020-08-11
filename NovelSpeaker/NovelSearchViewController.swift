@@ -204,7 +204,7 @@ class SearchResultBlock {
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection { (buttonCellOf, row) in
             DispatchQueue.main.async {
-                NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: parent, url: self.url, cookieArray: [])
+                NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: parent, url: self.url, cookieString: "")
             }
         }.cellUpdate({ (cell, button) in
             cell.textLabel?.textAlignment = .left
@@ -240,9 +240,9 @@ class SearchResult {
     func ConvertHTMLToSearchResultDataArray(data:Data, baseURL: URL) -> ([SearchResultBlock], URL?) {
         var result:[SearchResultBlock] = []
         guard let doc = try? HTMLDocument(data: data) else { return ([], nil) }
-        print("ConvertHTMLToSearchResultDataArray: phase 1: baseURL: \(baseURL.absoluteString), data.count: \(data.count), \(String(bytes: data, encoding: .utf8) ?? "nil")")
+        //print("ConvertHTMLToSearchResultDataArray: phase 1: baseURL: \(baseURL.absoluteString), data.count: \(data.count), \(String(bytes: data, encoding: .utf8) ?? "nil")")
         for blockHTML in doc.xpath(self.blockXpath) {
-            print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.rawXML)")
+            //print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.rawXML)")
             // TODO: 何かうまい方法があれば書き直す
             // 何故か blockHTML.xpath() をすると doc(文章全体) に対して xpath が適用されてしまうので、
             // 仕方がないので blockHTML.rawXML(これは文字列を再生成しているみたいなので負荷が気になる)を

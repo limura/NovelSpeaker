@@ -100,7 +100,7 @@ class MigrationViewController: UIViewController {
                 }
                 if GlobalDataSingleton.getInstance()?.isAliveCoreDataSaveFile() ?? false {
                     // CoreData のがあるならそこからコピーする
-                    CoreDataToRealmTool.ConvertFromCoreaData { (text) in
+                    CoreDataToRealmTool.ConvertFromCoreData { (text) in
                         DispatchQueue.main.async {
                             self.progressLabel.text = text
                         }
@@ -118,6 +118,7 @@ class MigrationViewController: UIViewController {
                     // realm file はあって
                     if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {
                         // CoreData からの移行もできてるならそれを使う
+                        print("CoreDataToRealmTool.IsConvertFromCoreDataFinished: return true. migrate done.")
                         return
                     }
                     // CoreData からの移行が完了していないらしいので Local Realm file は消しておきます
@@ -137,8 +138,7 @@ class MigrationViewController: UIViewController {
                 return
             }
             // そうでもないなら CoreData からの移行を行う
-            print("CoreDataToRealmTool.ConvertFromCoreaData() call.")
-            CoreDataToRealmTool.ConvertFromCoreaData { (text) in
+            CoreDataToRealmTool.ConvertFromCoreData { (text) in
                 DispatchQueue.main.async {
                     self.progressLabel.text = text
                 }
@@ -150,6 +150,10 @@ class MigrationViewController: UIViewController {
     func goToMainStoryBoard() {
         DispatchQueue.main.async {
             NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
+            // background Fetch は AppDelegate::init からの呼び出しでは動作しない場合がある
+            // (というかマイグレーションが必要な場合は動かない)ので、
+            // このタイミングで起動します。
+            NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
 
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             guard let firstViewController = storyboard.instantiateInitialViewController() else { return }
