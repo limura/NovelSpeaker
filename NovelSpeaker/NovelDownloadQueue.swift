@@ -203,98 +203,6 @@ class NovelDownloader : NSObject {
         }
     }
     
-    // 指定された URL を読み込んで、内容があるようであれば指定された chapterNumber のものとして(上書き)保存します。
-    // maxCount を超えておらず、次のURLが取得できたのならそのURLを chapterNumber + 1 のものとして再度 downloadOnce() を呼び出します。
-    private static func downloadOnce(novelID:String, uriLoader:UriLoader, count:Int, downloadCount:Int, chapterNumber:Int, targetURL:URL, urlSecret:[String], successAction:@escaping ((_ novelID:String, _ downloadCount:Int)->Void), failedAction:@escaping ((_ novelID: String, _ downloadCount:Int, _ errorDescription:String)->Void)) {
-        if isDownloadStop {
-            print("NovelDownloader.downloadOnce(): isDownloadStop が true であったのでダウンロードを終了します。novelID: \(novelID)")
-            if let writePool = writePool.removeValue(forKey: novelID) {
-                writePool.Flush()
-            }
-            successAction(novelID, downloadCount)
-            return
-        }
-        if count > NovelDownloader.maxCount {
-            print("NovelDownloader.downloadOnce(): ダウンロード回数が規定値(\(NovelDownloader.maxCount))を超えたのでダウンロードを終了します。novelID: \(novelID)")
-            if let pool = writePool[novelID] { pool.Flush() }
-            successAction(novelID, downloadCount)
-            return
-        }
-        let queuedDate = Date()
-        uriLoader.fetchOneUrl(
-            targetURL, cookieArray: urlSecret,
-            successAction: { (htmlStory) in
-                autoreleasepool {
-                    guard let htmlStory = htmlStory else {
-                        print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: htmlStory == nil")
-                        failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_htmlStoryIsNil", comment: "小説のダウンロードに失敗しました。") + "(novelID: \(novelID))")
-                        if let pool = writePool[novelID] { pool.Flush() }
-                        return
-                    }
-                    guard let content = htmlStory.content, content.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 else {
-                        if let nextUrl = htmlStory.nextUrl {
-                            print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: htmlStory.content の中身がありませんでしたが、nextUrl は取得できたのでそのまま読み込みを続けます。\(novelID)")
-                            // chapterNumber は増やしませんが、施行回数は増やします
-                            delayQueue(queuedDate: queuedDate, block: {
-                                downloadOnce(novelID: novelID, uriLoader: uriLoader, count: count + 1, downloadCount: downloadCount, chapterNumber: chapterNumber, targetURL: nextUrl, urlSecret: urlSecret, successAction: successAction, failedAction: failedAction)
-                            })
-                        }else{
-                            print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: htmlStory.content の中身がなく、nextUrl もありませんでしたのでここで読み込みを終了します。\(novelID)")
-                            failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_FailedByNoContent", comment: "取得された小説の本文がなかったため、読み込みを終了します。") + "(novelID: \(novelID))")
-                        }
-                        if let pool = writePool[novelID] { pool.Flush() }
-                        return
-                    }
-                    if RealmNovel.SearchNovelFrom(novelID: novelID) == nil {
-                        print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.successAction: 読み込みには成功したのですが、RealmNovel を検索したところ存在が確認できませんでした。ダウンロード中に本棚から削除された可能性があります。ダウンロードを停止します。(\(novelID))")
-                        failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_FailedByNoRealmNovel", comment: "小説が本棚に登録されていなかったため、ダウンロードを終了します。") + "(novelID: \(novelID))")
-                        if let pool = writePool[novelID] { pool.Flush() }
-                        return
-                    }
-                    var story = Story()
-                    story.novelID = novelID
-                    story.chapterNumber = chapterNumber
-                    story.url = targetURL.absoluteString
-                    story.content = content.trimmingCharacters(in: .whitespacesAndNewlines)
-                    story.downloadDate = queuedDate
-                    if let subtitle = htmlStory.subtitle {
-                        let trimedSubtitle = subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if trimedSubtitle.count > 0 {
-                            story.subtitle = trimedSubtitle
-                        }
-                    }
-                    if chapterNumber == 1 {
-                        //story.lastReadDate = Date(timeIntervalSince1970: 60)
-                    }
-                    if let pool = writePool[novelID] {
-                        pool.AddStory(story: story)
-                    }else{
-                        let pool = StoryBulkWritePool(novelID: novelID)
-                        pool.AddStory(story: story)
-                        writePool[novelID] = pool
-                    }
-                    print("add new story to queue: \(novelID), chapterNumber: \(chapterNumber), url: \(targetURL.absoluteString)")
-                    if let nextUrl = htmlStory.nextUrl {
-                        delayQueue(queuedDate: queuedDate) {
-                            downloadOnce(novelID: novelID, uriLoader: uriLoader, count: count + 1, downloadCount: downloadCount + 1, chapterNumber: chapterNumber + 1, targetURL: nextUrl, urlSecret: urlSecret, successAction: successAction, failedAction: failedAction)
-                        }
-                        return
-                    }else{
-                        if let pool = writePool[novelID] { pool.Flush() }
-                        print("download done: \(novelID), downloadCount: \(downloadCount + 1)")
-                        successAction(novelID, downloadCount + 1)
-                        return
-                    }
-                }
-            },
-            failedAction: { (url, errString) in
-                autoreleasepool {
-                    print("NovelDownloader.downloadOnce().urlLoader.fetchOneUrl.failedAction: 何らかの問題でダウンロードに失敗しました。url: \(url?.absoluteString ?? "unknown"), errString: \(errString ?? "unknown")")
-                    failedAction(novelID, downloadCount, NSLocalizedString("NovelDownloader_htmlStoryIsNil", comment: "小説のダウンロードに失敗しました。") + "(novelID: \"\(novelID)\", url: \(url?.absoluteString ?? "unknown"), errString: \(errString ?? "unknown"))")
-                }
-        })
-    }
-    
     static func startDownload(novelID:String, fetcher:StoryFetcher, currentState:StoryState? = nil, chapterNumber:Int = 0, downloadCount:Int = 0, successAction:@escaping ((_ novelID:String, _ downloadCount:Int)->Void), failedAction:@escaping ((_ novelID: String, _ downloadCount:Int, _ errorDescription:String)->Void)) {
         BehaviorLogger.AddLogSimple(description: "startDownload: \(novelID), chapter: \(chapterNumber)")
         if isDownloadStop {
@@ -425,117 +333,6 @@ class NovelDownloader : NSObject {
             failedAction(novelID, 0, msg)
         }
     }
-    
-    // ダウンロードの開始点。最初の FetchOneUrl() は次の章への link の読み込みだけなので downloadOnce() に頼むだけで保存はしません。
-    static func startDownload_Old(novelID:String, uriLoader:UriLoader, successAction:@escaping ((_ novelID:String, _ downloadCount:Int)->Void), failedAction:@escaping ((_ novelID: String, _ downloadCount:Int, _ errorDescription:String)->Void)) {
-        if isDownloadStop {
-            print("NovelDownloader.downloadOnce(): isDownloadStop が true であったのでダウンロードを終了します。novelID: \(novelID)")
-            successAction(novelID, 0)
-            return
-        }
-        var urlSecret:[String] = []
-        var chapterNumber = 1
-        var lastDownloadURLTmp:URL? = nil
-        autoreleasepool {
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
-                print("NovelDownloader.startDownload(): novel \(novelID) has invalid condition. download aborted.")
-                failedAction(novelID, 0, NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "(novelID: \"\(novelID)\")")
-                return
-            }
-            urlSecret = novel.urlSecret
-            autoreleasepool {
-                if let lastChapter = novel.lastChapter, let lastDownloadURLString = novel.lastDownloadURL, let targetURL = URL(string: lastDownloadURLString) {
-                    chapterNumber = lastChapter.chapterNumber
-                    lastDownloadURLTmp = targetURL
-                }else if let targetURL = URL(string: novelID) {
-                    chapterNumber = 1
-                    lastDownloadURLTmp = targetURL
-                }else{
-                    print("NovelDownloader.startDownload(): novel \(novelID) has invalid condition. download aborted.")
-                    failedAction(novelID, 0, NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "(novelID: \"\(novelID)\")")
-                    return
-                }
-            }
-        }
-        guard let lastDownloadURL = lastDownloadURLTmp else { return }
-        let queuedDate = Date()
-        uriLoader.fetchOneUrl(
-            lastDownloadURL,
-            cookieArray: urlSecret,
-            successAction: { (htmlStory) in
-                autoreleasepool {
-                    guard let htmlStory = htmlStory, let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
-                        print("NovelDownloader.startDownload().urlLoader.fetchOneUrl.successAction: htmlStory is nil.")
-                        failedAction(novelID, 0, NSLocalizedString("NovelDownloader_htmlStoryIsNil", comment: "小説のダウンロードに失敗しました。") + "(novelID: \"\(novelID)\")")
-                        return
-                    }
-                    let targetURL:URL
-                    if chapterNumber == 1 && novel.lastChapter == nil {
-                        // 章がダウンロードされていないのでここで書き込んでしまう。
-                        RealmUtil.Write { (realm) in
-                            if let title = htmlStory.title, novel.title.count <= 0 {
-                                novel.title = title
-                            }
-                            if let author = htmlStory.author, novel.writer.count <= 0 {
-                                novel.writer = author
-                            }
-                            realm.add(novel, update: .modified)
-                            if let keywords = htmlStory.keyword {
-                                for keyword in keywords {
-                                    guard let keyword = keyword as? String else { continue }
-                                    RealmNovelTag.AddTag(realm: realm, name: keyword, novelID: novelID, type: RealmNovelTag.TagType.Keyword)
-                                }
-                            }
-                        }
-                        if let firstPage = htmlStory.firstPageLink {
-                            // 最初の章へのlinkがあった。downloadOnce() に頑張ってもらう。
-                            targetURL = firstPage
-                            chapterNumber = 0 // あとで +1 して downloadOnce() が呼ばれるので。
-                        }else{
-                            let storyID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)
-                            var story = Story()
-                            story.novelID = novelID
-                            story.chapterNumber = 1
-                            story.content = (htmlStory.content ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-                            story.subtitle = (htmlStory.subtitle ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-                            story.url = lastDownloadURL.absoluteString
-                            RealmUtil.Write { (realm) in
-                                RealmStoryBulk.SetStoryWith(realm: realm, story: story)
-                                print("\(storyID) saved.")
-                                novel.m_lastChapterStoryID = storyID
-                                novel.lastDownloadDate = queuedDate
-                                novel.m_readingChapterStoryID = storyID
-                                novel.AppendDownloadDate(date: queuedDate, realm: realm)
-                                realm.add(novel, update: .modified)
-                            }
-                            if let url = htmlStory.nextUrl {
-                                targetURL = url
-                            }else{
-                                print("NovelDownloader.startDownload().urlLoader.fetchOneUrl.successAction: nextUrl is nil. \(lastDownloadURL.absoluteString)")
-                                successAction(novelID, 0)
-                                return
-                            }
-                        }
-                    }else{
-                        guard let url = htmlStory.nextUrl, url.absoluteString != lastDownloadURL.absoluteString else {
-                            print("NovelDownloader.startDownload().urlLoader.fetchOneUrl.successAction: nextUrl is nil or same URL. \(lastDownloadURL.absoluteString)")
-                            successAction(novelID, 0)
-                            return
-                        }
-                        targetURL = url
-                    }
-                    delayQueue(queuedDate: queuedDate, block: {
-                        downloadOnce(novelID: novelID, uriLoader: uriLoader, count: 0, downloadCount: 0, chapterNumber: chapterNumber + 1, targetURL: targetURL, urlSecret: urlSecret, successAction: successAction, failedAction: failedAction)
-                    })
-                }
-            },
-            failedAction: { (url, errString) in
-                autoreleasepool {
-                    print("NovelDownloader.startDownload().urlLoader.fetchOneUrl.failedAction: 何らかの問題でダウンロードに失敗しました。url: \(url?.absoluteString ?? "unknown"), errString: \(errString ?? "unknown")")
-                    failedAction(novelID, 0, NSLocalizedString("NovelDownloader_htmlStoryIsNil", comment: "小説のダウンロードに失敗しました。") + "(novelID: \"\(novelID)\", url: \(url?.absoluteString ?? "unknown"), errString: \(errString ?? "unknown"))")
-                }
-        })
-    }
 }
 
 class NovelDownloadQueue : NSObject {
@@ -556,7 +353,6 @@ class NovelDownloadQueue : NSObject {
     let DownloadCountKey = "NovelDownloadQueue_DownloadCount"
     let AlreadyBackgroundFetchedNovelIDListKey = "NovelDownloadQueue_AlreadyBackgroundFetchedNovelIDList"
     let backgroundFetchDeadlineTimeInSec:Double = 20.0
-    var tmpUriLoader:UriLoader? = nil
     let fetcherPoolLock = NSLock()
     var fetcherPool:[UUID:(Bool, StoryFetcher)] = [:]
     var siteInfoLoadDate:Date = Date(timeIntervalSince1970: 0)
@@ -589,50 +385,6 @@ class NovelDownloadQueue : NSObject {
     func clearSiteInfoCache() {
         NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: novelSpeakerSiteInfoCacheFileName)
         NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: autopagerizeSiteInfoCacheFileName)
-        tmpUriLoader = nil
-    }
-    
-    func createUriLoader() -> UriLoader {
-        return autoreleasepool {
-            let newUriLoader = UriLoader()
-            let semaphore = DispatchSemaphore(value: 0)
-            var cacheExpireTimeinterval:Double = 0
-            autoreleasepool {
-                if let instance = RealmGlobalState.GetInstance(), instance.isForceSiteInfoReloadIsEnabled {
-                    cacheExpireTimeinterval = 0
-                }else{
-                    cacheExpireTimeinterval = cacheFileExpireTimeinterval
-                }
-            }
-            var novelSpeakerSiteInfoData:Data? = nil
-            var autopagerizeSiteInfoData:Data? = nil
-            if let url = URL(string: novelSpeakerSiteInfoUrl) {
-                NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: novelSpeakerSiteInfoCacheFileName, expireTimeinterval: cacheExpireTimeinterval, successAction: { (data) in
-                    novelSpeakerSiteInfoData = data
-                    semaphore.signal()
-                }) { (err) in
-                    semaphore.signal()
-                }
-            }
-            if let url = URL(string: autopagerizeSiteInfoUrl) {
-                NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: autopagerizeSiteInfoCacheFileName, expireTimeinterval: cacheExpireTimeinterval, successAction: { (data) in
-                    autopagerizeSiteInfoData = data
-                    semaphore.signal()
-                }) { (err) in
-                    semaphore.signal()
-                }
-            }
-            semaphore.wait() // for novelSpeakerCacheData
-            semaphore.wait() // for autopagerizeCacheData
-            if let data = novelSpeakerSiteInfoData {
-                newUriLoader.addCustomSiteInfo(from: data)
-            }
-            if let data = autopagerizeSiteInfoData {
-                newUriLoader.addSiteInfo(from: data)
-            }
-            print("UriLoader has SiteInfo: \(newUriLoader.holdSiteInfoCont())")
-            return newUriLoader
-        }
     }
     
     func updateNetworkActivityIndicatorStatus(){

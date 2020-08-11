@@ -1531,46 +1531,6 @@ extension RealmStory: CanWriteIsDeleted {
         }
     }
     
-    static func AddNewNovelWithFirstStory(url:URL, htmlStory:HtmlStory, cookieParameter:String, title:String, author:String?, tagArray:[String], firstContent:String) -> String? {
-        return autoreleasepool {
-            let novelID = url.absoluteString
-            guard novelID.count > 0 else {
-                return nil
-            }
-            if SearchNovelFrom(novelID: url.absoluteString) != nil {
-                // already downloaded.
-                return nil
-            }
-            let novel = RealmNovel()
-            novel.novelID = novelID
-            novel.url = novelID
-            novel.m_urlSecret = cookieParameter
-            novel.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
-            if let author = author {
-                novel.writer = author
-            }
-            novel.type = .URL
-            novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)
-            var story = Story()
-            story.content = firstContent
-            story.novelID = novel.novelID
-            story.chapterNumber = 1
-            story.url = htmlStory.url ?? novelID
-            RealmUtil.Write { (realm) in
-                realm.add(novel, update: .modified)
-                RealmStoryBulk.SetStoryWith(realm: realm, story: story)
-            }
-            autoreleasepool {
-                RealmUtil.Write { (realm) in
-                    for tagName in tagArray {
-                        RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: "keyword")
-                    }
-                }
-            }
-            return novelID
-        }
-    }
-    
     func AppendDownloadDate(date:Date, realm:Realm) {
         downloadDateArray.append(date)
         while downloadDateArray.count > 10 {

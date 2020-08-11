@@ -1994,4 +1994,23 @@ class NovelSpeakerUtility: NSObject {
             }
         }
     }
+    
+    // 指定された NSHTTPCookieStorage に入っている変なkeyになっている cookie項目 を削除します
+    // 変なkey: 行頭に空白が入っているもの
+    // 補足: この 変なkey があると、同じkeyが延々と追加されていってしまいには cookie header がでかくなりすぎて 400 を返すことになる(と思う)
+    @objc static func RemoveInvalidKeyDataFromCookieStorage(storage:HTTPCookieStorage) {
+        var deleteTargets:[HTTPCookie] = []
+        if let cookies = storage.cookies {
+            for cookie in cookies {
+                let key = cookie.name
+                let validKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+                if key != validKey {
+                    deleteTargets.append(cookie)
+                }
+            }
+        }
+        for cookie in deleteTargets {
+            storage.deleteCookie(cookie)
+        }
+    }
 }

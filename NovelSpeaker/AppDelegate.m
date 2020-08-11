@@ -79,7 +79,7 @@ void uncaughtExceptionHandler(NSException *exception)
     [self.window makeKeyAndVisible];
     
     // CookieStorageを健全化しておきます……(´・ω・`)
-    [UriLoader RemoveInvalidKeyDataFromCookieStorage:[NSHTTPCookieStorage sharedHTTPCookieStorage]];
+    [NovelSpeakerUtility RemoveInvalidKeyDataFromCookieStorageWithStorage:[NSHTTPCookieStorage sharedHTTPCookieStorage]];
     
     // for FTLinearActivityIndicator enable (iPhone X とかのノッチのあるタイプでの network activity indicator を上書きしてくれる奴を enable にする)
     [UIApplication configureLinearNetworkActivityIndicatorIfNeeded];

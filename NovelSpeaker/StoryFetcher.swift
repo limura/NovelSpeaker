@@ -121,7 +121,7 @@ struct StorySiteInfo {
             injectStyle: jsonDecodable["injectStyle"] as? String,
             nextButton: jsonDecodable["nextButton"] as? String,
             firstPageButton: jsonDecodable["firstPageButton"] as? String,
-            waitSecondInHeadless: Double(string: jsonDecodable["waitSecondInHeadless"] as? String ?? "0.0") ?? 0.0
+            waitSecondInHeadless: Double(jsonDecodable["waitSecondInHeadless"] as? String ?? "0.0") ?? 0.0
             )
     }
     
@@ -407,10 +407,14 @@ class StoryHtmlDecoder {
 }
 
 class StoryFetcher {
+    #if !os(watchOS)
     let httpClient:HeadlessHttpClient
+    #endif
     
     init() {
+        #if !os(watchOS)
         self.httpClient = HeadlessHttpClient()
+        #endif
     }
     
     func DecodeDocument(currentState:StoryState, data:Data?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {

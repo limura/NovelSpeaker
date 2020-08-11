@@ -177,7 +177,6 @@
 		2193095623BBE56B00035EF0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2193095523BBE56B00035EF0 /* Preview Assets.xcassets */; };
 		21949BD523EDE75A00BCC5B9 /* NovelSupportMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21949BD423EDE75A00BCC5B9 /* NovelSupportMenuView.swift */; };
 		21949BD723EEBA6100BCC5B9 /* WKInterfaceVolumeControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21949BD623EEBA6000BCC5B9 /* WKInterfaceVolumeControlView.swift */; };
-		2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */; };
 		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
@@ -1831,7 +1830,6 @@
 				219106DF2468371A00BBA5AF /* NovelSearchViewController.swift in Sources */,
 				213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */,
 				215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */,
-				2195FBC01D2FBBCF00ADDCAB /* UriLoader.m in Sources */,
 				21648007229003E100A183DF /* BookShelfTreeViewCell.swift in Sources */,
 				21916375199F143E003FF7FC /* SpeechModSetting.m in Sources */,
 			);
