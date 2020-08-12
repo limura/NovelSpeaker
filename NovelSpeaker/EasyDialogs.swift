@@ -459,7 +459,6 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
                         equal.priority = UILayoutPriority(rawValue: 999)
                         dialog.forTextViewConstraintArray.append(equal)
                         NSLayoutConstraint.activate([equal])
-                        print("CONTENT height to: ", height)
                     }
                 }
                 

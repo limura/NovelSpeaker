@@ -192,10 +192,12 @@ class HiddenQuery: SearchQuery {
 class SearchResultBlock {
     let title:String
     let url:URL
+    let description:String?
 
-    init(title:String, url:URL){
+    init(title:String, url:URL, description:String?){
         self.title = title
         self.url = url
+        self.description = description
     }
     
     func CreateForm(parent:UIViewController) -> ButtonRow {
@@ -203,8 +205,28 @@ class SearchResultBlock {
             $0.title = title
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection { (buttonCellOf, row) in
-            DispatchQueue.main.async {
-                NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: parent, url: self.url, cookieString: "")
+            func download() {
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: parent, url: self.url, cookieString: "")
+                }
+            }
+            if let description = self.description, description.count > 0 {
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.EasyDialogBuilder(parent)
+                        .title(title: self.title)
+                        .textView(content: description, heightMultiplier: 0.6)
+                        .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
+                            dialog.dismiss(animated: false, completion: nil)
+                        })
+                        .addButton(title: NSLocalizedString("NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle", comment: "仮読み込み"), callback: { (dialog) in
+                            dialog.dismiss(animated: false) {
+                                download()
+                            }
+                        })
+                    .build().show()
+                }
+            }else{
+                download()
             }
         }.cellUpdate({ (cell, button) in
             cell.textLabel?.textAlignment = .left
@@ -254,7 +276,7 @@ class SearchResult {
             // 何故か blockHTML.xpath() をすると doc(文章全体) に対して xpath が適用されてしまうので、
             // 仕方がないので blockHTML.rawXML(これは文字列を再生成しているみたいなので負荷が気になる)を
             // XMLDocumentとして再度読み込んでそれを使う事にします。
-            guard let rawHtml = blockHTML.toHTML, let block = try? HTML(html: rawHtml, url: baseURL.absoluteString, encoding: headerEncoding ?? .utf8) else { continue }
+            guard let rawHtml = blockHTML.innerHTML, let block = try? HTML(html: rawHtml, url: baseURL.absoluteString, encoding: headerEncoding ?? .utf8) else { continue }
             let title:String
             if let titleXpath = self.titleXpath {
                 title = NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: block, xpath: titleXpath).trimmingCharacters(in: .whitespacesAndNewlines)
@@ -264,8 +286,11 @@ class SearchResult {
             if title.count <= 0 {
                 continue
             }
-            guard let urlXpath = self.urlXpath, let url = NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlDocument: block, xpath: urlXpath, baseURL: baseURL) else { continue }
-            let resultBlock = SearchResultBlock(title: title, url: url)
+            guard let urlXpath = self.urlXpath, let url = NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlDocument: block, xpath: urlXpath, baseURL: baseURL) else {
+                continue
+            }
+            let description = NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: block, xpath: "/html")
+            let resultBlock = SearchResultBlock(title: title, url: url, description: description)
             result.append(resultBlock)
         }
         let nextURL:URL?
