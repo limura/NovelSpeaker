@@ -103,7 +103,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     }
     
     func enqueue(text:String, voiceIdentifier:String?, locale:String?, pitch:Float = 1, rate:Float = 1, delay:TimeInterval = 0, isDummy:Bool = false) {
-        print("MultiVoiceSpeaker speech request got: \(text)")
+        //print("MultiVoiceSpeaker speech request got: \(text)")
         let queue = SpeechQueue(text: text, voiceIdentifier: voiceIdentifier, locale: locale, pitch: pitch, rate: rate, delay: delay, isDummy: isDummy)
 
         self.speechQueueLock.lock()
@@ -121,7 +121,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     }
     
     func Stop() {
-        print("MultiVoiceSpeaker Stop")
+        //print("MultiVoiceSpeaker Stop")
         self.speechQueueLock.lock()
         defer { self.speechQueueLock.unlock() }
         guard let queue = speechQueue.first else { return }
@@ -141,7 +141,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         }
     }
     func finishSpeak() {
-        print("MultiVoiceSpeaker finishSpeak")
+        //print("MultiVoiceSpeaker finishSpeak")
         var finishDelegate:SpeakRangeDelegate? = nil
         self.speechQueueLock.lock()
         defer {
@@ -159,7 +159,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
             return
         }
         if let queue = speechQueue.first {
-            print("MultiVoiceSpeaker finishSpeak start next queue")
+            //print("MultiVoiceSpeaker finishSpeak start next queue")
             startSpeech(queue: queue)
         }
     }

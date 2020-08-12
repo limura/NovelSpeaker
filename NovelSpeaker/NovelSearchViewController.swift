@@ -9,7 +9,7 @@
 import Foundation
 import Eureka
 import AnyCodable
-import Fuzi
+import Kanna
 
 @objc protocol MultipleSelectorDoneEnabled {
     @objc func multipleSelectorDone(_ item:UIBarButtonItem);
@@ -237,9 +237,16 @@ class SearchResult {
         return SearchResult(blockXpath: blockXpath, nextLinkXpath: nextLinkXpath, titleXpath: titleXpath, urlXpath: urlXpath)
     }
     
-    func ConvertHTMLToSearchResultDataArray(data:Data, baseURL: URL) -> ([SearchResultBlock], URL?) {
+    func ConvertHTMLToSearchResultDataArray(data:Data, headerEncoding: String.Encoding?, baseURL: URL) -> ([SearchResultBlock], URL?) {
         var result:[SearchResultBlock] = []
-        guard let doc = try? HTMLDocument(data: data) else { return ([], nil) }
+        let doc:HTMLDocument
+        let (htmlOptional, encoding) = NiftyUtilitySwift.decodeHTMLStringFrom(data: data, headerEncoding: headerEncoding)
+        if let html = htmlOptional, let htmlDocument = try? HTML(html: html, url: baseURL.absoluteString, encoding: headerEncoding ?? .utf8) {
+            doc = htmlDocument
+        }else{
+            guard let dataHtmlDocument = try? HTML(html: data, url: baseURL.absoluteString, encoding: encoding ?? headerEncoding ?? .utf8) else { return ([], nil) }
+            doc = dataHtmlDocument
+        }
         //print("ConvertHTMLToSearchResultDataArray: phase 1: baseURL: \(baseURL.absoluteString), data.count: \(data.count), \(String(bytes: data, encoding: .utf8) ?? "nil")")
         for blockHTML in doc.xpath(self.blockXpath) {
             //print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.rawXML)")
@@ -247,7 +254,7 @@ class SearchResult {
             // 何故か blockHTML.xpath() をすると doc(文章全体) に対して xpath が適用されてしまうので、
             // 仕方がないので blockHTML.rawXML(これは文字列を再生成しているみたいなので負荷が気になる)を
             // XMLDocumentとして再度読み込んでそれを使う事にします。
-            guard let block = try? HTMLDocument(string: blockHTML.rawXML) else { continue }
+            guard let rawHtml = blockHTML.toHTML, let block = try? HTML(html: rawHtml, url: baseURL.absoluteString, encoding: headerEncoding ?? .utf8) else { continue }
             let title:String
             if let titleXpath = self.titleXpath {
                 title = NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: block, xpath: titleXpath).trimmingCharacters(in: .whitespacesAndNewlines)
@@ -317,13 +324,13 @@ class SearchResultViewController: FormViewController {
             }else{
                 allowsCellularAccess = true
             }
-            NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, successAction: { (data) in
+            NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
                 DispatchQueue.main.async {
                     guard let searchResult = self.searchResult else {
                         self.removeLoadingRow()
                         return
                     }
-                    let (resultBlockArray, nextURL) = searchResult.ConvertHTMLToSearchResultDataArray(data: data, baseURL: nextURL)
+                    let (resultBlockArray, nextURL) = searchResult.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: nextURL)
                     self.removeLoadingRow()
                     self.resultBlockArray.append(contentsOf: resultBlockArray)
                     self.nextURL = nextURL
@@ -469,7 +476,7 @@ class WebSiteSection {
                     allowsCellularAccess = true
                 }
                 NiftyUtilitySwift.EasyDialogNoButton(viewController: self.parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
-                    NiftyUtilitySwift.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, successAction: { (data) in
+                    NiftyUtilitySwift.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
                         DispatchQueue.main.async {
                             dialog.dismiss(animated: false) {
                                 guard let result = self.result else {
@@ -478,7 +485,7 @@ class WebSiteSection {
                                     }
                                     return
                                 }
-                                let (searchResultBlockArray, nextURL) = result.ConvertHTMLToSearchResultDataArray(data: data, baseURL: url)
+                                let (searchResultBlockArray, nextURL) = result.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: url)
                                 DispatchQueue.main.async {
                                     let nextViewController = SearchResultViewController()
                                     nextViewController.resultBlockArray = searchResultBlockArray

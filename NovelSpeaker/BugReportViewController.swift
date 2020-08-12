@@ -27,8 +27,8 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     /// 最新のプライバシーポリシーを読んだことがあるか否かを判定して、読んだことがなければ表示して同意を求めます
     func CheckAndDisplayPrivacyPolicy(){
         if let privacyPolicyUrl = NovelSpeakerUtility.privacyPolicyURL {
-            NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data) in
-                guard let currentPrivacyPolicy = String(data: data, encoding: .utf8) else {
+            NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data, encoding) in
+                guard let currentPrivacyPolicy = String(data: data, encoding: encoding ?? .utf8) else {
                     return
                 }
                 let readedPrivacyPolicy = NovelSpeakerUtility.GetReadedPrivacyPolicy()
@@ -381,8 +381,8 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
 
         if let url = URL(string: "https://limura.github.io/NovelSpeaker/ImportantInformation.txt") {
             NiftyUtilitySwift.cashedHTTPGet(url: url, delay: 60*60,
-                successAction: { (data) in
-                    if let str = String(data: data, encoding: .utf8) {
+                successAction: { (data, encoding) in
+                    if let str = String(data: data, encoding: encoding ?? .utf8) {
                         var text = ""
                         str.enumerateLines(invoking: { (line, inOut) in
                             if line.count > 0 && line[line.startIndex] != "#" {

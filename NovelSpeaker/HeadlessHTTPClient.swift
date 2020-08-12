@@ -9,6 +9,7 @@
 import Foundation
 import WebKit
 import Erik
+import Kanna
 
 class HeadlessHttpClient {
     var webView : WKWebView!

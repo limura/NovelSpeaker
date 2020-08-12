@@ -18,7 +18,7 @@ target 'NovelSpeaker' do
   #pod 'IceCream', :git => 'https://github.com/caiyue1993/IceCream.git'
   pod 'IceCream'
   pod 'AnyCodable-FlightSchool'
-  pod 'Fuzi'
+  pod 'Kanna'
   pod 'Erik'
 
   target 'NovelSpeakerTests' do
@@ -40,7 +40,7 @@ target 'NovelSpeaker' do
     pod 'Zip', '~> 1.1'
     pod 'IceCream'
     pod 'AnyCodable-FlightSchool'
-    pod 'Fuzi'
+    pod 'Kanna'
   end
 
 end

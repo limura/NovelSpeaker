@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Fuzi
+import Kanna
 import AnyCodable
 #if !os(watchOS)
 import Erik
@@ -417,8 +417,8 @@ class StoryFetcher {
         #endif
     }
     
-    func DecodeDocument(currentState:StoryState, data:Data?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
-        guard let data = data, let htmlDocument = try? HTMLDocument(data: data) else {
+    func DecodeDocument(currentState:StoryState, html:String?, encoding:String.Encoding, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        guard let html = html, let htmlDocument = try? HTML(html: html, encoding: encoding) else {
             failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_Parse", comment: "HTMLの解析に失敗しました。(有効なHTMLまたはXHTML文書ではないようです。いまのところ、ことせかい はPDF等のHTMLやXHTMLではない文書は読み込む事ができません)"))
             return
         }
@@ -506,7 +506,7 @@ class StoryFetcher {
                                 completionHandler?(nil, SloppyError(msg: "unknown error: (Erik document = nil)"))
                                 return
                             }
-                            guard let data = document.innerHTML?.data(using: .utf8) else {
+                            guard let html = document.innerHTML else {
                                 completionHandler?(nil, SloppyError(msg: "unknown error: (Erik document.innerHTML?.data() return nil)"))
                                 return
                             }
@@ -517,9 +517,9 @@ class StoryFetcher {
                                 currentUrl = currentState.url
                             }
                             print("HeadlessHttpClient.shared.GetCurrentContent currentUrl:", currentUrl.absoluteString)
-                            print("HeadlessHttpClient.shared.GetCurrentContent data.count:", data.count)
+                            print("HeadlessHttpClient.shared.GetCurrentContent html.count:", html.count)
                             let newState:StoryState = StoryState(url: currentUrl, cookieString: cookieString ?? currentState.cookieString, content: nil, nextUrl: nil, firstPageLink: nil, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: true, waitSecondInHeadless: currentState.waitSecondInHeadless, document: document, nextButton: nil, firstPageButton: nil)
-                            self.DecodeDocument(currentState: newState, data: data, successAction: { (state) in
+                            self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
                                 completionHandler?(state, nil)
                             }) { (_, err) in
                                 completionHandler?(nil, SloppyError(msg: err))
@@ -563,9 +563,9 @@ class StoryFetcher {
             #if !os(watchOS)
             if currentState.isNeedHeadless {
                 NiftyUtilitySwift.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, successAction: { (doc) in
-                    let data = doc.innerHTML?.data(using: .utf8)
+                    let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton)
-                    self.DecodeDocument(currentState: newState, data: data, successAction: { (state) in
+                    self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
                         self.FetchNext(currentState: state, successAction: successAction, failedAction: failedAction)
                     }, failedAction: failedAction)
                 }) { (error) in
@@ -575,13 +575,14 @@ class StoryFetcher {
             }
             #endif
             
-            NiftyUtilitySwift.httpRequest(url: url, postData: nil, cookieString: currentState.cookieString, isNeedHeadless: currentState.isNeedHeadless, mainDocumentURL: url, allowsCellularAccess: (RealmGlobalState.GetInstance()?.IsDisallowsCellularAccess ?? false) ? false : true, successAction: { (data) in
+            NiftyUtilitySwift.httpRequest(url: url, postData: nil, cookieString: currentState.cookieString, isNeedHeadless: currentState.isNeedHeadless, mainDocumentURL: url, allowsCellularAccess: (RealmGlobalState.GetInstance()?.IsDisallowsCellularAccess ?? false) ? false : true, successAction: { (data, encoding) in
                 #if !os(watchOS)
                 let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, document: currentState.document, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton)
                 #else
                 let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless)
                 #endif
-                self.DecodeDocument(currentState: newState, data: data, successAction: { (state) in
+                let (html, guessedEncoding) = NiftyUtilitySwift.decodeHTMLStringFrom(data: data, headerEncoding: encoding)
+                self.DecodeDocument(currentState: newState, html: html, encoding: guessedEncoding ?? encoding ?? .utf8, successAction: { (state) in
                     self.FetchNext(currentState: state, successAction: successAction, failedAction: failedAction)
                 }, failedAction: failedAction)
             }) { (error) in

@@ -1,5 +1,5 @@
 //
-//  SampleUrlFetcher.swift
+//  NiftyUtilitySwift.swift
 //  NovelSpeaker
 //
 //  Created by 飯村卓司 on 2017/11/19.
@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 import UserNotifications
-import Fuzi
+import Kanna
 
 #if !os(watchOS)
 import PDFKit
@@ -561,12 +561,152 @@ class NiftyUtilitySwift: NSObject {
     }
     #endif
     
-    @objc public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successAction:((Data)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
+    static func GetMatchedText1(text:String, regexpPattern:String) -> String? {
+        guard let regexp = try? NSRegularExpression(pattern: regexpPattern, options: []) else { return nil }
+        guard let matchResult = regexp.firstMatch(in: text, options: [], range: NSMakeRange(0, text.count)) else { return nil }
+        if matchResult.numberOfRanges <= 0 { return nil }
+        let range = matchResult.range(at: 1)
+        let fromIndex = text.index(text.startIndex, offsetBy: range.location)
+        let toIndex = text.index(text.startIndex, offsetBy: range.location + range.length)
+        return String(text[fromIndex..<toIndex])
+    }
+    
+    static func getCharsetStringFromURLResponse(urlResponse:URLResponse?) -> String? {
+        guard let httpURLResponse = urlResponse as? HTTPURLResponse else { return nil }
+        guard let contentType = httpURLResponse.allHeaderFields.filter({ (element) -> Bool in
+            if let key = element.key as? String, key.lowercased() == "content-type" {
+                return true
+            }
+            return false
+        }).first?.value as? String else { return nil }
+        return GetMatchedText1(text: contentType, regexpPattern: "; *charset=([^ ]*)")
+    }
+    
+    static func guessStringEncodingFrom(charset:String) -> String.Encoding? {
+        let cfEncoding = CFStringConvertIANACharSetNameToEncoding(charset as CFString)
+        if cfEncoding != kCFStringEncodingInvalidId {
+            let nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding)
+            return String.Encoding(rawValue: nsEncoding)
+        }
+        let encodingMap:[String:String.Encoding] = [
+            "sjis": .shiftJIS,
+            "shiftjis": .shiftJIS,
+            "shift-jis": .shiftJIS,
+            "shift_jis": .shiftJIS,
+            "euc": .japaneseEUC,
+            "euc-jp": .japaneseEUC,
+            "euc_jp": .japaneseEUC,
+            "japaneseeuc": .japaneseEUC,
+            "iso-2022-jp": .iso2022JP,
+            "utf8": .utf8,
+            "utf-8": .utf8,
+            "utf16": .utf16,
+            "utf-16": .utf16,
+            "utf32": .utf32,
+            "utf-32": .utf32,
+            "unicode": .unicode,
+        ]
+        return encodingMap[charset]
+    }
+    
+    static func getStringEncodingFromURLResponse(urlResponse:URLResponse?) -> String.Encoding? {
+        guard let charset = getCharsetStringFromURLResponse(urlResponse: urlResponse) else { return nil }
+        return guessStringEncodingFrom(charset: charset)
+    }
+    
+    static func decodeDataToStringWith(charset:String, data:Data) -> (String?, String.Encoding?) {
+        guard let encoding = guessStringEncodingFrom(charset: charset) else { return (nil, nil) }
+        guard let decodedString = String(data: data, encoding: encoding) else { return (nil, nil) }
+        return (decodedString, encoding)
+    }
+    
+    // Data を String に変換しようとしてみます。
+    // charset がわかっているならそれをヒントに変換を試みます。
+    // charset がわかっていないならテキトーに変換できそうかどうかを確認しながら変換します。
+    static func tryDecodeToString(data:Data, charset:String?) -> (String?, String.Encoding?) {
+        return tryDecodeToString(data: data, encoding: charset != nil ? guessStringEncodingFrom(charset: charset!) : nil)
+    }
+
+    static func tryDecodeToString(data:Data, encoding:String.Encoding?) -> (String?, String.Encoding?) {
+        if let encoding = encoding, let string = String(data: data, encoding: encoding) {
+            return (string, encoding)
+        }
+        let targetEncodingArray:[String.Encoding] = [.utf8, .japaneseEUC, .shiftJIS, .iso2022JP]
+        for encoding in targetEncodingArray {
+            if let string = String(data: data, encoding: encoding) {
+                return (string, encoding)
+            }
+        }
+        return (nil, nil)
+    }
+    
+    // HTML内部に書かれている meta charset を取り出して String.Encoding にして返します
+    static func getHTMLMetaEncoding(html:String) -> String.Encoding? {
+        let metaTargetArray:[String] = [
+            "content=[\"'].*?; *charset=(.*?)[\"']",
+            "meta +charset=[\"'](.*?)[\"']",
+        ]
+        for metaPattern in metaTargetArray {
+            if let charset = GetMatchedText1(text: html, regexpPattern: metaPattern), let encoding = guessStringEncodingFrom(charset: charset) {
+                return encoding
+            }
+        }
+        return nil
+    }
+    
+    // とりあえず HTML の meta が読めるように decode された string から
+    // meta を読み込んで charset があればそれを使って String を生成しようとします。
+    static func decodeDataToStringUseHTMLMetaCharset(data:Data, charset:String?) -> (String?, String.Encoding?) {
+        let (stringOptional, encoding) = tryDecodeToString(data: data, charset: charset)
+        guard let string = stringOptional else { return (nil, nil) }
+        let metaTargetArray:[String] = [
+            "content=[\"'].*?; *charset=(.*?)[\"']",
+            "meta +charset=[\"'](.*?)[\"']",
+        ]
+        for metaPattern in metaTargetArray {
+            if let charset = GetMatchedText1(text: string, regexpPattern: metaPattern) {
+                let (html, encoding) = decodeDataToStringWith(charset: charset, data: data)
+                if let html = html {
+                    print("encoding guessed: \(charset)")
+                    return (html, encoding ?? .utf8)
+                }
+            }
+        }
+        return (nil, nil)
+    }
+    
+    static func convertStringEncoding(data:Data, urlResponse:URLResponse?) -> (String?, String.Encoding?) {
+        if let encoding = getCharsetStringFromURLResponse(urlResponse: urlResponse) {
+            let (html, encoding) = decodeDataToStringWith(charset: encoding, data: data)
+            if let html = html {
+                // HTTP response に書かれていたencodingでちゃんとデコードできたのならそれで良しとする
+                return (html, encoding)
+            }
+        }
+        return tryDecodeToString(data: data, charset: nil)
+    }
+    
+    //
+    static func decodeHTMLStringFrom(data:Data, headerEncoding: String.Encoding?) -> (String?, String.Encoding?) {
+        let (tmpStringOptional, firstEncoding) = tryDecodeToString(data: data, encoding: headerEncoding)
+        guard let tmpString = tmpStringOptional else {
+            return (nil, nil)
+        }
+        if let metaEncoding = getHTMLMetaEncoding(html: tmpString) {
+            let (decodedHtml, encoding) = tryDecodeToString(data: data, encoding: metaEncoding)
+            if let html = decodedHtml {
+                return (decodedHtml, encoding ?? .utf8)
+            }
+        }
+        return (tmpString, firstEncoding ?? .utf8)
+    }
+    
+    public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
         #if !os(watchOS)
         if isNeedHeadless {
             httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, successAction: { (doc) in
-                if let html = doc.innerHTML, let data = html.data(using: .utf8) {
-                    successAction?(data)
+                if let data = doc.innerHTML?.data(using: .utf8) {
+                    successAction?(data, .utf8)
                     return
                 }
             }, failedAction: failedAction)
@@ -603,7 +743,7 @@ class NiftyUtilitySwift: NSObject {
                     }
                 }
                 if let data = data {
-                    successAction?(data)
+                    successAction?(data, getStringEncodingFromURLResponse(urlResponse: response))
                     return
                 }
                 failedAction?(SloppyError(msg: String(format: NSLocalizedString("NiftyUtilitySwift_URLSessionRequestFailedAboutError", comment: "サーバからのデータの取得に失敗しました。(末尾に示されているエラー内容とエラーの起こったURLとエラーが起こるまでの操作手順を添えて、サポートサイト下部にありますご意見ご要望フォームか、設定→開発者に問い合わせるよりお問い合わせ頂けますと、あるいは何かできるかもしれません。\nエラー内容: %@)"), error?.localizedDescription ?? "unknown error(nil)")))
@@ -611,11 +751,11 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
-    @objc public static func httpGet(url: URL, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
+    public static func httpGet(url: URL, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
         httpRequest(url: url, postData: nil, successAction: successAction, failedAction: failedAction)
     }
     
-    @objc public static func httpPost(url: URL, data:Data, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
+    public static func httpPost(url: URL, data:Data, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
         httpRequest(url: url, postData: data, successAction: successAction, failedAction: failedAction)
     }
     
@@ -624,18 +764,19 @@ class NiftyUtilitySwift: NSObject {
         var data: Data?
         let cachedDate: Date
         var error: Error?
+        let encoding: String.Encoding?
     }
     // cachedHTTPGet のキャッシュ
     static var httpCache = Dictionary<URL,dataCache>()
 
     // 今から指定したTimeInterval時間前より新しいデータをキャッシュしていたなら、特に何にもアクセスせずにそれを返します。
     // キャッシュはメモリを使うのでちと微妙です。
-    @objc public static func cashedHTTPGet(url: URL, delay: TimeInterval, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?){
+    public static func cashedHTTPGet(url: URL, delay: TimeInterval, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
         if let cache = httpCache[url] {
             if cache.cachedDate < Date(timeIntervalSinceNow: delay) {
                 if let data = cache.data {
                     if let successAction = successAction {
-                        successAction(data)
+                        successAction(data, cache.encoding)
                     }
                 }else{
                     if let failedAction = failedAction {
@@ -645,14 +786,14 @@ class NiftyUtilitySwift: NSObject {
                 return
             }
         }
-        NiftyUtilitySwift.httpGet(url: url, successAction: { (data) in
-            let cache = dataCache(data: data, cachedDate: Date(timeIntervalSinceNow: 0), error: nil)
+        NiftyUtilitySwift.httpGet(url: url, successAction: { (data, encoding) in
+            let cache = dataCache(data: data, cachedDate: Date(timeIntervalSinceNow: 0), error: nil, encoding: encoding)
             httpCache[url] = cache
             if let successAction = successAction {
-                successAction(data)
+                successAction(data, encoding)
             }
         }, failedAction: { (error) in
-            let cache = dataCache(data: nil, cachedDate: Date(timeIntervalSinceNow: 0), error: error)
+            let cache = dataCache(data: nil, cachedDate: Date(timeIntervalSinceNow: 0), error: error, encoding: nil)
             httpCache[url] = cache
             if let failedAction = failedAction {
                 failedAction(error)
@@ -770,8 +911,8 @@ class NiftyUtilitySwift: NSObject {
     static let IMPORTANT_INFORMATION_TEXT_URL = "https://limura.github.io/NovelSpeaker/ImportantInformation.txt"
     @objc static public func FetchNewImportantImformation(fetched:@escaping ((_ text:String, _ holeText:String)->Void), err:(()->Void)?) {
         guard let url = URL(string: IMPORTANT_INFORMATION_TEXT_URL) else { return }
-        cashedHTTPGet(url: url, delay: 60*60*6, successAction: { (data) in
-            guard let text = String(bytes: data, encoding: .utf8) else { return }
+        cashedHTTPGet(url: url, delay: 60*60*6, successAction: { (data, encoding) in
+            guard let text = String(bytes: data, encoding: encoding ?? .utf8) else { return }
             var stripedText = ""
             text.enumerateLines(invoking: { (line, inOut) in
                 if line.count > 0 && line[line.startIndex] != "#" {
@@ -908,7 +1049,7 @@ class NiftyUtilitySwift: NSObject {
             successAction(data)
             return
         }
-        httpGet(url: url, successAction: { (data) in
+        httpGet(url: url, successAction: { (data, encoding) in
             if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName), let dataZiped = NiftyUtility.dataDeflate(data, level: 9) {
                 do {
                     try dataZiped.write(to: cacheFilePath, options: Data.WritingOptions.atomic)
@@ -1054,14 +1195,18 @@ class NiftyUtilitySwift: NSObject {
         return result
     }
     
-    static func HTMLUtf8DataToString(htmlUtf8Data:Data) -> String? {
+    static func HTMLDataToString(htmlData:Data, encoding:String.Encoding) -> String? {
         var result:String? = nil
         DispatchSyncMainQueue {
-            if let attributedString = try? NSAttributedString(data: htmlUtf8Data, options: [.documentType:NSAttributedString.DocumentType.html, .characterEncoding:String.Encoding.utf8.rawValue], documentAttributes: nil) {
+            if let attributedString = try? NSAttributedString(data: htmlData, options: [.documentType:NSAttributedString.DocumentType.html, .characterEncoding:encoding.rawValue], documentAttributes: nil) {
                 result = attributedString.string
             }
         }
         return result
+    }
+    
+    static func HTMLUtf8DataToString(htmlUtf8Data:Data) -> String? {
+        return HTMLDataToString(htmlData: htmlUtf8Data, encoding: .utf8)
     }
     
     static func HTMLToString(htmlString:String) -> String? {
@@ -1074,8 +1219,8 @@ class NiftyUtilitySwift: NSObject {
     static func FilterXpathToHtml(xmlDocument:XMLDocument, xpath:String) -> String {
         var resultHTML = ""
         for element in xmlDocument.xpath(xpath) {
-            var elementXML = element.rawXML
-            if let parent = element.parent, parent.type == .Element, let parentTag = parent.tag {
+            var elementXML = element.toHTML ?? ""
+            if let parent = element.parent, let parentTag = parent.tagName {
                 if element.nextSibling == nil && element.previousSibling == nil {
                     elementXML = "<\(parentTag)>\(elementXML)</\(parentTag)>"
                 }else if element.nextSibling == nil {
@@ -1100,12 +1245,12 @@ class NiftyUtilitySwift: NSObject {
         if let result = HTMLToString(htmlString: resultHTML) {
             return result
         }
-        return xmlDocument.xpath(xpath).map({ $0.stringValue }).joined(separator: "")
+        return xmlDocument.xpath(xpath).reduce(""){ $0 + ($1.content ?? "") }
     }
     
     static func FilterXpathWithExtructFirstHrefLink(xmlDocument:XMLDocument, xpath:String, baseURL:URL) -> URL? {
-        guard let urlNode = xmlDocument.firstChild(xpath: xpath) else { return nil }
-        let urlString = urlNode.attr("href") ?? urlNode.stringValue
+        guard let urlNode = xmlDocument.xpath(xpath).first else { return nil }
+        let urlString = urlNode["href"] ?? urlNode.content ?? ""
         return URL(string: urlString, relativeTo: baseURL)
     }
 }

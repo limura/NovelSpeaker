@@ -32,6 +32,8 @@
 		210EFEE123C8A92D007C3016 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
 		210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
+		2121BAE124E3EDDE001A368D /* hoge.html in Resources */ = {isa = PBXBuildFile; fileRef = 2121BAE024E3EDDE001A368D /* hoge.html */; };
+		2121BAE224E3EDDE001A368D /* hoge.html in Resources */ = {isa = PBXBuildFile; fileRef = 2121BAE024E3EDDE001A368D /* hoge.html */; };
 		2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */; };
 		212323F522B7049E00543543 /* RealmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212323F422B7049E00543543 /* RealmTests.swift */; };
 		2123240E22B7101000543543 /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
@@ -359,6 +361,7 @@
 		210EFEE023C8A92D007C3016 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBlockSpeaker.swift; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
+		2121BAE024E3EDDE001A368D /* hoge.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = hoge.html; path = "../../NovelSpeaker-githubpages/NovelSpeaker/hoge.html"; sourceTree = "<group>"; };
 		212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 5.xcdatamodel"; sourceTree = "<group>"; };
 		2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PickerViewDialog.h; sourceTree = "<group>"; };
 		2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PickerViewDialog.m; sourceTree = "<group>"; };
@@ -851,6 +854,7 @@
 		21B53A1819619BE7009658B7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				2121BAE024E3EDDE001A368D /* hoge.html */,
 				2133F28F1E80E175001A0BC5 /* AppIcon-monochrome-reverse */,
 				212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */,
 				21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */,
@@ -1470,6 +1474,7 @@
 				210958CB1A0DF55600E9171F /* soundbook.png in Resources */,
 				210958EE1A0E1C5C00E9171F /* NEW!@2x.png in Resources */,
 				21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */,
+				2121BAE124E3EDDE001A368D /* hoge.html in Resources */,
 				216359A322B167A700264A89 /* LikeStar@3x.png in Resources */,
 				21D3979E1FC95CBB0018F883 /* earth@2x.png in Resources */,
 				210958C91A0DF55600E9171F /* icloud1@2x.png in Resources */,
@@ -1502,6 +1507,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				21F054F61917E0F200CC6BA9 /* InfoPlist.strings in Resources */,
+				2121BAE224E3EDDE001A368D /* hoge.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1515,14 +1521,14 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/Fuzi-watchOS/Fuzi.framework",
+				"${BUILT_PRODUCTS_DIR}/Kanna-watchOS/Kanna.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm-watchOS/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift-watchOS/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/Zip-watchOS/Zip.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Fuzi.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kanna.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Zip.framework",
@@ -1564,8 +1570,7 @@
 				"${BUILT_PRODUCTS_DIR}/Erik/Erik.framework",
 				"${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework",
 				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
-				"${BUILT_PRODUCTS_DIR}/Fuzi-iOS/Fuzi.framework",
-				"${BUILT_PRODUCTS_DIR}/Kanna/Kanna.framework",
+				"${BUILT_PRODUCTS_DIR}/Kanna-iOS/Kanna.framework",
 				"${BUILT_PRODUCTS_DIR}/MSColorPicker/MSColorPicker.framework",
 				"${BUILT_PRODUCTS_DIR}/RATreeView/RATreeView.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm-iOS/Realm.framework",
@@ -1578,7 +1583,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Erik.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Eureka.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FTLinearActivityIndicator.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Fuzi.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kanna.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSColorPicker.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RATreeView.framework",
@@ -2356,12 +2360,7 @@
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
-				"HEADER_SEARCH_PATHS[arch=*]" = (
-					"$(inherited)",
-					"\"${PODS_ROOT}/Headers/Public\"",
-					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
-					"\"${SDKROOT}/usr/include/libxml2\"",
-				);
+				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_ROOT}/Headers/Public\" \"${PODS_ROOT}/Headers/Public/SZTextView\" \"${SDKROOT}/usr/include/libxml2\"";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -2393,12 +2392,7 @@
 				DEVELOPMENT_TEAM = 4KZE8276ZF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "NovelSpeaker/NovelSpeaker-Prefix.pch";
-				"HEADER_SEARCH_PATHS[arch=*]" = (
-					"$(inherited)",
-					"\"${PODS_ROOT}/Headers/Public\"",
-					"\"${PODS_ROOT}/Headers/Public/SZTextView\"",
-					"\"${SDKROOT}/usr/include/libxml2\"",
-				);
+				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_ROOT}/Headers/Public\" \"${PODS_ROOT}/Headers/Public/SZTextView\" \"${SDKROOT}/usr/include/libxml2\"";
 				INFOPLIST_FILE = "NovelSpeaker/NovelSpeaker-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -2485,17 +2479,7 @@
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Zip/Zip.framework/Headers\"",
 					"${SDKROOT}/usr/include/libxml2",
 				);
-				"HEADER_SEARCH_PATHS[arch=*]" = (
-					"$(inherited)",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/Eureka/Eureka.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/IceCream/IceCream.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/RATreeView/RATreeView.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/Realm/Realm.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/RealmSwift/RealmSwift.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/SZTextView/SZTextView.framework/Headers\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/Zip/Zip.framework/Headers\"",
-				);
+				"HEADER_SEARCH_PATHS[arch=*]" = "$(inherited) \"${PODS_CONFIGURATION_BUILD_DIR}/Eureka/Eureka.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/IceCream/IceCream.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/RATreeView/RATreeView.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/Realm/Realm.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/RealmSwift/RealmSwift.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/SZTextView/SZTextView.framework/Headers\" \"${PODS_CONFIGURATION_BUILD_DIR}/Zip/Zip.framework/Headers\"";
 				INFOPLIST_FILE = "NovelSpeakerTests/NovelSpeakerTests-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-v";

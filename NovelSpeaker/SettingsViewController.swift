@@ -672,8 +672,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             .build().show()
                         }
                     }
-                    NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data) in
-                        if let currentPrivacyPolicy = String(data: data, encoding: .utf8) {
+                    NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data, encoding) in
+                        if let currentPrivacyPolicy = String(data: data, encoding: encoding ?? .utf8) {
                             DispatchQueue.main.async {
                                 NiftyUtilitySwift.EasyDialogBuilder(self)
                                 .textView(content: currentPrivacyPolicy, heightMultiplier: 0.6)

@@ -8,6 +8,7 @@
 
 import XCTest
 @testable import NovelSpeaker
+@testable import Kanna
 
 class StoryFetcherTest: XCTestCase {
 
@@ -155,12 +156,12 @@ class StoryFetcherTest: XCTestCase {
         }
         
         if true {
-            let state = StoryFetcher.CreateFirstStoryState(url: url2, cookieString:cookieString)
+            let state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: url2, cookieString:cookieString)
             fetchLoop(state: state, fetcher: storyFetcher2, id: "fetcher #2")
         }
 
         var tryCount:Int = 1
-        var currentState:StoryState? = StoryFetcher.CreateFirstStoryState(url:url, cookieString:cookieString)
+        var currentState:StoryState? = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url:url, cookieString:cookieString)
         while let state = currentState {
             if tryCount > 20 {
                 print(nowDateString(), "tryCount > 20. done.")
@@ -181,6 +182,57 @@ class StoryFetcherTest: XCTestCase {
             tryCount += 1
         }
     }
+    
+    func testEncoding() throws {
+        let str = "<A href=\"001.htm\">１話</A>"
+        let sjis = str.data(using: .shiftJIS)
+        let utf8 = str.data(using: .utf8)
+        func hexdump(data:Data?){
+            guard let data = data else {
+                print("data is nil")
+                return
+            }
+            var index:Int = 0
+            while index < data.count {
+                if index % 8 == 0 && index != 0 { print(" ", separator: "", terminator: "") }
+                if index % 16 == 0 && index != 0 { print("") }
+                print(String(format: "%02x", data[index]), separator: "", terminator: "")
+                index += 1
+            }
+            print("")
+        }
+        print("sjis:")
+        hexdump(data: sjis)
+        print("utf8:")
+        hexdump(data: utf8)
+    }
+
+    #if false
+    func testFuzi() throws {
+        guard let path = Bundle.main.path(forResource: "hoge", ofType: "html") else { return }
+        let url = URL(fileURLWithPath: path)
+        guard let data = try? Data(contentsOf: url) else { return }
+        guard let htmlString = String(data: data, encoding: .shiftJIS) else { return }
+        let doc = try HTMLDocument(string: htmlString, encoding: .shiftJIS)
+        let string = NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: doc, xpath: "//body", injectStyle: nil).trimmingCharacters(in: .whitespacesAndNewlines)
+        print(string)
+    }
+    #else
+    func testKanna() throws {
+        guard let path = Bundle.main.path(forResource: "hoge", ofType: "html") else { return }
+        let url = URL(fileURLWithPath: path)
+        guard let data = try? Data(contentsOf: url) else { return }
+        //guard let htmlString = String(data: data, encoding: .shiftJIS) else { return }
+        guard let doc = try? HTML(html: data, url: nil, encoding: .shiftJIS) else { return }
+        var result:String = ""
+        for node in doc.xpath("//body") {
+            if let innerHTML = node.innerHTML {
+                result += innerHTML
+            }
+        }
+        print(result)
+    }
+    #endif
     
     func testMultiErik() throws {
         let erik1 = HeadlessHttpClient()
