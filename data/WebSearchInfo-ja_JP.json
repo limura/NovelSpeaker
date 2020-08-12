@@ -77,10 +77,10 @@
             {"queryType": "hidden", "queryName": "as_sitesearch", "value": "https://kakuyomu.jp/works/"}
         ],
         "result": {
-            "block": "//div[@id='rso']//a[contains(@href,'https://kakuyomu.jp/works/')and not(contains(@href,'webcache.google'))]",
-            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
-            "title": "//div/text()",
-            "url": "//a[contains(@href,'https://kakuyomu.jp/works/') and not(contains(@href,'webcache.google'))]/@href"
+            "block": "//div[@id='rso']//div[@data-hveid and descendant::a[contains(@href,'https://kakuyomu.jp/works/') and not(contains(@href,'webcache.google'))]]",
+            "nextLink": "//div[@id='extrares']//a[contains(@href,'/search?q=')]/@href",
+            "title": "//a/div[@role='heading']",
+            "url": "//a[@href]/@href"
         }
     },
     {
@@ -147,10 +147,10 @@
             {"queryType": "hidden", "queryName": "as_sitesearch", "value": "www.aozora.gr.jp"}
         ],
         "result": {
-            "block": "//div[@id='rso']//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]",
-            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
-            "title": "//div/text()",
-            "url": "//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]/@href"
+            "block": "//div[@id='rso']//div[@data-hveid and descendant::a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]]",
+            "nextLink": "//div[@id='extrares']//a[contains(@href,'/search?q=')]/@href",
+            "title": "//a/div[@role='heading']",
+            "url": "//a[@href]/@href"
         }
     },
     {
@@ -220,10 +220,10 @@
             {"queryType": "hidden", "queryName": "as_sitesearch", "value": "https://www.akatsuki-novels.com/stories/index/novel_id"}
         ],
         "result": {
-            "block": "//div[@id='rso']//a[contains(@href,'https://www.akatsuki-novels.com/stories/index/novel_id') and not(contains(@href,'webcache.google'))]",
-            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
-            "title": "//div/text()",
-            "url": "//a[contains(@href,'https://www.akatsuki-novels.com/stories/index/novel_id') and not(contains(@href,'webcache.google'))]/@href"
+            "block": "//div[@id='rso']//div[@data-hveid and descendant::a[contains(@href,'https://www.akatsuki-novels.com/stories/index/novel_id') and not(contains(@href,'webcache.google'))]]",
+            "nextLink": "//div[@id='extrares']//a[contains(@href,'/search?q=')]/@href",
+            "title": "//a/div[@role='heading']",
+            "url": "//a[@href]/@href"
         }
     }
 ]
