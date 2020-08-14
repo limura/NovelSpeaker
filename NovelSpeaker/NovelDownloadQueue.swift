@@ -207,7 +207,7 @@ class NovelDownloader : NSObject {
         BehaviorLogger.AddLogSimple(description: "startDownload: \(novelID), chapter: \(chapterNumber)")
         if isDownloadStop {
             if let pool = writePool[novelID] { pool.Flush() }
-            print("NovelDownloader.downloadOnce(): isDownloadStop が true であったのでダウンロードを終了します。novelID: \(novelID)")
+            BehaviorLogger.AddLogSimple(description: "NovelDownloader.downloadOnce(): isDownloadStop が true であったのでダウンロードを終了します。novelID: \(novelID)")
             successAction(novelID, 0)
             return
         }

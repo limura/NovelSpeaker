@@ -695,7 +695,7 @@ class NiftyUtilitySwift: NSObject {
         if let metaEncoding = getHTMLMetaEncoding(html: tmpString) {
             let (decodedHtml, encoding) = tryDecodeToString(data: data, encoding: metaEncoding)
             if let html = decodedHtml {
-                return (decodedHtml, encoding ?? .utf8)
+                return (html, encoding ?? .utf8)
             }
         }
         return (tmpString, firstEncoding ?? .utf8)
