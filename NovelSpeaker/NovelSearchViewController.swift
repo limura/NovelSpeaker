@@ -343,11 +343,11 @@ class SearchResultViewController: FormViewController {
     
     func loadNextLink(nextURL:URL, section:Section, row:ButtonRow) {
         DispatchQueue.main.async {
-            let allowsCellularAccess:Bool
-            if let globalData = RealmGlobalState.GetInstance(), globalData.IsDisallowsCellularAccess {
-                allowsCellularAccess = false
-            }else{
-                allowsCellularAccess = true
+            let allowsCellularAccess:Bool = RealmUtil.RealmBlock { (realm) -> Bool in
+                if let globalData = RealmGlobalState.GetInstanceWith(realm: realm), globalData.IsDisallowsCellularAccess {
+                    return false
+                }
+                return true
             }
             NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
                 DispatchQueue.main.async {
@@ -494,11 +494,11 @@ class WebSiteSection {
         }.onCellSelection({ (buttonCellOf, buttonRow) in
             guard let url = self.GenerateQueryURL() else { return }
             DispatchQueue.main.async {
-                let allowsCellularAccess:Bool
-                if let globalData = RealmGlobalState.GetInstance(), globalData.IsDisallowsCellularAccess {
-                    allowsCellularAccess = false
-                }else{
-                    allowsCellularAccess = true
+                let allowsCellularAccess:Bool = RealmUtil.RealmBlock {(realm) -> Bool in
+                    if let globalData = RealmGlobalState.GetInstanceWith(realm: realm), globalData.IsDisallowsCellularAccess {
+                        return false
+                    }
+                    return true
                 }
                 NiftyUtilitySwift.EasyDialogNoButton(viewController: self.parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
                     NiftyUtilitySwift.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in

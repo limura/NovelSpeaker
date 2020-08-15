@@ -71,9 +71,11 @@ struct StorySelectorView: View {
                 Button(action: {
                     let index = StorySelectorView.TitleAndIndexToIndex(titleAndIndex: titleAndIndex)
                     DispatchQueue.main.async {
-                        guard let story = RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: self.novelID, chapterNumber: index)) else { return }
-                        StorySpeaker.shared.SetStory(story: story)
-                        self.storyViewData.isSupportMenuVisible = false
+                        RealmUtil.RealmBlock { (realm) -> Void in
+                            guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: self.novelID, chapterNumber: index)) else { return }
+                            StorySpeaker.shared.SetStory(realm: realm, story: story)
+                            self.storyViewData.isSupportMenuVisible = false
+                        }
                     }
                 }) {
                     Text(StorySelectorView.TitleAndIndexToTitle(titleAndIndex: titleAndIndex))
@@ -98,8 +100,10 @@ struct NovelSupportMenuView: View {
     
     func loadStoryData(storyID:String) {
         DispatchQueue.main.async {
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID)) else { return }
-            self.viewData.navigationBarTitle = novel.title
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID)) else { return }
+                self.viewData.navigationBarTitle = novel.title
+            }
         }
     }
     
@@ -108,9 +112,11 @@ struct NovelSupportMenuView: View {
             List{
                 Button(action: {
                     DispatchQueue.main.async {
-                        guard let storyArray = RealmStoryBulk.SearchAllStoryFor(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyViewData.storyID)) else { return }
-                        self.viewData.titleAndIndexArray = StorySelectorView.GenerateTitleAndIndexArray(storyArray: storyArray)
-                        self.viewData.viewState = .StorySelect
+                        RealmUtil.RealmBlock { (realm) -> Void in
+                            guard let storyArray = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyViewData.storyID)) else { return }
+                            self.viewData.titleAndIndexArray = StorySelectorView.GenerateTitleAndIndexArray(storyArray: storyArray)
+                            self.viewData.viewState = .StorySelect
+                        }
                     }
                 }) {
                     Text(NSLocalizedString("WatchOS_NovelSupportMenuView_StorySelector", comment: "章を選択"))

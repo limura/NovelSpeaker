@@ -46,9 +46,9 @@ class EditBookViewController: UIViewController {
         super.viewDidLoad()
 
         initWidgets()
-        autoreleasepool {
-            if let novel = RealmNovel.SearchNovelFrom(novelID: self.targetNovelID) {
-                applyNovel(novelID: novel.novelID)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.targetNovelID) {
+                applyNovelWith(realm: realm, novelID: novel.novelID)
             }else{
                 DispatchQueue.main.async {
                     self.navigationController?.popViewController(animated: true)
@@ -70,8 +70,8 @@ class EditBookViewController: UIViewController {
     }
     
     func initWidgets() {
-        autoreleasepool {
-            if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting {
                 storyTextView.font = displaySetting.font
             }
         }
@@ -96,20 +96,18 @@ class EditBookViewController: UIViewController {
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
-    func applyNovel(novelID:String) {
-        autoreleasepool {
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
-            titleTextField.text = novel.title
-            if let story = novel.readingChapter {
-                setStory(storyID: story.storyID)
-            }else if let story = novel.firstChapter {
-                print("load chapter: \(story.chapterNumber)")
-                setStory(storyID: story.storyID)
-            }else{
-                currentStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: 1)
-                saveCurrentStory()
-                setStory(storyID: currentStoryID)
-            }
+    func applyNovelWith(realm: Realm, novelID:String) {
+        guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
+        titleTextField.text = novel.title
+        if let story = novel.readingChapter {
+            setStory(storyID: story.storyID)
+        }else if let story = novel.firstChapter {
+            print("load chapter: \(story.chapterNumber)")
+            setStory(storyID: story.storyID)
+        }else{
+            currentStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: 1)
+            saveCurrentStory()
+            setStory(storyID: currentStoryID)
         }
     }
     
@@ -262,14 +260,14 @@ class EditBookViewController: UIViewController {
         center.addObserver(self, selector: #selector(willHideKeyboardEventHandler(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
         // storyTextView は自前のフォント設定を使うので、それが更新されるのを監視しておきます
-        autoreleasepool {
-            if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting {
                 fontSizeObserveToken = displaySetting.observe({ (change) in
                     switch change {
                     case .change(_):
                         DispatchQueue.main.async {
-                            autoreleasepool {
-                                guard let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting else { return }
+                            RealmUtil.RealmBlock { (realm) -> Void in
+                                guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting else { return }
                                 self.storyTextView.font = displaySetting.font
                             }
                         }
@@ -334,18 +332,18 @@ class EditBookViewController: UIViewController {
 
     func setStory(storyID:String) {
         DispatchQueue.main.async {
-            autoreleasepool {
+            RealmUtil.RealmBlock { (realm) -> Void in
                 let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
-                guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
                 let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
                 var story:Story
-                if let storyObj = RealmStoryBulk.SearchStory(storyID: storyID) {
+                if let storyObj = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
                     story = storyObj
                 }else{
                     story = Story()
                     story.novelID = novelID
                     story.chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
-                    RealmStoryBulk.SetStory(story: story)
+                    RealmStoryBulk.SetStoryWith(realm: realm, story: story)
                 }
                 if let maxChapterNumber = novel.lastChapterNumber {
                     self.chapterNumberIndicatorLabel.text = "\(chapterNumber)/\(maxChapterNumber)"
@@ -379,8 +377,9 @@ class EditBookViewController: UIViewController {
                 }
                 
                 self.storyTextView.text = story.content
-                if story.readLocation <= story.content.count {
-                    let range = NSRange(location: story.readLocation, length: 0)
+                let readLocation = story.readLocation(realm: realm)
+                if readLocation <= story.content.count {
+                    let range = NSRange(location: readLocation, length: 0)
                     self.storyTextView.isScrollEnabled = false
                     self.storyTextView.isScrollEnabled = true
                     self.storyTextView.selectedRange = range
@@ -393,27 +392,27 @@ class EditBookViewController: UIViewController {
     }
     
     func saveCurrentStory() {
-        let content = storyTextView.text
-        var story:Story
-        if let storyObj = RealmStoryBulk.SearchStory(storyID: self.currentStoryID) {
-            story = storyObj
-        }else{
-            story = Story()
-            story.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.currentStoryID)
-            story.chapterNumber = 1
+        RealmUtil.RealmBlock { (realm) -> Void in
+            let content = storyTextView.text
+            var story:Story
+            if let storyObj = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.currentStoryID) {
+                story = storyObj
+            }else{
+                story = Story()
+                story.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.currentStoryID)
+                story.chapterNumber = 1
+            }
+            story.content = content ?? ""
+            RealmStoryBulk.SetStoryWith(realm: realm, story: story)
         }
-        story.content = content ?? ""
-        RealmStoryBulk.SetStory(story: story)
     }
     func saveCurrentNovel() {
-        autoreleasepool {
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID) else { return }
-            RealmUtil.Write { (realm) in
-                if let title = titleTextField.text, title.count > 0 {
-                    novel.title = title
-                }
-                realm.add(novel, update: .modified)
+        RealmUtil.Write { (realm) in
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID) else { return }
+            if let title = titleTextField.text, title.count > 0 {
+                novel.title = title
             }
+            realm.add(novel, update: .modified)
         }
     }
 
@@ -439,30 +438,28 @@ class EditBookViewController: UIViewController {
     }
     @IBAction func addChapterButtonClicked(_ sender: Any) {
         saveCurrentStory()
-        autoreleasepool {
-            if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let lastStory = novel.lastChapter {
+        RealmUtil.Write { (realm) in
+            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.lastChapter {
                 let newStoryID = RealmStoryBulk.CreateUniqueID(novelID: targetNovelID, chapterNumber: lastStory.chapterNumber + 1)
-                RealmUtil.Write { (realm) in
-                    novel.m_lastChapterStoryID = newStoryID
-                    novel.lastDownloadDate = Date()
-                }
+                novel.m_lastChapterStoryID = newStoryID
+                novel.lastDownloadDate = Date()
                 setStory(storyID: newStoryID)
             }
         }
     }
     @IBAction func deleteChapterButtonClicked(_ sender: Any) {
         // memo: 削除できるのは最後の章だけ(のはず)です。
-        if let story = RealmStoryBulk.SearchStory(storyID: currentStoryID), story.storyID == currentStoryID {
-            RealmStoryBulk.RemoveLastStoryWithCheck(storyID: currentStoryID)
-        }
-        autoreleasepool {
-            if let novel = RealmNovel.SearchNovelFrom(novelID: targetNovelID), let lastStory = novel.linkedStorys?.last {
-                RealmUtil.Write { (realm) in
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: currentStoryID), story.storyID == currentStoryID {
+                RealmStoryBulk.RemoveLastStoryWithCheckWith(realm: realm, storyID: currentStoryID)
+            }
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.linkedStorys?.last {
                     novel.m_lastChapterStoryID = lastStory.storyID
+                    setStory(storyID: lastStory.storyID)
+                }else{
+                    print("last chapter not found")
                 }
-                setStory(storyID: lastStory.storyID)
-            }else{
-                print("last chapter not found")
             }
         }
     }

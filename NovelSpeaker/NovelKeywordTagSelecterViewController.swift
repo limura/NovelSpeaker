@@ -30,14 +30,14 @@ class NovelKeywordTagSelecterViewController: FormViewController {
     
     func createCells() {
         var tagNameToSelected:[String:Bool] = [:]
-        autoreleasepool {
+        RealmUtil.RealmBlock { (realm) -> Void in
             if self.searchKey.count > 0 {
-                guard let tagArray = RealmNovelTag.GetAllObjects()?.filter("type = %@ AND name CONTAINS %@", RealmNovelTag.TagType.Keyword, self.searchKey) else { return }
+                guard let tagArray = RealmNovelTag.GetAllObjectsWith(realm: realm)?.filter("type = %@ AND name CONTAINS %@", RealmNovelTag.TagType.Keyword, self.searchKey) else { return }
                 for tag in tagArray {
                     tagNameToSelected[tag.name] = tag.targetNovelIDArray.contains(self.novelID)
                 }
             }else{
-                guard let tagArray = RealmNovelTag.GetAllObjects()?.filter("type = %@", RealmNovelTag.TagType.Keyword) else { return }
+                guard let tagArray = RealmNovelTag.GetAllObjectsWith(realm: realm)?.filter("type = %@", RealmNovelTag.TagType.Keyword) else { return }
                 for tag in tagArray {
                     tagNameToSelected[tag.name] = tag.targetNovelIDArray.contains(self.novelID)
                 }
@@ -55,12 +55,12 @@ class NovelKeywordTagSelecterViewController: FormViewController {
                 }
                 $0.trailingSwipe.actions = [
                     SwipeAction(style: .destructive, title: NSLocalizedString("AssignNovelFolderViewController_DeleteSwipeActionTitle", comment: "削除"), handler: { (action, row, completionHandler) in
-                        autoreleasepool {
-                            guard let tag = RealmNovelTag.SearchWith(name: name, type: RealmNovelTag.TagType.Keyword) else {
+                        RealmUtil.RealmBlock { (realm) -> Void in
+                            guard let tag = RealmNovelTag.SearchWith(realm: realm, name: name, type: RealmNovelTag.TagType.Keyword) else {
                                 completionHandler?(true)
                                 return
                             }
-                            RealmUtil.Write { (realm) in
+                            RealmUtil.WriteWith(realm: realm) { (realm) in
                                 tag.delete(realm: realm)
                             }
                         }
@@ -69,9 +69,9 @@ class NovelKeywordTagSelecterViewController: FormViewController {
                 ]
             }.onChange({ (row) in
                 guard let isSelected = row.value else { return }
-                autoreleasepool {
-                    guard let tag = RealmNovelTag.SearchWith(name: name, type: RealmNovelTag.TagType.Keyword) else { return }
-                    RealmUtil.Write(withoutNotifying: [self.novelTagNotificationToken], block: { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let tag = RealmNovelTag.SearchWith(realm: realm, name: name, type: RealmNovelTag.TagType.Keyword) else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.novelTagNotificationToken], block: { (realm) in
                         if isSelected {
                             RealmNovelTag.AddTag(realm: realm, name: name, novelID: self.novelID, type: RealmNovelTag.TagType.Keyword)
                         }else{
@@ -85,8 +85,8 @@ class NovelKeywordTagSelecterViewController: FormViewController {
     }
     
     func observeRealmNovelTag() {
-        autoreleasepool {
-            guard let target = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Keyword) else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let target = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Keyword) else { return }
             self.novelTagNotificationToken = target.observe({ (changes) in
                 switch changes {
                 case .initial(_):
@@ -125,11 +125,9 @@ class NovelKeywordTagSelecterViewController: FormViewController {
                         }
                         return
                     }
-                    autoreleasepool {
-                        RealmUtil.Write(block: { (realm) in
-                            RealmNovelTag.AddTag(realm: realm, name: name, novelID: self.novelID, type: RealmNovelTag.TagType.Keyword)
-                        })
-                    }
+                    RealmUtil.Write(block: { (realm) in
+                        RealmNovelTag.AddTag(realm: realm, name: name, novelID: self.novelID, type: RealmNovelTag.TagType.Keyword)
+                    })
                 }
             )
         }

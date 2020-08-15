@@ -304,7 +304,7 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="44" width="375" height="574"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <mutableString key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
+                                <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
 MIT License
 
@@ -1039,7 +1039,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
-</mutableString>
+</string>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
@@ -1215,7 +1215,7 @@ DEALINGS IN THE SOFTWARE.
                                     <action selector="nextChapterButtonClicked:" destination="WIX-4N-ZvP" eventType="touchUpInside" id="Gih-Mw-HwC"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1/1" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P4K-uK-bhG">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="?/?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P4K-uK-bhG">
                                 <rect key="frame" x="310" y="584.5" width="27" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="27" id="InC-Ax-NTQ"/>
@@ -1435,7 +1435,7 @@ DEALINGS IN THE SOFTWARE.
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="uw4-9z-dhB"/>
+        <segue reference="FvL-jm-emj"/>
         <segue reference="whQ-HQ-5wp"/>
     </inferredMetricsTieBreakers>
     <resources>

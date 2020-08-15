@@ -33,9 +33,11 @@ class RealmTests: XCTestCase {
     
     func testLeakTest() {
         let downloadQueue = NovelDownloadQueue.shared
-        if let novels = RealmNovel.GetAllObjects() {
-            for novel in novels {
-                downloadQueue.addQueue(novelID: novel.novelID)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let novels = RealmNovel.GetAllObjectsWith(realm: realm) {
+                for novel in novels {
+                    downloadQueue.addQueue(novelID: novel.novelID)
+                }
             }
         }
         while true {

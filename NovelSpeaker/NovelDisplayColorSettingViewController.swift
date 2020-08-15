@@ -37,22 +37,26 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
     */
     
     func getForegroundColor() -> UIColor {
-            if let state = RealmGlobalState.GetInstance(), let color = state.foregroundColor {
-            return color
+        return RealmUtil.RealmBlock { (realm) -> UIColor in
+            if let state = RealmGlobalState.GetInstanceWith(realm: realm), let color = state.foregroundColor {
+                return color
+            }
+            if #available(iOS 13.0, *) {
+                return UIColor.label
+            }
+            return UIColor.black
         }
-        if #available(iOS 13.0, *) {
-            return UIColor.label
-        }
-        return UIColor.black
     }
     func getBackgroundColor() -> UIColor {
-        if let state = RealmGlobalState.GetInstance(), let color = state.backgroundColor {
-            return color
+        return RealmUtil.RealmBlock { (realm) -> UIColor in
+            if let state = RealmGlobalState.GetInstanceWith(realm: realm), let color = state.backgroundColor {
+                return color
+            }
+            if #available(iOS 13.0, *) {
+                return UIColor.systemBackground
+            }
+            return UIColor.white
         }
-        if #available(iOS 13.0, *) {
-            return UIColor.systemBackground
-        }
-        return UIColor.white
     }
     
     func setColor(foregroundColor:UIColor, backgroundColor:UIColor) {
@@ -70,10 +74,12 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
     }
     
     func saveColor(foregroundColor:UIColor?, backgroundColor:UIColor?) {
-        guard let state = RealmGlobalState.GetInstance() else { return }
-        RealmUtil.Write { (realm) in
-            state.foregroundColor = foregroundColor
-            state.backgroundColor = backgroundColor
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let state = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                state.foregroundColor = foregroundColor
+                state.backgroundColor = backgroundColor
+            }
         }
     }
     

@@ -61,8 +61,8 @@ class MultipleNovelIDSelectorViewController: FormViewController {
     }
 
     func observeNovelArray() {
-        autoreleasepool {
-            guard let allNovels = RealmNovel.GetAllObjects() else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let allNovels = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
             self.novelArrayNotificationToken = allNovels.observe({ (change) in
                 switch change {
                 case .initial(_):
@@ -83,8 +83,8 @@ class MultipleNovelIDSelectorViewController: FormViewController {
     
     func createSelectorCells() {
         let section = Section()
-        autoreleasepool {
-            guard var allNovels = RealmNovel.GetAllObjects() else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard var allNovels = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
             if IsUseAnyNovelID {
                 section <<< CheckRow(MultipleNovelIDSelectorViewController.AnyTypeTag) {
                     $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AnyTargetName", comment: "全ての小説")

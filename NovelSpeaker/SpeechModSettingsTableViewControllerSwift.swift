@@ -66,8 +66,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     }
     
     func addNotificationReceiver(){
-        autoreleasepool {
-            self.speechModSettingObserveToken = RealmSpeechModSetting.GetAllObjects()?.observe { (collectionChange) in
+        RealmUtil.RealmBlock { (realm) -> Void in
+            self.speechModSettingObserveToken = RealmSpeechModSetting.GetAllObjectsWith(realm: realm)?.observe { (collectionChange) in
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                 }
@@ -87,8 +87,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return autoreleasepool {
-            if let speechModSettingArray = GetSpeechModArray() {
+        return RealmUtil.RealmBlock { (realm) -> Int in
+            if let speechModSettingArray = GetSpeechModArrayWith(realm: realm) {
                 return (speechModSettingArray.count);
             }
             return 0
@@ -104,8 +104,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
 
         cell.textLabel?.adjustsFontForContentSizeCategory = true
         cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .body)
-        autoreleasepool {
-            let modSetting = GetSpeechModSettingFromRow(row: indexPath.row)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            let modSetting = GetSpeechModSettingFromRowWith(realm: realm, row: indexPath.row)
             if modSetting == nil {
                 cell.textLabel?.text = "-"
             }else{
@@ -135,13 +135,11 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
-            autoreleasepool {
-                if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
-                    autoreleasepool {
-                        if let targetModSetting = RealmSpeechModSetting.SearchFrom(beforeString: modSetting.before) {
-                            RealmUtil.Write { (realm)  in
-                                targetModSetting.delete(realm: realm)
-                            }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                if let modSetting = GetSpeechModSettingFromRowWith(realm: realm, row: indexPath.row) {
+                    if let targetModSetting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: modSetting.before) {
+                        RealmUtil.WriteWith(realm: realm) { (realm)  in
+                            targetModSetting.delete(realm: realm)
                         }
                     }
                 }
@@ -154,8 +152,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
 
     // セルが選択された時
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        autoreleasepool {
-            if let modSetting = GetSpeechModSettingFromRow(row: indexPath.row) {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let modSetting = GetSpeechModSettingFromRowWith(realm: realm, row: indexPath.row) {
                 PushToCreateSpeechModSettingViewControllerSwift(modSetting: modSetting)
             }
         }
@@ -219,8 +217,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     
-    func GetSpeechModArray() -> LazyFilterSequence<Results<RealmSpeechModSetting>>? {
-        guard var speechModSettingArray = RealmSpeechModSetting.GetAllObjects() else { return nil }
+    func GetSpeechModArrayWith(realm: Realm) -> LazyFilterSequence<Results<RealmSpeechModSetting>>? {
+        guard var speechModSettingArray = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return nil }
         if m_FilterString.count > 0 {
             speechModSettingArray = speechModSettingArray.filter("( before CONTAINS %@ OR after CONTAINS %@ )", m_FilterString, m_FilterString)
         }
@@ -235,8 +233,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
         })
     }
     
-    func GetSpeechModSettingFromRow(row:Int) -> RealmSpeechModSetting? {
-        guard let speechModSettingArray = GetSpeechModArray() else { return nil }
+    func GetSpeechModSettingFromRowWith(realm: Realm, row:Int) -> RealmSpeechModSetting? {
+        guard let speechModSettingArray = GetSpeechModArrayWith(realm: realm) else { return nil }
         let array = Array(speechModSettingArray)
         if array.count <= row {
             return nil;

@@ -118,15 +118,4 @@ class SpeakerTest: XCTestCase {
         speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.Otoya-compact", language: "ja-JP")
         speakWithWait(speaker: speaker1, text: "発話ですよ", expectationID: "6")
     }
-    
-    func testSkip() {
-        let story = RealmStoryBulk.SearchStory(novelID: "https://ncode.syosetu.com/n6475db/", chapterNumber:431) ?? Story()
-        let speaker = StorySpeaker.shared
-        speaker.SetStory(story: story)
-        print("location: \(speaker.readLocation)")
-        speaker.SkipForward(length: 50)
-        print("location: \(speaker.readLocation)")
-        speaker.SkipBackward(length: 50)
-        print("location: \(speaker.readLocation)")
-    }
 }

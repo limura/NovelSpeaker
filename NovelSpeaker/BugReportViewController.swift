@@ -235,13 +235,15 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     BugReportViewController.value.ProblemOccurenceProcedure = value
                 }
             })
-            <<< MultipleSelectorRow<RealmNovel>("TargetNovelAlertRow") {
-                $0.title = NSLocalizedString("BugReportViewController_TargetNovelName", comment: "問題が発生する小説(もしあれば)")
-                $0.selectorTitle = NSLocalizedString("BugReportViewController_TargetNovelName_SelectorTitle", comment: "問題が発生する小説")
-                if let novelArray = RealmNovel.GetAllObjects() {
-                    $0.options = Array(novelArray)
+            <<< MultipleSelectorRow<RealmNovel>("TargetNovelAlertRow") { (row) in
+                row.title = NSLocalizedString("BugReportViewController_TargetNovelName", comment: "問題が発生する小説(もしあれば)")
+                row.selectorTitle = NSLocalizedString("BugReportViewController_TargetNovelName_SelectorTitle", comment: "問題が発生する小説")
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) {
+                        row.options = Array(novelArray)
+                    }
                 }
-                $0.value = BugReportViewController.value.TargetNovelNameSet
+                row.value = BugReportViewController.value.TargetNovelNameSet
             }.onPresent { from, to in
                 to.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: from, action: #selector(self.multipleSelectorDone(_:)))
             }.onChange { row in

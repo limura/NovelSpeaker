@@ -122,7 +122,7 @@ class CoreDataToRealmTool: NSObject {
                     var name = pitchConfig.title ?? NSLocalizedString("SpeakerSetting_NewSpeakerSetting", comment: "新規話者設定")
                     var n = 0
                     while(true) {
-                        if RealmSpeakerSetting.SearchFrom(name: name) != nil {
+                        if RealmSpeakerSetting.SearchFromWith(realm: realm, name: name) != nil {
                             n += 1
                             name = "\(pitchConfig.title ?? NSLocalizedString("SpeakerSetting_NewSpeakerSetting", comment: "新規話者設定"))(\(n))"
                         }else{
@@ -142,20 +142,18 @@ class CoreDataToRealmTool: NSObject {
                     speaker.type = "AVSpeechThinsesizer"
                     speaker.locale = "ja-JP"
                     
-                    autoreleasepool {
-                        let section = RealmSpeechSectionConfig()
-                        section.speakerID = speaker.name
-                        section.name = speaker.name
-                        if let startText = pitchConfig.startText {
-                            section.startText = startText
-                        }
-                        if let endText = pitchConfig.endText {
-                            section.endText = endText
-                        }
-                        section.targetNovelIDArray.append(RealmSpeechSectionConfig.anyTarget)
-
-                        realm.add([speaker, section])
+                    let section = RealmSpeechSectionConfig()
+                    section.speakerID = speaker.name
+                    section.name = speaker.name
+                    if let startText = pitchConfig.startText {
+                        section.startText = startText
                     }
+                    if let endText = pitchConfig.endText {
+                        section.endText = endText
+                    }
+                    section.targetNovelIDArray.append(RealmSpeechSectionConfig.anyTarget)
+
+                    realm.add([speaker, section])
                 }
             }
         }
@@ -170,24 +168,22 @@ class CoreDataToRealmTool: NSObject {
             count += 1
             progress(NSLocalizedString("CoreDataToRealmTool_ProgressSpeechMod", comment: "読み替え辞書を変換中") + " (\(count)/\(speechModArray.count))")
             if let speechMod = speechMod as? SpeechModSettingCacheData {
-                autoreleasepool {
-                    let mod = RealmSpeechModSetting()
+                let mod = RealmSpeechModSetting()
 
-                    if let before = speechMod.beforeString {
-                        mod.before = before
-                    }else{
-                        return
-                    }
-                    if let after = speechMod.afterString {
-                        mod.after = after
-                    }else{
-                        return
-                    }
-                    mod.isUseRegularExpression = speechMod.isRegexpType()
-                    mod.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
-
-                    realm.add(mod, update: .modified)
+                if let before = speechMod.beforeString {
+                    mod.before = before
+                }else{
+                    return
                 }
+                if let after = speechMod.afterString {
+                    mod.after = after
+                }else{
+                    return
+                }
+                mod.isUseRegularExpression = speechMod.isRegexpType()
+                mod.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
+
+                realm.add(mod, update: .modified)
             }
         }
     }
@@ -274,69 +270,67 @@ class CoreDataToRealmTool: NSObject {
             guard let novelCoreData = novelObj as? NarouContentCacheData else {
                 continue
             }
-            autoreleasepool {
-                let novel = RealmNovel()
-                novel.novelID = NarouContentToNovelID(content: novelCoreData)
-                let lastStory = CreateRealmStoryFromCoreDataWithNarouContent(realm: realm, globalDataSingleton: globalDataSingleton, content: novelCoreData, novelID: novel.novelID)
-                if novelCoreData.isURLContent() {
-                    novel.url = NarouContentToNovelID(content: novelCoreData)
-                    if let urlSecret = novelCoreData.keyword {
-                        novel.m_urlSecret = urlSecret
-                    }
-                    novel.type = NovelType.URL
-                }else if novelCoreData.isUserCreatedContent() {
-                    novel.type = NovelType.UserCreated
-                }else{
-                    novel.url = NarouContentToNovelID(content: novelCoreData)
-                    novel.type = NovelType.URL
-                    if let keyword = novelCoreData.keyword {
-                        for tag in keyword.components(separatedBy: " ") {
-                            RealmNovelTag.AddTag(realm: realm, name: tag, novelID: novel.novelID, type: RealmNovelTag.TagType.Keyword)
-                        }
+            let novel = RealmNovel()
+            novel.novelID = NarouContentToNovelID(content: novelCoreData)
+            let lastStory = CreateRealmStoryFromCoreDataWithNarouContent(realm: realm, globalDataSingleton: globalDataSingleton, content: novelCoreData, novelID: novel.novelID)
+            if novelCoreData.isURLContent() {
+                novel.url = NarouContentToNovelID(content: novelCoreData)
+                if let urlSecret = novelCoreData.keyword {
+                    novel.m_urlSecret = urlSecret
+                }
+                novel.type = NovelType.URL
+            }else if novelCoreData.isUserCreatedContent() {
+                novel.type = NovelType.UserCreated
+            }else{
+                novel.url = NarouContentToNovelID(content: novelCoreData)
+                novel.type = NovelType.URL
+                if let keyword = novelCoreData.keyword {
+                    for tag in keyword.components(separatedBy: " ") {
+                        RealmNovelTag.AddTag(realm: realm, name: tag, novelID: novel.novelID, type: RealmNovelTag.TagType.Keyword)
                     }
                 }
-                if let writer = novelCoreData.writer {
-                    novel.writer = writer
-                }
-                if let title = novelCoreData.title {
-                    novel.title = title
-                }
-                if let currentReadingStory = novelCoreData.currentReadingStory {
-                    if let chapterNumber = currentReadingStory.chapter_number as? Int {
-                        novel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: chapterNumber)
-                        if let readLocation = currentReadingStory.readLocation as? Int {
-                            Story.SetReadLocationWith(realm: realm, novelID: novel.novelID, chapterNumber: chapterNumber, location: readLocation)
-                        }
-                    }
-                }
-                // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
-                if let newFlug = novelCoreData.is_new_flug as? Bool {
-                    if newFlug {
-                        //lastStory.downloadDate = Date(timeIntervalSinceNow: 1.1)
-                        //realm.add(lastStory, update: .modified)
-                        novel.lastDownloadDate = Date(timeIntervalSinceNow: 1)
-                        novel.lastReadDate = Date(timeIntervalSinceNow: 0)
-                    }else{
-                        novel.lastDownloadDate = Date(timeIntervalSinceNow: 0)
-                        novel.lastReadDate = Date(timeIntervalSinceNow: 1)
-                    }
-                }
-
-                // chapterNumber が最後の章に関しては、
-                if var lastStory = lastStory {
-                    // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する
-                    if novelCoreData.isURLContent(), let lastDownloadURL = novelCoreData.userid {
-                        lastStory.url = lastDownloadURL
-                        RealmStoryBulk.SetStoryWith(realm: realm, story: lastStory)
-                    }
-                    novel.m_lastChapterStoryID = lastStory.storyID
-                }else{
-                    BehaviorLogger.AddLog(description: "WARN: m_lastChapterStoryID not set.", data: ["novelID":novel.novelID])
-                }
-                //print("novel add: novelID: \(novel.novelID), url: \(novel.url), coredata.ncode: \(novelCoreData.ncode ?? "unknown"), coredata.userid: \(novelCoreData.userid ?? "unknown"), isURLContent: \(novelCoreData.isURLContent() ? "true" : "false"), isUserCreatedContent: \(novelCoreData.isUserCreatedContent() ? "true" : "false")")
-
-                realm.add(novel, update: .modified)
             }
+            if let writer = novelCoreData.writer {
+                novel.writer = writer
+            }
+            if let title = novelCoreData.title {
+                novel.title = title
+            }
+            if let currentReadingStory = novelCoreData.currentReadingStory {
+                if let chapterNumber = currentReadingStory.chapter_number as? Int {
+                    novel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: chapterNumber)
+                    if let readLocation = currentReadingStory.readLocation as? Int {
+                        Story.SetReadLocationWith(realm: realm, novelID: novel.novelID, chapterNumber: chapterNumber, location: readLocation)
+                    }
+                }
+            }
+            // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
+            if let newFlug = novelCoreData.is_new_flug as? Bool {
+                if newFlug {
+                    //lastStory.downloadDate = Date(timeIntervalSinceNow: 1.1)
+                    //realm.add(lastStory, update: .modified)
+                    novel.lastDownloadDate = Date(timeIntervalSinceNow: 1)
+                    novel.lastReadDate = Date(timeIntervalSinceNow: 0)
+                }else{
+                    novel.lastDownloadDate = Date(timeIntervalSinceNow: 0)
+                    novel.lastReadDate = Date(timeIntervalSinceNow: 1)
+                }
+            }
+
+            // chapterNumber が最後の章に関しては、
+            if var lastStory = lastStory {
+                // type が URL のものであれば url を更新しておかないと再ダウンロードできなくなるので設定する
+                if novelCoreData.isURLContent(), let lastDownloadURL = novelCoreData.userid {
+                    lastStory.url = lastDownloadURL
+                    RealmStoryBulk.SetStoryWith(realm: realm, story: lastStory)
+                }
+                novel.m_lastChapterStoryID = lastStory.storyID
+            }else{
+                BehaviorLogger.AddLog(description: "WARN: m_lastChapterStoryID not set.", data: ["novelID":novel.novelID])
+            }
+            //print("novel add: novelID: \(novel.novelID), url: \(novel.url), coredata.ncode: \(novelCoreData.ncode ?? "unknown"), coredata.userid: \(novelCoreData.userid ?? "unknown"), isURLContent: \(novelCoreData.isURLContent() ? "true" : "false"), isUserCreatedContent: \(novelCoreData.isUserCreatedContent() ? "true" : "false")")
+
+            realm.add(novel, update: .modified)
         }
     }
     
@@ -372,14 +366,15 @@ class CoreDataToRealmTool: NSObject {
     }
     
     @objc static func IsNeedMigration() -> Bool {
-        return autoreleasepool {
+        return RealmUtil.RealmBlock { (realm) -> Bool in
             if RealmUtil.IsUseCloudRealm() {
                 do {
                     try RealmUtil.EnableSyncEngine()
                 }catch{
                     // TODO: exception を握りつぶしている
                 }
-                if let realm = try? RealmUtil.GetRealm(), NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
+                
+                if NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm){
                     return false
                 }
             }else{

@@ -257,9 +257,9 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
 
     // よりSwiftらしいBookmarkの形式([[String:URL]])のブックマークリストとしてブックマークリストを読み出します。
     func getBookmark() -> ([[String:URL]]) {
-        return autoreleasepool {
+        return RealmUtil.RealmBlock { (realm) -> [[String:URL]] in
             var resultArray = [[String:URL]]()
-            guard let bookmarks = RealmGlobalState.GetInstance()?.webImportBookmarkArray else {
+            guard let bookmarks = RealmGlobalState.GetInstanceWith(realm: realm)?.webImportBookmarkArray else {
                 return resultArray
             }
             for bookmarkString in bookmarks {
@@ -278,8 +278,8 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         }
     }
     func delBookmark(url:URL) {
-        autoreleasepool {
-            guard let globalState = RealmGlobalState.GetInstance() else {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 return
             }
             var dic:[String:Int] = [:]
@@ -294,18 +294,18 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
                 dic[urlString] = i
             }
             if let index = dic[url.absoluteString] {
-                RealmUtil.Write { (realm) in
+                RealmUtil.WriteWith(realm: realm) { (realm) in
                     globalState.webImportBookmarkArray.remove(at: index)
                 }
             }
         }
     }
     func addBookmark(url:URL, name:String) {
-        autoreleasepool {
-            guard let globalState = RealmGlobalState.GetInstance() else {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 return
             }
-            RealmUtil.Write { (realm) in
+            RealmUtil.WriteWith(realm: realm) { (realm) in
                 let saveName = name.replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "\r", with: "")
                 globalState.webImportBookmarkArray.append("\(saveName)\n\(url.absoluteString)")
             }

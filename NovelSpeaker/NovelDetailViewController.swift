@@ -45,8 +45,8 @@ class NovelDetailViewController: FormViewController {
     }
 
     func observeNovel() {
-        autoreleasepool {
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: self.novelID) else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else { return }
             self.novelObserverToken = novel.observe({ (change) in
                 switch change {
                 case .error(_):
@@ -71,8 +71,8 @@ class NovelDetailViewController: FormViewController {
     }
 
     func observeSpeakerSetting() {
-        autoreleasepool {
-            guard let speakerSettingList = RealmSpeakerSetting.GetAllObjects() else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let speakerSettingList = RealmSpeakerSetting.GetAllObjectsWith(realm: realm) else { return }
             self.speakerSettingObserverToken = speakerSettingList.observe({ (change) in
                 switch change {
                 case .initial(_):
@@ -90,8 +90,8 @@ class NovelDetailViewController: FormViewController {
         }
     }
     func observeSpeechSectionConfig() {
-        autoreleasepool {
-            guard let sectionConfigList = RealmSpeechSectionConfig.GetAllObjects() else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let sectionConfigList = RealmSpeechSectionConfig.GetAllObjectsWith(realm: realm) else { return }
             self.speakerSettingObserverToken = sectionConfigList.observe({ (change) in
                 switch change {
                 case .initial(_):
@@ -109,8 +109,8 @@ class NovelDetailViewController: FormViewController {
         }
     }
     func observeTag() {
-        autoreleasepool {
-            guard let tagList = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Keyword) else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let tagList = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Keyword) else { return }
             self.tagObserverToken = tagList.observe({ (change) in
                 switch change {
                     
@@ -135,8 +135,8 @@ class NovelDetailViewController: FormViewController {
     
     func assignTagList(row:LabelRow) {
         var tagListText = ""
-        autoreleasepool {
-            guard let tags = RealmNovelTag.SearchWith(novelID: self.novelID, type: RealmNovelTag.TagType.Keyword) else {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let tags = RealmNovelTag.SearchWith(realm: realm, novelID: self.novelID, type: RealmNovelTag.TagType.Keyword) else {
                 print("can not get tags")
                 return
             }
@@ -150,8 +150,8 @@ class NovelDetailViewController: FormViewController {
     }
     
     func createCells() {
-        autoreleasepool {
-            guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.RemoveRealmLink() else {
                 form +++ Section()
                 <<< LabelRow() {
                     $0.title = NSLocalizedString("NovelDetailViewController_NovelLoadFailed", comment: "小説情報の取得に失敗しました。")
@@ -201,17 +201,17 @@ class NovelDetailViewController: FormViewController {
                     row.title = NSLocalizedString("NovelDetailViewController_SpeakerAlertRowTitle", comment: "標準の話者")
                     row.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
                     row.selectorTitle = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSelectorTitle", comment: "話者を選択してください")
-                    autoreleasepool {
-                        guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjects()?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
                         row.options = speakerSettingArray.map({$0.name})
                     }
                     row.value = speaker.name
                 }.onChange({ (row) in
-                    autoreleasepool {
-                        guard let targetName = row.value, let speaker = RealmSpeakerSetting.SearchFrom(name: targetName), let novel = RealmNovel.SearchNovelFrom(novelID: self.novelID) else {
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let targetName = row.value, let speaker = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetName), let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else {
                             return
                         }
-                        RealmUtil.Write(withoutNotifying: [self.speakerSettingObserverToken, self.speechSectionConfigObserverToken, self.novelObserverToken]) { (realm) in
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingObserverToken, self.speechSectionConfigObserverToken, self.novelObserverToken]) { (realm) in
                             novel.defaultSpeakerID = speaker.name
                         }
                     }
@@ -239,8 +239,8 @@ class NovelDetailViewController: FormViewController {
             }.onCellSelection({ (cellOf, row) in
                 let novelID = self.novelID
                 var result:[String:String] = [:]
-                autoreleasepool {
-                    guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let storys = novel.linkedStorys else {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let storys = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.linkedStorys else {
                         DispatchQueue.main.async {
                             NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_CanNotGetNovelData", comment: "小説本文データの抽出に失敗しました。"))
                         }
@@ -258,20 +258,18 @@ class NovelDetailViewController: FormViewController {
                     return
                 }
                 var message = ""
-                autoreleasepool {
-                    RealmUtil.Write(block: { (realm) in
-                        for (before, after) in result {
-                            if before.count <= 0 || after.count <= 0 { continue }
-                            let modSetting = RealmSpeechModSetting()
-                            modSetting.before = before
-                            modSetting.after = after
-                            modSetting.isUseRegularExpression = false
-                            modSetting.targetNovelIDArray.append(novelID)
-                            realm.add(modSetting, update: .modified)
-                            message += "\(before) → \(after)\n"
-                        }
-                    })
-                }
+                RealmUtil.Write(block: { (realm) in
+                    for (before, after) in result {
+                        if before.count <= 0 || after.count <= 0 { continue }
+                        let modSetting = RealmSpeechModSetting()
+                        modSetting.before = before
+                        modSetting.after = after
+                        modSetting.isUseRegularExpression = false
+                        modSetting.targetNovelIDArray.append(novelID)
+                        realm.add(modSetting, update: .modified)
+                        message += "\(before) → \(after)\n"
+                    }
+                })
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogBuilder(self)
                     .title(title: NSLocalizedString("NovelDetailViewController_SpeechModAdded", comment: "この小説用に以下の読み替えを登録しました"))
@@ -297,16 +295,14 @@ class NovelDetailViewController: FormViewController {
                 $0.title = NSLocalizedString("NovelDetailViewController_LikeLevelStepperRowTitle", comment: "お気に入り")
                 $0.value = novel.likeLevel > 0
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let value = row.value, let novel = RealmNovel.SearchNovelFrom(novelID: self.novelID) else { return }
-                    RealmUtil.Write(block: { (relam) in
-                        if value {
-                            novel.likeLevel = 1
-                        }else{
-                            novel.likeLevel = 0
-                        }
-                    })
-                }
+                RealmUtil.Write(block: { (realm) in
+                    guard let value = row.value, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else { return }
+                    if value {
+                        novel.likeLevel = 1
+                    }else{
+                        novel.likeLevel = 0
+                    }
+                })
             })
 
             form +++ settingSection

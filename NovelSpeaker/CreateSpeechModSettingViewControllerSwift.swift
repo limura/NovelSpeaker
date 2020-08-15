@@ -74,8 +74,8 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         if self.targetNovelID.count > 0 {
             self.targetNovelIDSet.insert(self.targetNovelID)
         }
-        autoreleasepool {
-            if let targetID = targetSpeechModSettingBeforeString, let targetSetting = RealmSpeechModSetting.SearchFrom(beforeString: targetID) {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let targetID = targetSpeechModSettingBeforeString, let targetSetting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: targetID) {
                 before = targetSetting.before
                 after = targetSetting.after
                 isUseRegularExpression = targetSetting.isUseRegularExpression
@@ -212,9 +212,9 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                     button1Action: nil,
                     button2Title: nil,
                     button2Action: {
-                        autoreleasepool {
-                            if let setting = RealmSpeechModSetting.SearchFrom(beforeString: self.beforeText) {
-                                RealmUtil.Write(block: { (realm) in
+                        RealmUtil.RealmBlock { (realm) -> Void in
+                            if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: self.beforeText) {
+                                RealmUtil.WriteWith(realm: realm, block: { (realm) in
                                     setting.delete(realm: realm)
                                 })
                             }
@@ -224,29 +224,27 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                         }
                 })
             }
-            autoreleasepool {
-                RealmUtil.Write { (realm) in
-                    let setting:RealmSpeechModSetting
-                    if let targetBeforeString = self.targetSpeechModSettingBeforeString, let originalSetting = RealmSpeechModSetting.SearchFrom(beforeString: targetBeforeString) {
-                        if targetBeforeString != self.beforeText {
-                            originalSetting.delete(realm: realm)
-                            setting = RealmSpeechModSetting()
-                            setting.before = self.beforeText
-                        }else{
-                            setting = originalSetting
-                        }
-                    }else{
+            RealmUtil.Write { (realm) in
+                let setting:RealmSpeechModSetting
+                if let targetBeforeString = self.targetSpeechModSettingBeforeString, let originalSetting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: targetBeforeString) {
+                    if targetBeforeString != self.beforeText {
+                        originalSetting.delete(realm: realm)
                         setting = RealmSpeechModSetting()
                         setting.before = self.beforeText
+                    }else{
+                        setting = originalSetting
                     }
-                    setting.after = self.afterText
-                    setting.isUseRegularExpression = self.isUseRegexp
-                    setting.targetNovelIDArray.removeAll()
-                    for novelID in self.targetNovelIDSet {
-                        setting.targetNovelIDArray.append(novelID)
-                    }
-                    realm.add(setting, update: .modified)
+                }else{
+                    setting = RealmSpeechModSetting()
+                    setting.before = self.beforeText
                 }
+                setting.after = self.afterText
+                setting.isUseRegularExpression = self.isUseRegexp
+                setting.targetNovelIDArray.removeAll()
+                for novelID in self.targetNovelIDSet {
+                    setting.targetNovelIDArray.append(novelID)
+                }
+                realm.add(setting, update: .modified)
             }
             DispatchQueue.main.async {
                 self.navigationController?.popViewController(animated: true)
@@ -300,12 +298,12 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         }
 
         speaker.StopSpeech()
-        let defaultSpeaker:SpeakerSetting
-        if let globalState = RealmGlobalState.GetInstance(), let realmDefaultSpeaker = globalState.defaultSpeaker {
-            defaultSpeaker = SpeakerSetting(from: realmDefaultSpeaker)
-        }else{
+        let defaultSpeaker:SpeakerSetting = RealmUtil.RealmBlock { (realm) -> SpeakerSetting in
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let realmDefaultSpeaker = globalState.defaultSpeaker {
+                return SpeakerSetting(from: realmDefaultSpeaker)
+            }
             let realmDefaultSpeaker = RealmSpeakerSetting()
-            defaultSpeaker = SpeakerSetting(from: realmDefaultSpeaker)
+            return SpeakerSetting(from: realmDefaultSpeaker)
         }
         let modSettingArray = [SpeechModSetting(before: before, after: after, isUseRegularExpression: isUseRegexp)]
         speaker.SetText(content: testText, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: [], speechModArray: modSettingArray)
@@ -326,8 +324,8 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         }
         for novelID in selectedNovelIDSet {
             if novelID == MultipleNovelIDSelectorViewController.AnyTypeTag { continue }
-            autoreleasepool {
-                guard let novel = RealmNovel.SearchNovelFrom(novelID: novelID) else { return }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
                 selectedNovelNameArray.append(novel.title)
             }
         }

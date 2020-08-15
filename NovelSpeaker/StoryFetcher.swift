@@ -42,7 +42,7 @@ struct StoryState {
             // ヘッドレスブラウザが使える状況で、nextButton や firstPageButton がある場合も次のページがあると判定します。
             #if !os(watchOS)
             if nextButton != nil || firstPageButton  != nil{ return true }
-            print("IsNextAlive return false:", nextUrl?.absoluteString ?? "[nextUrl is nil]", firstPageLink?.absoluteString ?? "[firstPageLink is nil]", nextButton == nil ? "[nextButton is nil]" : "valid nextButton", firstPageButton == nil ? "[firstPageButton is nil]" : "valid firstPageButton")
+            //print("IsNextAlive return false:", nextUrl?.absoluteString ?? "[nextUrl is nil]", firstPageLink?.absoluteString ?? "[firstPageLink is nil]", nextButton == nil ? "[nextButton is nil]" : "valid nextButton", firstPageButton == nil ? "[firstPageButton is nil]" : "valid firstPageButton")
             #endif
             return false
         }
@@ -328,8 +328,10 @@ class StoryHtmlDecoder {
                 announceLoadEnd()
                 return
         }
-        if let instance = RealmGlobalState.GetInstance(), instance.isForceSiteInfoReloadIsEnabled {
-            cacheFileExpireTimeinterval = 0
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let instance = RealmGlobalState.GetInstanceWith(realm: realm), instance.isForceSiteInfoReloadIsEnabled {
+                cacheFileExpireTimeinterval = 0
+            }
         }
         var siteInfoData:Data? = nil
         var customSiteInfoData:Data? = nil
@@ -578,7 +580,11 @@ class StoryFetcher {
             }
             #endif
             
-            NiftyUtilitySwift.httpRequest(url: url, postData: nil, cookieString: currentState.cookieString, isNeedHeadless: currentState.isNeedHeadless, mainDocumentURL: url, allowsCellularAccess: (RealmGlobalState.GetInstance()?.IsDisallowsCellularAccess ?? false) ? false : true, successAction: { (data, encoding) in
+            let isDisallowsCellularAccess:Bool = RealmUtil.RealmBlock { (realm) -> Bool in
+                return RealmGlobalState.GetInstanceWith(realm: realm)?.IsDisallowsCellularAccess ?? false
+            }
+            
+            NiftyUtilitySwift.httpRequest(url: url, postData: nil, cookieString: currentState.cookieString, isNeedHeadless: currentState.isNeedHeadless, mainDocumentURL: url, allowsCellularAccess: isDisallowsCellularAccess ? false : true, successAction: { (data, encoding) in
                 #if !os(watchOS)
                 let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, document: currentState.document, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton)
                 #else

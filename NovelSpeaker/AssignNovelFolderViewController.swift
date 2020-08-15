@@ -28,8 +28,8 @@ class AssignNovelFolderViewController: FormViewController {
     }
     
     func createCells() {
-        autoreleasepool {
-            guard let tags = RealmNovelTag.GetObjectsFor(type: RealmNovelTag.TagType.Bookshelf) else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Bookshelf) else { return }
             
             let section = Section()
             for tag in tags {
@@ -39,12 +39,12 @@ class AssignNovelFolderViewController: FormViewController {
                     $0.title = tagName
                     $0.trailingSwipe.actions = [
                         SwipeAction(style: .destructive, title: NSLocalizedString("AssignNovelFolderViewController_DeleteSwipeActionTitle", comment: "削除"), handler: { (action, row, completionHandler) in
-                            autoreleasepool {
-                                guard let tag = RealmNovelTag.SearchWith(name: tagName, type: tagType) else {
+                            RealmUtil.RealmBlock { (realm) -> Void in
+                                guard let tag = RealmNovelTag.SearchWith(realm: realm, name: tagName, type: tagType) else {
                                     completionHandler?(true)
                                     return
                                 }
-                                RealmUtil.Write { (realm) in
+                                RealmUtil.WriteWith(realm: realm) { (realm) in
                                     tag.delete(realm: realm)
                                 }
                             }
@@ -53,14 +53,14 @@ class AssignNovelFolderViewController: FormViewController {
                     ]
                     $0.value = tag.targetNovelIDArray.contains(self.targetNovelID)
                 }.onChange({ (row) in
-                    autoreleasepool {
-                        guard let value = row.value, let tag = RealmNovelTag.SearchWith(name: tagName, type: tagType) else { return }
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let value = row.value, let tag = RealmNovelTag.SearchWith(realm: realm, name: tagName, type: tagType) else { return }
                         if value {
-                            RealmUtil.Write(block: { (realm) in
+                            RealmUtil.WriteWith(realm: realm, block: { (realm) in
                                 RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: self.targetNovelID, type: RealmNovelTag.TagType.Bookshelf)
                             })
                         }else{
-                            RealmUtil.Write(block: { (realm) in
+                            RealmUtil.WriteWith(realm: realm, block: { (realm) in
                                 tag.unref(realm: realm, novelID: self.targetNovelID)
                             })
                         }
@@ -81,14 +81,14 @@ class AssignNovelFolderViewController: FormViewController {
                 textFieldText: "",
                 placeHolder: NSLocalizedString("AssignNovelFolderViewController_CreateNewTagPlaceHolder", comment: "同じ名前のフォルダは生成できません"),
                 action: { (name) in
-                    autoreleasepool {
-                        if RealmNovelTag.SearchWith(name: name, type: RealmNovelTag.TagType.Bookshelf) != nil {
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        if RealmNovelTag.SearchWith(realm: realm, name: name, type: RealmNovelTag.TagType.Bookshelf) != nil {
                             DispatchQueue.main.async {
                                 NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("AssignNovelFolderViewController_CreateNewTagPlaceHolder", comment: "同じ名前のフォルダは生成できません"))
                             }
                             return
                         }
-                        RealmUtil.Write(block: { (realm) in
+                        RealmUtil.WriteWith(realm: realm, block: { (realm) in
                             RealmNovelTag.AddTag(realm: realm, name: name, novelID: self.targetNovelID, type: RealmNovelTag.TagType.Bookshelf)
                         })
                     }

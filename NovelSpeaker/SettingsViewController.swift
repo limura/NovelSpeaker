@@ -159,17 +159,17 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
                 row.minuteInterval = 5
                 row.cell.textLabel?.numberOfLines = 0
-                autoreleasepool {
-                    if let globalState = RealmGlobalState.GetInstance() {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                         row.value = Double(globalState.maxSpeechTimeInSec)
                     }else{
                         row.value = 60*60*24-60
                     }
                 }
             }.onChange({ row in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.maxSpeechTimeInSec = Int(value)
                     }
                 }
@@ -182,10 +182,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 self.CreateNewUserText()
             })
             
-            <<< SwitchRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_BackgroundFetch", comment:"小説の自動更新")
-                $0.value = RealmGlobalState.GetInstance()?.isBackgroundNovelFetchEnabled ?? false
-                $0.cell.textLabel?.numberOfLines = 0
+            <<< SwitchRow() { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_BackgroundFetch", comment:"小説の自動更新")
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    row.value = RealmGlobalState.GetInstanceWith(realm: realm)?.isBackgroundNovelFetchEnabled ?? false
+                }
+                row.cell.textLabel?.numberOfLines = 0
             }.onChange({ row in
                 guard let judge = row.value else { return }
                 if judge {
@@ -201,9 +203,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         })
                         .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
                             NiftyUtilitySwift.RegisterUserNotification()
-                            autoreleasepool {
-                                if let globalState = RealmGlobalState.GetInstance() {
-                                    RealmUtil.Write { (realm) in
+                            RealmUtil.RealmBlock { (realm) -> Void in
+                                if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                                    RealmUtil.WriteWith(realm: realm) { (realm) in
                                         globalState.isBackgroundNovelFetchEnabled = true
                                     }
                                     NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
@@ -215,9 +217,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         })
                         .build().show()
                 }else{
-                    autoreleasepool {
-                        if let globalState = RealmGlobalState.GetInstance() {
-                            RealmUtil.Write { (realm) in
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                            RealmUtil.WriteWith(realm: realm) { (realm) in
                                 globalState.isBackgroundNovelFetchEnabled = false
                             }
                             NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
@@ -229,8 +231,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow("OverrideRubySwitchRow") { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
                 row.cell.textLabel?.numberOfLines = 0
-                autoreleasepool {
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting else {
                         row.value = false
                         return
                     }
@@ -238,9 +240,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             }.onChange({ row in
                 self.m_RubySwitchToggleHitCount += 1
-                autoreleasepool {
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting, let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         speechOverrideSetting.isOverrideRubyIsEnabled = value
                     }
                 }
@@ -252,17 +254,17 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     let row: RowOf<Bool>! = form.rowBy(tag: "OverrideRubySwitchRow")
                     return row.value ?? false == false
                 })
-                autoreleasepool {
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting else {
                         row.value = ""
                         return
                     }
                     row.value = speechOverrideSetting.notRubyCharactorStringArray
                 }
             }.onChange({ textRow in
-                autoreleasepool {
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let value = textRow.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting, let value = textRow.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         speechOverrideSetting.notRubyCharactorStringArray = value
                     }
                 }
@@ -270,14 +272,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow(){ row in
                 row.title = NSLocalizedString("SettingTableViewController_DisplayBookmarkPositionOnBookshelf", comment: "本棚に栞の現在位置ゲージを表示する")
                 row.cell.textLabel?.numberOfLines = 0
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.isReadingProgressDisplayEnabled
                 }
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.isReadingProgressDisplayEnabled = value
                     }
                 }
@@ -286,14 +288,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_OnlyDisplayAddSpeechModSettings", comment: "本文中の長押しメニューを読み替え辞書へ登録のみにする")
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.isMenuItemIsAddNovelSpeakerItemsOnly
                 }
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.isMenuItemIsAddNovelSpeakerItemsOnly = value
                     }
                 }
@@ -302,14 +304,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_ShortSkipIsEnabled", comment: "コントロールセンターの前後の章(トラック)への移動ボタンを、少し前/少し後の文への移動にする")
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.isShortSkipEnabled
                 }
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.isShortSkipEnabled = value
                     }
                 }
@@ -318,14 +320,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_PlaybackDurationIsEnabled", comment: "コントロールセンターの再生時間ゲージを有効にする(表示される時間は概算で、正確な値にはなりません)")
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.isPlaybackDurationEnabled
                 }
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.isPlaybackDurationEnabled = value
                     }
                 }
@@ -333,14 +335,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_PageTurningSoundIsEnabled", comment: "ページめくり時に音を鳴らす")
                 row.cell.textLabel?.numberOfLines = 0
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.isPageTurningSoundEnabled
                 }
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.isPageTurningSoundEnabled = value
                     }
                 }
@@ -348,14 +350,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_IgnoreURISpeechIsEnabled", comment: "URIを読み上げないようにする")
                 row.cell.textLabel?.numberOfLines = 0
-                autoreleasepool {
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting else { return }
                     row.value = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
                 }
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting, let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         speechOverrideSetting.isIgnoreURIStringSpeechEnabled = value
                     }
                 }
@@ -369,8 +371,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.options = [noRepeat, rewindToFirstStory, rewindToThisStory]
                 row.value = noRepeat
                 row.cell.textLabel?.numberOfLines = 0
-                autoreleasepool {
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting else { return }
                     let type = speechOverrideSetting.repeatSpeechType
                     if type == .rewindToFirstStory {
                         row.value = rewindToFirstStory
@@ -383,9 +385,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 let noRepeat = NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
                 let rewindToFirstStory = NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
                 let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
-                autoreleasepool {
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting, let typeString = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting, let typeString = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         if typeString == noRepeat {
                             speechOverrideSetting.repeatSpeechType = .noRepeat
                         }else if typeString == rewindToFirstStory {
@@ -400,8 +402,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
                 }
             }.onChange({ (row) in
@@ -421,18 +423,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: true)
                             }
-                            autoreleasepool {
-                                guard let globalState = RealmGlobalState.GetInstance() else { return }
-                                RealmUtil.Write { (realm) in
+                            RealmUtil.RealmBlock { (realm) -> Void in
+                                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                                RealmUtil.WriteWith(realm: realm) { (realm) in
                                     globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = true
                                 }
                             }
                         })
                         .build().show()
                 }else{
-                    autoreleasepool {
-                        guard let globalState = RealmGlobalState.GetInstance() else { return }
-                        RealmUtil.Write { (realm) in
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                        RealmUtil.WriteWith(realm: realm) { (realm) in
                             globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = false
                         }
                     }
@@ -442,14 +444,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)")
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith( realm: realm) else { return }
                     row.value = globalState.isMixWithOthersEnabled
                 }
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.isMixWithOthersEnabled = value
                     }
                 }
@@ -461,14 +463,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     let row: RowOf<Bool>! = form.rowBy(tag: "MixWithOthersSwitchRow")
                     return row.value ?? false == false
                 })
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.isDuckOthersEnabled
                 }
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.isDuckOthersEnabled = value
                     }
                 }
@@ -476,43 +478,43 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< SwitchRow("IsOpenRecentBookInStartTime") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsOpenRecentBookInStartTime", comment: "起動時に前回開いていた小説を開く")
                 row.cell.textLabel?.numberOfLines = 0
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.isOpenRecentNovelInStartTime
                 }
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith( realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.isOpenRecentNovelInStartTime = value
                     }
                 }
             })
             <<< SwitchRow("isDisallowsCellularAccess") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsDisallowsCellularAccess", comment: "携帯電話網ではダウンロードしないようにする")
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.IsDisallowsCellularAccess
                 }
                 row.cell.textLabel?.numberOfLines = 0
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.IsDisallowsCellularAccess = value
                     }
                 }
             })
             <<< SwitchRow("isNeedConfirmDeleteBook") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsNeedConfirmDeleteBook", comment: "小説を削除する時に確認する")
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.IsNeedConfirmDeleteBook
                 }
                 row.cell.textLabel?.numberOfLines = 0
             }.onChange({ (row) in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
                     RealmUtil.Write { (realm) in
                         globalState.IsNeedConfirmDeleteBook = value
                     }
@@ -718,14 +720,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_ForceSiteInfoReload", comment:"SiteInfoを毎回読み直す")
                 row.value = false
                 row.cell.textLabel?.numberOfLines = 0
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance() else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     row.value = globalState.isForceSiteInfoReloadIsEnabled
                 }
             }.onChange({ row in
-                autoreleasepool {
-                    guard let globalState = RealmGlobalState.GetInstance(), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
                         globalState.isForceSiteInfoReloadIsEnabled = value
                     }
                 }
@@ -1123,7 +1125,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     }
     /// 標準で用意された読み上げ辞書を上書き追加します。
     func AddDefaultSpeechModSetting(){
-        NovelSpeakerUtility.OverrideDefaultSpeechModSettings()
+        RealmUtil.RealmBlock { (realm) -> Void in
+            NovelSpeakerUtility.OverrideDefaultSpeechModSettingsWith(realm: realm)
+        }
         DispatchQueue.main.async {
             NiftyUtilitySwift.EasyDialogBuilder(self)
                 .label(text: NSLocalizedString("SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary", comment: "標準の読み替え辞書を上書き追加しました。"))

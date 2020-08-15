@@ -536,11 +536,12 @@ class NiftyUtilitySwift: NSObject {
     #if !os(watchOS)
     static var headlessHttpClientObj:HeadlessHttpClient? = nil
     static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
-        let allowsCellularAccess:Bool
-        if let globalData = RealmGlobalState.GetInstance(), globalData.IsDisallowsCellularAccess {
-            allowsCellularAccess = false
-        }else{
-            allowsCellularAccess = true
+        // TODO: おおよそ関係の無い所で Realm を触る必要があってうぅむ。
+        let allowsCellularAccess:Bool = RealmUtil.RealmBlock { (realm) -> Bool in
+            if let globalData = RealmGlobalState.GetInstanceWith(realm: realm), globalData.IsDisallowsCellularAccess {
+                return false
+            }
+            return true
         }
         DispatchQueue.main.async {
             let client:HeadlessHttpClient
@@ -980,8 +981,8 @@ class NiftyUtilitySwift: NSObject {
     #endif
     
     @objc static public func IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled() -> Bool {
-        return autoreleasepool {
-            guard let globalState = RealmGlobalState.GetInstance() else {
+        return RealmUtil.RealmBlock { (realm) -> Bool in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 return false
             }
             return globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled

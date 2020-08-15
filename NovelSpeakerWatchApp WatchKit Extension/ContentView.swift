@@ -64,9 +64,11 @@ struct ContentView: View {
     }
     
     func GetContentText(novelID:String, chapterNumber:Int) -> String? {
-        guard let story = RealmStoryBulk.SearchStory(novelID: novelID, chapterNumber: chapterNumber) else { return nil }
-        StorySpeaker.shared.SetStory(story: story)
-        return story.content
+        return RealmUtil.RealmBlock { (realm) -> String? in
+            guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber) else { return nil }
+            StorySpeaker.shared.SetStory(realm: realm, story: story)
+            return story.content
+        }
     }
 }
 
@@ -109,10 +111,12 @@ struct CheckiCloudSyncView: View {
                 Text("Speech(Speaker)")
             }
             Button<Text>(action: {
-                var story = Story()
-                story.content = self.speechText
-                StorySpeaker.shared.SetStory(story: story)
-                StorySpeaker.shared.StartSpeech(withMaxSpeechTimeReset: false)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    var story = Story()
+                    story.content = self.speechText
+                    StorySpeaker.shared.SetStory(realm: realm, story: story)
+                    StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                }
             }) {
                 Text("speech(StorySpeaker)")
             }
@@ -197,9 +201,14 @@ class ViewData:ObservableObject {
 
     init() {
         guard ((try? RealmUtil.EnableSyncEngine()) != nil) else { return }
-        if let novelArray = RealmNovel.GetAllObjects(), novelArray.count > 1 {
-            novelList = Array(novelArray)
-            currentPage = .bookshelf
+        if RealmUtil.RealmBlock(block: { (realm) -> Bool in
+            if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm), novelArray.count > 1 {
+                novelList = Array(novelArray)
+                currentPage = .bookshelf
+                return true
+            }
+            return false
+        }) {
             return
         }
         DispatchQueue.global(qos: .background).async {
@@ -221,15 +230,16 @@ class ViewData:ObservableObject {
     func CheckiCloudSync() {
         DispatchQueue.main.async {
             RealmUtil.CheckCloudDataIsValid { (result) in
-                guard result == true, let novels = RealmNovel.GetAllObjects(), novels.count > 1 else { return }
-                self.ShowBookshelfView(novelList: Array(novels))
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard result == true, let novels = RealmNovel.GetAllObjectsWith(realm: realm), novels.count > 1 else { return }
+                    self.ShowBookshelfView(novelList: Array(novels))
+                }
             }
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             if self.currentPage != CurrentPageType.neediCloudSync { return }
-            var count = 0
-            if let realm = try? RealmUtil.GetRealm() {
-                count = RealmUtil.CountAllCloudRealmRecords(realm: realm)
+            let count = RealmUtil.RealmBlock {
+                return RealmUtil.CountAllCloudRealmRecords(realm: $0)
             }
         }
     }

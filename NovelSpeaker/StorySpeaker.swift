@@ -67,42 +67,42 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         unregistAudioNotifications()
     }
     
-    func ApplyStoryToSpeaker(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {
+    func ApplyStoryToSpeaker(realm: Realm, story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {
         speaker.SetStory(story: story, withMoreSplitTargets:withMoreSplitTargets, moreSplitMinimumLetterCount:moreSplitMinimumLetterCount)
         observeSpeechConfig(novelID: story.novelID)
         observeSpeechModSetting(novelID: story.novelID)
-        speaker.SetSpeechLocation(location: story.readLocation)
+        speaker.SetSpeechLocation(location: story.readLocation(realm: realm))
         self.isNeedApplySpeechConfigs = false
     }
     
     func ApplyDefaultSpeakerSettingToAnnounceSpeaker() {
-        let defaultSpeaker:RealmSpeakerSetting
-        if let globalStateDefaultSpeaker = RealmGlobalState.GetInstance()?.defaultSpeaker {
-            defaultSpeaker = globalStateDefaultSpeaker
-        }else{
-            defaultSpeaker = RealmSpeakerSetting()
+        RealmUtil.RealmBlock { (realm) -> Void in
+            let defaultSpeaker:RealmSpeakerSetting
+            if let globalStateDefaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker {
+                defaultSpeaker = globalStateDefaultSpeaker
+            }else{
+                defaultSpeaker = RealmSpeakerSetting()
+            }
+            announceSpeaker.SetVoiceWith(identifier: defaultSpeaker.voiceIdentifier, language: defaultSpeaker.locale)
+            announceSpeaker.pitch = defaultSpeaker.pitch
+            announceSpeaker.rate = defaultSpeaker.rate
+            announceSpeaker.Speech(text: " ")
         }
-        announceSpeaker.SetVoiceWith(identifier: defaultSpeaker.voiceIdentifier, language: defaultSpeaker.locale)
-        announceSpeaker.pitch = defaultSpeaker.pitch
-        announceSpeaker.rate = defaultSpeaker.rate
-        announceSpeaker.Speech(text: " ")
     }
 
     // 読み上げに用いられる小説の章を設定します。
     // 読み上げが行われていた場合、読み上げは停止します。
-    func SetStory(story:Story) {
+    func SetStory(realm: Realm, story:Story) {
         speaker.StopSpeech()
         let storyID = story.storyID
-        autoreleasepool {
-            self.storyID = storyID
-            updateReadDate(storyID: storyID)
-            ApplyStoryToSpeaker(story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
-            //updatePlayngInfo(story: story)
-            observeStory(storyID: self.storyID)
-            observeBookmark(novelID: story.novelID)
-            for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
-                delegate.storySpeakerStoryChanged(story: story)
-            }
+        self.storyID = storyID
+        updateReadDate(realm: realm, storyID: storyID)
+        ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
+        //updatePlayngInfo(story: story)
+        observeStory(storyID: self.storyID)
+        observeBookmark(novelID: story.novelID)
+        for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
+            delegate.storySpeakerStoryChanged(story: story)
         }
     }
     
@@ -128,50 +128,54 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     func observeGlobalState() {
         DispatchQueue.main.async {
-            guard let globalState = RealmGlobalState.GetInstance() else {
-                return
-            }
-            self.globalStateObserveToken = globalState.observe({ (change) in
-                switch change {
-                case .change(_, let propertys):
-                    for property in propertys {
-                        if property.name == "isMixWithOthersEnabled" || property.name == "isDuckOthersEnabled" {
-                            guard let oldValue = property.oldValue as? Bool, let newValue = property.newValue as? Bool else { continue }
-                            if oldValue != newValue {
-                                self.audioSessionInit(isActive: false)
-                                break
-                            }
-                        }else if property.name == "isPlaybackDurationEnabled" || property.name == "isShortSkipEnabled" {
-                            self.DisableMPRemoteCommandCenterEvents()
-                            self.EnableMPRemoteCommandCenterEvents()
-                            autoreleasepool {
-                                if property.name == "isPlaybackDurationEnabled" && self.speaker.isSpeaking, let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
-                                    self.updatePlayngInfo(story: story)
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
+                    return
+                }
+                self.globalStateObserveToken = globalState.observe({ (change) in
+                    switch change {
+                    case .change(_, let propertys):
+                        for property in propertys {
+                            if property.name == "isMixWithOthersEnabled" || property.name == "isDuckOthersEnabled" {
+                                guard let oldValue = property.oldValue as? Bool, let newValue = property.newValue as? Bool else { continue }
+                                if oldValue != newValue {
+                                    self.audioSessionInit(isActive: false)
+                                    break
+                                }
+                            }else if property.name == "isPlaybackDurationEnabled" || property.name == "isShortSkipEnabled" {
+                                self.DisableMPRemoteCommandCenterEvents()
+                                self.EnableMPRemoteCommandCenterEvents()
+                                RealmUtil.RealmBlock { (realm) -> Void in
+                                    if property.name == "isPlaybackDurationEnabled" && self.speaker.isSpeaking, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
+                                        self.updatePlayngInfo(realm: realm, story: story)
+                                    }
                                 }
                             }
                         }
+                    default:
+                        break
                     }
-                default:
-                    break
-                }
-            })
+                })
+            }
         }
     }
     func observeBookmark(novelID:String) {
         DispatchQueue.main.async {
-            if self.bookmarkObserverNovelID == novelID { return }
-            self.bookmarkObserverNovelID = novelID
-            guard let bookmark = RealmBookmark.SearchObjectFrom(type: .novelSpeechLocation, hint: novelID) else { return }
-            self.bookmarkObserverToken = bookmark.observe { (change) in
-                switch change {
-                case .change(_, let properties):
-                    for property in properties {
-                        if property.name == "location", let newObj = property.newValue as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID), self.speaker.currentLocation != newObj.location {
-                            self.speaker.SetSpeechLocation(location: newObj.location)
+            RealmUtil.RealmBlock { (realm) -> Void in
+                if self.bookmarkObserverNovelID == novelID { return }
+                self.bookmarkObserverNovelID = novelID
+                guard let bookmark = RealmBookmark.SearchObjectFromWith(realm: realm, type: .novelSpeechLocation, hint: novelID) else { return }
+                self.bookmarkObserverToken = bookmark.observe { (change) in
+                    switch change {
+                    case .change(_, let properties):
+                        for property in properties {
+                            if property.name == "location", let newObj = property.newValue as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID), self.speaker.currentLocation != newObj.location {
+                                self.speaker.SetSpeechLocation(location: newObj.location)
+                            }
                         }
+                    default:
+                        break
                     }
-                default:
-                    break
                 }
             }
         }
@@ -184,8 +188,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             if self.storyObserverStoryBulkID == targetBulkID { return }
             self.storyObserverStoryID = storyID
             self.storyObserverStoryBulkID = targetBulkID
-            autoreleasepool {
-            guard let storyBulk = RealmStoryBulk.SearchStoryBulk(storyID: storyID) else { return }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let storyBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: storyID) else { return }
                 let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
                 self.storyObserverToken = storyBulk.observe({ (change) in
                     switch change {
@@ -244,26 +248,26 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }else{
             if !isJointHeadphone(outputs: previousDesc.outputs) {
                 // ヘッドフォンが抜けた
-                StopSpeech()
-                SkipBackward(length: 25)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    StopSpeech(realm: realm)
+                    SkipBackward(realm: realm, length: 25)
+                }
                 self.readLocation = speaker.currentLocation
             }
         }
     }
     
-    func updateReadDate(storyID:String) {
+    func updateReadDate(realm: Realm, storyID:String) {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         DispatchQueue.main.async {
-            RealmUtil.Write { (realm) in
-                if let novel = RealmNovel.SearchNovelFrom(novelID: novelID) {
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
                     novel.lastReadDate = Date()
                     novel.m_readingChapterStoryID = storyID
                 }
-                autoreleasepool {
-                    if let globalState = RealmGlobalState.GetInstance() {
-                        if globalState.currentReadingNovelID != novelID {
-                            globalState.currentReadingNovelID = novelID
-                        }
+                if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                    if globalState.currentReadingNovelID != novelID {
+                        globalState.currentReadingNovelID = novelID
                     }
                 }
             }
@@ -272,14 +276,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     
     func observeSpeechConfig(novelID:String) {
         DispatchQueue.main.async {
-            autoreleasepool {
-                guard let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker else { return }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker else { return }
                 self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { (change) in
                     self.isNeedApplySpeechConfigs = true
                 }
             }
-            autoreleasepool {
-                guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjects() else { return }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjectsWith(realm: realm) else { return }
                 self.speechSectionConfigArrayObserverToken = allSpeechSectionConfigArray.observe({ (change) in
                     switch change {
                     case .initial(_):
@@ -305,51 +309,52 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     
     func observeSpeechModSetting(novelID:String) {
         DispatchQueue.main.async {
-            if let globalState = RealmGlobalState.GetInstance(), let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
-                self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ (change) in
+            RealmUtil.RealmBlock { (realm) -> Void in
+                if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
+                    self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ (change) in
+                        switch change {
+                        case .error(_):
+                            break
+                        case .change(_, let properties):
+                            for property in properties {
+                                if ["isOverrideRubyIsEnabled", "notRubyCharactorStringArray", "isIgnoreURIStringSpeechEnabled"].contains(property.name) {
+                                    self.isNeedApplySpeechConfigs = true
+                                    return
+                                }
+                            }
+                        case .deleted:
+                            break
+                        }
+                    })
+                }
+
+                self.novelIDSpeechOverrideSettingArrayObserverToken = RealmSpeechOverrideSetting.GetAllObjectsWith(realm: realm)?.observe({ (change) in
                     switch change {
-                    case .error(_):
+                    case .initial(_):
                         break
-                    case .change(_, let properties):
-                        for property in properties {
-                            if ["isOverrideRubyIsEnabled", "notRubyCharactorStringArray", "isIgnoreURIStringSpeechEnabled"].contains(property.name) {
+                    case .update(let speechOverrideSettingArray, let deletions, _, _):
+                        if deletions.count > 0 {
+                            self.isNeedApplySpeechConfigs = true
+                            return
+                        }
+                        for setting in speechOverrideSettingArray {
+                            if setting.targetNovelIDArray.contains(novelID) {
                                 self.isNeedApplySpeechConfigs = true
                                 return
                             }
                         }
-                    case .deleted:
+                    case .error(_):
                         break
                     }
                 })
             }
         }
-        DispatchQueue.main.async {
-            self.novelIDSpeechOverrideSettingArrayObserverToken = RealmSpeechOverrideSetting.GetAllObjects()?.observe({ (change) in
-                switch change {
-                case .initial(_):
-                    break
-                case .update(let speechOverrideSettingArray, let deletions, _, _):
-                    if deletions.count > 0 {
-                        self.isNeedApplySpeechConfigs = true
-                        return
-                    }
-                    for setting in speechOverrideSettingArray {
-                        if setting.targetNovelIDArray.contains(novelID) {
-                            self.isNeedApplySpeechConfigs = true
-                            return
-                        }
-                    }
-                case .error(_):
-                    break
-                }
-            })
-        }
     }
     
     func audioSessionInit(isActive:Bool) {
         var option:UInt = 0
-        autoreleasepool {
-            guard let globalState = RealmGlobalState.GetInstance() else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
             if globalState.isMixWithOthersEnabled {
                 option = AVAudioSession.CategoryOptions.mixWithOthers.rawValue
                 if globalState.isDuckOthersEnabled {
@@ -389,17 +394,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         announceSpeaker.Speech(text: text)
     }
     
-    func StartSpeech(withMaxSpeechTimeReset:Bool) {
+    func StartSpeech(realm: Realm, withMaxSpeechTimeReset:Bool) {
         if (self.isMaxSpeechTimeExceeded && (!withMaxSpeechTimeReset)) {
             return
         }
-        autoreleasepool {
-            if let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
-                updatePlayngInfo(story: story)
-                // story をここでも参照するので怪しくこの if の中に入れます
-                if self.isNeedApplySpeechConfigs {
-                    self.ApplyStoryToSpeaker(story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
-                }
+        if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
+            updatePlayngInfo(realm: realm, story: story)
+            // story をここでも参照するので怪しくこの if の中に入れます
+            if self.isNeedApplySpeechConfigs {
+                self.ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
             }
         }
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
@@ -412,13 +415,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             print("audioSession.setActive(true) failed")
         }
         if withMaxSpeechTimeReset {
-            startMaxSpeechInSecTimer()
+            startMaxSpeechInSecTimer(realm: realm)
         }
         dummySoundLooper.startPlay()
         speaker.StartSpeech()
     }
     // 読み上げを停止します。読み上げ位置が更新されます。
-    func StopSpeech(stopSpeechHandler:(()->Void)? = nil) {
+    func StopSpeech(realm: Realm, stopSpeechHandler:(()->Void)? = nil) {
         speaker.StopSpeech(stopSpeechHandler: stopSpeechHandler)
         dummySoundLooper.stopPlay()
         stopMaxSpeechInSecTimer()
@@ -429,13 +432,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             print("audioSession.setActive(false) failed.")
         }
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
-        NiftyUtilitySwift.DispatchSyncMainQueue {
-            if let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
-                let newLocation = self.speaker.currentLocation
-                if story.readLocation != newLocation {
-                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
-                        story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
-                    }
+        if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
+            let newLocation = self.speaker.currentLocation
+            if story.readLocation(realm: realm) != newLocation {
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                    story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
                 }
             }
         }
@@ -445,40 +446,40 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
     }
     
-    func SkipForward(length:Int) {
+    func SkipForward(realm: Realm, length:Int) {
         NiftyUtilitySwift.DispatchSyncMainQueue {
-            guard let story = RealmStoryBulk.SearchStory(storyID: self.storyID) else {
+            guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else {
                 return
             }
             let readingPoint = self.speaker.currentLocation
             let nextReadingPoint = readingPoint + length
             let contentLength = story.content.count
             if nextReadingPoint > contentLength {
-                if !self.LoadNextChapter() && story.readLocation != contentLength {
-                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                if !self.LoadNextChapter(realm: realm) && story.readLocation(realm: realm) != contentLength {
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         story.SetCurrentReadLocationWith(realm: realm, location: contentLength)
                     }
                 }
             }else{
                 self.speaker.SetSpeechLocation(location: nextReadingPoint)
                 let newLocation = self.speaker.currentLocation
-                if story.readLocation != newLocation {
-                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                if story.readLocation(realm: realm) != newLocation {
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
                     }
                 }
             }
         }
     }
-    func SkipBackward(length:Int){
-        let readingPoint = speaker.currentLocation
+    func SkipBackward(realm: Realm, length:Int){
+        let readingPoint = self.speaker.currentLocation
         if readingPoint >= length {
-            speaker.SetSpeechLocation(location: readingPoint - length)
+            self.speaker.SetSpeechLocation(location: readingPoint - length)
             NiftyUtilitySwift.DispatchSyncMainQueue {
-                if let story = RealmStoryBulk.SearchStory(storyID: self.storyID) {
+                if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
                     let newLocation = self.speaker.currentLocation
-                    if story.readLocation != newLocation {
-                        RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                    if story.readLocation(realm: realm) != newLocation {
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                             story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
                         }
                     }
@@ -489,55 +490,55 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         var targetLength = length - readingPoint
         var targetStory:Story? = nil
         NiftyUtilitySwift.DispatchSyncMainQueue {
-            targetStory = self.SearchPreviousChapter(storyID: self.storyID)
+            targetStory = self.SearchPreviousChapterWith(realm: realm, storyID: self.storyID)
             while let story = targetStory {
                 let contentLength = story.content.count
                 if targetLength <= contentLength {
                     let newLocation = contentLength - targetLength
-                    if story.readLocation != newLocation {
-                        RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                    if story.readLocation(realm: realm) != newLocation {
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                             story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
                         }
                     }
                     self.ringPageTurningSound()
-                    self.SetStory(story: story)
+                    self.SetStory(realm: realm, story: story)
                     return
                 }
-                targetStory = self.SearchPreviousChapter(storyID: story.storyID)
+                targetStory = self.SearchPreviousChapterWith(realm: realm, storyID: story.storyID)
                 targetLength -= contentLength
             }
             // 抜けてきたということは先頭まで行ってしまった。
-            if let firstStory = RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
-                if firstStory.readLocation != 0 {
-                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+            if let firstStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID), chapterNumber: 1)) {
+                if firstStory.readLocation(realm: realm) != 0 {
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         firstStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                     }
                 }
                 if firstStory.storyID != self.storyID {
                     self.ringPageTurningSound()
                 }
-                self.SetStory(story: firstStory)
+                self.SetStory(realm: realm, story: firstStory)
             }
         }
     }
     
-    func SearchNextChapter(storyID:String) -> Story? {
+    func SearchNextChapterWith(realm:Realm, storyID:String) -> Story? {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         let nextChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID) + 1
-        return RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: nextChapterNumber))
+        return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: nextChapterNumber))
     }
     @discardableResult
-    func LoadNextChapter() -> Bool{
+    func LoadNextChapter(realm: Realm) -> Bool{
         var result:Bool = false
         NiftyUtilitySwift.DispatchSyncMainQueue {
-            if let nextStory = self.SearchNextChapter(storyID: self.storyID) {
-                if nextStory.readLocation != 0 {
-                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+            if let nextStory = self.SearchNextChapterWith(realm: realm, storyID: self.storyID) {
+                if nextStory.readLocation(realm: realm) != 0 {
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                     }
                 }
                 self.ringPageTurningSound()
-                self.SetStory(story: nextStory)
+                self.SetStory(realm: realm, story: nextStory)
                 result = true
             }else{
                 result = false
@@ -546,26 +547,26 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         return result
     }
 
-    func SearchPreviousChapter(storyID:String) -> Story? {
+    func SearchPreviousChapterWith(realm: Realm, storyID:String) -> Story? {
         let previousChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID) - 1
         if previousChapterNumber <= 0 {
             return nil
         }
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
-        return RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: previousChapterNumber))
+        return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: previousChapterNumber))
     }
     @discardableResult
-    func LoadPreviousChapter() -> Bool{
+    func LoadPreviousChapter(realm: Realm) -> Bool{
         var result = false
         NiftyUtilitySwift.DispatchSyncMainQueue {
-            if let previousStory = self.SearchPreviousChapter(storyID: self.storyID) {
-                if previousStory.readLocation != 0 {
-                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+            if let previousStory = self.SearchPreviousChapterWith(realm: realm, storyID: self.storyID) {
+                if previousStory.readLocation(realm: realm) != 0 {
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         previousStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                     }
                 }
                 self.ringPageTurningSound()
-                self.SetStory(story: previousStory)
+                self.SetStory(realm: realm, story: previousStory)
                 result = true
             }else{
                 result = false
@@ -575,24 +576,22 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func ringPageTurningSound() {
-        autoreleasepool {
-            guard let globalState = RealmGlobalState.GetInstance(), globalState.isPageTurningSoundEnabled == true else { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.isPageTurningSoundEnabled == true else { return }
             self.pageTurningSoundPlayer.startPlay()
         }
     }
     
-    func startMaxSpeechInSecTimer() {
-        autoreleasepool {
-            guard let globalState = RealmGlobalState.GetInstance() else { return }
-            stopMaxSpeechInSecTimer()
-            self.isMaxSpeechTimeExceeded = false
-            self.maxSpeechInSecTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(integerLiteral:     Int64(globalState.maxSpeechTimeInSec)), repeats: false) { (timer) in
-                self.isMaxSpeechTimeExceeded = true
-                self.StopSpeech()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                    self.AnnounceSpeech(text: NSLocalizedString("GlobalDataSingleton_AnnounceStopedByTimer", comment: "最大連続再生時間を超えたので、読み上げを停止します。"))
-                })
-            }
+    func startMaxSpeechInSecTimer(realm: Realm) {
+        guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+        stopMaxSpeechInSecTimer()
+        self.isMaxSpeechTimeExceeded = false
+        self.maxSpeechInSecTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(integerLiteral:     Int64(globalState.maxSpeechTimeInSec)), repeats: false) { (timer) in
+            self.isMaxSpeechTimeExceeded = true
+            self.StopSpeech(realm: realm)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                self.AnnounceSpeech(text: NSLocalizedString("GlobalDataSingleton_AnnounceStopedByTimer", comment: "最大連続再生時間を超えたので、読み上げを停止します。"))
+            })
         }
     }
     func stopMaxSpeechInSecTimer() {
@@ -602,10 +601,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         self.maxSpeechInSecTimer = nil
     }
     
-    func updatePlayngInfo(story:Story) {
+    func updatePlayngInfo(realm: Realm, story:Story) {
         let titleName:String
         let writer:String
-        if let novel = story.ownerNovel {
+        if let novel = story.ownerNovel(realm: realm) {
             let lastChapterNumber:Int
             if let n = novel.lastChapterNumber {
                 lastChapterNumber = n
@@ -622,19 +621,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             MPMediaItemPropertyTitle: titleName,
             MPMediaItemPropertyArtist: writer
         ]
-        autoreleasepool {
-            if RealmGlobalState.GetInstance()?.isPlaybackDurationEnabled ?? false {
-                let textLength = story.content.count
-                autoreleasepool {
-                    if let speakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker {
-                        let duration = GuessSpeakDuration(textLength: textLength, speechConfig: speakerSetting)
-                        let position = GuessSpeakDuration(textLength: story.readLocation, speechConfig: speakerSetting)
-                        songInfo[MPMediaItemPropertyPlaybackDuration] = duration
-                        songInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = position
-                        songInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1.0
-                    }
-                }
-            }
+        if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.isPlaybackDurationEnabled == true, let speakerSetting = globalState.defaultSpeaker {
+            let textLength = story.content.count
+            let duration = GuessSpeakDuration(textLength: textLength, speechConfig: speakerSetting)
+            let position = GuessSpeakDuration(textLength: story.readLocation(realm: realm), speechConfig: speakerSetting)
+            songInfo[MPMediaItemPropertyPlaybackDuration] = duration
+            songInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = position
+            songInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1.0
         }
         if let image = UIImage.init(named: "NovelSpeakerIcon-167px.png") {
             let artWork = MPMediaItemArtwork.init(boundsSize: image.size) { (size) -> UIImage in
@@ -693,8 +686,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         commandCenter.seekForwardCommand.isEnabled = true
         commandCenter.seekBackwardCommand.addTarget(self, action: #selector(seekBackwardEvent(event:)))
         commandCenter.seekBackwardCommand.isEnabled = true
-        autoreleasepool {
-            if let globalState = RealmGlobalState.GetInstance() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                 if globalState.isShortSkipEnabled {
                     commandCenter.skipForwardCommand.addTarget(self, action: #selector(skipForwardEvent(_:)))
                     commandCenter.skipForwardCommand.isEnabled = true
@@ -738,39 +731,49 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     // MARK: MPCommandCenter commands
     @objc func playEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: playEvent")
-        StartSpeech(withMaxSpeechTimeReset: true)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+        }
         return .success
     }
     @objc func stopEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: stopEvent")
-        StopSpeech()
+        RealmUtil.RealmBlock { (realm) -> Void in
+            StopSpeech(realm: realm)
+        }
         return .success
     }
     @objc func togglePlayPauseEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: togglePlayPauseEvent")
-        if speaker.isSpeaking {
-            print("togglePlayPause stopSpeech")
-            StopSpeech()
-        }else{
-            StartSpeech(withMaxSpeechTimeReset: true)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if speaker.isSpeaking {
+                print("togglePlayPause stopSpeech")
+                StopSpeech(realm: realm)
+            }else{
+                StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+            }
         }
         return .success
     }
     @objc func nextTrackEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: nextTrackEvent")
         self.isSeeking = false
-        StopSpeech()
-        if LoadNextChapter() {
-            StartSpeech(withMaxSpeechTimeReset: true)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            StopSpeech(realm: realm)
+            if LoadNextChapter(realm: realm) {
+                StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+            }
         }
         return .success
     }
     @objc func previousTrackEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: previousTrackEvent")
         self.isSeeking = false
-        StopSpeech()
-        if LoadPreviousChapter() {
-            StartSpeech(withMaxSpeechTimeReset: true)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            StopSpeech(realm: realm)
+            if LoadPreviousChapter(realm: realm) {
+                StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+            }
         }
         return .success
     }
@@ -778,37 +781,45 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     @objc func skipForwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: skipForwardEvent")
         skipForwardCount += 100
-        StopSpeech {
-            let count = self.skipForwardCount
-            self.skipForwardCount = 0
-            self.SkipForward(length: count)
-            self.StartSpeech(withMaxSpeechTimeReset: true)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            StopSpeech(realm: realm) {
+                let count = self.skipForwardCount
+                self.skipForwardCount = 0
+                self.SkipForward(realm: realm, length: count)
+                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+            }
         }
         return .success
     }
     @objc func skipBackwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: skipBackwardEvent")
         skipForwardCount += 100
-        StopSpeech {
-            let count = self.skipForwardCount
-            self.skipForwardCount = 0
-            self.SkipBackward(length: count)
-            self.StartSpeech(withMaxSpeechTimeReset: true)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            StopSpeech(realm: realm) {
+                let count = self.skipForwardCount
+                self.skipForwardCount = 0
+                self.SkipBackward(realm: realm, length: count)
+                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+            }
         }
         return .success
     }
     
     var isSeeking = false
     func seekForwardInterval(){
-        self.StopSpeech {
-            self.SkipForward(length: 50)
-            NiftyUtilitySwift.DispatchSyncMainQueue {
-                self.StartSpeech(withMaxSpeechTimeReset: true)
-            }
-            if self.isSeeking == false { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                if self.isSeeking == false { return }
-                self.seekForwardInterval()
+        RealmUtil.RealmBlock { (realm) -> Void in
+            self.StopSpeech(realm: realm) {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.SkipForward(realm: realm, length: 50)
+                    NiftyUtilitySwift.DispatchSyncMainQueue {
+                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                    }
+                    if self.isSeeking == false { return }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        if self.isSeeking == false { return }
+                        self.seekForwardInterval()
+                    }
+                }
             }
         }
     }
@@ -829,15 +840,19 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func seekBackwardInterval(){
-        self.StopSpeech {
-            self.SkipBackward(length: 60)
-            NiftyUtilitySwift.DispatchSyncMainQueue {
-                self.StartSpeech(withMaxSpeechTimeReset: true)
-            }
-            if self.isSeeking == false { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                if self.isSeeking == false { return }
-                self.seekBackwardInterval()
+        RealmUtil.RealmBlock { (realm) -> Void in
+            self.StopSpeech(realm: realm) {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.SkipBackward(realm: realm, length: 60)
+                    NiftyUtilitySwift.DispatchSyncMainQueue {
+                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                    }
+                    if self.isSeeking == false { return }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        if self.isSeeking == false { return }
+                        self.seekBackwardInterval()
+                    }
+                }
             }
         }
     }
@@ -856,8 +871,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         return .success
     }
     @objc func changePlaybackPositionEvent(event:MPChangePlaybackPositionCommandEvent?) -> MPRemoteCommandHandlerStatus {
-        return autoreleasepool {
-            guard let event = event, let defaultSpeakerSetting = RealmGlobalState.GetInstance()?.defaultSpeaker, let story = RealmStoryBulk.SearchStory(storyID: self.storyID) else {
+        return RealmUtil.RealmBlock { (realm) -> MPRemoteCommandHandlerStatus in
+            guard let event = event, let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else {
                 return MPRemoteCommandHandlerStatus.commandFailed
             }
              let contentLength = story.content.count
@@ -872,10 +887,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 newLocation = 0
             }
             
-            StopSpeech()
+            StopSpeech(realm: realm)
             self.readLocation = newLocation
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: {
-                self.StartSpeech(withMaxSpeechTimeReset: true)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
             })
             return .success
         }
@@ -895,17 +912,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     func finishSpeak() {
         self.readLocation = speaker.currentLocation
         let repeatSpeechType:RepeatSpeechType? =
-            autoreleasepool { () -> RepeatSpeechType? in
-            return RealmGlobalState.GetInstance()?.defaultSpeechOverrideSetting?.repeatSpeechType
+            RealmUtil.RealmBlock { (realm) -> RepeatSpeechType? in
+                return RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting?.repeatSpeechType
         }
         if let repeatSpeechType = repeatSpeechType {
             switch repeatSpeechType {
             case .rewindToFirstStory:
                 let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
-                let processSuccess = autoreleasepool { () -> Bool in
-                    if let novel = RealmNovel.SearchNovelFrom(novelID: novelID), let lastChapterNumber = novel.lastChapterNumber, let currentStory = RealmStoryBulk.SearchStory(storyID: self.storyID), lastChapterNumber == currentStory.chapterNumber, let firstStory = RealmStoryBulk.SearchStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
-                        self.SetStory(story: firstStory)
-                        self.StartSpeech(withMaxSpeechTimeReset: false)
+                let processSuccess = RealmUtil.RealmBlock { (realm) -> Bool in
+                    if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let lastChapterNumber = novel.lastChapterNumber, let currentStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), lastChapterNumber == currentStory.chapterNumber, let firstStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
+                        self.SetStory(realm: realm, story: firstStory)
+                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                         return true
                     }
                     return false
@@ -915,7 +932,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 }
             case .rewindToThisStory:
                 self.readLocation = 0
-                self.StartSpeech(withMaxSpeechTimeReset: false)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                }
                 return
             case .noRepeat:
                 break
@@ -924,18 +943,20 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             }
         }
         NiftyUtilitySwift.DispatchSyncMainQueue {
-            if let nextStory = self.SearchNextChapter(storyID: self.storyID) {
-                self.ringPageTurningSound()
-                if nextStory.readLocation != 0 {
-                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
-                        nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
+            RealmUtil.RealmBlock { (realm) -> Void in
+                if let nextStory = self.SearchNextChapterWith(realm: realm, storyID: self.storyID) {
+                    self.ringPageTurningSound()
+                    if nextStory.readLocation(realm: realm) != 0 {
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                            nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
+                        }
                     }
+                    self.SetStory(realm: realm, story: nextStory)
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                }else{
+                    self.StopSpeech(realm: realm)
+                    self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
                 }
-                self.SetStory(story: nextStory)
-                self.StartSpeech(withMaxSpeechTimeReset: false)
-            }else{
-                self.StopSpeech()
-                self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
             }
         }
     }
@@ -952,11 +973,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
         set {
             NiftyUtilitySwift.DispatchSyncMainQueue {
-                if let story = RealmStoryBulk.SearchStory(storyID: self.storyID), story.content.count > newValue && newValue >= 0 {
-                    self.speaker.SetSpeechLocation(location: newValue)
-                    if story.readLocation != newValue {
-                        RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
-                            story.SetCurrentReadLocationWith(realm: realm, location: newValue)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.count > newValue && newValue >= 0 {
+                        self.speaker.SetSpeechLocation(location: newValue)
+                        if story.readLocation(realm: realm) != newValue {
+                            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                                story.SetCurrentReadLocationWith(realm: realm, location: newValue)
+                            }
                         }
                     }
                 }

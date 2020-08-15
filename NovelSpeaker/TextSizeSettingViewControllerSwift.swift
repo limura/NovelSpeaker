@@ -18,8 +18,8 @@ class TextSizeSettingViewControllerSwift: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        autoreleasepool {
-            if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting {
                 setFont(displaySetting: displaySetting)
                 displaySettingObserbeToken = displaySetting.observe { (change) in
                     switch change {
@@ -55,9 +55,11 @@ class TextSizeSettingViewControllerSwift: UIViewController {
     
     func applyColorSetting() {
         DispatchQueue.main.async {
-            if let state = RealmGlobalState.GetInstance() {
-                self.sampleTextTextView.backgroundColor = state.backgroundColor
-                self.sampleTextTextView.textColor = state.foregroundColor
+            RealmUtil.RealmBlock { (realm) -> Void in
+                if let state = RealmGlobalState.GetInstanceWith(realm: realm) {
+                    self.sampleTextTextView.backgroundColor = state.backgroundColor
+                    self.sampleTextTextView.textColor = state.foregroundColor
+                }
             }
         }
     }
@@ -75,8 +77,8 @@ class TextSizeSettingViewControllerSwift: UIViewController {
 
     
     func setFontFromRealm() {
-        autoreleasepool {
-            if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting {
                 self.setFont(displaySetting: displaySetting)
             }
         }
@@ -112,9 +114,9 @@ class TextSizeSettingViewControllerSwift: UIViewController {
     */
 
     @IBAction func textSizeSliderChanged(_ sender: Any) {
-        autoreleasepool {
-            if let displaySetting = RealmGlobalState.GetInstance()?.defaultDisplaySetting {
-                RealmUtil.Write(withoutNotifying: [self.displaySettingObserbeToken]) { (realm) in
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting {
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.displaySettingObserbeToken]) { (realm) in
                     displaySetting.textSizeValue = self.textSizeSlider.value
                 }
                 self.setFont(displaySetting: displaySetting)
