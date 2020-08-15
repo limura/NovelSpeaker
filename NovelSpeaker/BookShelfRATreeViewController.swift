@@ -497,12 +497,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     func showVersionUpNotice(){
         NiftyUtilitySwift.EasyDialogBuilder(self)
-            .title(title: NSLocalizedString(
-                "BookShelfTableViewController_AnnounceNewViersion"
-                , comment: "アップデートされました"))
-            .textView(content: NSLocalizedString(
-                "BookShelfTableViewController_AnnounceNewVersionMessage"
-                , comment: "Version 1.1.2\r\n..."), heightMultiplier: 0.63)
+            .title(title: NSLocalizedString("BookShelfTableViewController_AnnounceNewViersion", comment: "アップデートされました"))
+            .textView(content: NSLocalizedString("BookShelfTableViewController_AnnounceNewVersionMessage", comment: "Version 1.1.2\r\n..."), heightMultiplier: 0.63)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { dialog in
                 dialog.dismiss(animated: true, completion: nil)
                 RealmUtil.RealmBlock { (realm) -> Void in

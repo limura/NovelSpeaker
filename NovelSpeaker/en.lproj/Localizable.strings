@@ -348,6 +348,7 @@
 "NiftyUtilitySwift_ImportError_SendProblemReportButton" = "Create report email";
 "NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title" = "NovelSpeaker Import failure report";
 "NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "Please send this without editing.\nPlease note that we do not basically reply to this email.\n\nError message:\n";
+"NiftyUtilitySwift_ImportStoryStateConifirmToUser_NoContent" = "There was no text.";
 
 "BugReportViewController_SectionHeader" = "Problem report";
 "BugReportViewController_BugReportTitle" = "In case of inconvenience, you can input from this form and report it.";
@@ -553,6 +554,7 @@
 "NovelSearchViewController_SearchResultView_Title" = "Search results";
 "NovelSearchViewController_LoadNextPage" = "Searching for more...";
 "NovelSearchViewController_RadioSelectTarget_None" = "Deselect";
+"NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle" = "Temporary reading";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
 "NovelDisplayColorSettingViewController_SampleText" = "If I speak in the tongues of men or of angels, but do not have love, I am only a resounding gong or a clanging cymbal. If I have the gift of prophecy and can fathom all mysteries and all knowledge, and if I have a faith that can move mountains, but do not have love, I am nothing. If I give all I possess to the poor and give over my body to hardship that I may boast,[b] but do not have love, I gain nothing.";
@@ -565,6 +567,9 @@
 "NovelDisplayColorSettingViewController_ColorSettingButton_UserDefined_Background" = "Specify background colors";
 "NovelDisplayColorSettingViewController_ColorPickerDoneTitle" = "Done";
 
+"StoryFetcher_CanNotFindPageElementAndNextLink" = "The text or the URL indicating the next page could not be obtained from the specified URL.";
+"StoryFetcher_FetchFirstContent_NoNextUrlAlive" = "The text could not be retrieved. (I could not find the link to the part where the text is posted)";
+"StoryFetcher_FetchFirstContent_ExceededCountToLive" = "The text could not be retrieved. (I reached the maximum number of reads without being able to find the link to the text)";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

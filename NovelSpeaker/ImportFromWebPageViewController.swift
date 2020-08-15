@@ -505,9 +505,7 @@ li {
                 print("SecTrustEvaluate: .recoverableTrustFailure")
                 // recoverable だけれど、結局後で fetch しようとすると失敗するので見せない事にします。
                 NiftyUtilitySwift.EasyDialogBuilder(self)
-                    .label(text:
-                        // NSLocalizedString("ImportFromWebPageViewController_InvalidServerCertificate_CanContinue",
-                        NSLocalizedString("ImportFromWebPageViewController_InvalidServerCertificate", comment: "サーバの証明書に何らかの問題がありました。"))
+                    .label(text: NSLocalizedString("ImportFromWebPageViewController_InvalidServerCertificate", comment: "サーバの証明書に何らかの問題がありました。"))
                     /*
                     .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
                         completionHandler(.rejectProtectionSpace, nil)

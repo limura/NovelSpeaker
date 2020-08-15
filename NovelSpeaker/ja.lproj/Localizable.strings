@@ -339,6 +339,7 @@
 "NiftyUtilitySwift_ImportError_SendProblemReportButton" = "報告メールを作成";
 "NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title" = "ことせかい 取り込み失敗レポート";
 "NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n";
+"NiftyUtilitySwift_ImportStoryStateConifirmToUser_NoContent" = "本文がありませんでした。";
 
 "BugReportViewController_SectionHeader" = "不都合の報告";
 "BugReportViewController_BugReportTitle" = "不都合がある場合にはこのフォームで不都合報告ができます。";
@@ -545,6 +546,7 @@
 "NovelSearchViewController_SearchResultView_Title" = "検索結果";
 "NovelSearchViewController_LoadNextPage" = "続きを検索しています……";
 "NovelSearchViewController_RadioSelectTarget_None" = "選択しない";
+"NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle" = "仮読み込み";
 
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 
@@ -557,6 +559,10 @@
 "NovelDisplayColorSettingViewController_ColorSettingButton_UserDefined_Foreground" = "字の色を直接指定";
 "NovelDisplayColorSettingViewController_ColorSettingButton_UserDefined_Background" = "背景色を直接指定";
 "NovelDisplayColorSettingViewController_ColorPickerDoneTitle" = "この色で設定";
+
+"StoryFetcher_CanNotFindPageElementAndNextLink" = "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。";
+"StoryFetcher_FetchFirstContent_NoNextUrlAlive" = "本文を取り出せませんでした。(本文が掲載されている部分へのリンクが発見できませんでした)";
+"StoryFetcher_FetchFirstContent_ExceededCountToLive" = "本文を取り出せませんでした。(本文へのリンクが発見できないまま読み込み回数上限に達しました)";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
