@@ -198,27 +198,52 @@ class NovelDownloader : NSObject {
     }
     static var writePool:[String:StoryBulkWritePool] = [:]
     static func FlushAllWritePool() {
+        writePoolLock.lock()
         for (_, pool) in writePool {
             pool.Flush()
         }
+        writePool.removeAll()
+        writePoolLock.unlock()
+    }
+    static let writePoolLock = NSLock()
+    static func addWritePool(novelID:String, story:Story) {
+        writePoolLock.lock()
+        defer { writePoolLock.unlock() }
+        if let pool = writePool[novelID] {
+            pool.AddStory(story: story)
+        }else{
+            let pool = StoryBulkWritePool(novelID: novelID)
+            pool.AddStory(story: story)
+            writePool[novelID] = pool
+        }
+    }
+    @discardableResult
+    static func flushWritePool(novelID:String) -> Bool {
+        writePoolLock.lock()
+        defer { writePoolLock.unlock() }
+        if let pool = writePool.removeValue(forKey: novelID) {
+            pool.Flush()
+            return true
+        }
+        return false
     }
     
     static func startDownload(novelID:String, fetcher:StoryFetcher, currentState:StoryState? = nil, chapterNumber:Int = 0, downloadCount:Int = 0, successAction:@escaping ((_ novelID:String, _ downloadCount:Int)->Void), failedAction:@escaping ((_ novelID: String, _ downloadCount:Int, _ errorDescription:String)->Void)) {
         BehaviorLogger.AddLogSimple(description: "startDownload: \(novelID), chapter: \(chapterNumber)")
         if isDownloadStop {
-            if let pool = writePool[novelID] { pool.Flush() }
+            flushWritePool(novelID: novelID)
             BehaviorLogger.AddLogSimple(description: "NovelDownloader.downloadOnce(): isDownloadStop が true であったのでダウンロードを終了します。novelID: \(novelID)")
             successAction(novelID, 0)
             return
         }
         if downloadCount > NovelDownloader.maxCount {
-            if let pool = writePool[novelID] { pool.Flush() }
+            flushWritePool(novelID: novelID)
             BehaviorLogger.AddLogSimple(description: "NovelDownloader.downloadOnce(): ダウンロード回数が規定値(\(NovelDownloader.maxCount))を超えたのでダウンロードを終了します。novelID: \(novelID)")
             successAction(novelID, downloadCount)
             return
         }
         func failedSearchNovel(hint:String) {
-            if let pool = writePool[novelID] { pool.Flush() }
+            flushWritePool(novelID: novelID)
             let msg = NSLocalizedString("NovelDownloader_InvalidNovelID", comment: "小説のダウンロードに失敗しました。ダウンロードするためのデータ(URL等)を取得できずにダウンロードを開始できませんでした。小説データが保存されていないか削除された等の問題がありそうです。") + "\n(novelID: \"\(novelID)\", hint: \(hint))"
             BehaviorLogger.AddLogSimple(description: msg)
             failedAction(novelID, 0, msg)
@@ -307,14 +332,7 @@ class NovelDownloader : NSObject {
                         story.url = state.url.absoluteString
                         story.downloadDate = queuedDate
                         // storyの書き込み自体は writePool に突っ込んで後でやってもらうことにします。
-                        if let pool = writePool[novelID] {
-                            pool.AddStory(story: story)
-                        }else{
-                            let pool = StoryBulkWritePool(novelID: novelID)
-                            pool.AddStory(story: story)
-                            writePool[novelID] = pool
-                        }
-                        print("story \(story.storyID) add queue.")
+                        addWritePool(novelID: novelID, story: story)
                         nextChapterNumber += 1
                     }
                 }else{
@@ -338,7 +356,7 @@ class NovelDownloader : NSObject {
                 })
             }
         }) { (url, errorString) in
-            if let pool = writePool[novelID] { pool.Flush() }
+            flushWritePool(novelID: novelID)
             let msg = NSLocalizedString("NovelDownloader_htmlStoryIsNil", comment: "小説のダウンロードに失敗しました。") + "(novelID: \"\(novelID)\", url: \(url.absoluteString), errString: \(errorString))"
             BehaviorLogger.AddLogSimple(description: msg)
             failedAction(novelID, 0, msg)
