@@ -345,6 +345,14 @@ class NovelDownloader : NSObject {
                     successAction(novelID, downloadCount)
                     return
                 }
+                if let nextUrl = state.nextUrl, nextUrl == state.url {
+                    print("NovelDownloader.startDownload() IsNextAlive is true, but nextUrl is same current URL. then quit: \(state.url.absoluteString)")
+                    return
+                }
+                if let firstPageLink = state.firstPageLink, firstPageLink == state.url {
+                    print("NovelDownloader.startDownload() IsNextAlive is true, but firstPageLink is same current URL. then quit: \(state.url.absoluteString)")
+                    return
+                }
                 let dummyDate:Date
                 if state.isCanFetchNextImmediately {
                     dummyDate = Date(timeIntervalSince1970: 0)
@@ -656,6 +664,7 @@ class NovelDownloadQueue : NSObject {
             self.downloadStop()
             // downloadStop() した後、ダウンロードが終了するまで9秒待ちます。
             Timer.scheduledTimer(withTimeInterval: 9.0, repeats: false){ (timer) in
+                NovelDownloader.FlushAllWritePool()
                 let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
                 self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
                 self.downloadEndedNovelIDSet.removeAll()

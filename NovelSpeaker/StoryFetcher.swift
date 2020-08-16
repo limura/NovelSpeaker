@@ -36,9 +36,9 @@ struct StoryState {
     
     var IsNextAlive:Bool {
         get {
-            // nextUrl があったり firstPageLink があって、それが現在のURLと同じでないのなら次のページがあると判定します。
-            if let targetUrl = nextUrl, targetUrl != url { return true }
-            if let targetUrl = firstPageLink, targetUrl != url { return true }
+            // nextUrl や firstPageLink があったなら次のページがあると判定します。
+            if nextUrl != nil { return true }
+            if firstPageLink != nil { return true }
             // ヘッドレスブラウザが使える状況で、nextButton や firstPageButton がある場合も次のページがあると判定します。
             #if !os(watchOS)
             if nextButton != nil || firstPageButton  != nil{ return true }

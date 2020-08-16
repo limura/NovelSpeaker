@@ -79,6 +79,8 @@ class CoreDataToRealmTool: NSObject {
         defaultDisplaySetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
         if let textSizeValue = globalState?.textSizeValue as? Float {
             defaultDisplaySetting.textSizeValue = textSizeValue
+        }else{
+            defaultDisplaySetting.textSizeValue = 58.0
         }
         if let fontID = globalDataSingleton.getDisplayFontName() {
             defaultDisplaySetting.fontID = fontID

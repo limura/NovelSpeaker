@@ -40,9 +40,9 @@ class HeadlessHttpClient {
             if let window = UIApplication.shared.keyWindow {
                 self.webView.alpha = 0.0001
                 window.insertSubview(self.webView, at: 0)
-                print("Erik initialize done.")
+                //print("Erik initialize done.")
             } else {
-                print("Erik initialize failed.")
+                //print("Erik initialize failed.")
             }
         }
     }
