@@ -343,7 +343,9 @@ class EditBookViewController: UIViewController {
                     story = Story()
                     story.novelID = novelID
                     story.chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
-                    RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    }
                 }
                 if let maxChapterNumber = novel.lastChapterNumber {
                     self.chapterNumberIndicatorLabel.text = "\(chapterNumber)/\(maxChapterNumber)"
@@ -403,7 +405,9 @@ class EditBookViewController: UIViewController {
                 story.chapterNumber = 1
             }
             story.content = content ?? ""
-            RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+            }
         }
     }
     func saveCurrentNovel() {

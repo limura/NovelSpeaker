@@ -1579,7 +1579,7 @@ class NovelSpeakerUtility: NSObject {
                 }
                 var storyData:[String:Any] = [
                     "chapterNumber": story.chapterNumber,
-                    "readLocation": story.readLocation,
+                    "readLocation": story.readLocation(realm: realm),
                 ]
                 if story.url.count > 0 {
                     storyData["url"] = story.url
@@ -1973,12 +1973,16 @@ class NovelSpeakerUtility: NSObject {
     #endif
     
     static func CheckAndRecoverStoryCount(novelID:String) {
-        RealmUtil.Write { (realm) in
-            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let storyList = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novelID), let lastStory = storyList.last else { return }
-            let storyCount = storyList.count
-            let lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: storyCount)
-            if novel.m_lastChapterStoryID != lastChapterStoryID && RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStory.chapterNumber) == lastChapterStoryID {
-                novel.m_lastChapterStoryID = lastChapterStoryID
+        // これ、いろんな所から呼ばれる(NovelDownloadQueue.addQueue() から呼ばれる)
+        // のにもかかわらず RealmUtil.Write を呼び出すので別threadから呼ぶ事にします。(´・ω・`)
+        DispatchQueue.main.async {
+            RealmUtil.Write { (realm) in
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let storyList = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novelID), let lastStory = storyList.last else { return }
+                let storyCount = storyList.count
+                let lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: storyCount)
+                if novel.m_lastChapterStoryID != lastChapterStoryID && RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStory.chapterNumber) == lastChapterStoryID {
+                    novel.m_lastChapterStoryID = lastChapterStoryID
+                }
             }
         }
     }

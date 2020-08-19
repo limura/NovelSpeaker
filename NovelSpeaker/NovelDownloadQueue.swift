@@ -347,10 +347,12 @@ class NovelDownloader : NSObject {
                 }
                 if let nextUrl = state.nextUrl, nextUrl == state.url {
                     print("NovelDownloader.startDownload() IsNextAlive is true, but nextUrl is same current URL. then quit: \(state.url.absoluteString)")
+                    successAction(novelID, downloadCount)
                     return
                 }
                 if let firstPageLink = state.firstPageLink, firstPageLink == state.url {
                     print("NovelDownloader.startDownload() IsNextAlive is true, but firstPageLink is same current URL. then quit: \(state.url.absoluteString)")
+                    successAction(novelID, downloadCount)
                     return
                 }
                 let dummyDate:Date

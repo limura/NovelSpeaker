@@ -77,7 +77,7 @@ class CoreDataToRealmTool: NSObject {
         realmState.foregroundColor = globalDataSingleton.getReadingColorSettingForForegroundColor()
 
         defaultDisplaySetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
-        if let textSizeValue = globalState?.textSizeValue as? Float {
+        if let textSizeValue = globalState?.textSizeValue as? Float, textSizeValue >= 1.0 && textSizeValue <= 100 {
             defaultDisplaySetting.textSizeValue = textSizeValue
         }else{
             defaultDisplaySetting.textSizeValue = 58.0

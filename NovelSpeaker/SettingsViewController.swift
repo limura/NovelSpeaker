@@ -1264,7 +1264,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 return
             }
             let fileName = backupData.lastPathComponent
-            self.ShareBackupData(dataFileURL: backupData, fileName: fileName)
+            DispatchQueue.main.async {
+                dialog.dismiss(animated: false) {
+                    self.ShareBackupData(dataFileURL: backupData, fileName: fileName)
+                }
+            }
         }
     }
     

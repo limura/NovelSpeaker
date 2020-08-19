@@ -1274,9 +1274,9 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             story.novelID = novel.novelID
             story.chapterNumber = 1
             story.content = content
-            RealmStoryBulk.SetStoryWith(realm: realm, story: story)
-            novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: 1)
             RealmUtil.WriteWith(realm: realm) { (realm) in
+                RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: 1)
                 novel.AppendDownloadDate(realm: realm, date: novel.lastDownloadDate)
                 realm.add(novel, update: .modified)
             }

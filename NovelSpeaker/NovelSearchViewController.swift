@@ -613,7 +613,9 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     
     func reloadCells() {
         DispatchQueue.main.async {
-            self.form.removeAll()
+            if self.form.count > 0 {
+                self.form.removeAll()
+            }
             self.form +++ Section()
             <<< AlertRow<String>() {
                 $0.title = NSLocalizedString("NovelSearchViewController_SearchWebSiteTitle", comment: "検索先のWebサイト")
