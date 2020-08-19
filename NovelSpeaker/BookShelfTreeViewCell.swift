@@ -195,7 +195,7 @@ class BookShelfTreeViewCell: UITableViewCell {
                                 self.applyCurrentReadingPointToIndicator(novelID: novelID)
                             }
                         }
-                        if property.name == "lastReadDate" {
+                        if property.name == "lastDownloadDate" || property.name == "lastReadDate" {
                             DispatchQueue.main.async {
                                 self.checkAndUpdateNewImage(novelIDArray: [novelID])
                             }
