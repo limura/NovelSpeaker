@@ -122,7 +122,7 @@ class DownloadQueueHolder: NSObject {
 }
 
 // 読み込みを何秒に一回にするのかの値[秒]
-fileprivate var queueDelayTime = 1.5
+fileprivate var queueDelayTime = 1.05
 // 一定時間に一回しか動かさないようにする。
 fileprivate func delayQueue(queuedDate: Date, block:@escaping ()->Void) {
     let now = Date()
