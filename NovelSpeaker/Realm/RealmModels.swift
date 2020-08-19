@@ -1196,6 +1196,13 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             }
         }
     }
+    var readingChapterNumber: Int? {
+        get {
+            let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: self.m_readingChapterStoryID)
+            if chapterNumber <= 0 { return nil }
+            return chapterNumber
+        }
+    }
     var isNewFlug: Bool {
         return lastDownloadDate > lastReadDate
     }
@@ -1222,7 +1229,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         }
     }
     
-    // 推測によるアップデート頻度。単位は1日に何度更新されるのか(1日に1度なら1、10日に1度なら0.1、1日に3度なら3)。
+    // 推測によるアップデート頻度。単位は1日に何章分ダウンロードされたのか(1日に1章なら1、10日に1章なら0.1、1日に3章なら3)。
     // 計算としては 章数 / (現在 - 直近から数えて10個前のものがダウンロードされた日付)[日] なので、最後にダウンロードされた日付が古くても評価は下がる。
     // 最初に1000件とかダウンロードされた小説が既に更新終了していたとしても、10件分しか効果がないので10日経つと1に、100日経てば0.1になる。
     static let updateFrequencyTargetCount = 10

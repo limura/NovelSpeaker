@@ -73,17 +73,23 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     func applyCurrentReadingPointToIndicator(novelID:String) {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let story = novel.readingChapter else {
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let readingChapterNumber = novel.readingChapterNumber else {
                 self.readProgressView.progress = 0.0
                 return
             }
-            let chapterNumber = story.chapterNumber
-            let readLocation = Float(story.readLocation(realm: realm))
-            let contentCount = Float(story.content.count)
             let lastChapterNumber = novel.lastChapterNumber ?? 1
-            let progress = ((Float(chapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
+            let readLocation:Float
+            let contentCount:Float
+            if lastChapterNumber == readingChapterNumber, let lastChapter = novel.lastChapter {
+                readLocation = Float(lastChapter.readLocation(realm: realm))
+                contentCount = Float(lastChapter.content.count)
+            }else{
+                readLocation = 1.0
+                contentCount = 1.0
+            }
+            let progress = ((Float(readingChapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
             DispatchQueue.main.async {
-                if chapterNumber == lastChapterNumber && contentCount <= (readLocation + 10) {
+                if readingChapterNumber == lastChapterNumber && contentCount <= (readLocation + 10) {
                     self.readProgressView.tintColor = UIColor(displayP3Red: 0.6, green: 0.3, blue: 0.9, alpha: 1.0)
                 }else{
                     self.readProgressView.tintColor = UIColor(displayP3Red: 255/256.0, green: 188/256.0, blue: 2/256.0, alpha: 1.0)
