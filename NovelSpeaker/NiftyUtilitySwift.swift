@@ -572,7 +572,7 @@ class NiftyUtilitySwift: NSObject {
         return String(text[fromIndex..<toIndex])
     }
     
-    static func getCharsetStringFromURLResponse(urlResponse:URLResponse?) -> String? {
+    static func getContentTypeHeaderFromURLResponse(urlResponse:URLResponse?) -> String? {
         guard let httpURLResponse = urlResponse as? HTTPURLResponse else { return nil }
         guard let contentType = httpURLResponse.allHeaderFields.filter({ (element) -> Bool in
             if let key = element.key as? String, key.lowercased() == "content-type" {
@@ -580,10 +580,26 @@ class NiftyUtilitySwift: NSObject {
             }
             return false
         }).first?.value as? String else { return nil }
+        return contentType
+    }
+    
+    static func getCharsetStringFromContentTypeString(contentType:String?) -> String? {
+        guard let contentType = contentType else { return nil }
         return GetMatchedText1(text: contentType, regexpPattern: "; *charset=([^ ]*)")
     }
     
-    static func guessStringEncodingFrom(charset:String) -> String.Encoding? {
+    static func getCharsetStringFromURLResponse(urlResponse:URLResponse?) -> String? {
+        guard let contentType = getContentTypeHeaderFromURLResponse(urlResponse: urlResponse) else { return nil }
+        return getCharsetStringFromContentTypeString(contentType: contentType)
+    }
+    
+    static func isPDFFileByContentTypeString(contentType: String?) -> Bool {
+        guard let contentType = contentType else { return false }
+        return contentType.lowercased() == "application/pdf"
+    }
+    
+    static func guessStringEncodingFrom(charset:String?) -> String.Encoding? {
+        guard let charset = charset else { return nil }
         let cfEncoding = CFStringConvertIANACharSetNameToEncoding(charset as CFString)
         if cfEncoding != kCFStringEncodingInvalidId {
             let nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding)
@@ -627,8 +643,16 @@ class NiftyUtilitySwift: NSObject {
     static func tryDecodeToString(data:Data, charset:String?) -> (String?, String.Encoding?) {
         return tryDecodeToString(data: data, encoding: charset != nil ? guessStringEncodingFrom(charset: charset!) : nil)
     }
+    
+    static func forceDecodeToStringByUTF8(data:Data) -> String {
+        return String(decoding: data, as: UTF8.self)
+    }
 
     static func tryDecodeToString(data:Data, encoding:String.Encoding?) -> (String?, String.Encoding?) {
+        // UTF8 の時だけは問答無用でUTF8としてデコードする事にします。(変換できなかった文字は空白か何かに変わるはずです)
+        if let encoding = encoding, encoding == .utf8 {
+            return (forceDecodeToStringByUTF8(data: data), encoding)
+        }
         if let encoding = encoding, let string = String(data: data, encoding: encoding) {
             return (string, encoding)
         }
@@ -744,8 +768,27 @@ class NiftyUtilitySwift: NSObject {
                     }
                 }
                 if let data = data {
-                    successAction?(data, getStringEncodingFromURLResponse(urlResponse: response))
+                    let contentType = getContentTypeHeaderFromURLResponse(urlResponse: response)
+                    #if !os(watchOS)
+                    if isPDFFileByContentTypeString(contentType: contentType), let pdfString = NiftyUtilitySwift.BinaryPDFToString(data: data) {
+                        let fileName = (url.lastPathComponent as NSString).deletingPathExtension
+                        let dummyHtml = "<html><head><title>\(fileName)</title><meta charset=\"UTF-8\"></head><body><pre>\(pdfString)</pre></body></html>"
+                        if let dummyData = dummyHtml.data(using: .utf8) {
+                            successAction?(dummyData, String.Encoding.utf8)
+                            return
+                        }
+                    }else{
+                        let charset = getCharsetStringFromContentTypeString(contentType: contentType)
+                        let encoding = guessStringEncodingFrom(charset: charset)
+                        successAction?(data, encoding)
+                        return
+                    }
+                    #else
+                    let charset = getCharsetStringFromContentTypeString(contentType: contentType)
+                    let encoding = guessStringEncodingFrom(charset: charset)
+                    successAction?(data, encoding)
                     return
+                    #endif
                 }
                 failedAction?(SloppyError(msg: String(format: NSLocalizedString("NiftyUtilitySwift_URLSessionRequestFailedAboutError", comment: "サーバからのデータの取得に失敗しました。(末尾に示されているエラー内容とエラーの起こったURLとエラーが起こるまでの操作手順を添えて、サポートサイト下部にありますご意見ご要望フォームか、設定→開発者に問い合わせるよりお問い合わせ頂けますと、あるいは何かできるかもしれません。\nエラー内容: %@)"), error?.localizedDescription ?? "unknown error(nil)")))
             }.resume()
