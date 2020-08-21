@@ -14,10 +14,10 @@ public class CustomUITextView: UITextView {
     // UITextView で長押しして出て来るメニューの項目を減らします
     // from http://qiita.com/watt1006/items/2425bfa1720d522d05fd
     override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if StorySpeaker.shared.isPlayng {
+            return false
+        }
         return RealmUtil.RealmBlock { (realm) -> Bool in
-            if StorySpeaker.shared.isPlayng {
-                return false
-            }
             if RealmGlobalState.GetInstanceWith(realm: realm)?.isMenuItemIsAddNovelSpeakerItemsOnly ?? false {
                 return false
             }
