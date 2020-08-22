@@ -225,5 +225,21 @@
             "title": "//a/div[@role='heading']",
             "url": "//a[@href]/@href"
         }
+    },
+    {
+        "title": "ハーメルン",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://syosetu.org/search/",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "word"},
+            {"queryType": "hidden", "queryName": "mode", "value": "search"}
+	],
+        "result": {
+            "block": "//div[contains(@class,'autopagerize_page_element')]/div[@class='section3']",
+            "nextLink": "//div[contains(@class,'autopagerize_page_element')]/div[@class='paging']//a[@rel='next']/@href",
+            "title": "//a[contains(@href,'/novel/')]",
+            "url": "//a[contains(@href,'/novel/')]/@href"
+        }
     }
 ]
