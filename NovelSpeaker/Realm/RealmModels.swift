@@ -678,10 +678,10 @@ struct Story: Codable {
     
     static func ConvertToData(story:Story) -> Data {
         guard let data = try? JSONEncoder().encode(story) else { return Data() }
-        return NiftyUtility.dataDeflate(data, level: 9)
+        return NiftyUtilitySwift.compress(data: data) ?? Data()
     }
     static func DecodeFromData(storyData:Data) -> Story? {
-        guard let data = NiftyUtility.dataInflate(storyData), let story = try? JSONDecoder().decode(Story.self, from: data) else { return nil }
+        guard let data = NiftyUtilitySwift.decompress(data: storyData), let story = try? JSONDecoder().decode(Story.self, from: data) else { return nil }
         return story
     }
     func readLocation(realm: Realm) -> Int {
@@ -754,7 +754,7 @@ struct Story: Codable {
         if tmpString.count < 250 {
             return tmpString
         }
-        guard let data = urlString.data(using: .utf8), let zipedData = NiftyUtility.dataDeflate(data, level: 9) else {
+        guard let data = urlString.data(using: .utf8), let zipedData = NiftyUtilitySwift.compress(data: data) else {
             return tmpString
         }
         let base64ZipedData = zipedData.base64EncodedString()
@@ -766,7 +766,7 @@ struct Story: Codable {
     // deflate の後 base64 にされたものか、"/" を "%2F" に変換されたもののどちらかが入っているはずなので
     // とりあえず base64 decode できるかを試して失敗したら "%2F" を元に戻したものを返します。
     static func UniqueIDToURI(uniqueID:String) -> String {
-        guard let zipedData = Data(base64Encoded: uniqueID), let data = NiftyUtility.dataInflate(zipedData), let uri = String(data: data, encoding: .utf8) else {
+        guard let zipedData = Data(base64Encoded: uniqueID), let data = NiftyUtilitySwift.decompress(data: zipedData), let uri = String(data: data, encoding: .utf8) else {
             return uniqueID.removingPercentEncoding ?? uniqueID
         }
         return uri
@@ -807,7 +807,7 @@ struct Story: Codable {
             print("LoadStoryArray storedData() return nil. filePath: \(asset.filePath.absoluteString)")
             return nil
         }
-        guard let data = NiftyUtility.dataInflate(zipedData) else {
+        guard let data = NiftyUtilitySwift.decompress(data: zipedData) else {
             print("LoadStoryArray dataInflate() failed.")
             return nil
         }
@@ -823,8 +823,8 @@ struct Story: Codable {
             print("WARN: [Story] の JSONEncode に失敗")
             return
         }
-        guard let zipedData = NiftyUtility.dataDeflate(data, level: 9) else {
-            print("WARN: [Story] を JSON に変換した後、zip で失敗した")
+        guard let zipedData = NiftyUtilitySwift.compress(data: data) else {
+            print("WARN: [Story] を JSON に変換した後、compress で失敗した")
             return
         }
         self.storyListAsset = CreamAsset.create(object: self, propName: "", data: zipedData)

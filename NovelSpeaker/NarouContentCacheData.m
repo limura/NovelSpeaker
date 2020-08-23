@@ -8,9 +8,25 @@
 
 #import "NarouContentCacheData.h"
 #import "GlobalDataSingleton.h"
-#import "NiftyUtility.h"
+//#import "NiftyUtility.h"
 
 @implementation NarouContentCacheData
+
+/// HTML のエスケープ文字を元に戻します。(TODO: &#... 形式に対応する必要があります)
++ (NSString*)decodeHtmlEscape:(NSString*)htmlString {
+    if (htmlString == nil) {
+        return nil;
+    }
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&apos;" withString:@"'"];
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&lt;" withString:@"<"];
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&gt;" withString:@">"];
+    
+    // これは最後にやらないと駄目
+    htmlString = [htmlString stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
+    
+    return htmlString;
+}
 
 /// 小説になろうの時間フォーマットからNSDateに変換します
 - (NSDate*)ConvertNarouDate2NSDate: (NSString*)narouDate
@@ -39,13 +55,13 @@
         return nil;
     }
     
-    self.title = [NiftyUtility decodeHtmlEscape:[NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"title"]]];
+    self.title = [NarouContentCacheData decodeHtmlEscape:[NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"title"]]];
     self.ncode = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"ncode"]];
     self.userid = [NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"userid"]];
-    self.writer = [NiftyUtility decodeHtmlEscape:[NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"writer"]]];
-    self.story = [NiftyUtility decodeHtmlEscape:[NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"story"]]];
+    self.writer = [NarouContentCacheData decodeHtmlEscape:[NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"writer"]]];
+    self.story = [NarouContentCacheData decodeHtmlEscape:[NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"story"]]];
     self.genre = [self String2Number:[jsonContent objectForKey:@"genre"]];
-    self.keyword = [NiftyUtility decodeHtmlEscape:[NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"keyword"]]];
+    self.keyword = [NarouContentCacheData decodeHtmlEscape:[NSString stringWithFormat:@"%@", [jsonContent objectForKey:@"keyword"]]];
     self.general_all_no = [self String2Number:[jsonContent objectForKey:@"general_all_no"]];
     self.fav_novel_cnt = [self String2Number:[jsonContent objectForKey:@"fav_novel_cnt"]];
     self.review_cnt = [self String2Number:[jsonContent objectForKey:@"review_cnt"]];

@@ -10,7 +10,6 @@
 #import "GlobalDataSingleton.h"
 #import <AVFoundation/AVFoundation.h>
 #import "NovelSpeaker-Swift.h"
-#import "UriLoader.h"
 #import "FTLinearActivityIndicator-Swift.h"
 
 @implementation AppDelegate

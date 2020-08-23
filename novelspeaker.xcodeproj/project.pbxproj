@@ -37,8 +37,6 @@
 		2123240E22B7101000543543 /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
 		2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
 		2124B38523BBEE38002EBC31 /* NiftyUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */; };
-		2124B38723BBF220002EBC31 /* NiftyUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F01131D8FDEC5009D69E6 /* NiftyUtility.m */; };
-		2124B38823BBF234002EBC31 /* HtmlStory.m in Sources */ = {isa = PBXBuildFile; fileRef = 2127EACA1DB75989005B1636 /* HtmlStory.m */; };
 		2124B38D23BBF2E7002EBC31 /* NovelSpeakerUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */; };
 		2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759F92287123500956B73 /* RealmModels.swift */; };
 		2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
@@ -54,7 +52,6 @@
 		2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */; };
 		2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800B2290F3F900A183DF /* StorySpeaker.swift */; };
 		2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */; };
-		2124B39D23BBFC09002EBC31 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
 		2124B39E23BBFCDA002EBC31 /* SpeechModSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916374199F143E003FF7FC /* SpeechModSetting.m */; };
 		2124B3A023BC37EE002EBC31 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B39F23BC37EE002EBC31 /* CloudKit.framework */; };
 		2124B3A223BC37F7002EBC31 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B3A123BC37F7002EBC31 /* AVFoundation.framework */; };
@@ -62,7 +59,6 @@
 		2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */; };
 		2126A2611D9A1B90008E534A /* Action.js in Resources */ = {isa = PBXBuildFile; fileRef = 2126A2601D9A1B90008E534A /* Action.js */; };
 		2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */ = {isa = PBXBuildFile; fileRef = 2127EACA1DB75989005B1636 /* HtmlStory.m */; };
 		212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */; };
 		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
@@ -70,7 +66,6 @@
 		212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */; };
 		212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */; };
 		212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */; };
-		212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F01131D8FDEC5009D69E6 /* NiftyUtility.m */; };
 		212F011A1D907BF4009D69E6 /* NovelSpeakerIcon-167px.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */; };
 		212F011C1D907CF1009D69E6 /* Default568@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 212F011B1D907CF1009D69E6 /* Default568@2x.png */; };
 		212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F359B1A8F8857009D0E60 /* GlobalState.m */; };
@@ -101,7 +96,6 @@
 		2133F2B21E80E175001A0BC5 /* iTunesArtwork in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A01E80E175001A0BC5 /* iTunesArtwork */; };
 		2133F2B31E80E175001A0BC5 /* iTunesArtwork@2x in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2A11E80E175001A0BC5 /* iTunesArtwork@2x */; };
 		213515FC1F8CC06400F7AAD0 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 213515FB1F8CC06400F7AAD0 /* MessageUI.framework */; };
-		2138B14B23BEAE8200D8642C /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
 		2138B14E23BFD81500D8642C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2138B15023BFD81500D8642C /* InfoPlist.strings */; };
 		2138B15423C0804A00D8642C /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
 		2138B15523C0804D00D8642C /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
@@ -150,10 +144,8 @@
 		2173A6C121CC530E002E9EA8 /* FloatingButton.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2173A6C021CC530E002E9EA8 /* FloatingButton.xib */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
 		217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 217E683A1998F6A000C656AA /* MediaPlayer.framework */; };
-		21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21814C5B1E8D68A90096CB42 /* NSStringExtension.m */; };
 		21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */; };
 		21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */; };
-		21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21890CF21D92F38800869046 /* NSDataZlibExtension.m */; };
 		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
 		219106DF2468371A00BBA5AF /* NovelSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219106DE2468371A00BBA5AF /* NovelSearchViewController.swift */; };
 		219106E02469081100BBA5AF /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */; };
@@ -177,7 +169,6 @@
 		2193095623BBE56B00035EF0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2193095523BBE56B00035EF0 /* Preview Assets.xcassets */; };
 		21949BD523EDE75A00BCC5B9 /* NovelSupportMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21949BD423EDE75A00BCC5B9 /* NovelSupportMenuView.swift */; };
 		21949BD723EEBA6100BCC5B9 /* WKInterfaceVolumeControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21949BD623EEBA6000BCC5B9 /* WKInterfaceVolumeControlView.swift */; };
-		2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */; };
 		219CAE2A1BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE291BFCCE8B00033939 /* NovelSpeakerIcon-RoundedCorners.png */; };
 		219CAE2C1BFCD56000033939 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */; };
 		219CCF4924BC7FFA00AE35A9 /* StoryFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDE824B985A100E275D1 /* StoryFetcher.swift */; };
@@ -186,6 +177,7 @@
 		21A291F822A3F9DA000AA58C /* NovelDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F722A3F9DA000AA58C /* NovelDetailViewController.swift */; };
 		21A2CDBB2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBA2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift */; };
 		21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
+		21A4C75124EF9AF300038883 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
 		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -198,7 +190,6 @@
 		21B53A2819619D23009658B7 /* app_globe.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2519619D23009658B7 /* app_globe.png */; };
 		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
-		21C372DD21DFC41600FB2D52 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
 		21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
@@ -231,7 +222,6 @@
 		21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */; };
 		21E975B8229A8C8C0027A0A0 /* DefaultSpeechModList.json in Resources */ = {isa = PBXBuildFile; fileRef = 21E975B7229A8C8C0027A0A0 /* DefaultSpeechModList.json */; };
 		21E975BA22A06CC60027A0A0 /* MigrationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B922A06CC60027A0A0 /* MigrationViewController.swift */; };
-		21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */; };
 		21F054CD1917E0F200CC6BA9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CC1917E0F200CC6BA9 /* Foundation.framework */; };
 		21F054CF1917E0F200CC6BA9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */; };
 		21F054D11917E0F200CC6BA9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21F054D01917E0F200CC6BA9 /* UIKit.framework */; };
@@ -252,7 +242,6 @@
 		21F563D01FD802400037F5D7 /* <@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CD1FD8023F0037F5D7 /* <@2x.png */; };
 		21F563D11FD802400037F5D7 /* <@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21F563CE1FD8023F0037F5D7 /* <@3x.png */; };
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
-		21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */; };
 		21FDF5642043CDB200DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */; };
 		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
 		8261A40E09A2B1556BFC551B /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B449E9CF2D2F189FB86B53B2 /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework */; };
@@ -374,8 +363,6 @@
 		2126A25D1D9A1B90008E534A /* ActionRequestHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActionRequestHandler.h; sourceTree = "<group>"; };
 		2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ActionRequestHandler.m; sourceTree = "<group>"; };
 		2126A2601D9A1B90008E534A /* Action.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Action.js; sourceTree = "<group>"; };
-		2127EAC91DB75989005B1636 /* HtmlStory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HtmlStory.h; sourceTree = "<group>"; };
-		2127EACA1DB75989005B1636 /* HtmlStory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HtmlStory.m; sourceTree = "<group>"; };
 		212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_2to3.xcmappingmodel; sourceTree = "<group>"; };
 		212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_3to4.xcmappingmodel; sourceTree = "<group>"; };
 		212852DD19B1D101001A75DC /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -386,8 +373,6 @@
 		212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerSettingsViewController.swift; sourceTree = "<group>"; };
 		212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechWaitSettingViewController.swift; sourceTree = "<group>"; };
 		212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSectionConfigsViewController.swift; sourceTree = "<group>"; };
-		212F01121D8FDEC5009D69E6 /* NiftyUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NiftyUtility.h; sourceTree = "<group>"; };
-		212F01131D8FDEC5009D69E6 /* NiftyUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NiftyUtility.m; sourceTree = "<group>"; };
 		212F01191D907BF4009D69E6 /* NovelSpeakerIcon-167px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-167px.png"; sourceTree = "<group>"; };
 		212F011B1D907CF1009D69E6 /* Default568@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default568@2x.png"; sourceTree = "<group>"; };
 		212F359A1A8F8857009D0E60 /* GlobalState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalState.h; path = DataModelMapping/GlobalState.h; sourceTree = "<group>"; };
@@ -473,12 +458,8 @@
 		217E683A1998F6A000C656AA /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeaker.entitlements; sourceTree = "<group>"; };
 		21814C591E8CE8A00096CB42 /* NovelSpeakerURLDownloadExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerURLDownloadExtension.entitlements; sourceTree = "<group>"; };
-		21814C5A1E8D68A90096CB42 /* NSStringExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringExtension.h; sourceTree = "<group>"; };
-		21814C5B1E8D68A90096CB42 /* NSStringExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStringExtension.m; sourceTree = "<group>"; };
 		21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-small-40@3x.png"; sourceTree = "<group>"; };
 		21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDisplayColorSettingViewController.swift; sourceTree = "<group>"; };
-		21890CF11D92F38800869046 /* NSDataZlibExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSDataZlibExtension.h; sourceTree = "<group>"; };
-		21890CF21D92F38800869046 /* NSDataZlibExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSDataZlibExtension.m; sourceTree = "<group>"; };
 		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		219106DE2468371A00BBA5AF /* NovelSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSearchViewController.swift; sourceTree = "<group>"; };
 		21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 3.xcdatamodel"; sourceTree = "<group>"; };
@@ -513,10 +494,6 @@
 		2193095823BBE56B00035EF0 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
 		21949BD423EDE75A00BCC5B9 /* NovelSupportMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSupportMenuView.swift; sourceTree = "<group>"; };
 		21949BD623EEBA6000BCC5B9 /* WKInterfaceVolumeControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKInterfaceVolumeControlView.swift; sourceTree = "<group>"; };
-		2195FBBE1D2FBBCF00ADDCAB /* UriLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UriLoader.h; sourceTree = "<group>"; };
-		2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UriLoader.m; sourceTree = "<group>"; };
-		2195FBC11D2FCC6800ADDCAB /* SiteInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SiteInfo.h; sourceTree = "<group>"; };
-		2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SiteInfo.m; sourceTree = "<group>"; };
 		2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.2.tbd; path = usr/lib/libxml2.2.tbd; sourceTree = SDKROOT; };
 		2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
 		2195FBC81D346A3500ADDCAB /* SettingDataModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 8.xcdatamodel"; sourceTree = "<group>"; };
@@ -586,8 +563,6 @@
 		21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSpeakerUtility.swift; sourceTree = "<group>"; };
 		21E975B7229A8C8C0027A0A0 /* DefaultSpeechModList.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = DefaultSpeechModList.json; sourceTree = "<group>"; };
 		21E975B922A06CC60027A0A0 /* MigrationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationViewController.swift; sourceTree = "<group>"; };
-		21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIViewControllerExtension.h; sourceTree = "<group>"; };
-		21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIViewControllerExtension.m; sourceTree = "<group>"; };
 		21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NovelSpeaker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21F054CC1917E0F200CC6BA9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		21F054CE1917E0F200CC6BA9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -614,8 +589,6 @@
 		21F563CE1FD8023F0037F5D7 /* <@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "<@3x.png"; sourceTree = "<group>"; };
 		21F7DE43197EB33900BD2899 /* Story.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Story.h; path = DataModelMapping/Story.h; sourceTree = "<group>"; };
 		21F7DE44197EB33900BD2899 /* Story.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Story.m; path = DataModelMapping/Story.m; sourceTree = "<group>"; };
-		21FDF56020392E1E00DE1692 /* NSDataDetectEncodingExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSDataDetectEncodingExtension.h; sourceTree = "<group>"; };
-		21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSDataDetectEncodingExtension.m; sourceTree = "<group>"; };
 		21FDF5632043CDB100DE1692 /* NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "NovelSpeakerIcon-itunes-artwork-withoutAlpha-1024.png"; sourceTree = "<group>"; };
 		355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeaker.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker.release.xcconfig"; sourceTree = "<group>"; };
 		470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -921,24 +894,8 @@
 				2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */,
 				21D8FC4D19FC985B00CCF1B6 /* LPPerformanceChecker.h */,
 				21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */,
-				2195FBBE1D2FBBCF00ADDCAB /* UriLoader.h */,
-				2195FBBF1D2FBBCF00ADDCAB /* UriLoader.m */,
-				2195FBC11D2FCC6800ADDCAB /* SiteInfo.h */,
-				2195FBC21D2FCC6800ADDCAB /* SiteInfo.m */,
-				2127EAC91DB75989005B1636 /* HtmlStory.h */,
-				2127EACA1DB75989005B1636 /* HtmlStory.m */,
-				21890CF11D92F38800869046 /* NSDataZlibExtension.h */,
-				21890CF21D92F38800869046 /* NSDataZlibExtension.m */,
-				21FDF56020392E1E00DE1692 /* NSDataDetectEncodingExtension.h */,
-				21FDF56120392E1E00DE1692 /* NSDataDetectEncodingExtension.m */,
-				21814C5A1E8D68A90096CB42 /* NSStringExtension.h */,
-				21814C5B1E8D68A90096CB42 /* NSStringExtension.m */,
-				21EA9B9B1F947677002A7A94 /* UIViewControllerExtension.h */,
-				21EA9B9C1F947677002A7A94 /* UIViewControllerExtension.m */,
 				21C372DB21DFC41600FB2D52 /* UIImageExtension.h */,
 				21C372DC21DFC41600FB2D52 /* UIImageExtension.m */,
-				212F01121D8FDEC5009D69E6 /* NiftyUtility.h */,
-				212F01131D8FDEC5009D69E6 /* NiftyUtility.m */,
 				214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */,
 				21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */,
 				2167419F2043D592008A578D /* BehaviorLogger.swift */,
@@ -1515,6 +1472,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/DataCompression-watchOS/DataCompression.framework",
 				"${BUILT_PRODUCTS_DIR}/Kanna-watchOS/Kanna.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm-watchOS/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift-watchOS/RealmSwift.framework",
@@ -1522,6 +1480,7 @@
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DataCompression.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kanna.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
@@ -1561,6 +1520,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-NovelSpeaker/Pods-NovelSpeaker-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/DataCompression-iOS/DataCompression.framework",
 				"${BUILT_PRODUCTS_DIR}/Erik/Erik.framework",
 				"${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework",
 				"${BUILT_PRODUCTS_DIR}/FTLinearActivityIndicator/FTLinearActivityIndicator.framework",
@@ -1574,6 +1534,7 @@
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DataCompression.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Erik.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Eureka.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FTLinearActivityIndicator.framework",
@@ -1712,6 +1673,7 @@
 				21949BD523EDE75A00BCC5B9 /* NovelSupportMenuView.swift in Sources */,
 				214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */,
 				210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
+				21A4C75124EF9AF300038883 /* UIImageExtension.m in Sources */,
 				215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */,
 				2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */,
 				2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */,
@@ -1719,9 +1681,7 @@
 				215BFB4223EDB15F0078E158 /* SystemIconButtonView.swift in Sources */,
 				2193094723BBE56A00035EF0 /* ContentView.swift in Sources */,
 				219CCF4924BC7FFA00AE35A9 /* StoryFetcher.swift in Sources */,
-				2124B38723BBF220002EBC31 /* NiftyUtility.m in Sources */,
 				2100A42C2496441500F54A5D /* MultiVoiceSpeaker.swift in Sources */,
-				2138B14B23BEAE8200D8642C /* NSDataZlibExtension.m in Sources */,
 				2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */,
 				2124B39423BBF9FC002EBC31 /* SpeakPitchConfigCacheData.m in Sources */,
 				2124B39523BBFA04002EBC31 /* SpeechWaitConfigCacheData.m in Sources */,
@@ -1730,14 +1690,12 @@
 				2193094B23BBE56A00035EF0 /* ExtensionDelegate.swift in Sources */,
 				2124B39923BBFB7A002EBC31 /* CoreDataObjectHolder.m in Sources */,
 				2124B39823BBFAF4002EBC31 /* GlobalStateCacheData.m in Sources */,
-				2124B38823BBF234002EBC31 /* HtmlStory.m in Sources */,
 				2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */,
 				2193094F23BBE56A00035EF0 /* NotificationView.swift in Sources */,
 				214A400123D838C10034DFB2 /* SpeechBlockSpeaker.swift in Sources */,
 				2124B39023BBF392002EBC31 /* NovelSpeakerNotificationTool.swift in Sources */,
 				2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */,
 				2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */,
-				2124B39D23BBFC09002EBC31 /* UIImageExtension.m in Sources */,
 				2104EDED24B9D6C800E275D1 /* SloppyError.swift in Sources */,
 				21CE8EA6241677ED00C9DB7F /* ScrollableVStack.swift in Sources */,
 				2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */,
@@ -1752,13 +1710,10 @@
 			files = (
 				2164800E22910E6300A183DF /* UIImageExtensionSwift.swift in Sources */,
 				213AB8821FB7407E00EE302D /* TimeIntervalCountDownRow.swift in Sources */,
-				21814C5C1E8D68A90096CB42 /* NSStringExtension.m in Sources */,
 				2173A6BF21CC529F002E9EA8 /* FloatingButton.swift in Sources */,
-				212F01141D8FDEC5009D69E6 /* NiftyUtility.m in Sources */,
 				216741A3204421F1008A578D /* BugReportViewController.swift in Sources */,
 				212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */,
 				2169D65C22C26028008787A4 /* NovelKeywordTagSelecterViewController.swift in Sources */,
-				2195FBC31D2FCC6800ADDCAB /* SiteInfo.m in Sources */,
 				212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */,
 				2191636F199E6610003FF7FC /* SpeakPitchConfigCacheData.m in Sources */,
 				2191639A19A38414003FF7FC /* NarouContent.m in Sources */,
@@ -1783,12 +1738,10 @@
 				21A2CDBB2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,
 				21916378199F1463003FF7FC /* SpeechModSettingCacheData.m in Sources */,
-				21890CF31D92F38800869046 /* NSDataZlibExtension.m in Sources */,
 				21647FFC228CF44900A183DF /* UpdateLogViewController.swift in Sources */,
 				21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */,
 				210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */,
 				21CA0FCB218DE6520059FACB /* DuplicateSoundPlayer.swift in Sources */,
-				21C372DD21DFC41600FB2D52 /* UIImageExtension.m in Sources */,
 				2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
 				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
@@ -1805,13 +1758,10 @@
 				21C759FE22871D7C00956B73 /* CoreDataToRealmTool.swift in Sources */,
 				21621086247A62C6002EAA61 /* MultiVoiceSpeaker.swift in Sources */,
 				21724EEF1974163700DF6DC4 /* StoryCacheData.m in Sources */,
-				2127EACB1DB75989005B1636 /* HtmlStory.m in Sources */,
 				21647FF8228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift in Sources */,
 				2164800A229092A200A183DF /* SpeechViewController.swift in Sources */,
 				21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */,
 				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
-				21FDF56220392E1E00DE1692 /* NSDataDetectEncodingExtension.m in Sources */,
-				21EA9B9D1F947677002A7A94 /* UIViewControllerExtension.m in Sources */,
 				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
 				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
 				21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */,

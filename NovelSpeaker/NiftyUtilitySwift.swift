@@ -10,6 +10,7 @@ import UIKit
 import RealmSwift
 import UserNotifications
 import Kanna
+import DataCompression
 
 #if !os(watchOS)
 import PDFKit
@@ -172,6 +173,7 @@ class NiftyUtilitySwift: NSObject {
                         dialog.dismiss(animated: false, completion: nil)
                     }
                 })
+            print("builder.addButton(title: このまま取り込む)")
             builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
                     let titleTextField = dialog.view.viewWithTag(100) as! UITextField
                     let titleString = titleTextField.text ?? titleString
@@ -198,6 +200,7 @@ class NiftyUtilitySwift: NSObject {
                         })
                     }
                 })
+            print("check IsNextAlive != true")
             if state.IsNextAlive != true, let separatedText = CheckShouldSeparate(text: content), separatedText.reduce(0, { (result, body) -> Int in
                 return result + (body.count > 0 ? 1 : 0)
             }) > 1 {
@@ -210,6 +213,7 @@ class NiftyUtilitySwift: NSObject {
                     RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: titleString)
                 })
             }
+            print("builder.build().show() call.")
             builder.build().show()
         }
     }
@@ -762,6 +766,7 @@ class NiftyUtilitySwift: NSObject {
                     var statusCodeDiv100:Int = response.statusCode / 100
                     statusCodeDiv100 %= 10
                     if statusCodeDiv100 != 2 {
+                        print("\(url.absoluteString) return \(response.statusCode)")
                         failedAction?(SloppyError(msg:
                             String(format: NSLocalizedString("UriLoader_HTTPResponseIsInvalid", comment: "サーバから返されたステータスコードが正常値(200 OK等)ではなく、%ld を返されました。ログインが必要なサイトである場合などに発生する場合があります。ことせかい アプリ側でできることはあまり無いかもしれませんが、ことせかい のサポートサイトに設置してあります、ご意見ご要望フォームにこの問題の起こったURLとこの症状が起こった前にやったことを添えて報告して頂けると、あるいはなんとかできるかもしれません。"), response.statusCode)))
                         return
@@ -1089,12 +1094,12 @@ class NiftyUtilitySwift: NSObject {
             (Date().timeIntervalSince1970 - modificationDate.timeIntervalSince1970) < expireTimeinterval,
             let successAction = successAction,
             let dataZiped = try? Data(contentsOf: cacheFilePath),
-            let data = NiftyUtility.dataInflate(dataZiped) {
+            let data = decompress(data: dataZiped) {
             successAction(data)
             return
         }
         httpGet(url: url, successAction: { (data, encoding) in
-            if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName), let dataZiped = NiftyUtility.dataDeflate(data, level: 9) {
+            if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName), let dataZiped = compress(data: data) {
                 do {
                     try dataZiped.write(to: cacheFilePath, options: Data.WritingOptions.atomic)
                 }catch{
@@ -1296,5 +1301,77 @@ class NiftyUtilitySwift: NSObject {
         guard let urlNode = xmlDocument.xpath(xpath).first else { return nil }
         let urlString = urlNode["href"] ?? urlNode.content ?? ""
         return URL(string: urlString, relativeTo: baseURL)
+    }
+    
+    // a を b で xor します。b が a より短い場合はループして適用します
+    static func xorData(a:Data, b:Data) -> Data {
+        var result:Data = Data(capacity: a.count)
+        for i in 0..<a.count {
+            result.append(a[i] ^ b[i % b.count])
+        }
+        return result
+    }
+    
+    static func sha256(data: Data) -> Data {
+        let nsData = NSData(data: data)
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+        CC_SHA256(nsData.bytes, CC_LONG(nsData.length), &digest)
+        let resultNSData = NSData(bytes: &digest, length: Int(CC_SHA256_DIGEST_LENGTH))
+        return resultNSData as Data
+    }
+
+    /// ダサい暗号化
+    static func stringEncrypt(string:String, key:String) -> String? {
+        guard let data = string.data(using: .utf8), let keyData = key.data(using: .utf8) else { return nil }
+        let hashedKeyData = sha256(data: keyData)
+        guard let zipedData = data.zip() else { return nil }
+        let encryptedData = xorData(a: zipedData, b: hashedKeyData)
+        return encryptedData.base64EncodedString()
+    }
+    /// ダサい暗号化の戻し
+    static func stringDecrypt(string:String, key:String) -> String? {
+        guard let data = Data(base64Encoded: string) else { return nil }
+        guard let keyData = key.data(using: .utf8) else { return nil }
+        let hashedKeyData = sha256(data: keyData)
+        let decryptedData = xorData(a: data, b: hashedKeyData)
+        guard let unzipedData = decryptedData.unzip() else { return nil }
+        return String(data: unzipedData, encoding: .utf8)
+    }
+    
+    // 通知を表示させます。
+    static func InvokeNotificationNow(title:String, message:String, badgeNumber:Int) {
+        let notificationContent = UNMutableNotificationContent()
+        notificationContent.title = title
+        notificationContent.body = message
+        notificationContent.badge = NSNumber(value: badgeNumber)
+        // 怪しく identifier は日付を入れることにします。
+        // (複数登録された場合でも最後の一つにならないように)
+        // なお、通知を自分で消す場合はこの identifier をどこかに保存しておかないと駄目です。
+        let formatter = DateFormatter()
+        formatter.dateFormat = "YYYYMMDDhhmmss"
+        let formatedNow = formatter.string(from: Date())
+        let identifier = "NovelSpeaker_Notification_\(formatedNow)"
+        let request = UNNotificationRequest(identifier: identifier, content: notificationContent, trigger: nil)
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+    }
+    
+    static func compress(data:Data) -> Data? {
+        return data.compress(withAlgorithm: .lzfse)
+        //return data.zip()
+    }
+    static func decompress(data:Data) -> Data? {
+        return data.decompress(withAlgorithm: .lzfse)
+        //return data.unzip()
+    }
+    static func stringCompress(string:String) -> Data? {
+        return string.data(using: .utf8, allowLossyConversion: true)?.compress(withAlgorithm: .lzfse)
+        //return string.data(using: .utf8, allowLossyConversion: true)?.zip()
+    }
+    static func stringDecompress(data:Data) -> String? {
+        guard let data = data.decompress(withAlgorithm: .lzfse) else {
+        //guard let data = data.unzip() else {
+            return nil
+        }
+        return String(decoding: data, as: UTF8.self)
     }
 }

@@ -10,8 +10,9 @@
 #define NovelSpeakerWatchApp_Bridging_Header_h
 
 #import "GlobalDataSingleton.h"
-#import "UriLoader.h"
-#import "NiftyUtility.h"
+//#import "UriLoader.h"
+//#import "NiftyUtility.h"
 #import "UIImageExtension.h"
+#import <CommonCrypto/CommonHMAC.h>
 
 #endif /* NovelSpeakerWatchApp_Bridging_Header_h */

@@ -185,12 +185,12 @@
 "SettingTableViewController_IsOpenRecentBookInStartTime" = "Startup with the last read book";
 
 "NovelSpeakerBackup_InitializeBackup" = "Initializing";
-"NovelSpeakerBackup_ExportingNovelText" = "Step 1\r\nExtracting texts from novels";
-"NovelSpeakerBackup_CompressingBackupData" = "Step 2\r\nCompressing";
-"NovelSpeakerBackup_CompressingBackupDataProgress" = "Step 2\r\nCompressing";
+"NovelSpeakerBackup_ExportingNovelText" = "Step 1/2\r\nExtracting texts from novels";
+"NovelSpeakerBackup_CompressingBackupData" = "Step 2/2\r\nPreparing for compression";
+"NovelSpeakerBackup_CompressingBackupDataProgress" = "Step 2/2\r\nCompressing";
 "NovelSpeakerBackup_Restoreing" = "Restore backups";
-"NovelSpeakerBackup_ProgressExtractingZip" = "Step 1\r\nExpanding";
-"NovelSpeakerBackup_RestoreingBackupData" = "Step 2\r\nApplying";
+"NovelSpeakerBackup_ProgressExtractingZip" = "Step 1/2\r\nExpanding";
+"NovelSpeakerBackup_RestoreingBackupData" = "Step 2/2\r\nApplying";
     
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -555,6 +555,7 @@
 "NovelSearchViewController_LoadNextPage" = "Searching for more...";
 "NovelSearchViewController_RadioSelectTarget_None" = "Deselect";
 "NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle" = "Temporary reading";
+"NovelSearchViewController_LoadingSearchInfoTitle" = "Loading information for search...\n(Internet connection required)";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
 "NovelDisplayColorSettingViewController_SampleText" = "If I speak in the tongues of men or of angels, but do not have love, I am only a resounding gong or a clanging cymbal. If I have the gift of prophecy and can fathom all mysteries and all knowledge, and if I have a faith that can move mountains, but do not have love, I am nothing. If I give all I possess to the poor and give over my body to hardship that I may boast,[b] but do not have love, I gain nothing.";

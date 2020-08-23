@@ -810,7 +810,7 @@ class NovelSpeakerUtility: NSObject {
             if let title = novel.object(forKey: "title") as? String {
                 realmNovel.title = title
             }
-            if let secret = novel.object(forKey: "secret") as? String, let urlSecret = NiftyUtility.stringDecrypt(secret, key: url) {
+            if let secret = novel.object(forKey: "secret") as? String, let urlSecret = NiftyUtilitySwift.stringDecrypt(string: secret, key: url) {
                 realmNovel.m_urlSecret = urlSecret
             }
             if let author = novel.object(forKey: "author") as? String {
@@ -1352,7 +1352,7 @@ class NovelSpeakerUtility: NSObject {
                 if let url = novelDic.object(forKey: "url") as? String {
                     novel.url = url
                 }
-                if let secret = novelDic.object(forKey: "secret") as? String, let urlSecret = NiftyUtility.stringDecrypt(secret, key: novelID) {
+                if let secret = novelDic.object(forKey: "secret") as? String, let urlSecret = NiftyUtilitySwift.stringDecrypt(string: secret, key: novelID) {
                     novel.m_urlSecret = urlSecret
                 }
                 if let createdDateString = novelDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
@@ -1417,10 +1417,11 @@ class NovelSpeakerUtility: NSObject {
                             }
                             data = contentData
                         }
+                        guard let content = NiftyUtilitySwift.stringDecompress(data: data) else { continue }
                         var story = Story()
                         story.novelID = novelID
                         story.chapterNumber = chapterNumber.intValue
-                        story.content = NiftyUtility.stringInflate(data)
+                        story.content = content
                         if let url = storyDic.object(forKey: "url") as? String {
                             story.url = url
                         }
@@ -1590,7 +1591,7 @@ class NovelSpeakerUtility: NSObject {
                 if story.downloadDate > Date(timeIntervalSince1970: 0) {
                     storyData["downloadDate"] = NiftyUtilitySwift.Date2ISO8601String(date: story.downloadDate)
                 }
-                if let contentZiped = NiftyUtility.stringDeflate(story.content, level: 9) {
+                if let contentZiped = NiftyUtilitySwift.stringCompress(string: story.content) {
                     if let contentWriteTo = contentWriteTo {
                         do {
                             let filePath = contentWriteTo.appendingPathComponent("\(story.chapterNumber)")
@@ -1625,7 +1626,7 @@ class NovelSpeakerUtility: NSObject {
                     "writer": novel.writer,
                     "title": novel.title,
                     "url": novel.url,
-                    "secret": NiftyUtility.stringEncrypt(novel.m_urlSecret, key: novel.novelID) ?? "",
+                    "secret": NiftyUtilitySwift.stringEncrypt(string: novel.m_urlSecret, key: novel.novelID) ?? "",
                     "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: novel.createdDate),
                     "likeLevel": novel.likeLevel,
                     "isNeedSpeechAfterDelete": novel.isNeedSpeechAfterDelete,
@@ -1876,9 +1877,7 @@ class NovelSpeakerUtility: NSObject {
             return nil
         }
         let bookshelfResult = CreateBackupDataDictionary_Bookshelf(withAllStoryContent: withAllStoryContent, contentWriteTo: outputPath, progress: progress)
-        if let progress = progress {
-            progress(NSLocalizedString("NovelSpeakerUtility_ExportOtherSettings", comment: "設定情報の抽出中"))
-        }
+        progress?(NSLocalizedString("NovelSpeakerUtility_ExportOtherSettings", comment: "設定情報の抽出中"))
         let jsonDictionary:[String:Any] = [
             "data_version": "2.0.0",
             "bookshelf": bookshelfResult.0,
@@ -1918,7 +1917,7 @@ class NovelSpeakerUtility: NSObject {
             return backupDataFilePath
         }
         if let progress = progress {
-            progress(NSLocalizedString("NovelSpeakerBackup_CompressingBackupDataProgress", comment: "バックアップデータを圧縮中"))
+            progress(NSLocalizedString("NovelSpeakerBackup_CompressingBackupData", comment: "圧縮準備中"))
         }
         let zipFilePath = NiftyUtilitySwift.GetTemporaryFilePath(fileName: NiftyUtilitySwift.Date2ISO8601String(date: Date()) + ".zip")
         do {

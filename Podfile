@@ -20,6 +20,7 @@ target 'NovelSpeaker' do
   pod 'AnyCodable-FlightSchool'
   pod 'Kanna'
   pod 'Erik'
+  pod 'DataCompression'
 
   target 'NovelSpeakerTests' do
     inherit! :search_paths
@@ -41,6 +42,7 @@ target 'NovelSpeaker' do
     pod 'IceCream'
     pod 'AnyCodable-FlightSchool'
     pod 'Kanna'
+    pod 'DataCompression'
   end
 
 end

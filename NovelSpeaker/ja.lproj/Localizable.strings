@@ -155,10 +155,10 @@
 "SettingsViewController_ClearSiteInfoCache" = "SiteInfoキャッシュを削除する";
 "SettingsViewController_ClearSiteInfoCache_done" = "保存されている SiteInfo 情報を削除しました。";
 
-"NovelSpeakerUtility_ExportingNovelData" = "小説を抽出中";
-"NovelSpeakerUtility_ExportOtherSettings" = "設定情報の抽出中";
+"NovelSpeakerUtility_ExportingNovelData" = "工程 2/4\n小説を抽出中";
+"NovelSpeakerUtility_ExportOtherSettings" = "工程 3/4\n設定情報の抽出中";
 "NovelSpeakerUtility_RestoreingJSONType" = "バックアップファイルから設定を読み込んでいます。";
-"NovelSpeakerUtility_UnzipProgress" = "バックアップファイルを解凍しています";
+"NovelSpeakerUtility_UnzipProgress" = "工程 1/4\nバックアップファイルを解凍しています";
 "NovelSpeakerUtility_RestoreBackupTitle" = "バックアップデータを読み込んでいます";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
 
@@ -181,12 +181,12 @@
 "SettingTableViewController_IsOpenRecentBookInStartTime" = "起動時に前回開いていた小説を開く";
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";
-"NovelSpeakerBackup_ExportingNovelText" = "工程 1\r\n小説本文を抽出中";
-"NovelSpeakerBackup_CompressingBackupData" = "工程 2\r\n圧縮中";
-"NovelSpeakerBackup_CompressingBackupDataProgress" = "工程 2\r\n圧縮中";
+"NovelSpeakerBackup_ExportingNovelText" = "工程 3/4\r\n小説本文を抽出中";
+"NovelSpeakerBackup_CompressingBackupData" = "工程 4/4\r\n圧縮準備中";
+"NovelSpeakerBackup_CompressingBackupDataProgress" = "工程 4/4\r\n圧縮中";
 "NovelSpeakerBackup_Restoreing" = "バックアップより復元";
-"NovelSpeakerBackup_ProgressExtractingZip" = "工程 1\r\n展開中";
-"NovelSpeakerBackup_RestoreingBackupData" = "工程 2\r\n適用中";
+"NovelSpeakerBackup_ProgressExtractingZip" = "工程 1/2\r\n展開中";
+"NovelSpeakerBackup_RestoreingBackupData" = "工程 2/2\r\n適用中";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
@@ -547,6 +547,7 @@
 "NovelSearchViewController_LoadNextPage" = "続きを検索しています……";
 "NovelSearchViewController_RadioSelectTarget_None" = "選択しない";
 "NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle" = "仮読み込み";
+"NovelSearchViewController_LoadingSearchInfoTitle" = "Web検索用の情報を読み込んでいます……\n(インターネット接続が必要です)";
 
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 

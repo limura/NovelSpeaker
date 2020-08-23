@@ -687,7 +687,7 @@ class NovelDownloadQueue : NSObject {
                 let displayDownloadCount = self.GetCurrentDownloadCount() + novelIDArray.count
                 self.SetCurrentDownloadCount(count: displayDownloadCount)
                 DispatchQueue.main.async {
-                    NiftyUtility.invokeNotificationNow(downloadSuccessTitle, message: novelTitleArray.joined(separator: "\n"), badgeNumber: displayDownloadCount)
+                    NiftyUtilitySwift.InvokeNotificationNow(title: downloadSuccessTitle, message: novelTitleArray.joined(separator: "\n"), badgeNumber: displayDownloadCount)
                 }
                 performFetchWithCompletionHandler(.newData)
             }
