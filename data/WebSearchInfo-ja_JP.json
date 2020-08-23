@@ -64,23 +64,79 @@
     {
         "title": "カクヨム",
         "HTTPMethod": "GET",
-        "isNeedHeadless": true,
-        "url": "https://www.google.com/search?",
+        "isNeedHeadless": false,
+        "url": "https://kakuyomu.jp/search?",
         "values": [
-            {"queryType": "text", "displayText": "検索文字列", "queryName": "as_q"},
-            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
-            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
-            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
-            {"queryType": "hidden", "queryName": "num", "value": "20"},
-            {"queryType": "hidden", "queryName": "complete", "value": "0"},
-            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
-            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "https://kakuyomu.jp/works/"}
+            {"queryType": "text", "displayText": "次のキーワードを含む", "queryName": "q"},
+            {"queryType": "text", "displayText": "次のキーワードを含まない", "queryName": "ex_q"},
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre_name", "radio":
+                {
+                    "異世界ファンタジー": "fantasy",
+                    "現代ファンタジー": "action",
+                    "SF": "sf",
+                    "恋愛": "love_story",
+                    "ラブコメ": "romance",
+                    "現代ドラマ": "drama",
+                    "ホラー": "horror",
+                    "ミステリー": "mystery",
+                    "エッセイ・ノンフィクション": "nonfiction",
+                    "歴史・時代・伝奇": "history",
+                    "創作論・評論": "criticism",
+                    "詩・童話・その他": "others"
+                }
+            },
+            {"queryType": "radio", "displayText": "執筆状況", "queryName": "serial_status", "radio":
+                {
+                    "連載中": "running",
+                    "完結済": "completed"
+                }
+            },
+            {"queryType": "radio", "displayText": "★の数", "queryName": "total_review_point_range", "radio":
+                {
+                    "〜★9": "-9",
+                    "★10〜": "10-",
+                    "★100〜": "100-",
+                    "★500〜": "500-"
+                }
+            },
+            {"queryType": "radio", "displayText": "小説の長さ", "queryName": "total_character_count_range", "radio":
+                {
+                    "短編（〜2万文字）": "-20000",
+                    "中編（2万文字〜8万文字）": "20000-80000",
+                    "長編（8万文字〜）": "80000-"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "セルフレイティング(除外する項目を選択)", "queryName": "exclusion_flag_name", "separator": "&exclusion_flag_name=",
+                "multiSelect": {
+                    "残酷描写有り": "cruel",
+                    "暴力描写有り": "violent",
+                    "性描写有り": "sexual"
+                }
+            },
+            {"queryType": "", "displayText": "公開日", "queryName": "published_date_range", "radio":
+                {
+                    "1日以内": "1days",
+                    "1週間以内": "7days",
+                    "1ヶ月以内": "1months",
+                    "半年以内": "6months",
+                    "1年以内": "1years"
+                }
+            },
+            {"queryType": "radio", "displayText": "更新日", "queryName": "", "radio":
+                {
+                    "1日以内": "1days",
+                    "1週間以内": "7days",
+                    "1ヶ月以内": "1months",
+                    "半年以内": "6months",
+                    "1年以内": "1years"
+                }
+            }
         ],
         "result": {
-            "block": "//div[@id='rso']//div[@data-hveid and descendant::a[contains(@href,'https://kakuyomu.jp/works/') and not(contains(@href,'webcache.google'))]]",
-            "nextLink": "//div[@id='extrares']//a[contains(@href,'/search?q=')]/@href",
-            "title": "//a/div[@role='heading']",
-            "url": "//a[@href]/@href"
+            "block": "//section[@id='searchResult-works']/div[contains(@class,'widget-work')]/div[@class='float-left']",
+            "nextLink": "//div[@class='widget-pager']/p[@class='widget-pagerNext']/a[contains(@href,'/search?')]/@href",
+            "title": "/h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]",
+            "url": "/h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]/@href"
         }
     },
     {
