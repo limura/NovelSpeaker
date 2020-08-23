@@ -189,6 +189,37 @@ class HiddenQuery: SearchQuery {
     }
 }
 
+class OnOffQuery: SearchQuery {
+    let displayText:String
+    let queryName:String
+    let value:String
+    var isOn:Bool = false
+    init(displayText:String, queryName:String, value:String){
+        self.displayText = displayText
+        self.queryName = queryName
+        self.value = value
+    }
+    static func GenerateQuery(value:[String:Any]) -> OnOffQuery? {
+        guard let type = value["queryType"] as? String, type == "onOff", let displayText = value["displayText"] as? String, let queryName = value["queryName"] as? String, let queryValue = value["value"] as? String else { return nil }
+        return OnOffQuery(displayText: displayText, queryName: queryName, value: queryValue)
+    }
+    
+    func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
+        return SwitchRow() {
+            $0.title = self.displayText
+            $0.value = self.isOn
+        }.onChange { (row) in
+            self.isOn = row.value ?? false
+        }
+    }
+    func CreateQuery() -> String {
+        if isOn {
+            return queryName + "=" + value
+        }
+        return ""
+    }
+}
+
 class SearchResultBlock {
     let title:String
     let url:URL
@@ -413,13 +444,13 @@ class WebSiteSection {
     func SetSiteInfoJSON(jsonDecodable: [String:AnyDecodable]) -> Bool {
         if let title = jsonDecodable["title"]?.value as? String {
             self.title = title
-        }
+        }else{ return false }
         if let HTTPMethod = jsonDecodable["HTTPMethod"]?.value as? String, HTTPMethod == "GET" || HTTPMethod == "POST" {
             self.HTTPMethod = HTTPMethod
-        }
+        }else{ return false }
         if let url = jsonDecodable["url"]?.value as? String {
             self.url = url
-        }
+        }else{ return false }
         if let isNeedHeadless = jsonDecodable["isNeedHeadless"]?.value as? Bool {
             self.isNeedHeadless = isNeedHeadless
         }
@@ -448,6 +479,10 @@ class WebSiteSection {
                     if let query = HiddenQuery.GenerateQuery(value: value) {
                         values.append(query)
                     }
+                case "onOff":
+                    if let query = OnOffQuery.GenerateQuery(value: value) {
+                        values.append(query)
+                    }
                 default:
                     // nothing to do!
                     break
@@ -457,7 +492,7 @@ class WebSiteSection {
         }
         if let result = jsonDecodable["result"]?.value as? [String:Any] {
             self.result = SearchResult.GenerateObject(value: result)
-        }
+        }else{ return false }
         return true
     }
     
@@ -501,16 +536,19 @@ class WebSiteSection {
                     return true
                 }
                 NiftyUtilitySwift.EasyDialogNoButton(viewController: self.parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
+                    print("query: \(url.absoluteString)")
                     NiftyUtilitySwift.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
                         DispatchQueue.main.async {
-                            dialog.dismiss(animated: false) {
-                                guard let result = self.result else {
+                            guard let result = self.result else {
+                                dialog.dismiss(animated: false) {
                                     DispatchQueue.main.async {
                                         NiftyUtilitySwift.EasyDialogOneButton(viewController: self.parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailed_Title", comment: "検索失敗"), message: NSLocalizedString("NovelSearchViewController_SearchField_Message", comment: "検索に失敗しました。\n恐らくは検索に利用されたWebサイト様側の仕様変更(HTML内容の変更)が影響していると思われます。「Web取込」側で取込を行うか、「Web検索」タブ用のデータが更新されるのをお待ち下さい。"), buttonTitle: nil, buttonAction: nil)
                                     }
-                                    return
                                 }
-                                let (searchResultBlockArray, nextURL) = result.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: url)
+                                return
+                            }
+                            let (searchResultBlockArray, nextURL) = result.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: url)
+                            dialog.dismiss(animated: false) {
                                 DispatchQueue.main.async {
                                     let nextViewController = SearchResultViewController()
                                     nextViewController.resultBlockArray = searchResultBlockArray
@@ -544,6 +582,11 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = NSLocalizedString("NovelSearchViewController_Title", comment: "Web検索")
+        self.form +++ Section()
+        <<< LabelRow() {
+            $0.title = NSLocalizedString("NovelSearchViewController_LoadingSearchInfoTitle", comment: "Web検索用の情報を読み込んでいます……")
+            $0.cell.textLabel?.numberOfLines = 0
+        }
         loadSearchInfo()
     }
     
@@ -597,7 +640,9 @@ class NovelSearchViewController: FormViewController,ParentViewController {
             self.reloadCells()
         }) { (err) in
             DispatchQueue.main.async {
-                self.form.removeAll()
+                if self.form.count > 0 {
+                    self.form.removeAll()
+                }
                 self.form +++ Section()
                 <<< TextRow() {
                     $0.title = NSLocalizedString("NovelSearchViewController_SearchInfoLoadError_Title", comment: "検索設定の読み込みに失敗")
