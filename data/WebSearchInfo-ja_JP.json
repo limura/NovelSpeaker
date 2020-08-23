@@ -241,5 +241,76 @@
             "title": "//a[contains(@href,'/novel/')]",
             "url": "//a[contains(@href,'/novel/')]/@href"
         }
+    },
+    {
+        "title": "星空文庫",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://slib.net/works/",
+        "values": [
+            {"queryType": "radio", "displayText": "形式", "queryName": "type",
+                "radio": {
+                    "小説": "1",
+                    "随筆・エッセイ": "11",
+                    "韻文詩": "21",
+                    "自由詩": "31"
+                }
+            },
+            {"queryType": "radio", "displayText": "文章量", "queryName": "length",
+                "radio": {
+                    "掌編": "1",
+                    "短編": "2",
+                    "中編": "3",
+                    "長編": "4"
+                }
+            },
+            {"queryType": "radio", "displayText": "権利", "queryName": "copy",
+                "radio": {
+                    "CC BY-NC-ND": "11",
+                    "CC BY-NC-SA": "12",
+                    "CC BY-NC": "13",
+                    "CC BY-ND": "14",
+                    "CC BY-SA": "15",
+                    "CC BY": "16",
+                    "Derivative work": "21",
+                    "Public Domain": "99"
+                }
+            },
+            {"queryType": "radio", "displayText": "レーティング", "queryName": "rating",
+                "radio": {
+                    "全年齢対象": "1",
+                    "幼児向けまで": "-11",
+                    "幼児向けのみ": "11",
+                    "児童向けまで": "-12",
+                    "児童向けのみ": "12",
+                    "青年向けまで": "-13",
+                    "青年向けのみ": "13",
+                    "成人向けまで": "-14",
+                    "成人向けのみ": "14"
+                }
+            },
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "tag[]",
+                "radio": {
+                    "全ての要素": "on",
+                    "ファンタジー": "1",
+                    "青春": "2",
+                    "恋愛": "3",
+                    "冒険": "4",
+                    "アクション": "5",
+                    "サスペンス": "6",
+                    "ミステリー": "7",
+                    "時代・歴史": "8",
+                    "ホラー": "9",
+                    "SF": "10",
+                    "コメディ": "11"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='container_works']//section[contains(@class,'content_cardwork')]",
+            "nextLink": "//div[@class='works-navigation']//a[contains(@href,'/works/') and contains(@href,'index=') and child::i]",
+            "title": "//header/h2/a",
+            "url": "//header/h2/a/@href"
+        }
     }
 ]
