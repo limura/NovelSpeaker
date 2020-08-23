@@ -93,17 +93,17 @@
             },
             {"queryType": "radio", "displayText": "★の数", "queryName": "total_review_point_range", "radio":
                 {
-                    "〜★9": "-9",
-                    "★10〜": "10-",
-                    "★100〜": "100-",
-                    "★500〜": "500-"
+                    "  0〜9": "-9",
+                    " 10〜": "10-",
+                    "100〜": "100-",
+                    "500〜": "500-"
                 }
             },
             {"queryType": "radio", "displayText": "小説の長さ", "queryName": "total_character_count_range", "radio":
                 {
-                    "短編（〜2万文字）": "-20000",
-                    "中編（2万文字〜8万文字）": "20000-80000",
-                    "長編（8万文字〜）": "80000-"
+                    "1: 短編（〜2万文字）": "-20000",
+                    "2: 中編（2万文字〜8万文字）": "20000-80000",
+                    "3: 長編（8万文字〜）": "80000-"
                 }
             },
             {"queryType": "multiSelect", "displayText": "セルフレイティング(除外する項目を選択)", "queryName": "exclusion_flag_name", "separator": "&exclusion_flag_name=",
@@ -113,7 +113,7 @@
                     "性描写有り": "sexual"
                 }
             },
-            {"queryType": "", "displayText": "公開日", "queryName": "published_date_range", "radio":
+            {"queryType": "radio", "displayText": "公開日", "queryName": "published_date_range", "radio":
                 {
                     "1日以内": "1days",
                     "1週間以内": "7days",
@@ -122,7 +122,7 @@
                     "1年以内": "1years"
                 }
             },
-            {"queryType": "radio", "displayText": "更新日", "queryName": "", "radio":
+            {"queryType": "radio", "displayText": "更新日", "queryName": "last_episode_published_date_range", "radio":
                 {
                     "1日以内": "1days",
                     "1週間以内": "7days",
@@ -135,8 +135,8 @@
         "result": {
             "block": "//section[@id='searchResult-works']/div[contains(@class,'widget-work')]/div[@class='float-left']",
             "nextLink": "//div[@class='widget-pager']/p[@class='widget-pagerNext']/a[contains(@href,'/search?')]/@href",
-            "title": "/h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]",
-            "url": "/h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]/@href"
+            "title": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]",
+            "url": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]/@href"
         }
     },
     {
