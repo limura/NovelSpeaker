@@ -368,5 +368,71 @@
             "title": "//header/h2/a",
             "url": "//header/h2/a/@href"
         }
+    },
+    {
+        "title": "エブリスタ",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://estar.jp/novels?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "keyword"},
+            {"queryType": "text", "displayText": "除外キーワード", "queryName": "excludeKeyword"},
+            {"queryType": "radio", "displayText": "並び順", "queryName": "sort",
+                "radio": {
+                    "人気順": "score_desc",
+                    "更新日が新しい": "sort_modified_at_desc",
+                    "更新日が古い": "modified_at_asc",
+                    "公開日が新しい": "sort_published_at_desc",
+                    "公開日が古い": "published_at_asc",
+                    "スター数が多い": "sort_star_desc",
+                    "本棚追加数が多い": "sort_bookshelf_desc"
+                }
+            },
+            {"queryType": "onOff", "displayText": "連載中", "queryName": "writing", "value": "1"},
+            {"queryType": "onOff", "displayText": "完結", "queryName": "finished", "value": "1"},
+            {"queryType": "onOff", "displayText": "休載", "queryName": "ex_paused", "value": "1"},
+            {"queryType": "onOff", "displayText": "過激表現", "queryName": "ex_r18", "value": "1"},
+            {"queryType": "radio", "displayText": "文字数", "queryName": "characterLengthOption",
+                "radio": {
+                    "2万字以下（短編）": "short",
+                    "8万字以上（長編）": "long"
+                }
+            },
+            {"queryType": "radio", "displayText": "公開日", "queryName": "published",
+                "radio": {
+                    "1: 直近1週間": "7",
+                    "2: 直近1ヶ月": "30",
+                    "3: 1年以内": "365"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "genres", "separator": ",",
+                "multiSelect": {
+                    "恋愛": "1020",
+                    "ファンタジー": "1006",
+                    "現代ファンタジー": "1023",
+                    "ノンフィクション": "1005",
+                    "BL": "1018",
+                    "青春": "1002",
+                    "SF": "1007",
+                    "ミステリー": "1009",
+                    "ホラー": "1008",
+                    "ヒューマンドラマ": "1021",
+                    "エッセイ･HowTo": "1022",
+                    "歴史・時代": "1010",
+                    "コメディ": "1015",
+                    "詩・童話・絵本": "1003",
+                    "設定・プロット": "1016"
+                }
+            },
+            {"queryType": "onOff", "displayText": "書籍化・コミカライズ", "queryName": "is_book_p", "value": "1"},
+            {"queryType": "onOff", "displayText": "コンテスト受賞", "queryName": "awarded", "value": "1"},
+            {"queryType": "onOff", "displayText": "特集掲載", "queryName": "in_selection", "value": "1"}
+        ],
+        "result": {
+            "block": "//div[@class='container_works']//section[contains(@class,'content_cardwork')]",
+            "nextLink": "//div[@class='works-navigation']//a[contains(@href,'/works/') and contains(@href,'index=') and child::i]",
+            "title": "//header/h2/a",
+            "url": "//header/h2/a/@href"
+        }
     }
 ]
