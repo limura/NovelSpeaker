@@ -230,7 +230,7 @@
         "title": "ハーメルン",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
-        "url": "https://syosetu.org/search/",
+        "url": "https://syosetu.org/search/?",
         "values": [
             {"queryType": "text", "displayText": "検索文字列", "queryName": "word"},
             {"queryType": "hidden", "queryName": "mode", "value": "search"}
@@ -246,7 +246,7 @@
         "title": "星空文庫",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
-        "url": "https://slib.net/works/",
+        "url": "https://slib.net/works/?",
         "values": [
             {"queryType": "radio", "displayText": "形式", "queryName": "type",
                 "radio": {
