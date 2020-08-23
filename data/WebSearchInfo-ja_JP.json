@@ -429,10 +429,11 @@
             {"queryType": "onOff", "displayText": "特集掲載", "queryName": "in_selection", "value": "1"}
         ],
         "result": {
-            "block": "//div[@class='container_works']//section[contains(@class,'content_cardwork')]",
-            "nextLink": "//div[@class='works-navigation']//a[contains(@href,'/works/') and contains(@href,'index=') and child::i]",
-            "title": "//header/h2/a",
-            "url": "//header/h2/a/@href"
+            "block": "//div[contains(@class,'novelListItem')]",
+            "memo: TODO:": "nextLinkButton は Erik か何かを使って次のページへのボタンをJavaScriptで .click() させるための物という事にしておきますそのうち実装したいなぁ。(´・ω・`)",
+            "nextLinkButton": ".pager .next .button",
+            "title": "//div[@class='info']/h3[@class='title']",
+            "url": "//a[contains(@href,'/novels/')]/@href"
         }
     }
 ]
