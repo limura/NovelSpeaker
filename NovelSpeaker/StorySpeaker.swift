@@ -150,6 +150,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                                         self.updatePlayngInfo(realm: realm, story: story)
                                     }
                                 }
+                            }else if property.name == "isSpeechWaitSettingUseExperimentalWait" {
+                                self.isNeedApplySpeechConfigs = true
                             }
                         }
                     default:
@@ -403,6 +405,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             // story をここでも参照するので怪しくこの if の中に入れます
             if self.isNeedApplySpeechConfigs {
                 self.ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
+                self.isNeedApplySpeechConfigs = false
             }
         }
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
@@ -899,6 +902,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func GenerateSpeechTextFrom(displayTextRange:NSRange) -> String {
+        if self.isNeedApplySpeechConfigs {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
+                    self.ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
+                    self.isNeedApplySpeechConfigs = false
+                }
+            }
+        }
         return speaker.GenerateSpeechTextFrom(displayTextRange: displayTextRange)
     }
 
