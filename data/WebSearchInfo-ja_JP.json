@@ -370,7 +370,7 @@
         }
     },
     {
-        "title": "エブリスタ",
+        "title": "エブリスタ(今の所30件目以降の検索ができません)",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
         "url": "https://estar.jp/novels?",
