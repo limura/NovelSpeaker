@@ -226,7 +226,9 @@ class NiftyUtilitySwift: NSObject {
             let dialog = builder.build()
             let fetcher = StoryFetcher()
             dialog.show {
+                print("FetchFirstContent calling.")
                 fetcher.FetchFirstContent(url: url, cookieString: cookieString) { (url, state, errorString) in
+                    print("FetchFirstContent out.")
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: {
                             if let state = state, (state.content?.count ?? 0) > 0 {
@@ -1291,6 +1293,7 @@ class NiftyUtilitySwift: NSObject {
         }else{
             resultHTML = filterdHTML
         }
+        print("FilterXpathWithConvertString: xpath: \(xpath)\n\(resultHTML)")
         if let result = HTMLToString(htmlString: resultHTML) {
             return result
         }

@@ -190,10 +190,12 @@ class NovelSpeakerUtility: NSObject {
                             "ハーメルン\nhttps://syosetu.org/",
                             "暁\nhttps://www.akatsuki-novels.com/",
                             "カクヨム\nhttps://kakuyomu.jp/",
-                            //"アルファポリス\nhttps://www.alphapolis.co.jp/novel/",
-                            //"pixiv/ノベル\nhttps://www.pixiv.net/novel/",
                             "星空文庫\nhttps://slib.net/",
-                            //"ノベルアップ＋\nhttps://novelup.plus/"
+                            "アルファポリス\nhttps://www.alphapolis.co.jp/novel/",
+                            "pixiv小説\nhttps://www.pixiv.net/novel/",
+                            "ノベルアップ＋\nhttps://novelup.plus/",
+                            "エブリスタ\nhttps://estar.jp/",
+                            "ポケモン小説スクエア\nhttps://pokemon.sorakaze.info/"
                         ]
                         for bookmark in defaultBookmarks {
                             globalState.webImportBookmarkArray.append(bookmark)
@@ -618,7 +620,7 @@ class NovelSpeakerUtility: NSObject {
                     speechOverrideSetting.notRubyCharactorStringArray = not_ruby_charactor_array
                 }
                 if let force_siteinfo_reload_is_enabled = dic.value(forKey: "force_siteinfo_reload_is_enabled") as? NSNumber {
-                    globalState.isForceSiteInfoReloadIsEnabled = force_siteinfo_reload_is_enabled.boolValue
+                    RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: force_siteinfo_reload_is_enabled.boolValue)
                 }
                 if let is_reading_progress_display_enabled = dic.value(forKey: "is_reading_progress_display_enabled") as? NSNumber {
                     globalState.isReadingProgressDisplayEnabled = is_reading_progress_display_enabled.boolValue
@@ -1299,7 +1301,7 @@ class NovelSpeakerUtility: NSObject {
                     globalState.isReadingProgressDisplayEnabled = isReadingProgressDisplayEnabled.boolValue
                 }
                 if let isForceSiteInfoReloadIsEnabled = dic.object(forKey: "isForceSiteInfoReloadIsEnabled") as? NSNumber {
-                    globalState.isForceSiteInfoReloadIsEnabled = isForceSiteInfoReloadIsEnabled.boolValue
+                    RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: isForceSiteInfoReloadIsEnabled.boolValue)
                 }
                 if let isMenuItemIsAddNovelSpeakerItemsOnly = dic.object(forKey: "isMenuItemIsAddNovelSpeakerItemsOnly")  as? NSNumber {
                     globalState.isMenuItemIsAddNovelSpeakerItemsOnly = isMenuItemIsAddNovelSpeakerItemsOnly.boolValue
@@ -1785,7 +1787,7 @@ class NovelSpeakerUtility: NSObject {
                 "isPlaybackDurationEnabled": globalState.isPlaybackDurationEnabled,
                 "isShortSkipEnabled": globalState.isShortSkipEnabled,
                 "isReadingProgressDisplayEnabled": globalState.isReadingProgressDisplayEnabled,
-                "isForceSiteInfoReloadIsEnabled": globalState.isForceSiteInfoReloadIsEnabled,
+                "isForceSiteInfoReloadIsEnabled": RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled(),
                 "isMenuItemIsAddSpeechModSettingOnly": globalState.isMenuItemIsAddNovelSpeakerItemsOnly,
                 //"isBackgroundNovelFetchEnabled": globalState.isBackgroundNovelFetchEnabled,
                 "isPageTurningSoundEnabled": globalState.isPageTurningSoundEnabled,
@@ -2003,5 +2005,32 @@ class NovelSpeakerUtility: NSObject {
         for cookie in deleteTargets {
             storage.deleteCookie(cookie)
         }
+    }
+    
+    static let isAddedFirstStoryKey = "NovelSpeaker_NovelSpeakerUtility_IsAddedFirstStory"
+    static func GetIsAddedFirstStory() -> Bool {
+        let userDefaults = UserDefaults.standard
+        userDefaults.register(defaults: [NovelSpeakerUtility.isAddedFirstStoryKey : false])
+        return userDefaults.bool(forKey: NovelSpeakerUtility.isAddedFirstStoryKey)
+    }
+    static func SetIsIsAddedFirstStory(newValue:Bool) {
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(newValue, forKey: NovelSpeakerUtility.isAddedFirstStoryKey)
+    }
+    fileprivate static let FirstStoryURLString = "https://limura.github.io/NovelSpeaker/topics/00001.html"
+    @objc static func AddFirstStoryIfNeeded() {
+        if GetIsAddedFirstStory() { return }
+        let novelID = FirstStoryURLString
+        RealmUtil.Write { (realm) in
+            let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) ?? RealmNovel()
+            if novel.novelID != novelID {
+                novel.novelID = novelID
+                novel.url = novelID
+                novel.type = .URL
+                realm.add(novel, update: .modified)
+            }
+        }
+        NovelDownloadQueue.shared.addQueue(novelID: novelID)
+        SetIsIsAddedFirstStory(newValue: true)
     }
 }

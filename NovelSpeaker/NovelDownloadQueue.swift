@@ -403,23 +403,18 @@ class NovelDownloadQueue : NSObject {
     }
     
     func reloadSiteInfoIfNeeded() {
-        // SiteInfo を読み出そうとすると Realm object を生成してしまうため、
-        // CoreDataからのマイグレーションが必要な場合は何もしない事にします。
-        if CoreDataToRealmTool.IsNeedMigration() { return }
-        RealmUtil.RealmBlock { (realm) -> Void in
-            let semaphore = DispatchSemaphore(value: 0)
-            let expireDate = Date(timeIntervalSinceNow: -siteInfoReloadTimeinterval)
-            if expireDate > siteInfoLoadDate || RealmGlobalState.GetInstanceWith(realm: realm)?.isForceSiteInfoReloadIsEnabled ?? false {
-                StoryHtmlDecoder.shared.ClearSiteInfo()
-                StoryHtmlDecoder.shared.LoadSiteInfo { (err) in
-                    if let err = err {
-                        print("reloadSiteInfoIfNeeded LoadSiteInfo failed.", err.localizedDescription)
-                    }
-                    semaphore.signal()
+        let semaphore = DispatchSemaphore(value: 0)
+        let expireDate = Date(timeIntervalSinceNow: -siteInfoReloadTimeinterval)
+        if expireDate > siteInfoLoadDate || RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled()  {
+            StoryHtmlDecoder.shared.ClearSiteInfo()
+            StoryHtmlDecoder.shared.LoadSiteInfo { (err) in
+                if let err = err {
+                    print("reloadSiteInfoIfNeeded LoadSiteInfo failed.", err.localizedDescription)
                 }
-                siteInfoLoadDate = Date()
-                semaphore.wait()
+                semaphore.signal()
             }
+            siteInfoLoadDate = Date()
+            semaphore.wait()
         }
     }
     

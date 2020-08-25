@@ -14,8 +14,8 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 6
-    static let currentSchemaVersionForRealmStory : UInt64 = 6
+    static let currentSchemaVersion : UInt64 = 7
+    static let currentSchemaVersionForRealmStory : UInt64 = 7
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
@@ -1719,7 +1719,6 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     @objc dynamic var isPlaybackDurationEnabled = false
     @objc dynamic var isShortSkipEnabled = false
     @objc dynamic var isReadingProgressDisplayEnabled = false
-    @objc dynamic var isForceSiteInfoReloadIsEnabled = false
     @objc dynamic var isMenuItemIsAddNovelSpeakerItemsOnly = false
     @objc dynamic var isPageTurningSoundEnabled = false
     @objc dynamic var m_bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
@@ -1727,12 +1726,22 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     @objc dynamic var IsNeedConfirmDeleteBook = false
     @objc dynamic var fgColor = Data()
     @objc dynamic var bgColor = Data()
-    
     @objc dynamic var defaultDisplaySettingID = ""
     @objc dynamic var defaultSpeakerID = ""
     @objc dynamic var defaultSpeechOverrideSettingID = ""
     @objc dynamic var currentReadingNovelID = ""
-    
+
+    static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_RealmModels_IsForceSiteInfoReloadIsEnabled"
+    static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {
+        let userDefaults = UserDefaults.standard
+        userDefaults.register(defaults: [RealmGlobalState.isForceSiteInfoReloadIsEnabledKey : false])
+        return userDefaults.bool(forKey: RealmGlobalState.isForceSiteInfoReloadIsEnabledKey)
+    }
+    static func SetIsForceSiteInfoReloadIsEnabled(newValue:Bool) {
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(newValue, forKey: RealmGlobalState.isForceSiteInfoReloadIsEnabledKey)
+    }
+
     var bookShelfSortType : NarouContentSortType {
         get {
             return NarouContentSortType(rawValue: UInt(m_bookSelfSortType)) ?? NarouContentSortType.ncode

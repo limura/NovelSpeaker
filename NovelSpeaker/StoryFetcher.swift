@@ -332,10 +332,8 @@ class StoryHtmlDecoder {
                 announceLoadEnd()
                 return
         }
-        RealmUtil.RealmBlock { (realm) -> Void in
-            if let instance = RealmGlobalState.GetInstanceWith(realm: realm), instance.isForceSiteInfoReloadIsEnabled {
-                cacheFileExpireTimeinterval = 0
-            }
+        if RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled() {
+            cacheFileExpireTimeinterval = 0
         }
         var siteInfoData:Data? = nil
         var customSiteInfoData:Data? = nil
@@ -431,6 +429,17 @@ class StoryFetcher {
             failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_Parse", comment: "HTMLの解析に失敗しました。(有効なHTMLまたはXHTML文書ではないようです。いまのところ、ことせかい はPDF等のHTMLやXHTMLではない文書は読み込む事ができません)"))
             return
         }
+        struct Candidate {
+            let siteInfo:StorySiteInfo
+            let pageElement:String
+            let nextUrl:URL?
+            let firstPageLink:URL?
+            #if !os(watchOS)
+            let nextButton: Element?
+            let firstPageButton: Element?
+            #endif
+        }
+        var candidateList:[Candidate] = []
         for siteInfo in currentState.siteInfoArray {
             let pageElement = siteInfo.decodePageElement(xmlDocument: htmlDocument).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             let nextUrl = siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url)
@@ -439,7 +448,6 @@ class StoryFetcher {
             let nextButton:Element? = siteInfo.nextButton != nil ? currentState.document?.querySelectorAll(siteInfo.nextButton!).first : nil
             let firstPageButton:Element? = siteInfo.firstPageButton != nil ? currentState.document?.querySelectorAll(siteInfo.firstPageButton!).first : nil
             if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil {
-                print("no content or nextUrl and other:", siteInfo.pageElement)
                 continue
             }
             #else
@@ -448,28 +456,45 @@ class StoryFetcher {
             }
             #endif
             #if !os(watchOS)
+            candidateList.append(Candidate(siteInfo: siteInfo, pageElement: pageElement, nextUrl: nextUrl, firstPageLink: firstPageLink, nextButton: nextButton, firstPageButton: firstPageButton))
+            #else
+            candidateList.append(Candidate(siteInfo: siteInfo, pageElement: pageElement, nextUrl: nextUrl, firstPageLink: firstPageLink))
+            #endif
+        }
+        func success(candidate:Candidate){
+            #if !os(watchOS)
             successAction?(
                 StoryState(
                     url: currentState.url,
                     cookieString: currentState.cookieString,
-                    content: pageElement,
-                    nextUrl: nextUrl,
-                    firstPageLink: firstPageLink,
-                    title: siteInfo.decodeTitle(xmlDocument: htmlDocument),
-                    author: siteInfo.decodeAuthor(xmlDocument: htmlDocument),
-                    subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument),
-                    tagArray: siteInfo.decodeTag(xmlDocument: htmlDocument),
+                    content: candidate.pageElement,
+                    nextUrl: candidate.nextUrl,
+                    firstPageLink: candidate.firstPageLink,
+                    title: candidate.siteInfo.decodeTitle(xmlDocument: htmlDocument),
+                    author: candidate.siteInfo.decodeAuthor(xmlDocument: htmlDocument),
+                    subtitle: candidate.siteInfo.decodeSubtitle(xmlDocument: htmlDocument),
+                    tagArray: candidate.siteInfo.decodeTag(xmlDocument: htmlDocument),
                     siteInfoArray: currentState.siteInfoArray,
                     isNeedHeadless: currentState.isNeedHeadless,
                     waitSecondInHeadless: currentState.waitSecondInHeadless,
                     document: currentState.document,
-                    nextButton: nextButton,
-                    firstPageButton: firstPageButton
+                    nextButton: candidate.nextButton,
+                    firstPageButton: candidate.firstPageButton
                 )
             )
             #else
-            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: pageElement, nextUrl: siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: siteInfo.decodeTitle(xmlDocument: htmlDocument), author: siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: siteInfo.decodeTag(xmlDocument: htmlDocument), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless))
+            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: candidate.pageElement, nextUrl: candidate.siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: candidate.siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: candidate.siteInfo.decodeTitle(xmlDocument: htmlDocument), author: candidate.siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: candidate.siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: candidate.siteInfo.decodeTag(xmlDocument: htmlDocument), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless))
             #endif
+        }
+        // 広範囲にhitするけれどnextLinkしかhitしないような定義があるのでそれを回避するために一旦 candidateList に入れて pageElement があるものを優先的に使うようにします。
+        for candidate in candidateList {
+            if candidate.pageElement.count > 0 {
+                success(candidate: candidate)
+                return
+            }
+        }
+        if let candidate = candidateList.first {
+            success(candidate: candidate)
             return
         }
         failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_ContentIsNil", comment: "HTMLの解析に失敗しました。(文書の中身を取り出せませんでした。ことせかい のサポートサイト側のご意見ご要望フォームや設定→開発者に問い合わせる等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません)"))

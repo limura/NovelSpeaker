@@ -664,10 +664,13 @@ class StoryTextClassifier {
             let defaultSpeaker:RealmSpeakerSetting
             if let novelDefaultSpeaker = RealmNovel.SearchNovelWith(realm: realm, novelID: story.novelID)?.defaultSpeaker {
                 defaultSpeaker = novelDefaultSpeaker
+                print("defaultSpeaker is novelDefaultSpeaker. \(defaultSpeaker.voiceIdentifier)")
             }else if let globalStateDefaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker {
                 defaultSpeaker = globalStateDefaultSpeaker
+                print("defaultSpeaker is globalStateDefaultSpeaker. \(defaultSpeaker.voiceIdentifier)")
             }else{
                 defaultSpeaker = RealmSpeakerSetting()
+                print("defaultSpeaker is new(). \(defaultSpeaker.voiceIdentifier)")
             }
             
             let sectionConfigList:[SpeechSectionConfig]
@@ -737,6 +740,7 @@ class StoryTextClassifier {
                 speechModSettingList.append(contentsOf: rubySettingArray)
             }
             
+            print("categorizeStoryText voiceIdentifier: \(defaultSpeaker.voiceIdentifier)")
             return CategorizeStoryText(content: story.content, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, defaultSpeaker: SpeakerSetting(from: defaultSpeaker), sectionConfigList: sectionConfigList, waitConfigList: waitConfigList, speechModArray: speechModSettingList)
         }
     }

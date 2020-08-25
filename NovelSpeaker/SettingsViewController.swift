@@ -720,17 +720,10 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_ForceSiteInfoReload", comment:"SiteInfoを毎回読み直す")
                 row.value = false
                 row.cell.textLabel?.numberOfLines = 0
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.isForceSiteInfoReloadIsEnabled
-                }
+                row.value = RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled()
             }.onChange({ row in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
-                        globalState.isForceSiteInfoReloadIsEnabled = value
-                    }
-                }
+                guard let value = row.value else { return }
+                RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: value)
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")

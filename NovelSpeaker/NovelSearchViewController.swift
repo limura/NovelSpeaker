@@ -594,6 +594,8 @@ class WebSiteSection {
 class NovelSearchViewController: FormViewController,ParentViewController {
     var searchInfoArray:[WebSiteSection] = []
     var currentSelectedSite:WebSiteSection? = nil
+    var lastSearchInfoLoadDate:Date = Date(timeIntervalSince1970: 0)
+    let searchInfoExpireTimeInterval:TimeInterval = 60*60*6 // 6時間
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -606,12 +608,23 @@ class NovelSearchViewController: FormViewController,ParentViewController {
         loadSearchInfo()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        checkAndReloadSearchInfoIfNeeded()
+        super.viewDidAppear(animated)
+    }
+    
+    func checkAndReloadSearchInfoIfNeeded() {
+        if lastSearchInfoLoadDate < Date(timeIntervalSinceNow: -searchInfoExpireTimeInterval) {
+            loadSearchInfo()
+        }
+    }
+    
     func fetchSearchInfoJSON(urlString: String, successAction: ((Data) -> Void)?, failedAction:((Error?) -> Void)? ) {
         guard let url = URL(string: urlString) else {
             failedAction?(nil)
             return
         }
-        NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: "SearchInfoData.json", expireTimeinterval: /*60*60*/1, successAction: { (data) in
+        NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: "SearchInfoData.json", expireTimeinterval: searchInfoExpireTimeInterval, successAction: { (data) in
             successAction?(data)
         }) { (err) in
             failedAction?(err)
@@ -652,6 +665,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     func loadSearchInfo() {
         fetchSearchInfo(successAction: { (searchInfoArrayJsonData) in
             self.searchInfoArray = self.extractSearchInfoArray(jsonData: searchInfoArrayJsonData)
+            self.lastSearchInfoLoadDate = Date()
             self.currentSelectedSite = self.searchInfoArray.first
             self.reloadCells()
         }) { (err) in
@@ -678,6 +692,12 @@ class NovelSearchViewController: FormViewController,ParentViewController {
                 self.form.removeAll()
             }
             self.form +++ Section()
+            <<< LabelRow() {
+                $0.title = NSLocalizedString("NovelSearchViewController_NoticeLabelText", comment: "ご注意: 本ページの「Web検索」機能については、リストされているWebサイト様側の仕様が少しでも変わると途端に動作しなくなるような仕組みを用いておりますため、うまく利用できなくなる可能性がとても高い物となっております。\nうまく利用できなくなっている場合でも、Web取込機能側で取り込む事で回避できる場合もございますのでそちらをご利用頂くような形で回避していただけますと幸いです。")
+                $0.cell.textLabel?.font = .preferredFont(forTextStyle: .caption2)
+                $0.cell.textLabel?.numberOfLines = 0
+            }
+            +++ Section()
             <<< AlertRow<String>() {
                 $0.title = NSLocalizedString("NovelSearchViewController_SearchWebSiteTitle", comment: "検索先のWebサイト")
                 $0.selectorTitle = $0.title

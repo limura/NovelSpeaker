@@ -219,10 +219,14 @@ class SpeakerSettingsViewController: FormViewController {
             let voiceNameArray = AVSpeechSynthesisVoice.speechVoices().filter({ $0.language == currentSetting.locale }).map({$0.name}).sorted()
             $0.options = voiceNameArray
             let voice = AVSpeechSynthesisVoice(identifier: currentSetting.voiceIdentifier)
+            print("currentSetting.voiceIdentifier: \(currentSetting.voiceIdentifier)")
             let voiceName = voice?.name ?? ""
+            print("voiceName: \(voiceName)")
             if voiceNameArray.contains(voiceName) {
+                print("value set to: \(voiceName) from voiceNameArray.contains()")
                 $0.value = voiceName
             }else{
+                print("value set to: \(voiceNameArray.first ?? "") from voiceNameArray.first")
                 $0.value = voiceNameArray.first ?? ""
             }
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in

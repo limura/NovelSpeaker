@@ -21,6 +21,7 @@ class MigrationViewController: UIViewController {
         DispatchQueue.global(qos: .utility).async {
             self.CheckAndDoCoreDataMigration()
             self.CheckAndDoCoreDataToRealmMigration()
+            NovelSpeakerUtility.AddFirstStoryIfNeeded()
             self.goToMainStoryBoard()
         }
     }
