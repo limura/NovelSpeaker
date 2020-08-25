@@ -490,7 +490,7 @@
                     "性的表現あり作品": "rating[3]=1"
                 }
             },
-            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "sort", "radio":
+            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "sort", "defaultValue": "1", "radio":
                 {
                     "更新順（エピソード）": "1",
                     "新着順（作品）": "2",
