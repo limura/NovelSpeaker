@@ -110,6 +110,12 @@ class MultiSelectQuery: SearchQuery {
                 queryArray.append(value)
             }
         }
+        // queryName が空であれば、separator で join しただけの物を返します。
+        // つまり、separator を "&" にして、ganreList の value に "hoge=1" 的な物を入れておけば、
+        // hoge=1&hage=1&hige=1 のような query を生成して返す事ができます。
+        if queryName == "" {
+            return queryArray.joined(separator: separator)
+        }
         return queryName + "=" + queryArray.joined(separator: separator)
     }
 }
@@ -500,7 +506,17 @@ class WebSiteSection {
         if HTTPMethod == "POST" {
             return URL(string: self.url)
         }
-        let query = values.map({$0.CreateQuery()}).joined(separator: "&")
+        var query = ""
+        for value in values {
+            let v = value.CreateQuery()
+            if v.count <= 0 {
+                continue
+            }
+            if query.count > 0 {
+                query += "&"
+            }
+            query += v
+        }
         guard let queryEscaped = query.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) else { return nil }
         guard let url = URL(string: self.url + queryEscaped) else { return nil }
         return url
