@@ -298,13 +298,17 @@ class StoryHtmlDecoder {
     
     func WaitLoadSiteInfoReady(handler: @escaping ()->Void){
         defer { LoadSiteInfoIfNeeded() }
-        if IsSiteInfoReady {
-            handler()
-            return
-        }
+        var handlerQueued:Bool = false
         lock.lock()
-        siteInfoLoadDoneHandlerArray.append(handler)
+        if !IsSiteInfoReady {
+            siteInfoLoadDoneHandlerArray.append(handler)
+            handlerQueued = true
+        }
         lock.unlock()
+        if !handlerQueued {
+            handler()
+        }
+        return
     }
     
     // 標準のSiteInfoを非同期で読み込みます。
@@ -643,6 +647,7 @@ class StoryFetcher {
     }
     
     private func FetchFirstContentRecurcive(currentState:StoryState, countToLive:Int = 10, nextFetchTime:Date = Date(timeIntervalSince1970: 0), successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        print("FetchFirstContentRecurcive in. \(currentState.url.absoluteString)")
         if let content = currentState.content, content.count > 0 {
             successAction?(currentState)
             return
@@ -657,14 +662,16 @@ class StoryFetcher {
         }
         func doNext() {
             FetchNext(currentState: currentState, successAction: { (state) in
-                self.FetchFirstContentRecurcive(currentState: state, countToLive: countToLive - 1, nextFetchTime: Date(timeIntervalSinceNow: 1.5), successAction: successAction, failedAction: failedAction)
+                self.FetchFirstContentRecurcive(currentState: state, countToLive: countToLive - 1, nextFetchTime: Date(timeIntervalSinceNow: 1.05), successAction: successAction, failedAction: failedAction)
             }, failedAction: failedAction)
         }
         let delay = nextFetchTime.timeIntervalSince(Date())
         if delay <= 0 {
             doNext()
         }else{
+            print("FetchFirstContent delay: \(delay)")
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                print("FetchFirstContent delay: \(delay) done.")
                 doNext()
             }
         }
@@ -673,6 +680,7 @@ class StoryFetcher {
     // 指定されたURLから最初の本文と思われるものまで読み込んでその値を返します。
     func FetchFirstContent(url:URL, cookieString:String?, completion:((_ requestURL:URL, _ state:StoryState?, _ errorDescriptionString:String?)->Void)?) {
         StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, completion: { (state) in
+            print("FetchFirstContent CreateFirstStoryState done.")
             self.FetchFirstContentRecurcive(currentState: state, successAction: { (state) in
                 completion?(url, state, nil)
             }, failedAction: { (url, errorString) in
