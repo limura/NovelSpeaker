@@ -437,7 +437,7 @@
         }
     },
     {
-        "title": "ノベルアップ+",
+        "title": "ノベルアップ＋",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
         "url": "https://novelup.plus/search?",
