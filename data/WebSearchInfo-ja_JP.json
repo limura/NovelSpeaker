@@ -435,5 +435,78 @@
             "title": "//div[@class='info']/h3[@class='title']",
             "url": "//a[contains(@href,'/novels/')]/@href"
         }
+    },
+    {
+        "title": "ノベルアップ+",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://novelup.plus/search?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "q"},
+            {"queryType": "text", "displayText": "除外文字列", "queryName": "e"},
+            {"queryType": "multiSelect", "displayText": "キーワード検索対象", "queryName": "", "separator": "&",
+                "memo": "この項目は multiSelect を特殊な形式で利用しています。queryName に空文字列を指定して、separator に & を指定した上で、multiSelect の value に ***=*** の形式の値を設定することで、value に書かれた固定値のクエリを追加するような使い方にしています。",
+                "multiSelect": {
+                    "作品名": "search[story]=1",
+                    "あらすじ": "search[introduction]=1",
+                    "タグ": "search[tag]=1",
+                    "作者名": "search[member]=1",
+                    "原作": "search[license]=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "異世界ファンタジー": "genre[1]=1",
+                    "現代/その他ファンタジー": "genre[2]=1",
+                    "SF": "genre[3]=1",
+                    "恋愛/ラブコメ": "genre[4]=1",
+                    "ホラー": "genre[5]=1",
+                    "ミステリー": "genre[6]=1",
+                    "エッセイ/評論/コラム": "genre[7]=1",
+                    "歴史/時代": "genre[8]=1",
+                    "文芸/純文学": "genre[9]=1",
+                    "ブログ/活動報告": "genre[10]=1",
+                    "現代/青春ドラマ": "genre[11]=1",
+                    "詩/短歌": "genre[12]=1",
+                    "作品紹介": "genre[13]=1",
+                    "二次創作": "genre[52]=1",
+                    "童話/絵本/その他": "genre[99]=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "作品種別の絞り込み", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "短編 / 短編集": "short=1",
+                    "長編": "not-short=1",
+                    "設定・プロット": "plot=1",
+                    "完結済": "finish=1",
+                    "連載中": "not-finish=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "除外条件", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "長期連載停止中の作品": "pause=1",
+                    "残酷描写あり作品": "rating[1]=1",
+                    "暴力描写あり作品": "rating[2]=1",
+                    "性的表現あり作品": "rating[3]=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "sort", "radio":
+                {
+                    "更新順（エピソード）": "1",
+                    "新着順（作品）": "2",
+                    "ブックマーク数が多い順": "3",
+                    "ランキング順位（日間）が高い順": "4",
+                    "ランキング順位（累計）が高い順": "8",
+                    "応援ポイントが多い順": "9",
+                    "ノベラポイントが多い順": "10"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@id='section_search_result']//li//div[@class='info_set']",
+            "nextLink": "//div[@class='infinite-scroll-pagination']//a[contains(@class,'infinite-scroll-more')]/@href",
+            "title": "//div[@class='novel_title']",
+            "url": "//div[@class='novel_title']/a[contains(@href,'/story/')]/@href"
+        }
     }
 ]
