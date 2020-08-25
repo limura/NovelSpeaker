@@ -10,6 +10,7 @@ import RealmSwift
 import IceCream
 import CloudKit
 import UIKit
+import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
@@ -1519,12 +1520,52 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
     @objc dynamic var base : Int32 = 1
     @objc dynamic var volume : Float = 1.0
     @objc dynamic var type : String = "AVSpeechSynthesizer"
-    @objc dynamic var voiceIdentifier : String = "com.apple.ttsbundle.siri_female_ja-JP_premium"
-    @objc dynamic var locale : String = "ja-JP"
+    @objc dynamic var voiceIdentifier : String = GuessBestVoiceIdentifier()
+    @objc dynamic var locale : String = Locale.current.identifier.replacingOccurrences(of: "_", with: "-")
     @objc dynamic var createdDate = Date()
     
     static func GetAllObjectsWith(realm: Realm) -> Results<RealmSpeakerSetting>? {
         return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false")
+    }
+    
+    static func GuessBestVoiceIdentifier() -> String {
+        let bestVoiceIdentifier:[String:[String]] = [
+            "ja": [
+                "com.apple.ttsbundle.siri_female_ja-JP_premium",
+                "com.apple.ttsbundle.siri_male_ja-JP_premium",
+                "com.apple.ttsbundle.siri_female_ja-JP-premium",
+                "com.apple.ttsbundle.siri_male_ja-JP-premium",
+                "com.apple.ttsbundle.siri_female_ja-JP_compact",
+                "com.apple.ttsbundle.siri_male_ja-JP_compact",
+                "com.apple.ttsbundle.Kyoko-premium",
+                "com.apple.ttsbundle.Otoya-premium",
+                "com.apple.ttsbundle.Kyoko-compact",
+                "com.apple.ttsbundle.Otoya-compact"
+            ]
+        ]
+        let currentLocale = Locale.current.identifier
+        let aliveVoices = AVSpeechSynthesisVoice.speechVoices()
+        // 利用可能な言語は国しかみないことにします。("ja_JP" なら ja しかみないの意味)
+        let currentCountry = currentLocale.components(separatedBy: "_").first ?? "ja"
+        let currentLocaleVoiceArray = aliveVoices.filter({$0.language.range(of: currentCountry)?.lowerBound == $0.language.startIndex})
+        
+        // 事前に定義されている良い話者リストがあるならそこから選ぶ
+        if let targetList = bestVoiceIdentifier[currentCountry] {
+            for identifier in targetList {
+                if currentLocaleVoiceArray.filter({$0.identifier == identifier}).count > 0 {
+                    return identifier
+                }
+            }
+        }
+        // 事前に用意されていないのならテキトーにsortした後、_premium とついている最初のものを選ぶ
+        for voice in currentLocaleVoiceArray.sorted(by: {$0.identifier > $1.identifier}) {
+            if voice.identifier.contains("premium") {
+                return voice.identifier
+            }
+        }
+        // それでも無いならテキトーに作った object の identifier を使う
+        let dummyVoice = AVSpeechSynthesisVoice()
+        return dummyVoice.identifier
     }
     
     static func SearchFromWith(realm: Realm, name:String) -> RealmSpeakerSetting? {
