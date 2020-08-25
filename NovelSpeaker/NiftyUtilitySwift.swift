@@ -1293,7 +1293,6 @@ class NiftyUtilitySwift: NSObject {
         }else{
             resultHTML = filterdHTML
         }
-        print("FilterXpathWithConvertString: xpath: \(xpath)\n\(resultHTML)")
         if let result = HTMLToString(htmlString: resultHTML) {
             return result
         }

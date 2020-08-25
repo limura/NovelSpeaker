@@ -548,7 +548,8 @@
 "NovelSearchViewController_RadioSelectTarget_None" = "選択しない";
 "NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle" = "仮読み込み";
 "NovelSearchViewController_LoadingSearchInfoTitle" = "Web検索用の情報を読み込んでいます……\n(インターネット接続が必要です)";
-"NovelSearchViewController_NoticeLabelText" = "注: 本ページの「Web検索」機能については、リストされているWebサイト様側の仕様が少しでも変わると途端に動作しなくなるような仕組みを用いておりますため、うまく利用できなくなる可能性がとても高い物となっております。\nうまく利用できなくなっている場合でも、「Web取込」機能側で取り込む事で回避できる場合もございますのでそちらをご利用頂くような形で回避していただけますと幸いです。";
+"NovelSearchViewController_NoticeLabelText" = "注: 本画面の「Web検索」機能については、リストされているWebサイト様側の仕様が少しでも変わると途端に動作しなくなるような仕組みを用いておりますため、うまく利用できなくなる可能性がとても高い物となっております。\nうまく利用できなくなっている場合でも、「Web取込」機能側で取り込む事で回避できる場合もございますのでそちらをご利用頂くような形で回避していただけますと幸いです。";
+"NovelSearchViewController_ForceReloadSearchInfoButton_Title" = "検索設定の読み込みを試みる";
 
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 

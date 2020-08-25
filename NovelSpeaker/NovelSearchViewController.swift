@@ -682,6 +682,12 @@ class NovelSearchViewController: FormViewController,ParentViewController {
                     $0.title = NSLocalizedString("NovelSearchViewController_SearchInfoLoadError_Message", comment: "検索設定の読み込みに失敗しました。ネットワーク接続がうまくいっていない場合にこの問題が生じる可能性があります。通信状況を確認してみてください。")
                     $0.cell.textLabel?.numberOfLines = 0
                 }
+                <<< ButtonRow() {
+                    $0.title = NSLocalizedString("NovelSearchViewController_ForceReloadSearchInfoButton_Title", comment: "検索設定の読み込みを試みる")
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ (cellOf, row) in
+                    self.loadSearchInfo()
+                })
             }
         }
     }
