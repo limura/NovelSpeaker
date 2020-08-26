@@ -225,10 +225,10 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             currentBlockDisplayOffset = currentLocation
             currentBlockSpeechOffset = speechBlock.ComputeSpeechLocationFrom(displayLocation: currentLocation)
             currentSpeakingLocation = location
-            print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex)")
+            //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex)")
             return true
         }
-        print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex) (return false)")
+        //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex) (return false)")
         return false
     }
     

@@ -200,11 +200,6 @@ import AVFoundation
         do {
             let realm = try GetCloudRealm()
             try realm.write {
-                /*
-                for obj in realm.objects(RealmStory.self) {
-                    obj.isDeleted = true
-                }
-                */
                 for obj in realm.objects(RealmNovel.self) {
                     obj.isDeleted = true
                 }
@@ -1192,6 +1187,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     }
     var readingChapter: Story? {
         get {
+            if self.m_readingChapterStoryID == "" { return nil }
             return self.RealmUtilBlock { (realm) -> Story? in
                 return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.m_readingChapterStoryID)
             }

@@ -117,4 +117,8 @@ class HeadlessHttpClient {
             resultHandler?(nil, SloppyError(msg: "execute JavaScript(\"\(javaScript)\") error."))
         }
     }
+    
+    public func LoadAboutPage() {
+        self.erik.visit(urlString: "about:blank", completionHandler: nil)
+    }
 }

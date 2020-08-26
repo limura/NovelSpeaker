@@ -139,6 +139,8 @@
 "SettingsViewController_CopyingLocalToCloud" = "Registering current data with iCloud";
 "SettingsViewController_CopyLocalToCloudFailed" = "Registration of current data to iCloud has failed.";
 "SettingsViewController_iCloudEnable_done" = "iCloud Sync has started.\nSynchronization has been started, but synchronization (transfer) work between the handset and iCloud has not been completed.\nIf there is a lot of data to be transferred, it may take quite a while to complete the transfer. Unfortunately, there is nothing (unless the developer knows) to know if the transfer has ended. According to Apple's comment, if you launch the app again for 24 hours, it will continue to transfer, but you may not feel much relieved. If there is unsent or unsent data, it will make an effort to turn the indicator during communication, but it may not mean that the transfer has ended when this indicator has disappeared. Please understand.";
+"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocalOnly" = "Erase all data on iCloud and send current data to iCloud";
+"SettingsViewController_RemoveICloudData" = "Deleting data on iCloud";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData" = "There seems to be data available on the iCloud side. Select whether to use the iCloud data as it is or overwrite the data on iCloud with the current data.";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud" = "Use iCloud data as it is";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal" = "Overwrite data on iCloud with current data";

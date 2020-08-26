@@ -152,15 +152,17 @@ class StoryBulkWritePool {
         lock.lock()
         defer { lock.unlock() }
         RealmUtil.Write { (realm) in
-            RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
                 if let lastStory = storyArray.last {
                     novel.m_lastChapterStoryID = lastStory.storyID
                     novel.lastDownloadDate = lastStory.downloadDate
                 }
+                /*
                 if let firstStory = storyArray.first, firstStory.chapterNumber == 1 {
                     novel.m_readingChapterStoryID = firstStory.storyID
                 }
+                */
                 for story in storyArray {
                     novel.AppendDownloadDate(realm: realm, date: story.downloadDate)
                 }

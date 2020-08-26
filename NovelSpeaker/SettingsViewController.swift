@@ -706,7 +706,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingsViewController_ClearSiteInfoCache", comment: "SiteInfoキャッシュを削除する")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
-                NovelDownloadQueue.shared.clearSiteInfoCache()
+                StoryHtmlDecoder.shared.ClearSiteInfo()
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogOneButton(
                         viewController: self,
@@ -860,6 +860,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
     
+    func removeICloudDataAndUploadLocalData() {
+        // TODO RealmUtil.ClearCloudRealmModels() は iCloud 同期が終わっていない状態で呼び出すと消し損ないが発生するのであまりよろしくありません。
+        DispatchQueue.main.async {
+            NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: NSLocalizedString("SettingsViewController_RemoveICloudData", comment: "iCloud側に残っているデータを消去しています"), message: nil) { (dialog) in
+                RealmUtil.ClearCloudRealmModels()
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false) {
+                        self.overrideLocalToiCloud()
+                    }
+                }
+            }
+        }
+    }
+    
     func overrideLocalToiCloud() {
         DispatchQueue.main.async {
             NiftyUtilitySwift.EasyDialogNoButton(
@@ -964,6 +978,23 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
             })
+                /*
+                 removeICloudDataAndUploadLocalData() は
+                 RealmUtil.ClearCloudRealmModels() を内部で呼び出しますが、
+                 RealmUtil.ClearCloudRealmModels() は
+                 iCloud 同期が終わっていない状態で呼び出すと消し損ないが発生するため、
+                 利用すべきではありません。
+                 そのため、今の所は
+                 iCloud上のデータを消して現在のデータを送信する機能は有効化できません。
+                 やるとするなら、設定アプリ側で → iCloud → ストレージを管理 → ことせかい → データを削除 みたいな感じで消すのが良さそうです。
+            .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocalOnly", comment: "iCloud上のデータは全て消去し、現在のデータをiCloudに送信する"), callback: { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        self.removeICloudDataAndUploadLocalData()
+                    })
+                }
+            })
+                 */
             .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_Cancel", comment: "iCloud同期をやめる(キャンセル)"), callback: { (dialog) in
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
