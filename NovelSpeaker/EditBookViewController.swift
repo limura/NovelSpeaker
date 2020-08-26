@@ -71,7 +71,7 @@ class EditBookViewController: UIViewController {
     
     func initWidgets() {
         RealmUtil.RealmBlock { (realm) -> Void in
-            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting {
+            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
                 storyTextView.font = displaySetting.font
             }
         }
@@ -99,9 +99,9 @@ class EditBookViewController: UIViewController {
     func applyNovelWith(realm: Realm, novelID:String) {
         guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
         titleTextField.text = novel.title
-        if let story = novel.readingChapter {
+        if let story = novel.readingChapterWith(realm: realm) {
             setStory(storyID: story.storyID)
-        }else if let story = novel.firstChapter {
+        }else if let story = novel.firstChapterWith(realm: realm) {
             print("load chapter: \(story.chapterNumber)")
             setStory(storyID: story.storyID)
         }else{
@@ -261,13 +261,13 @@ class EditBookViewController: UIViewController {
         
         // storyTextView は自前のフォント設定を使うので、それが更新されるのを監視しておきます
         RealmUtil.RealmBlock { (realm) -> Void in
-            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting {
+            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
                 fontSizeObserveToken = displaySetting.observe({ (change) in
                     switch change {
                     case .change(_):
                         DispatchQueue.main.async {
                             RealmUtil.RealmBlock { (realm) -> Void in
-                                guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting else { return }
+                                guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
                                 self.storyTextView.font = displaySetting.font
                             }
                         }
@@ -443,7 +443,7 @@ class EditBookViewController: UIViewController {
     @IBAction func addChapterButtonClicked(_ sender: Any) {
         saveCurrentStory()
         RealmUtil.Write { (realm) in
-            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.lastChapter {
+            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.lastChapterWith(realm: realm) {
                 let newStoryID = RealmStoryBulk.CreateUniqueID(novelID: targetNovelID, chapterNumber: lastStory.chapterNumber + 1)
                 novel.m_lastChapterStoryID = newStoryID
                 novel.lastDownloadDate = Date()
@@ -458,7 +458,7 @@ class EditBookViewController: UIViewController {
                 RealmStoryBulk.RemoveLastStoryWithCheckWith(realm: realm, storyID: currentStoryID)
             }
             RealmUtil.WriteWith(realm: realm) { (realm) in
-                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.linkedStorys?.last {
+                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.linkedStorysWith(realm: realm)?.last {
                     novel.m_lastChapterStoryID = lastStory.storyID
                     setStory(storyID: lastStory.storyID)
                 }else{

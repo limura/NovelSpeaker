@@ -232,7 +232,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
                 row.cell.textLabel?.numberOfLines = 0
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting else {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm) else {
                         row.value = false
                         return
                     }
@@ -241,7 +241,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ row in
                 self.m_RubySwitchToggleHitCount += 1
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting, let value = row.value else { return }
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let value = row.value else { return }
                     RealmUtil.WriteWith(realm: realm) { (realm) in
                         speechOverrideSetting.isOverrideRubyIsEnabled = value
                     }
@@ -255,7 +255,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     return row.value ?? false == false
                 })
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting else {
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm) else {
                         row.value = ""
                         return
                     }
@@ -263,7 +263,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             }.onChange({ textRow in
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting, let value = textRow.value else { return }
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let value = textRow.value else { return }
                     RealmUtil.WriteWith(realm: realm) { (realm) in
                         speechOverrideSetting.notRubyCharactorStringArray = value
                     }
@@ -351,12 +351,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_IgnoreURISpeechIsEnabled", comment: "URIを読み上げないようにする")
                 row.cell.textLabel?.numberOfLines = 0
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting else { return }
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm) else { return }
                     row.value = speechOverrideSetting.isIgnoreURIStringSpeechEnabled
                 }
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting, let value = row.value else { return }
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let value = row.value else { return }
                     RealmUtil.WriteWith(realm: realm) { (realm) in
                         speechOverrideSetting.isIgnoreURIStringSpeechEnabled = value
                     }
@@ -372,7 +372,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.value = noRepeat
                 row.cell.textLabel?.numberOfLines = 0
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting else { return }
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm) else { return }
                     let type = speechOverrideSetting.repeatSpeechType
                     if type == .rewindToFirstStory {
                         row.value = rewindToFirstStory
@@ -386,7 +386,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 let rewindToFirstStory = NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
                 let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting, let typeString = row.value else { return }
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let typeString = row.value else { return }
                     RealmUtil.WriteWith(realm: realm) { (realm) in
                         if typeString == noRepeat {
                             speechOverrideSetting.repeatSpeechType = .noRepeat

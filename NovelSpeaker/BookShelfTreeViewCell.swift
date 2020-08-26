@@ -80,7 +80,7 @@ class BookShelfTreeViewCell: UITableViewCell {
             let lastChapterNumber = novel.lastChapterNumber ?? 1
             let readLocation:Float
             let contentCount:Float
-            if lastChapterNumber == readingChapterNumber, let lastChapter = novel.lastChapter {
+            if lastChapterNumber == readingChapterNumber, let lastChapter = novel.lastChapterWith(realm: realm) {
                 readLocation = Float(lastChapter.readLocation(realm: realm))
                 contentCount = Float(lastChapter.content.count)
             }else{

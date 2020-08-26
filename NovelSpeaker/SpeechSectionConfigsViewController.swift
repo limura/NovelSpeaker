@@ -71,11 +71,11 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         speaker.SetText(content: text, withMoreSplitTargets: [], moreSplitMinimumLetterCount: Int.max, defaultSpeaker: defaultSpeaker, sectionConfigList: [], waitConfigList: [], sortedSpeechModArray: [])
         speaker.StartSpeech()
     }
-    func updateTitleCell(speechSectionConfig:RealmSpeechSectionConfig) {
+    func updateTitleCell(realm:Realm, speechSectionConfig:RealmSpeechSectionConfig) {
         let name = speechSectionConfig.name
         let startText = speechSectionConfig.startText
         let endText = speechSectionConfig.endText
-        let speakerName = speechSectionConfig.speaker?.name
+        let speakerName = speechSectionConfig.speakerWith(realm: realm)?.name
         DispatchQueue.main.async {
             guard let row = self.form.rowBy(tag: "TitleLabelRow-\(name)") as? LabelRow else {
                 return
@@ -88,10 +88,10 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         }
     }
     
-    func createSpeechSectionConfigCells(speechSectionConfig:RealmSpeechSectionConfig) -> Section {
+    func createSpeechSectionConfigCells(realm: Realm, speechSectionConfig:RealmSpeechSectionConfig) -> Section {
         let name = speechSectionConfig.name
         var speakerName = NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
-        if let speaker = speechSectionConfig.speaker {
+        if let speaker = speechSectionConfig.speakerWith(realm: realm) {
             speakerName = speaker.name
         }
         self.targetNovelIDSetMap[name] = Set<String>()
@@ -149,7 +149,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
                     speechSectionConfig.startText = text
                 }
-                self.updateTitleCell(speechSectionConfig: speechSectionConfig)
+                self.updateTitleCell(realm: realm, speechSectionConfig: speechSectionConfig)
             }
         }).cellUpdate({ (textCell, textRow) in
             if !textRow.isValid {
@@ -181,7 +181,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
                     speechSectionConfig.endText = text
                 }
-                self.updateTitleCell(speechSectionConfig: speechSectionConfig)
+                self.updateTitleCell(realm: realm, speechSectionConfig: speechSectionConfig)
             }
         }).cellUpdate({ (textCell, textRow) in
             if !textRow.isValid {
@@ -200,7 +200,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 guard let speakerSettingArray = RealmSpeakerSetting.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "createdDate", ascending: true) else { return }
                 row.options = speakerSettingArray.map({$0.name})
             }
-            row.value = speechSectionConfig.speaker?.name ?? NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
+            row.value = speechSectionConfig.speakerWith(realm: realm)?.name ?? NSLocalizedString("SpeechSectionConfigsViewController_SpeakerUnknown", comment: "不明")
         }.onChange({ (row) in
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let targetName = row.value, let sectionConfig = RealmSpeechSectionConfig.SearchFromWith(realm: realm, name: name), let speaker = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetName) else {
@@ -209,7 +209,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.sectionConfigObserverToken]) { (realm) in
                     sectionConfig.speakerID = speaker.name
                 }
-                self.updateTitleCell(speechSectionConfig: sectionConfig)
+                self.updateTitleCell(realm: realm, speechSectionConfig: sectionConfig)
             }
         })
         <<< LabelRow("TargetNovelIDLabelRow-\(name)") {
@@ -240,7 +240,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
             })
         }.onCellSelection({ (buttonCellOf, button) in
             RealmUtil.RealmBlock { (realm) -> Void in
-                guard let speaker = RealmSpeechSectionConfig.SearchFromWith(realm: realm, name: name)?.speaker else {
+                guard let speaker = RealmSpeechSectionConfig.SearchFromWith(realm: realm, name: name)?.speakerWith(realm: realm) else {
                     return
                 }
                 self.testSpeech(text: self.testText, speakerSetting: speaker)
@@ -318,7 +318,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                             }else{
                                 newSpeechSectionConfig = RealmSpeechSectionConfig()
                                 newSpeechSectionConfig.name = name
-                                if let defaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker {
+                                if let defaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) {
                                     newSpeechSectionConfig.speakerID = defaultSpeaker.name
                                 }
                             }
@@ -326,7 +326,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                                 realm.add(newSpeechSectionConfig, update: .modified)
                             }
                             newSpeechSectionConfig.AddTargetNovelIDWith(realm: realm, novelID: self.targetNovelID)
-                            self.form.append(self.createSpeechSectionConfigCells(speechSectionConfig: newSpeechSectionConfig))
+                            self.form.append(self.createSpeechSectionConfigCells(realm: realm, speechSectionConfig: newSpeechSectionConfig))
                         }
                         DispatchQueue.main.async {
                             NiftyUtilitySwift.EasyDialogOneButton(
@@ -359,7 +359,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 return setting.targetNovelIDArray.contains(self.targetNovelID)
             }) {
                 for speechSectionConfig in speechSectionConfigArray {
-                    form.append(self.createSpeechSectionConfigCells(speechSectionConfig: speechSectionConfig))
+                    form.append(self.createSpeechSectionConfigCells(realm: realm, speechSectionConfig: speechSectionConfig))
                 }
             }
         }

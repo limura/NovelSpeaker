@@ -330,7 +330,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             var result = [BookShelfRATreeViewCellData]()
             var listedNovelIDSet = Set<String>()
             for tag in tags {
-                guard let novels = tag.targetNovelArray else { continue }
+                guard let novels = tag.targetNovelArrayWith(realm: realm) else { continue }
                 let folder = BookShelfRATreeViewCellData()
                 folder.childrens = [BookShelfRATreeViewCellData]()
                 folder.title = tag.name
@@ -376,7 +376,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             var result = [BookShelfRATreeViewCellData]()
             var listedNovelIDSet = Set<String>()
             for tag in tags {
-                guard let novels = tag.targetNovelArray else { continue }
+                guard let novels = tag.targetNovelArrayWith(realm: realm) else { continue }
                 let folder = BookShelfRATreeViewCellData()
                 folder.childrens = [BookShelfRATreeViewCellData]()
                 folder.title = tag.name
@@ -640,9 +640,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         RealmUtil.RealmBlock { (realm) -> Void in
             NovelDownloader.flushWritePool(novelID: novelID)
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
-            guard let story = novel.readingChapter ?? novel.firstChapter else {
+            guard let story = novel.readingChapterWith(realm: realm) ?? novel.firstChapterWith(realm: realm) else {
                 let targetChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_readingChapterStoryID)
-                guard let novelCount = novel.linkedStorys?.count, novelCount > 0 else {
+                guard let novelCount = novel.linkedStorysWith(realm: realm)?.count, novelCount > 0 else {
                     if novel.type == .URL {
                         DispatchQueue.main.async {
                             NiftyUtilitySwift.EasyDialogForButton(
@@ -673,7 +673,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                             button1Title: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OpenFirstStory", comment: "最初の章を開く"),
                             button1Action: {
                                 RealmUtil.RealmBlock { (realm) -> Void in
-                                    if let nextViewStoryID = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.firstChapter?.storyID {
+                                    if let nextViewStoryID = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.firstChapterWith(realm: realm)?.storyID {
                                         self.nextViewStoryID = nextViewStoryID
                                         self.isNextViewNeedResumeSpeech = isNeedSpeech
                                         self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
@@ -688,7 +688,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }
                     return
                 }
-                if let story = novel.firstChapter {
+                if let story = novel.firstChapterWith(realm: realm) {
                     nextViewStoryID = story.storyID
                     print("sendStoryID: \(nextViewStoryID ?? "unknown"), story.chapterNumber \(story.chapterNumber)")
                     self.isNextViewNeedResumeSpeech = isNeedSpeech

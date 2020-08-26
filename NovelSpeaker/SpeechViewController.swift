@@ -90,7 +90,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 return
             }
-            if let displaySetting = globalState.defaultDisplaySetting {
+            if let displaySetting = globalState.defaultDisplaySettingWith(realm: realm) {
                 textView.font = displaySetting.font
             }
         }
@@ -311,7 +311,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
     func observeDispaySetting() {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting else { return }
+            guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
             displaySettingObserverToken = displaySetting.observe({ (change) in
                 switch change {
                 case .change(_, let properties):
@@ -319,7 +319,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                         if propaty.name == "textSizeValue" || propaty.name == "fontID" {
                             DispatchQueue.main.async {
                                 RealmUtil.RealmBlock { (realm) -> Void in
-                                    guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting else { return }
+                                    guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
                                     self.textView.font = displaySetting.font
                                 }
                             }

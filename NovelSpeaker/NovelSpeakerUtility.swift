@@ -165,19 +165,19 @@ class NovelSpeakerUtility: NSObject {
                     })
                 }
                 RealmUtil.WriteWith(realm: realm, block: { (realm) in
-                    if globalState.defaultDisplaySetting == nil {
+                    if globalState.defaultDisplaySettingWith(realm: realm) == nil {
                         let defaultDisplaySetting = RealmDisplaySetting()
                         defaultDisplaySetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
                         globalState.defaultDisplaySettingID = defaultDisplaySetting.name
                         realm.add(defaultDisplaySetting, update: .modified)
                     }
-                    if globalState.defaultSpeaker == nil {
+                    if globalState.defaultSpeakerWith(realm: realm) == nil {
                         let defaultSpeaker = RealmSpeakerSetting()
                         defaultSpeaker.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
                         globalState.defaultSpeakerID = defaultSpeaker.name
                         realm.add(defaultSpeaker, update: .modified)
                     }
-                    if globalState.defaultSpeechOverrideSetting == nil {
+                    if globalState.defaultSpeechOverrideSettingWith(realm: realm) == nil {
                         let defaultSpeechOverrideSetting = RealmSpeechOverrideSetting()
                         defaultSpeechOverrideSetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
                         globalState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.name
@@ -490,7 +490,7 @@ class NovelSpeakerUtility: NSObject {
     
     static func RestoreSpeakPitch_V_1_0_0(dic:NSDictionary) {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let defaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker else { return }
+            guard let defaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) else { return }
             if let defaultDictionary = dic.object(forKey: "default") as? NSDictionary, let pitch = defaultDictionary.object(forKey: "pitch") as? NSNumber, let rate = defaultDictionary.object(forKey: "rate") as? NSNumber {
                 RealmUtil.WriteWith(realm: realm) { (realm) in
                     let pitchValue = pitch.floatValue
@@ -586,7 +586,7 @@ class NovelSpeakerUtility: NSObject {
     
     static func RestoreMiscSettings_V_1_0_0(dic:NSDictionary) -> String? {
         return RealmUtil.RealmBlock { (realm) -> String? in
-            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let defaultSpeaker = globalState.defaultSpeaker, let speechOverrideSetting = globalState.defaultSpeechOverrideSetting, let defaultDisplaySetting = globalState.defaultDisplaySetting else { return nil }
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let defaultSpeaker = globalState.defaultSpeakerWith(realm: realm), let speechOverrideSetting = globalState.defaultSpeechOverrideSettingWith(realm: realm), let defaultDisplaySetting = globalState.defaultDisplaySettingWith(realm: realm) else { return nil }
             var currentReadingContent:String? = nil
             RealmUtil.WriteWith(realm: realm) { (realm) in
                 if let max_speech_time_in_sec = dic.value(forKey: "max_speech_time_in_sec") as? NSNumber {
@@ -1059,7 +1059,7 @@ class NovelSpeakerUtility: NSObject {
             RealmUtil.RealmBlock { (realm) -> Void in
                 let speakerSetting:RealmSpeakerSetting
                 if name == defaultSpeakerSettingID {
-                    guard let defaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker else { return }
+                    guard let defaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) else { return }
                     speakerSetting = defaultSpeaker
                 }else{
                     speakerSetting = RealmSpeakerSetting.SearchFromWith(realm:realm, name: name) ?? RealmSpeakerSetting()
@@ -1138,7 +1138,7 @@ class NovelSpeakerUtility: NSObject {
             RealmUtil.RealmBlock { (realm) -> Void in
                 let setting:RealmDisplaySetting
                 if name == defaultSpeakerSettingID {
-                    guard let defaultSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySetting else { return }
+                    guard let defaultSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
                     setting = defaultSetting
                 }else{
                     setting = RealmDisplaySetting.SearchFromWith(realm: realm, name: name) ?? RealmDisplaySetting()

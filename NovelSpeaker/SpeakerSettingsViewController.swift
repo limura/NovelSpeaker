@@ -57,7 +57,7 @@ class SpeakerSettingsViewController: FormViewController {
         var isDefaultSpeakerSetting = false
         RealmUtil.RealmBlock { (realm) -> Void in
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                if let defaultSpeakerSetting = globalState.defaultSpeaker {
+                if let defaultSpeakerSetting = globalState.defaultSpeakerWith(realm: realm) {
                     if defaultSpeakerSetting.name == targetID {
                         isDefaultSpeakerSetting = true
                     }
@@ -386,7 +386,7 @@ class SpeakerSettingsViewController: FormViewController {
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 return
             }
-            if let defaultSpeaker = globalState.defaultSpeaker {
+            if let defaultSpeaker = globalState.defaultSpeakerWith(realm: realm) {
                 // defaultSpeaker がある場合はそれが一番上です。
                 sections = sections +++ createSpeakSettingRows(currentSetting: defaultSpeaker)
                 if let speakerSettingArray  = RealmSpeakerSetting.GetAllObjectsWith(realm: realm)?.filter("name != %@", defaultSpeaker.name) {

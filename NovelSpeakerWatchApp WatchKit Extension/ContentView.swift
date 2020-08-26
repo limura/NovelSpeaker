@@ -147,8 +147,10 @@ struct BookshelfView: View {
     var body: some View {
         List(bookshelfData) { (novel:RealmNovel) in
             Button<Text>(action: {
-                guard let story = novel.readingChapter else { return }
-                self.viewData.ShowStory(story: story)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let story = novel.readingChapterWith(realm: realm) else { return }
+                    self.viewData.ShowStory(story: story)
+                }
             }) {
                 Text(novel.title)
             }

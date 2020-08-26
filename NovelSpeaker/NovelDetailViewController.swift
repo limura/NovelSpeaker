@@ -196,7 +196,7 @@ class NovelDetailViewController: FormViewController {
             let settingSection = Section(NSLocalizedString("NovelDetailViewController_SettingSectionTitle", comment: "この小説専用の設定"))
             // novel.likeLevel
             // isNeedSpeechAfterDelete
-            if let speaker = novel.defaultSpeaker {
+            if let speaker = novel.defaultSpeakerWith(realm: realm) {
                 settingSection <<< AlertRow<String>("SpeakerAlertRow") { (row) -> Void in
                     row.title = NSLocalizedString("NovelDetailViewController_SpeakerAlertRowTitle", comment: "標準の話者")
                     row.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
@@ -240,7 +240,7 @@ class NovelDetailViewController: FormViewController {
                 let novelID = self.novelID
                 var result:[String:String] = [:]
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let storys = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.linkedStorys else {
+                    guard let storys = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.linkedStorysWith(realm: realm) else {
                         DispatchQueue.main.async {
                             NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_CanNotGetNovelData", comment: "小説本文データの抽出に失敗しました。"))
                         }

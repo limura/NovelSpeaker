@@ -289,14 +289,14 @@ class StoryTextClassifier {
     // RealmSpeechSectionConfig を SpeechSectionConfig に変換します。
     // 単に speakerID を RealmSpeakerSetting に変えるだけです。
     // RealmSpeakerSetting を検索する部分はキャッシュを使って無駄に Realm上 での検索を走らせない程度のことはします。
-    static func ConvertSpeechSectionConfig(fromArray:[RealmSpeechSectionConfig], defaultSpeaker:RealmSpeakerSetting) -> [SpeechSectionConfig] {
+    static func ConvertSpeechSectionConfig(realm: Realm, fromArray:[RealmSpeechSectionConfig], defaultSpeaker:RealmSpeakerSetting) -> [SpeechSectionConfig] {
         var speakerIDToSpeakerSettingDictionary:[String:SpeakerSetting] = [:]
         var result:[SpeechSectionConfig] = []
         for sectionConfig in fromArray {
             let speaker:SpeakerSetting
             if let sectionSpeaker = speakerIDToSpeakerSettingDictionary[sectionConfig.speakerID] {
                 speaker = sectionSpeaker
-            }else if let sectionSpeaker = sectionConfig.speaker {
+            }else if let sectionSpeaker = sectionConfig.speakerWith(realm: realm) {
                 speaker = SpeakerSetting(from: sectionSpeaker)
                 speakerIDToSpeakerSettingDictionary[sectionConfig.speakerID] = speaker
             }else{
@@ -662,9 +662,9 @@ class StoryTextClassifier {
     static func CategorizeStoryText(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) -> [CombinedSpeechBlock] {
         RealmUtil.RealmBlock { (realm) -> [CombinedSpeechBlock] in
             let defaultSpeaker:RealmSpeakerSetting
-            if let novelDefaultSpeaker = RealmNovel.SearchNovelWith(realm: realm, novelID: story.novelID)?.defaultSpeaker {
+            if let novelDefaultSpeaker = RealmNovel.SearchNovelWith(realm: realm, novelID: story.novelID)?.defaultSpeakerWith(realm: realm) {
                 defaultSpeaker = novelDefaultSpeaker
-            }else if let globalStateDefaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker {
+            }else if let globalStateDefaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) {
                 defaultSpeaker = globalStateDefaultSpeaker
             }else{
                 defaultSpeaker = RealmSpeakerSetting()
@@ -672,7 +672,7 @@ class StoryTextClassifier {
             
             let sectionConfigList:[SpeechSectionConfig]
             if let speechSectionConfigDictValues = RealmSpeechSectionConfig.SearchSettingsFor(realm: realm, novelID: story.novelID) {
-                sectionConfigList = ConvertSpeechSectionConfig(fromArray: Array(speechSectionConfigDictValues), defaultSpeaker: defaultSpeaker)
+                sectionConfigList = ConvertSpeechSectionConfig(realm: realm, fromArray: Array(speechSectionConfigDictValues), defaultSpeaker: defaultSpeaker)
             }else{
                 sectionConfigList = []
             }
@@ -712,7 +712,7 @@ class StoryTextClassifier {
                         isUseRegularExpression: true)
                     speechModSettingList.append(modSetting)
                 }
-                if let defaultSpeechOverrideSetting = globalState.defaultSpeechOverrideSetting {
+                if let defaultSpeechOverrideSetting = globalState.defaultSpeechOverrideSettingWith(realm: realm) {
                     isOverrideRubyEnabled = defaultSpeechOverrideSetting.isOverrideRubyIsEnabled
                     notRubyCharactorStringArray = defaultSpeechOverrideSetting.notRubyCharactorStringArray
                     isIgnoreURIStringSpeechEnabled = defaultSpeechOverrideSetting.isIgnoreURIStringSpeechEnabled

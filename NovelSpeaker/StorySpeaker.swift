@@ -78,7 +78,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     func ApplyDefaultSpeakerSettingToAnnounceSpeaker() {
         RealmUtil.RealmBlock { (realm) -> Void in
             let defaultSpeaker:RealmSpeakerSetting
-            if let globalStateDefaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker {
+            if let globalStateDefaultSpeaker = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) {
                 defaultSpeaker = globalStateDefaultSpeaker
             }else{
                 defaultSpeaker = RealmSpeakerSetting()
@@ -279,7 +279,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     func observeSpeechConfig(novelID:String) {
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
-                guard let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker else { return }
+                guard let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) else { return }
                 self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { (change) in
                     self.isNeedApplySpeechConfigs = true
                 }
@@ -312,7 +312,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     func observeSpeechModSetting(novelID:String) {
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
-                if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let speechOverrideSetting = globalState.defaultSpeechOverrideSetting {
+                if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let speechOverrideSetting = globalState.defaultSpeechOverrideSettingWith(realm: realm) {
                     self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ (change) in
                         switch change {
                         case .error(_):
@@ -624,7 +624,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             MPMediaItemPropertyTitle: titleName,
             MPMediaItemPropertyArtist: writer
         ]
-        if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.isPlaybackDurationEnabled == true, let speakerSetting = globalState.defaultSpeaker {
+        if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.isPlaybackDurationEnabled == true, let speakerSetting = globalState.defaultSpeakerWith(realm: realm) {
             let textLength = story.content.count
             let duration = GuessSpeakDuration(textLength: textLength, speechConfig: speakerSetting)
             let position = GuessSpeakDuration(textLength: story.readLocation(realm: realm), speechConfig: speakerSetting)
@@ -875,7 +875,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     }
     @objc func changePlaybackPositionEvent(event:MPChangePlaybackPositionCommandEvent?) -> MPRemoteCommandHandlerStatus {
         return RealmUtil.RealmBlock { (realm) -> MPRemoteCommandHandlerStatus in
-            guard let event = event, let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else {
+            guard let event = event, let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else {
                 return MPRemoteCommandHandlerStatus.commandFailed
             }
              let contentLength = story.content.count
@@ -924,7 +924,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         self.readLocation = speaker.currentLocation
         let repeatSpeechType:RepeatSpeechType? =
             RealmUtil.RealmBlock { (realm) -> RepeatSpeechType? in
-                return RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSetting?.repeatSpeechType
+                return RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm)?.repeatSpeechType
         }
         if let repeatSpeechType = repeatSpeechType {
             switch repeatSpeechType {

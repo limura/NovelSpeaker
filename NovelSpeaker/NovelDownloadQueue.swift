@@ -9,7 +9,9 @@
 import UIKit
 import RealmSwift
 import UserNotifications
+#if !os(watchOS)
 import FTLinearActivityIndicator
+#endif
 
 fileprivate class QueueItem {
     let novelID:String
@@ -255,7 +257,7 @@ class NovelDownloader : NSObject {
         var urlSecretString:String? = nil
         RealmUtil.RealmBlock { (realm) -> Void in
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                lastChapter = novel.lastChapter
+                lastChapter = novel.lastChapterWith(realm: realm)
                 urlSecretString = novel.urlSecretString
             }else{
                 isNovelAlive = false
@@ -299,7 +301,7 @@ class NovelDownloader : NSObject {
                     failedSearchNovel(hint: "SearchNovel failed in FetchNext success handler")
                     return
                 }
-                let lastChapter = novel.lastChapter
+                let lastChapter = novel.lastChapterWith(realm: realm)
                 if chapterNumber == 1 && lastChapter == nil {
                     // 章が一つもダウンロードされていないようなので、
                     // 恐らくは小説名なども登録されていないと思われるため、
@@ -379,7 +381,11 @@ class NovelDownloader : NSObject {
 class NovelDownloadQueue : NSObject {
     @objc static let shared = NovelDownloadQueue()
     private let queueHolder = DownloadQueueHolder()
+    #if !os(watchOS)
     var maxSimultaneousDownloadCount = 5
+    #else
+    var maxSimultaneousDownloadCount = 1
+    #endif
     let lock = NSLock()
     var downloadSuccessNovelIDSet = Set<String>()
     var downloadEndedNovelIDSet = Set<String>()
@@ -426,6 +432,7 @@ class NovelDownloadQueue : NSObject {
     }
     
     func updateNetworkActivityIndicatorStatus(){
+        #if !os(watchOS)
         let activityIndicatorID = "NovelDownloadQueue"
         DispatchQueue.main.async {
             if self.queueHolder.GetCurrentDownloadingNovelIDArray().count > 0 {
@@ -434,6 +441,7 @@ class NovelDownloadQueue : NSObject {
                 ActivityIndicatorManager.disable(id: activityIndicatorID)
             }
         }
+        #endif
     }
     
     var currentDownloadingNovelCount:Int {
@@ -565,6 +573,7 @@ class NovelDownloadQueue : NSObject {
     }
 
     @objc func StartBackgroundFetchIfNeeded() {
+        #if !os(watchOS)
         if CoreDataToRealmTool.IsNeedMigration() {
             // 起動時に background fetch を叩くのだけれど、Realm への移行が行われる段階の時は Realm object を作ってしまうとファイルができてしまうので実行させません。
             // TODO: つまり、移行が終わったら StartBackgroundFetchIfNeeded() を呼び出す必要があるのだけれどそれをやっていないはず。
@@ -586,6 +595,7 @@ class NovelDownloadQueue : NSObject {
                 UIApplication.shared.setMinimumBackgroundFetchInterval(hour)
             }
         }
+        #endif
     }
     func GetCurrentDownloadCount() -> Int {
         let userDefaults = UserDefaults.standard
@@ -594,6 +604,7 @@ class NovelDownloadQueue : NSObject {
     }
     func SetCurrentDownloadCount(count:Int) {
         UserDefaults.standard.set(count, forKey: DownloadCountKey)
+        #if !os(watchOS)
         DispatchQueue.main.async {
             if count <= 0 {
                 UIApplication.shared.applicationIconBadgeNumber = -1
@@ -601,6 +612,7 @@ class NovelDownloadQueue : NSObject {
                 UIApplication.shared.applicationIconBadgeNumber = count
             }
         }
+        #endif
     }
     @objc func ClearDownloadCountBadge() {
         SetCurrentDownloadCount(count: 0)
@@ -623,6 +635,7 @@ class NovelDownloadQueue : NSObject {
         UserDefaults.standard.setValue([] as [String], forKey: AlreadyBackgroundFetchedNovelIDListKey)
     }
     
+    #if !os(watchOS)
     @objc func HandleBackgroundFetch(application:UIApplication, performFetchWithCompletionHandler:@escaping (UIBackgroundFetchResult) -> Void) {
         let startTime = Date()
         if GetCurrentQueuedNovelIDArray().count > 0 || StorySpeaker.shared.isPlayng {
@@ -690,5 +703,5 @@ class NovelDownloadQueue : NSObject {
             }
         }
     }
-
+    #endif
 }

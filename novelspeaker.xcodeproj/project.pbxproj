@@ -178,6 +178,7 @@
 		21A2CDBB2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBA2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift */; };
 		21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
 		21A4C75124EF9AF300038883 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
+		21A4C75624F6776500038883 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
 		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -1694,6 +1695,7 @@
 				2193094F23BBE56A00035EF0 /* NotificationView.swift in Sources */,
 				214A400123D838C10034DFB2 /* SpeechBlockSpeaker.swift in Sources */,
 				2124B39023BBF392002EBC31 /* NovelSpeakerNotificationTool.swift in Sources */,
+				21A4C75624F6776500038883 /* NovelDownloadQueue.swift in Sources */,
 				2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */,
 				2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */,
 				2104EDED24B9D6C800E275D1 /* SloppyError.swift in Sources */,

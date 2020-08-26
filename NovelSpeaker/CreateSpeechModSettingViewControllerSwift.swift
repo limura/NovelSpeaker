@@ -299,7 +299,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
 
         speaker.StopSpeech()
         let defaultSpeaker:SpeakerSetting = RealmUtil.RealmBlock { (realm) -> SpeakerSetting in
-            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let realmDefaultSpeaker = globalState.defaultSpeaker {
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let realmDefaultSpeaker = globalState.defaultSpeakerWith(realm: realm) {
                 return SpeakerSetting(from: realmDefaultSpeaker)
             }
             let realmDefaultSpeaker = RealmSpeakerSetting()

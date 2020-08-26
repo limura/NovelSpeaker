@@ -1102,74 +1102,39 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     // 何故そうなるのかは詳しくはこの issue を参照。
     // https://github.com/caiyue1993/IceCream/issues/88
     // ということで、以下のような link されているものを検索するようなクエリは遅くなるかもしれん。というか多分遅い。
-    var linkedStorys: Array<Story>? {
-        get {
-            return self.RealmUtilBlock { (realm) -> Array<Story>? in
-                return RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: self.novelID)
-            }
-        }
+    func linkedStorysWith(realm:Realm) -> Array<Story>? {
+        return RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: self.novelID)
     }
-    var linkedSpeechModSettings : [RealmSpeechModSetting]? {
-        get {
-            return self.RealmUtilBlock { (realm) -> [RealmSpeechModSetting]? in
-                return realm.objects(RealmSpeechModSetting.self).filter({ (speechModSetting) -> Bool in
-                    return !speechModSetting.isDeleted && speechModSetting.targetNovelIDArray.contains(self.novelID)
-                })
-            }
-        }
+    func linkedSpeechModSettingsWith(realm:Realm) -> [RealmSpeechModSetting]? {
+        return realm.objects(RealmSpeechModSetting.self).filter({ (speechModSetting) -> Bool in
+            return !speechModSetting.isDeleted && speechModSetting.targetNovelIDArray.contains(self.novelID)
+        })
     }
-    var linkedSpeechSectionConfigs : [RealmSpeechSectionConfig]? {
-        get {
-            return self.RealmUtilBlock { (realm) -> [RealmSpeechSectionConfig]? in
-                return realm.objects(RealmSpeechSectionConfig.self).filter({ (speechSectionConfig) -> Bool in
-                    return !speechSectionConfig.isDeleted && speechSectionConfig.targetNovelIDArray.contains(self.novelID)
-                })
-            }
-        }
+    func linkedSpeechSectionConfigsWith(realm:Realm) -> [RealmSpeechSectionConfig]? {
+        return realm.objects(RealmSpeechSectionConfig.self).filter({ (speechSectionConfig) -> Bool in
+            return !speechSectionConfig.isDeleted && speechSectionConfig.targetNovelIDArray.contains(self.novelID)
+        })
     }
-    var linkedDisplaySettings : [RealmDisplaySetting]? {
-        get {
-            return self.RealmUtilBlock { (realm) -> [RealmDisplaySetting]? in
-                return realm.objects(RealmDisplaySetting.self).filter({ (displaySetting) -> Bool in
-                    return !displaySetting.isDeleted && displaySetting.targetNovelIDArray.contains(self.novelID)
-                })
-            }
-        }
+    func linkedDisplaySettingsWith(realm:Realm) -> [RealmDisplaySetting]? {
+        return realm.objects(RealmDisplaySetting.self).filter({ (displaySetting) -> Bool in
+            return !displaySetting.isDeleted && displaySetting.targetNovelIDArray.contains(self.novelID)
+        })
     }
-    
-    var linkedTags : [RealmNovelTag]? {
-        get {
-            return self.RealmUtilBlock { (realm) -> [RealmNovelTag]? in
-                return realm.objects(RealmNovelTag.self).filter({ (novelTag) -> Bool in
-                    return !novelTag.isDeleted && novelTag.targetNovelIDArray.contains(self.novelID)
-                })
-            }
-        }
+    func linkedTagsWith(realm:Realm) -> [RealmNovelTag]? {
+        return realm.objects(RealmNovelTag.self).filter({ (novelTag) -> Bool in
+            return !novelTag.isDeleted && novelTag.targetNovelIDArray.contains(self.novelID)
+        })
     }
-    
-    var linkedRealmSpeechOverrideSettings : [RealmSpeechOverrideSetting]? {
-        get {
-            return self.RealmUtilBlock { (realm) -> [RealmSpeechOverrideSetting]? in
-                return realm.objects(RealmSpeechOverrideSetting.self).filter({ (speechOverrideSetting) -> Bool in
-                    return !speechOverrideSetting.isDeleted && speechOverrideSetting.targetNovelIDArray.contains(self.novelID)
-                })
-            }
-        }
+    func linkedRealmSpeechOverrideSettingsWith(realm:Realm) -> [RealmSpeechOverrideSetting]? {
+        return realm.objects(RealmSpeechOverrideSetting.self).filter({ (speechOverrideSetting) -> Bool in
+            return !speechOverrideSetting.isDeleted && speechOverrideSetting.targetNovelIDArray.contains(self.novelID)
+        })
     }
-    
-    var firstChapter: Story? {
-        get {
-            return self.RealmUtilBlock { (realm) -> Story? in
-                return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1))
-            }
-        }
+    func firstChapterWith(realm:Realm) -> Story? {
+        return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1))
     }
-    var lastChapter : Story? {
-        get {
-            return self.RealmUtilBlock { (realm) -> Story? in
-                return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.m_lastChapterStoryID)
-            }
-        }
+    func lastChapterWith(realm:Realm) -> Story? {
+        return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.m_lastChapterStoryID)
     }
     var lastChapterNumber : Int? {
         get {
@@ -1180,18 +1145,12 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             return chapterNumber
         }
     }
-    var lastDownloadURL : String? {
-        get {
-            return lastChapter?.url
-        }
+    func lastDownloadURLWith(realm:Realm) -> String? {
+        return lastChapterWith(realm: realm)?.url
     }
-    var readingChapter: Story? {
-        get {
-            if self.m_readingChapterStoryID == "" { return nil }
-            return self.RealmUtilBlock { (realm) -> Story? in
-                return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.m_readingChapterStoryID)
-            }
-        }
+    func readingChapterWith(realm:Realm) -> Story? {
+        if self.m_readingChapterStoryID == "" { return nil }
+        return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.m_readingChapterStoryID)
     }
     var readingChapterNumber: Int? {
         get {
@@ -1212,18 +1171,13 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     var urlSecretString:String {
         get { return m_urlSecret }
     }
-    
-    var defaultSpeaker : RealmSpeakerSetting? {
-        get {
-            return self.RealmUtilBlock { (realm) -> RealmSpeakerSetting? in
-                if self.defaultSpeakerID.count <= 0 {
-                    return RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker
-                }
-                guard let obj = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: self.defaultSpeakerID) else { return nil }
-                if obj.isDeleted { return nil }
-                return obj
-            }
+    func defaultSpeakerWith(realm:Realm) -> RealmSpeakerSetting? {
+        if self.defaultSpeakerID.count <= 0 {
+            return RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm)
         }
+        guard let obj = realm.object(ofType: RealmSpeakerSetting.self, forPrimaryKey: self.defaultSpeakerID) else { return nil }
+        if obj.isDeleted { return nil }
+        return obj
     }
     
     // 推測によるアップデート頻度。単位は1日に何章分ダウンロードされたのか(1日に1章なら1、10日に1章なら0.1、1日に3章なら3)。
@@ -1352,27 +1306,27 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     
     func delete(realm:Realm) {
         RealmStoryBulk.RemoveAllStoryWith(realm: realm, novelID: self.novelID)
-        if let speechModSettingArray = linkedSpeechModSettings {
+        if let speechModSettingArray = linkedSpeechModSettingsWith(realm: realm) {
             for speechModSetting in speechModSettingArray {
                 speechModSetting.unref(realm:realm, novelID: self.novelID)
             }
         }
-        if let speechSectionConfigArray = linkedSpeechSectionConfigs {
+        if let speechSectionConfigArray = linkedSpeechSectionConfigsWith(realm: realm) {
             for speechSectionConfig in speechSectionConfigArray {
                 speechSectionConfig.unref(realm:realm, novelID: self.novelID)
             }
         }
-        if let displaySettingArray = linkedDisplaySettings {
+        if let displaySettingArray = linkedDisplaySettingsWith(realm: realm) {
             for displaySetting in displaySettingArray {
                 displaySetting.unref(realm:realm, novelID: self.novelID)
             }
         }
-        if let tagArray = linkedTags {
+        if let tagArray = linkedTagsWith(realm: realm) {
             for tag in tagArray {
                 tag.unref(realm:realm, novelID: self.novelID)
             }
         }
-        if let realmSpeechOverrideSettingArray = linkedRealmSpeechOverrideSettings {
+        if let realmSpeechOverrideSettingArray = linkedRealmSpeechOverrideSettingsWith(realm: realm) {
             for realmSpeechOverrideSetting in realmSpeechOverrideSettingArray {
                 realmSpeechOverrideSetting.unref(realm:realm, novelID: self.novelID)
             }
@@ -1415,14 +1369,10 @@ func == (lhs: RealmNovel, rhs: RealmNovel) -> Bool {
     static let anyTarget = "novelspeakerdata://any"
     let targetNovelIDArray = List<String>()
     
-    var targetNovelArray : [RealmNovel]? {
-        get {
-            return RealmUtil.RealmBlock {
-                return $0.objects(RealmNovel.self).filter({ (novel) -> Bool in
-                    return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
-                })
-            }
-        }
+    func targetNovelArrayWith(realm:Realm) -> [RealmNovel]? {
+        return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
+        })
     }
     
     static func GetAllObjectsWith(realm:Realm) -> Results<RealmSpeechModSetting>? {
@@ -1577,7 +1527,7 @@ extension RealmSpeechWaitConfig: CanWriteIsDeleted {
                 sectionConfig.unref(realm: realm, speakerID: self.name)
             }
         }
-        if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.filter("defaultSpeakerID = %@", self.name), let defaultSpeakerID = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeaker?.name {
+        if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.filter("defaultSpeakerID = %@", self.name), let defaultSpeakerID = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm)?.name {
             for novel in novelArray {
                 novel.defaultSpeakerID = defaultSpeakerID
             }
@@ -1611,21 +1561,13 @@ extension RealmSpeakerSetting: CanWriteIsDeleted {
     static let anyTarget = "novelspeakerdata://any"
     let targetNovelIDArray = List<String>()
     
-    var speaker : RealmSpeakerSetting? {
-        get {
-            return RealmUtil.RealmBlock {
-                return $0.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.speakerID).first
-            }
-        }
+    func speakerWith(realm:Realm) -> RealmSpeakerSetting? {
+        return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.speakerID).first
     }
-    var targetNovelArray : [RealmNovel]? {
-        get {
-            return RealmUtil.RealmBlock {
-                return $0.objects(RealmNovel.self).filter({ (novel) -> Bool in
-                    return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
-                })
-            }
-        }
+    func targetNovelArrayWith(realm: Realm) -> [RealmNovel]? {
+        return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
+        })
     }
     // 指定された NovelID に対する default設定以外 の section config をリストにして返します。
     // 複雑なクエリになるので何度も呼び出すような使い方はしないほうが良いです。
@@ -1746,27 +1688,14 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
             m_bookSelfSortType = Int(newValue.rawValue)
         }
     }
-    
-    var defaultDisplaySetting : RealmDisplaySetting? {
-        get {
-            return RealmUtil.RealmBlock {
-                return $0.objects(RealmDisplaySetting.self).filter("isDeleted = false AND name = %@", self.defaultDisplaySettingID).first
-            }
-        }
+    func defaultDisplaySettingWith(realm:Realm) -> RealmDisplaySetting? {
+        return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false AND name = %@", self.defaultDisplaySettingID).first
     }
-    var defaultSpeaker : RealmSpeakerSetting? {
-        get {
-            return RealmUtil.RealmBlock {
-                return $0.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeakerID).first
-            }
-        }
+    func defaultSpeakerWith(realm: Realm) -> RealmSpeakerSetting? {
+        return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeakerID).first
     }
-    var defaultSpeechOverrideSetting : RealmSpeechOverrideSetting? {
-        get {
-            return RealmUtilBlock {
-                $0.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeechOverrideSettingID).first
-            }
-        }
+    func defaultSpeechOverrideSettingWith(realm: Realm) -> RealmSpeechOverrideSetting? {
+        realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeechOverrideSettingID).first
     }
     // background fetch の設定は その端末 だけに依存するようにしないとおかしなことになるので、UserDefaults.standard を使います
     static let isBackgroundNovelFetchEnabledKey = "NovelSpeaker_RealmModels_IsBackgroundNovelFetchEnabled"
@@ -1848,7 +1777,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
         }
     }
     static func GetLastReadStory(realm: Realm) -> Story? {
-        return GetLastReadNovel(realm: realm)?.readingChapter
+        return GetLastReadNovel(realm: realm)?.readingChapterWith(realm: realm)
     }
     static func GetLastReadNovel(realm: Realm) -> RealmNovel? {
         guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return nil }
@@ -1882,14 +1811,10 @@ extension RealmGlobalState: CanWriteIsDeleted {
     
     let targetNovelIDArray = List<String>()
     
-    var targetNovelArray : [RealmNovel]? {
-        get {
-            return RealmUtil.RealmBlock {
-                return $0.objects(RealmNovel.self).filter({ (novel) -> Bool in
-                    return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
-                })
-            }
-        }
+    func targetNovelArrayWith(realm:Realm) -> [RealmNovel]? {
+        return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
+        })
     }
     
     static func GetAllObjectsWith(realm:Realm) -> Results<RealmDisplaySetting>? {
@@ -1967,14 +1892,10 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
         static let Bookshelf = "bookshelf"
     }
     
-    var targetNovelArray : [RealmNovel]? {
-        get {
-            return RealmUtil.RealmBlock {
-                return $0.objects(RealmNovel.self).filter({ (novel) -> Bool in
-                    return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
-                })
-            }
-        }
+    func targetNovelArrayWith(realm:Realm) -> [RealmNovel]? {
+        return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
+        })
     }
     
     static func CreateNewTag(name:String, type:String) -> RealmNovelTag {
@@ -2087,14 +2008,10 @@ extension RealmNovelTag: CanWriteIsDeleted {
         }
     }
     
-    var targetNovelArray : [RealmNovel]? {
-        get {
-            return RealmUtil.RealmBlock {
-                return $0.objects(RealmNovel.self).filter({ (novel) -> Bool in
-                    return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
-                })
-            }
-        }
+    func targetNovelArrayWith(realm: Realm) -> [RealmNovel]? {
+        return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
+            return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
+        })
     }
     
     static func GetAllObjectsWith(realm:Realm) -> Results<RealmSpeechOverrideSetting>? {

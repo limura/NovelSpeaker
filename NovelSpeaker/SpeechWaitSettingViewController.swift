@@ -21,7 +21,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                 print("can not get globalState")
                 return
             }
-            guard let speakerSetting = globalState.defaultSpeaker else {
+            guard let speakerSetting = globalState.defaultSpeakerWith(realm: realm) else {
                 print("can not get defaultSpeakerSetting")
                 return
             }
