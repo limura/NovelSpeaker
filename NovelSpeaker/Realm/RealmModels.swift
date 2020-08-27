@@ -670,11 +670,7 @@ struct Story: Codable {
         return CreateUniqueBulkID(novelID: StoryIDToNovelID(storyID: storyID), chapterNumber: StoryIDToChapterNumber(storyID: storyID))
     }
     
-    func LoadStoryArray() -> [Story]? {
-        guard let asset = self.storyListAsset else {
-            print("LoadStoryArray storyListAsset is nil")
-            return nil
-        }
+    static func StoryCreamAssetToStoryArray(asset:CreamAsset) -> [Story]? {
         guard let zipedData = asset.storedData() else {
             print("LoadStoryArray storedData() return nil. filePath: \(asset.filePath.absoluteString)")
             return nil
@@ -688,6 +684,14 @@ struct Story: Codable {
             return nil
         }
         return storyDict
+    }
+    
+    func LoadStoryArray() -> [Story]? {
+        guard let asset = self.storyListAsset else {
+            print("LoadStoryArray storyListAsset is nil")
+            return nil
+        }
+        return RealmStoryBulk.StoryCreamAssetToStoryArray(asset: asset)
     }
     
     func OverrideStoryListAsset(storyArray:[Story]) {
@@ -834,17 +838,6 @@ struct Story: Codable {
         let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         realm.delete(storyBulkArray)
     }
-    
-    static func BulkToStory(bulk:List<Data>, chapterNumber:Int) -> Story? {
-        let bulkIndex = (chapterNumber - 1) % bulkCount
-        if bulk.count > bulkIndex {
-            let storyData = bulk[bulkIndex]
-            if let story = Story.DecodeFromData(storyData: storyData), story.chapterNumber == chapterNumber {
-                return story
-            }
-        }
-        return nil
-    }
 
     static func SearchStoryBulkWith(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
         //realm.refresh()
@@ -863,6 +856,14 @@ struct Story: Codable {
     static func SearchStoryBulkWith(realm: Realm, novelID:String) -> Results<RealmStoryBulk>?{
         print("SearchStoryBulk(\"\(novelID)\")")
         return realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
+    }
+    
+    static func StoryBulkArrayToStory(storyArray:[Story], chapterNumber: Int) -> Story? {
+        let bulkIndex = (chapterNumber - 1) % bulkCount
+        if bulkIndex < 0 || storyArray.count <= bulkIndex {
+            return nil
+        }
+        return storyArray[bulkIndex]
     }
     
     static func SearchStoryWith(realm:Realm, novelID:String, chapterNumber:Int) -> Story? {

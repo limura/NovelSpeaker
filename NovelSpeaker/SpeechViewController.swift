@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import IceCream
 
 class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     
@@ -53,6 +54,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                     self.storySpeaker.SetStory(realm: realm, story: story)
                 }
             }
+            self.observeStory(storyID: storyID)
         }else{
             textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
         }
@@ -255,8 +257,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                     for property in properties {
                         // content が書き換わった時のみを監視します。
                         // でないと lastReadDate とかが書き換わった時にも表示の更新が走ってしまいます。
-                        if property.name == "contentArray", let contentArray = property.newValue as? List<Data>, let story = RealmStoryBulk.BulkToStory(bulk: contentArray, chapterNumber: RealmStoryBulk.StoryIDToChapterNumber(storyID: targetStoryID)), story.content != self?.textView.text {
-                            self?.setStoryWithoutSetToStorySpeaker(story: story)
+                        let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: targetStoryID)
+                        if property.name == "storyListAsset", let newValue = property.newValue as? CreamAsset, let storyArray = RealmStoryBulk.StoryCreamAssetToStoryArray(asset: newValue), let story = RealmStoryBulk.StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber), story.chapterNumber == chapterNumber, let currentText = self?.textView.text, story.content != currentText {
+                            DispatchQueue.main.async {
+                                self?.setStoryWithoutSetToStorySpeaker(story: story)
+                            }
                         }
                     }
                 case .deleted:

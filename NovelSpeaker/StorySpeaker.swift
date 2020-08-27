@@ -9,6 +9,7 @@
 import UIKit
 import RealmSwift
 import MediaPlayer
+import IceCream
 
 protocol StorySpeakerDeletgate {
     func storySpeakerStartSpeechEvent(storyID:String)
@@ -169,10 +170,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 guard let bookmark = RealmBookmark.SearchObjectFromWith(realm: realm, type: .novelSpeechLocation, hint: novelID) else { return }
                 self.bookmarkObserverToken = bookmark.observe { (change) in
                     switch change {
-                    case .change(_, let properties):
+                    case .change(let value, let properties):
                         for property in properties {
-                            if property.name == "location", let newObj = property.newValue as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID), self.speaker.currentLocation != newObj.location {
-                                self.speaker.SetSpeechLocation(location: newObj.location)
+                            if property.name == "location", let newLocation = property.newValue as? Int, let newObj = value as? RealmBookmark, newObj.chapterNumber == RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID) {
+                                self.speaker.SetSpeechLocation(location: newLocation)
+                                self.willSpeakRange(range: NSMakeRange(newLocation, 0))
                             }
                         }
                     default:
@@ -199,12 +201,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                         break
                     case .change(_, let properties):
                         for property in properties {
-                            if property.name == "contentArray", let newValue = property.newValue as? List<Data>, let story = RealmStoryBulk.BulkToStory(bulk: newValue, chapterNumber: chapterNumber) {
-                                let text = self.speaker.displayText
-                                if text != story.content {
-                                    DispatchQueue.global(qos: .background).async {
-                                        self.speaker.SetStory(story: story)
-                                    }
+                            if property.name == "storyListAsset", let newValue = property.newValue as? CreamAsset, let storyArray = RealmStoryBulk.StoryCreamAssetToStoryArray(asset: newValue), let story = RealmStoryBulk.StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber), story.chapterNumber == chapterNumber, story.content != self.speaker.displayText {
+                                DispatchQueue.global(qos: .background).async {
+                                    self.speaker.SetStory(story: story)
                                 }
                             }
                         }
