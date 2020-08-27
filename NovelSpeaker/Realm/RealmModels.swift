@@ -21,16 +21,12 @@ import AVFoundation
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
 
     static var syncEngine: SyncEngine? = nil
-    static var realmStorySyncEngine: SyncEngine? = nil
     static let lock = NSLock()
     static var realmLocalCache:[String:Realm] = [:]
     static var realmCloudCache:[String:Realm] = [:]
-    static let lockRealmStory = NSLock()
-    static var realmRealmStoryCache:[String:Realm] = [:]
     
     static var writeCount = 0
     static let writeCountPullInterval = 1000 // realm.write を何回したら pull するか
-    public static let isUseCloudRealmForStory = true
 
     static func Migrate_0_To_1(migration:Migration, oldSchemaVersion:UInt64) {
         
@@ -53,19 +49,6 @@ import AVFoundation
             return nil
         }
     }
-    static func GetRealmStoryLocalRealmFilePath() -> URL? {
-        if isUseCloudRealmForStory {
-            return GetLocalRealmFilePath()
-        }
-        
-        let fileManager = FileManager.default
-        do {
-            let directory = try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            return directory.appendingPathComponent("localStory.realm")
-        }catch{
-            return nil
-        }
-    }
     @objc static func RemoveLocalRealmFile() {
         if let path = GetLocalRealmFilePath() {
             let fileManager = FileManager.default
@@ -80,21 +63,6 @@ import AVFoundation
             lock.unlock()
         }
         realmLocalCache.removeAll()
-    }
-    @objc static func RemoveRealmStoryLocalRealmFile() {
-        if let path = GetRealmStoryLocalRealmFilePath() {
-            let fileManager = FileManager.default
-            do {
-                try fileManager.removeItem(at: path)
-            }catch{
-                print("file \(path.absoluteString) remove failed.")
-            }
-        }
-        lockRealmStory.lock()
-        defer {
-            lockRealmStory.unlock()
-        }
-        realmRealmStoryCache.removeAll()
     }
     static func GetLocalRealmConfiguration() -> Realm.Configuration {
         return Realm.Configuration(
@@ -120,37 +88,6 @@ import AVFoundation
         //realmLocalCache[threadID] = realm
         return realm
     }
-    static func GetRealmStoryLocalRealmConfiguration() -> Realm.Configuration {
-        return Realm.Configuration(
-            fileURL: GetRealmStoryLocalRealmFilePath(),
-            schemaVersion: currentSchemaVersionForRealmStory,
-            migrationBlock: MigrateFuncForRealmStory,
-            deleteRealmIfMigrationNeeded: deleteRealmIfMigrationNeeded,
-            shouldCompactOnLaunch: { (totalBytes:Int, usedBytes:Int) in
-                return Double(totalBytes) * 1.3 < Double(usedBytes)
-        })
-    }
-    static func GetRealmStoryLocalRealm() throws -> Realm {
-        if isUseCloudRealmForStory {
-            return try GetLocalRealm()
-        }
-        
-        lockRealmStory.lock()
-        defer { lockRealmStory.unlock() }
-        let threadID = "\(Thread.current)"
-        if let realm = realmRealmStoryCache[threadID] {
-            return realm
-        }
-        let config = GetRealmStoryLocalRealmConfiguration()
-        do {
-            let realm = try Realm(configuration: config)
-            //realmLocalOnlyCache[threadID] = realm
-            return realm
-        }catch let error {
-            print("GetLocalOnlyRealm try Realm() failed. \(error.localizedDescription)")
-            throw error
-        }
-    }
     static func GetCloudRealmFilePath() -> URL? {
         let fileManager = FileManager.default
         do {
@@ -159,20 +96,6 @@ import AVFoundation
         }catch{
             return nil
         }
-    }
-    static func GetRealmStoryCloudRealmFilePath() -> URL? {
-        if isUseCloudRealmForStory {
-            return GetCloudRealmFilePath()
-        }
-        
-        let fileManager = FileManager.default
-        do {
-            let directory = try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            return directory.appendingPathComponent("cloudStory.realm")
-        }catch{
-            return nil
-        }
-
     }
     static func RemoveCloudRealmFile() {
         // 注意：
@@ -224,6 +147,9 @@ import AVFoundation
                 for obj in realm.objects(RealmNovelTag.self) {
                     obj.isDeleted = true
                 }
+                for obj in realm.objects(RealmStoryBulk.self) {
+                    obj.isDeleted = true
+                }
             }
         }catch{
         }
@@ -261,27 +187,6 @@ import AVFoundation
         realm.autorefresh = true
         return realm
     }
-    fileprivate static func GetRealmStoryCloudRealmConfiguration() -> Realm.Configuration {
-        return Realm.Configuration(
-            fileURL: GetRealmStoryCloudRealmFilePath(),
-            schemaVersion: currentSchemaVersionForRealmStory,
-            migrationBlock: MigrateFuncForRealmStory,
-            deleteRealmIfMigrationNeeded: deleteRealmIfMigrationNeeded,
-            shouldCompactOnLaunch: { (totalBytes, usedBytes) in
-                return Double(totalBytes) * 1.2 < Double(usedBytes)
-        })
-    }
-    fileprivate static func GetRealmStoryCloudRealmWithoutLock() throws -> Realm {
-        if isUseCloudRealmForStory {
-            return try GetCloudRealmWithoutLock()
-        }
-        
-        let config = GetRealmStoryCloudRealmConfiguration()
-        let realm = try Realm(configuration: config)
-        realm.autorefresh = true
-        return realm
-    }
-    
     static func GetCloudRealm() throws -> Realm {
         lock.lock()
         defer {
@@ -292,23 +197,6 @@ import AVFoundation
             return realm
         }
         let realm = try GetCloudRealmWithoutLock()
-        //realmCloudCache[threadID] = realm
-        return realm
-    }
-    static func GetRealmStoryCloudRealm() throws -> Realm {
-        if isUseCloudRealmForStory {
-            return try GetCloudRealm()
-        }
-        
-        lockRealmStory.lock()
-        defer {
-            lockRealmStory.unlock()
-        }
-        let threadID = "\(Thread.current)"
-        if let realm = realmRealmStoryCache[threadID] {
-            return realm
-        }
-        let realm = try GetRealmStoryCloudRealmWithoutLock()
         //realmCloudCache[threadID] = realm
         return realm
     }
@@ -342,7 +230,6 @@ import AVFoundation
     
     static func stopSyncEngine() {
         syncEngine = nil
-        realmStorySyncEngine = nil
     }
     static func FetchAllLongLivedOperationIDs(completionHandler: @escaping ([CKOperation.ID]?, Error?) -> Void) {
         let container = GetContainer()
@@ -509,17 +396,6 @@ import AVFoundation
         let defaults = UserDefaults.standard
         defaults.set(isUse, forKey: UseCloudRealmKey)
         NovelSpeakerNotificationTool.AnnounceRealmSettingChanged()
-    }
-    static let UseRealmStoryCloudRealmKey = "RealmUtil_RealmStoryUseCloudRealm"
-    static func IsUseRealmStoryCloudRealm() -> Bool {
-        let defaults = UserDefaults.standard
-        defaults.register(defaults: [UseRealmStoryCloudRealmKey: false])
-        return defaults.bool(forKey: UseRealmStoryCloudRealmKey)
-    }
-    static func SetIsUseRealmStoryCloudRealm(isUse:Bool) {
-        let defaults = UserDefaults.standard
-        defaults.set(isUse, forKey: UseRealmStoryCloudRealmKey)
-        //NovelSpeakerNotificationTool.AnnounceRealmSettingChanged()
     }
     static func GetRealm() throws -> Realm {
         if IsUseCloudRealm() {

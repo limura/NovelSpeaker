@@ -42,7 +42,7 @@
 "GlobalDataSingleton_RTFToStringFailed_Title" = "RTFの読み込みに失敗";
 "GlobalDataSingleton_BackupDataLoaded" = "設定データを読み込みました。\nダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。";
 "GlobalDataSingleton_RestoreFullBackupEnd" = "バックアップデータからの復元を完了しました。";
-"GlobalDataSingleton_RestoreingBookProgress" = "工程 2\r\n小説を本棚に登録中";
+"GlobalDataSingleton_RestoreingBookProgress" = "工程 2/2\r\n小説を本棚に登録中";
 "GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings" = "工程 1\r\n設定の復元中";
 "GlobalDataSingleton_RestoreBackupDataFailed" = "バックアップデータの読み込みに失敗しました。";
 "GlobalDataSingleton_AnnounceStopedByTimer" = "最大連続再生時間を超えたので、読み上げを停止しました。";
@@ -159,7 +159,7 @@
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 2/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 3/4\n設定情報の抽出中";
-"NovelSpeakerUtility_RestoreingJSONType" = "バックアップファイルから設定を読み込んでいます。";
+"NovelSpeakerUtility_RestoreingJSONType" = "工程 1/4\nバックアップファイルから設定を読み込んでいます。";
 "NovelSpeakerUtility_UnzipProgress" = "工程 1/4\nバックアップファイルを解凍しています";
 "NovelSpeakerUtility_RestoreBackupTitle" = "バックアップデータを読み込んでいます";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";

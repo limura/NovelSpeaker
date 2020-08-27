@@ -246,8 +246,6 @@ class RealmToRealmCopyTool: NSObject {
         try CopyNovelTag(from: from, to: to, progress: progress)
         try CopySpeechOverrideSetting(from: from, to: to, progress: progress)
         try CopyNovels(from: from, to: to, progress: progress)
-        if RealmUtil.isUseCloudRealmForStory {
-            try CopyStorys(from: from, to: to, progress: progress)
-        }
+        try CopyStorys(from: from, to: to, progress: progress)
     }
 }
