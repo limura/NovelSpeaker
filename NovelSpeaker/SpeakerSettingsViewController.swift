@@ -9,12 +9,15 @@
 import UIKit
 import Eureka
 import AVFoundation
+import RealmSwift
 
 class SpeakerSettingsViewController: FormViewController {
     let speaker = SpeechBlockSpeaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     var isRateSettingSync = true
     var hideCache:[String:Bool] = [:]
+    
+    var speakerSettingNotificationToken:NotificationToken? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,9 +27,29 @@ class SpeakerSettingsViewController: FormViewController {
         self.title = NSLocalizedString("SpeakerSettingsViewController_TitleText", comment: "話者設定")
         createSettingsTable()
         registNotificationCenter()
+        registNotificationToken()
     }
     deinit {
         self.unregistNotificationCenter()
+    }
+    
+    func registNotificationToken() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let speakerSettings = RealmSpeakerSetting.GetAllObjectsWith(realm: realm) else { return }
+            self.speakerSettingNotificationToken = speakerSettings.observe({ (change) in
+                switch change {
+                case .update(_, deletions: _, insertions: _, modifications: _):
+                    DispatchQueue.main.async {
+                        self.form.removeAll()
+                        self.createSettingsTable()
+                    }
+                case .initial(_):
+                    break
+                default:
+                    break
+                }
+            })
+        }
     }
     
     func registNotificationCenter() {
@@ -108,7 +131,7 @@ class SpeakerSettingsViewController: FormViewController {
             if let value = row.value {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
-                        RealmUtil.WriteWith(realm: realm) { (realm) in
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
                             setting.pitch = value
                         }
                     }
@@ -154,7 +177,7 @@ class SpeakerSettingsViewController: FormViewController {
                     targetRow.updateCell()
                     RealmUtil.RealmBlock { (realm) -> Void in
                         if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
-                            RealmUtil.WriteWith(realm: realm) { (realm) in
+                            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
                                 setting.rate = rate
                             }
                         }
@@ -163,7 +186,7 @@ class SpeakerSettingsViewController: FormViewController {
             }else{
                 RealmUtil.RealmBlock { (realm) -> Void in
                     if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
-                        RealmUtil.WriteWith(realm: realm) { (realm) in
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
                             setting.rate = rate
                         }
                     }
@@ -196,7 +219,7 @@ class SpeakerSettingsViewController: FormViewController {
                 }
                 var voiceNames:[String] = []
                 var voiceName = ""
-                RealmUtil.WriteWith(realm: realm) { (realm) in
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
                     let voices = AVSpeechSynthesisVoice.speechVoices().filter({$0.language == locale})
                     voiceNames = voices.map({$0.name})
                     voiceName = voiceNames.first ?? ""
@@ -219,14 +242,10 @@ class SpeakerSettingsViewController: FormViewController {
             let voiceNameArray = AVSpeechSynthesisVoice.speechVoices().filter({ $0.language == currentSetting.locale }).map({$0.name}).sorted()
             $0.options = voiceNameArray
             let voice = AVSpeechSynthesisVoice(identifier: currentSetting.voiceIdentifier)
-            print("currentSetting.voiceIdentifier: \(currentSetting.voiceIdentifier)")
             let voiceName = voice?.name ?? ""
-            print("voiceName: \(voiceName)")
             if voiceNameArray.contains(voiceName) {
-                print("value set to: \(voiceName) from voiceNameArray.contains()")
                 $0.value = voiceName
             }else{
-                print("value set to: \(voiceNameArray.first ?? "") from voiceNameArray.first")
                 $0.value = voiceNameArray.first ?? ""
             }
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
@@ -243,7 +262,7 @@ class SpeakerSettingsViewController: FormViewController {
                 guard  let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else {
                     return
                 }
-                RealmUtil.WriteWith(realm: realm) { (realm) in
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
                     setting.voiceIdentifier = voice.identifier
                 }
             }
@@ -286,7 +305,7 @@ class SpeakerSettingsViewController: FormViewController {
                         guard let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else {
                             return
                         }
-                        RealmUtil.WriteWith(realm: realm) { (realm) in
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
                             setting.delete(realm: realm)
                         }
                     }
@@ -355,7 +374,7 @@ class SpeakerSettingsViewController: FormViewController {
                         RealmUtil.RealmBlock { (realm) -> Void in
                             let newSpeakerSetting = RealmSpeakerSetting()
                             newSpeakerSetting.name = name
-                            RealmUtil.WriteWith(realm: realm) { (realm) in
+                            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
                                 realm.add(newSpeakerSetting, update: .modified)
                             }
                             self.form.append(self.createSpeakSettingRows(currentSetting: newSpeakerSetting))
