@@ -9,16 +9,21 @@
 import UIKit
 import MessageUI
 import Eureka
+import RealmSwift
 
 class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate {
     var m_NarouContentCacheData:NarouContentCacheData? = nil
     var m_RubySwitchToggleHitCount = 0
     var notificationTokens:[NSObjectProtocol] = []
     
+    var globalDataNotificationToken:NotificationToken? = nil
+    var defaultSpeechOverrideSettingNotificationToken:NotificationToken? = nil
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         BehaviorLogger.AddLog(description: "SettingsViewController viewDidLoad", data: [:])
         createSettingsTable()
+        registerObserver()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -29,6 +34,44 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         removeNotificationCenter()
+    }
+    
+    func registerObserver() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let globalData = RealmGlobalState.GetInstanceWith(realm: realm) {
+                self.globalDataNotificationToken = globalData.observe({ (change) in
+                    print("globalDataNotificationToken change got.")
+                    switch change {
+                    case .change(_, _):
+                        DispatchQueue.main.async {
+                            self.form.removeAll()
+                            self.createSettingsTable()
+                        }
+                    case .deleted:
+                        break
+                    default:
+                        break
+                    }
+                    
+                })
+                if let defaultSpeechSetting = globalData.defaultSpeechOverrideSettingWith(realm: realm) {
+                    self.defaultSpeechOverrideSettingNotificationToken = defaultSpeechSetting.observe({ (change) in
+                        print("defaultSpeechOverrideSettingNotificationToken change got.")
+                        switch change {
+                        case .change(_, _):
+                            DispatchQueue.main.async {
+                                self.form.removeAll()
+                                self.createSettingsTable()
+                            }
+                        case .deleted:
+                            break
+                        default:
+                            break
+                        }
+                    })
+                }
+            }
+        }
     }
     
     // TODO: バックアップファイルからのデータ読み込み完了後にこの Notification を呼ぶ
@@ -169,7 +212,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ row in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.maxSpeechTimeInSec = Int(value)
                     }
                 }
@@ -205,7 +248,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             NiftyUtilitySwift.RegisterUserNotification()
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                                         globalState.isBackgroundNovelFetchEnabled = true
                                     }
                                     NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
@@ -219,7 +262,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }else{
                     RealmUtil.RealmBlock { (realm) -> Void in
                         if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                            RealmUtil.WriteWith(realm: realm) { (realm) in
+                            RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                                 globalState.isBackgroundNovelFetchEnabled = false
                             }
                             NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
@@ -242,7 +285,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 self.m_RubySwitchToggleHitCount += 1
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         speechOverrideSetting.isOverrideRubyIsEnabled = value
                     }
                 }
@@ -264,7 +307,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ textRow in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let value = textRow.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         speechOverrideSetting.notRubyCharactorStringArray = value
                     }
                 }
@@ -279,7 +322,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.isReadingProgressDisplayEnabled = value
                     }
                 }
@@ -295,7 +338,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.isMenuItemIsAddNovelSpeakerItemsOnly = value
                     }
                 }
@@ -311,7 +354,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.isShortSkipEnabled = value
                     }
                 }
@@ -327,7 +370,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.isPlaybackDurationEnabled = value
                     }
                 }
@@ -342,7 +385,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.isPageTurningSoundEnabled = value
                     }
                 }
@@ -357,7 +400,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         speechOverrideSetting.isIgnoreURIStringSpeechEnabled = value
                     }
                 }
@@ -387,7 +430,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let typeString = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         if typeString == noRepeat {
                             speechOverrideSetting.repeatSpeechType = .noRepeat
                         }else if typeString == rewindToFirstStory {
@@ -425,7 +468,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             }
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                                RealmUtil.WriteWith(realm: realm) { (realm) in
+                                RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                                     globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = true
                                 }
                             }
@@ -434,7 +477,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }else{
                     RealmUtil.RealmBlock { (realm) -> Void in
                         guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                        RealmUtil.WriteWith(realm: realm) { (realm) in
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                             globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = false
                         }
                     }
@@ -451,7 +494,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.isMixWithOthersEnabled = value
                     }
                 }
@@ -470,7 +513,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.isDuckOthersEnabled = value
                     }
                 }
@@ -485,7 +528,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith( realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.isOpenRecentNovelInStartTime = value
                     }
                 }
@@ -500,7 +543,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
                         globalState.IsDisallowsCellularAccess = value
                     }
                 }
