@@ -67,7 +67,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     
     func addNotificationReceiver(){
         RealmUtil.RealmBlock { (realm) -> Void in
-            self.speechModSettingObserveToken = RealmSpeechModSetting.GetAllObjectsWith(realm: realm)?.observe { (collectionChange) in
+            self.speechModSettingObserveToken = realm.objects(RealmSpeechModSetting.self).observe { (collectionChange) in
+                print("RealmSpeechModSetting change got.")
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                 }

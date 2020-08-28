@@ -109,20 +109,19 @@ void uncaughtExceptionHandler(NSException *exception)
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    NSLog(@"application will enter foreground.");
-    // badge clear.
-    [[NovelDownloadQueue shared] ClearDownloadCountBadge];
-    if ([RealmUtil IsUseCloudRealm]) {
-        [RealmUtil CloudPull];
-    }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    //NSLog(@"application did become active.");
+    NSLog(@"application did become active.");
+    // badge clear.
+    [[NovelDownloadQueue shared] ClearDownloadCountBadge];
     // BackgroundFetchが有効な設定であれば有効化します。
     [[NovelDownloadQueue shared] StartBackgroundFetchIfNeeded];
+    if ([RealmUtil IsUseCloudRealm]) {
+        [RealmUtil CloudPull];
+    }
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
