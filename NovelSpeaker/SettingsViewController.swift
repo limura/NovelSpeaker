@@ -40,7 +40,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         RealmUtil.RealmBlock { (realm) -> Void in
             if let globalData = RealmGlobalState.GetInstanceWith(realm: realm) {
                 self.globalDataNotificationToken = globalData.observe({ (change) in
-                    print("globalDataNotificationToken change got.")
                     switch change {
                     case .change(_, _):
                         DispatchQueue.main.async {
@@ -56,7 +55,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 })
                 if let defaultSpeechSetting = globalData.defaultSpeechOverrideSettingWith(realm: realm) {
                     self.defaultSpeechOverrideSettingNotificationToken = defaultSpeechSetting.observe({ (change) in
-                        print("defaultSpeechOverrideSettingNotificationToken change got.")
                         switch change {
                         case .change(_, _):
                             DispatchQueue.main.async {

@@ -8,12 +8,16 @@
 
 import UIKit
 import Eureka
+import RealmSwift
 
 class SpeechWaitSettingViewControllerSwift: FormViewController {
     final let TestTextAreaTag = "TestTextAreaTag"
     var testText:String = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     let speaker = SpeechBlockSpeaker()
     var hideCache:[String:Bool] = [:]
+    
+    var speechWaitSettingNotificationToken:NotificationToken? = nil
+    var globalStateNotificationToken:NotificationToken? = nil
 
     func testSpeech(text: String, delaySetting:RealmSpeechWaitConfig) {
         RealmUtil.RealmBlock { (realm) -> Void in
@@ -39,10 +43,42 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
         self.title = NSLocalizedString("SettingTableViewController_SettingOfTheSpeechDelay", comment:"読み上げ時の間の設定")
         createCells()
         registNotificationCenter()
+        registNotificationToken()
     }
 
     deinit {
         self.unregistNotificationCenter()
+    }
+    
+    func registNotificationToken() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                self.globalStateNotificationToken = globalState.observe({ (change) in
+                    switch change {
+                    case .change(_, _):
+                        DispatchQueue.main.async {
+                            self.form.removeAll()
+                            self.createCells()
+                        }
+                    default:
+                        break
+                    }
+                })
+            }
+            if let speechWaitSetting = RealmSpeechWaitConfig.GetAllObjectsWith(realm: realm) {
+                self.speechWaitSettingNotificationToken = speechWaitSetting.observe({ (change) in
+                    switch change {
+                    case .update(_, deletions: _, insertions: _, modifications: _):
+                        DispatchQueue.main.async {
+                            self.form.removeAll()
+                            self.createCells()
+                        }
+                    default:
+                        break
+                    }
+                })
+            }
+        }
     }
     
     func registNotificationCenter() {
@@ -156,7 +192,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                 guard let value = row.value, let setting = RealmSpeechWaitConfig.SearchFromWith(realm: realm, targetText: targetText) else {
                     return
                 }
-                RealmUtil.WriteWith(realm: realm) { (realm) in
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speechWaitSettingNotificationToken, self.globalStateNotificationToken]) { (realm) in
                     var floatValue = Float(value)
                     if fabsf(floatValue - 0.0) < Float.ulpOfOne {
                         floatValue = 0.0
@@ -198,7 +234,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                         guard let setting = RealmSpeechWaitConfig.SearchFromWith(realm: realm, targetText: targetText) else {
                             return
                         }
-                        RealmUtil.WriteWith(realm: realm) { (realm) in
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speechWaitSettingNotificationToken, self.globalStateNotificationToken]) { (realm) in
                             setting.delete(realm: realm)
                         }
                     }
@@ -252,7 +288,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
                         RealmUtil.RealmBlock { (realm) -> Void in
                             let newSpeechWaitConfig = RealmSpeechWaitConfig()
                             newSpeechWaitConfig.targetText = text
-                            RealmUtil.WriteWith(realm: realm) { (realm) in
+                            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speechWaitSettingNotificationToken, self.globalStateNotificationToken]) { (realm) in
                                 realm.add(newSpeechWaitConfig, update: .modified)
                             }
                             self.form.append(self.createSpeechWaitCells(speechWaitSetting: newSpeechWaitConfig))
@@ -278,7 +314,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
         }.onChange({ (row) in
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let value = row.value, let globalData = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                RealmUtil.WriteWith(realm: realm) { (realm) in
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speechWaitSettingNotificationToken, self.globalStateNotificationToken]) { (realm) in
                     globalData.isSpeechWaitSettingUseExperimentalWait = value == NSLocalizedString("SpeechWaitConfigTableView_DelayTimeInSec_SpeechWaitSettingType_Experimental", comment: "非推奨型")
                 }
             }
