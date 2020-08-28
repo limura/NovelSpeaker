@@ -479,7 +479,12 @@ class NovelSpeakerUtility: NSObject {
                     guard let target = target as? NSDictionary else { continue }
                     for (key, value) in target {
                         guard let name = key as? String, let url = value as? String else { continue }
-                        let bookmark = "\(name)\n\(url)"
+                        let bookmark:String
+                        if name == "アルファポリス(Web取込 非対応サイトになりました。詳細はサポートサイト下部にありますQ&Aを御覧ください)\nhttps://www.alphapolis.co.jp/novel/" {
+                            bookmark = "アルファポリス\n\(url)"
+                        }else{
+                            bookmark = "\(name)\n\(url)"
+                        }
                         if globalStatus.webImportBookmarkArray.contains(bookmark) { continue }
                         globalStatus.webImportBookmarkArray.append(bookmark)
                     }
