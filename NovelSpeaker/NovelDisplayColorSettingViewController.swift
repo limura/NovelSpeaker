@@ -8,9 +8,12 @@
 
 import UIKit
 import Eureka
+import RealmSwift
 
 class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPresentationControllerDelegate, MSColorSelectionViewControllerDelegate {
     var tmpColorSetting:UIColor = UIColor.white
+    
+    var globalStateColorNotificationToken:NotificationToken? = nil
     
     enum ColorPickerTarget {
         case foreground
@@ -22,7 +25,8 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        createForms();
+        createForms()
+        registNotificationToken()
     }
     
 
@@ -35,6 +39,28 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
         // Pass the selected object to the new view controller.
     }
     */
+    
+    func registNotificationToken() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+            self.globalStateColorNotificationToken = globalState.observe({ (change) in
+                switch change {
+                case .change(_, let propertys):
+                    for property in propertys {
+                        if property.name == "fgColor" || property.name == "bgColor" {
+                            DispatchQueue.main.async {
+                                self.form.removeAll()
+                                self.createForms()
+                            }
+                            return
+                        }
+                    }
+                default:
+                    break
+                }
+            })
+        }
+    }
     
     func getForegroundColor() -> UIColor {
         return RealmUtil.RealmBlock { (realm) -> UIColor in
@@ -76,7 +102,7 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
     func saveColor(foregroundColor:UIColor?, backgroundColor:UIColor?) {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let state = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-            RealmUtil.WriteWith(realm: realm) { (realm) in
+            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalStateColorNotificationToken]) { (realm) in
                 state.foregroundColor = foregroundColor
                 state.backgroundColor = backgroundColor
             }
