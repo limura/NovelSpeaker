@@ -17,7 +17,6 @@ target 'NovelSpeaker' do
   pod "RATreeView", "~> 2.1.2"
   #pod 'IceCream', :git => 'https://github.com/caiyue1993/IceCream.git'
   pod 'IceCream'
-  #pod 'AnyCodable-FlightSchool'
   pod 'Kanna'
   pod 'Erik'
   pod 'DataCompression'
@@ -40,7 +39,6 @@ target 'NovelSpeaker' do
     use_frameworks!
     pod 'Zip', '~> 1.1'
     pod 'IceCream'
-    #pod 'AnyCodable-FlightSchool'
     pod 'Kanna'
     pod 'DataCompression'
   end
