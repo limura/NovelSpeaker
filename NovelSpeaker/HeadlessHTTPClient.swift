@@ -121,4 +121,8 @@ class HeadlessHttpClient {
     public func LoadAboutPage() {
         self.erik.visit(urlString: "about:blank", completionHandler: nil)
     }
+    
+    public func GetUserAgent(resultHandler:((String?, Error?)->Void)?) {
+        ExecuteJavaScript(javaScript: "navigator.userAgent", resultHandler: resultHandler)
+    }
 }

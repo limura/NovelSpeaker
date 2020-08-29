@@ -568,6 +568,7 @@
 "StoryFetcher_CanNotFindPageElementAndNextLink" = "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。";
 "StoryFetcher_FetchFirstContent_NoNextUrlAlive" = "本文を取り出せませんでした。(本文が掲載されている部分へのリンクが発見できませんでした)";
 "StoryFetcher_FetchFirstContent_ExceededCountToLive" = "本文を取り出せませんでした。(本文へのリンクが発見できないまま読み込み回数上限に達しました)";
+"StoryFetcher_FetchError_RobotsText" = "Webサイト様側で機械的なアクセスを制限されているサイトであったため、ことせかい による取得ができません。(robots.txt で拒否されています)";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

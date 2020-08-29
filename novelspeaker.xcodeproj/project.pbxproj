@@ -32,6 +32,8 @@
 		210EFEE123C8A92D007C3016 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
 		210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
+		212137CE24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */; };
+		212137CF24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */; };
 		2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */; };
 		212323F522B7049E00543543 /* RealmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212323F422B7049E00543543 /* RealmTests.swift */; };
 		2123240E22B7101000543543 /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
@@ -349,6 +351,7 @@
 		210EFEE023C8A92D007C3016 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBlockSpeaker.swift; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
+		212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotsFileTool.swift; sourceTree = "<group>"; };
 		212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 5.xcdatamodel"; sourceTree = "<group>"; };
 		2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PickerViewDialog.h; sourceTree = "<group>"; };
 		2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PickerViewDialog.m; sourceTree = "<group>"; };
@@ -912,6 +915,7 @@
 				21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */,
 				2104EDE824B985A100E275D1 /* StoryFetcher.swift */,
 				2104EDEB24B9D6C800E275D1 /* SloppyError.swift */,
+				212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1675,6 +1679,7 @@
 				214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */,
 				210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
 				21A4C75124EF9AF300038883 /* UIImageExtension.m in Sources */,
+				212137CF24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */,
 				215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */,
 				2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */,
 				2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */,
@@ -1730,6 +1735,7 @@
 				21A291F822A3F9DA000AA58C /* NovelDetailViewController.swift in Sources */,
 				2163599D22B1428400264A89 /* AssignNovelFolderViewController.swift in Sources */,
 				21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */,
+				212137CE24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,

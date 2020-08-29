@@ -575,6 +575,7 @@
 "StoryFetcher_CanNotFindPageElementAndNextLink" = "The text or the URL indicating the next page could not be obtained from the specified URL.";
 "StoryFetcher_FetchFirstContent_NoNextUrlAlive" = "The text could not be retrieved. (I could not find the link to the part where the text is posted)";
 "StoryFetcher_FetchFirstContent_ExceededCountToLive" = "The text could not be retrieved. (I reached the maximum number of reads without being able to find the link to the text)";
+"StoryFetcher_FetchError_RobotsText" = "Since the website is a site with mechanical access restricted, we cannot obtain it due to the facts. (rejected by robots.txt)";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

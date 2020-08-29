@@ -552,6 +552,17 @@ class StoryFetcher {
         }
         #endif
         
+        func fetchUrlWithRobotsCheck(url:URL, currentState:StoryState) {
+            let novelSpeakerUserAgent = "NovelSpeaker/1.1.147 CFNetwork/1128.0.1 Darwin/19.6.0"
+            RobotsFileTool.shared.CheckRobotsTxt(url: url, userAgentString: novelSpeakerUserAgent) { (result) in
+                if result {
+                    fetchUrl(url: url, currentState: currentState)
+                    return
+                }
+                failedAction?(url, NSLocalizedString("StoryFetcher_FetchError_RobotsText", comment: "Webサイト様側で機械的なアクセスを制限されているサイトであったため、ことせかい による取得ができません。"))
+            }
+        }
+        
         // URL を GET した後に本文を取り出す時の挙動
         // 状態を更新してDecodeDocument()を呼び出すだけです
         func fetchUrl(url:URL, currentState:StoryState) {
@@ -593,12 +604,12 @@ class StoryFetcher {
         
         if let nextUrl = currentState.nextUrl {
             // nextUrl があるならそれを辿る
-            fetchUrl(url: nextUrl, currentState: currentState)
+            fetchUrlWithRobotsCheck(url: nextUrl, currentState: currentState)
             return
         }
         if let firstPageLink = currentState.firstPageLink {
             // firstPageLink があるならそれを辿る
-            fetchUrl(url: firstPageLink, currentState: currentState)
+            fetchUrlWithRobotsCheck(url: firstPageLink, currentState: currentState)
             return
         }
 
