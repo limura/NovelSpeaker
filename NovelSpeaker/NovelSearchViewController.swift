@@ -8,7 +8,6 @@
 
 import Foundation
 import Eureka
-import AnyCodable
 import Kanna
 
 @objc protocol MultipleSelectorDoneEnabled {
@@ -30,7 +29,7 @@ extension SearchQuery {
     func CreateQuery() -> String { return "" }
 }
 
-class TextQuery: SearchQuery {
+class TextQuery: SearchQuery, Decodable {
     let displayText:String
     let queryName:String
     var inputText:String = ""
@@ -38,11 +37,6 @@ class TextQuery: SearchQuery {
     init(displayText:String, queryName:String) {
         self.displayText = displayText
         self.queryName = queryName
-    }
-    
-    static func GenerateQuery(value:[String:Any]) -> TextQuery? {
-        guard let type = value["queryType"] as? String, type == "text", let displayText = value["displayText"] as? String, let queryName = value["queryName"] as? String else { return nil }
-        return TextQuery(displayText: displayText, queryName: queryName)
     }
 
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
@@ -65,32 +59,24 @@ class TextQuery: SearchQuery {
     }
 }
 
-class MultiSelectQuery: SearchQuery {
+class MultiSelectQuery: SearchQuery, Decodable {
     let displayText:String
     let queryName:String
-    let ganreList:[String:String]
+    let multiselect:[String:String]
     let separator:String
     var enableTargets:Set<String> = Set()
-    init(displayText:String, queryName:String, genreList:[String:String], separator:String){
+    init(displayText:String, queryName:String, multiselect:[String:String], separator:String){
         self.displayText = displayText
         self.queryName = queryName
-        self.ganreList = genreList
+        self.multiselect = multiselect
         self.separator = separator
     }
-    static func GenerateQuery(value:[String:Any]) -> MultiSelectQuery? {
-        guard let type = value["queryType"] as? String, type == "multiSelect", let displayText = value["displayText"] as? String, let queryName = value["queryName"] as? String, let genreArray = value["multiSelect"] as? [String:Any], let separator = value["separator"] as? String else { return nil }
-        var genreList:[String:String] = [:]
-        for (key,value) in genreArray {
-            guard let value = value as? String else { continue }
-            genreList[key] = value
-        }
-        return MultiSelectQuery(displayText: displayText, queryName: queryName, genreList: genreList, separator: separator)
-    }
+
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
         return MultipleSelectorRow<String>() {
             $0.title = displayText
             $0.selectorTitle = displayText
-            $0.options = ([String](self.ganreList.keys)).sorted()
+            $0.options = ([String](self.multiselect.keys)).sorted()
             $0.value = self.enableTargets
             $0.cell.textLabel?.numberOfLines = 0
         }.onChange { (row) in
@@ -106,12 +92,12 @@ class MultiSelectQuery: SearchQuery {
     func CreateQuery() -> String {
         var queryArray:[String] = []
         for key in enableTargets {
-            if let value = self.ganreList[key] {
+            if let value = self.multiselect[key] {
                 queryArray.append(value)
             }
         }
         // queryName が空であれば、separator で join しただけの物を返します。
-        // つまり、separator を "&" にして、ganreList の value に "hoge=1" 的な物を入れておけば、
+        // つまり、separator を "&" にして、multiselect の value に "hoge=1" 的な物を入れておけば、
         // hoge=1&hage=1&hige=1 のような query を生成して返す事ができます。
         if queryName == "" {
             return queryArray.joined(separator: separator)
@@ -120,33 +106,19 @@ class MultiSelectQuery: SearchQuery {
     }
 }
 
-class RadioQuery: SearchQuery {
+class RadioQuery: SearchQuery, Decodable {
     let displayText:String
     let queryName:String
     let defaultValue:String
     let radioList:[String:String]
     var enableTarget:String? = nil
-    init(displayText:String, queryName:String, defaultValue:String, radioList:[String:String]){
+    init(displayText:String, queryName:String, defaultValue:String?, radioList:[String:String]){
         self.displayText = displayText
         self.queryName = queryName
         self.radioList = radioList
-        self.defaultValue = defaultValue
+        self.defaultValue = defaultValue ?? ""
     }
-    static func GenerateQuery(value:[String:Any]) -> RadioQuery? {
-        guard let type = value["queryType"] as? String, type == "radio", let displayText = value["displayText"] as? String, let queryName = value["queryName"] as? String, let radioArray = value["radio"] as? [String:Any] else { return nil }
-        var radioList:[String:String] = [:]
-        for (key,value) in radioArray {
-            guard let value = value as? String else { continue }
-            radioList[key] = value
-        }
-        let defaultValue:String
-        if let valueDefault = value["defaultValue"] as? String {
-            defaultValue = valueDefault
-        }else{
-            defaultValue = ""
-        }
-        return RadioQuery(displayText: displayText, queryName: queryName, defaultValue: defaultValue, radioList: radioList)
-    }
+
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
         return AlertRow<String>() {
             $0.title = displayText
@@ -175,16 +147,12 @@ class RadioQuery: SearchQuery {
     }
 }
 
-class HiddenQuery: SearchQuery {
+class HiddenQuery: SearchQuery, Decodable {
     let queryName:String
     let value:String
     init(queryName:String, value:String){
         self.queryName = queryName
         self.value = value
-    }
-    static func GenerateQuery(value:[String:Any]) -> HiddenQuery? {
-        guard let type = value["queryType"] as? String, type == "hidden", let queryName = value["queryName"] as? String, let queryValue = value["value"] as? String else { return nil }
-        return HiddenQuery(queryName: queryName, value: queryValue)
     }
     
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
@@ -195,7 +163,7 @@ class HiddenQuery: SearchQuery {
     }
 }
 
-class OnOffQuery: SearchQuery {
+class OnOffQuery: SearchQuery, Decodable {
     let displayText:String
     let queryName:String
     let value:String
@@ -204,10 +172,6 @@ class OnOffQuery: SearchQuery {
         self.displayText = displayText
         self.queryName = queryName
         self.value = value
-    }
-    static func GenerateQuery(value:[String:Any]) -> OnOffQuery? {
-        guard let type = value["queryType"] as? String, type == "onOff", let displayText = value["displayText"] as? String, let queryName = value["queryName"] as? String, let queryValue = value["value"] as? String else { return nil }
-        return OnOffQuery(displayText: displayText, queryName: queryName, value: queryValue)
     }
     
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
@@ -274,26 +238,25 @@ class SearchResultBlock {
     }
 }
 
-class SearchResult {
+struct SearchResult : Decodable {
     let blockXpath:String
     let nextLinkXpath:String?
     let titleXpath:String?
     let urlXpath:String?
     var nextLink:URL? = nil
     
-    init(blockXpath:String, nextLinkXpath:String? = nil, titleXpath:String? = nil, urlXpath:String? = nil) {
-        self.blockXpath = blockXpath
-        self.nextLinkXpath = nextLinkXpath
-        self.titleXpath = titleXpath
-        self.urlXpath = urlXpath
+    enum CodingKeys: String, CodingKey {
+        case blockXpath = "block"
+        case nextLinkXpath = "nextLink"
+        case titleXpath = "title"
+        case urlXpath = "url"
     }
-    
-    static func GenerateObject(value:[String:Any]) -> SearchResult? {
-        guard let blockXpath = value["block"] as? String else { return nil }
-        let nextLinkXpath = value["nextLink"] as? String
-        let titleXpath = value["title"] as? String
-        let urlXpath = value["url"] as? String
-        return SearchResult(blockXpath: blockXpath, nextLinkXpath: nextLinkXpath, titleXpath: titleXpath, urlXpath: urlXpath)
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        blockXpath = try values.decode(String.self, forKey: .blockXpath)
+        nextLinkXpath = try? values.decode(String.self, forKey: .nextLinkXpath)
+        titleXpath = try? values.decode(String.self, forKey: .titleXpath)
+        urlXpath = try? values.decode(String.self, forKey: .urlXpath)
     }
     
     func ConvertHTMLToSearchResultDataArray(data:Data, headerEncoding: String.Encoding?, baseURL: URL) -> ([SearchResultBlock], URL?) {
@@ -433,7 +396,7 @@ class SearchResultViewController: FormViewController {
 protocol ParentViewController:UIViewController,MultipleSelectorDoneEnabled {
 }
 
-class WebSiteSection {
+class WebSiteSection : Decodable {
     var title:String = ""
     var HTTPMethod:String = "GET"
     var url:String = ""
@@ -441,65 +404,68 @@ class WebSiteSection {
     var mainDocumentURL:String = ""
     var values:[SearchQuery] = []
     var result:SearchResult? = nil
-    var parentViewController:ParentViewController
+    //var parentViewController:ParentViewController
     
-    init(parent:ParentViewController) {
-        parentViewController = parent
+    enum CodingKeys: String, CodingKey {
+        case title
+        case HTTPMethod
+        case url
+        case isNeedHeadless
+        case mainDocumentURL
+        case values
+        case result
     }
-    
-    func SetSiteInfoJSON(jsonDecodable: [String:AnyDecodable]) -> Bool {
-        if let title = jsonDecodable["title"]?.value as? String {
-            self.title = title
-        }else{ return false }
-        if let HTTPMethod = jsonDecodable["HTTPMethod"]?.value as? String, HTTPMethod == "GET" || HTTPMethod == "POST" {
-            self.HTTPMethod = HTTPMethod
-        }else{ return false }
-        if let url = jsonDecodable["url"]?.value as? String {
-            self.url = url
-        }else{ return false }
-        if let isNeedHeadless = jsonDecodable["isNeedHeadless"]?.value as? Bool {
-            self.isNeedHeadless = isNeedHeadless
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        
+        title = try values.decode(String.self, forKey: .title)
+        HTTPMethod = (try? values.decode(String.self, forKey: .HTTPMethod)) ?? "GET"
+        url = try values.decode(String.self, forKey: .url)
+        isNeedHeadless = (try? values.decode(Bool.self, forKey: .isNeedHeadless)) ?? false
+        mainDocumentURL = (try? values.decode(String.self, forKey: .mainDocumentURL)) ?? ""
+
+        // 怪しく全てを読み込める struct を作って一旦読み込みます(´・ω・`)
+        struct DummySearchQuery: Decodable {
+            let queryType:String
+            let queryName:String
+            let displayText:String?
+            let separator:String?
+            let multiSelect:[String:String]?
+            let radio:[String:String]?
+            let value:String?
+            let defaultValue:String?
         }
-        if let mainDocumentURL = jsonDecodable["mainDocumentURL"]?.value as? String {
-            self.mainDocumentURL = mainDocumentURL
-        }
-        if let valueArray = jsonDecodable["values"]?.value as? [Any] {
-            var values:[SearchQuery] = []
-            for value in valueArray {
-                guard let value = value as? [String:Any] else { continue }
-                guard let type = value["queryType"] as? String else { continue }
-                switch type {
+        var generatedValues:[SearchQuery] = []
+        if let queryArray = try? values.decode([DummySearchQuery].self, forKey: .values) {
+            for query in queryArray {
+                switch query.queryType {
                 case "text":
-                    if let query = TextQuery.GenerateQuery(value: value) {
-                        values.append(query)
+                    if let displayText = query.displayText {
+                        generatedValues.append(TextQuery(displayText: displayText, queryName: query.queryName))
                     }
                 case "multiSelect":
-                    if let query = MultiSelectQuery.GenerateQuery(value: value) {
-                        values.append(query)
+                    if let displayText = query.displayText, let multiSelect = query.multiSelect, let separator = query.separator {
+                        generatedValues.append(MultiSelectQuery(displayText: displayText, queryName: query.queryName, multiselect: multiSelect, separator: separator))
                     }
                 case "radio":
-                    if let query = RadioQuery.GenerateQuery(value: value) {
-                        values.append(query)
+                    if let displayText = query.displayText, let radio = query.radio {
+                        generatedValues.append(RadioQuery(displayText: displayText, queryName: query.queryName, defaultValue: query.defaultValue, radioList: radio))
                     }
                 case "hidden":
-                    if let query = HiddenQuery.GenerateQuery(value: value) {
-                        values.append(query)
+                    if let value = query.value {
+                        generatedValues.append(HiddenQuery(queryName: query.queryName, value: value))
                     }
                 case "onOff":
-                    if let query = OnOffQuery.GenerateQuery(value: value) {
-                        values.append(query)
+                    if let displayText = query.displayText, let value = query.value {
+                        generatedValues.append(OnOffQuery(displayText: displayText, queryName: query.queryName, value: value))
                     }
                 default:
-                    // nothing to do!
                     break
                 }
             }
-            self.values = values
+            self.values = generatedValues
         }
-        if let result = jsonDecodable["result"]?.value as? [String:Any] {
-            self.result = SearchResult.GenerateObject(value: result)
-        }else{ return false }
-        return true
+        result = try? values.decode(SearchResult.self, forKey: .title)
     }
     
     func GenerateQueryURL() -> URL? {
@@ -530,7 +496,7 @@ class WebSiteSection {
         return query.data(using: .utf8)
     }
     
-    func GenerateSection() -> Section {
+    func GenerateSection(parentViewController:ParentViewController) -> Section {
         let section = Section()
         /*section <<< LabelRow() {
             $0.title = title
@@ -551,14 +517,14 @@ class WebSiteSection {
                     }
                     return true
                 }
-                NiftyUtilitySwift.EasyDialogNoButton(viewController: self.parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
+                NiftyUtilitySwift.EasyDialogNoButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
                     print("query: \(url.absoluteString)")
                     NiftyUtilitySwift.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
                         DispatchQueue.main.async {
                             guard let result = self.result else {
                                 dialog.dismiss(animated: false) {
                                     DispatchQueue.main.async {
-                                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self.parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailed_Title", comment: "検索失敗"), message: NSLocalizedString("NovelSearchViewController_SearchField_Message", comment: "検索に失敗しました。\n恐らくは検索に利用されたWebサイト様側の仕様変更(HTML内容の変更)が影響していると思われます。「Web取込」側で取込を行うか、「Web検索」タブ用のデータが更新されるのをお待ち下さい。"), buttonTitle: nil, buttonAction: nil)
+                                        NiftyUtilitySwift.EasyDialogOneButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailed_Title", comment: "検索失敗"), message: NSLocalizedString("NovelSearchViewController_SearchField_Message", comment: "検索に失敗しました。\n恐らくは検索に利用されたWebサイト様側の仕様変更(HTML内容の変更)が影響していると思われます。「Web取込」側で取込を行うか、「Web検索」タブ用のデータが更新されるのをお待ち下さい。"), buttonTitle: nil, buttonAction: nil)
                                     }
                                 }
                                 return
@@ -571,7 +537,7 @@ class WebSiteSection {
                                     nextViewController.nextURL = nextURL
                                     nextViewController.searchResult = result
                                     nextViewController.siteName = self.title
-                                    self.parentViewController.navigationController?.pushViewController(nextViewController, animated: true)
+                                    parentViewController.navigationController?.pushViewController(nextViewController, animated: true)
                                 }
                             }
                         }
@@ -579,7 +545,7 @@ class WebSiteSection {
                         DispatchQueue.main.async {
                             dialog.dismiss(animated: false) {
                                 DispatchQueue.main.async {
-                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: self.parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailedTitle", comment: "検索に失敗しました"), message: nil, buttonTitle: nil, buttonAction: nil)
+                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailedTitle", comment: "検索に失敗しました"), message: nil, buttonTitle: nil, buttonAction: nil)
                                 }
                             }
                         }
@@ -651,14 +617,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     
     func extractSearchInfoArray(jsonData:Data) -> [WebSiteSection] {
         let decorder = JSONDecoder()
-        guard let searchInfoArray = try? decorder.decode([[String:AnyDecodable]].self, from: jsonData) else { return [] }
-        var result:[WebSiteSection] = []
-        for searchInfoJSON in searchInfoArray {
-            let site = WebSiteSection(parent: self)
-            if site.SetSiteInfoJSON(jsonDecodable: searchInfoJSON) {
-                result.append(site)
-            }
-        }
+        guard let result = try? decorder.decode([WebSiteSection].self, from: jsonData) else { return [] }
         return result
     }
     
@@ -718,7 +677,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
                 self.reloadCells()
             }
             if let currentSite = self.currentSelectedSite {
-                self.form +++ currentSite.GenerateSection()
+                self.form +++ currentSite.GenerateSection(parentViewController: self)
             }
         }
     }

@@ -8,7 +8,6 @@
 
 import UIKit
 import Kanna
-import AnyCodable
 #if !os(watchOS)
 import Erik
 #endif
@@ -107,27 +106,6 @@ struct StorySiteInfo {
         self.waitSecondInHeadless = waitSecondInHeadless
     }
     
-    static func DecodeFrom(jsonDecodable:[String:Any]) -> StorySiteInfo? {
-        guard let pageElement = jsonDecodable["pageElement"] as? String else {
-            print("pageElement is not found. return nil.")
-            return nil }
-        return StorySiteInfo(
-            pageElement: pageElement,
-            url: jsonDecodable["url"] as? String,
-            title: jsonDecodable["title"] as? String,
-            subtitle: jsonDecodable["subtitle"] as? String,
-            firstPageLink: jsonDecodable["firstPageLink"] as? String,
-            nextLink: jsonDecodable["nextLink"] as? String,
-            tag: jsonDecodable["tag"] as? String,
-            author: jsonDecodable["author"] as? String,
-            isNeedHeadless: jsonDecodable["isNeedHeadless"] as? String,
-            injectStyle: jsonDecodable["injectStyle"] as? String,
-            nextButton: jsonDecodable["nextButton"] as? String,
-            firstPageButton: jsonDecodable["firstPageButton"] as? String,
-            waitSecondInHeadless: Double(jsonDecodable["waitSecondInHeadless"] as? String ?? "0.0") ?? 0.0
-            )
-    }
-    
     func isMatchUrl(urlString:String) -> Bool {
         guard let urlRegex = self.url else { return false }
         if urlRegex.matches(in: urlString, options: [], range: NSMakeRange(0, urlString.count)).count > 0 {
@@ -194,6 +172,68 @@ extension StorySiteInfo: CustomStringConvertible {
     }
 }
 
+extension StorySiteInfo : Decodable {
+    enum CodingKeys: String, CodingKey {
+        case data
+    }
+    private enum NestedKeys: String, CodingKey {
+        case title
+        case pageElement
+        case subtitle
+        case firstPageLink
+        case nextLink
+        case tag
+        case url
+        case author
+        case isNeedHeadless
+        case injectStyle
+        case nextButton
+        case firstPageButton
+        case waitSecondInHeadless
+    }
+    
+    init(from decoder: Decoder) throws {
+        let toplevelValue = try decoder.container(keyedBy: CodingKeys.self)
+
+        let values = try toplevelValue.nestedContainer(keyedBy: NestedKeys.self, forKey: .data)
+        title = try? values.decode(String.self, forKey: NestedKeys.title)
+        pageElement = try values.decode(String.self, forKey: NestedKeys.pageElement)
+        subtitle = try? values.decode(String.self, forKey: NestedKeys.subtitle)
+        firstPageLink = try? values.decode(String.self, forKey: NestedKeys.firstPageLink)
+        nextLink = try? values.decode(String.self, forKey: NestedKeys.nextLink)
+        tag = try? values.decode(String.self, forKey: NestedKeys.tag)
+        if let urlString = try? values.decode(String.self, forKey: NestedKeys.url) {
+            url = try? NSRegularExpression(pattern: urlString, options: [])
+        }else{
+            url = nil
+        }
+        author = try? values.decode(String.self, forKey: NestedKeys.author)
+        let isNeedHeadlessString = try? values.decode(String.self, forKey: NestedKeys.isNeedHeadless)
+        if let isNeedHeadlessString = isNeedHeadlessString, isNeedHeadlessString.count > 0 {
+            switch isNeedHeadlessString.lowercased() {
+            case "false":
+                isNeedHeadless = false
+            case "nil":
+                isNeedHeadless = false
+            case "0":
+                isNeedHeadless = false
+            default:
+                isNeedHeadless = true
+            }
+        }else{
+            isNeedHeadless = false
+        }
+        injectStyle = try? values.decode(String.self, forKey: NestedKeys.injectStyle)
+        nextButton = try? values.decode(String.self, forKey: NestedKeys.nextButton)
+        firstPageButton = try? values.decode(String.self, forKey: NestedKeys.firstPageButton)
+        if let waitSecondInHeadlessString = try? values.decode(String.self, forKey: NestedKeys.waitSecondInHeadless), let value = Double(string: waitSecondInHeadlessString) {
+            waitSecondInHeadless = value
+        }else{
+            waitSecondInHeadless = 0
+        }
+    }
+}
+
 class StoryHtmlDecoder {
     var siteInfoArray:[StorySiteInfo] = []
     var customSiteInfoArray:[StorySiteInfo] = []
@@ -223,12 +263,7 @@ class StoryHtmlDecoder {
     }
     
     func DecodeSiteInfoData(data:Data) -> [StorySiteInfo]? {
-        guard let weDataDataArray = try? JSONDecoder().decode([[String:AnyDecodable]].self, from: data) else { return nil }
-        var result:[StorySiteInfo] = []
-        for weData in weDataDataArray {
-            guard let data = weData["data"]?.value as? [String:Any], let siteInfo = StorySiteInfo.DecodeFrom(jsonDecodable: data) else { continue }
-            result.append(siteInfo)
-        }
+        guard let result = try? JSONDecoder().decode([StorySiteInfo].self, from: data) else { return nil }
         return result
     }
     

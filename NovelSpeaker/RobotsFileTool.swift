@@ -7,6 +7,7 @@
 //
 // robots.txt の仕様はこの辺りを参照するとよさげ
 // https://developers.google.com/search/reference/robots_txt
+// https://qiita.com/rana_kualu/items/a5bebcae76fa6257167b
 // TODO: なんだけど、自分がテキトーに作ったものなんかより「わかってる」人が作ったのが使いたいよぅ……(´・ω・`)
 
 import Foundation
