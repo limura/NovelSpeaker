@@ -62,13 +62,13 @@ class TextQuery: SearchQuery, Decodable {
 class MultiSelectQuery: SearchQuery, Decodable {
     let displayText:String
     let queryName:String
-    let multiselect:[String:String]
+    let multiSelect:[String:String]
     let separator:String
     var enableTargets:Set<String> = Set()
-    init(displayText:String, queryName:String, multiselect:[String:String], separator:String){
+    init(displayText:String, queryName:String, multiSelect:[String:String], separator:String){
         self.displayText = displayText
         self.queryName = queryName
-        self.multiselect = multiselect
+        self.multiSelect = multiSelect
         self.separator = separator
     }
 
@@ -76,7 +76,7 @@ class MultiSelectQuery: SearchQuery, Decodable {
         return MultipleSelectorRow<String>() {
             $0.title = displayText
             $0.selectorTitle = displayText
-            $0.options = ([String](self.multiselect.keys)).sorted()
+            $0.options = ([String](self.multiSelect.keys)).sorted()
             $0.value = self.enableTargets
             $0.cell.textLabel?.numberOfLines = 0
         }.onChange { (row) in
@@ -92,12 +92,12 @@ class MultiSelectQuery: SearchQuery, Decodable {
     func CreateQuery() -> String {
         var queryArray:[String] = []
         for key in enableTargets {
-            if let value = self.multiselect[key] {
+            if let value = self.multiSelect[key] {
                 queryArray.append(value)
             }
         }
         // queryName が空であれば、separator で join しただけの物を返します。
-        // つまり、separator を "&" にして、multiselect の value に "hoge=1" 的な物を入れておけば、
+        // つまり、separator を "&" にして、multiSelect の value に "hoge=1" 的な物を入れておけば、
         // hoge=1&hage=1&hige=1 のような query を生成して返す事ができます。
         if queryName == "" {
             return queryArray.joined(separator: separator)
@@ -445,7 +445,7 @@ class WebSiteSection : Decodable {
                     }
                 case "multiSelect":
                     if let displayText = query.displayText, let multiSelect = query.multiSelect, let separator = query.separator {
-                        generatedValues.append(MultiSelectQuery(displayText: displayText, queryName: query.queryName, multiselect: multiSelect, separator: separator))
+                        generatedValues.append(MultiSelectQuery(displayText: displayText, queryName: query.queryName, multiSelect: multiSelect, separator: separator))
                     }
                 case "radio":
                     if let displayText = query.displayText, let radio = query.radio {
