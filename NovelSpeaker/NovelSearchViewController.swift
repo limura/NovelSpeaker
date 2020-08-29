@@ -624,7 +624,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
             failedAction?(nil)
             return
         }
-        NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: "SearchInfoData.json", expireTimeinterval: searchInfoExpireTimeInterval, successAction: { (data) in
+        NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: "SearchInfoData.json", expireTimeinterval: searchInfoExpireTimeInterval, canRecoverOldFile: true, successAction: { (data) in
             successAction?(data)
         }) { (err) in
             failedAction?(err)

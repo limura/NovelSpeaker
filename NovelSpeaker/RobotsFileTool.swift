@@ -197,6 +197,8 @@ struct RobotsCache {
             index += 1
         }
         addNewUserAgentGroupIfNeeded()
+        // 全て駄目なのだけにしてテスト場合はコメントアウトする
+        //userAgentGroupArray = [RobotsUserAgentGroup(userAgent: "*", directiveArray: [RobotsDirectiveLine(isAllow: false, pathPattern: "/", pathRegexp: try! NSRegularExpression(pattern: "/", options: []))])]
         // 後で使う時には UserAgent のマッチ文字列は長い方が優先なので長い方を前に出てくるようにソートしておきます
         let sortedUserAgentGroupArray = userAgentGroupArray.sorted { $0.userAgent.count > $1.userAgent.count }
         return RobotsCache(robotsURL: robotsURL, createdDate: Date(), userAgentGroupArray: sortedUserAgentGroupArray)
@@ -237,9 +239,10 @@ class RobotsFileTool {
         }
         let port = url.port ?? -1
         let cacheFileName = "robotsCache_\(scheme):\(host):\(port)"
-        NiftyUtilitySwift.FileCachedHttpGet(url: targetURL, cacheFileName: cacheFileName, expireTimeinterval: fileCacheTimeoutSecond, successAction: { (data) in
+        NiftyUtilitySwift.FileCachedHttpGet(url: targetURL, cacheFileName: cacheFileName, expireTimeinterval: fileCacheTimeoutSecond, canRecoverOldFile: true, successAction: { (data) in
             completion?(RobotsCache.Decode(robotsURL: targetURL, data: data))
         }) { (err) in
+            // リクエストに失敗した場合、404 などの 4** なら arrow だけれど、ネットワークエラーやサーバエラー(5**)なら disarrow らしいんだけどどうしたら
             completion?(nil)
         }
     }

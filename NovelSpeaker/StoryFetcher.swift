@@ -373,16 +373,16 @@ class StoryHtmlDecoder {
         // watchOS では Autopagerize の SiteInfo については読み込まないようにします
         // WARN: TODO: つまり、ことせかい用の SiteInfo が巨大になった場合同様に問題が発生しえます
         #if !os(watchOS)
-        NiftyUtilitySwift.FileCachedHttpGet(url: siteInfoURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: { (data) in
+        NiftyUtilitySwift.FileCachedHttpGet(url: siteInfoURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
             siteInfoData = data
-            NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: { (data) in
+            NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
                 customSiteInfoData = data
                 completion?(updateSiteInfo(siteInfoData: siteInfoData, customSiteInfoData: customSiteInfoData))
             }) { (err) in
                 completion?(updateSiteInfo(siteInfoData: siteInfoData, customSiteInfoData: nil))
             }
         }) { (err) in
-            NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: { (data) in
+            NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
                 customSiteInfoData = data
                 completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
             }) { (err) in
@@ -391,7 +391,7 @@ class StoryHtmlDecoder {
             }
         }
         #else
-        NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: { (data) in
+        NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
             customSiteInfoData = data
             completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
         }) { (err) in

@@ -103,8 +103,22 @@ class NiftyUtilitySwift: NSObject {
     #endif
 
     #if !os(watchOS)
+    // エラーメッセージについて、開発者にメールを送ってもなんともできない物以外については true を返します(つまり開発者にメールを送れるようになります)
+    static func isRecoverbleErrorString(error:String) -> Bool {
+        let targetArray:[String] = [
+            NSLocalizedString("UriLoader_NSURLConnectionRequestFailed", comment: "Webサーバからの取得に失敗しました。(恐らくは接続に失敗しています。ネットワーク状況を確認してください〜"),
+            NSLocalizedString("StoryFetcher_FetchError_RobotsText", comment: "Webサイト様側で機械的なアクセスを制限されているサイトであったため、ことせかい による取得ができません。(robots.txt で拒否されています)"),
+        ]
+        for target in targetArray {
+            if error.contains(target) {
+                return false
+            }
+        }
+        return true
+    }
+    
     static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieString:String) {
-        if MFMailComposeViewController.canSendMail() {
+        if isRecoverbleErrorString(error: error) && MFMailComposeViewController.canSendMail() {
             var errorMessage = error
             errorMessage += NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
             EasyDialogBuilder(viewController)
@@ -1088,16 +1102,15 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
-    static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?) {
+    static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, canRecoverOldFile:Bool = false, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?) {
         if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName),
             FileManager.default.fileExists(atPath: cacheFilePath.path),
             let attribute = try? FileManager.default.attributesOfItem(atPath: cacheFilePath.path),
             let modificationDate = attribute[FileAttributeKey.modificationDate] as? Date,
             (Date().timeIntervalSince1970 - modificationDate.timeIntervalSince1970) < expireTimeinterval,
-            let successAction = successAction,
             let dataZiped = try? Data(contentsOf: cacheFilePath),
             let data = decompress(data: dataZiped) {
-            successAction(data)
+            successAction?(data)
             return
         }
         httpGet(url: url, successAction: { (data, encoding) in
@@ -1108,12 +1121,15 @@ class NiftyUtilitySwift: NSObject {
                     print("cache file write error. for url: \(url.absoluteString)")
                 }
             }
-            if let successAction = successAction {
-                successAction(data)
-            }
+            successAction?(data)
         }) { (err) in
-            guard let failedAction = failedAction else { return }
-            failedAction(err)
+            if canRecoverOldFile, let cacheFilePath = GetCacheFilePath(fileName: cacheFileName),
+                FileManager.default.fileExists(atPath: cacheFilePath.path), let dataZiped = try? Data(contentsOf: cacheFilePath),
+                let data = decompress(data: dataZiped) {
+                successAction?(data)
+                return
+            }
+            failedAction?(err)
         }
     }
     

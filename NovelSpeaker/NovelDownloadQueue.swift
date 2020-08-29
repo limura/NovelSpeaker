@@ -393,42 +393,15 @@ class NovelDownloadQueue : NSObject {
     let semaphore = DispatchSemaphore(value: 0)
     
     let cacheFileExpireTimeinterval:Double = 60*60*6
-    let novelSpeakerSiteInfoUrl = "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
-    let novelSpeakerSiteInfoCacheFileName = "NovelSpeakerSiteInfoCache"
-    let autopagerizeSiteInfoUrl = "http://wedata.net/databases/AutoPagerize/items.json"
-    let autopagerizeSiteInfoCacheFileName = "AutopagerizeSiteInfoCache"
     let DownloadCountKey = "NovelDownloadQueue_DownloadCount"
     let AlreadyBackgroundFetchedNovelIDListKey = "NovelDownloadQueue_AlreadyBackgroundFetchedNovelIDList"
     let backgroundFetchDeadlineTimeInSec:Double = 20.0
     let fetcherPoolLock = NSLock()
     var fetcherPool:[UUID:(Bool, StoryFetcher)] = [:]
-    var siteInfoLoadDate:Date = Date(timeIntervalSince1970: 0)
-    let siteInfoReloadTimeinterval:Double = 60*60*6
 
     private override init() {
         super.init()
         startQueueWatcher()
-    }
-    
-    func reloadSiteInfoIfNeeded() {
-        let semaphore = DispatchSemaphore(value: 0)
-        let expireDate = Date(timeIntervalSinceNow: -siteInfoReloadTimeinterval)
-        if expireDate > siteInfoLoadDate || RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled()  {
-            StoryHtmlDecoder.shared.ClearSiteInfo()
-            StoryHtmlDecoder.shared.LoadSiteInfo { (err) in
-                if let err = err {
-                    print("reloadSiteInfoIfNeeded LoadSiteInfo failed.", err.localizedDescription)
-                }
-                semaphore.signal()
-            }
-            siteInfoLoadDate = Date()
-            semaphore.wait()
-        }
-    }
-    
-    func clearSiteInfoCache() {
-        NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: novelSpeakerSiteInfoCacheFileName)
-        NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: autopagerizeSiteInfoCacheFileName)
     }
     
     func updateNetworkActivityIndicatorStatus(){
@@ -531,7 +504,6 @@ class NovelDownloadQueue : NSObject {
     func startQueueWatcher() {
         DispatchQueue.global(qos: .utility).async {
             while true {
-                self.reloadSiteInfoIfNeeded()
                 self.semaphore.wait()
                 self.dispatch()
             }
