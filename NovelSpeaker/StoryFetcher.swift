@@ -204,6 +204,7 @@ class StoryHtmlDecoder {
     var nextExpireDate:Date = Date(timeIntervalSince1970: 0)
     let cacheFileName = "AutopagerizeSiteInfoCache"
     let customCacheFileName = "NovelSpeakerSiteInfoCache"
+    var siteInfoNowLoading:Bool = false
 
     // シングルトンにしている。
     static let shared = StoryHtmlDecoder()
@@ -292,28 +293,33 @@ class StoryHtmlDecoder {
     
     func LoadSiteInfoIfNeeded() {
         let now = Date()
+        lock.lock()
         if IsSiteInfoReady == true && nextExpireDate > now && RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled() == false {
+            let handlerQueued = self.siteInfoLoadDoneHandlerArray
+            self.siteInfoLoadDoneHandlerArray.removeAll()
+            lock.unlock()
+            for handler in handlerQueued {
+                handler()
+            }
+            return
+        }
+        if siteInfoNowLoading {
+            lock.unlock()
             return
         }
         nextExpireDate = now.addingTimeInterval(cacheFileExpireTimeinterval)
+        siteInfoNowLoading = true
+        lock.unlock()
         DispatchQueue.global(qos: .background).async {
             self.LoadSiteInfo()
         }
     }
     
     func WaitLoadSiteInfoReady(handler: @escaping ()->Void){
-        defer { LoadSiteInfoIfNeeded() }
-        var handlerQueued:Bool = false
         lock.lock()
-        if !IsSiteInfoReady {
-            siteInfoLoadDoneHandlerArray.append(handler)
-            handlerQueued = true
-        }
+        siteInfoLoadDoneHandlerArray.append(handler)
         lock.unlock()
-        if !handlerQueued {
-            handler()
-        }
-        return
+        LoadSiteInfoIfNeeded()
     }
     
     // 標準のSiteInfoを非同期で読み込みます。
@@ -321,10 +327,10 @@ class StoryHtmlDecoder {
         var cacheFileExpireTimeinterval:Double = self.cacheFileExpireTimeinterval
         func announceLoadEnd() {
             lock.lock()
+            siteInfoNowLoading = false
             let targetArray = siteInfoLoadDoneHandlerArray
             siteInfoLoadDoneHandlerArray.removeAll()
             lock.unlock()
-
             for handler in targetArray {
                 handler()
             }
@@ -377,16 +383,19 @@ class StoryHtmlDecoder {
             siteInfoData = data
             NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
                 customSiteInfoData = data
-                completion?(updateSiteInfo(siteInfoData: siteInfoData, customSiteInfoData: customSiteInfoData))
+                let result = updateSiteInfo(siteInfoData: siteInfoData, customSiteInfoData: customSiteInfoData)
+                completion?(result)
             }) { (err) in
-                completion?(updateSiteInfo(siteInfoData: siteInfoData, customSiteInfoData: nil))
+                let result = updateSiteInfo(siteInfoData: siteInfoData, customSiteInfoData: nil)
+                completion?(result)
             }
         }) { (err) in
             NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
                 customSiteInfoData = data
-                completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
+                let result = updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData)
+                completion?(result)
             }) { (err) in
-                // nothing to do!
+                announceLoadEnd()
                 completion?(SloppyError(msg: "siteInfo and customSiteInfo fetch failed."))
             }
         }
@@ -395,7 +404,7 @@ class StoryHtmlDecoder {
             customSiteInfoData = data
             completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
         }) { (err) in
-            // nothing to do!
+            announceLoadEnd()
             completion?(SloppyError(msg: "siteInfo and customSiteInfo fetch failed."))
         }
         #endif
@@ -553,6 +562,7 @@ class StoryFetcher {
         #endif
         
         func fetchUrlWithRobotsCheck(url:URL, currentState:StoryState) {
+            // TODO: 謎の固定値
             let novelSpeakerUserAgent = "NovelSpeaker/1.1.147 CFNetwork/1128.0.1 Darwin/19.6.0"
             RobotsFileTool.shared.CheckRobotsTxt(url: url, userAgentString: novelSpeakerUserAgent) { (result) in
                 if result {
@@ -668,9 +678,7 @@ class StoryFetcher {
         if delay <= 0 {
             doNext()
         }else{
-            print("FetchFirstContent delay: \(delay)")
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                print("FetchFirstContent delay: \(delay) done.")
                 doNext()
             }
         }
@@ -679,7 +687,6 @@ class StoryFetcher {
     // 指定されたURLから最初の本文と思われるものまで読み込んでその値を返します。
     func FetchFirstContent(url:URL, cookieString:String?, completion:((_ requestURL:URL, _ state:StoryState?, _ errorDescriptionString:String?)->Void)?) {
         StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, completion: { (state) in
-            print("FetchFirstContent CreateFirstStoryState done.")
             self.FetchFirstContentRecurcive(currentState: state, successAction: { (state) in
                 completion?(url, state, nil)
             }, failedAction: { (url, errorString) in

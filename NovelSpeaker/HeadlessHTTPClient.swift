@@ -122,7 +122,20 @@ class HeadlessHttpClient {
         self.erik.visit(urlString: "about:blank", completionHandler: nil)
     }
     
+    // ErikのUserAgentを取得します。
+    // WARN: 一回取得したら起動している間は無闇にJavaScriptを呼び出さないようにしています。
+    // そのため、WKWebViewConfiguration で UserAgent を上書きしたりする運用をしている場合には誤動作します。
+    static var userAgentCache:String? = nil
     public func GetUserAgent(resultHandler:((String?, Error?)->Void)?) {
-        ExecuteJavaScript(javaScript: "navigator.userAgent", resultHandler: resultHandler)
+        if let userAgent = HeadlessHttpClient.userAgentCache {
+            resultHandler?(userAgent, nil)
+            return
+        }
+        ExecuteJavaScript(javaScript: "navigator.userAgent", resultHandler: { (userAgent, err) in
+            if let userAgent = userAgent {
+                HeadlessHttpClient.userAgentCache = userAgent
+            }
+            resultHandler?(userAgent, err)
+        })
     }
 }

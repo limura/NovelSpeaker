@@ -123,16 +123,39 @@ struct RobotsDirectiveLine {
 
 // robots.txt の user-agent で区切られる「グループ」の一つを格納する物
 struct RobotsUserAgentGroup {
-    let userAgent:String
+    let userAgent:[String]
     let directiveArray:[RobotsDirectiveLine]
+    
+    static func isUserAgentLine(line:String) -> (Bool, String?) {
+        let lowerCasedLine = line.lowercased()
+        if let userAgentRange = lowerCasedLine.range(of: "user-agent"), userAgentRange.lowerBound == lowerCasedLine.startIndex {
+            let splited = line.split(separator: ":", maxSplits: 2, omittingEmptySubsequences: true)
+            if splited.count < 2 { return (false, nil) }
+            let userAgentString = String(splited[1]).trimmingCharacters(in: .whitespaces)
+            return (true, userAgentString)
+        }
+        return (false, nil)
+    }
     
     // WARN: 最初の行が "user-agent" で始まる事を確認「していません」
     static func Decode(lines:[String]) -> RobotsUserAgentGroup? {
-        guard let userAgentLine = lines.first else { return nil }
-        let splited = userAgentLine.split(separator: ":", maxSplits: 2, omittingEmptySubsequences: true)
-        if splited.count < 2 { return nil }
-        let userAgentString = String(splited[1]).trimmingCharacters(in: .whitespaces)
-        var index:Int = 1
+        var userAgentArray:[String] = []
+        var index:Int = 0
+        while index < lines.count {
+            let line = lines[index]
+            let (isUserAgentLine, userAgent) = RobotsUserAgentGroup.isUserAgentLine(line: line)
+            if isUserAgentLine == false { break }
+            if let userAgent = userAgent {
+                userAgentArray.append(userAgent)
+            }else{
+                break
+            }
+            index += 1
+        }
+        if userAgentArray.count <= 0 {
+            return nil
+        }
+        
         var directiveArray:[RobotsDirectiveLine] = []
         while index < lines.count {
             let line = lines[index]
@@ -143,11 +166,19 @@ struct RobotsUserAgentGroup {
         }
         // directive は pathPattern が長い順で効果があるようなので、長い順にソートしておきます
         directiveArray.sort { $0.pathPattern.count > $1.pathPattern.count }
-        return RobotsUserAgentGroup(userAgent: userAgentString, directiveArray: directiveArray)
+        return RobotsUserAgentGroup(userAgent: userAgentArray, directiveArray: directiveArray)
     }
     
     func isTargetUserAgent(userAgent:String) -> Bool {
-        return userAgent.range(of: self.userAgent) != nil || self.userAgent == "*"
+        for ua in self.userAgent {
+            if userAgent.range(of: ua) != nil {
+                return true
+            }
+            if ua == "*" {
+                return true
+            }
+        }
+        return false
     }
     
     func isAllow(url:URL) -> Bool {
@@ -187,12 +218,14 @@ struct RobotsCache {
                 currentUserAgentGroupLines.removeAll()
             }
         }
+        var prevLineIsUserAgentLine:Bool = true
         while index < lines.count {
             let line = lines[index]
-            let lowerCasedLine = line.lowercased()
-            if let userAgentRange = lowerCasedLine.range(of: "user-agent"), userAgentRange.lowerBound == lowerCasedLine.startIndex {
+            let (isUserAgent, _) = RobotsUserAgentGroup.isUserAgentLine(line: line)
+            if isUserAgent == true && prevLineIsUserAgentLine == false {
                 addNewUserAgentGroupIfNeeded()
             }
+            prevLineIsUserAgentLine = isUserAgent
             currentUserAgentGroupLines.append(line)
             index += 1
         }
@@ -248,16 +281,16 @@ class RobotsFileTool {
     }
     
     private func addCache(cache:RobotsCache){
-        /*
+        #if false
         print("robots.txt cache adding.")
         print("\(cache.robotsURL.absoluteString)")
         for group in cache.userAgentGroupArray {
-            print("  \(group.userAgent)")
+            print("  \(group.userAgent.joined(separator: "\n  "))")
             for directive in group.directiveArray {
                 print("    \(directive.isAllow ? "allow" : "disallow"): \(directive.pathPattern)")
             }
         }
-        */
+        #endif
         lock.lock()
         robotsCacheArray[cache.robotsURL] = cache
         lock.unlock()
@@ -306,6 +339,7 @@ class RobotsFileTool {
             self.addCache(cache: cache)
             if let group = cache.SearchTargetUserAgentGroup(userAgent: userAgentString) {
                 resultHandler?(group.isAllow(url: url))
+                return
             }
             resultHandler?(true)
         }
