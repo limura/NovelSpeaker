@@ -299,6 +299,7 @@ class RobotsFileTool {
     
     private func clearExpiredCache() {
         lock.lock()
+        defer { lock.unlock() }
         let cacheExpireDate = Date(timeIntervalSinceNow: -memoryCacheTimeoutSecond)
         var expiredArray:[URL] = []
         for cache in robotsCacheArray {
@@ -309,7 +310,6 @@ class RobotsFileTool {
         for url in expiredArray {
             robotsCacheArray.removeValue(forKey: url)
         }
-        lock.unlock()
     }
     
     func CheckRobotsTxt(url:URL, userAgentString:String, resultHandler:((_ isAllow:Bool) -> Void)?) {
@@ -317,8 +317,9 @@ class RobotsFileTool {
         let cacheExpireDate = Date(timeIntervalSinceNow: -memoryCacheTimeoutSecond)
         guard let robotsURL = RobotsFileTool.URLToRobotsURL(url: url) else { resultHandler?(true); return }
         lock.lock()
-        if let robotsCache = robotsCacheArray.filter({ $0.value.robotsURL == robotsURL }).first?.value, robotsCache.createdDate > cacheExpireDate {
-            lock.unlock()
+        let robotsCache = robotsCacheArray.filter({ $0.value.robotsURL == robotsURL }).first?.value
+        lock.unlock()
+        if let robotsCache = robotsCache, robotsCache.createdDate > cacheExpireDate {
             // キャッシュにあったのでそれを使います
             if let group = robotsCache.SearchTargetUserAgentGroup(userAgent: userAgentString) {
                 resultHandler?(group.isAllow(url: url))
@@ -328,7 +329,6 @@ class RobotsFileTool {
             }
             return
         }
-        lock.unlock()
         RobotsFileTool.GetRobotsText(url: url) { (cache) in
             guard let cache = cache else {
                 // cache が無いなら全部 allow な cache を作って入れておきます

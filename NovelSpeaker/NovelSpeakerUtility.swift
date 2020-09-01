@@ -760,11 +760,12 @@ class NovelSpeakerUtility: NSObject {
                     RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
                     storyArray.removeAll()
                 }
-                if no > 0 {
+                no -= 1
+                if no >= 0 {
                     realmNovel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: no)
                     realm.add(realmNovel, update: .modified)
                 }
-                for _ in 0..<no {
+                for _ in 0...no {
                     realmNovel.AppendDownloadDate(realm: realm, date: realmNovel.lastDownloadDate)
                 }
             }else{
@@ -848,14 +849,14 @@ class NovelSpeakerUtility: NSObject {
                     RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
                     storyArray.removeAll()
                 }
-                if no > 0 {
+                no -= 1
+                if no >= 0 {
                     realmNovel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: no)
                     realm.add(realmNovel, update: .modified)
                 }
-                for _ in 0..<no {
+                for _ in 0...no {
                     realmNovel.AppendDownloadDate(realm: realm, date: realmNovel.lastDownloadDate)
                 }
-                no -= 1
                 if no > 0, var story = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: no), let last_download_url = novel.object(forKey: "last_download_url") as? String {
                     story.url = last_download_url
                     RealmStoryBulk.SetStoryWith(realm: realm, story: story)
