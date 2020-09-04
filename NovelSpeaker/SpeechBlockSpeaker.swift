@@ -164,7 +164,6 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             voiceIdentifierDictionary[block.voiceIdentifier] = block.locale
         }
         for (voiceIdentifier, locale) in voiceIdentifierDictionary {
-            print("register: \(voiceIdentifier ?? "nil"), \(locale ?? "nil")")
             speaker.RegisterVoiceIdentifier(voiceIdentifier: voiceIdentifier, locale: locale)
         }
     }

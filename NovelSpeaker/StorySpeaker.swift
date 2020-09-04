@@ -91,20 +91,51 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
     }
 
-    // 読み上げに用いられる小説の章を設定します。
-    // 読み上げが行われていた場合、読み上げは停止します。
-    func SetStory(realm: Realm, story:Story) {
-        speaker.StopSpeech()
-        let storyID = story.storyID
-        self.storyID = storyID
-        updateReadDate(realm: realm, storyID: storyID)
-        ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: withMoreSplitTargets, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
-        //updatePlayngInfo(story: story)
-        observeStory(storyID: self.storyID)
-        observeBookmark(novelID: story.novelID)
+    let queuedSetStoryStoryLock = NSLock()
+    var queuedSetStoryStory:Story? = nil
+
+    func SetStoryAsync(story:Story) {
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: DispatchQueue.main) { (realm) in
+            self.speaker.StopSpeech()
+            let storyID = story.storyID
+            self.storyID = storyID
+            self.updateReadDate(realm: realm, storyID: storyID)
+            self.ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
+            self.observeStory(storyID: self.storyID)
+            self.observeBookmark(novelID: story.novelID)
+
+            // queueに入っていたらしょうがないので再度自分を呼び出す(´・ω・`)
+            self.queuedSetStoryStoryLock.lock()
+            defer { self.queuedSetStoryStoryLock.unlock() }
+            if let queuedStory = self.queuedSetStoryStory, queuedStory.storyID != story.storyID {
+                self.SetStoryAsync(story: queuedStory)
+            }else{
+                self.queuedSetStoryStory = nil
+            }
+        }
+    }
+    
+    func AnnounceSetStory(story:Story) {
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerStoryChanged(story: story)
         }
+    }
+
+    func EnqueueSetStory(story:Story) {
+        queuedSetStoryStoryLock.lock()
+        let currentQueuedStory = queuedSetStoryStory
+        queuedSetStoryStory = story
+        queuedSetStoryStoryLock.unlock()
+        if currentQueuedStory == nil {
+            SetStoryAsync(story: story)
+        }
+        AnnounceSetStory(story: story)
+    }
+
+    // 読み上げに用いられる小説の章を設定します。
+    // 読み上げが行われていた場合、読み上げは停止します。
+    func SetStory(realm: Realm, story:Story) {
+        EnqueueSetStory(story: story)
     }
     
     func ForceOverrideHungSpeakString(text:String) -> String {

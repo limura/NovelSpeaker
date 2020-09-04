@@ -21,6 +21,7 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     var m_Rate:Float = AVSpeechUtteranceDefaultSpeechRate
     var m_Delay:TimeInterval = 0.0
     var m_Delegate:SpeakRangeDelegate? = nil
+    var isSpeechKicked:Bool = false
     
     override init() {
         super.init()
@@ -34,6 +35,7 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     }
     
     func Speech(text:String) {
+        isSpeechKicked = true
         let utt = AVSpeechUtterance(string: text)
         utt.voice = m_Voice
         utt.pitchMultiplier = m_Pitch

@@ -166,6 +166,9 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
 
     // 特定の voiceidentifier の speaker について、事前に speech しておく事で初回の speech に時間がかかる問題を回避するためのmethod
     func RegisterVoiceIdentifier(voiceIdentifier:String?, locale:String?) {
+        let speaker = getSpeaker(voiceIdentifier: voiceIdentifier, locale: locale)
+        if speaker.isSpeechKicked { return }
+        print("register: \(voiceIdentifier ?? "nil"), \(locale ?? "nil")")
         enqueue(text: " ", voiceIdentifier: voiceIdentifier, locale: locale, pitch: 1, rate: 1, delay: 0, isDummy: true)
     }
 }
