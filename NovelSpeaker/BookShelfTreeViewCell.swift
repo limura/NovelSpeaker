@@ -59,6 +59,7 @@ class BookShelfTreeViewCell: UITableViewCell {
         likeButton.imageView?.contentMode = .scaleAspectFit
         likeButton.contentHorizontalAlignment = .fill
         likeButton.contentVerticalAlignment = .fill
+        likeButton.imageView?.image = UIImage(named: "NotLikeStar.png")
         downloadingActivityIndicator.isHidden = true
         newImageView.isHidden = true
         readProgressView.isHidden = true
