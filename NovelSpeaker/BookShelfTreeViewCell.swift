@@ -29,6 +29,9 @@ class BookShelfTreeViewCell: UITableViewCell {
     var bookmarkObserveToken: NotificationToken? = nil
     var watchNovelIDArray:[String] = []
     
+    static let staticRealmQueue:DispatchQueue? = DispatchQueue(label: "NovelSpeakerBookShelfTableCellQueue")
+    let realmQueue:DispatchQueue? = BookShelfTreeViewCell.staticRealmQueue
+    
     deinit {
         self.unregistDownloadStatusNotification()
     }
@@ -44,9 +47,27 @@ class BookShelfTreeViewCell: UITableViewCell {
         downloadingActivityIndicator.isHidden = true
     }
     
+    func unregistAllObserver() {
+        storyObserveToken = nil
+        storyForNovelArrayObserveToken = nil
+        globalStateObserveToken = nil
+        novelObserveToken = nil
+        novelArrayObserveToken = nil
+        bookmarkObserveToken = nil
+    }
+    func cleanCellDisplay() {
+        likeButton.imageView?.contentMode = .scaleAspectFit
+        likeButton.contentHorizontalAlignment = .fill
+        likeButton.contentVerticalAlignment = .fill
+        downloadingActivityIndicator.isHidden = true
+        newImageView.isHidden = true
+        readProgressView.isHidden = true
+    }
+
     override func prepareForReuse() {
         super.prepareForReuse()
-        unregistStoryObserver()
+        unregistAllObserver()
+        cleanCellDisplay()
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -76,7 +97,7 @@ class BookShelfTreeViewCell: UITableViewCell {
         self.treeDepthImageViewWidthConstraint.isActive = true
     }
     func applyCurrentReadingPointToIndicator(novelID:String) {
-        RealmUtil.RealmBlock { (realm) -> Void in
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let readingChapterNumber = novel.readingChapterNumber else {
                 DispatchQueue.main.async {
                     self.readProgressView.progress = 0.0
@@ -94,6 +115,7 @@ class BookShelfTreeViewCell: UITableViewCell {
                 contentCount = 1.0
             }
             let progress = ((Float(readingChapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
+            if self.watchNovelIDArray != [novelID] { return }
             DispatchQueue.main.async {
                 if readingChapterNumber == lastChapterNumber && contentCount <= (readLocation + 10) {
                     self.readProgressView.tintColor = UIColor(displayP3Red: 0.6, green: 0.3, blue: 0.9, alpha: 1.0)
@@ -150,13 +172,22 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     
     func applyLikeStarStatus(novelID:String) {
-        RealmUtil.RealmBlock { (realm) -> Void in
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else {
-                self.likeButton.isHidden = true
+                DispatchQueue.main.async {
+                    self.likeButton.isHidden = true
+                }
                 return
             }
+            if self.watchNovelIDArray.count != 1 {
+                return
+            }
+            if let currentNovelID = self.watchNovelIDArray.first, currentNovelID != novelID {
+                return
+            }
+            let likeLevel = novel.likeLevel
             DispatchQueue.main.async {
-                if novel.likeLevel > 0 {
+                if likeLevel > 0 {
                     self.likeButton.imageView?.image = UIImage(named: "LikeStar.png")
                 }else{
                     self.likeButton.imageView?.image = UIImage(named: "NotLikeStar.png")
@@ -166,16 +197,14 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     
     func registerNovelArrayObserver(novelIDArray:[String]) {
-        RealmUtil.RealmBlock { (realm) -> Void in
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             self.novelArrayObserveToken = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: novelIDArray)?.observe({ (change) in
                 switch change {
                 case .error(_):
                     break
                 case .update(_, let deleteIndexArray, let insertionIndexArray, let modificationIndexArray):
                     if deleteIndexArray.count > 0 || insertionIndexArray.count > 0 || modificationIndexArray.count > 0 {
-                        DispatchQueue.main.async {
-                            self.checkAndUpdateNewImage(novelIDArray: novelIDArray)
-                        }
+                        self.checkAndUpdateNewImage(novelIDArray: novelIDArray)
                     }
                 case .initial(_):
                     break
@@ -185,7 +214,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     
     func registerNovelObserver(novelID:String) {
-        RealmUtil.RealmBlock { (realm) -> Void in
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
             self.novelObserveToken = novel.observe { (change) in
                 switch change {
@@ -197,14 +226,10 @@ class BookShelfTreeViewCell: UITableViewCell {
                             self.applyLikeStarStatus(novelID: novelID)
                         }
                         if property.name == "m_readingChapterStoryID" {
-                            DispatchQueue.main.async {
-                                self.applyCurrentReadingPointToIndicator(novelID: novelID)
-                            }
+                            self.applyCurrentReadingPointToIndicator(novelID: novelID)
                         }
                         if property.name == "lastDownloadDate" || property.name == "lastReadDate" {
-                            DispatchQueue.main.async {
-                                self.checkAndUpdateNewImage(novelIDArray: [novelID])
-                            }
+                            self.checkAndUpdateNewImage(novelIDArray: [novelID])
                         }
                         if property.name == "title", let newTitle = property.newValue as? String, newTitle.count > 0 {
                             DispatchQueue.main.async {
@@ -220,7 +245,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
 
     func registerStoryObserver(novelID:String) {
-        RealmUtil.RealmBlock { (realm) -> Void in
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             self.storyObserveToken = RealmStoryBulk.GetAllObjectsWith(realm: realm)?.filter("novelID = %@", novelID).observe({ (change) in
                 switch (change) {
                 case .initial(_):
@@ -228,14 +253,10 @@ class BookShelfTreeViewCell: UITableViewCell {
                 case .update(_, _, let insertions, _):
                     // 「更新有」の反映
                     if insertions.count > 0 {
-                        DispatchQueue.main.async {
-                            self.activateNewImageView()
-                        }
+                        self.activateNewImageView()
                     }
                     // 読んだ位置の更新
-                    DispatchQueue.main.async {
-                        self.applyCurrentReadingPointToIndicator(novelID: novelID)
-                    }
+                    self.applyCurrentReadingPointToIndicator(novelID: novelID)
                 case .error(_):
                     break
                 }
@@ -243,15 +264,13 @@ class BookShelfTreeViewCell: UITableViewCell {
         }
     }
     func registerBookmarkObserver(novelID:String) {
-        RealmUtil.RealmBlock { (realm) -> Void in
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             self.bookmarkObserveToken = RealmBookmark.SearchObjectFromWith(realm: realm, type: .novelSpeechLocation, hint: novelID)?.observe({ (change) in
                 switch change {
                 case .change(_, let propertys):
                     for property in propertys {
                         if property.name == "location" {
-                            DispatchQueue.main.async {
-                                self.applyCurrentReadingPointToIndicator(novelID: novelID)
-                            }
+                            self.applyCurrentReadingPointToIndicator(novelID: novelID)
                             break
                         }
                     }
@@ -264,30 +283,31 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     
     func checkAndUpdateNewImage(novelIDArray:[String]) {
-        RealmUtil.RealmBlock { (realm) -> Void in
+        if novelIDArray != self.watchNovelIDArray { return }
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             guard let novelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.filter("novelID IN %@", novelIDArray) else { return }
+            if novelIDArray != self.watchNovelIDArray { return }
             for novel in novelArray {
                 if novel.isNewFlug {
-                    activateNewImageView()
+                    self.activateNewImageView()
                     return
                 }
             }
-            deactivateNewImageView()
+            self.deactivateNewImageView()
         }
     }
     // TODO: StoryObserver といいつつ、New フラグしか見張ってない
     func registerStoryForNovelArrayObserver(novelIDArray:[String]) {
-        RealmUtil.RealmBlock { (realm) -> Void in
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             self.storyForNovelArrayObserveToken = RealmStoryBulk.GetAllObjectsWith(realm: realm)?.filter("novelID IN %@", novelIDArray).observe({ (change) in
+                if novelIDArray != self.watchNovelIDArray { return }
                 switch (change) {
                 case .initial(_):
                     break
                 case .update(_, _, let insertions, _):
                     // New! の 表示/非表示 周り
                     if insertions.count > 0 {
-                        DispatchQueue.main.async {
-                            self.activateNewImageView()
-                        }
+                        self.activateNewImageView()
                     }
                 case .error(_):
                     break
@@ -299,7 +319,7 @@ class BookShelfTreeViewCell: UITableViewCell {
         self.storyObserveToken = nil
     }
     func registerGlobalStateObserver() {
-        RealmUtil.RealmBlock { (realm) -> Void in
+        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
             let isDisplay = globalState.isReadingProgressDisplayEnabled
             DispatchQueue.main.async {

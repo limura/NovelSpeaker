@@ -420,10 +420,12 @@ import AVFoundation
             }
         }
     }
-    static func RealmDispatchQueueAsyncBlock(queue: DispatchQueue, block: @escaping (_ realm:Realm) -> Void) {
-        queue.async {
+    static func RealmDispatchQueueAsyncBlock(queue: DispatchQueue? = nil, block: @escaping (_ realm:Realm) -> Void) {
+        (queue ?? DispatchQueue.main).async {
             autoreleasepool {
-                guard let realm = try? RealmUtil.GetRealm(queue: queue) else { return }
+                guard let realm = try? RealmUtil.GetRealm(queue: queue) else {
+                    return
+                }
                 block(realm)
             }
         }
