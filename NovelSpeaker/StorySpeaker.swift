@@ -134,7 +134,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
 
     // 読み上げに用いられる小説の章を設定します。
     // 読み上げが行われていた場合、読み上げは停止します。
-    func SetStory(realm: Realm, story:Story) {
+    func SetStory(story:Story) {
         EnqueueSetStory(story: story)
     }
     
@@ -534,7 +534,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                         }
                     }
                     self.ringPageTurningSound()
-                    self.SetStory(realm: realm, story: story)
+                    self.SetStory(story: story)
                     return
                 }
                 targetStory = self.SearchPreviousChapterWith(realm: realm, storyID: story.storyID)
@@ -550,7 +550,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 if firstStory.storyID != self.storyID {
                     self.ringPageTurningSound()
                 }
-                self.SetStory(realm: realm, story: firstStory)
+                self.SetStory(story: firstStory)
             }
         }
     }
@@ -571,7 +571,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                     }
                 }
                 self.ringPageTurningSound()
-                self.SetStory(realm: realm, story: nextStory)
+                self.SetStory(story: nextStory)
                 result = true
             }else{
                 result = false
@@ -599,7 +599,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                     }
                 }
                 self.ringPageTurningSound()
-                self.SetStory(realm: realm, story: previousStory)
+                self.SetStory(story: previousStory)
                 result = true
             }else{
                 result = false
@@ -962,7 +962,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
                 let processSuccess = RealmUtil.RealmBlock { (realm) -> Bool in
                     if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let lastChapterNumber = novel.lastChapterNumber, let currentStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), lastChapterNumber == currentStory.chapterNumber, let firstStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
-                        self.SetStory(realm: realm, story: firstStory)
+                        self.SetStory(story: firstStory)
                         self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                         return true
                     }
@@ -992,7 +992,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                             nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                         }
                     }
-                    self.SetStory(realm: realm, story: nextStory)
+                    self.SetStory(story: nextStory)
                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                 }else{
                     self.StopSpeech(realm: realm)

@@ -51,7 +51,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                     loadNovel(novel: novel)
                 }
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
-                    self.storySpeaker.SetStory(realm: realm, story: story)
+                    self.storySpeaker.SetStory(story: story)
                 }
             }
             self.observeStory(storyID: storyID)
@@ -530,7 +530,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                         }
                         let picker = PickerViewDialog.createNewDialog(displayTextArray, firstSelectedString: selectedText, parentView: self.view) { (selectedText) in
                             guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)) else { return }
-                            self.storySpeaker.SetStory(realm: realm, story: story)
+                            self.storySpeaker.SetStory(story: story)
                         }
                         searchingDialog.dismiss(animated: false) {
                             picker?.popup(nil)
@@ -653,7 +653,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         //self.chapterSlider.value = Float(chapterNumber)
         RealmUtil.RealmBlock { (realm) -> Void in
             if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: targetStoryID) {
-                self.storySpeaker.SetStory(realm: realm, story: story)
+                self.storySpeaker.SetStory(story: story)
             }
         }
     }
