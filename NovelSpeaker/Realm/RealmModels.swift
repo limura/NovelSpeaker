@@ -74,7 +74,7 @@ import AVFoundation
                 return totalBytes * 2 < usedBytes
         })
     }
-    static func GetLocalRealm() throws -> Realm {
+    static func GetLocalRealm(queue:DispatchQueue? = nil) throws -> Realm {
         lock.lock()
         defer {
             lock.unlock()
@@ -84,7 +84,7 @@ import AVFoundation
             return realm
         }
         let config = GetLocalRealmConfiguration()
-        let realm = try Realm(configuration: config)
+        let realm = try Realm(configuration: config, queue: queue)
         //realmLocalCache[threadID] = realm
         return realm
     }
@@ -181,13 +181,13 @@ import AVFoundation
                 return totalBytes * 2 < usedBytes
         })
     }
-    fileprivate static func GetCloudRealmWithoutLock() throws -> Realm {
+    fileprivate static func GetCloudRealmWithoutLock(queue:DispatchQueue? = nil) throws -> Realm {
         let config = GetCloudRealmConfiguration()
-        let realm = try Realm(configuration: config)
+        let realm = try Realm(configuration: config, queue: queue)
         realm.autorefresh = true
         return realm
     }
-    static func GetCloudRealm() throws -> Realm {
+    static func GetCloudRealm(queue:DispatchQueue? = nil) throws -> Realm {
         lock.lock()
         defer {
             lock.unlock()
@@ -196,7 +196,7 @@ import AVFoundation
         if let realm = realmCloudCache[threadID] {
             return realm
         }
-        let realm = try GetCloudRealmWithoutLock()
+        let realm = try GetCloudRealmWithoutLock(queue: queue)
         //realmCloudCache[threadID] = realm
         return realm
     }
@@ -397,14 +397,14 @@ import AVFoundation
         defaults.set(isUse, forKey: UseCloudRealmKey)
         NovelSpeakerNotificationTool.AnnounceRealmSettingChanged()
     }
-    static func GetRealm() throws -> Realm {
+    static func GetRealm(queue:DispatchQueue? = nil) throws -> Realm {
         if IsUseCloudRealm() {
             if syncEngine == nil {
                 try EnableSyncEngine()
             }
-            return try GetCloudRealm()
+            return try GetCloudRealm(queue: queue)
         }
-        return try GetLocalRealm()
+        return try GetLocalRealm(queue: queue)
     }
     @discardableResult
     static func RealmBlock<Result>(block: (_ realm:Realm) throws -> Result) rethrows -> Result {
@@ -420,6 +420,15 @@ import AVFoundation
             }
         }
     }
+    static func RealmDispatchQueueAsyncBlock(queue: DispatchQueue, block: @escaping (_ realm:Realm) -> Void) {
+        queue.async {
+            autoreleasepool {
+                guard let realm = try? RealmUtil.GetRealm(queue: queue) else { return }
+                block(realm)
+            }
+        }
+    }
+    
     @objc static func IsValidRealmData() -> Bool {
         return RealmBlock { (realm) -> Bool in
             return RealmGlobalState.GetInstanceWith(realm: realm) != nil

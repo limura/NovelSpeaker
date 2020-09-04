@@ -505,7 +505,6 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                             }
                         }
                     }), let backupData = try? Data(contentsOf: backupDataURL) {
-                        print("backupDataURL: \(backupDataURL.absoluteString)")
                         let mimeType:String
                         if backupDataURL.pathExtension == "novelspeaker-backup-json" {
                             mimeType = "application/json; charset=utf-8"

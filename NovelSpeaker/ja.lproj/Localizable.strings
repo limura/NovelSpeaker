@@ -42,7 +42,7 @@
 "GlobalDataSingleton_RTFToStringFailed_Title" = "RTFの読み込みに失敗";
 "GlobalDataSingleton_BackupDataLoaded" = "設定データを読み込みました。\nダウンロードされていた小説については現在ダウンロード中です。すべての小説のダウンロードにはそれなりの時間がかかります。";
 "GlobalDataSingleton_RestoreFullBackupEnd" = "バックアップデータからの復元を完了しました。";
-"GlobalDataSingleton_RestoreingBookProgress" = "工程 3/4\r\n小説を本棚に登録中";
+"GlobalDataSingleton_RestoreingBookProgress" = "工程 3/3\r\n小説を本棚に登録中";
 "GlobalDataSingleton_RestoreBackupFromJSONProgress_RestoreSettings" = "工程 1\r\n設定の復元中";
 "GlobalDataSingleton_RestoreBackupDataFailed" = "バックアップデータの読み込みに失敗しました。";
 "GlobalDataSingleton_AnnounceStopedByTimer" = "最大連続再生時間を超えたので、読み上げを停止しました。";
@@ -157,10 +157,10 @@
 "SettingsViewController_ClearSiteInfoCache" = "SiteInfoキャッシュを削除する";
 "SettingsViewController_ClearSiteInfoCache_done" = "保存されている SiteInfo 情報を削除しました。";
 
-"NovelSpeakerUtility_ExportingNovelData" = "工程 2/4\n小説を抽出中";
-"NovelSpeakerUtility_ExportOtherSettings" = "工程 3/4\n設定情報の抽出中";
-"NovelSpeakerUtility_RestoreingJSONType" = "工程 2/4\nバックアップファイルから設定を読み込んでいます。";
-"NovelSpeakerUtility_UnzipProgress" = "工程 1/4\nバックアップファイルを解凍しています";
+"NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
+"NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";
+"NovelSpeakerUtility_UnzipProgress" = "工程 1/3\nバックアップファイルを解凍しています";
+"NovelSpeakerUtility_RestoreingJSONType" = "工程 2/3\nバックアップファイルから設定を読み込んでいます。";
 "NovelSpeakerUtility_RestoreBackupTitle" = "バックアップデータを読み込んでいます";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
 
@@ -183,9 +183,9 @@
 "SettingTableViewController_IsOpenRecentBookInStartTime" = "起動時に前回開いていた小説を開く";
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";
-"NovelSpeakerBackup_ExportingNovelText" = "工程 3/4\r\n小説本文を抽出中";
-"NovelSpeakerBackup_CompressingBackupData" = "工程 4/4\r\n圧縮準備中";
-"NovelSpeakerBackup_CompressingBackupDataProgress" = "工程 4/4\r\n圧縮中";
+"NovelSpeakerBackup_ExportingNovelText" = "工程 3/5\r\n小説本文を抽出中";
+"NovelSpeakerBackup_CompressingBackupData" = "工程 4/5\r\n圧縮準備中";
+"NovelSpeakerBackup_CompressingBackupDataProgress" = "工程 5/5\r\n圧縮中";
 "NovelSpeakerBackup_Restoreing" = "バックアップより復元";
 "NovelSpeakerBackup_ProgressExtractingZip" = "工程 1/2\r\n展開中";
 "NovelSpeakerBackup_RestoreingBackupData" = "工程 2/2\r\n適用中";

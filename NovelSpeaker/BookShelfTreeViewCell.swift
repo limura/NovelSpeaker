@@ -56,13 +56,17 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     
     func activateNewImageView() {
-        if self.newImageView.isHidden {
-            self.newImageView.isHidden = false
+        DispatchQueue.main.async {
+            if self.newImageView.isHidden {
+                self.newImageView.isHidden = false
+            }
         }
     }
     func deactivateNewImageView() {
-        if !self.newImageView.isHidden {
-            self.newImageView.isHidden = true
+        DispatchQueue.main.async {
+            if !self.newImageView.isHidden {
+                self.newImageView.isHidden = true
+            }
         }
     }
     func applyDepth(treeLevel:Int) {
@@ -74,7 +78,9 @@ class BookShelfTreeViewCell: UITableViewCell {
     func applyCurrentReadingPointToIndicator(novelID:String) {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let readingChapterNumber = novel.readingChapterNumber else {
-                self.readProgressView.progress = 0.0
+                DispatchQueue.main.async {
+                    self.readProgressView.progress = 0.0
+                }
                 return
             }
             let lastChapterNumber = novel.lastChapterNumber ?? 1
