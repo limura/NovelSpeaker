@@ -271,7 +271,7 @@ struct SearchResult : Decodable {
         }
         //print("ConvertHTMLToSearchResultDataArray: phase 1: baseURL: \(baseURL.absoluteString), data.count: \(data.count), \(String(bytes: data, encoding: .utf8) ?? "nil")")
         for blockHTML in doc.xpath(self.blockXpath) {
-            //print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.rawXML)")
+            //print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.toHTML ?? "nil")")
             // TODO: 何かうまい方法があれば書き直す
             // 何故か blockHTML.xpath() をすると doc(文章全体) に対して xpath が適用されてしまうので、
             // 仕方がないので blockHTML.rawXML(これは文字列を再生成しているみたいなので負荷が気になる)を
@@ -653,6 +653,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     
     func reloadCells() {
         DispatchQueue.main.async {
+            NiftyUtilitySwift.headlessClientLoadAboutPage()
             if self.form.count > 0 {
                 self.form.removeAll()
             }

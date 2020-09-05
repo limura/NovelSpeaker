@@ -555,6 +555,11 @@ class NiftyUtilitySwift: NSObject {
     
     #if !os(watchOS)
     static var headlessHttpClientObj:HeadlessHttpClient? = nil
+    static func headlessClientLoadAboutPage() {
+        if let client = headlessHttpClientObj {
+            client.LoadAboutPage()
+        }
+    }
     static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
         // TODO: おおよそ関係の無い所で Realm を触る必要があってうぅむ。
         let allowsCellularAccess:Bool = RealmUtil.RealmBlock { (realm) -> Bool in
