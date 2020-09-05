@@ -1286,7 +1286,7 @@ class NiftyUtilitySwift: NSObject {
     static func FilterXpathToHtml(xmlDocument:XMLDocument, xpath:String) -> String {
         var resultHTML = ""
         for element in xmlDocument.xpath(xpath) {
-            var elementXML = element.innerHTML ?? ""
+            var elementXML = element.toHTML ?? ""
             if let parent = element.parent, let parentTag = parent.tagName {
                 if element.nextSibling == nil && element.previousSibling == nil {
                     elementXML = "<\(parentTag)>\(elementXML)</\(parentTag)>"
