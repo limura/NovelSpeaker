@@ -465,7 +465,7 @@ class WebSiteSection : Decodable {
             }
             self.values = generatedValues
         }
-        result = try? values.decode(SearchResult.self, forKey: .title)
+        result = try? values.decode(SearchResult.self, forKey: .result)
     }
     
     func GenerateQueryURL() -> URL? {
