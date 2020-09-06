@@ -296,9 +296,9 @@ class StoryHtmlDecoder {
     
     func ClearSiteInfo() {
         self.lock.lock()
-        defer { self.lock.unlock() }
         siteInfoArray.removeAll()
         customSiteInfoArray.removeAll()
+        self.lock.unlock()
         NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: cacheFileName)
         NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: customCacheFileName)
         LoadSiteInfoIfNeeded()
