@@ -1257,6 +1257,9 @@ class NiftyUtilitySwift: NSObject {
         try? NSRegularExpression(pattern: "<link.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<meta.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<noscript.*?/noscript>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
+        // <head>や<title>の中はNSAttributedString で取り出そうとしても消えてしまうため、<head>や<title>タグを消してしまうことでこれに対応します。
+        try? NSRegularExpression(pattern: "<\\s*head[^>]*>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
+        try? NSRegularExpression(pattern: "<\\s*title[^>]*>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
     ]
     static func RemoveNoNeedTag(htmlString:String) -> String {
         var result = htmlString
