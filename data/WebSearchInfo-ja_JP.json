@@ -193,7 +193,7 @@
         "isNeedHeadless": true,
         "url": "https://www.google.com/search?",
         "values": [
-            {"queryType": "text", "displayText": "検索文字列", "queryName": "as_q"},
+            {"queryType": "text", "displayText": "検索文字列(空文字列だと失敗します)", "queryName": "as_q"},
             {"queryType": "hidden", "queryName": "hl", "value": "ja"},
             {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
             {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
