@@ -771,7 +771,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0
             }
-            
+            /*
             <<< ButtonRow() {
                 $0.title = "iCloud pull (with remove server change token)"
                 $0.cell.textLabel?.numberOfLines = 0
@@ -819,6 +819,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
             })
+            */
             <<< ButtonRow() {
                 $0.title = "次回起動時に CoreData(旧データベース) の情報に書き戻す"
                 $0.cell.textLabel?.numberOfLines = 0
