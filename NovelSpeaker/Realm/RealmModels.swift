@@ -97,7 +97,7 @@ import AVFoundation
             return nil
         }
     }
-    static func RemoveCloudRealmFile() {
+    @objc static func RemoveCloudRealmFile() {
         // 注意：
         // Cloud側(というかIceCream側)は、SyncEngine に渡している
         // Realm object を消さないと、同じデータに対する Realm object が

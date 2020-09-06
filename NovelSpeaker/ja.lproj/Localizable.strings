@@ -156,6 +156,8 @@
 "SettingsViewController_InvalidiCloudStatus" = "iCloud状態 に問題があります";
 "SettingsViewController_ClearSiteInfoCache" = "SiteInfoキャッシュを削除する";
 "SettingsViewController_ClearSiteInfoCache_done" = "保存されている SiteInfo 情報を削除しました。";
+"SettingsViewController_IsNeedRestartApp_Title" = "アプリの再起動が必要です";
+"SettingsViewController_IsNeedRestartApp_Message" = "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。(iCloud同期の ON/OFF は変更のたびに再起動が必要になります)";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";

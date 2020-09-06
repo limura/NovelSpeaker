@@ -886,7 +886,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 dialog.dismiss(animated: false) {
                                     RealmUtil.SetIsUseCloudRealm(isUse: false)
                                     RealmUtil.stopSyncEngine()
-                                    RealmUtil.RemoveCloudRealmFile()
+                                    //RealmUtil.RemoveCloudRealmFile()
                                     NiftyUtilitySwift.EasyDialogOneButton(
                                         viewController: self,
                                         title: nil,
@@ -963,8 +963,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: false) {
                                     RealmUtil.SetIsUseCloudRealm(isUse: true)
-                                    // TODO: local realm file をここで消してしまうと、iCloud側への転送が終わっていない records が転送できなくなってしまう……気がします。(要調査)
-                                    RealmUtil.RemoveLocalRealmFile()
+                                    // TODO: local realm file をここで消してしまうと、realm object を握っている奴が残り続ける関係なのか、
+                                    // 再度 iCloud をOFFにしようとして local の realm file が生成されようとした時に生成できないぽく、
+                                    // そうするとメモリ上で動作してしまって
+                                    // アプリ起動中はちゃんと動いているように見えるのだけれど
+                                    // アプリを再起動すると綺麗サッパリ消えているという症状になってしまうようなので消さずにおきます。
+                                    //RealmUtil.RemoveLocalRealmFile()
                                     NiftyUtilitySwift.EasyDialogLongMessageDialog(
                                         viewController: self,
                                         message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました。\n同期は開始されましたが、端末側に保存されているデータをiCloud側へ登録する作業は続いています。\n端末側に保存されているデータが多い場合には、iCloud側への転送が終わるまでかなりの時間がかかる可能性があります。\nなお、残念ながらiCloud側への転送が終わったかどうかを知るすべが(開発者の知る限りでは)ありません。Appleの解説によると24時間の間はアプリを再度立ち上げれば転送を継続してくれるそうですが、機内モードにすると全てを諦められてしまうなどといった問題があるという話をWeb上でみかけたりしましたので、あまり安心はできないかもしれません。\n一応未送信や未受信のデータがある場合には通信中のインジケータを回すように努力はしますが、このインジケータが消えた事で送信が終了したというわけではないかもしれない、という事を理解しておいてください。"))
@@ -1001,8 +1005,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 button2Action: {
                                     DispatchQueue.main.async {
                                         RealmUtil.SetIsUseCloudRealm(isUse: true)
-                                        // local realm は消して良いと言われたので消します。
-                                        RealmUtil.RemoveLocalRealmFile()
+                                        // local realm は消して良いと言われたのですが、ここで消してしまうとこのファイルを保持している realm object が生き残り続けて新しいファイルが生成できないという罠があるので消さずにおきます
+                                        //RealmUtil.RemoveLocalRealmFile()
                                         NiftyUtilitySwift.EasyDialogLongMessageDialog(
                                             viewController: self,
                                             message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました"))
@@ -1103,6 +1107,19 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     }
     
     func ConifirmiCloudEnable() {
+        if RealmUtil.CheckIsCloudRealmCreated() {
+            DispatchQueue.main.async {
+                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Title", comment: "アプリの再起動が必要です"), message: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Message", comment: "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。"), buttonTitle: nil, buttonAction: {
+                    DispatchQueue.main.async {
+                        guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                        row.value = false
+                        row.updateCell()
+                    }
+                })
+            }
+            return
+        }
+        
         DispatchQueue.main.async {
             NiftyUtilitySwift.EasyDialogTwoButton(
                 viewController: self,
@@ -1145,6 +1162,19 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     }
     
     func ConifirmiCloudDisable() {
+        print("checking iCloud realm file alive: \(RealmUtil.CheckIsCloudRealmCreated() ? "true" : "false")")
+        if RealmUtil.CheckIsLocalRealmCreated() {
+            DispatchQueue.main.async {
+                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Title", comment: "アプリの再起動が必要です"), message: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Message", comment: "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。"), buttonTitle: nil, buttonAction: {
+                    DispatchQueue.main.async {
+                        guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                        row.value = true
+                        row.updateCell()
+                    }
+                })
+            }
+            return
+        }
         CheckiCloudAccountStatusIsValid(okHandler: {
             DispatchQueue.main.async {
                 NiftyUtilitySwift.EasyDialogTwoButton(

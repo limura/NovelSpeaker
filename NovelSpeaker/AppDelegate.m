@@ -52,12 +52,36 @@ void uncaughtExceptionHandler(NSException *exception)
     NSSetUncaughtExceptionHandler(&uncaughtExceptionHandler);
     
     // Override point for customization after application launch.
-    //TODO: ここに入れるとマイグレーション時に酷いことになるけどここにあるべき。
-    // [NovelSpeakerUtility InsertDefaultSettingsIfNeeded];
     
     // TODO: RunLoop のを使わないのであれば消す
     //[RealmUtil startRealmRunLoopThread];
     [NovelSpeakerUtility StartAllLongLivedOperationIDWatcher];
+    
+    // realm の data file は
+    // 起動時に iCloud か local の realm file しか無い状態にしておきます。
+    // これは iCloud同期 を ON/OFF しようとした時に、
+    // 逆側の realm file を掴んだままの realm object が存在するなどの理由で
+    // その逆側の realm file を削除することができない事が原因になっています。
+    // 例えば iCloud同期 を OFF から ON の状態にした直後に
+    // 再度 ON から OFF にしたとします。
+    // この時、OFF から ON にした時は iCloud 側の realm file は存在しなかったため
+    // 正常に作成して iCloud側 のデータを保存できますが、
+    // ON から OFF にした時には
+    // 起動時から存在していた local側 の realm file が消せずに残っているために
+    // それを作成しなおす事ができません。
+    // それにも関わらず realm object は作成できてしまうようで、
+    // メモリにのみ残った状態でなんとなく動作してしまうみたいなのですが、
+    // メモリにのみデータが載っているので
+    // アプリを再起動すると全てのデータが消えてしまう、という事になります。
+    // という事で、「iCloud同期 の ON/OFF を切り替える場合、
+    // 切り替え先の realm file が存在しない場合にのみそれを許す」という事にして、
+    // アプリの起動時には「現在使用中の realm file ではない方の realm file は消す」
+    // という運用にすることにします。
+    if ([RealmUtil IsUseCloudRealm]) {
+        [RealmUtil RemoveLocalRealmFile];
+    }else{
+        [RealmUtil RemoveCloudRealmFile];
+    }
     
     UIViewController* toplevelViewController = nil;
     // 強制的に localRealm を消す場合はこうします
