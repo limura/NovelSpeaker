@@ -625,7 +625,13 @@ class NovelSearchViewController: FormViewController,ParentViewController {
         fetchSearchInfo(successAction: { (searchInfoArrayJsonData) in
             self.searchInfoArray = self.extractSearchInfoArray(jsonData: searchInfoArrayJsonData)
             self.lastSearchInfoLoadDate = Date()
-            self.currentSelectedSite = self.searchInfoArray.first
+            RealmUtil.RealmBlock { (realm) -> Void in
+                if let siteString = RealmGlobalState.GetInstanceWith(realm: realm)?.currentWebSearchSite, let section = self.searchInfoArray.filter({ $0.title == siteString }).first {
+                    self.currentSelectedSite = section
+                }else{
+                    self.currentSelectedSite = self.searchInfoArray.first
+                }
+            }
             self.reloadCells()
         }) { (err) in
             DispatchQueue.main.async {
@@ -654,9 +660,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     func reloadCells() {
         DispatchQueue.main.async {
             NiftyUtilitySwift.headlessClientLoadAboutPage()
-            if self.form.count > 0 {
-                self.form.removeAll()
-            }
+            self.form.removeAll()
             self.form +++ Section()
             <<< LabelRow() {
                 $0.title = NSLocalizedString("NovelSearchViewController_NoticeLabelText", comment: "ご注意: 本ページの「Web検索」機能については、リストされているWebサイト様側の仕様が少しでも変わると途端に動作しなくなるような仕組みを用いておりますため、うまく利用できなくなる可能性がとても高い物となっております。\nうまく利用できなくなっている場合でも、Web取込機能側で取り込む事で回避できる場合もございますのでそちらをご利用頂くような形で回避していただけますと幸いです。")
@@ -675,7 +679,14 @@ class NovelSearchViewController: FormViewController,ParentViewController {
                 guard let selectedTitle = row.value else { return }
                 guard let selectedSite = self.searchInfoArray.filter({$0.title == selectedTitle}).first else { return }
                 self.currentSelectedSite = selectedSite
-                self.reloadCells()
+                RealmUtil.RealmBlockWrite { (realm) in
+                    if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                        globalState.currentWebSearchSite = selectedSite.title
+                    }
+                }
+                DispatchQueue.main.async {
+                    self.reloadCells()
+                }
             }
             if let currentSite = self.currentSelectedSite {
                 self.form +++ currentSite.GenerateSection(parentViewController: self)

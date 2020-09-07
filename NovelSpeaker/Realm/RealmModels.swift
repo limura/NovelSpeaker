@@ -14,8 +14,7 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 7
-    static let currentSchemaVersionForRealmStory : UInt64 = 7
+    static let currentSchemaVersion : UInt64 = 8
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
@@ -1556,6 +1555,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     @objc dynamic var defaultSpeakerID = ""
     @objc dynamic var defaultSpeechOverrideSettingID = ""
     @objc dynamic var currentReadingNovelID = ""
+    @objc dynamic var currentWebSearchSite = ""
 
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_RealmModels_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {

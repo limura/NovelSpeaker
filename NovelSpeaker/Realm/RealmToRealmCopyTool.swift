@@ -174,6 +174,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.defaultSpeechOverrideSettingID = obj.defaultSpeechOverrideSettingID
             newObj.currentReadingNovelID = obj.currentReadingNovelID
             to.add(newObj, update: .modified)
+            newObj.currentWebSearchSite = obj.currentWebSearchSite
             try to.commitWrite()
         }
     }
