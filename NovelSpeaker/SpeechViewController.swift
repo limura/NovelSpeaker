@@ -245,11 +245,15 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     }
     func observeStory(storyID:String) {
         if storyObserverBulkStoryID == RealmStoryBulk.StoryIDToBulkID(storyID: storyID) { return }
+        self.storyObserverToken = nil
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let storyBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: storyID) else { return }
             storyObserverBulkStoryID = storyBulk.id
-            let targetStoryID = storyID
             self.storyObserverToken = storyBulk.observe({ [weak self] (change) in
+                guard let self = self else { return }
+                guard let targetStoryID = self.storyID, self.storyObserverBulkStoryID != RealmStoryBulk.StoryIDToBulkID(storyID: targetStoryID) else {
+                    return
+                }
                 switch change {
                 case .error(_):
                     break
@@ -258,9 +262,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                         // content が書き換わった時のみを監視します。
                         // でないと lastReadDate とかが書き換わった時にも表示の更新が走ってしまいます。
                         let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: targetStoryID)
-                        if property.name == "storyListAsset", let newValue = property.newValue as? CreamAsset, let storyArray = RealmStoryBulk.StoryCreamAssetToStoryArray(asset: newValue), let story = RealmStoryBulk.StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber), story.chapterNumber == chapterNumber, let currentText = self?.textView.text, story.content != currentText {
+                        if property.name == "storyListAsset", let newValue = property.newValue as? CreamAsset, let storyArray = RealmStoryBulk.StoryCreamAssetToStoryArray(asset: newValue), let story = RealmStoryBulk.StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber), story.chapterNumber == chapterNumber, let currentText = self.textView.text, story.content != currentText {
                             DispatchQueue.main.async {
-                                self?.setStoryWithoutSetToStorySpeaker(story: story)
+                                self.setStoryWithoutSetToStorySpeaker(story: story)
                             }
                         }
                     }
