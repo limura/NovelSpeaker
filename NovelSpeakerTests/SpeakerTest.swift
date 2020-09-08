@@ -52,7 +52,7 @@ class SpeakerTest: XCTestCase {
         speaker.withMoreSplitTargets = ["。", ".", "\n"]
         speaker.moreSplitMinimumLetterCount = 30
         RealmUtil.Write { (realm) in
-            speaker.SetStory(realm: realm, story: story)
+            speaker.SetStory(story: story)
         }
         let blockArray = speaker.speechBlockArray
         print("currentBlockIndex: \(speaker.currentBlockIndex)")
@@ -119,5 +119,20 @@ class SpeakerTest: XCTestCase {
         speakWithWait(speaker: speaker1, text: "3回目の", expectationID: "5")
         speaker1.setVoiceWith(identifier: "com.apple.ttsbundle.Otoya-compact", language: "ja-JP")
         speakWithWait(speaker: speaker1, text: "発話ですよ", expectationID: "6")
+    }
+    
+    func testStringLength() {
+        let rn = "\r\n"
+        let n = "\n"
+        let r = "\r"
+        let rnrn = "\r\n\r\n"
+        let rr = "\r\r"
+        let nn = "\n\n"
+        print("n: \(n.count)")
+        print("r: \(r.count)")
+        print("rn: \(rn.count)") // why 1?
+        print("rnrn: \(rnrn.count)") // why 2?
+        print("rr: \(rr.count)")
+        print("nn: \(nn.count)")
     }
 }

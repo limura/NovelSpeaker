@@ -558,14 +558,26 @@ struct Story: Codable {
     var chapterNumber = 0
     var downloadDate:Date = Date(timeIntervalSince1970: -1)
     
-    static func ConvertToData(story:Story) -> Data {
-        guard let data = try? JSONEncoder().encode(story) else { return Data() }
-        return NiftyUtilitySwift.compress(data: data) ?? Data()
+    enum CodingKeys: String, CodingKey {
+        case url
+        case subtitle
+        case content
+        case novelID
+        case chapterNumber
+        case downloadDate
     }
-    static func DecodeFromData(storyData:Data) -> Story? {
-        guard let data = NiftyUtilitySwift.decompress(data: storyData), let story = try? JSONDecoder().decode(Story.self, from: data) else { return nil }
-        return story
+    init() {}
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+
+        url = try values.decode(String.self, forKey: CodingKeys.url)
+        subtitle = try values.decode(String.self, forKey: CodingKeys.subtitle)
+        content = (try values.decode(String.self, forKey: CodingKeys.content)).replacingOccurrences(of: "\r\n", with: "\n")
+        novelID = try values.decode(String.self, forKey: CodingKeys.novelID)
+        chapterNumber = try values.decode(Int.self, forKey: CodingKeys.chapterNumber)
+        downloadDate = try values.decode(Date.self, forKey: CodingKeys.downloadDate)
     }
+    
     func readLocation(realm: Realm) -> Int {
         guard let bookmark = RealmBookmark.SearchObjectFromWith(realm: realm, type: .novelSpeechLocation, hint: novelID), bookmark.chapterNumber == chapterNumber else { return 0 }
         return bookmark.location

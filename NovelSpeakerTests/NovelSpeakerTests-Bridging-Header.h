@@ -4,7 +4,5 @@
 
 #import <UIKit/UIKit.h>
 #import "GlobalDataSingleton.h"
-#import "UriLoader.h"
-#import "NiftyUtility.h"
 #import "PickerViewDialog.h"
 
