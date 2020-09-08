@@ -513,8 +513,27 @@ class NovelDownloadQueue : NSObject {
     func addQueue(novelID:String) {
         NovelSpeakerUtility.CheckAndRecoverStoryCount(novelID: novelID)
         self.queueHolder.addQueue(novelID: novelID)
-        self.isDownloadStop = false
-        semaphore.signal()
+        self.downloadStart()
+    }
+    // 注: ここで呼び出す realm は RealmUtil.Write 等で write が許可されている状態で呼び出してください
+    func addQueueArray(realm: Realm, novelArray:Results<RealmNovel>) {
+        self.downloadStop()
+        for novel in novelArray {
+            NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novel: novel)
+            self.queueHolder.addQueue(novelID: novel.novelID)
+        }
+        self.downloadStart()
+    }
+    
+    func addQueueArray(novelIDArray:[String]) {
+        self.downloadStop()
+        RealmUtil.Write { (realm) in
+            for novelID in novelIDArray {
+                NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novelID: novelID)
+                self.queueHolder.addQueue(novelID: novelID)
+            }
+        }
+        self.downloadStart()
     }
     
     func ClearAllDownloadQueue() {
@@ -634,16 +653,12 @@ class NovelDownloadQueue : NSObject {
         
         self.downloadSuccessNovelIDSet.removeAll()
         self.downloadEndedNovelIDSet.removeAll()
-        // 一旦ダウンロードを止めて、queueにリストを全部入れてから再開させることで、更新頻度の高いものから順にダウンロードさせます
-        self.isDownloadStop = true
-        for novelID in targetNovelIDList {
-            addQueue(novelID: novelID)
-        }
-        self.isDownloadStop = false
-        self.downloadStart()
-        
         // 30秒で処理を終わらねばならないのでタイマを使います
         let deadlineTimeInterval = backgroundFetchDeadlineTimeInSec - (Date().timeIntervalSince1970 - startTime.timeIntervalSince1970)
+
+        // この処理は結構重いのでタイマの基準時間はこれよりも先にとっておきます
+        self.addQueueArray(novelIDArray: targetNovelIDList)
+        
         Timer.scheduledTimer(withTimeInterval: deadlineTimeInterval, repeats: false) { (timer) in
             self.downloadStop()
             // downloadStop() した後、ダウンロードが終了するまで9秒待ちます。

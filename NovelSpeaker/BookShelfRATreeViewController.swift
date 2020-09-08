@@ -514,12 +514,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
 
     @objc func refreshButtonClicked(sender: Any) {
-        RealmUtil.RealmBlock { (realm) -> Void in
-            guard let novels = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
-            for novel in novels {
-                if novel.type == .URL {
-                    NovelDownloadQueue.shared.addQueue(novelID: novel.novelID)
-                }
+        DispatchQueue.global(qos: .background).async {
+            RealmUtil.Write { (realm) -> Void in
+                guard let novels = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
+                NovelDownloadQueue.shared.addQueueArray(realm: realm, novelArray: novels)
             }
         }
     }
@@ -953,12 +951,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     @objc func refreshControlValueChangedEvent(sendor:UIRefreshControl) {
         sendor.endRefreshing()
-        RealmUtil.RealmBlock { (realm) -> Void in
-            guard let novels = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
-            for novel in novels {
-                if novel.type == .URL {
-                    NovelDownloadQueue.shared.addQueue(novelID: novel.novelID)
-                }
+        DispatchQueue.global(qos: .background).async {
+            RealmUtil.Write { (realm) -> Void in
+                guard let novels = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
+                NovelDownloadQueue.shared.addQueueArray(realm: realm, novelArray: novels)
             }
         }
     }

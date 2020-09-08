@@ -268,6 +268,7 @@ class NovelSpeakerUtility: NSObject {
         if host == "downloadncode" {
             DispatchQueue.global(qos: .utility).async {
                 let ncodeArray = url.path.components(separatedBy: "-")
+                var novelIDArray:[String] = []
                 for ncode in ncodeArray {
                     guard let targetURL = URL(string: "https://ncode.syosetu.com/\(ncode.lowercased())/") else { continue }
                     let novelID = targetURL.absoluteString
@@ -280,8 +281,9 @@ class NovelSpeakerUtility: NSObject {
                             realm.add(novel, update: .modified)
                         }
                     }
-                    NovelDownloadQueue.shared.addQueue(novelID: novelID)
+                    novelIDArray.append(novelID)
                 }
+                NovelDownloadQueue.shared.addQueueArray(novelIDArray: novelIDArray)
             }
             return true
         }else if host == "downloadurl" {
@@ -1979,17 +1981,28 @@ class NovelSpeakerUtility: NSObject {
     }
     #endif
     
+    // 注: 内部で realm write するので、 RealmUtil.Write 等で括られている必要があります。
+    static func CheckAndRecoverStoryCountWith(realm:Realm, novel:RealmNovel) {
+        guard let storyList = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novel.novelID), let lastStory = storyList.last else { return }
+        let storyCount = storyList.count
+        let lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: storyCount)
+        if novel.m_lastChapterStoryID != lastChapterStoryID && RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: lastStory.chapterNumber) == lastChapterStoryID {
+            novel.m_lastChapterStoryID = lastChapterStoryID
+        }
+    }
+    
+    // 注: 内部で realm write するので、 RealmUtil.Write 等で括られている必要があります。
+    static func CheckAndRecoverStoryCountWith(realm:Realm, novelID:String) {
+        guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
+        CheckAndRecoverStoryCountWith(realm: realm, novel: novel)
+    }
+    
     static func CheckAndRecoverStoryCount(novelID:String) {
         // これ、いろんな所から呼ばれる(NovelDownloadQueue.addQueue() から呼ばれる)
         // のにもかかわらず RealmUtil.Write を呼び出すので別threadから呼ぶ事にします。(´・ω・`)
         DispatchQueue.main.async {
             RealmUtil.Write { (realm) in
-                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let storyList = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novelID), let lastStory = storyList.last else { return }
-                let storyCount = storyList.count
-                let lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: storyCount)
-                if novel.m_lastChapterStoryID != lastChapterStoryID && RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStory.chapterNumber) == lastChapterStoryID {
-                    novel.m_lastChapterStoryID = lastChapterStoryID
-                }
+                CheckAndRecoverStoryCountWith(realm: realm, novelID: novelID)
             }
         }
     }
