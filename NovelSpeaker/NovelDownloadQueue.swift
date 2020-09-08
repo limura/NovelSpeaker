@@ -521,6 +521,7 @@ class NovelDownloadQueue : NSObject {
         for novel in novelArray {
             NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novel: novel)
             self.queueHolder.addQueue(novelID: novel.novelID)
+            NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
         }
         self.downloadStart()
     }
@@ -531,6 +532,7 @@ class NovelDownloadQueue : NSObject {
             for novelID in novelIDArray {
                 NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novelID: novelID)
                 self.queueHolder.addQueue(novelID: novelID)
+                NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
             }
         }
         self.downloadStart()
