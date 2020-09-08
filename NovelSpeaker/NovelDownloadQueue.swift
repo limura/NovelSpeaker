@@ -519,7 +519,7 @@ class NovelDownloadQueue : NSObject {
     func addQueueArray(realm: Realm, novelArray:Results<RealmNovel>) {
         self.downloadStop()
         for novel in novelArray {
-            NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novel: novel)
+            //NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novel: novel)
             self.queueHolder.addQueue(novelID: novel.novelID)
             NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
         }
@@ -530,7 +530,7 @@ class NovelDownloadQueue : NSObject {
         self.downloadStop()
         RealmUtil.Write { (realm) in
             for novelID in novelIDArray {
-                NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novelID: novelID)
+                //NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novelID: novelID)
                 self.queueHolder.addQueue(novelID: novelID)
                 NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
             }
