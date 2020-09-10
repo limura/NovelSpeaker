@@ -276,6 +276,15 @@ import AVFoundation
         //syncEngine?.query(syncObjectType: syncObjectType, predicate: predicate)
     }
     
+    static var isCheckCloudDataIsValidInterrupt:Bool = false
+    @objc static func SetCheckCloudDataIsValidInterrupt(isInterrupt:Bool) {
+        isCheckCloudDataIsValidInterrupt = isInterrupt
+    }
+    enum CheckCloudDataIsValidResult {
+        case validDataAlive
+        case validDataNotAlive
+        case checkFailed
+    }
     /// iCloud上にあるデータが使い物になるかどうかを確認します。
     /// 全てのデータが取得できたという事を確認する事が難しいため、
     /// 全てのデータが取得できていなかったとしても、使い物になるかどうかの確認だけをして、
@@ -286,7 +295,7 @@ import AVFoundation
     /// timeout については、
     /// minimumTimeoutLimit の間、iCloud 上のデータのRecord数が 0 のまま新しい record を取得できないのであれば false
     /// record数は増えていたが、timeoutLimit の間に有効なデータが取得できなければ false を返す事になります。
-    static func CheckCloudDataIsValid(minimumTimeoutLimit: TimeInterval = 15.0, timeoutLimit: TimeInterval = 60.0 * 60.0, completion: ((Bool) -> Void)?) {
+    static func CheckCloudDataIsValid(minimumTimeoutLimit: TimeInterval = 15.0, timeoutLimit: TimeInterval = 60.0 * 60.0, completion: ((CheckCloudDataIsValidResult) -> Void)?) {
 
         // カンジ悪く必要そうなものを別途 fetch してしまいます(というか、RealmNovel や RealmStory は数が多すぎるので fetch したくないんですけど、syncEngine を起動した時に fetch が走ってしまいます)
         FetchCloudData(syncObjectType: RealmGlobalState.self, predicate: NSPredicate(format: "id = %@", RealmGlobalState.UniqueID))
@@ -298,7 +307,7 @@ import AVFoundation
 
         autoreleasepool {
             guard let realm = try? GetCloudRealm() else {
-                completion?(false)
+                completion?(.validDataNotAlive)
                 return
             }
             realm.refresh()
@@ -306,22 +315,27 @@ import AVFoundation
             let minimumTimelimitDate = Date(timeIntervalSinceNow: minimumTimeoutLimit)
             let timelimitDate = Date(timeIntervalSinceNow: timeoutLimit)
             if startCount > 0 && NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
-                completion?(true)
+                completion?(.validDataAlive)
                 return
             }
 
+            isCheckCloudDataIsValidInterrupt = false
             syncEngine?.pull()
-            func watcher(completion: ((Bool) -> Void)?, startCount:Int, minimumTimelimitDate:Date, timelimitDate:Date) {
+            func watcher(completion: ((CheckCloudDataIsValidResult) -> Void)?, startCount:Int, minimumTimelimitDate:Date, timelimitDate:Date) {
                 DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 1) {
+                    if isCheckCloudDataIsValidInterrupt {
+                        completion?(.checkFailed)
+                        return
+                    }
                     autoreleasepool {
                         guard let realm = try? GetCloudRealm() else {
-                            completion?(false)
+                            completion?(.validDataNotAlive)
                             return
                         }
                         realm.refresh()
                         let currentCount = CountAllCloudRealmRecords(realm: realm)
                         if currentCount > startCount && NovelSpeakerUtility.CheckDefaultSettingsAlive(realm: realm) {
-                            completion?(true)
+                            completion?(.validDataAlive)
                             FetchCloudData(syncObjectType: RealmStoryBulk.self, predicate: NSPredicate(value: true))
                             FetchCloudData(syncObjectType: RealmNovel.self, predicate: NSPredicate(value: true))
                             FetchCloudData(syncObjectType: RealmDisplaySetting.self, predicate: NSPredicate(value: true))
@@ -331,12 +345,12 @@ import AVFoundation
                             return
                         }
                         if Date() > timelimitDate {
-                            completion?(false)
+                            completion?(.validDataNotAlive)
                             return
                         }
                         if startCount <= 0 && currentCount <= 0 && Date() > minimumTimelimitDate {
                             // minimumTimeoutLimit秒経っても count が 0 から何も増えてないということは多分何も入っていない
-                            completion?(false)
+                            completion?(.validDataNotAlive)
                             return
                         }
                         watcher(completion: completion, startCount: startCount, minimumTimelimitDate: minimumTimelimitDate, timelimitDate: timelimitDate)

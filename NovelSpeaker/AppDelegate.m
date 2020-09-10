@@ -128,6 +128,7 @@ void uncaughtExceptionHandler(NSException *exception)
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     NSLog(@"application did enter background.");
     [[GlobalDataSingleton GetInstance] saveContext];
+    [RealmUtil SetCheckCloudDataIsValidInterruptWithIsInterrupt:true];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application

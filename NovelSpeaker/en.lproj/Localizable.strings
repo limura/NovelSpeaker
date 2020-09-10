@@ -158,6 +158,7 @@
 "SettingsViewController_ClearSiteInfoCache_done" = "The saved SiteInfo information has been deleted.";
 "SettingsViewController_IsNeedRestartApp_Title" = "App restart required";
 "SettingsViewController_IsNeedRestartApp_Message" = "In order to do this operation, you need to restart the application once. Quit the application from the App switcher, restart it, and then try again.";
+"SettingsViewController_FailedCheckIcloudDataIsValid" = "Failed to check the data on iCloud side.";
 
 "NovelSpeakerUtility_ExportingNovelData" = "Exporting novel";
 "NovelSpeakerUtility_ExportOtherSettings" = "Exporting settings";

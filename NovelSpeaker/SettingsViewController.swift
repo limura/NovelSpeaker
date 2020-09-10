@@ -1086,18 +1086,29 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                     DispatchQueue.main.async {
                         RealmUtil.CheckCloudDataIsValid { (result) in
-                            if result {
+                            switch result {
+                            case .validDataAlive:
                                 // iCloud側に使えそうなデータがあった
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false) {
                                         self.ChooseUseiCloudDataOrOverrideLocalData()
                                     }
                                 }
-                                return
-                            }
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: false) {
-                                    self.overrideLocalToiCloud()
+                                break
+                            case .validDataNotAlive:
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: false) {
+                                        self.overrideLocalToiCloud()
+                                    }
+                                }
+                            case .checkFailed:
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: false) {
+                                        guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                                        row.value = false
+                                        row.updateCell()
+                                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_FailedCheckIcloudDataIsValid", comment: "iCloud側のデータ確認に失敗しました。"), buttonTitle: nil, buttonAction: nil)
+                                    }
                                 }
                             }
                         }
