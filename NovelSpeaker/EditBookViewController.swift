@@ -39,7 +39,7 @@ class EditBookViewController: UIViewController {
     @IBOutlet weak var chapterNumberIndicatorLabelWidthConstraint: NSLayoutConstraint!
     //var storyTextViewBottomConstraint:NSLayoutConstraint? = nil
     //var chapterNumberIndicatorLabelWidthConstraint:NSLayoutConstraint? = nil
-    var fontSizeObserveToken:NotificationToken? = nil
+    var fontSizeObserverToken:NotificationToken? = nil
     var currentStoryID:String = ""
     
     override func viewDidLoad() {
@@ -262,7 +262,8 @@ class EditBookViewController: UIViewController {
         // storyTextView は自前のフォント設定を使うので、それが更新されるのを監視しておきます
         RealmUtil.RealmBlock { (realm) -> Void in
             if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
-                fontSizeObserveToken = displaySetting.observe({ (change) in
+                fontSizeObserverToken = displaySetting.observe({ [weak self] (change) in
+                    guard let self = self else { return }
                     switch change {
                     case .change(_):
                         DispatchQueue.main.async {

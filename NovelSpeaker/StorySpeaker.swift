@@ -28,7 +28,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
     var delegateArray = NSHashTable<AnyObject>.weakObjects()
 
     var storyID:String = ""
-    var globalStateObserveToken:NotificationToken? = nil
+    var globalStateObserverToken:NotificationToken? = nil
     var storyObserverToken:NotificationToken? = nil
     var storyObserverStoryID:String = ""
     var storyObserverStoryBulkID:String = ""
@@ -172,7 +172,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                     return
                 }
-                self.globalStateObserveToken = globalState.observe({ (change) in
+                self.globalStateObserverToken = globalState.observe({ [weak self] (change) in
+                    guard let self = self else { return }
                     switch change {
                     case .change(_, let propertys):
                         for property in propertys {
@@ -207,7 +208,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 if self.bookmarkObserverNovelID == novelID { return }
                 self.bookmarkObserverNovelID = novelID
                 guard let bookmark = RealmBookmark.SearchObjectFromWith(realm: realm, type: .novelSpeechLocation, hint: novelID) else { return }
-                self.bookmarkObserverToken = bookmark.observe { (change) in
+                self.bookmarkObserverToken = bookmark.observe { [weak self] (change) in
+                    guard let self = self else { return }
                     switch change {
                     case .change(let value, let properties):
                         for property in properties {
@@ -234,7 +236,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let storyBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: storyID) else { return }
                 let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
-                self.storyObserverToken = storyBulk.observe({ (change) in
+                self.storyObserverToken = storyBulk.observe({ [weak self] (change) in
+                    guard let self = self else { return }
                     switch change {
                     case .error(_):
                         break
@@ -318,13 +321,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) else { return }
-                self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { (change) in
+                self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { [weak self] (change) in
+                    guard let self = self else { return }
                     self.isNeedApplySpeechConfigs = true
                 }
             }
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let allSpeechSectionConfigArray = RealmSpeechSectionConfig.GetAllObjectsWith(realm: realm) else { return }
-                self.speechSectionConfigArrayObserverToken = allSpeechSectionConfigArray.observe({ (change) in
+                self.speechSectionConfigArrayObserverToken = allSpeechSectionConfigArray.observe({ [weak self] (change) in
+                    guard let self = self else { return }
                     switch change {
                     case .initial(_):
                         break
@@ -351,7 +356,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
                 if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let speechOverrideSetting = globalState.defaultSpeechOverrideSettingWith(realm: realm) {
-                    self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ (change) in
+                    self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ [weak self] (change) in
+                        guard let self = self else { return }
                         switch change {
                         case .error(_):
                             break
@@ -368,7 +374,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                     })
                 }
 
-                self.novelIDSpeechOverrideSettingArrayObserverToken = RealmSpeechOverrideSetting.GetAllObjectsWith(realm: realm)?.observe({ (change) in
+                self.novelIDSpeechOverrideSettingArrayObserverToken = RealmSpeechOverrideSetting.GetAllObjectsWith(realm: realm)?.observe({ [weak self] (change) in
+                    guard let self = self else { return }
                     switch change {
                     case .initial(_):
                         break

@@ -12,7 +12,7 @@ import RealmSwift
 class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     static let speechModSettingsTableViewDefaultCellID = "speechModSettingsTableViewDefaultCell"
     var m_FilterString = ""
-    var speechModSettingObserveToken:NotificationToken? = nil
+    var speechModSettingObserverToken:NotificationToken? = nil
     public var targetNovelID = RealmSpeechModSetting.anyTarget
 
     override func viewDidLoad() {
@@ -67,7 +67,8 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     
     func addNotificationReceiver(){
         RealmUtil.RealmBlock { (realm) -> Void in
-            self.speechModSettingObserveToken = realm.objects(RealmSpeechModSetting.self).observe { (collectionChange) in
+            self.speechModSettingObserverToken = realm.objects(RealmSpeechModSetting.self).observe { [weak self] (collectionChange) in
+                guard let self = self else { return }
                 print("RealmSpeechModSetting change got.")
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
@@ -76,7 +77,7 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
         }
     }
     func removeNotificationReceiver(){
-        self.speechModSettingObserveToken = nil
+        self.speechModSettingObserverToken = nil
     }
 
     // MARK: - Table view data source

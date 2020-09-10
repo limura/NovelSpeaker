@@ -49,7 +49,8 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
     func observeSectionConfig() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let sectionConfigList = RealmSpeechSectionConfig.GetAllObjectsWith(realm: realm) else { return }
-            self.sectionConfigObserverToken = sectionConfigList.observe({ (change) in
+            self.sectionConfigObserverToken = sectionConfigList.observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
                 case .initial(_):
                     break

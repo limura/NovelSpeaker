@@ -21,12 +21,12 @@ class BookShelfTreeViewCell: UITableViewCell {
     @IBOutlet weak var treeDepthImageViewWidthConstraint: NSLayoutConstraint!
     @IBOutlet weak var likeButton: UIButton!
     
-    var storyObserveToken: NotificationToken? = nil
-    var storyForNovelArrayObserveToken: NotificationToken? = nil
-    var globalStateObserveToken: NotificationToken? = nil
-    var novelObserveToken: NotificationToken? = nil
-    var novelArrayObserveToken: NotificationToken? = nil
-    var bookmarkObserveToken: NotificationToken? = nil
+    var storyObserverToken: NotificationToken? = nil
+    var storyForNovelArrayObserverToken: NotificationToken? = nil
+    var globalStateObserverToken: NotificationToken? = nil
+    var novelObserverToken: NotificationToken? = nil
+    var novelArrayObserverToken: NotificationToken? = nil
+    var bookmarkObserverToken: NotificationToken? = nil
     var watchNovelIDArray:[String] = []
     
     static let staticRealmQueue:DispatchQueue? = DispatchQueue(label: "NovelSpeakerBookShelfTableCellQueue")
@@ -48,12 +48,12 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     
     func unregistAllObserver() {
-        storyObserveToken = nil
-        storyForNovelArrayObserveToken = nil
-        globalStateObserveToken = nil
-        novelObserveToken = nil
-        novelArrayObserveToken = nil
-        bookmarkObserveToken = nil
+        storyObserverToken = nil
+        storyForNovelArrayObserverToken = nil
+        globalStateObserverToken = nil
+        novelObserverToken = nil
+        novelArrayObserverToken = nil
+        bookmarkObserverToken = nil
     }
     func cleanCellDisplay() {
         likeButton.imageView?.contentMode = .scaleAspectFit
@@ -199,7 +199,8 @@ class BookShelfTreeViewCell: UITableViewCell {
     
     func registerNovelArrayObserver(novelIDArray:[String]) {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
-            self.novelArrayObserveToken = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: novelIDArray)?.observe({ (change) in
+            self.novelArrayObserverToken = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: novelIDArray)?.observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
                 case .error(_):
                     break
@@ -217,7 +218,8 @@ class BookShelfTreeViewCell: UITableViewCell {
     func registerNovelObserver(novelID:String) {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
-            self.novelObserveToken = novel.observe { (change) in
+            self.novelObserverToken = novel.observe { [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
                 case .error(_):
                     break
@@ -247,7 +249,8 @@ class BookShelfTreeViewCell: UITableViewCell {
 
     func registerStoryObserver(novelID:String) {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
-            self.storyObserveToken = RealmStoryBulk.GetAllObjectsWith(realm: realm)?.filter("novelID = %@", novelID).observe({ (change) in
+            self.storyObserverToken = RealmStoryBulk.GetAllObjectsWith(realm: realm)?.filter("novelID = %@", novelID).observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch (change) {
                 case .initial(_):
                     break
@@ -266,7 +269,8 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
     func registerBookmarkObserver(novelID:String) {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
-            self.bookmarkObserveToken = RealmBookmark.SearchObjectFromWith(realm: realm, type: .novelSpeechLocation, hint: novelID)?.observe({ (change) in
+            self.bookmarkObserverToken = RealmBookmark.SearchObjectFromWith(realm: realm, type: .novelSpeechLocation, hint: novelID)?.observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
                 case .change(_, let propertys):
                     for property in propertys {
@@ -300,7 +304,8 @@ class BookShelfTreeViewCell: UITableViewCell {
     // TODO: StoryObserver といいつつ、New フラグしか見張ってない
     func registerStoryForNovelArrayObserver(novelIDArray:[String]) {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
-            self.storyForNovelArrayObserveToken = RealmStoryBulk.GetAllObjectsWith(realm: realm)?.filter("novelID IN %@", novelIDArray).observe({ (change) in
+            self.storyForNovelArrayObserverToken = RealmStoryBulk.GetAllObjectsWith(realm: realm)?.filter("novelID IN %@", novelIDArray).observe({ [weak self] (change) in
+                guard let self = self else { return }
                 if novelIDArray != self.watchNovelIDArray { return }
                 switch (change) {
                 case .initial(_):
@@ -317,7 +322,7 @@ class BookShelfTreeViewCell: UITableViewCell {
         }
     }
     func unregistStoryObserver() {
-        self.storyObserveToken = nil
+        self.storyObserverToken = nil
     }
     func registerGlobalStateObserver() {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
@@ -330,7 +335,8 @@ class BookShelfTreeViewCell: UITableViewCell {
                     self.readProgressView.isHidden = true
                 }
             }
-            self.globalStateObserveToken = globalState.observe { (changes) in
+            self.globalStateObserverToken = globalState.observe { [weak self] (changes) in
+                guard let self = self else { return }
                 switch changes {
                 case .error(_):
                     break
@@ -384,14 +390,14 @@ class BookShelfTreeViewCell: UITableViewCell {
             registerBookmarkObserver(novelID: novelID)
             applyLikeStarStatus(novelID: novelID)
             self.likeButton.isHidden = false
-            self.storyForNovelArrayObserveToken = nil
+            self.storyForNovelArrayObserverToken = nil
         }else{
             self.readProgressView.isHidden = true
             self.likeButton.isHidden = true
             registerStoryForNovelArrayObserver(novelIDArray: watchNovelIDArray)
             registerNovelArrayObserver(novelIDArray: watchNovelIDArray)
-            self.storyObserveToken = nil
-            self.bookmarkObserveToken = nil
+            self.storyObserverToken = nil
+            self.bookmarkObserverToken = nil
         }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
         self.watchNovelIDArray = watchNovelIDArray

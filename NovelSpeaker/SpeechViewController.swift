@@ -226,6 +226,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
             novelObserverNovelID = novelID
             self.novelObserverToken = novel.observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
                 case .error(_):
                     break
@@ -233,7 +234,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                     for property in properties {
                         if property.name == "title", let newValue = property.newValue as? String {
                             DispatchQueue.main.async {
-                                self?.title = newValue
+                                self.title = newValue
                             }
                         }
                      }
@@ -280,6 +281,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
             guard let storyBulkArray = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID) else { return }
             storyArrayObserverNovelID = novelID
             self.storyArrayObserverToken = storyBulkArray.observe({ [weak self] (changes) in
+                guard let self = self else { return }
                 switch changes {
                 case .initial(_):
                     break
@@ -288,7 +290,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                         // 数の増減があったら反映する
                         DispatchQueue.main.async {
                             //print("SpeechViewController: story delete or inserted. update display")
-                            self?.applyChapterListChange()
+                            self.applyChapterListChange()
                         }
                     }
                     if modifications.count > 0 {
@@ -300,7 +302,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                             }
                         }
                         DispatchQueue.main.async {
-                            guard let chapterPositionText = self?.chapterPositionLabel.text else {
+                            guard let chapterPositionText = self.chapterPositionLabel.text else {
                                 return
                             }
                             let lastChapterNumberTextArray = chapterPositionText.components(separatedBy: "/")
@@ -308,7 +310,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
                                 return
                             }
                             if chapterCount != lastChapterNumber {
-                                self?.applyChapterListChange()
+                                self.applyChapterListChange()
                             }
                         }
                     }
@@ -321,7 +323,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     func observeDispaySetting() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
-            displaySettingObserverToken = displaySetting.observe({ (change) in
+            displaySettingObserverToken = displaySetting.observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
                 case .change(_, let properties):
                     for propaty in properties {

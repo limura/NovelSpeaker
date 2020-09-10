@@ -47,7 +47,8 @@ class NovelDetailViewController: FormViewController {
     func observeNovel() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else { return }
-            self.novelObserverToken = novel.observe({ (change) in
+            self.novelObserverToken = novel.observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
                 case .error(_):
                     break
@@ -73,7 +74,8 @@ class NovelDetailViewController: FormViewController {
     func observeSpeakerSetting() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let speakerSettingList = RealmSpeakerSetting.GetAllObjectsWith(realm: realm) else { return }
-            self.speakerSettingObserverToken = speakerSettingList.observe({ (change) in
+            self.speakerSettingObserverToken = speakerSettingList.observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
                 case .initial(_):
                     break
@@ -92,7 +94,8 @@ class NovelDetailViewController: FormViewController {
     func observeSpeechSectionConfig() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let sectionConfigList = RealmSpeechSectionConfig.GetAllObjectsWith(realm: realm) else { return }
-            self.speakerSettingObserverToken = sectionConfigList.observe({ (change) in
+            self.speakerSettingObserverToken = sectionConfigList.observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
                 case .initial(_):
                     break
@@ -111,9 +114,9 @@ class NovelDetailViewController: FormViewController {
     func observeTag() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let tagList = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Keyword) else { return }
-            self.tagObserverToken = tagList.observe({ (change) in
+            self.tagObserverToken = tagList.observe({ [weak self] (change) in
+                guard let self = self else { return }
                 switch change {
-                    
                 case .initial(_):
                     break
                 case .update(let objs, _, _, _):
