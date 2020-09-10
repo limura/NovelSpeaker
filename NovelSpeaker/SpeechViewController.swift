@@ -99,10 +99,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         
         let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(leftSwipe(_:)))
         leftSwipe.direction = .left
-        view.addGestureRecognizer(leftSwipe)
+        self.textView.addGestureRecognizer(leftSwipe)
         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(rightSwipe(_:)))
         rightSwipe.direction = .right
-        view.addGestureRecognizer(rightSwipe)
+        self.textView.addGestureRecognizer(rightSwipe)
         
         previousChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
         nextChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
