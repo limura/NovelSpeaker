@@ -630,9 +630,15 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange){
         DispatchQueue.main.async {
             let contentLength = self.textView.text.count
-            if contentLength >= (range.location + range.length) {
+            let newRange:NSRange
+            if range.length == 0 && contentLength >= (range.location + 1) {
+                newRange = NSMakeRange(range.location, 1)
+            }else{
+                newRange = range
+            }
+            if contentLength >= (newRange.location + newRange.length) {
                 self.textView.select(self) // この「おまじない」をしないと選択範囲が表示されない
-                self.textView.selectedRange = range
+                self.textView.selectedRange = newRange
             }
             self.textViewScrollTo(readLocation: range.location)
         }
