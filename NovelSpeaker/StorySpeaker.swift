@@ -93,6 +93,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
 
     let queuedSetStoryStoryLock = NSLock()
     var queuedSetStoryStory:Story? = nil
+    var queuedSetStoryCompletionArray:[(()->Void)] = []
 
     func SetStoryAsync(story:Story) {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: DispatchQueue.main) { (realm) in
@@ -111,6 +112,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                 self.SetStoryAsync(story: queuedStory)
             }else{
                 self.queuedSetStoryStory = nil
+                for completion in self.queuedSetStoryCompletionArray {
+                    completion()
+                }
+                self.queuedSetStoryCompletionArray.removeAll()
             }
         }
     }
@@ -121,10 +126,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
         }
     }
 
-    func EnqueueSetStory(story:Story) {
+    func EnqueueSetStory(story:Story, completion:(()->Void)?) {
         queuedSetStoryStoryLock.lock()
         let currentQueuedStory = queuedSetStoryStory
         queuedSetStoryStory = story
+        if let completion = completion {
+            queuedSetStoryCompletionArray.append(completion)
+        }
         queuedSetStoryStoryLock.unlock()
         if currentQueuedStory == nil {
             SetStoryAsync(story: story)
@@ -134,8 +142,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
 
     // 読み上げに用いられる小説の章を設定します。
     // 読み上げが行われていた場合、読み上げは停止します。
-    func SetStory(story:Story) {
-        EnqueueSetStory(story: story)
+    func SetStory(story:Story, completion:(()->Void)? = nil) {
+        EnqueueSetStory(story: story, completion: completion)
     }
     
     func ForceOverrideHungSpeakString(text:String) -> String {
@@ -992,8 +1000,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
                             nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                         }
                     }
-                    self.SetStory(story: nextStory)
-                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                    self.SetStory(story: nextStory, completion: {
+                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                    })
                 }else{
                     self.StopSpeech(realm: realm)
                     self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
