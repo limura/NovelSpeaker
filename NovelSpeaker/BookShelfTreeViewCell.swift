@@ -373,6 +373,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     }
 
     func cellSetup(title:String, treeLevel: Int, watchNovelIDArray: [String]) {
+        self.watchNovelIDArray = watchNovelIDArray
         applyDepth(treeLevel: treeLevel)
         if title.count <= 0 {
             titleLabel.text = NSLocalizedString("BookShelfTreeViewCell_UnknownTitle", comment: "(小説名未設定)")
@@ -400,7 +401,6 @@ class BookShelfTreeViewCell: UITableViewCell {
             self.bookmarkObserverToken = nil
         }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
-        self.watchNovelIDArray = watchNovelIDArray
     }
     
     public var height : CGFloat {
