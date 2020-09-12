@@ -61,7 +61,7 @@ class DownloadQueueHolder: NSObject {
             }
             queueList.append(item)
             queue[hostName] = queueList.sorted(by: { (a, b) -> Bool in
-                a.updateFrequency < b.updateFrequency
+                a.updateFrequency > b.updateFrequency
             })
         }else{
             queue[hostName] = [item]
