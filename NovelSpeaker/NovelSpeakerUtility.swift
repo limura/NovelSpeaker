@@ -14,6 +14,7 @@ import AVFoundation
 class NovelSpeakerUtility: NSObject {
     static let privacyPolicyURL = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/master/PrivacyPolicy.txt")
     static let privacyPolicyKey = "NovelSpeaker_ReadedPrivacyPolicy"
+    static let UserCreatedContentPrefix = "https://novelspeaker.example.com/UserCreatedContent/"
     static func GetReadedPrivacyPolicy() -> String {
         let defaults = UserDefaults.standard
         defaults.register(defaults: [privacyPolicyKey : ""])
@@ -871,7 +872,7 @@ class NovelSpeakerUtility: NSObject {
 
     static func RestoreBookshelf_user_V_1_0_0(novel:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
         guard let id = novel.object(forKey: "id") as? String, let title = novel.object(forKey: "title") as? String, let storys = novel.object(forKey: "storys") as? NSArray else { return }
-        let novelID = "https://novelspeaker.example.com/UserCreatedContent/" + id
+        let novelID = NovelSpeakerUtility.UserCreatedContentPrefix + id
         RealmUtil.Write { (realm) in
             let realmNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) ?? RealmNovel()
             if realmNovel.novelID != novelID {
@@ -959,7 +960,7 @@ class NovelSpeakerUtility: NSObject {
                     if coreDataNarouContent.isURLContent() {
                         globalState.currentReadingNovelID = targetNovelID
                     }else if targetNovelID.hasPrefix("_u") {
-                        globalState.currentReadingNovelID = "https://novelspeaker.example.com/UserCreatedContent/" + targetNovelID
+                        globalState.currentReadingNovelID = NovelSpeakerUtility.UserCreatedContentPrefix + targetNovelID
                     }else{
                         globalState.currentReadingNovelID = CoreDataToRealmTool.NcodeToUrlString(ncode: targetNovelID, no: 1, end: false)
                     }
@@ -998,7 +999,7 @@ class NovelSpeakerUtility: NSObject {
                     if coreDataNarouContent.isURLContent() {
                         globalState.currentReadingNovelID = targetNovelID
                     }else if targetNovelID.hasPrefix("_u") {
-                        globalState.currentReadingNovelID = "https://novelspeaker.example.com/UserCreatedContent/" + targetNovelID
+                        globalState.currentReadingNovelID = NovelSpeakerUtility.UserCreatedContentPrefix + targetNovelID
                     }else{
                         globalState.currentReadingNovelID = CoreDataToRealmTool.NcodeToUrlString(ncode: targetNovelID, no: 1, end: false)
                     }

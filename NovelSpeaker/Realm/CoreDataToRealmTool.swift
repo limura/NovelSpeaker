@@ -52,7 +52,7 @@ class CoreDataToRealmTool: NSObject {
             if content.isURLContent(), let url = content.ncode {
                 realmState.currentReadingNovelID = url
             }else if content.isUserCreatedContent(), let ncode = content.ncode, ncode.hasPrefix("_u") {
-                realmState.currentReadingNovelID = "https://novelspeaker.example.com/UserCreatedContent/" + ncode
+                realmState.currentReadingNovelID = NovelSpeakerUtility.UserCreatedContentPrefix + ncode
             }else if let ncode = content.ncode{
                 realmState.currentReadingNovelID = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: 1, end: false)
             }
@@ -253,7 +253,7 @@ class CoreDataToRealmTool: NSObject {
             // 自作小説については ID を新しい形式に一新します。
             // ただし、過去のバックアップファイルからの書き戻しが発生した時にその ID を追跡できるようにするために
             // 謎の ID 埋め込みを行います
-            return "https://novelspeaker.example.com/UserCreatedContent/" + (content.ncode ?? "\(NSUUID().uuidString)")
+            return NovelSpeakerUtility.UserCreatedContentPrefix + (content.ncode ?? "\(NSUUID().uuidString)")
         }
         guard let ncode = content.ncode else {
             return ""

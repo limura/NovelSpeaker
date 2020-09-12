@@ -520,6 +520,7 @@ class NovelDownloadQueue : NSObject {
         self.downloadStop()
         for novel in novelArray {
             //NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novel: novel)
+            if novel.type != .URL { continue }
             self.queueHolder.addQueue(novelID: novel.novelID)
             NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
         }
@@ -531,6 +532,7 @@ class NovelDownloadQueue : NSObject {
         RealmUtil.Write { (realm) in
             for novelID in novelIDArray {
                 //NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novelID: novelID)
+                if novelID.hasPrefix(NovelSpeakerUtility.UserCreatedContentPrefix) { continue }
                 self.queueHolder.addQueue(novelID: novelID)
                 NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
             }

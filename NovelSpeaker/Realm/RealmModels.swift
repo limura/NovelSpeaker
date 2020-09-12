@@ -1110,7 +1110,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     }
     
     public static func CreateUniqueID() -> String {
-        return "https://novelspeaker.example.com/UserCreatedContent/\(NSUUID().uuidString)"
+        return "\(NovelSpeakerUtility.UserCreatedContentPrefix)\(NSUUID().uuidString)"
     }
     
     static func GetAllObjectsWith(realm: Realm) -> Results<RealmNovel>? {
