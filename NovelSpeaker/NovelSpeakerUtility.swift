@@ -522,6 +522,10 @@ class NovelSpeakerUtility: NSObject {
                 if pitchValue < 0.5 || pitchValue > 2.0 { continue }
                 if let speaker = RealmSpeakerSetting.SearchFromWith(realm: realm, name: title) {
                     RealmUtil.WriteWith(realm: realm) { (realm) in
+                        speaker.voiceIdentifier = defaultSpeaker.voiceIdentifier
+                        speaker.locale = defaultSpeaker.locale
+                        speaker.type = defaultSpeaker.type
+                        speaker.rate = defaultSpeaker.rate
                         speaker.pitch = pitchValue
                     }
                     if let section = speechSectionArray.filter("startText = %@ AND endText = %@", start_text, end_text).first {
@@ -545,6 +549,8 @@ class NovelSpeakerUtility: NSObject {
                     speaker.name = title
                     speaker.voiceIdentifier = defaultSpeaker.voiceIdentifier
                     speaker.rate = defaultSpeaker.rate
+                    speaker.locale = defaultSpeaker.locale
+                    speaker.type = defaultSpeaker.type
                     RealmUtil.WriteWith(realm: realm) { (realm) in
                         realm.add(speaker, update: .modified)
                     }
@@ -931,6 +937,18 @@ class NovelSpeakerUtility: NSObject {
     }
     
     static func ProcessNovelSpeakerBackupJSONData_V_1_0_0(toplevelDictionary:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> Bool {
+        // misc_settings を一番先に読み出すのは
+        // misc_settings に default_voice_identifier があるからで、
+        // default_voice_identifier で標準の読み上げ話者が設定された物を
+        // 後で RestoreSpeakPitch_V_1_0_0 側で使うというトリッキーな事をしています。
+        // さらに、currentReadingNovelID も misc_settings にあるため、
+        // コレを取り出して後で使っています。(´・ω・`)
+        let currentReadingNovelID:String?
+        if let miscDictionary = toplevelDictionary.object(forKey: "misc_settings") as? NSDictionary {
+            currentReadingNovelID = RestoreMiscSettings_V_1_0_0(dic:miscDictionary)
+        }else{
+            currentReadingNovelID = nil
+        }
         if let speechModDictionary = toplevelDictionary.object(forKey: "word_replacement_dictionary") as? NSDictionary {
             RestoreSpeechMod_V_1_0_0(dic: speechModDictionary)
         }
@@ -942,12 +960,6 @@ class NovelSpeakerUtility: NSObject {
         }
         if let waitArray = toplevelDictionary.object(forKey: "speech_wait_config") as? NSArray {
             RestoreSpeechWaitConfig_V_1_0_0(waitArray:waitArray)
-        }
-        let currentReadingNovelID:String?
-        if let miscDictionary = toplevelDictionary.object(forKey: "misc_settings") as? NSDictionary {
-            currentReadingNovelID = RestoreMiscSettings_V_1_0_0(dic:miscDictionary)
-        }else{
-            currentReadingNovelID = nil
         }
         if let novelArray = toplevelDictionary.object(forKey: "bookshelf") as? NSArray {
             RestoreBookshelf_V_1_0_0(novelArray:novelArray, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
@@ -970,6 +982,18 @@ class NovelSpeakerUtility: NSObject {
         return true
     }
     static func ProcessNovelSpeakerBackupJSONData_V_1_1_0(toplevelDictionary:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> Bool {
+        // misc_settings を一番先に読み出すのは
+        // misc_settings に default_voice_identifier があるからで、
+        // default_voice_identifier で標準の読み上げ話者が設定された物を
+        // 後で RestoreSpeakPitch_V_1_0_0 側で使うというトリッキーな事をしています。
+        // さらに、currentReadingNovelID も misc_settings にあるため、
+        // コレを取り出して後で使っています。(´・ω・`)
+        let currentReadingNovelID:String?
+        if let miscDictionary = toplevelDictionary.object(forKey: "misc_settings") as? NSDictionary {
+            currentReadingNovelID = RestoreMiscSettings_V_1_0_0(dic:miscDictionary)
+        }else{
+            currentReadingNovelID = nil
+        }
         if let speechModDictionary = toplevelDictionary.object(forKey: "word_replacement_dictionary") as? NSDictionary {
             RestoreSpeechMod_V_1_1_0(dic: speechModDictionary)
         }
@@ -981,12 +1005,6 @@ class NovelSpeakerUtility: NSObject {
         }
         if let waitArray = toplevelDictionary.object(forKey: "speech_wait_config") as? NSArray {
             RestoreSpeechWaitConfig_V_1_0_0(waitArray:waitArray)
-        }
-        let currentReadingNovelID:String?
-        if let miscDictionary = toplevelDictionary.object(forKey: "misc_settings") as? NSDictionary {
-            currentReadingNovelID = RestoreMiscSettings_V_1_0_0(dic:miscDictionary)
-        }else{
-            currentReadingNovelID = nil
         }
         if let novelArray = toplevelDictionary.object(forKey: "bookshelf") as? NSArray {
             RestoreBookshelf_V_1_0_0(novelArray:novelArray, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
