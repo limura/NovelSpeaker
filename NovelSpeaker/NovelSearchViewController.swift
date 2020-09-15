@@ -678,13 +678,14 @@ class NovelSearchViewController: FormViewController,ParentViewController {
             }.onChange { (row) in
                 guard let selectedTitle = row.value else { return }
                 guard let selectedSite = self.searchInfoArray.filter({$0.title == selectedTitle}).first else { return }
+                if let currentSelectedSiteTitle = self.currentSelectedSite?.title, currentSelectedSiteTitle == selectedTitle { return }
                 self.currentSelectedSite = selectedSite
                 RealmUtil.RealmBlockWrite { (realm) in
                     if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                         globalState.currentWebSearchSite = selectedSite.title
                     }
                 }
-                DispatchQueue.main.async {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     self.reloadCells()
                 }
             }
