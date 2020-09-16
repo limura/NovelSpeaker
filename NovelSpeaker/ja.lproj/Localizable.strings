@@ -141,11 +141,11 @@
 "SettingsViewController_iCloudEnable_done" = "iCloud同期を開始しました。\n同期は開始されましたが、端末側とiCloud側の同期(転送)作業は終わっていません。\n転送されるべきデータが多い場合には、転送が終わるまでかなりの時間がかかると思われます。\nなお、残念ながら転送が終わったかどうかを知るすべが(開発者の知る限りでは)ありません。また、Appleの解説によると24時間の間はアプリが終了していても裏で受信はしてくれていてアプリを再度立ち上げれば転送を継続してくれるそうですが、あまり安心はできないかもしれません。\n一応未送信や未受信のデータがある場合には通信中のインジケータを回すように努力はしますが、このインジケータが消えた事で転送が終了したというわけではないかもしれない、という事は理解しておいてください(実際の所、インジケータが消えた後に200以上の小説が本棚に追加されたのを見たことがありますので全く信用できないと考えてもよさそうです。なお、iCloud側からデータを読み出そうとした時(今の状態が正にそれです)、ある程度の量がAppleから送信された後に30秒から2分程度の間が開いて、また少しデータが流れてきて、また暫く間が開いて……というような形の間欠泉？のような感じでデータが流れてくるようです。恐らくは一気にデータを流す事はできないように制限がかけられているのではないかと思います)。\nという事なので、登録されているはずの小説が本棚に登録されない、という場合などは気を長くして待って頂ければと思います。";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocalOnly" = "iCloud上のデータを消去し、現在のデータをiCloudに送信する";
 "SettingsViewController_RemoveICloudData" = "iCloud上のデータを消去しています";
-"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData" = "iCloud側に利用可能なデータが存在するようです。iCloud側のデータをそのまま利用するか、iCloud上のデータに現在のデータを上書きで追加するかを選択してください。";
+"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData" = "iCloud側に利用可能なデータが存在するようです。iCloud側のデータをそのまま利用する(現在のデータは削除されます)か、iCloud上のデータに現在のデータを上書きで追加するか(iCloud上のデータと現在のデータが混ざりますが、重複するものについては現在のデータが優先されます)を選択してください。";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud" = "iCloudのデータのみ利用";
-"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal" = "現在のデータをiCloud側に追加";
+"SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal" = "iCloud側に上書き追加";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_Cancel" = "iCloud同期をやめる(キャンセル)";
-"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "iCloud側のデータを確認しています。\n過去に ことせかい で iCloud同期 を使用していた場合や、別の端末の ことせかい で iCloud同期 を利用しているなどで iCloud側 に多量のデータが保存されている場合、この作業は時間がかかる可能性があります。\nまた、この操作中にアプリを閉じるなどした場合には失敗と判定しています。";
+"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "iCloud側のデータを確認しています。\n過去に ことせかい で iCloud同期 を使用していた場合や、別の端末の ことせかい で iCloud同期 を利用しているなどで iCloud側 に多量のデータが保存されている場合、この作業は時間がかかる可能性があります。\nネットワーク接続を用いますので、この操作は接続状態の良い所で行ってください。\nまた、この操作中にアプリを閉じるなどした場合には失敗と判定しています。";
 "SettingsViewController_IsUseiCloud_FailedSyncEngineStart" = "iCloud への接続に失敗しました。";
 "SettingsViewController_CloudPullProcessingDialog" = "iCloud からデータを読み込み中です。";
 "SettingsViewController_CloudPushProcessingDialog" = "iCloud 側へデータを書き込み中です。";
@@ -159,6 +159,10 @@
 "SettingsViewController_IsNeedRestartApp_Title" = "アプリの再起動が必要です";
 "SettingsViewController_IsNeedRestartApp_Message" = "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。(iCloud同期の ON/OFF は変更のたびに再起動が必要になります)";
 "SettingsViewController_FailedCheckIcloudDataIsValid" = "iCloud側のデータ確認に失敗しました。";
+"SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Title" = "アプリのバージョンアップが必要です";
+"SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Message" = "iCloud側に保存されているデータは新しいバージョンで作成された物でした。iCloud同期を行うにはアプリのバージョンアップを行う必要があります。";
+"SettingsViewController_FailedCheck_NetworkError" = "iCloud側のデータ確認に失敗しました。ネットワークに接続されていないようです。機内モードになっていたり電波の届かない場所に居るなどの問題があるかもしれません。iCloud同期の初回チェックは安定したインターネット接続ができる環境で行ってください。";
+"SettingsViewController_ChooseInvalidiCloudData_Message" = "iCloud 側にデータが存在する事は確認したのですが、ことせかい で利用するために必須のデータを取得できませんでした。\n\nネットワークの状態が悪い場合や iCloud側 に保存されているデータの量が多かった場合、以前 iCloud同期 を行った端末のデータが iCloud側 へ転送しきれていなかった場合といったような色々な場合が考えられますが、とにかくこのままでは正常に利用する事はできそうにありません。\n\nなお、この端末にあるデータを iCloud側 に上書き保存する形で iCloud同期 を ON にする事もできます。iCloud側 に上書き保存する場合、iCloud側とこの端末側の両方に存在する設定や小説はこの端末側の値に、iCloud側にしか存在しない設定や小説はiCloud側の物が残るという形になります。\n\n上書き保存する形でiCloud同期を開始しますか？";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";
@@ -345,6 +349,12 @@
 "NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title" = "ことせかい 取り込み失敗レポート";
 "NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body" = "このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n";
 "NiftyUtilitySwift_ImportStoryStateConifirmToUser_NoContent" = "本文がありませんでした。";
+"NiftyUtility_FailedConvertiCloudToLocal_CreateRealmFailed" = "iCloud側のデータからlocalデータへの書き換えに失敗しました。(どちらかのデータを開けませんでした)\n念の為、アプリを再起動してもう一度試してみてください。";
+"NiftyUtility_FailedConvertiCloudToLocal_DoCopyFailed" = "iCloud側のデータからlocalデータへの書き換えに失敗しました。(データのコピー中にエラーが発生しました)\n念の為、アプリを再起動してもう一度試してみてください。";
+"NiftyUtility_iCloudDataVersionIsLow_Title" = "iCloudとの同期に問題があります";
+"NiftyUtility_iCloudDataVersionIsLow_Message" = "iCloud側に保存されているデータは、この ことせかい の扱っているデータよりも新しいバージョンになっているようです。このまま iCloud同期 を行い続けるにはアプリのバージョンアップが必要となります。\nなお、古いiOSでご利用中などでアプリのバージョンアップができない場合など、アプリのバージョンアップができない場合には iCloud同期 を解除して頂く必要があります。どちらかを選択してください。";
+"NiftyUtility_iCloudDataVersionIsLow_AppVersionUpButton" = "バージョンアップ";
+"NiftyUtility_iCloudDataVersionIsLow_DisableiCloudButton" = "iCloud同期を停止";
 
 "BugReportViewController_SectionHeader" = "不都合の報告";
 "BugReportViewController_BugReportTitle" = "不都合がある場合にはこのフォームで不都合報告ができます。";

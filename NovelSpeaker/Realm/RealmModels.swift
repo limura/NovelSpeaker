@@ -14,7 +14,7 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 8
+    static let currentSchemaVersion : UInt64 = 2
     static let deleteRealmIfMigrationNeeded: Bool = false
     //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
@@ -28,11 +28,20 @@ import AVFoundation
     static let writeCountPullInterval = 1000 // realm.write を何回したら pull するか
 
     static func Migrate_0_To_1(migration:Migration, oldSchemaVersion:UInt64) {
-        
+    }
+    static func Migrate_1_To_2(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmSpeechModSetting.className()) { (oldObject, newObject) in
+            //guard let oldObject = oldObject, let newObject = newObject else { return }
+            //guard let before = oldObject["before"] as? String else { return }
+            //newObject["beforeBefore"] = before
+        }
     }
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
-        if oldSchemaVersion < 1 {
+        if oldSchemaVersion == 0 {
             Migrate_0_To_1(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion == 1 {
+            Migrate_1_To_2(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     static func MigrateFuncForRealmStory(migration:Migration, oldSchemaVersion:UInt64) {
@@ -122,6 +131,9 @@ import AVFoundation
         do {
             let realm = try GetCloudRealm()
             try realm.write {
+                for obj in realm.objects(RealmCloudVersionChecker.self) {
+                    obj.isDeleted = true
+                }
                 for obj in realm.objects(RealmNovel.self) {
                     obj.isDeleted = true
                 }
@@ -206,6 +218,7 @@ import AVFoundation
         let container = GetContainer()
         let realmConfiguration = RealmUtil.GetCloudRealmConfiguration()
         return SyncEngine(objects: [
+            SyncObject<RealmCloudVersionChecker>(realmConfiguration: realmConfiguration),
             SyncObject<RealmStoryBulk>(realmConfiguration: realmConfiguration),
             SyncObject<RealmNovel>(realmConfiguration: realmConfiguration),
             SyncObject<RealmSpeechModSetting>(realmConfiguration: realmConfiguration),
@@ -253,6 +266,7 @@ import AVFoundation
     
     static func CountAllCloudRealmRecords(realm:Realm) -> Int {
         let targetRealmClasses = [
+            RealmCloudVersionChecker.self,
             RealmStoryBulk.self,
             RealmNovel.self,
             RealmSpeechWaitConfig.self,
@@ -283,6 +297,8 @@ import AVFoundation
     enum CheckCloudDataIsValidResult {
         case validDataAlive
         case validDataNotAlive
+        case dataAliveButNotValid
+        case networkError
         case checkFailed
     }
     /// iCloud上にあるデータが使い物になるかどうかを確認します。
@@ -295,9 +311,10 @@ import AVFoundation
     /// timeout については、
     /// minimumTimeoutLimit の間、iCloud 上のデータのRecord数が 0 のまま新しい record を取得できないのであれば false
     /// record数は増えていたが、timeoutLimit の間に有効なデータが取得できなければ false を返す事になります。
-    static func CheckCloudDataIsValid(minimumTimeoutLimit: TimeInterval = 15.0, timeoutLimit: TimeInterval = 60.0 * 60.0, completion: ((CheckCloudDataIsValidResult) -> Void)?) {
+    static func CheckCloudDataIsValid(minimumTimeoutLimit: TimeInterval = 10.0, timeoutLimit: TimeInterval = 60.0 * 1, completion: ((CheckCloudDataIsValidResult) -> Void)?) {
 
         // カンジ悪く必要そうなものを別途 fetch してしまいます(というか、RealmNovel や RealmStory は数が多すぎるので fetch したくないんですけど、syncEngine を起動した時に fetch が走ってしまいます)
+        FetchCloudData(syncObjectType: RealmCloudVersionChecker.self, predicate: NSPredicate(format: "id = %@", RealmCloudVersionChecker.uniqueID))
         FetchCloudData(syncObjectType: RealmGlobalState.self, predicate: NSPredicate(format: "id = %@", RealmGlobalState.UniqueID))
         FetchCloudData(syncObjectType: RealmSpeakerSetting.self, predicate: NSPredicate(value: true))
         FetchCloudData(syncObjectType: RealmSpeechSectionConfig.self, predicate: NSPredicate(value: true))
@@ -320,7 +337,15 @@ import AVFoundation
             }
 
             isCheckCloudDataIsValidInterrupt = false
-            syncEngine?.pull()
+            var syncEnginePullEnd:Bool = false
+            syncEngine?.pull(completionHandler: { (err) in
+                if let err = err {
+                    print("syncEngine.pull completion error: \(err.localizedDescription)")
+                }else{
+                    print("syncEngine.pull completion. not error.")
+                }
+                syncEnginePullEnd = true
+            })
             func watcher(completion: ((CheckCloudDataIsValidResult) -> Void)?, startCount:Int, minimumTimelimitDate:Date, timelimitDate:Date) {
                 DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 1) {
                     if isCheckCloudDataIsValidInterrupt {
@@ -344,13 +369,26 @@ import AVFoundation
 
                             return
                         }
-                        if Date() > timelimitDate {
+                        if Date() > timelimitDate || syncEnginePullEnd == true {
+                            if startCount < currentCount {
+                                completion?(.dataAliveButNotValid)
+                                return
+                            }
                             completion?(.validDataNotAlive)
                             return
                         }
                         if startCount <= 0 && currentCount <= 0 && Date() > minimumTimelimitDate {
                             // minimumTimeoutLimit秒経っても count が 0 から何も増えてないということは多分何も入っていない
-                            completion?(.validDataNotAlive)
+                            // ……と、思うんだけれど、ネットワークが繋がっていなくてもここに来てしまうので、
+                            // 一応インターネットから何かを取り出せるかどうかを確認する。
+                            NiftyUtilitySwift.httpGet(url: URL(string: NiftyUtilitySwift.IMPORTANT_INFORMATION_TEXT_URL)!, successAction: { (_, _) in
+                                // 取り出せるのなら本当にデータは無いのだろうということで
+                                // データは無かったと報告する
+                                completion?(.validDataNotAlive)
+                            }) { (err) in
+                                // エラーしているならネットワークエラーっぽい
+                                completion?(.networkError)
+                            }
                             return
                         }
                         watcher(completion: completion, startCount: startCount, minimumTimelimitDate: minimumTimelimitDate, timelimitDate: timelimitDate)
@@ -635,6 +673,126 @@ struct Story: Codable {
     func ownerNovel(realm: Realm) -> RealmNovel? {
         return RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)
     }
+}
+
+// 現在実行中のバイナリの RealmUtil.currentSchemaVersion と、
+// iCloud に保存されている currentSchemaVersion の違いを確認するための仕組みを提供します。
+// 使い方としては RealmCloudVersionChecker.RunChecker() を呼び出して
+// その RunChecker に与えた handler への呼び出しに適切に対応する、という形です。
+// handler が呼び出された場合は iCloud に保存されているデータのバージョンが
+// 現在実行中のバイナリでは対応できない未来のバージョンであるという事になるため、
+// "一旦 SyncEngine を止めてから"
+// 「iCloud の同期を止める」か
+// 「アプリのアップデートを行う」の選択肢を出すような対応をユーザに求める
+// といった対応を行うべきです。
+// なお、この仕組みで発見できるのは「iCloud側に保存されている情報からすると
+// 現在実行中のバイナリよりも新しいバージョンのデータ形式で
+// iCloud側の情報が保存されている可能性がある」という事が検知できるだけです。
+// なお、Realm+IceCream はそのようなデータ型でもそのまま使う事もできてしまうため、
+// 古い schemaVersion のシステムが新しい schemaVersion のシステムのデータを書き換える事で
+// データの不思議な改変が起こる可能性が発生します。
+// 前述の通り、この仕組みは問題が発生している事を確認できるだけでその発生を止める事はできないため
+// schemaVersion を上げる(データ型の変更を行う)場合には
+// データの不思議な改変を起こさないような手法での更新を行う必要があることを肝に銘じてください。
+// 問題が発生している事を確認できるだけ、というのは、
+// iCloud側に保存されているデータが実行中の端末に降りてくるまでにタイムラグがあるため、
+// この仕組みによって検知する「前」にデータを扱ってしまっている可能性があるためです。
+// 従って、この仕組みではそのような問題へは対処"できません"。
+//
+// memo:
+// 将来的にこの仕組みに頼る事になるような事がある場合に問題を大きくしないようにメモを残します。
+// Realm+IceCream では class xxx : Object のメンバ変数を「追加」するだけにしたほうが良いです。
+// メンバ変数の名前を変更した場合、iCloud上では
+// 変更前のカラムが残った状態で変更後のカラムが追加されてしまいます。
+// つまり、その後永遠に前のカラムが残った状態で運用されてしまうなどの問題が発生します。
+// また、primaryKey に当たるメンバ変数の名前を変更する事は絶対に避けたほうが良いです。
+// primaryKey が変わる前の object が残されてしまい、新しい primaryKey の object は観測できない、というような挙動を取ることになります。
+// (なお、primaryKey を変更した後に最初に起動した端末ではその端末側に保存された Realm データが新しい primaryKey に変更されて保存されなおすために正常に動作したように見える挙動をとってしまうため、問題に気づきにくい状態になります)
+// なお、似た話として Object の primaryKey を「書き換える」ような場合には
+// 元の primaryKey の物を RealmUtil.delete() した上で、
+// 新しく別の Object を生成して realm.write するべきです。
+// そうしないと iCloud 上で古いデータが消えてしまいます。
+@objc final class RealmCloudVersionChecker : Object {
+    // インスタンスは一個限定です
+    static let uniqueID = "NovelSepakerVersionChecker"
+    @objc dynamic var id = RealmCloudVersionChecker.uniqueID
+    @objc dynamic var isDeleted: Bool = false
+    // 現在利用している RealmUtil.currentSchemaVersion を入れてある、という事にします
+    @objc dynamic var currentSchemaVersion:Int = 0
+    
+    static func CheckCloudDataHasInvalidVersion() -> Bool {
+        guard let cloudRealm = try? RealmUtil.GetCloudRealm(), let obj = cloudRealm.object(ofType: RealmCloudVersionChecker.self, forPrimaryKey: uniqueID) else { return false }
+        return obj.currentSchemaVersion > RealmUtil.currentSchemaVersion
+    }
+    
+    static var checkerObserverToken:NotificationToken? = nil
+    // RunChecker() に渡した checkHandler が呼び出された時は
+    // これに保存されている currentSchemaVersion が
+    // このバイナリの期待している RealmUtil.currentSchemaVersion よりも大きい値だったという意味になります。
+    static func RunChecker(checkerHandler:((_ newSchemaVersion:Int)->Void)?) {
+        if !RealmUtil.IsUseCloudRealm() { return }
+        print("RunChecker in.")
+        RealmUtil.RealmBlock { (realm) -> Void in
+            let obj:RealmCloudVersionChecker
+            if let currentObj = realm.object(ofType: RealmCloudVersionChecker.self, forPrimaryKey: uniqueID) {
+                print("RunChecker obj get: \(currentObj.currentSchemaVersion)")
+                obj = currentObj
+            }else{
+                obj = RealmCloudVersionChecker()
+                obj.currentSchemaVersion = Int(RealmUtil.currentSchemaVersion)
+                RealmUtil.WriteWith(realm: realm) { (realm) in
+                    print("RunChecker realm.add. \(obj.currentSchemaVersion)")
+                    realm.add(obj, update: .modified)
+                }
+            }
+            if obj.currentSchemaVersion > RealmUtil.currentSchemaVersion {
+                checkerHandler?(obj.currentSchemaVersion)
+                return
+            }
+            print("RunChecker observe.")
+            checkerObserverToken = obj.observe({ (change) in
+                print("RunChecker observe event got.")
+                switch change {
+                case .change(_, let propertys):
+                    for property in propertys {
+                        if property.name == "currentSchemaVersion", let newValue = property.newValue as? Int {
+                            if newValue > RealmUtil.currentSchemaVersion {
+                                checkerHandler?(newValue)
+                            }else{
+                                
+                            }
+                            break
+                        }
+                    }
+                default:
+                    break
+                }
+            })
+            // このタイミングで現在のバイナリの currentSchemaVersion の方が
+            // 保存されている currentSchemaVersion より新しければ、
+            // その値で上書きしておきます。
+            if obj.currentSchemaVersion < RealmUtil.currentSchemaVersion {
+                print("RunChecker update currentVersion: \(RealmUtil.currentSchemaVersion)")
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [checkerObserverToken]) { (realm) in
+                    obj.currentSchemaVersion = Int(RealmUtil.currentSchemaVersion)
+                }
+            }
+        }
+    }
+    
+    override class func primaryKey() -> String? {
+        return "id"
+    }
+    
+    override static func indexedProperties() -> [String] {
+        return ["id", "isDeleted"]
+    }
+}
+extension RealmCloudVersionChecker: CKRecordConvertible {
+}
+extension RealmCloudVersionChecker: CKRecordRecoverable {
+}
+extension RealmCloudVersionChecker: CanWriteIsDeleted {
 }
 
 // MARK: Model

@@ -556,7 +556,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
-                    RealmUtil.Write { (realm) in
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
                         globalState.IsNeedConfirmDeleteBook = value
                     }
                 }
@@ -1007,6 +1007,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         RealmUtil.SetIsUseCloudRealm(isUse: true)
                                         // local realm は消して良いと言われたのですが、ここで消してしまうとこのファイルを保持している realm object が生き残り続けて新しいファイルが生成できないという罠があるので消さずにおきます
                                         //RealmUtil.RemoveLocalRealmFile()
+                                        NiftyUtilitySwift.StartiCloudDataVersionChecker()
                                         NiftyUtilitySwift.EasyDialogLongMessageDialog(
                                             viewController: self,
                                             message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました"))
@@ -1053,6 +1054,31 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
     
+    // データは入っているけれど完全ではないぽい iCloudデータ を受信してしまったけれどどうする？
+    // とユーザに尋ねる
+    func ChooseInvalidiCloudDataProcess() {
+        DispatchQueue.main.async {
+            NiftyUtilitySwift.EasyDialogBuilder(self)
+            .textView(content: NSLocalizedString("SettingsViewController_ChooseInvalidiCloudData_Message", comment: "iCloud 側にデータが存在する事は確認したのですが、ことせかい で利用するために必須のデータを取得できませんでした。\n\nネットワークの状態が悪い場合や iCloud側 に保存されているデータの量が多かった場合、以前 iCloud同期 を行った端末のデータが iCloud側 へ転送しきれていなかった場合といったような色々な場合が考えられますが、とにかくこのままでは正常に利用する事はできそうにありません。\n\nなお、この端末にあるデータを iCloud側 に上書き保存する形で iCloud同期 を ON にする事もできます。iCloud側 に上書き保存する場合、iCloud側とこの端末側の両方に存在する設定や小説はこの端末側の値に、iCloud側にしか存在しない設定や小説はiCloud側の物が残るという形になります。\n\n上書き保存する形でiCloud同期を開始しますか？"), heightMultiplier: 0.65)
+            .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal", comment: "現在のデータでiCloud上のデータを上書きする"), callback: { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        self.overrideLocalToiCloud()
+                    })
+                }
+            })
+            .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_Cancel", comment: "iCloud同期をやめる(キャンセル)"), callback: { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
+                    guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                    row.value = false
+                    row.updateCell()
+                }
+            })
+            .build().show()
+        }
+    }
+    
     func CheckiCloudDataForiCloudEnable() {
         DispatchQueue.main.async {
             // 全てのダウンロードを止めてから作業を行います。
@@ -1086,15 +1112,48 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                     DispatchQueue.main.async {
                         RealmUtil.CheckCloudDataIsValid { (result) in
+                            func checkCloudVersionIsInvalid() -> Bool {
+                                // iCloud側のデータバージョンが実行中のバイナリよりも新しかった場合は拒否します
+                                if RealmCloudVersionChecker.CheckCloudDataHasInvalidVersion() == true {
+                                    guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return false }
+                                    row.value = false
+                                    row.updateCell()
+                                    NiftyUtilitySwift
+                                        .EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Title", comment: "アプリのバージョンアップが必要です"), message: NSLocalizedString("SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Message", comment: "iCloud側に保存されているデータは新しいバージョンで作成された物でした。iCloud同期を行うにはアプリのバージョンアップを行う必要があります。"), buttonTitle: nil, buttonAction: nil)
+                                    return true
+                                }
+                                return false
+                            }
                             switch result {
                             case .validDataAlive:
                                 // iCloud側に使えそうなデータがあった
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false) {
+                                        if checkCloudVersionIsInvalid() {
+                                            return
+                                        }
                                         self.ChooseUseiCloudDataOrOverrideLocalData()
                                     }
                                 }
                                 break
+                            case .dataAliveButNotValid:
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: false) {
+                                        if checkCloudVersionIsInvalid() {
+                                            return
+                                        }
+                                        self.ChooseInvalidiCloudDataProcess()
+                                    }
+                                }
+                            case .networkError:
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: false) {
+                                        guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                                        row.value = false
+                                        row.updateCell()
+                                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_FailedCheck_NetworkError", comment: "iCloud側のデータ確認に失敗しました。ネットワークに接続されていないようです。機内モードになっていたり電波の届かない場所に居るなどの問題があるかもしれません。iCloud同期の初回チェックは安定したインターネット接続ができる環境で行ってください。"), buttonTitle: nil, buttonAction: nil)
+                                    }
+                                }
                             case .validDataNotAlive:
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false) {

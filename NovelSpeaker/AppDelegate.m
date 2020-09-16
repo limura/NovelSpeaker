@@ -112,6 +112,7 @@ void uncaughtExceptionHandler(NSException *exception)
     
     [[NovelDownloadQueue shared] StartBackgroundFetchIfNeeded];
     [[NovelDownloadQueue shared] ClearDownloadCountBadge];
+    [NiftyUtilitySwift StartiCloudDataVersionChecker];
 
     return YES;
 }

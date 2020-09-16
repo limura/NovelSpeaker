@@ -226,11 +226,15 @@ extension StorySiteInfo : Decodable {
         injectStyle = try? values.decode(String.self, forKey: NestedKeys.injectStyle)
         nextButton = try? values.decode(String.self, forKey: NestedKeys.nextButton)
         firstPageButton = try? values.decode(String.self, forKey: NestedKeys.firstPageButton)
+        #if !os(watchOS)
         if let waitSecondInHeadlessString = try? values.decode(String.self, forKey: NestedKeys.waitSecondInHeadless), let value = Double(string: waitSecondInHeadlessString) {
             waitSecondInHeadless = value
         }else{
             waitSecondInHeadless = 0
         }
+        #else
+        waitSecondInHeadless = 0
+        #endif
     }
 }
 

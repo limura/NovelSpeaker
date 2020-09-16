@@ -11,6 +11,7 @@ import RealmSwift
 import UserNotifications
 import Kanna
 import DataCompression
+import StoreKit
 
 #if !os(watchOS)
 import PDFKit
@@ -1400,4 +1401,71 @@ class NiftyUtilitySwift: NSObject {
         }
         return String(decoding: data, as: UTF8.self)
     }
+    
+    #if !os(watchOS)
+    static func StopiCloudSync(viewController:UIViewController) {
+        EasyDialogNoButton(viewController: viewController, title: NSLocalizedString("SettingsViewController_CopyingCloudToLocal", comment: "iCloud側のデータを端末側のデータへ変換中"), message: "-") { (dialog) in
+            func assignMessage(message:String) {
+                DispatchQueue.main.async {
+                    guard let label = dialog.view.viewWithTag(100) as? UILabel else { return }
+                    label.text = message
+                }
+            }
+            if RealmUtil.CheckIsLocalRealmCreated() {
+                assignMessage(message: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Message", comment: "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。"))
+                return
+            }
+            guard let cloudRealm = try? RealmUtil.GetCloudRealm(), let localRealm = try? RealmUtil.GetLocalRealm() else {
+                assignMessage(message: NSLocalizedString("NiftyUtility_FailedConvertiCloudToLocal_CreateRealmFailed", comment: "iCloud側のデータからlocalデータへの書き換えに失敗しました。(どちらかのデータを開けませんでした)\n念の為、アプリを再起動してもう一度試してみてください。"))
+                return
+            }
+            do {
+                try RealmToRealmCopyTool.DoCopy(from: cloudRealm, to: localRealm, progress: { (text) in
+                    assignMessage(message: text)
+                })
+            }catch{
+                assignMessage(message: NSLocalizedString("NiftyUtility_FailedConvertiCloudToLocal_DoCopyFailed", comment: "iCloud側のデータからlocalデータへの書き換えに失敗しました。(データのコピー中にエラーが発生しました)\n念の為、アプリを再起動してもう一度試してみてください。"))
+                return
+            }
+            RealmUtil.SetIsUseCloudRealm(isUse: false)
+            RealmUtil.stopSyncEngine()
+            dialog.dismiss(animated: false) {
+                NiftyUtilitySwift.EasyDialogOneButton(
+                viewController: viewController,
+                title: nil,
+                message: NSLocalizedString("SettingsViewController_iCloudDisable_done", comment: "iCloud同期を停止しました"),
+                buttonTitle: nil,
+                buttonAction: nil)
+            }
+        }
+    }
+    #endif
+    
+    #if !os(watchOS)
+    @objc static func StartiCloudDataVersionChecker() {
+        RealmCloudVersionChecker.RunChecker { (version) in
+            DispatchQueue.main.async {
+                print("RealmCloudVersionChecker.RunChecker hit: \(version)")
+                guard let toplevelViewController = GetToplevelViewController(controller: nil) else { return }
+                // ここで呼び出すダイアログは閉じる事はしないため、
+                // 汎用の物は使わずに自前で制御します。
+                print("RealmCloudVersionChecker.RunChecker building Dialog...")
+                EasyDialogBuilder(toplevelViewController)
+                .title(title: NSLocalizedString("NiftyUtility_iCloudDataVersionIsLow_Title", comment: "iCloudとの同期に問題があります"))
+                .textView(content: NSLocalizedString("NiftyUtility_iCloudDataVersionIsLow_Message", comment: "iCloud側に保存されているデータは、この ことせかい の扱っているデータよりも新しいバージョンになっているようです。このまま iCloud同期 を行い続けるにはアプリのバージョンアップが必要となります。\nなお、古いiOSでご利用中などでアプリのバージョンアップができない場合など、アプリのバージョンアップができない場合には iCloud同期 を解除して頂く必要があります。どちらかを選択してください。"), heightMultiplier: 0.65)
+                .addButton(title: NSLocalizedString("NiftyUtility_iCloudDataVersionIsLow_AppVersionUpButton", comment: "バージョンアップ")) { (dialog) in
+                    guard let url = URL(string: "https://apps.apple.com/jp/app/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84/id914344185") else { return }
+                    RealmUtil.stopSyncEngine()
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                }
+                .addButton(title: NSLocalizedString("NiftyUtility_iCloudDataVersionIsLow_DisableiCloudButton", comment: "iCloud同期を停止")) { (dialog) in
+                    dialog.dismiss(animated: false) {
+                        StopiCloudSync(viewController: toplevelViewController)
+                    }
+                }
+                .build().show()
+            }
+        }
+    }
+    #endif
 }

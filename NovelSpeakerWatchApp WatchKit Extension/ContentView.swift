@@ -66,7 +66,7 @@ struct ContentView: View {
     func GetContentText(novelID:String, chapterNumber:Int) -> String? {
         return RealmUtil.RealmBlock { (realm) -> String? in
             guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber) else { return nil }
-            StorySpeaker.shared.SetStory(realm: realm, story: story)
+            StorySpeaker.shared.SetStory(story: story)
             return story.content
         }
     }
@@ -114,7 +114,7 @@ struct CheckiCloudSyncView: View {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     var story = Story()
                     story.content = self.speechText
-                    StorySpeaker.shared.SetStory(realm: realm, story: story)
+                    StorySpeaker.shared.SetStory(story: story)
                     StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                 }
             }) {
@@ -232,8 +232,15 @@ class ViewData:ObservableObject {
     func CheckiCloudSync() {
         DispatchQueue.main.async {
             RealmUtil.CheckCloudDataIsValid { (result) in
+                switch result {
+                case .validDataAlive:
+                    break
+                default:
+                    // TODO: iCloudが使えなかった場合はそういう表示にするべき
+                    return
+                }
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard result == true, let novels = RealmNovel.GetAllObjectsWith(realm: realm), novels.count > 1 else { return }
+                    guard let novels = RealmNovel.GetAllObjectsWith(realm: realm), novels.count > 1 else { return }
                     self.ShowBookshelfView(novelList: Array(novels))
                 }
             }

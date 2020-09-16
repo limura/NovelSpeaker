@@ -143,9 +143,7 @@ class NovelSpeakerUtility: NSObject {
         if globalState.defaultSpeakerID.count <= 0
             || globalState.defaultDisplaySettingID.count <= 0
             || globalState.defaultSpeechOverrideSettingID.count <= 0
-            || globalState.webImportBookmarkArray.count <= 0 {
-            return false
-        }
+            || globalState.webImportBookmarkArray.count <= 0 { return false }
         if realm.objects(RealmSpeakerSetting.self).count <= 0 { return false }
         if realm.objects(RealmSpeechSectionConfig.self).count <= 0 { return false }
         if realm.objects(RealmSpeechWaitConfig.self).count <= 0 { return false }
