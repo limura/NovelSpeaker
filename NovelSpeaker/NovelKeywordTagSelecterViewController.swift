@@ -10,7 +10,7 @@ import UIKit
 import Eureka
 import RealmSwift
 
-class NovelKeywordTagSelecterViewController: FormViewController {
+class NovelKeywordTagSelecterViewController: FormViewController, RealmObserverResetDelegate {
     var novelID:String = ""
     var novelTagNotificationToken:NotificationToken? = nil
     var searchKey:String = ""
@@ -26,6 +26,19 @@ class NovelKeywordTagSelecterViewController: FormViewController {
         
         self.createCells()
         self.observeRealmNovelTag()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
+    }
+    
+    deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
+    }
+    
+    func StopObservers() {
+        novelTagNotificationToken = nil
+    }
+    func RestartObservers() {
+        StopObservers()
+        observeRealmNovelTag()
     }
     
     func createCells() {

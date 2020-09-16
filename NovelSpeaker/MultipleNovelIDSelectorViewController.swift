@@ -16,7 +16,7 @@ protocol MultipleNovelIDSelectorDelegate : class {
     func MultipleNovelIDSelectorSelected(selectedNovelIDSet:Set<String>, hint:String)
 }
 
-class MultipleNovelIDSelectorViewController: FormViewController {
+class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverResetDelegate {
     public var SelectedNovelIDSet:Set<String> = Set<String>()
     public var IsUseAnyNovelID = true
     public var Hint = ""
@@ -36,10 +36,20 @@ class MultipleNovelIDSelectorViewController: FormViewController {
         self.filterButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .done, target: self, action: #selector(filterButtonClicked(sender:)))
         navigationItem.rightBarButtonItems = [filterButton]
         registNotificationCenter()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
 
     deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         self.unregistNotificationCenter()
+    }
+    
+    func StopObservers() {
+        novelArrayNotificationToken = nil
+    }
+    func RestartObservers() {
+        StopObservers()
+        observeNovelArray()
     }
 
     override func viewWillDisappear(_ animated: Bool) {

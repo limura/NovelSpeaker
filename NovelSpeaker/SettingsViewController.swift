@@ -11,7 +11,7 @@ import MessageUI
 import Eureka
 import RealmSwift
 
-class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate {
+class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate, RealmObserverResetDelegate {
     var m_NarouContentCacheData:NarouContentCacheData? = nil
     var m_RubySwitchToggleHitCount = 0
     var notificationTokens:[NSObjectProtocol] = []
@@ -24,6 +24,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         BehaviorLogger.AddLog(description: "SettingsViewController viewDidLoad", data: [:])
         createSettingsTable()
         registerObserver()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -34,6 +35,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         removeNotificationCenter()
+    }
+    
+    deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
+    }
+    
+    func StopObservers(){
+        globalDataNotificationToken = nil
+        defaultSpeechOverrideSettingNotificationToken = nil
+
+    }
+    func RestartObservers(){
+        StopObservers()
+        registerObserver()
     }
     
     func registerObserver() {
@@ -885,6 +900,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: false) {
                                     RealmUtil.SetIsUseCloudRealm(isUse: false)
+                                    RealmObserverHandler.shared.AnnounceRestartObservers()
                                     RealmUtil.stopSyncEngine()
                                     //RealmUtil.RemoveCloudRealmFile()
                                     NiftyUtilitySwift.EasyDialogOneButton(
@@ -963,6 +979,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: false) {
                                     RealmUtil.SetIsUseCloudRealm(isUse: true)
+                                    RealmObserverHandler.shared.AnnounceRestartObservers()
                                     // TODO: local realm file をここで消してしまうと、realm object を握っている奴が残り続ける関係なのか、
                                     // 再度 iCloud をOFFにしようとして local の realm file が生成されようとした時に生成できないぽく、
                                     // そうするとメモリ上で動作してしまって
@@ -1005,6 +1022,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 button2Action: {
                                     DispatchQueue.main.async {
                                         RealmUtil.SetIsUseCloudRealm(isUse: true)
+                                        RealmObserverHandler.shared.AnnounceRestartObservers()
                                         // local realm は消して良いと言われたのですが、ここで消してしまうとこのファイルを保持している realm object が生き残り続けて新しいファイルが生成できないという罠があるので消さずにおきます
                                         //RealmUtil.RemoveLocalRealmFile()
                                         NiftyUtilitySwift.StartiCloudDataVersionChecker()

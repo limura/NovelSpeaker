@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class SpeechModSettingsTableViewControllerSwift: UITableViewController {
+class SpeechModSettingsTableViewControllerSwift: UITableViewController, RealmObserverResetDelegate {
     static let speechModSettingsTableViewDefaultCellID = "speechModSettingsTableViewDefaultCell"
     var m_FilterString = ""
     var speechModSettingObserverToken:NotificationToken? = nil
@@ -33,9 +33,11 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
         let addButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.add, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.addButtonClicked))
         let filterButton = UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.search, target: self, action: #selector(SpeechModSettingsTableViewControllerSwift.filterButtonClicked))
         navigationItem.rightBarButtonItems = [addButton, editButtonItem, filterButton]
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         self.unregistNotificationCenter()
     }
     
@@ -52,6 +54,14 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func StopObservers() {
+        removeNotificationReceiver()
+    }
+    func RestartObservers() {
+        StopObservers()
+        addNotificationReceiver()
     }
     
     func registNotificationCenter() {

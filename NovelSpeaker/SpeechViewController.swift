@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 import IceCream
 
-class SpeechViewController: UIViewController, StorySpeakerDeletgate {
+class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate {
     
     public var storyID : String? = nil
     public var isNeedResumeSpeech : Bool = false
@@ -60,6 +60,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         }
         observeDispaySetting()
         registNotificationCenter()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -69,6 +70,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
     
     deinit {
         self.unregistNotificationCenter()
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
     }
 
     // 表示される直前に呼ばれる
@@ -85,6 +87,22 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate {
         if range.location >= 0 && range.location < self.textView.text.count {
             storySpeaker.readLocation = range.location
         }
+    }
+    
+    func StopObservers() {
+        novelObserverToken = nil
+        storyObserverToken = nil
+        storyArrayObserverToken = nil
+        displaySettingObserverToken = nil
+    }
+    func RestartObservers() {
+        StopObservers()
+        observeDispaySetting()
+        guard let storyID = self.storyID else { return }
+        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
+        observeStory(storyID: storyID)
+        observeNovel(novelID: novelID)
+        observeStoryArray(novelID: novelID)
     }
     
     func initWidgets() {

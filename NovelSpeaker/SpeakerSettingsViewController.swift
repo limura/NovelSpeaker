@@ -11,7 +11,7 @@ import Eureka
 import AVFoundation
 import RealmSwift
 
-class SpeakerSettingsViewController: FormViewController {
+class SpeakerSettingsViewController: FormViewController, RealmObserverResetDelegate {
     let speaker = SpeechBlockSpeaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     var isRateSettingSync = true
@@ -28,9 +28,18 @@ class SpeakerSettingsViewController: FormViewController {
         createSettingsTable()
         registNotificationCenter()
         registNotificationToken()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         self.unregistNotificationCenter()
+    }
+    
+    func StopObservers() {
+        speakerSettingNotificationToken = nil
+    }
+    func RestartObservers() {
+        registNotificationToken()
     }
     
     func registNotificationToken() {

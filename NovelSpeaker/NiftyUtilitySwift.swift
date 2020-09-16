@@ -1428,6 +1428,7 @@ class NiftyUtilitySwift: NSObject {
                 return
             }
             RealmUtil.SetIsUseCloudRealm(isUse: false)
+            RealmObserverHandler.shared.AnnounceRestartObservers()
             RealmUtil.stopSyncEngine()
             dialog.dismiss(animated: false) {
                 NiftyUtilitySwift.EasyDialogOneButton(

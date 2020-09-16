@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TextSizeSettingViewControllerSwift: UIViewController {
+class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDelegate {
     @IBOutlet weak var textSizeSlider: UISlider!
     @IBOutlet weak var sampleTextTextView: UITextView!
 
@@ -18,6 +18,29 @@ class TextSizeSettingViewControllerSwift: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        addObservers()
+        
+        self.navigationItem.rightBarButtonItems = [
+            UIBarButtonItem(title: NSLocalizedString("TextSizeSettingViewController_FontSettingTitle", comment: "字体設定"), style: .plain, target: self, action: #selector(fontSettingButtonClicked(_:))),
+            UIBarButtonItem(title: NSLocalizedString("TextSizeSettinvViewController_ColorSettingTitle", comment: "色設定"), style: .plain, target: self, action: #selector(colorSettingButtonClicked(_:))),
+        ]
+        registNotificationCenter()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
+    }
+    deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
+        self.unregistNotificationCenter()
+    }
+    
+    func StopObservers() {
+        displaySettingObserbeToken = nil
+    }
+    func RestartObservers() {
+        StopObservers()
+        addObservers()
+    }
+    
+    func addObservers() {
         RealmUtil.RealmBlock { (realm) -> Void in
             if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
                 setFont(displaySetting: displaySetting)
@@ -33,15 +56,6 @@ class TextSizeSettingViewControllerSwift: UIViewController {
                 }
             }
         }
-        
-        self.navigationItem.rightBarButtonItems = [
-            UIBarButtonItem(title: NSLocalizedString("TextSizeSettingViewController_FontSettingTitle", comment: "字体設定"), style: .plain, target: self, action: #selector(fontSettingButtonClicked(_:))),
-            UIBarButtonItem(title: NSLocalizedString("TextSizeSettinvViewController_ColorSettingTitle", comment: "色設定"), style: .plain, target: self, action: #selector(colorSettingButtonClicked(_:))),
-        ]
-        registNotificationCenter()
-    }
-    deinit {
-        self.unregistNotificationCenter()
     }
 
     override func viewDidDisappear(_ animated: Bool) {

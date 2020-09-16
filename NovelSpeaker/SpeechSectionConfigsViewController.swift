@@ -10,7 +10,7 @@ import UIKit
 import Eureka
 import RealmSwift
 
-class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSelectorDelegate {
+class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSelectorDelegate, RealmObserverResetDelegate {
     let speaker = SpeechBlockSpeaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     var hideCache:[String:Bool] = [:]
@@ -29,10 +29,20 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         createCells()
         observeSectionConfig()
         registNotificationCenter()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
 
     deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         self.unregistNotificationCenter()
+    }
+    
+    func StopObservers() {
+        sectionConfigObserverToken = nil
+    }
+    func RestartObservers() {
+        StopObservers()
+        observeSectionConfig()
     }
     
     func registNotificationCenter() {

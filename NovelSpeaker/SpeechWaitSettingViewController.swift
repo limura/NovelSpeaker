@@ -10,7 +10,7 @@ import UIKit
 import Eureka
 import RealmSwift
 
-class SpeechWaitSettingViewControllerSwift: FormViewController {
+class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverResetDelegate {
     final let TestTextAreaTag = "TestTextAreaTag"
     var testText:String = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     let speaker = SpeechBlockSpeaker()
@@ -44,10 +44,21 @@ class SpeechWaitSettingViewControllerSwift: FormViewController {
         createCells()
         registNotificationCenter()
         registNotificationToken()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
 
     deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         self.unregistNotificationCenter()
+    }
+    
+    func StopObservers() {
+        speechWaitSettingNotificationToken = nil
+        globalStateNotificationToken = nil
+    }
+    func RestartObservers() {
+        StopObservers()
+        registNotificationToken()
     }
     
     func registNotificationToken() {

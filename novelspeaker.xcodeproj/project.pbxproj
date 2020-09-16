@@ -145,6 +145,8 @@
 		2173A6BF21CC529F002E9EA8 /* FloatingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */; };
 		2173A6C121CC530E002E9EA8 /* FloatingButton.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2173A6C021CC530E002E9EA8 /* FloatingButton.xib */; };
 		2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
+		217DCC5225119B9A00952A17 /* RealmObserverHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217DCC5125119B9A00952A17 /* RealmObserverHandler.swift */; };
+		217DCC5325121FA400952A17 /* RealmObserverHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217DCC5125119B9A00952A17 /* RealmObserverHandler.swift */; };
 		217E683B1998F6A000C656AA /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 217E683A1998F6A000C656AA /* MediaPlayer.framework */; };
 		21814C601E8D7FD00096CB42 /* Icon-small-40@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21814C5F1E8D7FD00096CB42 /* Icon-small-40@3x.png */; };
 		21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */; };
@@ -459,6 +461,7 @@
 		2177634F19756781004F22FD /* GlobalStateCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalStateCacheData.h; sourceTree = "<group>"; };
 		2177635019756781004F22FD /* GlobalStateCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalStateCacheData.m; sourceTree = "<group>"; };
 		21778D701A6168C30042F2F1 /* SettingDataModel 7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 7.xcdatamodel"; sourceTree = "<group>"; };
+		217DCC5125119B9A00952A17 /* RealmObserverHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmObserverHandler.swift; sourceTree = "<group>"; };
 		217E683A1998F6A000C656AA /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeaker.entitlements; sourceTree = "<group>"; };
 		21814C591E8CE8A00096CB42 /* NovelSpeakerURLDownloadExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerURLDownloadExtension.entitlements; sourceTree = "<group>"; };
@@ -701,6 +704,7 @@
 				21C759F92287123500956B73 /* RealmModels.swift */,
 				21C759FD22871D7C00956B73 /* CoreDataToRealmTool.swift */,
 				21A291F222A13CDD000AA58C /* RealmToRealmCopyTool.swift */,
+				217DCC5125119B9A00952A17 /* RealmObserverHandler.swift */,
 			);
 			path = Realm;
 			sourceTree = "<group>";
@@ -1697,6 +1701,7 @@
 				2124B39923BBFB7A002EBC31 /* CoreDataObjectHolder.m in Sources */,
 				2124B39823BBFAF4002EBC31 /* GlobalStateCacheData.m in Sources */,
 				2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */,
+				217DCC5325121FA400952A17 /* RealmObserverHandler.swift in Sources */,
 				2193094F23BBE56A00035EF0 /* NotificationView.swift in Sources */,
 				214A400123D838C10034DFB2 /* SpeechBlockSpeaker.swift in Sources */,
 				2124B39023BBF392002EBC31 /* NovelSpeakerNotificationTool.swift in Sources */,
@@ -1737,6 +1742,7 @@
 				21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */,
 				212137CE24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */,
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
+				217DCC5225119B9A00952A17 /* RealmObserverHandler.swift in Sources */,
 				212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,

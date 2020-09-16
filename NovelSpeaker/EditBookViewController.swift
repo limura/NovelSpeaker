@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 import SZTextView
 
-class EditBookViewController: UIViewController {
+class EditBookViewController: UIViewController, RealmObserverResetDelegate {
     public var targetNovelID:String = ""
     
     @IBOutlet weak var titleTextField: UITextField!
@@ -57,16 +57,26 @@ class EditBookViewController: UIViewController {
         }
         registNotificationCenter()
         startObserve()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     deinit {
         self.unregistNotificationCenter()
         endObserve()
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         saveCurrentStory()
         saveCurrentNovel()
+    }
+    
+    func StopObservers() {
+        endObserve()
+    }
+    func RestartObservers() {
+        StopObservers()
+        startObserve()
     }
     
     func initWidgets() {
@@ -284,6 +294,7 @@ class EditBookViewController: UIViewController {
     func endObserve() {
         let center = NotificationCenter.default
         center.removeObserver(self)
+        fontSizeObserverToken = nil
     }
 
     @objc func willShowKeyboardEventHandler(notification:Notification) {

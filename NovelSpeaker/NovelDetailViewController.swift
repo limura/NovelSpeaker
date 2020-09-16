@@ -10,7 +10,7 @@ import UIKit
 import Eureka
 import RealmSwift
 
-class NovelDetailViewController: FormViewController {
+class NovelDetailViewController: FormViewController, RealmObserverResetDelegate {
     public var novelID = ""
     var speakerSettingObserverToken:NotificationToken? = nil
     var speechSectionConfigObserverToken:NotificationToken? = nil
@@ -27,10 +27,26 @@ class NovelDetailViewController: FormViewController {
         observeSpeechSectionConfig()
         observeTag()
         registNotificationCenter()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         self.unregistNotificationCenter()
+    }
+    
+    func StopObservers() {
+        speakerSettingObserverToken = nil
+        speechSectionConfigObserverToken = nil
+        novelObserverToken = nil
+        tagObserverToken = nil
+    }
+    func RestartObservers() {
+        StopObservers()
+        observeNovel()
+        observeSpeakerSetting()
+        observeSpeechSectionConfig()
+        observeTag()
     }
     
     func registNotificationCenter() {
@@ -94,7 +110,7 @@ class NovelDetailViewController: FormViewController {
     func observeSpeechSectionConfig() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let sectionConfigList = RealmSpeechSectionConfig.GetAllObjectsWith(realm: realm) else { return }
-            self.speakerSettingObserverToken = sectionConfigList.observe({ [weak self] (change) in
+            self.speechSectionConfigObserverToken = sectionConfigList.observe({ [weak self] (change) in
                 guard let self = self else { return }
                 switch change {
                 case .initial(_):

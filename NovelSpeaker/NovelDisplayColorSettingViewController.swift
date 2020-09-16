@@ -10,7 +10,7 @@ import UIKit
 import Eureka
 import RealmSwift
 
-class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPresentationControllerDelegate, MSColorSelectionViewControllerDelegate {
+class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPresentationControllerDelegate, MSColorSelectionViewControllerDelegate, RealmObserverResetDelegate {
     var tmpColorSetting:UIColor = UIColor.white
     
     var globalStateColorNotificationToken:NotificationToken? = nil
@@ -27,8 +27,20 @@ class NovelDisplayColorSettingViewController: FormViewController, UIPopoverPrese
         // Do any additional setup after loading the view.
         createForms()
         registNotificationToken()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
+    deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
+    }
+    
+    func StopObservers() {
+        globalStateColorNotificationToken = nil
+    }
+    func RestartObservers() {
+        StopObservers()
+        registNotificationToken()
+    }
 
     /*
     // MARK: - Navigation

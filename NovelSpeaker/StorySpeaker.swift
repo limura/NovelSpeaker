@@ -18,7 +18,7 @@ protocol StorySpeakerDeletgate {
     func storySpeakerStoryChanged(story:Story)
 }
 
-class StorySpeaker: NSObject, SpeakRangeDelegate {
+class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     static let shared = StorySpeaker()
     
     let speaker = SpeechBlockSpeaker()
@@ -61,11 +61,33 @@ class StorySpeaker: NSObject, SpeakRangeDelegate {
             print("pageTurningSoundPlayer load media failed.")
         }
         ApplyDefaultSpeakerSettingToAnnounceSpeaker()
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         DisableMPRemoteCommandCenterEvents()
         unregistAudioNotifications()
+    }
+    
+    func StopObservers() {
+        globalStateObserverToken = nil
+        storyObserverToken = nil
+        defaultSpeakerSettingObserverToken = nil
+        speechSectionConfigArrayObserverToken = nil
+        defaultSpeechOverrideSettingObserverToken = nil
+        novelIDSpeechOverrideSettingArrayObserverToken = nil
+        speechModSettingArrayObserverToken = nil
+        bookmarkObserverToken = nil
+    }
+    func RestartObservers() {
+        StopObservers()
+        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
+        observeGlobalState()
+        observeSpeechModSetting(novelID: novelID)
+        observeSpeechConfig(novelID: novelID)
+        observeBookmark(novelID: novelID)
+        observeStory(storyID: storyID)
     }
     
     func ApplyStoryToSpeaker(realm: Realm, story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {

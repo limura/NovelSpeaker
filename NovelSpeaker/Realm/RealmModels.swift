@@ -779,6 +779,9 @@ struct Story: Codable {
             }
         }
     }
+    static func StopChecker() {
+        checkerObserverToken = nil
+    }
     
     override class func primaryKey() -> String? {
         return "id"

@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class BookShelfTreeViewCell: UITableViewCell {
+class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
     public static let id = "BookShelfTreeViewCell"
     final let depthWidth:Float = 32.0
     
@@ -33,6 +33,7 @@ class BookShelfTreeViewCell: UITableViewCell {
     let realmQueue:DispatchQueue? = BookShelfTreeViewCell.staticRealmQueue
     
     deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         self.unregistDownloadStatusNotification()
     }
 
@@ -45,6 +46,7 @@ class BookShelfTreeViewCell: UITableViewCell {
         likeButton.contentHorizontalAlignment = .fill
         likeButton.contentVerticalAlignment = .fill
         downloadingActivityIndicator.isHidden = true
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     func unregistAllObserver() {
@@ -55,6 +57,15 @@ class BookShelfTreeViewCell: UITableViewCell {
         novelArrayObserverToken = nil
         bookmarkObserverToken = nil
     }
+
+    func StopObservers() {
+        unregistAllObserver()
+    }
+    func RestartObservers() {
+        unregistAllObserver()
+        assignObservers()
+    }
+    
     func cleanCellDisplay() {
         likeButton.imageView?.contentMode = .scaleAspectFit
         likeButton.contentHorizontalAlignment = .fill
@@ -67,6 +78,7 @@ class BookShelfTreeViewCell: UITableViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         unregistAllObserver()
         cleanCellDisplay()
     }
@@ -371,6 +383,24 @@ class BookShelfTreeViewCell: UITableViewCell {
     @objc func downloadStatusChanged(notification:Notification) {
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: self.watchNovelIDArray)
     }
+    
+    func assignObservers() {
+        registerGlobalStateObserver()
+        if watchNovelIDArray.count == 1 {
+            let novelID = watchNovelIDArray[0]
+            registerStoryObserver(novelID: novelID)
+            registerNovelObserver(novelID: novelID)
+            registerBookmarkObserver(novelID: novelID)
+            self.novelArrayObserverToken = nil
+            self.storyForNovelArrayObserverToken = nil
+        }else{
+            self.storyObserverToken = nil
+            self.novelObserverToken = nil
+            self.bookmarkObserverToken = nil
+            registerNovelArrayObserver(novelIDArray: watchNovelIDArray)
+            registerStoryForNovelArrayObserver(novelIDArray: watchNovelIDArray)
+        }
+    }
 
     func cellSetup(title:String, treeLevel: Int, watchNovelIDArray: [String]) {
         self.watchNovelIDArray = watchNovelIDArray
@@ -381,26 +411,19 @@ class BookShelfTreeViewCell: UITableViewCell {
             titleLabel.text = title
         }
         self.checkAndUpdateNewImage(novelIDArray: watchNovelIDArray)
-        registerGlobalStateObserver()
+        assignObservers()
         if watchNovelIDArray.count == 1 {
             let novelID = watchNovelIDArray[0]
             self.readProgressView.isHidden = false
             applyCurrentReadingPointToIndicator(novelID: novelID)
-            registerStoryObserver(novelID: novelID)
-            registerNovelObserver(novelID: novelID)
-            registerBookmarkObserver(novelID: novelID)
             applyLikeStarStatus(novelID: novelID)
             self.likeButton.isHidden = false
-            self.storyForNovelArrayObserverToken = nil
         }else{
             self.readProgressView.isHidden = true
             self.likeButton.isHidden = true
-            registerStoryForNovelArrayObserver(novelIDArray: watchNovelIDArray)
-            registerNovelArrayObserver(novelIDArray: watchNovelIDArray)
-            self.storyObserverToken = nil
-            self.bookmarkObserverToken = nil
         }
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     public var height : CGFloat {
