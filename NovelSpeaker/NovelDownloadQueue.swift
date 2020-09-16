@@ -395,7 +395,7 @@ class NovelDownloadQueue : NSObject {
     let cacheFileExpireTimeinterval:Double = 60*60*6
     let DownloadCountKey = "NovelDownloadQueue_DownloadCount"
     let AlreadyBackgroundFetchedNovelIDListKey = "NovelDownloadQueue_AlreadyBackgroundFetchedNovelIDList"
-    let backgroundFetchDeadlineTimeInSec:Double = 20.0
+    let backgroundFetchDeadlineTimeInSec:Double = 23.0
     let fetcherPoolLock = NSLock()
     var fetcherPool:[UUID:(Bool, StoryFetcher)] = [:]
 
@@ -665,8 +665,8 @@ class NovelDownloadQueue : NSObject {
         
         Timer.scheduledTimer(withTimeInterval: deadlineTimeInterval, repeats: false) { (timer) in
             self.downloadStop()
-            // downloadStop() した後、ダウンロードが終了するまで9秒待ちます。
-            Timer.scheduledTimer(withTimeInterval: 9.0, repeats: false){ (timer) in
+            // downloadStop() した後、ダウンロードが終了するまで3秒待ちます。
+            Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false){ (timer) in
                 NovelDownloader.FlushAllWritePool()
                 let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
                 self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
