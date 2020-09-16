@@ -873,6 +873,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                             guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                                             row.value = true
                                             row.updateCell()
+                                            RealmUtil.ChangeToCloudRealm()
                                         }
                                     })
                                 }
@@ -893,16 +894,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                                         row.value = true
                                         row.updateCell()
+                                        RealmUtil.ChangeToCloudRealm()
                                     })
                                 }
                                 return
                             }
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: false) {
-                                    RealmUtil.SetIsUseCloudRealm(isUse: false)
-                                    RealmObserverHandler.shared.AnnounceRestartObservers()
-                                    RealmUtil.stopSyncEngine()
-                                    //RealmUtil.RemoveCloudRealmFile()
+                                    RealmUtil.ChangeToLocalRealm()
                                     NiftyUtilitySwift.EasyDialogOneButton(
                                         viewController: self,
                                         title: nil,
@@ -952,6 +951,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                             guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                                             row.value = false
                                             row.updateCell()
+                                            RealmUtil.ChangeToLocalRealm()
                                         }
                                     })
                                 }
@@ -972,20 +972,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                                         row.value = false
                                         row.updateCell()
+                                        RealmUtil.ChangeToLocalRealm()
                                     })
                                 }
                                 return
                             }
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: false) {
-                                    RealmUtil.SetIsUseCloudRealm(isUse: true)
-                                    RealmObserverHandler.shared.AnnounceRestartObservers()
-                                    // TODO: local realm file をここで消してしまうと、realm object を握っている奴が残り続ける関係なのか、
-                                    // 再度 iCloud をOFFにしようとして local の realm file が生成されようとした時に生成できないぽく、
-                                    // そうするとメモリ上で動作してしまって
-                                    // アプリ起動中はちゃんと動いているように見えるのだけれど
-                                    // アプリを再起動すると綺麗サッパリ消えているという症状になってしまうようなので消さずにおきます。
-                                    //RealmUtil.RemoveLocalRealmFile()
+                                    RealmUtil.ChangeToCloudRealm()
                                     NiftyUtilitySwift.EasyDialogLongMessageDialog(
                                         viewController: self,
                                         message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました。\n同期は開始されましたが、端末側に保存されているデータをiCloud側へ登録する作業は続いています。\n端末側に保存されているデータが多い場合には、iCloud側への転送が終わるまでかなりの時間がかかる可能性があります。\nなお、残念ながらiCloud側への転送が終わったかどうかを知るすべが(開発者の知る限りでは)ありません。Appleの解説によると24時間の間はアプリを再度立ち上げれば転送を継続してくれるそうですが、機内モードにすると全てを諦められてしまうなどといった問題があるという話をWeb上でみかけたりしましたので、あまり安心はできないかもしれません。\n一応未送信や未受信のデータがある場合には通信中のインジケータを回すように努力はしますが、このインジケータが消えた事で送信が終了したというわけではないかもしれない、という事を理解しておいてください。"))
@@ -1016,15 +1010,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                                         row.value = false
                                         row.updateCell()
+                                        RealmUtil.ChangeToLocalRealm()
                                     }
                                 },
                                 button2Title: nil, // OK
                                 button2Action: {
                                     DispatchQueue.main.async {
-                                        RealmUtil.SetIsUseCloudRealm(isUse: true)
-                                        RealmObserverHandler.shared.AnnounceRestartObservers()
-                                        // local realm は消して良いと言われたのですが、ここで消してしまうとこのファイルを保持している realm object が生き残り続けて新しいファイルが生成できないという罠があるので消さずにおきます
-                                        //RealmUtil.RemoveLocalRealmFile()
+                                        RealmUtil.ChangeToCloudRealm()
                                         NiftyUtilitySwift.StartiCloudDataVersionChecker()
                                         NiftyUtilitySwift.EasyDialogLongMessageDialog(
                                             viewController: self,
@@ -1066,6 +1058,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                     row.value = false
                     row.updateCell()
+                    RealmUtil.ChangeToLocalRealm()
                 }
             })
             .build().show()
@@ -1091,6 +1084,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                     row.value = false
                     row.updateCell()
+                    RealmUtil.ChangeToLocalRealm()
                 }
             })
             .build().show()
@@ -1124,6 +1118,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                                 row.value = false
                                 row.updateCell()
+                                RealmUtil.ChangeToLocalRealm()
                             })
                         }
                         return
@@ -1136,6 +1131,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                     guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return false }
                                     row.value = false
                                     row.updateCell()
+                                    RealmUtil.ChangeToLocalRealm()
                                     NiftyUtilitySwift
                                         .EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Title", comment: "アプリのバージョンアップが必要です"), message: NSLocalizedString("SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Message", comment: "iCloud側に保存されているデータは新しいバージョンで作成された物でした。iCloud同期を行うにはアプリのバージョンアップを行う必要があります。"), buttonTitle: nil, buttonAction: nil)
                                     return true
@@ -1169,6 +1165,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                                         row.value = false
                                         row.updateCell()
+                                        RealmUtil.ChangeToLocalRealm()
                                         NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_FailedCheck_NetworkError", comment: "iCloud側のデータ確認に失敗しました。ネットワークに接続されていないようです。機内モードになっていたり電波の届かない場所に居るなどの問題があるかもしれません。iCloud同期の初回チェックは安定したインターネット接続ができる環境で行ってください。"), buttonTitle: nil, buttonAction: nil)
                                     }
                                 }
@@ -1184,6 +1181,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                                         row.value = false
                                         row.updateCell()
+                                        RealmUtil.ChangeToLocalRealm()
                                         NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_FailedCheckIcloudDataIsValid", comment: "iCloud側のデータ確認に失敗しました。"), buttonTitle: nil, buttonAction: nil)
                                     }
                                 }

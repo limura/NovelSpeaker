@@ -448,6 +448,28 @@ import AVFoundation
         defaults.set(isUse, forKey: UseCloudRealmKey)
         NovelSpeakerNotificationTool.AnnounceRealmSettingChanged()
     }
+    // IsUseCloudRealm が true になるように書き換えます。
+    // 同時に全ての NotificationToken を作り直させたり、
+    // 使わなくなった Realm のデータファイルを消したりします。
+    // 注: EnableSyncEngine() は呼び出しません。
+    // というか、EnableSyncEngine() はこれを呼ぶ前の
+    // iCloud側 が使えるかを確認する時に呼び出されているはずです。
+    // これが呼び出されるのは iCloud側のデータ が正しく入っている
+    // (つまり既に SyncEngine が動いている)状態のはずです。
+    static func ChangeToCloudRealm(){
+        SetIsUseCloudRealm(isUse: true)
+        RealmObserverHandler.shared.AnnounceRestartObservers()
+        RemoveLocalRealmFile()
+    }
+    // IsUseCloudRealm が false になるように書き換えます。
+    // 同時に全ての NotificationToken を作り直させたり、
+    // 使わなくなった Realm のデータファイルを消したりします。
+    static func ChangeToLocalRealm(){
+        SetIsUseCloudRealm(isUse: false)
+        stopSyncEngine()
+        RealmObserverHandler.shared.AnnounceRestartObservers()
+        RemoveCloudRealmFile()
+    }
     static func GetRealm(queue:DispatchQueue? = nil) throws -> Realm {
         if IsUseCloudRealm() {
             if syncEngine == nil {

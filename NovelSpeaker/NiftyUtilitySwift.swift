@@ -1427,9 +1427,7 @@ class NiftyUtilitySwift: NSObject {
                 assignMessage(message: NSLocalizedString("NiftyUtility_FailedConvertiCloudToLocal_DoCopyFailed", comment: "iCloud側のデータからlocalデータへの書き換えに失敗しました。(データのコピー中にエラーが発生しました)\n念の為、アプリを再起動してもう一度試してみてください。"))
                 return
             }
-            RealmUtil.SetIsUseCloudRealm(isUse: false)
-            RealmObserverHandler.shared.AnnounceRestartObservers()
-            RealmUtil.stopSyncEngine()
+            RealmUtil.ChangeToLocalRealm()
             dialog.dismiss(animated: false) {
                 NiftyUtilitySwift.EasyDialogOneButton(
                 viewController: viewController,
