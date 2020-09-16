@@ -668,8 +668,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         setStoryWithoutSetToStorySpeaker(story: story)
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false
-            RealmUtil.RealmBlock { (realm) -> Void in
-                self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+            DispatchQueue.main.async {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
             }
         }
     }
