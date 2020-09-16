@@ -1206,24 +1206,39 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             return
         }
         
-        DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogTwoButton(
-                viewController: self,
-                title: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmTitle", comment: "iCloud 同期を有効にしますか？"),
-                message: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmMessage", comment: "iCloud 同期を有効にすると、ことせかい 内のデータを書き換えるたびに iCloud による通信が試みるようになります。例えば小説を開いたり、読み上げを行ったりしただけでもデータが書き換わりますので、頻繁に通信が発生する事になります。"),
-                button1Title: nil,
-                button1Action: {
-                    DispatchQueue.main.async {
-                        guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
-                        row.value = false
-                        row.updateCell()
-                    }
-                },
-                button2Title: nil,
-                button2Action: {
-                    self.CheckiCloudDataForiCloudEnable()
-                })
-        }
+        CheckiCloudAccountStatusIsValid(okHandler: {
+            DispatchQueue.main.async {
+                NiftyUtilitySwift.EasyDialogTwoButton(
+                    viewController: self,
+                    title: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmTitle", comment: "iCloud 同期を有効にしますか？"),
+                    message: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmMessage", comment: "iCloud 同期を有効にすると、ことせかい 内のデータを書き換えるたびに iCloud による通信が試みるようになります。例えば小説を開いたり、読み上げを行ったりしただけでもデータが書き換わりますので、頻繁に通信が発生する事になります。"),
+                    button1Title: nil,
+                    button1Action: {
+                        DispatchQueue.main.async {
+                            guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                            row.value = false
+                            row.updateCell()
+                        }
+                    },
+                    button2Title: nil,
+                    button2Action: {
+                        self.CheckiCloudDataForiCloudEnable()
+                    })
+            }
+        }, ngHandler: { (errorDescription) in
+            DispatchQueue.main.async {
+                guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                
+                row.value = false
+                row.updateCell()
+                NiftyUtilitySwift.EasyDialogOneButton(
+                    viewController: self,
+                    title: NSLocalizedString("SettingsViewController_InvalidiCloudStatus", comment: "iCloud の状態に問題がありました。"),
+                    message: errorDescription,
+                    buttonTitle: nil,
+                    buttonAction: nil)
+            }
+        })
     }
     
     func CheckiCloudAccountStatusIsValid(okHandler:(() -> Void)?, ngHandler:((String)->Void)?) {
@@ -1248,7 +1263,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     }
     
     func ConifirmiCloudDisable() {
-        print("checking iCloud realm file alive: \(RealmUtil.CheckIsCloudRealmCreated() ? "true" : "false")")
         if RealmUtil.CheckIsLocalRealmCreated() {
             DispatchQueue.main.async {
                 NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Title", comment: "アプリの再起動が必要です"), message: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Message", comment: "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。"), buttonTitle: nil, buttonAction: {

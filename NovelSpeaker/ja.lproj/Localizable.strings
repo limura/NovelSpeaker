@@ -124,7 +124,7 @@
 "SettingsViewController_RemoveDefaultSpeechModSettings_DeletedMessage" = "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除しました。";
 "SettingsViewController_IsUseiCloud_Title" = "iCloud 同期を使用する";
 "SettingsViewController_IsUseiCloud_ConifirmTitle" = "iCloud 同期を有効にしますか？";
-"SettingsViewController_IsUseiCloud_ConifirmMessage" = "iCloud 同期を有効にすると、ことせかい 内のデータを書き換えるたびに iCloud による通信が試みるようになります。例えば小説を開いたり、読み上げを行ったりしただけでもデータが書き換わりますので、頻繁に通信が発生する事になります。";
+"SettingsViewController_IsUseiCloud_ConifirmMessage" = "iCloud 同期を有効にすると、iCloud同期を有効にした複数の端末間で小説や読み替えの設定を同期する事ができるようになります。\nただし、ことせかい 内のデータを書き換えるたびに iCloud による通信が試みるようになります。例えば小説を開いたり、読み上げを行ったりしただけでもデータが書き換わりますので、頻繁にネットワーク通信が発生する事になります。それらを了承の上、iCloud同期を有効にしますか？";
 "SettingsViewController_IsUseiCloud_EnabledButNextStart" = "iCloud 同期を開始しました。一旦アプリを終了します。";
 "SettingsViewController_IsUseiCloud_ConifirmTitle_disable" = "iCloud 同期を無効にしますか？";
 "SettingsViewController_IsUseiCloud_DisabledButNextStart" = "iCloud 同期を停止しました。一旦アプリを終了します。";
@@ -150,10 +150,10 @@
 "SettingsViewController_CloudPullProcessingDialog" = "iCloud からデータを読み込み中です。";
 "SettingsViewController_CloudPushProcessingDialog" = "iCloud 側へデータを書き込み中です。";
 "SettingsViewController_IsUseiCloud_ConifirmRemoveLocalData" = "iCloud上のデータを利用する事にします。\n現在のデータは破棄されます。\nこの操作は元に戻せません。\nよろしいですか？";
-"SettingsViewController_iCloudAccountInvalid_restricted" = "iCloud アカウントが制限付きの状態のため利用できません。";
-"SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloud アカウントが設定されていません。";
-"SettingsViewController_iCloudAccountInvalid_cloudNotDetermine" = "iCloud アカウントの状態を取得できませんでした。";
-"SettingsViewController_InvalidiCloudStatus" = "iCloud状態 に問題があります";
+"SettingsViewController_iCloudAccountInvalid_restricted" = "iCloudアカウント が制限付きの状態のため利用できません。";
+"SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloudアカウント が設定されていません(設定アプリから iCloud にサインインする必要があります)。";
+"SettingsViewController_iCloudAccountInvalid_cloudNotDetermine" = "iCloudアカウント の状態を取得できませんでした。";
+"SettingsViewController_InvalidiCloudStatus" = "iCloud の状態に問題があります";
 "SettingsViewController_ClearSiteInfoCache" = "SiteInfoキャッシュを削除する";
 "SettingsViewController_ClearSiteInfoCache_done" = "保存されている SiteInfo 情報を削除しました。";
 "SettingsViewController_IsNeedRestartApp_Title" = "アプリの再起動が必要です";
