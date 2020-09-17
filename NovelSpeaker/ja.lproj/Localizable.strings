@@ -124,7 +124,7 @@
 "SettingsViewController_RemoveDefaultSpeechModSettings_DeletedMessage" = "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除しました。";
 "SettingsViewController_IsUseiCloud_Title" = "iCloud 同期を使用する";
 "SettingsViewController_IsUseiCloud_ConifirmTitle" = "iCloud 同期を有効にしますか？";
-"SettingsViewController_IsUseiCloud_ConifirmMessage" = "iCloud 同期を有効にすると、iCloud同期を有効にした複数の端末間で小説や読み替えの設定を同期する事ができるようになります。\nただし、ことせかい 内のデータを書き換えるたびに iCloud による通信が試みるようになります。例えば小説を開いたり、読み上げを行ったりしただけでもデータが書き換わりますので、頻繁にネットワーク通信が発生する事になります。それらを了承の上、iCloud同期を有効にしますか？";
+"SettingsViewController_IsUseiCloud_ConifirmMessage" = "iCloud 同期を有効にすると、iCloud同期を有効にした複数の端末間で小説や読み替えの設定を同期する事ができるようになります。\nただし、ことせかい 内のデータを書き換えるたびに iCloud による通信が試みるようになります。例えば小説を開いたり、読み上げを行ったりしただけでもデータが書き換わりますので、頻繁にネットワーク通信が発生する事になります。また、ことせかい に取り込まれた小説を iCloud で保存するようになるため、取り込まれた小説の量が多い場合には iCloud の容量を圧迫する可能性があります。それらを了承の上、iCloud同期を有効にしますか？";
 "SettingsViewController_IsUseiCloud_EnabledButNextStart" = "iCloud 同期を開始しました。一旦アプリを終了します。";
 "SettingsViewController_IsUseiCloud_ConifirmTitle_disable" = "iCloud 同期を無効にしますか？";
 "SettingsViewController_IsUseiCloud_DisabledButNextStart" = "iCloud 同期を停止しました。一旦アプリを終了します。";

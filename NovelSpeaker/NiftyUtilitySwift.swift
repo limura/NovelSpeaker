@@ -374,6 +374,36 @@ class NiftyUtilitySwift: NSObject {
         return dialog
     }
     #endif
+    
+    #if !os(watchOS)
+    @discardableResult
+    public static func EasyDialogLongMessageTwoButton(viewController: UIViewController, title: String?, message: String?, button1Title: String?, button1Action:(()->Void)?, button2Title: String?, button2Action:(()->Void)?, completion: ((_ dialog:EasyDialog)->Void)? = nil) -> EasyDialog {
+        var dialog = EasyDialogBuilder(viewController)
+        if let title = title {
+            dialog = dialog.title(title: title)
+        }
+        if let message = message {
+            dialog = dialog.textView(content: message, heightMultiplier: 0.65)
+        }
+        dialog = dialog.addButton(title: button1Title != nil ? button1Title! : NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
+            dialog.dismiss(animated: false, completion: {
+                if let button1Action = button1Action {
+                    button1Action()
+                }
+            })
+        })
+        dialog = dialog.addButton(title: button2Title != nil ? button2Title! : NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+            dialog.dismiss(animated: false, completion: {
+                if let button2Action = button2Action {
+                    button2Action()
+                }
+            })
+        })
+        let builded = dialog.build()
+        builded.show { completion?(builded) }
+        return builded
+    }
+    #endif
 
     #if !os(watchOS)
     @discardableResult

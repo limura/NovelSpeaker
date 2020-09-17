@@ -1208,7 +1208,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         
         CheckiCloudAccountStatusIsValid(okHandler: {
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogTwoButton(
+                NiftyUtilitySwift.EasyDialogLongMessageTwoButton(
                     viewController: self,
                     title: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmTitle", comment: "iCloud 同期を有効にしますか？"),
                     message: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmMessage", comment: "iCloud 同期を有効にすると、ことせかい 内のデータを書き換えるたびに iCloud による通信が試みるようになります。例えば小説を開いたり、読み上げを行ったりしただけでもデータが書き換わりますので、頻繁に通信が発生する事になります。"),
