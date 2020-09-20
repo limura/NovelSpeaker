@@ -538,7 +538,7 @@
                     "R15･R18": "1,2"
                 }
             },
-            {"queryType": "hidden", "queryName": "limit", "value": "120"},
+            {"queryType": "hidden", "queryName": "limit", "value": "40"},
             {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "sort", "defaultValue": "24hpt", "radio":
                 {
                     "24h. ポイント順": "24hpt",
