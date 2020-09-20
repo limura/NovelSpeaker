@@ -510,7 +510,7 @@
         }
     },
     {
-        "title": "ノベルアップ＋",
+        "title": "アルファポリス",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
         "url": "https://www.alphapolis.co.jp/novel/index?",
