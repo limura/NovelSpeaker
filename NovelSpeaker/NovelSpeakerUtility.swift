@@ -387,7 +387,7 @@ class NovelSpeakerUtility: NSObject {
     #if !os(watchOS)
     @objc public static func ProcessURL(url:URL?) -> Bool {
         guard let url = url else { return false }
-        let isSecurityScopedURL = url.startAccessingSecurityScopedResource()
+        /* let isSecurityScopedURL */ _ = url.startAccessingSecurityScopedResource()
         defer { url.stopAccessingSecurityScopedResource()}
 
         if let scheme = url.scheme, scheme == "novelspeaker" || scheme == "limuraproducts.novelspeaker" {

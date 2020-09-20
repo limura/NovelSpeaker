@@ -738,7 +738,7 @@ class NiftyUtilitySwift: NSObject {
     // とりあえず HTML の meta が読めるように decode された string から
     // meta を読み込んで charset があればそれを使って String を生成しようとします。
     static func decodeDataToStringUseHTMLMetaCharset(data:Data, charset:String?) -> (String?, String.Encoding?) {
-        let (stringOptional, encoding) = tryDecodeToString(data: data, charset: charset)
+        let (stringOptional, _) = tryDecodeToString(data: data, charset: charset)
         guard let string = stringOptional else { return (nil, nil) }
         let metaTargetArray:[String] = [
             "content=[\"'].*?; *charset=(.*?)[\"']",

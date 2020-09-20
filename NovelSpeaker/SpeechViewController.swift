@@ -528,7 +528,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.StopSpeech(realm: realm)
-            let searchFunc = { (searchString:String?) in
+            func searchFunc(searchString:String?){
                 NiftyUtilitySwift.EasyDialogNoButton(
                     viewController: self,
                     title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
@@ -574,7 +574,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 rightButtonText: NSLocalizedString("OK_button", comment: "OK"),
                 leftButtonAction: nil,
                 rightButtonAction: { (filterText) in
-                    searchFunc(filterText)
+                    searchFunc(searchString: filterText)
                 },
                 shouldReturnIsRightButtonClicked: true,
                 completion: nil)

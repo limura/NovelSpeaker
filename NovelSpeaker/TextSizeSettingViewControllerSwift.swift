@@ -46,7 +46,7 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
                 setFont(displaySetting: displaySetting)
                 displaySettingObserbeToken = displaySetting.observe { (change) in
                     switch change {
-                    case .change(_):
+                    case .change(_, _):
                         self.setFontFromRealm()
                     case .error(_):
                         break

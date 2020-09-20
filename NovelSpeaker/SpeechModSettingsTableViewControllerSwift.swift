@@ -108,11 +108,13 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, RealmObs
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCell(withIdentifier: SpeechModSettingsTableViewControllerSwift.speechModSettingsTableViewDefaultCellID, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: SpeechModSettingsTableViewControllerSwift.speechModSettingsTableViewDefaultCellID, for: indexPath)
 
+        /*
         if cell == nil {
             cell = UITableViewCell.init(style: UITableViewCell.CellStyle.default, reuseIdentifier: SpeechModSettingsTableViewControllerSwift.speechModSettingsTableViewDefaultCellID)
         }
+        */
 
         cell.textLabel?.adjustsFontForContentSizeCategory = true
         cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .body)

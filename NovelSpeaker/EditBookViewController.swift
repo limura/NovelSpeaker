@@ -275,7 +275,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate {
                 fontSizeObserverToken = displaySetting.observe({ [weak self] (change) in
                     guard let self = self else { return }
                     switch change {
-                    case .change(_):
+                    case .change(_, _):
                         DispatchQueue.main.async {
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }

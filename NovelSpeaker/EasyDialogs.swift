@@ -453,7 +453,6 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
                 baseView.addSubview(view)
                 
                 if let view = view as? EasyDialogCustomUITextView {
-                    let height = UIScreen.main.bounds.height
                     if let toplevelView = dialog.view {
                         let equal = NSLayoutConstraint.init(item: view, attribute: .height, relatedBy: .equal, toItem: toplevelView, attribute: .height, multiplier: view.heightMultiplier, constant: 0)
                         equal.priority = UILayoutPriority(rawValue: 999)
