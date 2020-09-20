@@ -508,5 +508,55 @@
             "title": "//div[@class='novel_title']",
             "url": "//div[@class='novel_title']/a[contains(@href,'/story/')]/@href"
         }
+    },
+    {
+        "title": "ノベルアップ＋",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www.alphapolis.co.jp/novel/index?",
+        "values": [
+            {"queryType": "text", "displayText": "フリーワード", "queryName": "query"},
+            {"queryType": "radio", "displayText": "長さ", "queryName": "volume", "radio":
+                {
+                    "ショートショート": "1",
+                    "短編": "2",
+                    "長編": "3"
+                }
+            },
+            {"queryType": "radio", "displayText": "進行状況", "queryName": "complete", "radio":
+                {
+                    "連載中": "2",
+                    "完結": "1"
+                }
+            },
+            {"queryType": "radio", "displayText": "Ｒ指定", "queryName": "rating", "radio":
+                {
+                    "R15･R18を除く": "-1,-2",
+                    "R18を除く": "-2",
+                    "R15": "1",
+                    "R18": "2",
+                    "R15･R18": "1,2"
+                }
+            },
+            {"queryType": "hidden", "queryName": "limit", "value": "120"},
+            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "sort", "defaultValue": "24hpt", "radio":
+                {
+                    "24h. ポイント順": "24hpt",
+                    "週間人気順": "weekly",
+                    "月間人気順": "monthly",
+                    "年間人気順": "yearly",
+                    "累計ポイント順": "total",
+                    "お気に入りの多い順": "favorite",
+                    "新着順": "recent",
+                    "最近更新された順": "episode_recent"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@id='main']/div[contains(@class,'novels')]//div[@class='content-main']",
+            "nextLink": "//div[contains(@class,'paginator')]/span[preceding-sibling::span[@class='current']]/a[contains(@href,'/novel/index?')]/@href",
+            "title": "//div[contains(@class,'content-title')]/h2[@class='title']",
+            "url": "//div[contains(@class,'content-title')]/h2[@class='title']/a[contains(@href,'/novel/')]/@href"
+        }
     }
 ]
