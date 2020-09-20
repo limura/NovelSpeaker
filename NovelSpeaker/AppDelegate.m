@@ -167,6 +167,7 @@ void uncaughtExceptionHandler(NSException *exception)
     //return [globalData ProcessURL:url];
 }
 
+/*
 // iOS9 で deprecated になったらしい。
 // https://qiita.com/ShingoFukuyama/items/e85d34360f3f951ca612
 - (BOOL)application:(UIApplication*)application openURL:(NSURL*)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation
@@ -175,6 +176,7 @@ void uncaughtExceptionHandler(NSException *exception)
     //GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     //return [globalData ProcessURL:url];
 }
+ */
 
 // for background fetch
 - (void)application:(UIApplication *)application
