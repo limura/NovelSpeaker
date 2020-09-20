@@ -593,7 +593,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }else{
                 urlString = ""
             }
-            let message = String(format: NSLocalizedString("SpeechViewController_TweetMessage", comment: "%@ %@ #narou #ことせかい %@ %@"), novel.title, novel.writer, urlString, "https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185")
+            let message = String(format: NSLocalizedString("SpeechViewController_TweetMessage", comment: "%@ %@ #ことせかい %@ %@"), novel.title, novel.writer, urlString, "https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185")
             NiftyUtilitySwift.Share(message: message, viewController: self, barButton: self.shareButtonItem)
         }
     }
