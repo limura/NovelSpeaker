@@ -110,6 +110,10 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     @Published var displayIndex:Int = 0 {
         // displayIndex が変更された時にはその位置を表示するように移動させる……んだけどコレはなんともSwiftUIぽくない感じだ('A`)
         didSet {
+            if self.combinedBlockArray.count >= self.displayIndex {
+                print("displayIndex set. but out of range: \(self.displayIndex)")
+                return
+            }
             print("displayIndex update to: \(self.displayIndex), \(self.combinedBlockArray[self.displayIndex].displayText)")
             self.displayIndexUpdateFunc?.DisplayIndexUpdate(index: self.displayIndex)
         }

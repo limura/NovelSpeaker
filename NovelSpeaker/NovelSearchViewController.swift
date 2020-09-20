@@ -560,7 +560,8 @@ class WebSiteSection : Decodable {
 class NovelSearchViewController: FormViewController,ParentViewController {
     var searchInfoArray:[WebSiteSection] = []
     var currentSelectedSite:WebSiteSection? = nil
-    var lastSearchInfoLoadDate:Date = Date(timeIntervalSince1970: 0)
+    static var lastSearchInfoLoadDate:Date = Date(timeIntervalSince1970: 0)
+    static let SearchInfoCacheFileName = "SearchInfoData.json"
     let searchInfoExpireTimeInterval:TimeInterval = 60*60*6 // 6時間
     
     override func viewDidLoad() {
@@ -579,8 +580,13 @@ class NovelSearchViewController: FormViewController,ParentViewController {
         super.viewDidAppear(animated)
     }
     
+    static func SearchInfoCacheClear() {
+        lastSearchInfoLoadDate = Date(timeIntervalSince1970: 0)
+        NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: SearchInfoCacheFileName)
+    }
+    
     func checkAndReloadSearchInfoIfNeeded() {
-        if lastSearchInfoLoadDate < Date(timeIntervalSinceNow: -searchInfoExpireTimeInterval) {
+        if NovelSearchViewController.lastSearchInfoLoadDate < Date(timeIntervalSinceNow: -searchInfoExpireTimeInterval) {
             loadSearchInfo()
         }
     }
@@ -590,7 +596,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
             failedAction?(nil)
             return
         }
-        NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: "SearchInfoData.json", expireTimeinterval: searchInfoExpireTimeInterval, canRecoverOldFile: true, successAction: { (data) in
+        NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: NovelSearchViewController.SearchInfoCacheFileName, expireTimeinterval: searchInfoExpireTimeInterval, canRecoverOldFile: true, successAction: { (data) in
             successAction?(data)
         }) { (err) in
             failedAction?(err)
@@ -624,7 +630,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     func loadSearchInfo() {
         fetchSearchInfo(successAction: { (searchInfoArrayJsonData) in
             self.searchInfoArray = self.extractSearchInfoArray(jsonData: searchInfoArrayJsonData)
-            self.lastSearchInfoLoadDate = Date()
+            NovelSearchViewController.lastSearchInfoLoadDate = Date()
             RealmUtil.RealmBlock { (realm) -> Void in
                 if let siteString = RealmGlobalState.GetInstanceWith(realm: realm)?.currentWebSearchSite, let section = self.searchInfoArray.filter({ $0.title == siteString }).first {
                     self.currentSelectedSite = section

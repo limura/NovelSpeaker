@@ -781,6 +781,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let value = row.value else { return }
                 RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: value)
             })
+            <<< ButtonRow(){
+                $0.title = NSLocalizedString("SettingsViewController_ClearWebSearchSiteInfoCache", comment: "Web検索タブの検索データを読み直す")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                NovelSearchViewController.SearchInfoCacheClear()
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.EasyDialogOneButton(
+                        viewController: self,
+                        title: nil,
+                        message: NSLocalizedString("SettingsViewController_ClearWebSearchSiteInfoCache_done", comment: "Web検索タブに戻ると読み込み直すように設定しました。"),
+                        buttonTitle: nil,
+                        buttonAction: nil)
+                }
+            })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)

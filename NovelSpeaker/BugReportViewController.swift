@@ -70,9 +70,15 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         }
         print("can not send mail")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("BugReportViewController_NoEMailApp_Title", comment: "メールが送信できません"), message: NSLocalizedString("BugReportViewController_NoEMailApp_Message", comment: "メールを送信する事ができないようです。\nメールアプリにメールアドレスを設定していないか、メールアプリが削除されていると思われます。\nことせかい へのお問い合わせにはe-mailをご利用頂く事が必要となりますので適切に設定して頂けますようお願い致します。"), buttonTitle: nil, buttonAction: {
-                _ = self.navigationController?.popViewController(animated: true)
-            })
+            NiftyUtilitySwift.EasyDialogBuilder(self)
+            .title(title: NSLocalizedString("BugReportViewController_NoEMailApp_Title", comment: "メールが送信できません"))
+            .textView(content: NSLocalizedString("BugReportViewController_NoEMailApp_Message", comment: "メールを送信する事ができないようです。\nメールアプリにメールアドレスを設定していないか、メールアプリが削除されていると思われます。\nことせかい へのお問い合わせにはe-mailをご利用頂く事が必要となりますので適切に設定して頂けますようお願い致します。"), heightMultiplier: 0.65)
+            .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+                dialog.dismiss(animated: false, completion: {
+                    _ = self.navigationController?.popViewController(animated: true)
+                })
+            }
+            .build().show()
         }
     }
     
