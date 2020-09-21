@@ -529,8 +529,9 @@
                     "完結": "1"
                 }
             },
-            {"queryType": "radio", "displayText": "Ｒ指定", "queryName": "rating", "radio":
-                {
+            {"queryType": "hidden", "displayText": "Ｒ指定", "queryName": "rating", "value": "-1,-2",
+                "memo": {
+                    "queryType が radio であればこんな感じのデータを入れれば良い事になってます。": "けれど、ことせかい は一応9歳以上対象なので、Web検索で除外できるのならその時点で除外しておきます。",
                     "R15･R18を除く": "-1,-2",
                     "R18を除く": "-2",
                     "R15": "1",
