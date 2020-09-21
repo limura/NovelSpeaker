@@ -306,7 +306,7 @@
         ],
         "result": {
             "block": "//div[@class='topicsBox']",
-            "nextLink": "//div[@class='paging-top']/span[@class='next']/a[contains(@href,'/novels/index/page')]/@href",
+            "nextLink": "//a[@rel='next']/@href",
             "title": "//strong[@class='novelTitle']/a[contains(@href,'/stories/index/novel_id')]",
             "url": "//strong[@class='novelTitle']/a[contains(@href,'/stories/index/novel_id')]/@href"
         }
