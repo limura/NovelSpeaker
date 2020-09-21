@@ -196,9 +196,13 @@ class NovelSpeakerUtility: NSObject {
                             "エブリスタ\nhttps://estar.jp/",
                             "ポケモン小説スクエア\nhttps://pokemon.sorakaze.info/"
                         ]
-                        for bookmark in defaultBookmarks {
-                            globalState.webImportBookmarkArray.append(bookmark)
-                        }
+                        globalState.webImportBookmarkArray.append(objectsIn: defaultBookmarks)
+                    }
+                    if globalState.autoSplitStringList.count <= 0 {
+                        let defaultAutoSplitStringList:[String] = [
+                            "[[改ページ]]", "[改ページ]", "［＃改ページ］", "［＃改丁］", "\n\n\n"
+                        ]
+                        globalState.autoSplitStringList.append(objectsIn: defaultAutoSplitStringList)
                     }
                 })
 
@@ -755,7 +759,7 @@ class NovelSpeakerUtility: NSObject {
                     var story = Story()
                     story.novelID = novelID
                     story.chapterNumber = no
-                    story.content = content
+                    story.content = content.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
                     story.url = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: no, end: end.boolValue)
                     storyArray.append(story)
                     if storyArray.count >= RealmStoryBulk.bulkCount {
@@ -845,7 +849,7 @@ class NovelSpeakerUtility: NSObject {
                     var story = Story()
                     story.novelID = novelID
                     story.chapterNumber = no
-                    story.content = content
+                    story.content = content.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
                     storyArray.append(story)
                     if storyArray.count >= RealmStoryBulk.bulkCount {
                         RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
@@ -894,7 +898,7 @@ class NovelSpeakerUtility: NSObject {
                 var story = Story()
                 story.novelID = novelID
                 story.chapterNumber = no
-                story.content = storyText
+                story.content = storyText.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
                 storyArray.append(story)
                 if storyArray.count >= RealmStoryBulk.bulkCount {
                     RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)

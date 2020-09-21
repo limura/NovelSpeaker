@@ -233,7 +233,7 @@ class CoreDataToRealmTool: NSObject {
             var story = Story()
             story.novelID = novelID
             story.chapterNumber = chapterNumber
-            story.content = storyCoreData.content
+            story.content = storyCoreData.content.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
             if let ncode = content.ncode, let end = content.end as? Bool {
                 story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
             }

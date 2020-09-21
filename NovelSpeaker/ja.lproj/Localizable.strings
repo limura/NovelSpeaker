@@ -165,6 +165,7 @@
 "SettingsViewController_ChooseInvalidiCloudData_Message" = "iCloud 側にデータが存在する事は確認したのですが、ことせかい で利用するために必須のデータを取得できませんでした。\n\nネットワークの状態が悪い場合や iCloud側 に保存されているデータの量が多かった場合、以前 iCloud同期 を行った端末のデータが iCloud側 へ転送しきれていなかった場合といったような色々な場合が考えられますが、とにかくこのままでは正常に利用する事はできそうにありません。\n\nなお、この端末にあるデータを iCloud側 に上書き保存する形で iCloud同期 を ON にする事もできます。iCloud側 に上書き保存する場合、iCloud側とこの端末側の両方に存在する設定や小説はこの端末側の値に、iCloud側にしか存在しない設定や小説はiCloud側の物が残るという形になります。\n\n上書き保存する形でiCloud同期を開始しますか？";
 "SettingsViewController_ClearWebSearchSiteInfoCache" = "Web検索タブの検索データを読み直す";
 "SettingsViewController_ClearWebSearchSiteInfoCache_done" = "Web検索タブに戻ると読み込み直すように設定しました。";
+"SettingTableViewController_AutoSplitStringSetting" = "テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";
@@ -584,6 +585,13 @@
 "StoryFetcher_FetchFirstContent_NoNextUrlAlive" = "本文を取り出せませんでした。(本文が掲載されている部分へのリンクが発見できませんでした)";
 "StoryFetcher_FetchFirstContent_ExceededCountToLive" = "本文を取り出せませんでした。(本文へのリンクが発見できないまま読み込み回数上限に達しました)";
 "StoryFetcher_FetchError_RobotsText" = "Webサイト様側で機械的なアクセスを制限されているサイトであったため、ことせかい による取得ができません。(robots.txt で拒否されています)";
+
+"AutoSplitStringSettingViewController_Title" = "テキスト分割文字列の設定";
+"AutoSplitStringSettingViewController_AddSplitTargetDialog_Error_NoText" = "空文字列は指定できません";
+"AutoSplitStringSettingViewController_AddSplitTargetDialog_AlreadyAssigned" = "既に存在する設定です";
+"AutoSplitStringSettingViewController_AddSplitTargetDialog_Title" = "分割対象文字の追加";
+"AutoSplitStringSettingViewController_AddSplitTargetDialog_PlaceHolder" = "改行を表現するには <改行> と入力します";
+"AutoSplitStringSettingViewController_AddSplitTargetDialog_EnterButton" = "追加";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

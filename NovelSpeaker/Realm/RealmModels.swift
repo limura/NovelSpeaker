@@ -1765,6 +1765,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     @objc dynamic var defaultSpeechOverrideSettingID = ""
     @objc dynamic var currentReadingNovelID = ""
     @objc dynamic var currentWebSearchSite = ""
+    let autoSplitStringList = List<String>()
 
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_RealmModels_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {

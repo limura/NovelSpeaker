@@ -115,7 +115,7 @@ struct StorySiteInfo {
     }
     
     func decodePageElement(xmlDocument:XMLDocument) -> String {
-        return NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: pageElement, injectStyle: injectStyle).trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "\r\n", with: "\n")
+        return NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: pageElement, injectStyle: injectStyle).trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
     }
     func decodeTitle(xmlDocument:XMLDocument) -> String? {
         guard let xpath = title else { return nil }

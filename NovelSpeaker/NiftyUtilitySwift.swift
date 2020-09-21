@@ -20,18 +20,19 @@ import MessageUI
 #endif
 
 class NiftyUtilitySwift: NSObject {
-    static let textCountSeparatorArray:[String] = ["[[改ページ]]", "[改ページ]", "［＃改ページ］", "［＃改丁］", "\n\n\n", "\r\n\r\n\r\n", "\r\r\r"]
-    
     // 分割すべき大きさで、分割できそうな文字列であれば分割して返します
     static func CheckShouldSeparate(text:String) -> [String]? {
+        guard let realm = try? RealmUtil.GetRealm(), let textCountSeparatorArray = RealmGlobalState.GetInstanceWith(realm: realm)?.autoSplitStringList else { return nil }
+        let text = text.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
         var separated:[String] = [text]
         for separator in textCountSeparatorArray {
             var newSeparated:[String] = []
             for text in separated {
-                newSeparated.append(contentsOf: text.components(separatedBy: separator))
+                newSeparated.append(contentsOf: text.components(separatedBy: separator).filter({$0.count > 0}))
             }
             separated = newSeparated
         }
+        separated = separated.map({$0.trimmingCharacters(in: .whitespacesAndNewlines)}).filter({$0.count > 0})
         print("separated.count: \(separated.count)")
         if separated.count > 1 {
             return separated
@@ -51,6 +52,7 @@ class NiftyUtilitySwift: NSObject {
     
     #if !os(watchOS)
     @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
+        let content = content.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
         DispatchQueue.main.async {
             var easyDialog = EasyDialogBuilder(viewController)
                 .textField(tag: 100, placeholder: title, content: title, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
