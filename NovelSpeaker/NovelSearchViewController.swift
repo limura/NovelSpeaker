@@ -17,7 +17,7 @@ import Kanna
 
 protocol SearchQuery {
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow?
-    func CreateQuery() -> String
+    func CreateQuery(joinner:String) -> String
 }
 
 extension SearchQuery {
@@ -26,7 +26,7 @@ extension SearchQuery {
             $0.title = "..."
         }
     }
-    func CreateQuery() -> String { return "" }
+    func CreateQuery(joinner:String) -> String { return "" }
 }
 
 class TextQuery: SearchQuery, Decodable {
@@ -54,8 +54,8 @@ class TextQuery: SearchQuery, Decodable {
             cell.textField.clearButtonMode = .always
         }
     }
-    func CreateQuery() -> String {
-        return queryName + "=" + inputText
+    func CreateQuery(joinner:String) -> String {
+        return queryName + joinner + inputText
     }
 }
 
@@ -89,7 +89,7 @@ class MultiSelectQuery: SearchQuery, Decodable {
             to.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: from, action: #selector(parent.multipleSelectorDone(_:)))
         }
     }
-    func CreateQuery() -> String {
+    func CreateQuery(joinner:String) -> String {
         var queryArray:[String] = []
         for key in enableTargets {
             if let value = self.multiSelect[key] {
@@ -102,7 +102,7 @@ class MultiSelectQuery: SearchQuery, Decodable {
         if queryName == "" {
             return queryArray.joined(separator: separator)
         }
-        return queryName + "=" + queryArray.joined(separator: separator)
+        return queryName + joinner + queryArray.joined(separator: separator)
     }
 }
 
@@ -136,14 +136,14 @@ class RadioQuery: SearchQuery, Decodable {
             self.enableTarget = row.value
         }
     }
-    func CreateQuery() -> String {
+    func CreateQuery(joinner:String) -> String {
         let value:String
         if let target = enableTarget, let ganreValue = self.radioList[target] {
             value = ganreValue
         }else{
             value = ""
         }
-        return queryName + "=" + value
+        return queryName + joinner + value
     }
 }
 
@@ -158,8 +158,8 @@ class HiddenQuery: SearchQuery, Decodable {
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
         return nil
     }
-    func CreateQuery() -> String {
-        return queryName + "=" + value
+    func CreateQuery(joinner:String) -> String {
+        return queryName + joinner + value
     }
 }
 
@@ -182,9 +182,9 @@ class OnOffQuery: SearchQuery, Decodable {
             self.isOn = row.value ?? false
         }
     }
-    func CreateQuery() -> String {
+    func CreateQuery(joinner:String) -> String {
         if isOn {
-            return queryName + "=" + value
+            return queryName + joinner + value
         }
         return ""
     }
@@ -401,6 +401,8 @@ class WebSiteSection : Decodable {
     var HTTPMethod:String = "GET"
     var url:String = ""
     var isNeedHeadless:Bool = false
+    var querySeparator:String = "&"
+    var queryJoinner:String = "="
     var mainDocumentURL:String = ""
     var values:[SearchQuery] = []
     var result:SearchResult? = nil
@@ -411,6 +413,8 @@ class WebSiteSection : Decodable {
         case HTTPMethod
         case url
         case isNeedHeadless
+        case querySeparator
+        case queryJoinner
         case mainDocumentURL
         case values
         case result
@@ -422,6 +426,8 @@ class WebSiteSection : Decodable {
         HTTPMethod = (try? values.decode(String.self, forKey: .HTTPMethod)) ?? "GET"
         url = try values.decode(String.self, forKey: .url)
         isNeedHeadless = (try? values.decode(Bool.self, forKey: .isNeedHeadless)) ?? false
+        querySeparator = (try? values.decode(String.self, forKey: .querySeparator)) ?? "&"
+        queryJoinner = (try? values.decode(String.self, forKey: .queryJoinner)) ?? "="
         mainDocumentURL = (try? values.decode(String.self, forKey: .mainDocumentURL)) ?? ""
 
         // 怪しく全てを読み込める struct を作って一旦読み込みます(´・ω・`)
@@ -474,12 +480,12 @@ class WebSiteSection : Decodable {
         }
         var query = ""
         for value in values {
-            let v = value.CreateQuery()
+            let v = value.CreateQuery(joinner: queryJoinner)
             if v.count <= 0 {
                 continue
             }
             if query.count > 0 {
-                query += "&"
+                query += querySeparator
             }
             query += v
         }
@@ -492,7 +498,8 @@ class WebSiteSection : Decodable {
         if HTTPMethod != "POST" {
             return nil
         }
-        let query = values.map({$0.CreateQuery()}).joined(separator: "&")
+        // TODO: WARN: POST 用では queryJoinner と querySeparator を使っていない
+        let query = values.map({$0.CreateQuery(joinner: "=")}).joined(separator: "&")
         return query.data(using: .utf8)
     }
     
