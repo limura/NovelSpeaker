@@ -188,28 +188,6 @@
         }
     },
     {
-        "title": "青空文庫",
-        "HTTPMethod": "GET",
-        "isNeedHeadless": true,
-        "url": "https://www.google.com/search?",
-        "values": [
-            {"queryType": "text", "displayText": "検索文字列(空文字列だと失敗します)", "queryName": "as_q"},
-            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
-            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
-            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
-            {"queryType": "hidden", "queryName": "num", "value": "20"},
-            {"queryType": "hidden", "queryName": "complete", "value": "0"},
-            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
-            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "www.aozora.gr.jp"}
-        ],
-        "result": {
-            "block": "//div[@id='rso']//div[@data-hveid and descendant::a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]]",
-            "nextLink": "//div[@id='extrares']//a[contains(@href,'/search?q=')]/@href",
-            "title": "//a/div[@role='heading']",
-            "url": "//a[@href]/@href"
-        }
-    },
-    {
         "title": "Yahoo! ニュース",
         "HTTPMethod": "GET",
         "url": "https://news.yahoo.co.jp/search/?",
@@ -263,23 +241,74 @@
     {
         "title": "暁",
         "HTTPMethod": "GET",
-        "isNeedHeadless": true,
-        "url": "https://www.google.com/search?",
+        "isNeedHeadless": false,
+        "url": "https://www.akatsuki-novels.com/novels/index/",
+        "memo": "暁はクエリの連結が / で、key=value の = に当たるものが ~ になっていて、POSTで送信すべきとなっているけれど GET でも受け付けてくれるという謎の仕様のようです。また、検索文字列のような文字列を引数とする場合、謎の16進(?)に変換しなければならないようなので、これは使えない事にします。",
+        "querySeparator": "/",
+        "queryJoinner": "~",
         "values": [
-            {"queryType": "text", "displayText": "検索文字列", "queryName": "as_q"},
-            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
-            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
-            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
-            {"queryType": "hidden", "queryName": "num", "value": "20"},
-            {"queryType": "hidden", "queryName": "complete", "value": "0"},
-            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
-            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "https://www.akatsuki-novels.com/stories/index/novel_id"}
+            {"queryType": "multiSelect", "displayText": "除外条件", "queryName": "", "separator": "/", "multiSelect":
+                {
+                    "R-15": "age_limit_a~1",
+                    "オリ主": "orinusi_a~1",
+                    "神様転生": "kamiten_a~1",
+                    "BL": "boys_love_a~1",
+                    "百合": "girls_love_a~1",
+                    "残酷な描写": "representative_cruel_a~1",
+                    "アンチ": "anti~1",
+                    "ヘイト": "hate~1",
+                    "短編": "serial_story_a~1",
+                    "長編(連載中)": "finished_a~1",
+                    "長編(完結)": "finished_b~1",
+                    "多作品(短期間に大量の投稿をしている)作者の小説": "nl_mkx~1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "絞込条件", "queryName": "", "separator": "/", "multiSelect":
+                {
+                    "R-15": "age_limit_xa~1",
+                    "オリ主": "orinusi_xa~1",
+                    "神様転生": "kamiten_xa~1",
+                    "BL": "boys_love_xa~1",
+                    "百合": "girls_love_xa~1",
+                    "残酷な描写": "representative_cruel_xa~1",
+                    "アンチ": "anti_xa~1",
+                    "ヘイト": "hate_xa~1",
+                    "短編": "serial_story_xa~1",
+                    "長編(連載中)": "finished_xa~1",
+                    "長編(完結)": "finished_xb~1"
+                }
+            },
+            {"queryType": "radio", "queryName": "so", "defaultValue": "0",
+                "radio": {
+                    "01: 新着順": "0",
+                    "02: 総合評価(話別評価除く)高い順": "17",
+                    "03: 総合評価(話別評価除く)低い順": "18",
+                    "04: 総合評価高い順": "1",
+                    "05: 総合評価低い順": "2",
+                    "06: 評価人数多い順": "3",
+                    "07: 評価人数低い順": "4",
+                    "08: PV数多い順": "5",
+                    "09: PV数少ない順": "6",
+                    "10: UA数多い順": "7",
+                    "11: UA数少ない順": "8",
+                    "12: 文字数多い順": "9",
+                    "13: 文字数少ない順": "10",
+                    "14: 1話当たりの文字数多い順": "11",
+                    "15: 1話当たりの文字数少ない順": "12",
+                    "16: 話数多い順": "13",
+                    "17: 話数少ない順": "14",
+                    "18: お気に入り登録数多い順": "15",
+                    "19: お気に入り登録数少ない順": "16",
+                    "20: 感想数が多い順": "19",
+                    "21: 感想数が少ない順": "20"
+                }
+            }
         ],
         "result": {
-            "block": "//div[@id='rso']//div[@data-hveid and descendant::a[contains(@href,'https://www.akatsuki-novels.com/stories/index/novel_id') and not(contains(@href,'webcache.google'))]]",
-            "nextLink": "//div[@id='extrares']//a[contains(@href,'/search?q=')]/@href",
-            "title": "//a/div[@role='heading']",
-            "url": "//a[@href]/@href"
+            "block": "//div[@class='topicsBox']",
+            "nextLink": "//div[@class='paging-top']/span[@class='next']/a[contains(@href,'/novels/index/page')]/@href",
+            "title": "//strong[@class='novelTitle']/a[contains(@href,'/stories/index/novel_id')]",
+            "url": "//strong[@class='novelTitle']/a[contains(@href,'/stories/index/novel_id')]/@href"
         }
     },
     {
