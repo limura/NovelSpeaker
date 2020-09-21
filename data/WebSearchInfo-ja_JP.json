@@ -278,7 +278,7 @@
                     "長編(完結)": "finished_xb~1"
                 }
             },
-            {"queryType": "radio", "queryName": "so", "defaultValue": "0",
+            {"queryType": "radio", "displayText": "表示順", "queryName": "so", "defaultValue": "0",
                 "radio": {
                     "01: 新着順": "0",
                     "02: 総合評価(話別評価除く)高い順": "17",
