@@ -498,8 +498,7 @@ class WebSiteSection : Decodable {
         if HTTPMethod != "POST" {
             return nil
         }
-        // TODO: WARN: POST 用では queryJoinner と querySeparator を使っていない
-        let query = values.map({$0.CreateQuery(joinner: "=")}).joined(separator: "&")
+        let query = values.map({$0.CreateQuery(joinner: queryJoinner)}).joined(separator: querySeparator)
         return query.data(using: .utf8)
     }
     
