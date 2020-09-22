@@ -16,8 +16,7 @@ import AVFoundation
 @objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 1
     static let deleteRealmIfMigrationNeeded: Bool = false
-    //static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
-    static let CKContainerIdentifier = "iCloud.com.limuraproducts.RealmIceCreamTest"
+    static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
     static var syncEngine: SyncEngine? = nil
     static let lock = NSLock()
