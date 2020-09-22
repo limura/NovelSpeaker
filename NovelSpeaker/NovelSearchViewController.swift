@@ -597,11 +597,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
         }
     }
     
-    func fetchSearchInfoJSON(urlString: String, successAction: ((Data) -> Void)?, failedAction:((Error?) -> Void)? ) {
-        guard let url = URL(string: urlString) else {
-            failedAction?(nil)
-            return
-        }
+    func fetchSearchInfoJSON(url: URL, successAction: ((Data) -> Void)?, failedAction:((Error?) -> Void)? ) {
         NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: NovelSearchViewController.SearchInfoCacheFileName, expireTimeinterval: searchInfoExpireTimeInterval, canRecoverOldFile: true, successAction: { (data) in
             successAction?(data)
         }) { (err) in
@@ -610,21 +606,32 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     }
     
     func fetchSearchInfo(successAction: ((Data) -> Void)?, failedAction:((Error?) -> Void)? ) {
-        let fallbackUrlString = "https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/WebSearchInfo-ja_JP.json"
-        let urlString = NSLocalizedString("https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/WebSearchInfo-ja_JP.json", comment: "適切にURLを返すように Localizable.strings に設定しておく。言語とか地域とかOS側の言語とかアプリ側の言語とかもうわけわからんので NSLocalizedString() 側で設定された言語の設定ファイルを読み込む、というイメージにする。")
-        fetchSearchInfoJSON(urlString: urlString, successAction: { (data) in
-            successAction?(data)
-        }) { (err) in
-            if urlString == fallbackUrlString {
-                failedAction?(err)
-                return
-            }
-            self.fetchSearchInfoJSON(urlString: fallbackUrlString, successAction: { (data) in
-                successAction?(data)
-            }) { (err) in
-                failedAction?(err)
-            }
+        var urlQueue:[URL] = []
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let userDefinedURL = RealmGlobalState.GetInstanceWith(realm: realm)?.searchInfoURL, let url = URL(string: userDefinedURL) else { return }
+            urlQueue.append(url)
         }
+        if let url = URL(string: NSLocalizedString("https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/WebSearchInfo-ja_JP.json", comment: "適切にURLを返すように Localizable.strings に設定しておく。言語とか地域とかOS側の言語とかアプリ側の言語とかもうわけわからんので NSLocalizedString() 側で設定された言語の設定ファイルを読み込む、というイメージにする。")) {
+            urlQueue.append(url)
+        }
+        if let url = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/WebSearchInfo-ja_JP.json") {
+            urlQueue.append(url)
+        }
+        var lastError:Error? = nil
+        func fetchOne(queue:[URL], index:Int) {
+            if queue.count <= index {
+                failedAction?(lastError)
+            }
+            let url = queue[index]
+            fetchSearchInfoJSON(url: url, successAction: { (data) in
+                successAction?(data)
+                return
+            }, failedAction: { (err) in
+                lastError = err
+                fetchOne(queue: queue, index: index + 1)
+            })
+        }
+        fetchOne(queue: urlQueue, index: 0)
     }
     
     func extractSearchInfoArray(jsonData:Data) -> [WebSiteSection] {

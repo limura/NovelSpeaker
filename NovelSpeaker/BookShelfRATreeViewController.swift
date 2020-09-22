@@ -42,6 +42,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        StoryHtmlDecoder.shared.LoadSiteInfoIfNeeded()
 
         let treeView = RATreeView()
         view.addSubview(treeView)

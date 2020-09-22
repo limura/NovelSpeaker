@@ -144,6 +144,7 @@ class MigrationViewController: UIViewController {
             // (というかマイグレーションが必要な場合は動かない)ので、
             // このタイミングで起動します。
             NovelDownloadQueue.shared.StartBackgroundFetchIfNeeded()
+            StoryHtmlDecoder.shared.LoadSiteInfoIfNeeded()
 
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             guard let firstViewController = storyboard.instantiateInitialViewController() else { return }

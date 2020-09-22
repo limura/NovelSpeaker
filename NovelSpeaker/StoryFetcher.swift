@@ -249,6 +249,9 @@ class StoryHtmlDecoder {
     let cacheFileName = "AutopagerizeSiteInfoCache"
     let customCacheFileName = "NovelSpeakerSiteInfoCache"
     var siteInfoNowLoading:Bool = false
+    
+    static let AutopagerizeSiteInfoJSONURL = "http://wedata.net/databases/AutoPagerize/items.json"
+    static let NovelSpeakerSiteInfoJSONURL = "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json"
 
     // シングルトンにしている。
     static let shared = StoryHtmlDecoder()
@@ -257,7 +260,6 @@ class StoryHtmlDecoder {
             StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil),
             StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil)
         ]
-        LoadSiteInfoIfNeeded()
     }
     
     var IsSiteInfoReady: Bool {
@@ -374,8 +376,18 @@ class StoryHtmlDecoder {
                 handler()
             }
         }
-        guard let siteInfoURL = URL(string: "http://wedata.net/databases/AutoPagerize/items.json"),
-            let customSiteInfoURL = URL(string: "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1/items.json") else {
+        var userDefinedSiteInfoURL:URL? = nil
+        var userDefinedCustomSiteInfoURL:URL? = nil
+        if let realm = try? RealmUtil.GetRealm(), let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+            if globalState.autopagerizeSiteInfoURL.count > 0, let autopagerizeURL = URL(string: globalState.autopagerizeSiteInfoURL) {
+                userDefinedSiteInfoURL = autopagerizeURL
+            }
+            if globalState.novelSpeakerSiteInfoURL.count > 0, let novelSpeakerURL = URL(string: globalState.novelSpeakerSiteInfoURL) {
+                userDefinedCustomSiteInfoURL = novelSpeakerURL
+            }
+        }
+        guard let siteInfoURL = userDefinedSiteInfoURL ?? URL(string: StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL),
+              let customSiteInfoURL = userDefinedCustomSiteInfoURL ?? URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL) else {
                 completion?(SloppyError(msg: "unknown error. default url decode error."))
                 announceLoadEnd()
                 return

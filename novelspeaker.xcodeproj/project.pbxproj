@@ -152,6 +152,7 @@
 		21843D56235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */; };
 		21890CF51D9309F000869046 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 21890CF41D9309F000869046 /* libz.tbd */; };
 		218E81E92518F0BE0041A1B5 /* AutoSplitStringSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 218E81E82518F0BE0041A1B5 /* AutoSplitStringSettingViewController.swift */; };
+		218E81FC251997E30041A1B5 /* RemoteDataURLSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 218E81FB251997E30041A1B5 /* RemoteDataURLSettingViewController.swift */; };
 		219106DF2468371A00BBA5AF /* NovelSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219106DE2468371A00BBA5AF /* NovelSearchViewController.swift */; };
 		219106E02469081100BBA5AF /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC61D2FD22C00ADDCAB /* libxml2.tbd */; };
 		2191636C199E65B9003FF7FC /* SpeakPitchConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636B199E65B9003FF7FC /* SpeakPitchConfig.m */; };
@@ -470,6 +471,7 @@
 		21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDisplayColorSettingViewController.swift; sourceTree = "<group>"; };
 		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		218E81E82518F0BE0041A1B5 /* AutoSplitStringSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoSplitStringSettingViewController.swift; sourceTree = "<group>"; };
+		218E81FB251997E30041A1B5 /* RemoteDataURLSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteDataURLSettingViewController.swift; sourceTree = "<group>"; };
 		219106DE2468371A00BBA5AF /* NovelSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelSearchViewController.swift; sourceTree = "<group>"; };
 		21916369199E6367003FF7FC /* SettingDataModel 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 3.xcdatamodel"; sourceTree = "<group>"; };
 		2191636A199E65B9003FF7FC /* SpeakPitchConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeakPitchConfig.h; sourceTree = "<group>"; };
@@ -1104,6 +1106,7 @@
 				21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */,
 				219106DE2468371A00BBA5AF /* NovelSearchViewController.swift */,
 				218E81E82518F0BE0041A1B5 /* AutoSplitStringSettingViewController.swift */,
+				218E81FB251997E30041A1B5 /* RemoteDataURLSettingViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1751,6 +1754,7 @@
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
 				21E6B41E246D55DC00605874 /* HeadlessHTTPClient.swift in Sources */,
+				218E81FC251997E30041A1B5 /* RemoteDataURLSettingViewController.swift in Sources */,
 				216741A02043D592008A578D /* BehaviorLogger.swift in Sources */,
 				21A2CDBB2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift in Sources */,
 				21F054DD1917E0F200CC6BA9 /* AppDelegate.m in Sources */,

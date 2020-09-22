@@ -8,12 +8,12 @@
 
 import Foundation
 import Eureka
-import Realm
+import RealmSwift
 
 class AutoSplitStringSettingViewController: UITableViewController, RealmObserverResetDelegate {
     
     let defaultCellID = "AutoSplitStringSettingViewController_TableCellID"
-    var globalDataNotificationToken:RLMNotificationToken? = nil
+    var globalDataNotificationToken:NotificationToken? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()

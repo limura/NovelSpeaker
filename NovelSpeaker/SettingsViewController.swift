@@ -577,7 +577,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingTableViewController_AutoSplitStringSetting", comment:"テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)")
+                $0.title = NSLocalizedString("SettingsViewController_AutoSplitStringSetting", comment:"テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCellOf, button) in
                 let nextViewController = AutoSplitStringSettingViewController()
@@ -603,6 +603,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         self.ConifirmiCloudDisable()
                     }
                 }
+            })
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingsViewController_RemoteDataURLSetting", comment:"内部データ参照用URLの設定")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (buttonCellOf, button) in
+                let nextViewController = RemoteDataURLSettingViewController()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")

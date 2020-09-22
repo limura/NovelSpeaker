@@ -24,25 +24,31 @@ class NovelSpeakerUtility: NSObject {
         UserDefaults.standard.set(readedText, forKey: privacyPolicyKey)
     }
     
-    static func defaultSpeechModSettings() -> [String:String] {
-        // static let defaultSpeechModSettings:[String:Sring] = ["hoge": "hoge", ... ] というので作ったんだけど
-        // 実行時にそれを参照すると落ちるのでリソースファイルから読み込むように変更した。heap でも食い尽くしてるん？(´・ω・`)
-        guard let path = Bundle.main.path(forResource: "DefaultSpeechModList", ofType: "json"), let handle = FileHandle(forReadingAtPath: path) else { return [:] }
-        let data = handle.readDataToEndOfFile()
-        let json:Any
-        do {
-            json = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
-        }catch{
-            return [:]
-        }
-        guard let result = json as? [String:String] else { return [:] }
-        return result
-    }
     static let defaultRegexpSpeechModSettings:[String:String] = [
         "([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)\\s*[〜]\\s*([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)": "$1から$2", // 100〜200 → 100から200
         "([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)\\s*話": "$1は"
     ]
-
+    static func getSpeechModSettings(completion:([String:String], [String:String])->Void) {
+        var speechModSettings:[String:String]? = nil
+        var regexpSpeechModSettings:[String:String]? = nil
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                if let url = URL(string: globalState.defaultSpeechModURL), let data = try? Data(contentsOf: url), let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments), let result = json as? [String:String] {
+                    speechModSettings = result
+                }
+                if let url = URL(string: globalState.defaultRegexpSpeechModURL), let data = try? Data(contentsOf: url), let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments), let result = json as? [String:String] {
+                    regexpSpeechModSettings = result
+                }
+            }
+        }
+        if speechModSettings == nil, let path = Bundle.main.path(forResource: "DefaultSpeechModList", ofType: "json"), let handle = FileHandle(forReadingAtPath: path), let json = try? JSONSerialization.jsonObject(with: handle.readDataToEndOfFile(), options: .allowFragments), let result = json as? [String:String] {
+            speechModSettings = result
+        }
+        if regexpSpeechModSettings == nil {
+            regexpSpeechModSettings = defaultRegexpSpeechModSettings
+        }
+        completion(speechModSettings ?? [:], regexpSpeechModSettings ?? [:])
+    }
     /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
     @objc static func ForceOverrideHungSpeakStringToSpeechModSettings() {
         let targets = ["*": " "]
@@ -65,61 +71,65 @@ class NovelSpeakerUtility: NSObject {
 
     // 標準の読み替え辞書を上書き登録します。
     static func OverrideDefaultSpeechModSettingsWith(realm:Realm) {
-        RealmUtil.WriteWith(realm: realm) { (realm) in
-            for (before, after) in defaultSpeechModSettings() {
-                if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) {
-                    setting.after = after
-                    setting.isUseRegularExpression = false
-                    continue
+        getSpeechModSettings { (speechModSettings, regexpModSettings) in
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                for (before, after) in speechModSettings {
+                    if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) {
+                        setting.after = after
+                        setting.isUseRegularExpression = false
+                        continue
+                    }
+                    let speechModSetting = RealmSpeechModSetting()
+                    speechModSetting.before = before
+                    speechModSetting.after = after
+                    speechModSetting.isUseRegularExpression = false
+                    speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
+                    realm.add(speechModSetting, update: .modified)
                 }
-                let speechModSetting = RealmSpeechModSetting()
-                speechModSetting.before = before
-                speechModSetting.after = after
-                speechModSetting.isUseRegularExpression = false
-                speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
-                realm.add(speechModSetting, update: .modified)
-            }
-            for (before, after) in defaultRegexpSpeechModSettings {
-                if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) {
-                    setting.after = after
-                    setting.isUseRegularExpression = true
-                    continue
+                for (before, after) in regexpModSettings {
+                    if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) {
+                        setting.after = after
+                        setting.isUseRegularExpression = true
+                        continue
+                    }
+                    let speechModSetting = RealmSpeechModSetting()
+                    speechModSetting.before = before
+                    speechModSetting.after = after
+                    speechModSetting.isUseRegularExpression = true
+                    speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
+                    realm.add(speechModSetting, update: .modified)
                 }
-                let speechModSetting = RealmSpeechModSetting()
-                speechModSetting.before = before
-                speechModSetting.after = after
-                speechModSetting.isUseRegularExpression = true
-                speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
-                realm.add(speechModSetting, update: .modified)
             }
         }
     }
 
     // 保存されている読み替え辞書の中から、標準の読み替え辞書を全て削除します
     static func RemoveAllDefaultSpeechModSettings() {
-        RealmUtil.RealmBlock { (realm) -> Void in
-            guard let allSpeechModSettings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
-            var removeTargetArray:[RealmSpeechModSetting] = []
-            for targetSpeechModSetting in allSpeechModSettings {
-                var hit = false
-                for (before, after) in defaultSpeechModSettings() {
-                    if targetSpeechModSetting.before == before && targetSpeechModSetting.after == after && targetSpeechModSetting.isUseRegularExpression != true {
-                        removeTargetArray.append(targetSpeechModSetting)
-                        hit = true
-                        break
+        getSpeechModSettings { (speechModSettings, regexpModSettings) in
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let allSpeechModSettings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
+                var removeTargetArray:[RealmSpeechModSetting] = []
+                for targetSpeechModSetting in allSpeechModSettings {
+                    var hit = false
+                    for (before, after) in speechModSettings {
+                        if targetSpeechModSetting.before == before && targetSpeechModSetting.after == after && targetSpeechModSetting.isUseRegularExpression != true {
+                            removeTargetArray.append(targetSpeechModSetting)
+                            hit = true
+                            break
+                        }
+                    }
+                    if hit { continue }
+                    for (before, after) in regexpModSettings {
+                        if targetSpeechModSetting.before == before && targetSpeechModSetting.after == after && targetSpeechModSetting.isUseRegularExpression == true {
+                            removeTargetArray.append(targetSpeechModSetting)
+                            break
+                        }
                     }
                 }
-                if hit { continue }
-                for (before, after) in defaultRegexpSpeechModSettings {
-                    if targetSpeechModSetting.before == before && targetSpeechModSetting.after == after && targetSpeechModSetting.isUseRegularExpression == true {
-                        removeTargetArray.append(targetSpeechModSetting)
-                        break
+                RealmUtil.WriteWith(realm: realm) { (realm) in
+                    for targetSpeechModSetting in removeTargetArray {
+                        targetSpeechModSetting.delete(realm: realm)
                     }
-                }
-            }
-            RealmUtil.WriteWith(realm: realm) { (realm) in
-                for targetSpeechModSetting in removeTargetArray {
-                    targetSpeechModSetting.delete(realm: realm)
                 }
             }
         }

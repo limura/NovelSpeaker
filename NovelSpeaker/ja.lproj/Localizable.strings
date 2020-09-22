@@ -165,7 +165,8 @@
 "SettingsViewController_ChooseInvalidiCloudData_Message" = "iCloud 側にデータが存在する事は確認したのですが、ことせかい で利用するために必須のデータを取得できませんでした。\n\nネットワークの状態が悪い場合や iCloud側 に保存されているデータの量が多かった場合、以前 iCloud同期 を行った端末のデータが iCloud側 へ転送しきれていなかった場合といったような色々な場合が考えられますが、とにかくこのままでは正常に利用する事はできそうにありません。\n\nなお、この端末にあるデータを iCloud側 に上書き保存する形で iCloud同期 を ON にする事もできます。iCloud側 に上書き保存する場合、iCloud側とこの端末側の両方に存在する設定や小説はこの端末側の値に、iCloud側にしか存在しない設定や小説はiCloud側の物が残るという形になります。\n\n上書き保存する形でiCloud同期を開始しますか？";
 "SettingsViewController_ClearWebSearchSiteInfoCache" = "Web検索タブの検索データを読み直す";
 "SettingsViewController_ClearWebSearchSiteInfoCache_done" = "Web検索タブに戻ると読み込み直すように設定しました。";
-"SettingTableViewController_AutoSplitStringSetting" = "テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)";
+"SettingsViewController_AutoSplitStringSetting" = "テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)";
+"SettingsViewController_RemoteDataURLSetting" = "内部データ参照用URLの設定";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";
@@ -191,6 +192,20 @@
 "SettingTableViewController_MixWithOthersIsEnabled" = "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)";
 "SettingTableViewController_DuckOthersIsEnabled" = "他のアプリの音を小さくする";
 "SettingTableViewController_IsOpenRecentBookInStartTime" = "起動時に前回開いていた小説を開く";
+
+"RemoteDataURLSettingViewController_Title" = "内部データ参照用URLの設定";
+"RemoteDataURLSettingViewController_Information" = "注意: ここにある設定は下手に書き換えると ことせかい が正常に動作しなくなる可能性があります。書き換えを行う場合は内容を理解した上で行ってください。\nなお、標準設定は全て「空(なにも書かれていない)」状態ですので問題が起こった場合には全ての項目の内容を消すことで標準設定に戻すことができます。";
+"RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSection_Title" = "ことせかい用SiteInfo";
+"RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSampleButton" = "標準設定データのURLを開く";
+"RemoteDataURLSettingViewController_FallbackSiteInfoSection_Title" = "次点のSiteInfo";
+"RemoteDataURLSettingViewController_FallbackSiteInfoSampleButton" = "標準設定データのURLを開く";
+"RemoteDataURLSettingViewController_SpeechModSection_Title" = "標準の読み替え設定(正規表現ではないもの)";
+"RemoteDataURLSettingViewController_SpeechModSampleButton" = "標準設定データのURLを開く";
+"RemoteDataURLSettingViewController_RegexpSpeechModSection_Title" = "標準の読み替え設定(正規表現のもの)";
+"RemoteDataURLSettingViewController_RegexpSpeechModSampleButton" = "標準設定データのURLを開く";
+"RemoteDataURLSettingViewController_SearchInfoSection_Title" = "Web検索タブ用検索ヒント情報";
+"RemoteDataURLSettingViewController_SearchInfoSampleButton" = "標準設定データのURLを開く";
+"RemoteDataURLSettingViewController_URLTextFieldPlaceholder" = "URLを入力してください";
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";
 "NovelSpeakerBackup_ExportingNovelText" = "工程 3/5\r\n小説本文を抽出中";
