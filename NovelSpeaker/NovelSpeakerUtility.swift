@@ -210,7 +210,7 @@ class NovelSpeakerUtility: NSObject {
                     }
                     if globalState.autoSplitStringList.count <= 0 {
                         let defaultAutoSplitStringList:[String] = [
-                            "[[改ページ]]", "[改ページ]", "［＃改ページ］", "［＃改丁］", "\n\n\n"
+                            "\n[[改ページ]]", "\n[改ページ]", "\n［＃改ページ］", "\n［＃改丁］", "\n\n\n"
                         ]
                         globalState.autoSplitStringList.append(objectsIn: defaultAutoSplitStringList)
                     }
