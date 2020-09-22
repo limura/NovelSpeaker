@@ -657,7 +657,7 @@ class NiftyUtilitySwift: NSObject {
     }
     
     static func guessStringEncodingFrom(charset:String?) -> String.Encoding? {
-        guard let charset = charset else { return nil }
+        guard let charset = charset?.lowercased() else { return nil }
         let cfEncoding = CFStringConvertIANACharSetNameToEncoding(charset as CFString)
         if cfEncoding != kCFStringEncodingInvalidId {
             let nsEncoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding)
@@ -771,6 +771,12 @@ class NiftyUtilitySwift: NSObject {
     
     //
     static func decodeHTMLStringFrom(data:Data, headerEncoding: String.Encoding?) -> (String?, String.Encoding?) {
+        // headerEncoding で decode できるのならそれを信じます。(HTML の meta よりも優先します)
+        if let encoding = headerEncoding, let tmpString = String(data: data, encoding: encoding) {
+            return (tmpString, encoding)
+        }
+        // headerEncoding では駄目だったと仮定して、html meta encoding を取り出します。
+        // tryDecodeToString() はなんとなく頑張ってencodingを推測するはずです。
         let (tmpStringOptional, firstEncoding) = tryDecodeToString(data: data, encoding: headerEncoding)
         guard let tmpString = tmpStringOptional else {
             return (nil, nil)
