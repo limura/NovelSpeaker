@@ -492,7 +492,7 @@
 "SpeechSectionConfigsViewController_BeforeTextTitle" = "開始文字";
 "SpeechSectionConfigsViewController_AfterTextTitle" = "終了文字";
 "SpeechSectionConfigsViewController_SpeakerAlertRowTitle" = "発話設定";
-"SpeechSectionConfigsViewController_SpeakerSelectorTitle" = "話者を選択してください\n話者を増やすには一旦戻って「話者・声色設定」で話者を増やす必要があります。";
+"SpeechSectionConfigsViewController_SpeakerSelectorTitle" = "話者を選択してください\n話者を増やすには「設定タブ」の「発話設定」で話者(の設定)を増やす必要があります。";
 "SpeechSectionConfigsViewController_RemoveButtonRow" = "この設定を削除";
 "SpeechSectionConfigsViewController_AddNewSettingButtonTitle" = "新しい発話変更設定を追加する";
 "SpeechSectionConfigsViewController_Usage" = "会話文などで読み上げ時の話者設定を変更するための設定です。\nそれぞれの設定をタップすると詳細が設定できます。開始文字と終了文字の間に挟まれた部分を読み上げる話者を選択します。必要のない設定は削除することもできます。";
