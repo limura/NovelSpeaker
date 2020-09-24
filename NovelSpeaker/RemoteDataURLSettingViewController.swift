@@ -93,7 +93,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
             $0.cell.textField.placeholder = NSLocalizedString("RemoteDataURLSettingViewController_URLTextFieldPlaceholder", comment: "URLを入力してください")
             $0.value = globalState?.novelSpeakerSiteInfoURL ?? ""
         }.onChange({ (row) in
-            guard let value = row.value else { return }
+            let value = row.value ?? ""
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
@@ -117,7 +117,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
             $0.cell.textField.placeholder = NSLocalizedString("RemoteDataURLSettingViewController_URLTextFieldPlaceholder", comment: "URLを入力してください")
             $0.value = globalState?.autopagerizeSiteInfoURL ?? ""
         }.onChange({ (row) in
-            guard let value = row.value else { return }
+            let value = row.value ?? ""
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
@@ -165,7 +165,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
             $0.cell.textField.placeholder = NSLocalizedString("RemoteDataURLSettingViewController_URLTextFieldPlaceholder", comment: "URLを入力してください")
             $0.value = globalState?.defaultRegexpSpeechModURL ?? ""
         }.onChange({ (row) in
-            guard let value = row.value else { return }
+            let value = row.value ?? ""
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
@@ -189,7 +189,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
             $0.cell.textField.placeholder = NSLocalizedString("RemoteDataURLSettingViewController_URLTextFieldPlaceholder", comment: "URLを入力してください")
             $0.value = globalState?.searchInfoURL ?? ""
         }.onChange({ (row) in
-            guard let value = row.value else { return }
+            let value = row.value ?? ""
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
