@@ -168,7 +168,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         guard let storyID = self.storyID else { return }
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
-        DispatchQueue.global(qos: .background).async {
+        DispatchQueue.global(qos: .utility).async {
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let lastChapterNumber = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.lastChapterNumber else {
                     return
@@ -675,7 +675,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
         }
     }
-
 
     @IBAction func chapterSliderValueChanged(_ sender: Any) {
         guard let storyID = self.storyID else {

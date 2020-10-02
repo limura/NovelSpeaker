@@ -115,15 +115,25 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
 
     let queuedSetStoryStoryLock = NSLock()
     var queuedSetStoryStory:Story? = nil
-    var queuedSetStoryCompletionArray:[(()->Void)] = []
+    var queuedSetStoryCompletionArray:[((_ story:Story)->Void)] = []
 
     func SetStoryAsync(story:Story) {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: DispatchQueue.main) { (realm) in
             self.speaker.StopSpeech()
             let storyID = story.storyID
+            self.ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
+            // self.ApplyStoryToSpeaker() はやたら重いので
+            // この時点でqueueが入っているならやり直します。
+            self.queuedSetStoryStoryLock.lock()
+            if let queuedStory = self.queuedSetStoryStory, queuedStory.storyID != story.storyID {
+                self.queuedSetStoryStoryLock.unlock()
+                self.SetStoryAsync(story: queuedStory)
+                return
+            }
+            self.queuedSetStoryStoryLock.unlock()
+
             self.storyID = storyID
             self.updateReadDate(realm: realm, storyID: storyID)
-            self.ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
             self.observeStory(storyID: self.storyID)
             self.observeBookmark(novelID: story.novelID)
 
@@ -132,13 +142,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             defer { self.queuedSetStoryStoryLock.unlock() }
             if let queuedStory = self.queuedSetStoryStory, queuedStory.storyID != story.storyID {
                 self.SetStoryAsync(story: queuedStory)
-            }else{
-                self.queuedSetStoryStory = nil
-                for completion in self.queuedSetStoryCompletionArray {
-                    completion()
-                }
-                self.queuedSetStoryCompletionArray.removeAll()
+                return
             }
+            self.queuedSetStoryStory = nil
+            for completion in self.queuedSetStoryCompletionArray {
+                completion(story)
+            }
+            self.queuedSetStoryCompletionArray.removeAll()
+            self.AnnounceSetStory(story: story)
         }
     }
     
@@ -148,7 +159,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
 
-    func EnqueueSetStory(story:Story, completion:(()->Void)?) {
+    func EnqueueSetStory(story:Story, completion:((_ story:Story)->Void)?) {
         queuedSetStoryStoryLock.lock()
         let currentQueuedStory = queuedSetStoryStory
         queuedSetStoryStory = story
@@ -159,12 +170,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         if currentQueuedStory == nil {
             SetStoryAsync(story: story)
         }
-        AnnounceSetStory(story: story)
     }
 
     // 読み上げに用いられる小説の章を設定します。
     // 読み上げが行われていた場合、読み上げは停止します。
-    func SetStory(story:Story, completion:(()->Void)? = nil) {
+    func SetStory(story:Story, completion:((_ story:Story)->Void)? = nil) {
         EnqueueSetStory(story: story, completion: completion)
     }
     
@@ -266,7 +276,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     case .change(_, let properties):
                         for property in properties {
                             if property.name == "storyListAsset", let newValue = property.newValue as? CreamAsset, let storyArray = RealmStoryBulk.StoryCreamAssetToStoryArray(asset: newValue), let story = RealmStoryBulk.StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber), story.chapterNumber == chapterNumber, story.content != self.speaker.displayText {
-                                DispatchQueue.global(qos: .background).async {
+                                DispatchQueue.global(qos: .userInitiated).async {
                                     self.speaker.SetStory(story: story)
                                 }
                             }
@@ -339,8 +349,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
+    var prevObserveSpeechConfigNovelID = ""
     func observeSpeechConfig(novelID:String) {
+        if prevObserveSpeechConfigNovelID == novelID { return }
         DispatchQueue.main.async {
+            self.prevObserveSpeechConfigNovelID = novelID
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm) else { return }
                 self.defaultSpeakerSettingObserverToken = defaultSpeakerSetting.observe { [weak self] (change) in
@@ -374,8 +387,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
+    var prevObserveSpeechModSettingNovelID = ""
     func observeSpeechModSetting(novelID:String) {
+        if prevObserveSpeechModSettingNovelID == novelID { return }
         DispatchQueue.main.async {
+            self.prevObserveSpeechModSettingNovelID = novelID
             RealmUtil.RealmBlock { (realm) -> Void in
                 if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let speechOverrideSetting = globalState.defaultSpeechOverrideSettingWith(realm: realm) {
                     self.defaultSpeechOverrideSettingObserverToken = speechOverrideSetting.observe({ [weak self] (change) in
@@ -1029,7 +1045,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                             nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                         }
                     }
-                    self.SetStory(story: nextStory, completion: {
+                    self.SetStory(story: nextStory, completion: { (story) in
                         self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                     })
                 }else{
