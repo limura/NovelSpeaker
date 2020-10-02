@@ -1368,6 +1368,17 @@ class NiftyUtilitySwift: NSObject {
         return URL(string: urlString, relativeTo: baseURL)
     }
     
+    static func FilterXpathWithExtructTagString(xmlDocument:XMLDocument, xpath:String) -> Set<String> {
+        var tagSet = Set<String>()
+        for element in xmlDocument.xpath(xpath) {
+            guard let elementXML = element.toHTML, let tagString = HTMLToString(htmlString: elementXML) else { continue }
+            let trimedString = tagString.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "#＃♯"))
+            if trimedString.count <= 0 { continue }
+            tagSet.insert(trimedString)
+        }
+        return tagSet
+    }
+    
     // a を b で xor します。b が a より短い場合はループして適用します
     static func xorData(a:Data, b:Data) -> Data {
         var result:Data = Data(capacity: a.count)

@@ -1061,7 +1061,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         //realm.refresh()
         let chapterNumberBulk = Int((chapterNumber - 1) / bulkCount) * bulkCount
         if let cachedBulk = bulkCache, cachedBulk.chapterNumber == chapterNumberBulk && cachedBulk.novelID == novelID { return cachedBulk }
-        print("SearchStoryBulkWith(\"\(novelID)\", \"\(chapterNumber)\")")
+        //print("SearchStoryBulkWith(\"\(novelID)\", \"\(chapterNumber)\")")
         guard let result = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@ AND chapterNumber = %@", novelID, chapterNumberBulk).first else { return nil }
         return result
     }

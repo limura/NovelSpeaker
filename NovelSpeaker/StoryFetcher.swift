@@ -139,15 +139,7 @@ struct StorySiteInfo {
     }
     func decodeTag(xmlDocument:XMLDocument) -> [String] {
         guard let xpath = tag else { return [] }
-        let tagStringArray = NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath)
-        var tagSet = Set<String>()
-        for tagCandidate in tagStringArray.components(separatedBy: CharacterSet.whitespacesAndNewlines) {
-            let tag = tagCandidate.trimmingCharacters(in: CharacterSet(charactersIn: "#＃♯"))
-            if tag.count > 0 {
-                tagSet.insert(tag)
-            }
-        }
-        return Array(tagSet)
+        return Array(NiftyUtilitySwift.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath))
     }
 }
 
