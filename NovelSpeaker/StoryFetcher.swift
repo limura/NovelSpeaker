@@ -518,10 +518,15 @@ class StoryFetcher {
     // 具体的には、
     // 本文の読み込みに成功するとその時の StoryState を引数として successAction を呼び出します。
     // successAction が呼び出されたら、
-    func FetchNext(currentState:StoryState, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?){
+    func FetchNext(currentState:StoryState, fetchTimeToLive:Int = 5, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?){
         // 入力に有効な content があるならそこで探索は終わり
         if let content = currentState.content, content.count > 0 {
             successAction?(currentState)
+            return
+        }
+        
+        if fetchTimeToLive <= 0 {
+            failedAction?(currentState.url, NSLocalizedString("StoryFetcher_FetchFirstContent_ExceededCountToLive", comment: "本文を取り出せませんでした。(本文へのリンクが発見できないまま読み込み回数上限に達しました)"))
             return
         }
         
@@ -579,18 +584,6 @@ class StoryFetcher {
             }
         }
         
-        // 本文へのボタンがあればそれを辿る
-        if let element = currentState.firstPageButton {
-            buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
-                if let state = state {
-                    successAction?(state)
-                    return
-                }
-                failedAction?(currentState.url, err?.localizedDescription ?? NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。") + "(firstPageClick)")
-            }
-            return
-        }
-        
         // 次ページへのボタンがあればそれを辿る
         if let element = currentState.nextButton {
             buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
@@ -599,6 +592,17 @@ class StoryFetcher {
                     return
                 }
                 failedAction?(currentState.url, err?.localizedDescription ?? NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。") + "(nextButtonClick)")
+            }
+            return
+        }
+        // 本文へのボタンがあればそれを辿る
+        if let element = currentState.firstPageButton {
+            buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
+                if let state = state {
+                    successAction?(state)
+                    return
+                }
+                failedAction?(currentState.url, err?.localizedDescription ?? NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。") + "(firstPageClick)")
             }
             return
         }
@@ -627,7 +631,7 @@ class StoryFetcher {
                     let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton)
                     self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
-                        self.FetchNext(currentState: state, successAction: successAction, failedAction: failedAction)
+                        self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, successAction: successAction, failedAction: failedAction)
                     }, failedAction: failedAction)
                 }) { (error) in
                     failedAction?(currentState.url, error?.localizedDescription ?? "httpHeadlessRequest return unknown error(nil)")
@@ -648,7 +652,7 @@ class StoryFetcher {
                 #endif
                 let (html, guessedEncoding) = NiftyUtilitySwift.decodeHTMLStringFrom(data: data, headerEncoding: encoding)
                 self.DecodeDocument(currentState: newState, html: html, encoding: guessedEncoding ?? encoding ?? .utf8, successAction: { (state) in
-                    self.FetchNext(currentState: state, successAction: successAction, failedAction: failedAction)
+                    self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, successAction: successAction, failedAction: failedAction)
                 }, failedAction: failedAction)
             }) { (error) in
                 failedAction?(currentState.url, error?.localizedDescription ?? "httpRequest return unknown error(nil)")
