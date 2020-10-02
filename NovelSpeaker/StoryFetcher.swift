@@ -587,18 +587,6 @@ class StoryFetcher {
             }
         }
         
-        // 次ページへのボタンがあればそれを辿る
-        if let element = currentState.nextButton {
-            buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
-                if let state = state {
-                    successAction?(state)
-                    return
-                }
-                failedAction?(currentState.url, err?.localizedDescription ?? NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。") + "(nextButtonClick)")
-            }
-            return
-        }
-
         // 本文へのボタンがあればそれを辿る
         if let element = currentState.firstPageButton {
             buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
@@ -607,6 +595,18 @@ class StoryFetcher {
                     return
                 }
                 failedAction?(currentState.url, err?.localizedDescription ?? NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。") + "(firstPageClick)")
+            }
+            return
+        }
+        
+        // 次ページへのボタンがあればそれを辿る
+        if let element = currentState.nextButton {
+            buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
+                if let state = state {
+                    successAction?(state)
+                    return
+                }
+                failedAction?(currentState.url, err?.localizedDescription ?? NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。") + "(nextButtonClick)")
             }
             return
         }
@@ -663,14 +663,14 @@ class StoryFetcher {
             }
         }
         
-        if let nextUrl = currentState.nextUrl {
-            // nextUrl があるならそれを辿る
-            fetchUrlWithRobotsCheck(url: nextUrl, currentState: currentState)
-            return
-        }
         if let firstPageLink = currentState.firstPageLink {
             // firstPageLink があるならそれを辿る
             fetchUrlWithRobotsCheck(url: firstPageLink, currentState: currentState)
+            return
+        }
+        if let nextUrl = currentState.nextUrl {
+            // nextUrl があるならそれを辿る
+            fetchUrlWithRobotsCheck(url: nextUrl, currentState: currentState)
             return
         }
 
