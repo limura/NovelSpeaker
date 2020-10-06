@@ -121,12 +121,13 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     }
     
     func Stop() {
-        //print("MultiVoiceSpeaker Stop")
         self.speechQueueLock.lock()
         defer { self.speechQueueLock.unlock() }
-        guard let queue = speechQueue.first else { return }
         isStopping = true
-        queue.Stop()
+        if let queue = speechQueue.first {
+            queue.Stop()
+        }
+        speechQueue.removeAll()
     }
     
     func willSpeakRange(range:NSRange) {
@@ -141,7 +142,6 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         }
     }
     func finishSpeak() {
-        //print("MultiVoiceSpeaker finishSpeak")
         var finishDelegate:SpeakRangeDelegate? = nil
         self.speechQueueLock.lock()
         defer {
@@ -159,7 +159,6 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
             return
         }
         if let queue = speechQueue.first {
-            //print("MultiVoiceSpeaker finishSpeak start next queue")
             startSpeech(queue: queue)
         }
     }
