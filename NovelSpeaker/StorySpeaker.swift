@@ -170,6 +170,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         if currentQueuedStory == nil {
             SetStoryAsync(story: story)
         }
+        self.AnnounceSetStory(story: story)
     }
 
     // 読み上げに用いられる小説の章を設定します。
