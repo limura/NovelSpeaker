@@ -261,15 +261,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func observeStory(storyID:String) {
         DispatchQueue.main.async {
             if self.storyObserverStoryID == storyID { return }
+            self.storyObserverStoryID = storyID
             let targetBulkID = RealmStoryBulk.CreateUniqueBulkID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID))
             if self.storyObserverStoryBulkID == targetBulkID { return }
-            self.storyObserverStoryID = storyID
             self.storyObserverStoryBulkID = targetBulkID
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let storyBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: storyID) else { return }
-                let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
                 self.storyObserverToken = storyBulk.observe({ [weak self] (change) in
                     guard let self = self else { return }
+                    let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyObserverStoryID)
                     switch change {
                     case .error(_):
                         break
