@@ -29,11 +29,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var novelObserverNovelID:String = ""
     var storyObserverToken:NotificationToken? = nil
     var storyObserverBulkStoryID:String = ""
-    var storyArrayObserverToken:NotificationToken? = nil
-    var storyArrayObserverNovelID:String = ""
     var displaySettingObserverToken:NotificationToken? = nil
     
     let storySpeaker = StorySpeaker.shared
+    
+    var lastChapterNumber:Int = -1
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -92,7 +92,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     func StopObservers() {
         novelObserverToken = nil
         storyObserverToken = nil
-        storyArrayObserverToken = nil
         displaySettingObserverToken = nil
     }
     func RestartObservers() {
@@ -102,7 +101,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         observeStory(storyID: storyID)
         observeNovel(novelID: novelID)
-        observeStoryArray(novelID: novelID)
     }
     
     func initWidgets() {
@@ -161,42 +159,44 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         navigationItem.rightBarButtonItems = barButtonArray
         navigationItem.title = novel.title
         observeNovel(novelID: novel.novelID)
-        self.observeStoryArray(novelID: novel.novelID)
     }
     
     func applyChapterListChange() {
         guard let storyID = self.storyID else { return }
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
-        DispatchQueue.global(qos: .utility).async {
+        var lastChapterNumber:Int = self.lastChapterNumber
+        if lastChapterNumber <= 0 {
             RealmUtil.RealmBlock { (realm) -> Void in
-                guard let lastChapterNumber = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.lastChapterNumber else {
-                    return
-                }
-                DispatchQueue.main.async {
-                    if chapterNumber <= 1 {
-                        self.previousChapterButton.isEnabled = false
-                    }else{
-                        self.previousChapterButton.isEnabled = true
-                    }
-                    if chapterNumber < lastChapterNumber {
-                        self.nextChapterButton.isEnabled = true
-                    }else{
-                        self.nextChapterButton.isEnabled = false
-                    }
-                    self.chapterSlider.minimumValue = 1.0
-                    self.chapterSlider.maximumValue = Float(lastChapterNumber) + Float(0.01)
-                    self.chapterSlider.value = Float(chapterNumber)
-                    
-                    self.chapterPositionLabel.text = "\(chapterNumber)/\(lastChapterNumber)"
-                    if let constraint = self.chapterPositionLabelWidthConstraint {
-                        self.chapterPositionLabel.removeConstraint(constraint)
-                    }
-                    self.chapterPositionLabel.sizeToFit()
-                    self.chapterPositionLabelWidthConstraint = self.chapterPositionLabel.widthAnchor.constraint(equalToConstant: self.chapterPositionLabel.frame.width)
-                    self.chapterPositionLabelWidthConstraint.isActive = true
-                }
+                lastChapterNumber = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.lastChapterNumber ?? -1
             }
+            if lastChapterNumber <= 0 {
+                return
+            }
+            self.lastChapterNumber = lastChapterNumber
+        }
+        DispatchQueue.main.async {
+            if chapterNumber <= 1 {
+                self.previousChapterButton.isEnabled = false
+            }else{
+                self.previousChapterButton.isEnabled = true
+            }
+            if chapterNumber < lastChapterNumber {
+                self.nextChapterButton.isEnabled = true
+            }else{
+                self.nextChapterButton.isEnabled = false
+            }
+            self.chapterSlider.minimumValue = 1.0
+            self.chapterSlider.maximumValue = Float(lastChapterNumber) + Float(0.01)
+            self.chapterSlider.value = Float(chapterNumber)
+            
+            self.chapterPositionLabel.text = "\(chapterNumber)/\(lastChapterNumber)"
+            if let constraint = self.chapterPositionLabelWidthConstraint {
+                self.chapterPositionLabel.removeConstraint(constraint)
+            }
+            self.chapterPositionLabel.sizeToFit()
+            self.chapterPositionLabelWidthConstraint = self.chapterPositionLabel.widthAnchor.constraint(equalToConstant: self.chapterPositionLabel.frame.width)
+            self.chapterPositionLabelWidthConstraint.isActive = true
         }
     }
     
@@ -242,6 +242,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         if novelObserverNovelID == novelID { return }
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
+            self.lastChapterNumber = novel.lastChapterNumber ?? -1
             novelObserverNovelID = novelID
             self.novelObserverToken = novel.observe({ [weak self] (change) in
                 guard let self = self else { return }
@@ -253,6 +254,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         if property.name == "title", let newValue = property.newValue as? String {
                             DispatchQueue.main.async {
                                 self.title = newValue
+                            }
+                        }
+                        if property.name == "m_lastChapterStoryID", let newValue = property.newValue as? String {
+                            let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: newValue)
+                            if chapterNumber > 0 && self.lastChapterNumber != chapterNumber {
+                                self.lastChapterNumber = chapterNumber
+                                self.applyChapterListChange()
                             }
                         }
                      }
@@ -288,51 +296,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         }
                     }
                 case .deleted:
-                    break
-                }
-            })
-        }
-    }
-    func observeStoryArray(novelID:String) {
-        if storyArrayObserverNovelID == novelID { return }
-        RealmUtil.RealmBlock { (realm) -> Void in
-            guard let storyBulkArray = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID) else { return }
-            storyArrayObserverNovelID = novelID
-            self.storyArrayObserverToken = storyBulkArray.observe({ [weak self] (changes) in
-                guard let self = self else { return }
-                switch changes {
-                case .initial(_):
-                    break
-                case .update(let value, let deletions, let insertions, let modifications):
-                    if deletions.count > 0 || insertions.count > 0 {
-                        // 数の増減があったら反映する
-                        DispatchQueue.main.async {
-                            //print("SpeechViewController: story delete or inserted. update display")
-                            self.applyChapterListChange()
-                        }
-                    }
-                    if modifications.count > 0 {
-                        // Bulk 管理になったので modifications でも数の増減がありえる
-                        var chapterCount = 0
-                        for storyBulk in value {
-                            if let storyArray = storyBulk.LoadStoryArray() {
-                                chapterCount += storyArray.count
-                            }
-                        }
-                        DispatchQueue.main.async {
-                            guard let chapterPositionText = self.chapterPositionLabel.text else {
-                                return
-                            }
-                            let lastChapterNumberTextArray = chapterPositionText.components(separatedBy: "/")
-                            guard lastChapterNumberTextArray.count == 2, let lastChapterNumber = Int(string: lastChapterNumberTextArray[1]) else {
-                                return
-                            }
-                            if chapterCount != lastChapterNumber {
-                                self.applyChapterListChange()
-                            }
-                        }
-                    }
-                case .error(_):
                     break
                 }
             })
