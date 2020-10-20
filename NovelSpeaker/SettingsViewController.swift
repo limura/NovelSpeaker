@@ -135,29 +135,31 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             row.value = ""
                             row.updateCell()
                         }
-                    }
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
-                    .title(title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"))
-                    .textView(content: informationText, heightMultiplier: 0.6)
-                        .addButton(title: NSLocalizedString("SettingsTableViewController_Information_ShowOutdatedInformation", comment: "過去のお知らせを確認する"), callback: { (dialog) in
+                        NiftyUtilitySwift.EasyDialogBuilder(self)
+                        .title(title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"))
+                        .textView(content: informationText, heightMultiplier: 0.6)
+                            .addButton(title: NSLocalizedString("SettingsTableViewController_Information_ShowOutdatedInformation", comment: "過去のお知らせを確認する"), callback: { (dialog) in
+                                DispatchQueue.main.async {
+                                    dialog.dismiss(animated: false, completion: {
+                                        NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, title: NSLocalizedString("SettingsTableViewController_Information_PastInformationTitle", comment: "過去のお知らせ"), message: holeText.replacingOccurrences(of: "#", with: "\n"), completion: nil)
+                                    })
+                                }
+                            })
+                        .addButton(title: NSLocalizedString("OK_button", comment: "OK"),
+                                   callback: { (dialog) in
                             DispatchQueue.main.async {
-                                dialog.dismiss(animated: false, completion: {
-                                    NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, title: NSLocalizedString("SettingsTableViewController_Information_PastInformationTitle", comment: "過去のお知らせ"), message: holeText.replacingOccurrences(of: "#", with: "\n"), completion: nil)
-                                })
+                                dialog.dismiss(animated: false, completion: nil)
                             }
-                        })
-                    .addButton(title: NSLocalizedString("OK_button", comment: "OK"),
-                               callback: { (dialog) in
-                        DispatchQueue.main.async {
-                            dialog.dismiss(animated: false, completion: nil)
-                        }
-                    }).build().show()
+                        }).build().show()
+                    }
                 }, err: {
-                    NiftyUtilitySwift.EasyDialogOneButton(
-                        viewController: self,
-                        title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"),
-                        message: NSLocalizedString("SettingsTableViewController_Information_CanNotGetInformation", comment: "お知らせの読み込みに失敗しました。"),
-                        buttonTitle: nil, buttonAction: nil)
+                    DispatchQueue.main.async {
+                        NiftyUtilitySwift.EasyDialogOneButton(
+                            viewController: self,
+                            title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"),
+                            message: NSLocalizedString("SettingsTableViewController_Information_CanNotGetInformation", comment: "お知らせの読み込みに失敗しました。"),
+                            buttonTitle: nil, buttonAction: nil)
+                    }
                 })
             })
             <<< ButtonRow() {
