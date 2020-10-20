@@ -385,7 +385,7 @@ class NiftyUtilitySwift: NSObject {
             dialog = dialog.title(title: title)
         }
         if let message = message {
-            dialog = dialog.textView(content: message, heightMultiplier: 0.65)
+            dialog = dialog.textView(content: message, heightMultiplier: 0.55)
         }
         dialog = dialog.addButton(title: button1Title != nil ? button1Title! : NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
             dialog.dismiss(animated: false, completion: {
@@ -1500,7 +1500,7 @@ class NiftyUtilitySwift: NSObject {
                 print("RealmCloudVersionChecker.RunChecker building Dialog...")
                 EasyDialogBuilder(toplevelViewController)
                 .title(title: NSLocalizedString("NiftyUtility_iCloudDataVersionIsLow_Title", comment: "iCloudとの同期に問題があります"))
-                .textView(content: NSLocalizedString("NiftyUtility_iCloudDataVersionIsLow_Message", comment: "iCloud側に保存されているデータは、この ことせかい の扱っているデータよりも新しいバージョンになっているようです。このまま iCloud同期 を行い続けるにはアプリのバージョンアップが必要となります。\nなお、古いiOSでご利用中などでアプリのバージョンアップができない場合など、アプリのバージョンアップができない場合には iCloud同期 を解除して頂く必要があります。どちらかを選択してください。"), heightMultiplier: 0.65)
+                .textView(content: NSLocalizedString("NiftyUtility_iCloudDataVersionIsLow_Message", comment: "iCloud側に保存されているデータは、この ことせかい の扱っているデータよりも新しいバージョンになっているようです。このまま iCloud同期 を行い続けるにはアプリのバージョンアップが必要となります。\nなお、古いiOSでご利用中などでアプリのバージョンアップができない場合など、アプリのバージョンアップができない場合には iCloud同期 を解除して頂く必要があります。どちらかを選択してください。"), heightMultiplier: 0.55)
                 .addButton(title: NSLocalizedString("NiftyUtility_iCloudDataVersionIsLow_AppVersionUpButton", comment: "バージョンアップ")) { (dialog) in
                     guard let url = URL(string: "https://apps.apple.com/jp/app/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84/id914344185") else { return }
                     RealmUtil.stopSyncEngine()
