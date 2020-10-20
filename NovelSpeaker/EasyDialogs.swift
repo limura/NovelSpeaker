@@ -26,6 +26,19 @@
 import Foundation
 import UIKit
 
+// from https://stackoverflow.com/questions/34588598/ios-adjust-uibutton-height-depend-on-title-text-using-autolayout
+fileprivate class AutoLayoutButton:UIButton {
+    override var intrinsicContentSize: CGSize {
+        var size = titleLabel!.sizeThatFits(CGSize(width: titleLabel!.preferredMaxLayoutWidth - contentEdgeInsets.left - contentEdgeInsets.right, height: .greatestFiniteMagnitude))
+        size.height += contentEdgeInsets.left + contentEdgeInsets.right
+        return size
+    }
+    override func layoutSubviews() {
+        titleLabel?.preferredMaxLayoutWidth = frame.size.width
+        super.layoutSubviews()
+    }
+}
+
 fileprivate class EasyDialogCustomUITextField: UITextField {
     public var focusKeyboard: Bool = false
     public var shouldReturnEventHander: ((EasyDialog)->(Void))? = nil
@@ -241,7 +254,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
         let theme: Theme
         
         private var views = [UIView]()
-        private var buttons = [UIButton]()
+        private var buttons = [AutoLayoutButton]()
         private var actions = [ActionWrapper]()
         
         public init(_ viewController: UIViewController, theme: Theme = defaultTheme) {
@@ -332,7 +345,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
         }
         
         public func addButton(tag: Int? = nil, title: String, type: ButtonType = .regular, callback: ((EasyDialog) -> ())?) -> Self {
-            let button = UIButton(type: .custom)
+            let button = AutoLayoutButton(type: .custom)
             if let t = tag {
                 button.tag = t
             }
@@ -352,6 +365,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             button.setBackgroundImage(UIImage.imageWithColor(tintColor: buttonTheme.selectedBackgroundColor), for: .highlighted)
             button.setTitleColor(buttonTheme.textColor, for: .normal)
             button.titleLabel?.font = buttonTheme.font
+            button.titleLabel?.numberOfLines = 0
             button.backgroundColor = buttonTheme.backgroundColor
             
             if let cb = callback {
@@ -464,9 +478,9 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
                 if let pv = previousView {
                     var constant = CGFloat(12.0)
 
-                    if let _ = pv as? UIButton, let _ = view as? UIButton {
+                    if let _ = pv as? AutoLayoutButton, let _ = view as? AutoLayoutButton {
                         constant = 0
-                    } else if let _ = view as? UIButton {
+                    } else if let _ = view as? AutoLayoutButton {
                         constant = 24
                     }
                     
