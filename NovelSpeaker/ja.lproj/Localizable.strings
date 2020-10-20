@@ -452,6 +452,15 @@
 
 "MigrationViewController_DoingCoreDataMigration" = "旧データベースの更新を行っています。";
 "MigrationViewController_FetchAllCloudData_Progress" = "iCloud上のデータに利用可能なデータが残されているかを確認しています。";
+"MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Title" = "iCloud が使用できません";
+"MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Message" = "iCloud が利用できない状態のようなのですが、iCloud を利用する形で起動されています。内部に保存されている iCloud 側のデータも存在しないか消えてしまっているようなので、iCloud を利用しないように設定した上で起動します。";
+"MigrationViewController_InvalidiCloudStatus_UnknowniCloudError" = "不明な iCloud 状態エラー";
+"MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Title" = "iCloud が使用できません";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Title" = "iCloud が利用できません";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Message" = "iCloud が利用できない状態のようなのですが、iCloud を利用する形で起動されています。このまま利用を続けた場合、後で iCloud の利用が可能になった時などに動作が不安定になる可能性があるかもしれません(そのような場合の動作不良についての対応は致しかねます事は予めご承知おきください)。このまま iCloud を利用する設定のままで起動しますか？";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_ConvertToLocalButton" = "iCloudを利用しないように設定を変更した上で起動する";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_StayButton" = "iCloudを利用する設定のまま起動する";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Message_AppendErrorDescription" = "検出されたエラー: ";
 
 "SpeakerSetting_NewSpeakerSetting" = "新規話者設定";
 

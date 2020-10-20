@@ -18,12 +18,57 @@ class MigrationViewController: UIViewController {
         // 戻るボタンを見えなくします
         self.navigationItem.setHidesBackButton(true, animated: false)
         
-        DispatchQueue.global(qos: .utility).async {
-            self.CheckAndDoCoreDataMigration()
-            self.CheckAndDoCoreDataToRealmMigration()
-            NovelSpeakerUtility.AddFirstStoryIfNeeded()
-            self.goToMainStoryBoard()
+        RealmUtil.CheckCloudAccountStatus { (result, error) in
+            DispatchQueue.global(qos: .utility).async {
+                self.CheckAndDoCoreDataMigration()
+                self.CheckAndDoCoreDataToRealmMigration()
+                if self.CheckAndiCloudStatusInvalidNotice(isiCloudAccountStatusValid: result, icloudAccountStatusCheckError: error) {
+                    return
+                }
+                NovelSpeakerUtility.AddFirstStoryIfNeeded()
+                self.goToMainStoryBoard()
+            }
         }
+    }
+    
+    func CheckAndiCloudStatusInvalidNotice(isiCloudAccountStatusValid:Bool, icloudAccountStatusCheckError:String?) -> Bool {
+        // iCloud を使っていないか iCloud の状態が問題ないのであれば何もしない
+        if RealmUtil.IsUseCloudRealm() == false || isiCloudAccountStatusValid == true {
+            return false
+        }
+        // ここまで来たという事は、iCloud を使う設定になっているけれど、iCloud の状態がおかしかった
+        if RealmUtil.CheckIsCloudRealmCreated() == false {
+            // iCloud の Realm data が無いという事は、このままだと何のデータも無い事になる。
+            // で、iCloud の状態が不正で local の Realm data が無いという事になり、
+            // iCloud を使わない状態にして初期状態で起動するしかない。
+            DispatchQueue.main.async {
+                NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, title: NSLocalizedString("MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Title", comment: "iCloud が使用できません"), message: NSLocalizedString("MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Message", comment: "iCloud が利用できない状態のようなのですが、iCloud を利用する形で起動されています。内部に保存されている iCloud 側のデータも存在しないか消えてしまっているようなので、iCloud を利用しないように設定した上で起動することになります。") + "\n" + (icloudAccountStatusCheckError ?? NSLocalizedString("MigrationViewController_InvalidiCloudStatus_UnknowniCloudError", comment: "不明な iCloud 状態エラー")), completion: {
+                    RealmUtil.SetIsUseCloudRealm(isUse: false)
+                    NovelSpeakerUtility.AddFirstStoryIfNeeded()
+                    self.goToMainStoryBoard()
+                })
+            }
+            return true
+        }
+        // ここに来るという事は、
+        // iCloud を使う設定になっている
+        // iCloud の状態がおかしい
+        // iCloud 側の Realm data がある
+        // という状態であるので、local に直して起動して良いかどうかを確認する必要がある。
+        DispatchQueue.main.async {
+            NiftyUtilitySwift.EasyDialogLongMessageTwoButton(viewController: self, title: NSLocalizedString("MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Title", comment: "iCloud が使用できません"), message: NSLocalizedString("MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Message", comment: "iCloud が利用できない状態のようなのですが、iCloud を利用する形で起動されています。このまま利用を続けた場合、後で iCloud の利用が可能になった時などに動作が不安定になる可能性があるかもしれません(そのような場合の動作不良についての対応は致しかねます事は予めご承知おきください)。このまま iCloud を利用する設定のままで起動しますか？") + "\n\n" + NSLocalizedString("MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Message_AppendErrorDescription", comment: "検知されたエラー: ") + (icloudAccountStatusCheckError ?? NSLocalizedString("MigrationViewController_InvalidiCloudStatus_UnknowniCloudError", comment: "不明な iCloud 状態エラー")), button1Title: NSLocalizedString("MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_ConvertToLocalButton", comment: "iCloudを利用しない"), button1Action: {
+                RealmUtil.SetIsUseCloudRealm(isUse: false)
+                DispatchQueue.global(qos: .utility).async {
+                    self.CopyLocalToCloud()
+                    NovelSpeakerUtility.AddFirstStoryIfNeeded()
+                    self.goToMainStoryBoard()
+                }
+            }, button2Title: NSLocalizedString("MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_StayButton", comment: "iCloudを利用したまま起動する")) {
+                NovelSpeakerUtility.AddFirstStoryIfNeeded()
+                self.goToMainStoryBoard()
+            }
+        }
+        return true
     }
     
     func CheckAndDoCoreDataMigration() {
@@ -51,6 +96,7 @@ class MigrationViewController: UIViewController {
         semaphore.wait()
     }
     
+    @discardableResult
     func CopyLocalToCloud() -> Bool {
         return autoreleasepool {
             guard let localRealm = try? RealmUtil.GetLocalRealm(), let cloudRealm = try? RealmUtil.GetCloudRealm() else { return false }

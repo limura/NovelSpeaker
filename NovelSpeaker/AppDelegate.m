@@ -57,6 +57,16 @@ void uncaughtExceptionHandler(NSException *exception)
     //[RealmUtil startRealmRunLoopThread];
     [NovelSpeakerUtility StartAllLongLivedOperationIDWatcher];
     
+    __block BOOL isiCloudValid = true;
+    if ([RealmUtil IsUseCloudRealm]) {
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        [RealmUtil CheckCloudAccountStatusWithCompletionHandler:^(BOOL result, NSString * _Nullable error) {
+            isiCloudValid = result;
+            dispatch_semaphore_signal(semaphore);
+        }];
+        dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
+    }
+    
     // realm の data file は
     // 起動時に iCloud か local の realm file しか無い状態にしておきます。
     if ([RealmUtil IsUseCloudRealm]) {
@@ -70,7 +80,7 @@ void uncaughtExceptionHandler(NSException *exception)
     //[CoreDataToRealmTool UnregisterConvertFromCoreDataFinished];
     //[RealmUtil RemoveLocalRealmFile];
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool IsNeedMigration]) {
+    if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool IsNeedMigration] || isiCloudValid == false) {
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"coreDataMigration" bundle:nil];
         toplevelViewController = [storyboard instantiateInitialViewController];
     }else{

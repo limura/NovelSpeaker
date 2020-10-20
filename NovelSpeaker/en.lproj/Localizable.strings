@@ -460,6 +460,15 @@
 
 "MigrationViewController_DoingCoreDataMigration" = "Updating the old database.";
 "MigrationViewController_FetchAllCloudData_Progress" = "We check whether available data is left for data on iCloud.";
+"MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Title" = "iCloud is not available";
+"MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Message" = "It seems that iCloud is not available, but it is started using iCloud. It seems that the data on the iCloud side stored inside does not exist or has disappeared, so set it not to use iCloud before starting it.";
+"MigrationViewController_InvalidiCloudStatus_UnknowniCloudError" = "Unknown iCloud status error";
+"MigrationViewController_InvalidiCloudStatus_NoiCloudRealmData_Title" = "iCloud is not available";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Title" = "iCloud is not available";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Message" = "It seems that iCloud is not available, but it is started using iCloud. If you continue to use it as it is, the operation may become unstable when iCloud becomes available later (We can not handle the malfunction in such a case. Please be aware in advance). Would you like to start with the settings to use iCloud as it is?";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_ConvertToLocalButton" = "Start after changing the settings so that iCloud is not used";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_StayButton" = "Start with the settings to use iCloud";
+"MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Message_AppendErrorDescription" = "Detected error: ";
 
 "SpeakerSetting_NewSpeakerSetting" = "New speaker";
 
