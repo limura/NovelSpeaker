@@ -250,6 +250,26 @@ import AVFoundation
         let container = GetContainer()
         container.accountStatus(completionHandler: completionHandler)
     }
+    @objc static func CheckCloudAccountStatus(completionHandler: @escaping (Bool, String?) -> Void) {
+        GetCloudAccountStatus { (accountStatus, error) in
+            if let error = error {
+                completionHandler(false, error.localizedDescription)
+                return
+            }
+            switch accountStatus {
+            case .available:
+                completionHandler(true, nil)
+            case .restricted:
+                completionHandler(false, NSLocalizedString("SettingsViewController_iCloudAccountInvalid_restricted", comment: "iCloud アカウントが制限付きの状態でしたので利用できません。"))
+            case .noAccount:
+                completionHandler(false, NSLocalizedString("SettingsViewController_iCloudAccountInvalid_noAccount", comment: "iCloud アカウントが設定されていません。"))
+            case .couldNotDetermine:
+                fallthrough
+            @unknown default:
+                completionHandler(false, NSLocalizedString("SettingsViewController_iCloudAccountInvalid_cloudNotDetermine", comment: "iCloud アカウントの状態を取得できませんでした。"))
+            }
+        }
+    }
     // LongLivedOperationID が全部消えるまで待ちます。
     static func WaitAllLongLivedOperationIDCleared(watchInterval:TimeInterval = 1.0, completion:@escaping (()->Void)) {
         FetchAllLongLivedOperationIDs { (operationIDArray, error) in
