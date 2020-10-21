@@ -1770,7 +1770,6 @@ struct SpeechViewButtonSetting: Codable {
     let type:SpeechViewButtonTypes
     var isOn:Bool
     
-    static let SpeechViewButtonSettingsKey = "NovelSpeaker_SpeechViewButtonSettings"
     static let defaultSetting:[SpeechViewButtonSetting] = [
         SpeechViewButtonSetting(type: .openWebPage, isOn: true),
         SpeechViewButtonSetting(type: .reload, isOn: true),
