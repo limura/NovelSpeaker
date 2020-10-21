@@ -231,6 +231,7 @@
 "SpeechViewController_Speak" = "Speak";
 "SpeechViewController_Detail" = "詳細";
 "SpeechViewController_Edit" = "編集";
+"SpeechViewController_BackupButton" = "バックアップ";
 "SpeechViewController_ContentReadFailed" = "文書の読み込みに失敗しました。";
 "SpeechViewController_Stop" = "Stop";
 "SpeechViewController_SpeechStopedByEnd" = "読み上げが最後に達しました。";
@@ -305,6 +306,17 @@
 "NovelDetailViewController_AddToFolderButtonTitle" = "フォルダへ分類";
 "NovelDetailViewController_LikeLevelStepperRowTitle" = "お気に入り";
 "NovelDetailViewController_Tags" = "タグ";
+"NovelDetailViewController_CurrentPage" = "現在開いているページ";
+"NovelDetailViewController_ActionSectionTitle" = "この小説に対する操作";
+"NovelDetailViewController_ActionSection_CheckUpdate" = "この小説の更新確認を行う";
+"NovelDetailViewController_ActionSection_CheckUpdateDone_Message" = "更新チェックを開始しました";
+"NovelDetailViewController_ActionSection_CopyNovelTitleButton" = "小説名をコピーする";
+"NovelDetailViewController_ActionSection_CopyNovelTitleDone_Message" = "小説名をコピーしました";
+"NovelDetailViewController_ActionSection_CopyNovelWriterNameButton" = "著者名をコピーする";
+"NovelDetailViewController_ActionSection_CopyNovelWriterNameDone_Message" = "著者名をコピーしました";
+"NovelDetailViewController_ActionSection_CreateBackupForThisNovelButton" = "この小説のバックアップを生成する";
+"NovelDetailViewController_ActionSection_SearchButton_Title" = "この小説内を検索(何も入れずに検索すると章のリストを表示します)";
+"NovelDetailViewController_ActionSection_EditNovelButton" = "この小説を編集する";
 
 "NovelKeywordTagSelectorViewController_Title" = "タグを選択";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "タグの追加";
@@ -616,6 +628,16 @@
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_Title" = "分割対象文字の追加";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_PlaceHolder" = "改行を表現するには <改行> と入力します";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_EnterButton" = "追加";
+
+"SpeechViewButtonType_OpenWebPage" = "Web取込タブで開く";
+"SpeechViewButtonType_Reload" = "その小説の更新確認を行う";
+"SpeechViewButtonType_Share" = "小説のURLをシェアする";
+"SpeechViewButtonType_Search" = "小説内を検索(何も入れずに検索すると章のリストを表示します)";
+"SpeechViewButtonType_Edit" = "小説を編集する";
+"SpeechViewButtonType_CopyTitle" = "小説名をコピーする";
+"SpeechViewButtonType_Backup" = "小説をバックアップする";
+"SpeechViewButtonSettingsViewController_Title" = "小説本文画面の右上に表示されるボタン群の設定";
+"SpeechViewButtonType_Detail" = "小説の詳細を表示する";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

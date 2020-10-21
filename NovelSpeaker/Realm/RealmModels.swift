@@ -14,7 +14,7 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 1
+    static let currentSchemaVersion : UInt64 = 2
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -1756,6 +1756,64 @@ extension RealmSpeechSectionConfig: CKRecordRecoverable {
 extension RealmSpeechSectionConfig: CanWriteIsDeleted {
 }
 
+enum SpeechViewButtonTypes:String, Codable {
+    case openWebPage = "openWebPage"
+    case reload = "reload"
+    case share = "share"
+    case search = "search"
+    case edit = "edit"
+    case backup = "backup"
+    case detail = "detail"
+}
+
+struct SpeechViewButtonSetting: Codable {
+    let type:SpeechViewButtonTypes
+    var isOn:Bool
+    
+    static let SpeechViewButtonSettingsKey = "NovelSpeaker_SpeechViewButtonSettings"
+    static let defaultSetting:[SpeechViewButtonSetting] = [
+        SpeechViewButtonSetting(type: .openWebPage, isOn: true),
+        SpeechViewButtonSetting(type: .reload, isOn: true),
+        SpeechViewButtonSetting(type: .share, isOn: true),
+        SpeechViewButtonSetting(type: .search, isOn: true),
+        SpeechViewButtonSetting(type: .backup, isOn: false),
+        SpeechViewButtonSetting(type: .detail, isOn: true),
+        SpeechViewButtonSetting(type: .edit, isOn: true),
+    ]
+    // 与えられた配列を、defaultSetting に存在するtypeの物を全て含んだ状態にして返します。
+    // つまり、壊れていて空の配列になっていれば defaultSetting そのものになるし、
+    // 新しい要素が将来的に追加された時に、その要素が含まれないデータを読み込んだ場合でも
+    // その新しい要素が追加された状態の配列に修正する、という事をします。
+    static func ValidateAndFixSettingArray(settingArray:[SpeechViewButtonSetting]) -> [SpeechViewButtonSetting] {
+        var result:[SpeechViewButtonSetting] = []
+        var aliveSet:Set<SpeechViewButtonTypes> = Set<SpeechViewButtonTypes>()
+        for setting in defaultSetting {
+            aliveSet.insert(setting.type)
+        }
+        for setting in settingArray {
+            result.append(setting)
+            aliveSet.remove(setting.type)
+        }
+        for type in aliveSet {
+            for setting in defaultSetting {
+                if type == setting.type {
+                    result.append(setting)
+                    break
+                }
+            }
+        }
+        return result
+    }
+    static func DataToSettingArray(data:Data) -> [SpeechViewButtonSetting] {
+        guard let result = try? JSONDecoder().decode([SpeechViewButtonSetting].self, from: data) else { return defaultSetting }
+        return ValidateAndFixSettingArray(settingArray: result)
+    }
+    static func SettingArrayToData(settingArray:[SpeechViewButtonSetting]) -> Data? {
+        return try? JSONEncoder().encode(settingArray)
+    }
+}
+
+
 @objc final class RealmGlobalState: Object {
     static public let UniqueID = "only one object"
     @objc dynamic var id = UniqueID
@@ -1790,8 +1848,9 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
     @objc dynamic var defaultSpeechModURL = ""
     @objc dynamic var defaultRegexpSpeechModURL = ""
     @objc dynamic var searchInfoURL = ""
+    @objc dynamic var speechViewButtonSettingArrayData = Data()
 
-    static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_RealmModels_IsForceSiteInfoReloadIsEnabled"
+    static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {
         let userDefaults = UserDefaults.standard
         userDefaults.register(defaults: [RealmGlobalState.isForceSiteInfoReloadIsEnabledKey : false])
@@ -1801,7 +1860,7 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
         let userDefaults = UserDefaults.standard
         userDefaults.set(newValue, forKey: RealmGlobalState.isForceSiteInfoReloadIsEnabledKey)
     }
-
+    
     var bookShelfSortType : NarouContentSortType {
         get {
             return NarouContentSortType(rawValue: UInt(m_bookSelfSortType)) ?? NarouContentSortType.ncode
@@ -1910,6 +1969,13 @@ extension RealmSpeechSectionConfig: CanWriteIsDeleted {
         guard let obj = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: UniqueID) else { return nil }
         if obj.isDeleted { return nil }
         return obj
+    }
+
+    func GetSpeechViewButtonSetting() -> [SpeechViewButtonSetting] {
+        return SpeechViewButtonSetting.DataToSettingArray(data: self.speechViewButtonSettingArrayData)
+    }
+    func SetSpeechViewButtonSettingWith(realm:Realm, newValue:[SpeechViewButtonSetting]) {
+        self.speechViewButtonSettingArrayData = SpeechViewButtonSetting.SettingArrayToData(settingArray: newValue) ?? Data()
     }
 
     override class func primaryKey() -> String? {

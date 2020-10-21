@@ -246,6 +246,7 @@
 "SpeechViewController_Speak" = "Speak";
 "SpeechViewController_Detail" = "Detail";
 "SpeechViewController_Edit" = "Edit";
+"SpeechViewController_BackupButton" = "Backup";
 "SpeechViewController_ContentReadFailed" = "Failed to read contents. This problem may be resolved by choosing \"Detail\" → \"Download\", and selecting Re-Download.";
 "SpeechViewController_Stop" = "Stop";
 
@@ -328,6 +329,18 @@
 "NovelDetailViewController_AddToFolderButtonTitle" = "Classify to folder";
 "NovelDetailViewController_LikeLevelStepperRowTitle" = "Liked";
 "NovelDetailViewController_Tags" = "Tags";
+"NovelDetailViewController_CurrentPage" = "URL of the page currently open";
+"NovelDetailViewController_ActionSectionTitle" = "Manipulation on this novel";
+"NovelDetailViewController_ActionSection_OpenCurrentPageOnWebImportTab" = "Open the currently open page in the Web import tab";
+"NovelDetailViewController_ActionSection_CheckUpdate" = "Check for updates to this novel";
+"NovelDetailViewController_ActionSection_CheckUpdateDone_Message" = "Update check started";
+"NovelDetailViewController_ActionSection_CopyNovelTitleButton" = "Copy the novel name";
+"NovelDetailViewController_ActionSection_CopyNovelTitleDone_Message" = "I copied the novel name";
+"NovelDetailViewController_ActionSection_CopyNovelWriterNameButton" = "Copy the author name";
+"NovelDetailViewController_ActionSection_CopyNovelWriterNameDone_Message" = "I copied the author name";
+"NovelDetailViewController_ActionSection_CreateBackupForThisNovelButton" = "Create backup file for this novel";
+"NovelDetailViewController_ActionSection_SearchButton_Title" = "Search within this novel (searching without anything will display a list of chapters)";
+"NovelDetailViewController_ActionSection_EditNovelButton" = "Edit this novel";
 
 "NovelKeywordTagSelectorViewController_Title" = "Select Tag";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "Add Tag";
@@ -623,6 +636,15 @@
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_PlaceHolder" = "Type <Enter> to represent a line break";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_EnterButton" = "Add";
 
+"SpeechViewButtonType_OpenWebPage" = "Open in Web import tab";
+"SpeechViewButtonType_Reload" = "Check for updates to the novel";
+"SpeechViewButtonType_Share" = "Share the URL of this novel";
+"SpeechViewButtonType_Search" = "Search in this novel (search without entering anything will display a list of chapters)";
+"SpeechViewButtonType_Edit" = "Edit this novel";
+"SpeechViewButtonType_CopyTitle" = "Copy this novel title";
+"SpeechViewButtonType_Backup" = "Back up this novel";
+"SpeechViewButtonSettingsViewController_Title" = "Settings for the buttons displayed in the upper right corner of the novel text screen";
+"SpeechViewButtonType_Detail" = "Show novel detail";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

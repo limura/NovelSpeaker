@@ -168,6 +168,16 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
         row.value = tagListText
     }
     
+    func openInWebImportTab(url:URL) {
+        DispatchQueue.main.async {
+            /// XXX 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
+            let targetTabIndex = 2
+            guard let viewController = self.tabBarController?.viewControllers?[targetTabIndex] as? ImportFromWebPageViewController else { return }
+            viewController.openTargetUrl = url
+            self.tabBarController?.selectedIndex = targetTabIndex
+        }
+    }
+    
     func createCells() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.RemoveRealmLink() else {
@@ -181,25 +191,43 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
             detailSection <<< LabelRow("TitleLabel") {
                 $0.title = NSLocalizedString("NovelDetailViewController_Title", comment: "小説名")
                 $0.value = novel.title
-            }
+            }.onCellSelection({ (cellOf, row) in
+                UIPasteboard.general.string = novel.title.trimmingCharacters(in: .whitespacesAndNewlines)
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CopyNovelTitleDone_Message", comment: "小説名をコピーしました"), buttonTitle: nil, buttonAction: nil)
+                }
+            })
             if novel.type == .URL {
                 detailSection <<< LabelRow("WriterLabel") {
                     $0.title = NSLocalizedString("NovelDetailViewController_Writer", comment: "著者")
                     $0.value = novel.writer
-                }
+                }.onCellSelection({ (cellOf, row) in
+                    UIPasteboard.general.string = novel.writer.trimmingCharacters(in: .whitespacesAndNewlines)
+                    DispatchQueue.main.async {
+                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CopyNovelWriterNameDone_Message", comment: "著者名をコピーしました"), buttonTitle: nil, buttonAction: nil)
+                    }
+                })
+
                 detailSection <<< LabelRow("URLLabel") {
                     $0.title = NSLocalizedString("NovelDetailViewController_URL", comment: "URL")
                     $0.value = novel.url
                     $0.cell.accessoryType = .disclosureIndicator
                 }.onCellSelection({ (cellOf, row) in
-                    DispatchQueue.main.async {
-                        /// XXX 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
-                        let targetTabIndex = 2
-                        guard let viewController = self.tabBarController?.viewControllers?[targetTabIndex] as? ImportFromWebPageViewController, let url = URL(string: novel.url) else { return }
-                        viewController.openTargetUrl = url
-                        self.tabBarController?.selectedIndex = targetTabIndex
-                    }
+                    guard let url = URL(string: novel.url) else { return }
+                    self.openInWebImportTab(url: url)
                 })
+                
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let chapterNumber = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID)?.readingChapterNumber, let story = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: self.novelID, chapterNumber: chapterNumber), let url = URL(string: story.url) else { return }
+                    detailSection <<< LabelRow() {
+                        $0.title = NSLocalizedString("NovelDetailViewController_CurrentPage", comment: "現在開いているページ")
+                        $0.value = story.url
+                        $0.cell.textLabel?.numberOfLines = 0
+                        $0.cell.accessoryType = .disclosureIndicator
+                    }.onCellSelection({ (cellOf, row) in
+                        self.openInWebImportTab(url: url)
+                    })
+                }
             }
             detailSection <<< LabelRow("TagsLabel") {
                 $0.title = NSLocalizedString("NovelDetailViewController_Tags", comment: "タグ")
@@ -210,8 +238,65 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 nextViewController.novelID = self.novelID
                 self.navigationController?.pushViewController(nextViewController, animated: true)
             })
-            
             self.form +++ detailSection
+            
+            let actionSection = Section(NSLocalizedString("NovelDetailViewController_ActionSectionTitle", comment: "この小説に対する操作"))
+            
+            actionSection <<< ButtonRow() {
+                $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_SearchButton_Title", comment: "この小説内を検索(何も入れずに検索すると章のリストを表示します)")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                DispatchQueue.main.async {
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let chapterNumber = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID)?.readingChapterNumber else { return }
+                        StorySpeaker.shared.StopSpeech(realm: realm)
+                        NovelSpeakerUtility.SearchStoryFor(storyID: RealmStoryBulk.CreateUniqueBulkID(novelID: self.novelID, chapterNumber: chapterNumber), viewController: self) { (story) in
+                            StorySpeaker.shared.SetStory(story: story)
+                            self.navigationController?.popViewController(animated: true)
+                        }
+                    }
+                }
+            })
+
+            if novel.type == .URL {
+                actionSection <<< ButtonRow() {
+                    $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_CheckUpdate", comment: "この小説の更新確認を行う")
+                    $0.cell.textLabel?.numberOfLines = 0
+                    $0.cell.accessoryType = .disclosureIndicator
+                }.onCellSelection({ (cellOf, row) in
+                    NovelDownloadQueue.shared.addQueue(novelID: self.novelID)
+                    DispatchQueue.main.async {
+                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CheckUpdateDone_Message", comment: "更新チェックを開始しました"), buttonTitle: nil, buttonAction: nil)
+                    }
+                })
+            }
+
+            actionSection <<< ButtonRow() {
+                $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_CreateBackupForThisNovelButton", comment: "この小説のバックアップを生成する")
+            }.onCellSelection({ (cellOf, row) in
+                DispatchQueue.main.async {
+                    NovelSpeakerUtility.CreateNovelOnlyBackup(novelIDArray: [self.novelID], viewController: self) { (fileUrl, fileName) in
+                        DispatchQueue.main.async {
+                            let activityViewController = UIActivityViewController(activityItems: [fileUrl], applicationActivities: nil)
+                            let frame = UIScreen.main.bounds
+                            activityViewController.popoverPresentationController?.sourceView = self.view
+                            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
+                            self.present(activityViewController, animated: true, completion: nil)
+                        }
+                    }
+                }
+            })
+            
+            actionSection <<< ButtonRow() {
+                $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_EditNovelButton", comment: "この小説を編集する")
+            }.onCellSelection({ (cellOf, row) in
+                DispatchQueue.main.async {
+                    self.performSegue(withIdentifier: "EditUserTextSegue", sender: self)
+                }
+            })
+            
+            self.form +++ actionSection
+            
             let settingSection = Section(NSLocalizedString("NovelDetailViewController_SettingSectionTitle", comment: "この小説専用の設定"))
             // novel.likeLevel
             // isNeedSpeechAfterDelete
@@ -252,6 +337,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 $0.title = NSLocalizedString("SettingTableViewController_CorrectionOfTheReading", comment:"読みの修正")
                 $0.presentationMode = .segueName(segueName: "speechModSettingSegue", onDismiss: nil)
             }
+            /*
             settingSection <<< ButtonRow() {
                 $0.title = NSLocalizedString("NovelDetailViewController_AddRubyToSpeechModButtonTitle", comment: "小説中に出てくるルビ表記をこの小説用の読みの修正に上書き追加する")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -298,6 +384,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                     }).build().show()
                 }
             })
+            */
             settingSection <<< ButtonRow() {
                 $0.title = NSLocalizedString("NovelDetailViewController_AddToFolderButtonTitle", comment: "フォルダへ分類")
             }.onCellSelection({ (_, _) in
@@ -310,7 +397,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
-            settingSection <<< CheckRow() {
+            settingSection <<< SwitchRow() {
                 $0.title = NSLocalizedString("NovelDetailViewController_LikeLevelStepperRowTitle", comment: "お気に入り")
                 $0.value = novel.likeLevel > 0
             }.onChange({ (row) in
@@ -332,10 +419,13 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "speechModSettingSegue" {
+        if segue.identifier == "EditUserTextSegue" {
+            if let nextViewController = segue.destination as? EditBookViewController {
+                nextViewController.targetNovelID = self.novelID
+            }
+        }else if segue.identifier == "speechModSettingSegue" {
             guard let nextViewController = segue.destination as? SpeechModSettingsTableViewControllerSwift, self.novelID.count > 0 else { return }
             nextViewController.targetNovelID = self.novelID
         }
     }
-
 }

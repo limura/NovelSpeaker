@@ -30,6 +30,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var storyObserverToken:NotificationToken? = nil
     var storyObserverBulkStoryID:String = ""
     var displaySettingObserverToken:NotificationToken? = nil
+    var globalStateObserverToken:NotificationToken? = nil
     
     let storySpeaker = StorySpeaker.shared
     
@@ -48,7 +49,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
             RealmUtil.RealmBlock { (realm) -> Void in
                 if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID){
-                    loadNovel(novel: novel)
+                    loadNovel(novel: novel, aliveButtonSettings: RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting)
                 }
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
                     self.storySpeaker.SetStory(story: story)
@@ -59,6 +60,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
         }
         observeDispaySetting()
+        observeGlobalState()
         registNotificationCenter()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
@@ -93,6 +95,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         novelObserverToken = nil
         storyObserverToken = nil
         displaySettingObserverToken = nil
+        globalStateObserverToken = nil
     }
     func RestartObservers() {
         StopObservers()
@@ -101,6 +104,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         observeStory(storyID: storyID)
         observeNovel(novelID: novelID)
+        observeGlobalState()
     }
     
     func initWidgets() {
@@ -140,23 +144,49 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         menuController.menuItems = []
     }
     
-    func loadNovel(novel:RealmNovel) {
-        startStopButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"), style: .plain, target: self, action: #selector(startStopButtonClicked(_:)))
-        var barButtonArray:[UIBarButtonItem] = [
-            startStopButtonItem!,
-            UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Edit", comment: "編集"), style: .plain, target: self, action: #selector(editButtonClicked(_:)))
-        ]
-        barButtonArray.append(
-            UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Detail", comment: "詳細"), style: .plain, target: self, action: #selector(detailButtonClicked(_:))))
-        barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonClicked(_:))))
-        if novel.type == .URL {
-            let buttonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action:   #selector(shareButtonClicked(_:)))
-            self.shareButtonItem = buttonItem
-            barButtonArray.append(buttonItem)
-            barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(urlRefreshButtonClicked(_:))))
-            barButtonArray.append(UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(safariButtonClicked(_:))))
+    func assignUpperButtons(novel:RealmNovel, aliveButtonSettings:[SpeechViewButtonSetting]) {
+        var barButtonArray:[UIBarButtonItem] = []
+        
+        for buttonSetting in aliveButtonSettings {
+            if buttonSetting.isOn == false { continue }
+            switch buttonSetting.type {
+            case .openWebPage:
+                if novel.type == .URL {
+                    barButtonArray.append(UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(safariButtonClicked(_:))))
+                }
+            case .reload:
+                if novel.type == .URL {
+                    barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(urlRefreshButtonClicked(_:))))
+                }
+            case .share:
+                if novel.type == .URL {
+                    let shareButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action:   #selector(shareButtonClicked(_:)))
+                    self.shareButtonItem = shareButtonItem
+                    barButtonArray.append(shareButtonItem)
+                }
+            case .search:
+                barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonClicked(_:))))
+            case .edit:
+                barButtonArray.append(UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Edit", comment: "編集"), style: .plain, target: self, action: #selector(editButtonClicked(_:))))
+            case .detail:
+                barButtonArray.append(UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Detail", comment: "詳細"), style: .plain, target: self, action: #selector(detailButtonClicked(_:))))
+            case .backup:
+                barButtonArray.append(UIBarButtonItem(title: NSLocalizedString("SpeechViewController_BackupButton", comment: "バックアップ"), style: .plain, target: self, action: #selector(backupButtonClicked(_:))))
+                break
+            default:
+                break
+            }
         }
+        let startStopButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"), style: .plain, target: self, action: #selector(startStopButtonClicked(_:)))
+        self.startStopButtonItem = startStopButtonItem
+        barButtonArray.append(startStopButtonItem)
+        barButtonArray.reverse()
+
         navigationItem.rightBarButtonItems = barButtonArray
+    }
+    
+    func loadNovel(novel:RealmNovel, aliveButtonSettings: [SpeechViewButtonSetting]) {
+        assignUpperButtons(novel: novel, aliveButtonSettings: aliveButtonSettings)
         navigationItem.title = novel.title
         observeNovel(novelID: novel.novelID)
     }
@@ -236,6 +266,29 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     func unregistNotificationCenter() {
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
+    }
+    
+    func observeGlobalState() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+            self.globalStateObserverToken = globalState.observe({ [weak self] (change) in
+                guard let self = self else { return }
+                switch change {
+                case .change(_, let propertys):
+                    for property in propertys {
+                        if property.name == "speechViewButtonSettingArrayData" {
+                            RealmUtil.RealmBlock { (realm) -> Void in
+                                guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(), let buttonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() else { return }
+                                self.assignUpperButtons(novel: novel, aliveButtonSettings: buttonSettings)
+                            }
+                            break
+                        }
+                    }
+                default:
+                    break
+                }
+            })
+        }
     }
     
     func observeNovel(novelID:String) {
@@ -482,6 +535,19 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         applyThemeColor(backgroundColor: backgroundColor, foregroundColor: foregroundColor, indicatorStyle: indicatorStyle, barStyle: barStyle)
     }
 
+    @objc func backupButtonClicked(_ sender: UIBarButtonItem) {
+        guard let storyID = self.storyID else { return }
+        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
+        NovelSpeakerUtility.CreateNovelOnlyBackup(novelIDArray: [novelID], viewController: self) { (fileUrl, fileName) in
+            DispatchQueue.main.async {
+                let activityViewController = UIActivityViewController(activityItems: [fileUrl], applicationActivities: nil)
+                let frame = UIScreen.main.bounds
+                activityViewController.popoverPresentationController?.sourceView = self.view
+                activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
+                self.present(activityViewController, animated: true, completion: nil)
+            }
+        }
+    }
     @objc func editButtonClicked(_ sender: UIBarButtonItem) {
         pushToEditStory()
     }

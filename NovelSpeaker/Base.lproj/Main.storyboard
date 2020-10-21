@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -23,14 +24,14 @@
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="Mzu-ia-Ii4"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="gQM-YC-Qn8" secondAttribute="trailing" constant="-16" id="Cza-lx-hvB"/>
                             <constraint firstItem="gQM-YC-Qn8" firstAttribute="bottom" secondItem="l03-Ng-qdH" secondAttribute="bottomMargin" id="avF-H3-1hF"/>
                             <constraint firstItem="gQM-YC-Qn8" firstAttribute="leading" secondItem="l03-Ng-qdH" secondAttribute="leadingMargin" constant="-16" id="c3I-ff-FUp"/>
                             <constraint firstItem="gQM-YC-Qn8" firstAttribute="top" secondItem="l03-Ng-qdH" secondAttribute="topMargin" id="fMZ-Kk-X6C"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="Mzu-ia-Ii4"/>
                     </view>
                     <navigationItem key="navigationItem" id="FcK-cJ-voF">
                         <rightBarButtonItems>
@@ -75,7 +76,7 @@
                             </slider>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vgK-qt-EeE">
                                 <rect key="frame" x="16" y="90" width="343" height="520"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <string key="text">メロスは両手で老爺のからだをゆすぶって質問を重ねた。老爺は、あたりをはばかる低声で、わずか答えた。
 「王様は、人を殺します。」
 「なぜ殺すのだ。」
@@ -87,12 +88,13 @@
 　聞いて、メロスは激怒した。「呆れた王だ。生かして置けぬ。」
 　メロスは、単純な男であった。買い物を、背負ったままで、のそのそ王城にはいって行った。たちまち彼は、巡邏の警吏に捕縛された。調べられて、メロスの懐中からは短剣が出て来たので、騒ぎが大きくなってしまった。メロスは、王の前に引き出された。
 「この短刀で何をするつもりであったか。言え！」暴君ディオニスは静かに、けれども威厳を以て問いつめた。その王の顔は蒼白で、眉間の皺しわは、刻み込まれたように深かった。  太宰治 走れメロスより</string>
-                                <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="WC8-P8-5Yg"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="vgK-qt-EeE" firstAttribute="leading" secondItem="OW2-Cz-epG" secondAttribute="leadingMargin" id="4QT-7q-iiY"/>
                             <constraint firstItem="Fkj-1l-L3c" firstAttribute="top" secondItem="WC8-P8-5Yg" secondAttribute="top" constant="8" id="Jh6-lD-Fzh"/>
@@ -102,7 +104,6 @@
                             <constraint firstItem="vgK-qt-EeE" firstAttribute="top" secondItem="Fkj-1l-L3c" secondAttribute="bottom" constant="8" id="t5l-0L-QId"/>
                             <constraint firstItem="WC8-P8-5Yg" firstAttribute="bottom" secondItem="vgK-qt-EeE" secondAttribute="bottom" constant="8" id="ui5-qs-9yA"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="WC8-P8-5Yg"/>
                     </view>
                     <navigationItem key="navigationItem" title="文字の大きさ" id="PxM-wl-qYW"/>
                     <connections>
@@ -121,8 +122,8 @@
                     <view key="view" contentMode="scaleToFill" id="6ia-66-EXl">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <viewLayoutGuide key="safeArea" id="Zpy-8L-X86"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
                     <navigationItem key="navigationItem" id="HfT-tu-afw"/>
                 </viewController>
@@ -137,8 +138,8 @@
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="IYP-gH-U8o">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                        <color key="sectionIndexBackgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="sectionIndexBackgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="speechModSettingsTableViewDefaultCell" id="W85-N7-Sen">
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
@@ -167,8 +168,8 @@
                     <view key="view" contentMode="scaleToFill" id="f1k-ts-e6k">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <viewLayoutGuide key="safeArea" id="uJV-8y-Mc6"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
                     <navigationItem key="navigationItem" title="設定" id="IR0-u3-ueb"/>
                     <connections>
@@ -194,7 +195,7 @@
                         <subviews>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YKK-cB-MCo">
                                 <rect key="frame" x="0.0" y="574" width="375" height="44"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="zYe-yy-RAc"/>
                                 </constraints>
@@ -251,7 +252,7 @@
                             </progressView>
                             <textField opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="LSE-Fd-akM">
                                 <rect key="frame" x="10" y="0.0" width="355" height="30"/>
-                                <color key="backgroundColor" systemColor="secondarySystemBackgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="30" id="nNY-OD-eoC"/>
                                 </constraints>
@@ -263,7 +264,8 @@
                                 </connections>
                             </textField>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="7Se-Bl-rd5"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="LSE-Fd-akM" firstAttribute="leading" secondItem="7Se-Bl-rd5" secondAttribute="leading" constant="10" id="53A-al-MMq"/>
                             <constraint firstItem="b2P-LC-lhM" firstAttribute="leading" secondItem="7Se-Bl-rd5" secondAttribute="leading" id="6aK-cA-78r"/>
@@ -275,7 +277,6 @@
                             <constraint firstItem="7Se-Bl-rd5" firstAttribute="trailing" secondItem="YKK-cB-MCo" secondAttribute="trailing" id="iA9-7N-LmO"/>
                             <constraint firstItem="7Se-Bl-rd5" firstAttribute="trailing" secondItem="b2P-LC-lhM" secondAttribute="trailing" id="wQK-bS-Qsi"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="7Se-Bl-rd5"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="Web取込" image="earth.png" id="DHc-nq-yTa"/>
                     <connections>
@@ -304,7 +305,7 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="44" width="375" height="574"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <mutableString key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
+                                <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
 MIT License
 
@@ -1223,19 +1224,19 @@ THE SOFTWARE.
    See the License for the specific language governing permissions and
    limitations under the License.
 
-</mutableString>
+</string>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="Kai-Tt-fHY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="em1-qg-D62" firstAttribute="top" secondItem="Kai-Tt-fHY" secondAttribute="top" id="AgH-9b-pNs"/>
                             <constraint firstItem="em1-qg-D62" firstAttribute="bottom" secondItem="Kai-Tt-fHY" secondAttribute="bottom" id="WVw-cq-ie2"/>
                             <constraint firstItem="em1-qg-D62" firstAttribute="leading" secondItem="Kai-Tt-fHY" secondAttribute="leading" id="lWh-td-Hf2"/>
                             <constraint firstItem="em1-qg-D62" firstAttribute="trailing" secondItem="Kai-Tt-fHY" secondAttribute="trailing" id="xzt-me-K9N"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="Kai-Tt-fHY"/>
                     </view>
                     <navigationItem key="navigationItem" title="クレジット" id="dcE-Gm-Rdn"/>
                 </viewController>
@@ -1268,8 +1269,8 @@ THE SOFTWARE.
                     <view key="view" contentMode="scaleToFill" id="pzR-lv-fks">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <viewLayoutGuide key="safeArea" id="KWG-GU-LqD"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                     <navigationItem key="navigationItem" title="詳細" id="XJd-XT-qbJ"/>
                 </viewController>
@@ -1285,7 +1286,7 @@ THE SOFTWARE.
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="6vb-08-2I9">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </navigationBar>
                     <connections>
                         <segue destination="vgt-bB-KL1" kind="relationship" relationship="rootViewController" id="D6S-Lb-d63"/>
@@ -1302,8 +1303,8 @@ THE SOFTWARE.
                     <view key="view" contentMode="scaleToFill" id="zZP-gD-Q37">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="fgh-3a-YAA"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
                     <navigationItem key="navigationItem" title="Web検索" id="aTj-OP-UCn"/>
                 </viewController>
@@ -1319,7 +1320,7 @@ THE SOFTWARE.
                     <tabBar key="tabBar" contentMode="scaleToFill" id="vA1-b7-MqS">
                         <rect key="frame" x="129" y="330" width="163" height="49"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                        <color key="backgroundColor" systemColor="systemGroupedBackgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
                     </tabBar>
                     <connections>
                         <segue destination="v42-xJ-9mb" kind="relationship" relationship="viewControllers" id="ktK-js-zfL"/>
@@ -1340,7 +1341,7 @@ THE SOFTWARE.
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="kzS-si-TDC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </navigationBar>
                     <connections>
                         <segue destination="qdr-YW-SRT" kind="relationship" relationship="rootViewController" id="lw0-xX-U4f"/>
@@ -1357,8 +1358,8 @@ THE SOFTWARE.
                     <view key="view" contentMode="scaleToFill" id="lbe-Qa-v0c">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="MCD-xD-iwy"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
                     <navigationItem key="navigationItem" id="BIV-fi-F7U"/>
                     <connections>
@@ -1383,7 +1384,7 @@ THE SOFTWARE.
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RsE-pW-sT4">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RsE-pW-sT4">
                                 <rect key="frame" x="0.0" y="572" width="30" height="46"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                 <state key="normal" title="◀"/>
@@ -1391,7 +1392,7 @@ THE SOFTWARE.
                                     <action selector="previousChapterButtonClicked:" destination="WIX-4N-ZvP" eventType="touchUpInside" id="vwS-82-YMh"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Atz-vc-WDz">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Atz-vc-WDz">
                                 <rect key="frame" x="345" y="571" width="30" height="48"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                 <state key="normal" title="▶"/>
@@ -1415,6 +1416,7 @@ THE SOFTWARE.
                                 </connections>
                             </slider>
                         </subviews>
+                        <viewLayoutGuide key="safeArea" id="ZHI-m6-f76"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="Atz-vc-WDz" firstAttribute="leading" secondItem="P4K-uK-bhG" secondAttribute="trailing" constant="8" id="Ctr-Od-bva"/>
@@ -1432,7 +1434,6 @@ THE SOFTWARE.
                             <constraint firstItem="xzg-Fa-5p1" firstAttribute="centerY" secondItem="RsE-pW-sT4" secondAttribute="centerY" id="oVH-3O-e1L"/>
                             <constraint firstItem="RsE-pW-sT4" firstAttribute="bottom" secondItem="ZHI-m6-f76" secondAttribute="bottom" id="zPZ-xE-Ucs"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="ZHI-m6-f76"/>
                     </view>
                     <navigationItem key="navigationItem" id="D8u-t9-uNo"/>
                     <connections>
@@ -1457,12 +1458,13 @@ THE SOFTWARE.
                     <view key="view" contentMode="scaleToFill" id="Wuf-KC-jPq">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="0I4-IU-VQJ"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
                     <navigationItem key="navigationItem" id="U6G-A9-LTB"/>
                     <connections>
                         <segue destination="DcS-zk-4zM" kind="push" identifier="speechModSettingSegue" id="DiM-k6-LVA"/>
+                        <segue destination="dCR-kh-Ivz" kind="push" identifier="EditUserTextSegue" id="xAC-6a-6U9"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qnL-F1-ydf" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1478,17 +1480,17 @@ THE SOFTWARE.
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" adjustsFontForContentSizeCategory="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7U0-Lh-pyC">
-                                <rect key="frame" x="57.5" y="54.5" width="252.5" height="34"/>
+                                <rect key="frame" x="57" y="54.5" width="253" height="34"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hYi-6O-tpR">
-                                <rect key="frame" x="16" y="61" width="33.5" height="20.5"/>
+                                <rect key="frame" x="16" y="61" width="33" height="20.5"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wMt-h0-xpF">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wMt-h0-xpF">
                                 <rect key="frame" x="318" y="57" width="52" height="33"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="52" id="IPa-mV-vhY"/>
@@ -1501,7 +1503,7 @@ THE SOFTWARE.
                                     <action selector="entryButtonClicked:" destination="dCR-kh-Ivz" eventType="touchUpInside" id="BHz-Xr-Oli"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cM0-Wf-FN8">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cM0-Wf-FN8">
                                 <rect key="frame" x="0.0" y="139" width="55" height="46"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="55" id="a61-DH-2Zr"/>
@@ -1535,8 +1537,8 @@ THE SOFTWARE.
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="E2C-GJ-Of6">
-                                <rect key="frame" x="160" y="98" width="97" height="33"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="E2C-GJ-Of6">
+                                <rect key="frame" x="161" y="98" width="97" height="33"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <state key="normal" title="Add Chapter">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -1545,8 +1547,8 @@ THE SOFTWARE.
                                     <action selector="addChapterButtonClicked:" destination="dCR-kh-Ivz" eventType="touchUpInside" id="dUE-av-Csu"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KLa-F4-FYq">
-                                <rect key="frame" x="267" y="98" width="92" height="33"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KLa-F4-FYq">
+                                <rect key="frame" x="268" y="98" width="91" height="33"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <state key="normal" title="Del Chapter">
                                     <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -1555,7 +1557,7 @@ THE SOFTWARE.
                                     <action selector="deleteChapterButtonClicked:" destination="dCR-kh-Ivz" eventType="touchUpInside" id="A3U-l7-C2m"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Dd3-il-QVF">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Dd3-il-QVF">
                                 <rect key="frame" x="319" y="139" width="51" height="46"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="51" id="tck-oG-aNy"/>
@@ -1569,7 +1571,8 @@ THE SOFTWARE.
                                 </connections>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="G7J-8n-cqw"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="ZfF-jG-c09" firstAttribute="centerY" secondItem="LN3-sB-fzm" secondAttribute="centerY" id="5Qd-LU-hZu"/>
                             <constraint firstAttribute="trailingMargin" secondItem="LN3-sB-fzm" secondAttribute="trailing" constant="38" id="7Pr-ac-AM7"/>
@@ -1596,7 +1599,6 @@ THE SOFTWARE.
                             <constraint firstItem="G7J-8n-cqw" firstAttribute="bottom" secondItem="XX2-ka-OrJ" secondAttribute="bottom" id="ptL-vb-4Pl"/>
                             <constraint firstItem="KLa-F4-FYq" firstAttribute="trailing" secondItem="UOv-Sk-8f5" secondAttribute="trailingMargin" id="ztG-HW-GhK"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="G7J-8n-cqw"/>
                     </view>
                     <navigationItem key="navigationItem" title="UserText" id="veu-sd-mPo"/>
                     <connections>
@@ -1620,7 +1622,7 @@ THE SOFTWARE.
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="FvL-jm-emj"/>
-        <segue reference="whQ-HQ-5wp"/>
+        <segue reference="DiM-k6-LVA"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="&lt;.png" width="36" height="36"/>
@@ -1631,5 +1633,17 @@ THE SOFTWARE.
         <image name="gear.png" width="15" height="15"/>
         <image name="home.png" width="36" height="36"/>
         <image name="soundbook.png" width="9.8742856979370117" height="9.8742856979370117"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="secondarySystemBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGroupedBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
     </resources>
 </document>

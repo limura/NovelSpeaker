@@ -1649,11 +1649,12 @@ class NovelSpeakerUtility: NSObject {
             return result
         }
     }
-    fileprivate static func CreateBackupDataDictionary_Bookshelf(withAllStoryContent:Bool, contentWriteTo:URL, progress:((_ description:String)->Void)?) -> ([[String:Any]], [URL]) {
+    fileprivate static func CreateBackupDataDictionary_Bookshelf(forNovelIDArray:[String], contentWriteTo:URL, progress:((_ description:String)->Void)?) -> ([[String:Any]], [URL]) {
+        let withAllStoryContent = (forNovelIDArray.count > 0)
         var result:[[String:Any]] = []
         var fileArray:[URL] = []
         return RealmUtil.RealmBlock { (realm) -> ([[String:Any]], [URL]) in
-            guard let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) else { return (result, []) }
+            guard let novelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.filter({forNovelIDArray.contains($0.novelID)}) else { return (result, []) }
             var novelCount = 1
             let novelArrayCount = novelArray.count
             for novel in novelArray {
@@ -1906,8 +1907,24 @@ class NovelSpeakerUtility: NSObject {
             return result
         }
     }
-
+    
     static func CreateBackupData(withAllStoryContent:Bool, progress:((_ description:String)->Void)?) -> URL? {
+        if withAllStoryContent {
+            let result = RealmUtil.RealmBlock { (realm) -> URL? in
+                if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) {
+                    let novelIDArray = Array(novelArray.map({$0.novelID}))
+                    return CreateBackupData(forNovelIDArray: novelIDArray, progress: progress)
+                }
+                return nil
+            }
+            if let result = result {
+                return result
+            }
+        }
+        return CreateBackupData(forNovelIDArray: [], progress: progress)
+    }
+    
+    static func CreateBackupData(forNovelIDArray:[String], isOnlyNovelData:Bool = false, progress:((_ description:String)->Void)?) -> URL? {
         let directoryName = "NovelSpeakerBackup"
         // 一旦対象のディレクトリを作って、中身を全部消します。
         if let outputPath = NiftyUtilitySwift.CreateTemporaryDirectory(directoryName: directoryName) {
@@ -1917,22 +1934,34 @@ class NovelSpeakerUtility: NSObject {
         guard let outputPath = NiftyUtilitySwift.CreateTemporaryDirectory(directoryName: directoryName) else {
             return nil
         }
-        let bookshelfResult = CreateBackupDataDictionary_Bookshelf(withAllStoryContent: withAllStoryContent, contentWriteTo: outputPath, progress: progress)
-        progress?(NSLocalizedString("NovelSpeakerUtility_ExportOtherSettings", comment: "設定情報の抽出中"))
-        let jsonDictionary:[String:Any] = [
-            "data_version": "2.0.0",
-            "bookshelf": bookshelfResult.0,
-            "word_replacement_dictionary": CreateBackupDataDictionary_SpeechModSetting(),
-            "speech_wait_config": CreateBackupDataDictionary_SpeechWaitConfig(),
-            "speaker_setting": CreateBackupDataDictionary_SpeakerSetting(),
-            "speech_section_config": CreateBackupDataDictionary_SpeechSectionConfig(),
-            "misc_settings": CreateBackupDataDictionary_GlobalState(),
-            "display_setting": CreateBackupDataDictionary_DisplaySetting(),
-            "novel_tag": CreateBackupDataDictionary_NovelTag(),
-            "speech_override_setting": CreateBackupDataDictionary_SpeechOverrideSetting(),
-            "bookmark": CreateBackupDataDictionary_Bookmark(),
-        ]
+        let bookshelfResult = CreateBackupDataDictionary_Bookshelf(forNovelIDArray: forNovelIDArray, contentWriteTo: outputPath, progress: progress)
         defer { NiftyUtilitySwift.RemoveDirectory(directoryPath: outputPath) }
+        if isOnlyNovelData && forNovelIDArray.count > 0 && bookshelfResult.0.count <= 0 {
+            // forNovelIDArray が 0以上 で bookshelfResult に内容が無いようであるなら、それは失敗している(恐らくは指定されたNovelIDの小説が全て存在しなかった)
+            return nil
+        }
+        progress?(NSLocalizedString("NovelSpeakerUtility_ExportOtherSettings", comment: "設定情報の抽出中"))
+        let jsonDictionary:[String:Any]
+        if isOnlyNovelData {
+            jsonDictionary = [
+                "data_version": "2.0.0",
+                "bookshelf": bookshelfResult.0,
+            ]
+        }else{
+            jsonDictionary = [
+                "data_version": "2.0.0",
+                "bookshelf": bookshelfResult.0,
+                "word_replacement_dictionary": CreateBackupDataDictionary_SpeechModSetting(),
+                "speech_wait_config": CreateBackupDataDictionary_SpeechWaitConfig(),
+                "speaker_setting": CreateBackupDataDictionary_SpeakerSetting(),
+                "speech_section_config": CreateBackupDataDictionary_SpeechSectionConfig(),
+                "misc_settings": CreateBackupDataDictionary_GlobalState(),
+                "display_setting": CreateBackupDataDictionary_DisplaySetting(),
+                "novel_tag": CreateBackupDataDictionary_NovelTag(),
+                "speech_override_setting": CreateBackupDataDictionary_SpeechOverrideSetting(),
+                "bookmark": CreateBackupDataDictionary_Bookmark(),
+            ]
+        }
         
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale.current
@@ -1940,7 +1969,7 @@ class NovelSpeakerUtility: NSObject {
         let dateString = dateFormatter.string(from: Date())
         var ziptargetFiles:[URL] = bookshelfResult.1
         let backupDataFilePath:URL
-        if withAllStoryContent {
+        if forNovelIDArray.count > 0 {
             backupDataFilePath = outputPath.appendingPathComponent("backup_data.json")
             ziptargetFiles.append(backupDataFilePath)
         }else{
@@ -1954,7 +1983,7 @@ class NovelSpeakerUtility: NSObject {
             print("JSONSerizization.data() failed. or jsonData.write() failed.")
             return nil
         }
-        if !withAllStoryContent {
+        if forNovelIDArray.count <= 0 {
             return backupDataFilePath
         }
         if let progress = progress {
@@ -2083,4 +2112,97 @@ class NovelSpeakerUtility: NSObject {
         NovelDownloadQueue.shared.addQueue(novelID: novelID)
         SetIsIsAddedFirstStory(newValue: true)
     }
+    
+    #if !os(watchOS)
+    static func CreateNovelOnlyBackup(novelIDArray:[String], viewController:UIViewController, successAction:((_ filePath:URL, _ fileName: String)->Void)? = nil) {
+        let labelTag = 100
+        let dialog = NiftyUtilitySwift.EasyDialogBuilder(viewController)
+            .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
+            .build()
+        DispatchQueue.main.async {
+            dialog.show()
+        }
+        DispatchQueue.global(qos: .utility).async {
+            guard let backupData = NovelSpeakerUtility.CreateBackupData(forNovelIDArray: novelIDArray, isOnlyNovelData: true, progress: { (description) in
+                DispatchQueue.main.async {
+                    if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
+                        label.text = NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……") + "\r\n"
+                            + description
+                    }
+                }
+            }) else {
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false) {
+                        DispatchQueue.main.async {
+                            NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                        }
+                    }
+                }
+                return
+            }
+            let fileName = backupData.lastPathComponent
+            DispatchQueue.main.async {
+                dialog.dismiss(animated: false) {
+                    successAction?(backupData, fileName)
+                }
+            }
+        }
+    }
+    #endif
+    
+    #if !os(watchOS)
+    static func SearchStoryFor(storyID:String, viewController:UIViewController, selectedResultHandler:((_ story:Story)->Void)? = nil) {
+        func searchFunc(searchString:String?){
+            NiftyUtilitySwift.EasyDialogNoButton(
+                viewController: viewController,
+                title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
+                message: nil) { (searchingDialog) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let storys = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.filter({ (story) -> Bool in
+                        guard let searchString = searchString else { return true }
+                        if searchString.count <= 0 { return true }
+                        return story.content.contains(searchString)
+                    }) else {
+                        NiftyUtilitySwift.EasyDialogOneButton(
+                            viewController: viewController,
+                            title: nil,
+                            message: NSLocalizedString("SpeechViewController_CanNotGetStorys", comment: "小説情報を参照できませんでした。"),
+                            buttonTitle: nil, buttonAction: nil)
+                        return
+                    }
+                    let displayTextArray = Array(storys.map { (story) -> String in
+                        return "\(story.chapterNumber): " + story.GetSubtitle()
+                    })
+                    var selectedText:String? = nil
+                    if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
+                        selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
+                    }
+                    let picker = PickerViewDialog.createNewDialog(displayTextArray, firstSelectedString: selectedText, parentView: viewController.view) { (selectedText) in
+                        guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)) else { return }
+                        selectedResultHandler?(story)
+                        //SpeechBlockSpeaker.shared.SetStory(story: story)
+                    }
+                    searchingDialog.dismiss(animated: false) {
+                        picker?.popup(nil)
+                    }
+                }
+            }
+        }
+        
+        NiftyUtilitySwift.EasyDialogTextInput2Button(
+            viewController: viewController,
+            title: NSLocalizedString("SpeechViewController_SearchDialogTitle", comment: "検索"),
+            message: NSLocalizedString("SpeechViewController_SearchDialogMessage", comment: "本文中から文字列を検索します"),
+            textFieldText: nil,
+            placeHolder: NSLocalizedString("SpeechViewController_SearchDialogPlaceholderText", comment: "空文字列で検索すると全ての章がリストされます"),
+            leftButtonText: NSLocalizedString("Cancel_button", comment: "Cancel"),
+            rightButtonText: NSLocalizedString("OK_button", comment: "OK"),
+            leftButtonAction: nil,
+            rightButtonAction: { (filterText) in
+                searchFunc(searchString: filterText)
+            },
+            shouldReturnIsRightButtonClicked: true,
+            completion: nil)
+    }
+    #endif
 }
