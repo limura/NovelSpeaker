@@ -1615,7 +1615,6 @@ static DummySoundLooper* dummySoundLooper = nil;
             fromString = [fromString stringByReplacingOccurrencesOfString:@"\r\n" withString:newlinePattern];
             NSArray* regexpModConfigArray = [StringSubstituter FindRegexpSpeechModConfigs:content pattern:fromString to:waitString];
             for (SpeechModSettingCacheData* modSetting in regexpModConfigArray) {
-                NSLog(@"add modpattern: \"%@\" to \"%@\"", modSetting.beforeString, modSetting.afterString);
                 if (isUseExperimentalWait) {
                     [niftySpeaker AddSpeechModText:modSetting.beforeString to:modSetting.afterString];
                 }else{
