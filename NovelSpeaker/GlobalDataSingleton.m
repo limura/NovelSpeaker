@@ -1586,6 +1586,54 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
 
 /// NiftySpeakerに現在の読みの「間」の設定を登録します
+- (void)ApplySpeechWaitConfigWithRegexpPattern:(NiftySpeaker*) niftySpeaker content:(NSString*)content
+{
+    GlobalStateCacheData* globalState = [self GetGlobalState];
+    
+    NSArray* speechWaitConfigList = [self GetAllSpeechWaitConfig];
+    if (speechWaitConfigList == nil) { return; }
+    for (SpeechWaitConfigCacheData* speechWaitConfigCache in speechWaitConfigList) {
+        float delay = [speechWaitConfigCache.delayTimeInSec floatValue];
+        if (delay <= 0.0f) { continue; }
+        BOOL isUseExperimentalWait = [globalState.speechWaitSettingUseExperimentalWait boolValue];
+        NSMutableString* waitString = [[NSMutableString alloc] initWithString:@"。"];
+        if (isUseExperimentalWait) {
+            for (float x = 0.0f; x < delay; x += 0.1f) {
+                [waitString appendString:@"_。"];
+            }
+        }
+
+        // newline に当たる文字は Unicode において (U+000A ~ U+000D, U+0085, U+2028, and U+2029) らしい。
+        // 根拠はこれ https://developer.apple.com/documentation/foundation/nscharacterset/1416730-newlines
+        // で、
+        // U+000A~U+000D はそれぞれ \r\v\f\n になる
+        // という事で、\r\n を含めて正規表現に落とすとこんな感じか？
+        NSString* newlinePattern = @"\r?[\r\v\f\n\u2028\u2029]";
+        NSString* fromString = speechWaitConfigCache.targetText;
+        NSRange enterRange = [fromString rangeOfString:@"\r\n"];
+        if (enterRange.location != NSNotFound) {
+            fromString = [fromString stringByReplacingOccurrencesOfString:@"\r\n" withString:newlinePattern];
+            NSArray* regexpModConfigArray = [StringSubstituter FindRegexpSpeechModConfigs:content pattern:fromString to:waitString];
+            for (SpeechModSettingCacheData* modSetting in regexpModConfigArray) {
+                NSLog(@"add modpattern: \"%@\" to \"%@\"", modSetting.beforeString, modSetting.afterString);
+                if (isUseExperimentalWait) {
+                    [niftySpeaker AddSpeechModText:modSetting.beforeString to:modSetting.afterString];
+                }else{
+                    [niftySpeaker AddDelayBlockSeparator:modSetting.beforeString delay:delay];
+                }
+            }
+        }else{
+            if (isUseExperimentalWait) {
+                [niftySpeaker AddSpeechModText:fromString to:waitString];
+            }else{
+                [niftySpeaker AddDelayBlockSeparator:fromString delay:delay];
+            }
+        }
+
+    }
+}
+
+/// NiftySpeakerに現在の読みの「間」の設定を登録します
 - (void)ApplySpeechWaitConfig:(NiftySpeaker*) niftySpeaker
 {
     GlobalStateCacheData* globalState = [self GetGlobalState];
@@ -1704,7 +1752,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [m_NiftySpeaker ClearSpeakSettings];
     [self ApplyDefaultSpeechconfig:m_NiftySpeaker];
     [self ApplySpeakPitchConfig:m_NiftySpeaker];
-    [self ApplySpeechWaitConfig:m_NiftySpeaker];
+    //[self ApplySpeechWaitConfig:m_NiftySpeaker];
     if ([self GetOverrideRubyIsEnabled]) {
         [self ApplyRubyModConfig:m_NiftySpeaker];
     }
@@ -1788,6 +1836,7 @@ static DummySoundLooper* dummySoundLooper = nil;
         [self ApplyRemoveURIModConfigWithText:m_NiftySpeaker text:story.content];
     }
     [self ApplySpeechModConfigForRegexp:m_NiftySpeaker targetText:story.content];
+    [self ApplySpeechWaitConfigWithRegexpPattern:m_NiftySpeaker content:story.content];
     //[self ApplySpeechModConfigForSpeechRecognizerBugEscape:m_NiftySpeaker targetText:story.content];
     
     if(![m_NiftySpeaker SetText:[self ConvertStoryContentToDisplayText:story]])
