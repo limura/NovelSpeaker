@@ -340,14 +340,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.67
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.68
 
-- 「設定」->「開発者に問い合わせる」で選択できる「新機能等のご提案」を「新機能等のご提案・その他のお問い合わせ」に名称変更
-- 完全バックアップファイルの小説本文を保存しているフォルダの中にゴミファイルが混ざっていると正常に本文を取り込めない場合がある問題について修正
+- 「設定」->「読み上げ時の間の設定」にて「<改行>」を設定している場合に、一部の文書では改行をうまく検出できない場合があった問題を修正
+- アプリ起動時にはバッジが消えなかった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.68
+
+問題の修正
+
+- 「設定」->「読み上げ時の間の設定」にて「<改行>」を設定している場合に、一部の文書では改行をうまく検出できない場合があった問題を修正
+- アプリ起動時にはバッジが消えなかった問題を修正
+
+
 # Version 1.1.67
 
 インタフェースの変更
