@@ -68,6 +68,10 @@ void uncaughtExceptionHandler(NSException *exception)
     // for FTLinearActivityIndicator enable (iPhone X とかのノッチのあるタイプでの network activity indicator を上書きしてくれる奴を enable にする)
     [UIApplication configureLinearNetworkActivityIndicatorIfNeeded];
     
+    // badge clear.
+    application.applicationIconBadgeNumber = -1;
+    [[GlobalDataSingleton GetInstance] UpdateBackgroundFetchedNovelCount:0];
+    
     return YES;
 }
 
