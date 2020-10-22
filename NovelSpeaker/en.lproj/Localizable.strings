@@ -659,9 +659,10 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.67
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.68
 
-- Corrected the problem that the text may not be imported normally if the garbage file is mixed in the folder storing the novel text of the complete backup file.
+- Fixed an issue where line breaks could not be detected properly in some documents when \"<Enter>\" was set in \"Settings\" -> \"Setting for punctuation delays\".
+- Fixed an issue where the badge did not disappear when the app was launched.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -677,6 +678,15 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 -Change speaker setting items
 -Added a function to separate chapters into text files when importing text files etc.
 -Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
+
+
+# Version 1.1.68
+
+Bug fix.
+
+- Fixed an issue where line breaks could not be detected properly in some documents when \"<Enter>\" was set in \"Settings\" -> \"Setting for punctuation delays\".
+- Fixed an issue where the badge did not disappear when the app was launched.
+
 
 # Version 1.1.67
 

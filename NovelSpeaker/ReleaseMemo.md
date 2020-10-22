@@ -2499,6 +2499,32 @@ Bug fix
 
 - Corrected the problem that the text may not be imported normally if the garbage file is mixed in the folder storing the novel text of the complete backup file.
 
+
+# Version 1.1.68
+
+問題の修正
+
+- 「設定」->「読み上げ時の間の設定」にて改行を設定している場合に、一部の文書では改行をうまく検出できない場合があった問題を修正
+- アプリ起動時にはバッジが消えなかった問題を修正
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は改行に対する読み上げ時の間を設定していてもうまく改行を検出できない小説があったという問題と、「設定」->「小説の自動更新」をONにしていて自動更新された小説の数を表すバッジ(アプリアイコンの右上に出る数字)が、アプリ起動時には消えないという問題を修正した物になります。
+
+前者の問題は、読み上げ時の間の設定のうち改行を含んだ物がうまく作動しない場合があった問題に対する物になります。今までは改行を表現する文字列をいくつかのパターンとして検出していました。なのですが、このパターンに合わない改行の文字列を指定してある小説がある事を確認致しましたので、これらにも対応できるようにしたという物になります。これで空白行で間が開かない場合がある、という事を回避する事ができるようになるはずです。
+
+後者のバッジが消えない問題は、アプリのバックグラウンドからの復帰時にしかバッジを消す動作をしていなかったという単純な問題で、これをアプリ起動時にも行うようにした、という物になります。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 1.1.68
+
+Bug fix
+
+- Fixed an issue where line breaks could not be detected properly in some documents when "<Enter>" was set in "Settings" -> "Setting for punctuation delays".
+- Fixed an issue where the badge did not disappear when the app was launched.
+
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
