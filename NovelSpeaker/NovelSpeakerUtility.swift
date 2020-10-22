@@ -591,7 +591,7 @@ class NovelSpeakerUtility: NSObject {
             if let dic = dic as? NSDictionary, let target_text = dic.object(forKey: "target_text") as? String, let delay_time_in_sec = dic.object(forKey: "delay_time_in_sec") as? NSNumber, target_text.count > 0 && delay_time_in_sec.floatValue >= 0 {
                 let delayTimeInSec = delay_time_in_sec.floatValue
                 // 改行の保存形式は \r\n から \n に変更されました。
-                let targetText = target_text.replacingOccurrences(of: "\r", with: "")
+                let targetText = NovelSpeakerUtility.NormalizeNewlineString(string: target_text)
                 RealmUtil.RealmBlock { (realm) -> Void in
                     if let speechWaitConfig = RealmSpeechWaitConfig.GetAllObjectsWith(realm: realm)?.filter("targetText = %@", targetText).first {
                         RealmUtil.WriteWith(realm: realm) { (realm) in
@@ -769,7 +769,7 @@ class NovelSpeakerUtility: NSObject {
                     var story = Story()
                     story.novelID = novelID
                     story.chapterNumber = no
-                    story.content = content.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+                    story.content = NormalizeNewlineString(string: content)
                     story.url = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: no, end: end.boolValue)
                     storyArray.append(story)
                     if storyArray.count >= RealmStoryBulk.bulkCount {
@@ -859,7 +859,7 @@ class NovelSpeakerUtility: NSObject {
                     var story = Story()
                     story.novelID = novelID
                     story.chapterNumber = no
-                    story.content = content.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+                    story.content = NormalizeNewlineString(string: content)
                     storyArray.append(story)
                     if storyArray.count >= RealmStoryBulk.bulkCount {
                         RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
@@ -908,7 +908,7 @@ class NovelSpeakerUtility: NSObject {
                 var story = Story()
                 story.novelID = novelID
                 story.chapterNumber = no
-                story.content = storyText.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+                story.content = NormalizeNewlineString(string: storyText)
                 storyArray.append(story)
                 if storyArray.count >= RealmStoryBulk.bulkCount {
                     RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
@@ -2205,4 +2205,21 @@ class NovelSpeakerUtility: NSObject {
             completion: nil)
     }
     #endif
+    
+    // 改行文字について全てを "\n" に変更した String を生成します。
+    static func NormalizeNewlineString(string:String) -> String {
+        // newline に当たる文字は Unicode において (U+000A ~ U+000D, U+0085, U+2028, and U+2029) らしい。
+        // 根拠はこれ https://developer.apple.com/documentation/foundation/nscharacterset/1416730-newlines
+        // で、
+        // U+000A~U+000D はそれぞれ \r\v\f\n になる(Swift だと \v, \f は無いみたいなので \u{} で書く
+        var result = string
+        let targetArray = ["\r\n", "\r", "\u{000B}", "\u{000C}", "\u{2028}", "\u{2029}"]
+        let convertTo = "\n"
+        for target in targetArray {
+            if result.contains(target) {
+                result = result.replacingOccurrences(of: target, with: convertTo)
+            }
+        }
+        return result
+    }
 }

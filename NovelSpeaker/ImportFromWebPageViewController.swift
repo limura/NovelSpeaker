@@ -306,7 +306,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
                 return
             }
             RealmUtil.WriteWith(realm: realm) { (realm) in
-                let saveName = name.replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "\r", with: "")
+                let saveName = NovelSpeakerUtility.NormalizeNewlineString(string: name).replacingOccurrences(of: "\n", with: "")
                 globalState.webImportBookmarkArray.append("\(saveName)\n\(url.absoluteString)")
             }
         }

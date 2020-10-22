@@ -202,7 +202,7 @@ class CoreDataToRealmTool: NSObject {
                     wait.delayTimeInSec = delayTimeInSec
                 }
                 if let targetText = speechWait.targetText {
-                    wait.targetText = targetText.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+                    wait.targetText = NovelSpeakerUtility.NormalizeNewlineString(string: targetText)
                 }
                 
                 realm.add(wait, update: .modified)
@@ -233,7 +233,7 @@ class CoreDataToRealmTool: NSObject {
             var story = Story()
             story.novelID = novelID
             story.chapterNumber = chapterNumber
-            story.content = storyCoreData.content.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+            story.content = NovelSpeakerUtility.NormalizeNewlineString(string: storyCoreData.content)
             if let ncode = content.ncode, let end = content.end as? Bool {
                 story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
             }

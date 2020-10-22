@@ -665,7 +665,7 @@ struct Story: Codable {
 
         url = try values.decode(String.self, forKey: CodingKeys.url)
         subtitle = try values.decode(String.self, forKey: CodingKeys.subtitle)
-        content = (try values.decode(String.self, forKey: CodingKeys.content)).replacingOccurrences(of: "\r\n", with: "\n")
+        content = NovelSpeakerUtility.NormalizeNewlineString(string:(try values.decode(String.self, forKey: CodingKeys.content)))
         novelID = try values.decode(String.self, forKey: CodingKeys.novelID)
         chapterNumber = try values.decode(Int.self, forKey: CodingKeys.chapterNumber)
         downloadDate = try values.decode(Date.self, forKey: CodingKeys.downloadDate)

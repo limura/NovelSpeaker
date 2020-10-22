@@ -23,7 +23,7 @@ class NiftyUtilitySwift: NSObject {
     // 分割すべき大きさで、分割できそうな文字列であれば分割して返します
     static func CheckShouldSeparate(text:String) -> [String]? {
         guard let realm = try? RealmUtil.GetRealm(), let textCountSeparatorArray = RealmGlobalState.GetInstanceWith(realm: realm)?.autoSplitStringList else { return nil }
-        let text = text.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+        let text = NovelSpeakerUtility.NormalizeNewlineString(string: text)
         var separated:[String] = [text]
         for separator in textCountSeparatorArray {
             var newSeparated:[String] = []
@@ -52,7 +52,7 @@ class NiftyUtilitySwift: NSObject {
     
     #if !os(watchOS)
     @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
-        let content = content.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+        let content = NovelSpeakerUtility.NormalizeNewlineString(string: content)
         DispatchQueue.main.async {
             var easyDialog = EasyDialogBuilder(viewController)
                 .textField(tag: 100, placeholder: title, content: title, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
