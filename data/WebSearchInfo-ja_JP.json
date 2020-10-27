@@ -598,7 +598,7 @@
             {"queryType": "text", "displayText": "検索キーワード", "queryName": "word"},
             {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0", "radio":
                 {
-                    "指定なし": "0",
+                    " 指定なし": "0",
                     "恋愛(すべて)": "100",
                     "恋愛(純愛)": "101",
                     "恋愛(ラブコメ)": "102",
@@ -627,7 +627,7 @@
             },
             {"queryType": "radio", "displayText": "気持ち", "queryName": "feeling", "defaultValue": "0", "radio":
                 {
-                    "指定なし": "0",
+                    " 指定なし": "0",
                     "泣ける": "1",
                     "切ない": "2",
                     "感動した": "3",
