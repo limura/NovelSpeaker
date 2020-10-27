@@ -588,5 +588,83 @@
             "title": "//div[contains(@class,'content-title')]/h2[@class='title']",
             "url": "//div[contains(@class,'content-title')]/h2[@class='title']/a[contains(@href,'/novel/')]/@href"
         }
+    },
+    {
+        "title": "Berry's Cafe",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www.berrys-cafe.jp/search/book?",
+        "values": [
+            {"queryType": "text", "displayText": "検索キーワード", "queryName": "word"},
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0", "radio":
+                {
+                    "指定なし": "0",
+                    "恋愛(すべて)": "100",
+                    "恋愛(純愛)": "101",
+                    "恋愛(ラブコメ)": "102",
+                    "恋愛(オフィスラブ)": "103",
+                    "恋愛(学園)": "104",
+                    "恋愛(実話)": "105",
+                    "恋愛(その他)": "199",
+                    "ファンタジー・ＳＦ・冒険": "700",
+                    "実用・エッセイ(すべて)": "1200",
+                    "実用・エッセイ(グルメ・レシピ)": "1201",
+                    "実用・エッセイ(美容・健康)": "1202",
+                    "実用・エッセイ(生活・趣味)": "1203",
+                    "実用・エッセイ(こども)": "1204",
+                    "実用・エッセイ(仕事)": "1205",
+                    "実用・エッセイ(その他)": "1299",
+                    "ミステリー・サスペンス": "400",
+                    "青春・友情": "200",
+                    "ノンフィクション・実話": "300",
+                    "ホラー・オカルト": "600",
+                    "歴史・時代": "1400",
+                    "絵本・童話": "1000",
+                    "コメディ": "900",
+                    "詩・短歌・俳句・川柳": "1300",
+                    "その他": "9900"
+                }
+            },
+            {"queryType": "radio", "displayText": "気持ち", "queryName": "feeling", "defaultValue": "0", "radio":
+                {
+                    "指定なし": "0",
+                    "泣ける": "1",
+                    "切ない": "2",
+                    "感動した": "3",
+                    "ドキドキ": "4",
+                    "胸キュン": "5",
+                    "おもしろい": "6",
+                    "ワクワクする": "7",
+                    "怖い": "8",
+                    "ほのぼの": "9",
+                    "スカッとする": "10",
+                    "元気が出る": "11",
+                    "夢がある": "12",
+                    "不思議な気分": "13",
+                    "ためになる": "14",
+                    "ビックリ": "15"
+                }
+            },
+            {"queryType": "radio", "displayText": "完結", "queryName": "finished", "defaultValue": "0", "radio":
+                {
+                    "全て": "0",
+                    "完結": "2",
+                    "更新中": "1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "作品の長さ", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "長編": "length[]=4",
+                    "中編": "length[]=2",
+                    "短編": "length[]=1"
+                }
+            }
+        ],
+        "result": {
+            "block": "//section[@class='search_result']/ul/li",
+            "nextLink": "//div[@class='pageList']//li[@class='next']/a[contains(@href,'/search/')]/@href",
+            "title": "//div[@class='book_main']//a[contains(@href,'/book/')]//h4",
+            "url": "//div[@class='book_main']//a[contains(@href,'/book/') and descendant::h4]/@href"
+        }
     }
 ]
