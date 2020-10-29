@@ -111,6 +111,8 @@
 		21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21429D85209F45FD001426F5 /* AudioToolbox.framework */; };
 		214A400123D838C10034DFB2 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
 		214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
+		214E60D725493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */; };
+		214E60D825493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
 		215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BFB3E23ED5DAB0078E158 /* StoryView.swift */; };
@@ -427,6 +429,7 @@
 		214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiftyUtilitySwift.swift; sourceTree = "<group>"; };
 		21429D82209F4516001426F5 /* nc48625.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = nc48625.m4a; sourceTree = "<group>"; };
 		21429D85209F45FD001426F5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPCookieSyncTool.swift; sourceTree = "<group>"; };
 		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		215BFB3E23ED5DAB0078E158 /* StoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryView.swift; sourceTree = "<group>"; };
@@ -926,6 +929,7 @@
 				2104EDE824B985A100E275D1 /* StoryFetcher.swift */,
 				2104EDEB24B9D6C800E275D1 /* SloppyError.swift */,
 				212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */,
+				214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1693,6 +1697,7 @@
 				210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
 				21A4C75124EF9AF300038883 /* UIImageExtension.m in Sources */,
 				212137CF24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */,
+				214E60D825493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */,
 				215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */,
 				2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */,
 				2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */,
@@ -1747,6 +1752,7 @@
 				21A291F622A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift in Sources */,
 				21F7DE45197EB33900BD2899 /* Story.m in Sources */,
 				21A291F822A3F9DA000AA58C /* NovelDetailViewController.swift in Sources */,
+				214E60D725493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */,
 				2163599D22B1428400264A89 /* AssignNovelFolderViewController.swift in Sources */,
 				21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */,
 				212137CE24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */,

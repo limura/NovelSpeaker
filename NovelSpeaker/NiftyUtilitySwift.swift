@@ -120,7 +120,7 @@ class NiftyUtilitySwift: NSObject {
         return true
     }
     
-    static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieString:String) {
+    static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieString:String?) {
         if isRecoverbleErrorString(error: error) && MFMailComposeViewController.canSendMail() {
             var errorMessage = error
             errorMessage += NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
@@ -138,7 +138,7 @@ class NiftyUtilitySwift: NSObject {
                         picker.setMessageBody(messageBody, isHTML: false)
                         let sendData:[String:String] = [
                             "url": url?.absoluteString ?? "-",
-                            "cookie": cookieString
+                            "cookie": cookieString ?? "(nil)"
                         ]
                         if let data = try? JSONEncoder().encode(sendData) {
                             picker.addAttachmentData(data, mimeType: "application/json", fileName: "import_description.json")
@@ -235,7 +235,14 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     
-    public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieString:String) {
+    public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieArray:[HTTPCookie]) {
+        // update Realm cookie store
+        // update Session cookie store
+        // update WkWebView cookie store
+        // call original method with cookieString = nil
+    }
+    
+    public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieString:String?) {
         BehaviorLogger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
             let builder = EasyDialogBuilder(viewController)
@@ -809,7 +816,14 @@ class NiftyUtilitySwift: NSObject {
             request.httpBody = postData
         }
         if let cookieString = cookieString {
-            request.addValue(cookieString, forHTTPHeaderField: "Cookie")
+            if let cookieStorage = session.configuration.httpCookieStorage, let oldCookies = cookieStorage.cookies, let host = url.host, let domainURL = URL(string: "http://\(host)/") {
+                let newCookieArray = FilterNewCookie(oldCookieArray: oldCookies, newCookieArray: ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString: cookieString, targetURL: domainURL/*, expireDate: Date(timeIntervalSinceNow: 60*60*24)*/))
+                if newCookieArray.count > 0 {
+                    cookieStorage.setCookies(newCookieArray, for: domainURL, mainDocumentURL: nil)
+                }
+            }else{
+                request.addValue(cookieString, forHTTPHeaderField: "Cookie")
+            }
         }
         request.allowsCellularAccess = allowsCellularAccess
         request.mainDocumentURL = mainDocumentURL
@@ -866,6 +880,133 @@ class NiftyUtilitySwift: NSObject {
     
     public static func httpPost(url: URL, data:Data, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
         httpRequest(url: url, postData: data, successAction: successAction, failedAction: failedAction)
+    }
+    
+    public static func getAllCookies(completionHandler:(([HTTPCookie]?)->Void)) {
+        let cookies = URLSession.shared.configuration.httpCookieStorage?.cookies
+        completionHandler(cookies)
+    }
+    
+    public static func injectCookie(cookie:HTTPCookie) -> Bool {
+        guard let cookieStorage = URLSession.shared.configuration.httpCookieStorage else { return false }
+        cookieStorage.setCookie(cookie)
+        return true
+    }
+    
+    // newCookieArray に入っている cookie のうち、oldCookieArray で既に指定されている物を排除します。
+    // つまり、新しく設定する必要のあると思われる cookie だけにするための関数です。
+    // 内容としては、domain, path, name の全てが一致した物が無い場合には残ります。
+    // またそれらが一致していても、expireDate がより後になっていなければ残しません。
+    // expireDate が指定されていない場合は残ります。
+    public static func FilterNewCookie(oldCookieArray:[HTTPCookie], newCookieArray:[HTTPCookie]) -> [HTTPCookie] {
+        var result:[HTTPCookie] = []
+        for newCookie in newCookieArray {
+            var hit:Bool = false
+            for oldCookie in oldCookieArray {
+                if newCookie == oldCookie {
+                    hit = true
+                    continue
+                }
+                if newCookie.domain != oldCookie.domain ||
+                    newCookie.path != oldCookie.path ||
+                    newCookie.name != oldCookie.name
+                     {
+                    continue
+                }
+                if let newExpireDate = newCookie.expiresDate, let oldExpireDate = oldCookie.expiresDate, newExpireDate > oldExpireDate { continue }
+                hit = true
+            }
+            if !hit {
+                print("FilterNewCookie new cookie found:\n\(newCookie.description)")
+                result.append(newCookie)
+            }
+        }
+        return result
+    }
+    
+    public static func RemoveExpiredCookie(cookieArray:[HTTPCookie]) -> [HTTPCookie] {
+        var result:[HTTPCookie] = []
+        let now = Date()
+        for cookie in cookieArray {
+            if let expiresDate = cookie.expiresDate, expiresDate > now {
+                result.append(cookie)
+            }
+        }
+        return result
+    }
+    
+    public static func MergeCookieArray(currentCookieArray:[HTTPCookie], newCookieArray:[HTTPCookie]) -> [HTTPCookie] {
+        var filterdCookieArray = FilterNewCookie(oldCookieArray: currentCookieArray, newCookieArray: newCookieArray)
+        print("MergeCookieArray filterdCookieArray.count: \(filterdCookieArray.count)")
+        filterdCookieArray.append(contentsOf: currentCookieArray)
+        return filterdCookieArray
+    }
+    
+    public static func ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString:String, targetURL:URL, expireDate:Date? = nil, portArray:[Int]? = nil, isSecure:Bool? = nil) -> [HTTPCookie] {
+        // この関数では、Version 1 の HTTPCookie を生成することにします。
+        var result:[HTTPCookie] = []
+        let keyValueArray = javaScriptCookieString.split(separator: ";")
+        for keyValueWithWhitespace in keyValueArray {
+            let keyValue = keyValueWithWhitespace.trimmingCharacters(in: .whitespaces).split(separator: "=")
+            guard keyValue.count == 2 else { continue }
+            let key = keyValue[0]
+            let value = keyValue[1]
+            // HTTPCookie を生成するには
+            // cookies(withResponseHeaderFields:for:)
+            // https://developer.apple.com/documentation/foundation/httpcookie/1393011-cookies
+            // っていうのもあるんだけれど、JavaScript から取得できる document.cookie は
+            // HTTP header の情報は載っていないので
+            // HTTPCookie のコンストラクタに properites を渡す形で生成します。
+            var properties:[HTTPCookiePropertyKey:Any] = [
+                .name: key,
+                .value: value,
+                .originURL: targetURL,
+                .version: "1",
+            ]
+            if let expireDate = expireDate {
+                properties[.expires] = expireDate
+            }
+            if let portArray = portArray {
+                properties[.port] = portArray.map({$0.description}).joined(separator: ",")
+            }
+            if let isSecure = isSecure {
+                properties[.secure] = isSecure ? "TRUE" : "FALSE"
+            }
+            guard let cookie = HTTPCookie(properties: properties) else { continue }
+            result.append(cookie)
+        }
+        return result
+    }
+    
+    static func DumpHTTPCookieArray(cookieArray:[HTTPCookie]) {
+        var domainCount:[String:Int] = [:]
+        for cookie in cookieArray {
+            print(cookie.description)
+            if let count = domainCount[cookie.domain] {
+                domainCount[cookie.domain] = count + 1
+            }else{
+                domainCount[cookie.domain] = 1
+            }
+        }
+        for kv in domainCount {
+            let domain = kv.key
+            let count = kv.value
+            print("  \(domain):\(count)")
+        }
+        print("cookieArray.count: \(cookieArray.count)")
+    }
+    
+    static func AssignCookieArrayToCookieStorage(cookieArray:[HTTPCookie], cookieStorage:HTTPCookieStorage) {
+        for cookie in cookieArray {
+            cookieStorage.setCookie(cookie)
+        }
+    }
+    
+    static func RemoveAllCookieInCookieStorage(cookieStorage:HTTPCookieStorage) {
+        guard let cookieArray = cookieStorage.cookies else { return }
+        for cookie in cookieArray {
+            cookieStorage.deleteCookie(cookie)
+        }
     }
     
     // cachedHTTPGet で使われるキャッシュの情報

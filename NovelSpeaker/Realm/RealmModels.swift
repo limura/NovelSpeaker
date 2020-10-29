@@ -14,7 +14,7 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 2
+    static let currentSchemaVersion : UInt64 = 3
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -1812,6 +1812,142 @@ struct SpeechViewButtonSetting: Codable {
     }
 }
 
+// HTTPCookie を Codable にするのが難しそうだったのでwrapperでごまかします。
+// で、HTTPCookie.name とかを参照しても良さそうなのですが、
+// アクセサからは全ての情報を参照できなさそうなので
+// properties の内容を問答無用で全部保存することにします。(´・ω・`)
+class CodableHTTPCookie: Codable {
+    class CodableValue: Codable, CustomStringConvertible {
+        // HTTPCookie.properties の value には Date と String しか存在しなさそう
+        // (HTTPCookieのドキュメントによると "All properties can handle an NSString value, but some can also handle other types." らしいので文字列で指定するのはアリの模様)ですが
+        // 意味的には bool 等もあるようなので一応それらも保存できるようにします。
+        enum CodableValueType:String, Codable {
+            case date
+            case string
+            case int
+            case bool
+        }
+        let date:Date?
+        let string:String?
+        let int:Int?
+        let bool:Bool?
+        let type:CodableValueType
+        
+        init(date:Date){
+            self.date = date
+            string = nil
+            int = nil
+            bool = nil
+            type = .date
+        }
+        init(string:String){
+            self.string = string
+            date = nil
+            int = nil
+            bool = nil
+            type = .string
+        }
+        init(int:Int){
+            self.int = int
+            date = nil
+            string = nil
+            bool = nil
+            type = .int
+        }
+        init(bool:Bool){
+            self.bool = bool
+            date = nil
+            string = nil
+            int = nil
+            type = .bool
+        }
+        func GetValue() -> Any? {
+            switch type {
+            case .date:
+                return date
+            case .string:
+                return string
+            case .int:
+                return int
+            case .bool:
+                return bool
+            }
+            return nil
+        }
+        var description:String {
+            get {
+                switch type {
+                case .date:
+                    return date?.description ?? "nil(date)"
+                case .string:
+                    return string ?? "nil(string)"
+                case .int:
+                    guard let int = int else { return "nil(int)" }
+                    return "\(int)"
+                case .bool:
+                    guard let bool = bool else { return "nil(bool)" }
+                    return bool ? "true" : "false"
+                }
+            }
+        }
+    }
+    
+    let properties:[String : CodableValue]
+    
+    init(from:HTTPCookie) {
+        guard let fromProperties = from.properties else { properties = [:]; return }
+        var prop:[String:CodableValue] = [:]
+        for (key, value) in fromProperties {
+            if let date = value as? Date {
+                prop[key.rawValue] = CodableValue(date:date)
+            }else if let string = value as? String {
+                prop[key.rawValue] = CodableValue(string: string)
+            }else if let int = value as? Int {
+                prop[key.rawValue] = CodableValue(int: int)
+            }else if let bool = value as? Bool {
+                prop[key.rawValue] = CodableValue(bool: bool)
+            }else{
+                print("WARNING: HTTPCookie に謎の type が保存されていた: \(key.rawValue): \(String(describing: type(of: value)))")
+            }
+        }
+        properties = prop
+    }
+    
+    var httpCookie: HTTPCookie? {
+        get {
+            var prop:[HTTPCookiePropertyKey:Any] = [:]
+            for (key, value) in properties {
+                if let value = value.GetValue() {
+                    prop[HTTPCookiePropertyKey(key)] = value
+                }
+            }
+            return HTTPCookie(properties: prop)
+        }
+    }
+    
+    
+    static func ConvertArrayToCodable(cookieArray:[HTTPCookie]) -> [CodableHTTPCookie] {
+        return cookieArray.map({$0.createCodable()})
+    }
+    static func ConvertArrayFromCodable(cookieArray:[CodableHTTPCookie]) -> ([HTTPCookie], [CodableHTTPCookie]) {
+        var result:[HTTPCookie] = []
+        var failedResult:[CodableHTTPCookie] = []
+        for cookie in cookieArray {
+            if let httpCookie = cookie.httpCookie {
+                result.append(httpCookie)
+            }else{
+                failedResult.append(cookie)
+            }
+        }
+        return (result, failedResult)
+    }
+}
+
+extension HTTPCookie {
+    func createCodable() -> CodableHTTPCookie {
+        return CodableHTTPCookie(from: self)
+    }
+}
 
 @objc final class RealmGlobalState: Object {
     static public let UniqueID = "only one object"
@@ -1848,6 +1984,7 @@ struct SpeechViewButtonSetting: Codable {
     @objc dynamic var defaultRegexpSpeechModURL = ""
     @objc dynamic var searchInfoURL = ""
     @objc dynamic var speechViewButtonSettingArrayData = Data()
+    @objc dynamic var cookieArrayData = Data()
 
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {
@@ -1975,6 +2112,21 @@ struct SpeechViewButtonSetting: Codable {
     }
     func SetSpeechViewButtonSettingWith(realm:Realm, newValue:[SpeechViewButtonSetting]) {
         self.speechViewButtonSettingArrayData = SpeechViewButtonSetting.SettingArrayToData(settingArray: newValue) ?? Data()
+    }
+    
+    @discardableResult
+    func MergeCookieArrayWith(realm:Realm, cookieArray:[HTTPCookie]) -> Bool {
+        let currentCookieArray = GetCookieArray() ?? []
+        let filterdCookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.FilterNewCookie(oldCookieArray: currentCookieArray, newCookieArray: cookieArray))
+        let codableArray = CodableHTTPCookie.ConvertArrayToCodable(cookieArray: filterdCookieArray)
+        guard let cookieData = try? JSONEncoder().encode(codableArray) else { return false }
+        self.cookieArrayData = cookieData
+        return true
+    }
+    
+    func GetCookieArray() -> [HTTPCookie]? {
+        guard let codableArray = try? JSONDecoder().decode([CodableHTTPCookie].self, from: self.cookieArrayData) else { return nil }
+        return NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: CodableHTTPCookie.ConvertArrayFromCodable(cookieArray: codableArray).0)
     }
 
     override class func primaryKey() -> String? {

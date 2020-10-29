@@ -394,6 +394,17 @@ li {
             print("url is nil")
             return
         }
+        if #available(iOS 11.0, *) {
+            if let store = self.wkWebView?.configuration.websiteDataStore.httpCookieStore {
+                store.getAllCookies { (cookieArray) in
+                    RealmUtil.RealmBlockWrite { (realm) in
+                        HTTPCookieSyncTool.shared.SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: cookieArray)
+                    }
+                    NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: "")
+                }
+                return
+            }
+        }
         NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: self.cookiesString ?? "")
     }
     @IBAction func bookmarkButtonClicked(_ sender: Any) {

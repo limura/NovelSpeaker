@@ -14,11 +14,19 @@ import Kanna
 class HeadlessHttpClient {
     var webView : WKWebView!
     var erik:Erik!
+    var config:WKWebViewConfiguration
     
     //static let shared = HeadlessHttpClient()
 
     init(config:WKWebViewConfiguration? = nil) {
-        ReloadWebView(config: config)
+        let wkConfig:WKWebViewConfiguration
+        if let config = config {
+            wkConfig = config
+        }else{
+            wkConfig = WKWebViewConfiguration()
+        }
+        self.config = wkConfig
+        ReloadWebView(config: wkConfig)
     }
     deinit {
         dispatch_sync_on_main_thread {
@@ -26,16 +34,10 @@ class HeadlessHttpClient {
         }
     }
     
-    func ReloadWebView(config:WKWebViewConfiguration?){
+    func ReloadWebView(config:WKWebViewConfiguration){
         dispatch_sync_on_main_thread {
-            let wkConfig:WKWebViewConfiguration
-            if let config = config {
-                wkConfig = config
-            }else{
-                wkConfig = WKWebViewConfiguration()
-            }
             let frame = CGRect(x: 0, y: 0, width: 1024, height: 1366)
-            self.webView = WKWebView(frame: frame, configuration: wkConfig)
+            self.webView = WKWebView(frame: frame, configuration: config)
             erik = Erik(webView: self.webView)
             if let window = UIApplication.shared.keyWindow {
                 self.webView.alpha = 0.0001
@@ -137,5 +139,83 @@ class HeadlessHttpClient {
             }
             resultHandler?(userAgent, err)
         })
+    }
+    
+    func getAllCookies(completionHandler:@escaping (([HTTPCookie]?)->Void)) {
+        if #available(iOS 11.0, *) {
+            self.config.websiteDataStore.httpCookieStore.getAllCookies(completionHandler)
+        } else {
+            completionHandler(nil)
+        }
+    }
+    
+    func injectCookie(cookie:HTTPCookie, completionHandler:(()->Void)? = nil) -> Bool {
+        if #available(iOS 11.0, *) {
+            let cookieStore = self.config.websiteDataStore.httpCookieStore
+            cookieStore.setCookie(cookie, completionHandler: completionHandler)
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    func AssignCookieArray(cookieArray:[HTTPCookie], completionHandler:(()->Void)? = nil) {
+        if cookieArray.count <= 0 {
+            completionHandler?()
+            return
+        }
+        DispatchQueue.main.async {
+            let semaphore = DispatchSemaphore(value: cookieArray.count)
+            for cookie in cookieArray {
+                DispatchQueue.main.async {
+                    if self.injectCookie(cookie: cookie, completionHandler: {semaphore.signal()}) == false {
+                        semaphore.signal()
+                    }
+                }
+            }
+            semaphore.wait()
+            completionHandler?()
+        }
+    }
+    
+    func dumpAllCookies() {
+        getAllCookies { (cookieArray) in
+            guard let cookieArray = cookieArray else {
+                print("getAllCookies return error.")
+                return
+            }
+            for cookie in cookieArray {
+                print(cookie.description)
+            }
+        }
+    }
+    
+    func removeAllCookies(completionHandler:(()->Void)? = nil) {
+        self.getAllCookies { (cookieArray) in
+            guard let cookieArray = cookieArray else {
+                print("removeAllCookies getAllCookies failed.")
+                completionHandler?()
+                return
+            }
+            if cookieArray.count <= 0 {
+                print("removeAllCookies cookieArray.count <= 0")
+                completionHandler?()
+                return
+            }
+            if #available(iOS 11.0, *) {
+                let cookieStore = self.config.websiteDataStore.httpCookieStore
+                DispatchQueue.main.async {
+                    let semaphore = DispatchSemaphore(value: cookieArray.count)
+                    for cookie in cookieArray {
+                        cookieStore.delete(cookie, completionHandler: { semaphore.signal()})
+                    }
+                    semaphore.wait()
+                    completionHandler?()
+                }
+            }else{
+                print("removeAllCookies error. iOS 11.0 >= self")
+                completionHandler?()
+            }
+        }
     }
 }

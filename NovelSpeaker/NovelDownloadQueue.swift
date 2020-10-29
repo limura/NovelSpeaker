@@ -88,6 +88,8 @@ class DownloadQueueHolder: NSObject {
             }
         }
         if item.novelID == "" {
+            // 一通りダウンロードが終わったようなのでその時点でのcookieを保存します
+            HTTPCookieSyncTool.shared.Save()
             return nil
         }
         if var itemList = queue[item.hostName] {
@@ -558,6 +560,7 @@ class NovelDownloadQueue : NSObject {
     @objc static func DownloadFlush() {
         NovelDownloadQueue.shared.downloadStop()
         NovelDownloader.FlushAllWritePool()
+        HTTPCookieSyncTool.shared.SaveSync()
     }
     
     func GetCurrentDownloadingNovelIDArray() -> [String] {
@@ -671,6 +674,7 @@ class NovelDownloadQueue : NSObject {
                 let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
                 self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
                 self.downloadEndedNovelIDSet.removeAll()
+                HTTPCookieSyncTool.shared.Save()
                 
                 let novelIDArray = self.downloadSuccessNovelIDSet
                 if novelIDArray.count <= 0 {
