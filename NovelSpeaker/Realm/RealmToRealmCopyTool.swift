@@ -173,8 +173,18 @@ class RealmToRealmCopyTool: NSObject {
             newObj.defaultSpeakerID = obj.defaultSpeakerID
             newObj.defaultSpeechOverrideSettingID = obj.defaultSpeechOverrideSettingID
             newObj.currentReadingNovelID = obj.currentReadingNovelID
-            to.add(newObj, update: .modified)
             newObj.currentWebSearchSite = obj.currentWebSearchSite
+            newObj.autoSplitStringList.removeAll()
+            newObj.autoSplitStringList.append(objectsIn: obj.autoSplitStringList)
+            newObj.novelSpeakerSiteInfoURL = obj.novelSpeakerSiteInfoURL
+            newObj.autopagerizeSiteInfoURL = obj.autopagerizeSiteInfoURL
+            newObj.defaultSpeechModURL = obj.defaultSpeechModURL
+            newObj.defaultRegexpSpeechModURL = obj.defaultRegexpSpeechModURL
+            newObj.searchInfoURL = obj.searchInfoURL
+            newObj.speechViewButtonSettingArrayData = obj.speechViewButtonSettingArrayData
+            newObj.cookieArrayData = obj.cookieArrayData
+
+            to.add(newObj, update: .modified)
             try to.commitWrite()
         }
     }

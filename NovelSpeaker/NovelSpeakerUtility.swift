@@ -795,8 +795,17 @@ class NovelSpeakerUtility: NSObject {
         }
     }
 
-    static func RestoreBookshelf_url_V_1_0_0(novel:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
-        guard let url = novel.object(forKey: "url") as? String else { return }
+    static func RestoreBookshelf_url_V_1_0_0(novel:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> [HTTPCookie] {
+        guard let url = novel.object(forKey: "url") as? String else { return [] }
+        var cookieArray:[HTTPCookie] = []
+        func addNewCookie(urlSecret:String, urlString:String, lastUpdateDate:Date) {
+            // 元のcookieでは path や expire date がどう指定されていたかを推測できないため、
+            // とりあえず path は '/' 固定で、最終ダウンロード日時から1日後まで有効、という事にします。
+            guard let fullPathURL = URL(string: urlString), let host = fullPathURL.host, let scheme = fullPathURL.scheme, let url = URL(string: "\(scheme)://\(host)") else { return }
+            let expireDate = lastUpdateDate.addingTimeInterval(60*60*24)
+            let newCookieArray = NiftyUtilitySwift.ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString: urlSecret, targetURL: url, expireDate: expireDate)
+            cookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: cookieArray, newCookieArray: newCookieArray))
+        }
         RealmUtil.Write { (realm) in
             let realmNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: url) ?? RealmNovel()
             if realmNovel.novelID != url {
@@ -840,7 +849,7 @@ class NovelSpeakerUtility: NSObject {
                 realmNovel.title = title
             }
             if let secret = novel.object(forKey: "secret") as? String, let urlSecret = NiftyUtilitySwift.stringDecrypt(string: secret, key: url) {
-                realmNovel.m_urlSecret = urlSecret
+                addNewCookie(urlSecret: urlSecret, urlString: novelID, lastUpdateDate: realmNovel.lastDownloadDate)
             }
             if let author = novel.object(forKey: "author") as? String {
                 realmNovel.writer = author
@@ -886,6 +895,7 @@ class NovelSpeakerUtility: NSObject {
                 NovelDownloadQueue.shared.addQueue(novelID: novelID)
             }
         }
+        return cookieArray
     }
 
     static func RestoreBookshelf_user_V_1_0_0(novel:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
@@ -926,11 +936,12 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
-    static func RestoreBookshelf_V_1_0_0(novelArray:NSArray, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
+    static func RestoreBookshelf_V_1_0_0(novelArray:NSArray, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> [HTTPCookie] {
         // 一旦ダウンロードは止めておきます。
         NovelDownloadQueue.shared.downloadStop()
         defer { NovelDownloadQueue.shared.downloadStart() }
         var count = 0
+        var cookieArray:[HTTPCookie] = []
         for novel in novelArray {
             count += 1
             progressUpdate(NSLocalizedString("GlobalDataSingleton_RestoreingBookProgress", comment: "小説の復元中") + "(\(count)/\(novelArray.count))")
@@ -939,13 +950,15 @@ class NovelSpeakerUtility: NSObject {
             case "ncode":
                 RestoreBookshelf_ncode_V_1_0_0(novel:novel, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
             case "url":
-                RestoreBookshelf_url_V_1_0_0(novel:novel, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
+                let newCookieArray = RestoreBookshelf_url_V_1_0_0(novel:novel, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
+                cookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: cookieArray, newCookieArray: newCookieArray))
             case "user":
                 RestoreBookshelf_user_V_1_0_0(novel:novel, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
             default:
                 continue
             }
         }
+        return cookieArray
     }
     
     static func ProcessNovelSpeakerBackupJSONData_V_1_0_0(toplevelDictionary:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> Bool {
@@ -973,14 +986,19 @@ class NovelSpeakerUtility: NSObject {
         if let waitArray = toplevelDictionary.object(forKey: "speech_wait_config") as? NSArray {
             RestoreSpeechWaitConfig_V_1_0_0(waitArray:waitArray)
         }
+        var newCookieArray:[HTTPCookie] = []
         if let novelArray = toplevelDictionary.object(forKey: "bookshelf") as? NSArray {
-            RestoreBookshelf_V_1_0_0(novelArray:novelArray, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
+            newCookieArray = RestoreBookshelf_V_1_0_0(novelArray:novelArray, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
         }
         RealmUtil.RealmBlock { (realm) -> Void in
             if let targetNovelID = currentReadingNovelID, let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                 let coreDataNarouContent = NarouContentCacheData()
                 coreDataNarouContent.ncode = targetNovelID
                 RealmUtil.WriteWith(realm: realm) { (realm) in
+                    if newCookieArray.count > 0 {
+                        HTTPCookieSyncTool.shared.SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: newCookieArray)
+                        HTTPCookieSyncTool.shared.LoadCookiesFromRealmWith(realm: realm)
+                    }
                     if coreDataNarouContent.isURLContent() {
                         globalState.currentReadingNovelID = targetNovelID
                     }else if targetNovelID.hasPrefix("_u") {
@@ -1018,14 +1036,19 @@ class NovelSpeakerUtility: NSObject {
         if let waitArray = toplevelDictionary.object(forKey: "speech_wait_config") as? NSArray {
             RestoreSpeechWaitConfig_V_1_0_0(waitArray:waitArray)
         }
+        var newCookieArray:[HTTPCookie] = []
         if let novelArray = toplevelDictionary.object(forKey: "bookshelf") as? NSArray {
-            RestoreBookshelf_V_1_0_0(novelArray:novelArray, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
+            newCookieArray = RestoreBookshelf_V_1_0_0(novelArray:novelArray, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
         }
         RealmUtil.RealmBlock { (realm) -> Void in
             if let targetNovelID = currentReadingNovelID, let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                 let coreDataNarouContent = NarouContentCacheData()
                 coreDataNarouContent.ncode = targetNovelID
                 RealmUtil.WriteWith(realm: realm) { (realm) in
+                    if newCookieArray.count > 0 {
+                        HTTPCookieSyncTool.shared.SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: newCookieArray)
+                        HTTPCookieSyncTool.shared.LoadCookiesFromRealmWith(realm: realm)
+                    }
                     if coreDataNarouContent.isURLContent() {
                         globalState.currentReadingNovelID = targetNovelID
                     }else if targetNovelID.hasPrefix("_u") {
@@ -1361,6 +1384,38 @@ class NovelSpeakerUtility: NSObject {
                     if let foregroundColor = readingDisplayColor.object(forKey: "backgroundColor") as? NSDictionary, let red = foregroundColor.object(forKey: "red") as? NSNumber, let green = foregroundColor.object(forKey: "green") as? NSNumber, let blue = foregroundColor.object(forKey: "blue") as? NSNumber, let alpha = foregroundColor.object(forKey: "alpha") as? NSNumber {
                         globalState.backgroundColor = UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
                     }
+                }
+                if let currentWebSearchSite = dic.object(forKey: "currentWebSearchSite") as? String {
+                    globalState.currentWebSearchSite = currentWebSearchSite
+                }
+                if let autoSplitStringList = dic.object(forKey: "autoSplitStringList") as? NSArray {
+                    globalState.autoSplitStringList.removeAll()
+                    for splitString in autoSplitStringList {
+                        if let splitString = splitString as? String {
+                            globalState.autoSplitStringList.append(splitString)
+                        }
+                    }
+                }
+                if let novelSpeakerSiteInfoURL = dic.object(forKey: "novelSpeakerSiteInfoURL") as? String {
+                    globalState.novelSpeakerSiteInfoURL = novelSpeakerSiteInfoURL
+                }
+                if let autopagerizeSiteInfoURL = dic.object(forKey: "autopagerizeSiteInfoURL") as? String {
+                    globalState.autopagerizeSiteInfoURL = autopagerizeSiteInfoURL
+                }
+                if let defaultSpeechModURL = dic.object(forKey: "defaultSpeechModURL") as? String {
+                    globalState.defaultSpeechModURL = defaultSpeechModURL
+                }
+                if let defaultRegexpSpeechModURL = dic.object(forKey: "defaultRegexpSpeechModURL") as? String {
+                    globalState.defaultRegexpSpeechModURL = defaultRegexpSpeechModURL
+                }
+                if let searchInfoURL = dic.object(forKey: "searchInfoURL") as? String {
+                    globalState.searchInfoURL = searchInfoURL
+                }
+                if let speechViewButtonSettingArrayData = dic.object(forKey: "speechViewButtonSettingArrayData") as? String, let data = Data(base64Encoded: speechViewButtonSettingArrayData) {
+                    globalState.speechViewButtonSettingArrayData = data
+                }
+                if let cookieArrayData = dic.object(forKey: "cookieArrayData") as? String, let data = Data(base64Encoded: cookieArrayData) {
+                    globalState.cookieArrayData = data
                 }
             }
         }
@@ -1833,6 +1888,15 @@ class NovelSpeakerUtility: NSObject {
                 "isPageTurningSoundEnabled": globalState.isPageTurningSoundEnabled,
                 "bookSelfSortType": globalState.m_bookSelfSortType,
                 "currentReadingNovelID": globalState.currentReadingNovelID,
+                "currentWebSearchSite": globalState.currentWebSearchSite,
+                "autoSplitStringList": Array(globalState.autoSplitStringList),
+                "novelSpeakerSiteInfoURL": globalState.novelSpeakerSiteInfoURL,
+                "autopagerizeSiteInfoURL": globalState.autopagerizeSiteInfoURL,
+                "defaultSpeechModURL": globalState.defaultSpeechModURL,
+                "defaultRegexpSpeechModURL": globalState.defaultRegexpSpeechModURL,
+                "searchInfoURL": globalState.searchInfoURL,
+                "speechViewButtonSettingArrayData": globalState.speechViewButtonSettingArrayData.base64EncodedString(),
+                "cookieArrayData": globalState.cookieArrayData.base64EncodedString(),
 
                 "defaultDisplaySettingID": globalState.defaultDisplaySettingID,
                 "defaultSpeakerID": globalState.defaultSpeakerID,

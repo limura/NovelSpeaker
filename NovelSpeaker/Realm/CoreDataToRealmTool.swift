@@ -261,11 +261,21 @@ class CoreDataToRealmTool: NSObject {
         return "https://ncode.syosetu.com/\(ncode.lowercased())/"
     }
     
-    private static func CreateRealmNovelFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) {
+    private static func CreateRealmNovelFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) -> [HTTPCookie] {
         guard let novelArray = globalDataSingleton.getAllNarouContent(.ncode) else {
-            return
+            return []
         }
         var count = 0
+        var cookieArray:[HTTPCookie] = []
+        func addURLSecret(urlSecret:String, novelID:String, lastUpdateDate:Date) {
+            // 元のcookieでは path や expire date がどう指定されていたかを推測できないため、
+            // とりあえず path は '/' 固定で、最終ダウンロード日時から1日後まで有効、という事にします。
+            guard let fullPathURL = URL(string: novelID), let host = fullPathURL.host, let scheme = fullPathURL.scheme, let url = URL(string: "\(scheme)://\(host)") else { return }
+            let expireDate = lastUpdateDate.addingTimeInterval(60*60*24)
+            let newCookieArray = NiftyUtilitySwift.ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString: urlSecret, targetURL: url, expireDate: expireDate)
+            cookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: cookieArray, newCookieArray: newCookieArray))
+        }
+        
         for novelObj in novelArray {
             count += 1
             progress(NSLocalizedString("CoreDataToRealmTool_ProgressNovel", comment: "小説データを変換中") + " (\(count)/\(novelArray.count))")
@@ -278,7 +288,7 @@ class CoreDataToRealmTool: NSObject {
             if novelCoreData.isURLContent() {
                 novel.url = NarouContentToNovelID(content: novelCoreData)
                 if let urlSecret = novelCoreData.keyword {
-                    novel.m_urlSecret = urlSecret
+                    addURLSecret(urlSecret: urlSecret, novelID: novel.novelID, lastUpdateDate: novelCoreData.novelupdated_at)
                 }
                 novel.type = NovelType.URL
             }else if novelCoreData.isUserCreatedContent() {
@@ -334,6 +344,7 @@ class CoreDataToRealmTool: NSObject {
 
             realm.add(novel, update: .modified)
         }
+        return cookieArray
     }
     
     //
@@ -347,7 +358,9 @@ class CoreDataToRealmTool: NSObject {
             CreateRealmSpeakerSettingFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
             CreateRealmSpeechModSettingFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
             CreateRealmSpeechWaitConfigFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
-            CreateRealmNovelFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
+            let newCookieArray = CreateRealmNovelFromCoreData(realm: realm, globalDataSingleton: globalDataSingleton, progress: progress)
+            HTTPCookieSyncTool.shared.SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: newCookieArray)
+            HTTPCookieSyncTool.shared.LoadCookiesFromRealmWith(realm: realm)
         }
         RegisterConvertFromCoreDataFinished()
     }
