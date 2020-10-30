@@ -917,7 +917,7 @@ class NiftyUtilitySwift: NSObject {
                 hit = true
             }
             if !hit {
-                print("FilterNewCookie new cookie found:\n\(newCookie.description)")
+                //print("FilterNewCookie new cookie found:\n\(newCookie.description)")
                 result.append(newCookie)
             }
         }
@@ -936,10 +936,21 @@ class NiftyUtilitySwift: NSObject {
     }
     
     public static func MergeCookieArray(currentCookieArray:[HTTPCookie], newCookieArray:[HTTPCookie]) -> [HTTPCookie] {
-        var filterdCookieArray = FilterNewCookie(oldCookieArray: currentCookieArray, newCookieArray: newCookieArray)
-        print("MergeCookieArray filterdCookieArray.count: \(filterdCookieArray.count)")
-        filterdCookieArray.append(contentsOf: currentCookieArray)
-        return filterdCookieArray
+        var tmpCookies:[String:HTTPCookie] = [:]
+        var filterdCookieArray = currentCookieArray
+        filterdCookieArray.append(contentsOf: newCookieArray)
+        for cookie in filterdCookieArray {
+            let key = "\(cookie.domain)/\(cookie.path)#\(cookie.name)"
+            if let prevCookie = tmpCookies[key] {
+                if let prevDate = prevCookie.expiresDate, let currentDate = cookie.expiresDate, currentDate > prevDate {
+                    tmpCookies[key] = cookie
+                }
+            }else{
+                tmpCookies[key] = cookie
+            }
+        }
+        filterdCookieArray = Array(tmpCookies.values)
+        return RemoveExpiredCookie(cookieArray: filterdCookieArray)
     }
     
     public static func ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString:String, targetURL:URL, expireDate:Date? = nil, portArray:[Int]? = nil, isSecure:Bool? = nil) -> [HTTPCookie] {

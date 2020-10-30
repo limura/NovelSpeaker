@@ -131,7 +131,7 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
         guard let realmCookieArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetCookieArray() else { return }
         if let cookieStorage = URLSession.shared.configuration.httpCookieStorage {
             let sharedCookieArray = cookieStorage.cookies ?? []
-            let newCookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.FilterNewCookie(oldCookieArray: sharedCookieArray, newCookieArray: realmCookieArray))
+            let newCookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: sharedCookieArray, newCookieArray: realmCookieArray))
             NiftyUtilitySwift.AssignCookieArrayToCookieStorage(cookieArray: newCookieArray, cookieStorage: cookieStorage)
         }
     }

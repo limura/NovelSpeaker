@@ -2106,7 +2106,7 @@ extension HTTPCookie {
     @discardableResult
     func MergeCookieArrayWith(realm:Realm, cookieArray:[HTTPCookie]) -> Bool {
         let currentCookieArray = GetCookieArray() ?? []
-        let filterdCookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.FilterNewCookie(oldCookieArray: currentCookieArray, newCookieArray: cookieArray))
+        let filterdCookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: currentCookieArray, newCookieArray: cookieArray))
         let codableArray = CodableHTTPCookie.ConvertArrayToCodable(cookieArray: filterdCookieArray)
         guard let cookieData = try? JSONEncoder().encode(codableArray) else { return false }
         self.cookieArrayData = cookieData
