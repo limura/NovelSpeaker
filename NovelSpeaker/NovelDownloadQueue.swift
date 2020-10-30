@@ -256,11 +256,9 @@ class NovelDownloader : NSObject {
         }
         var isNovelAlive:Bool = true
         var lastChapter:Story? = nil
-        var urlSecretString:String? = nil
         RealmUtil.RealmBlock { (realm) -> Void in
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
                 lastChapter = novel.lastChapterWith(realm: realm)
-                urlSecretString = novel.urlSecretString
             }else{
                 isNovelAlive = false
             }
@@ -292,7 +290,7 @@ class NovelDownloader : NSObject {
             state = currentState
         }else if let lastDownloadURL = lastDownloadURLTmp {
             print("lastDownloadURL:", lastDownloadURL.absoluteString)
-            state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: lastDownloadURL, cookieString: urlSecretString ?? "")
+            state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: lastDownloadURL, cookieString: "")
         }else{
             failedSearchNovel(hint: "currentState and lastDownloadURL is nil.")
             return

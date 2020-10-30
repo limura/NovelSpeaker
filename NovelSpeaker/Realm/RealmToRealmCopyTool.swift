@@ -42,7 +42,6 @@ class RealmToRealmCopyTool: NSObject {
             newObj.writer = obj.writer
             newObj.title = obj.title
             newObj.url = obj.url
-            newObj.m_urlSecret = obj.m_urlSecret
             newObj.createdDate = obj.createdDate
             newObj.likeLevel = obj.likeLevel
             newObj.isNeedSpeechAfterDelete = obj.isNeedSpeechAfterDelete

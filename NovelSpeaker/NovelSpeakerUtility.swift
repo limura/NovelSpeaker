@@ -1448,9 +1448,6 @@ class NovelSpeakerUtility: NSObject {
                 if let url = novelDic.object(forKey: "url") as? String {
                     novel.url = url
                 }
-                if let secret = novelDic.object(forKey: "secret") as? String, let urlSecret = NiftyUtilitySwift.stringDecrypt(string: secret, key: novelID) {
-                    novel.m_urlSecret = urlSecret
-                }
                 if let createdDateString = novelDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
                     novel.createdDate = createdDate
                 }
@@ -1723,7 +1720,6 @@ class NovelSpeakerUtility: NSObject {
                     "writer": novel.writer,
                     "title": novel.title,
                     "url": novel.url,
-                    "secret": NiftyUtilitySwift.stringEncrypt(string: novel.m_urlSecret, key: novel.novelID) ?? "",
                     "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: novel.createdDate),
                     "likeLevel": novel.likeLevel,
                     "isNeedSpeechAfterDelete": novel.isNeedSpeechAfterDelete,

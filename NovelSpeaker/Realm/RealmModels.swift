@@ -14,7 +14,7 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 3
+    static let currentSchemaVersion : UInt64 = 4
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -1164,7 +1164,6 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     @objc dynamic var writer : String = ""
     @objc dynamic var title : String = ""
     @objc dynamic var url : String = ""
-    @objc dynamic var m_urlSecret : String = ""
     @objc dynamic var createdDate : Date = Date()
     @objc dynamic var likeLevel : Int8 = 0
     @objc dynamic var isNeedSpeechAfterDelete : Bool = false
@@ -1196,7 +1195,6 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         obj.writer = writer
         obj.title = title
         obj.url = url
-        obj.m_urlSecret = m_urlSecret
         obj.createdDate = createdDate
         obj.likeLevel = likeLevel
         obj.isNeedSpeechAfterDelete = isNeedSpeechAfterDelete
@@ -1278,14 +1276,6 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         return lastDownloadDate > lastReadDate
     }
     
-    var urlSecret: [String] {
-        get {
-            return m_urlSecret.components(separatedBy: ";")
-        }
-    }
-    var urlSecretString:String {
-        get { return m_urlSecret }
-    }
     func defaultSpeakerWith(realm:Realm) -> RealmSpeakerSetting? {
         if self.defaultSpeakerID.count <= 0 {
             return RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm)
@@ -1387,7 +1377,6 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             let novel = RealmNovel()
             novel.novelID = novelID
             novel.url = novelID
-            novel.m_urlSecret = state.cookieString ?? ""
             novel.title = (state.title ?? novelID).trimmingCharacters(in: .whitespacesAndNewlines)
             if let writer = state.author {
                 novel.writer = writer
