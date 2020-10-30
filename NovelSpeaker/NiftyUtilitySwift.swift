@@ -943,7 +943,6 @@ class NiftyUtilitySwift: NSObject {
     }
     
     public static func ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString:String, targetURL:URL, expireDate:Date? = nil, portArray:[Int]? = nil, isSecure:Bool? = nil) -> [HTTPCookie] {
-        // この関数では、Version 1 の HTTPCookie を生成することにします。
         var result:[HTTPCookie] = []
         let keyValueArray = javaScriptCookieString.split(separator: ";")
         for keyValueWithWhitespace in keyValueArray {
@@ -951,6 +950,8 @@ class NiftyUtilitySwift: NSObject {
             guard keyValue.count == 2 else { continue }
             let key = keyValue[0]
             let value = keyValue[1]
+            guard let host = targetURL.host else { continue }
+            let path = targetURL.path
             // HTTPCookie を生成するには
             // cookies(withResponseHeaderFields:for:)
             // https://developer.apple.com/documentation/foundation/httpcookie/1393011-cookies
@@ -960,8 +961,8 @@ class NiftyUtilitySwift: NSObject {
             var properties:[HTTPCookiePropertyKey:Any] = [
                 .name: key,
                 .value: value,
-                .originURL: targetURL,
-                .version: "1",
+                .domain: host,
+                .path: path,
             ]
             if let expireDate = expireDate {
                 properties[.expires] = expireDate
