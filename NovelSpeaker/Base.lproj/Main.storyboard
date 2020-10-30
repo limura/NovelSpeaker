@@ -1336,7 +1336,7 @@ THE SOFTWARE.
         <!--本棚-->
         <scene sceneID="fHI-C2-mKL">
             <objects>
-                <navigationController definesPresentationContext="YES" id="v42-xJ-9mb" customClass="UINavicationController_StatusBarHack" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                <navigationController definesPresentationContext="YES" id="v42-xJ-9mb" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="本棚" image="soundbook.png" id="48f-BN-UmV"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="kzS-si-TDC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>

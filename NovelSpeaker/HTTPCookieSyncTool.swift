@@ -82,10 +82,10 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
     }
     
     func observeGlobalState() {
-        DispatchQueue.main.sync {
+        NiftyUtilitySwift.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                globalStateNotificationToken = globalState.observe({ (change) in
+                self.globalStateNotificationToken = globalState.observe({ (change) in
                     switch change {
                     case .change(_, let propertys):
                         for property in propertys {
@@ -113,7 +113,7 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
         }
     }
     func SaveSync(){
-        DispatchQueue.main.sync {
+        NiftyUtilitySwift.DispatchSyncMainQueue {
             RealmUtil.Write(withoutNotifying: [self.globalStateNotificationToken]) { (realm) in
                 self.SaveCookiesFromURLSessionSharedConfigurationWith(realm: realm)
             }
