@@ -724,12 +724,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         
         let level = treeView.levelForCell(forItem: item)
-        var headSpace = ""
-        if level > 0 {
-            for _ in 1 ... level {
-                headSpace += "   "
-            }
-        }
 
         RealmUtil.RealmBlock { (realm) -> Void in
             if let novelID = item.novelID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
