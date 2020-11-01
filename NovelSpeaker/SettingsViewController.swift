@@ -73,7 +73,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                  "defaultDisplaySettingID",
                                  "searchInfoURL",
                                  "defaultSpeechModURL",
-                                 "defaultRegexpSpeechModURL",
                                  "autopagerizeSiteInfoURL",
                                  "novelSpeakerSiteInfoURL",
                                  "speechViewButtonSettingArrayData",

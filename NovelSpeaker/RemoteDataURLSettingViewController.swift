@@ -45,7 +45,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
     }
     
     func registerObserver() {
-        let targets:[String] = ["autopagerizeSiteInfoURL", "novelSpeakerSiteInfoURL", "defaultSpeechModURL", "defaultRegexpSpeechModURL", "searchInfoURL"]
+        let targets:[String] = ["autopagerizeSiteInfoURL", "novelSpeakerSiteInfoURL", "defaultSpeechModURL", "searchInfoURL"]
         
         RealmUtil.RealmBlock { (realm) -> Void in
             if let globalData = RealmGlobalState.GetInstanceWith(realm: realm) {
@@ -133,7 +133,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
         })
-        +++ Section(NSLocalizedString("RemoteDataURLSettingViewController_SpeechModSection_Title", comment: "標準の読み替え設定(正規表現ではないもの)"))
+        +++ Section(NSLocalizedString("RemoteDataURLSettingViewController_SpeechModSection_Title", comment: "標準の読み替え設定"))
         <<< TextRow() {
             $0.title = ""
             $0.cell.textLabel?.numberOfLines = 0
@@ -151,30 +151,6 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
         })
         <<< ButtonRow() {
             $0.title = NSLocalizedString("RemoteDataURLSettingViewController_SpeechModSampleButton", comment: "標準設定データのURLを開く")
-            $0.cell.textLabel?.numberOfLines = 0
-        }.onCellSelection({ (cellOf, row) in
-            if let url = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/IceCream/NovelSpeaker/DefaultSpeechModList.json") {
-                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            }
-        })
-        +++ Section(NSLocalizedString("RemoteDataURLSettingViewController_RegexpSpeechModSection_Title", comment: "標準の読み替え設定(正規表現のもの)"))
-        <<< TextRow() {
-            $0.title = ""
-            $0.cell.textLabel?.numberOfLines = 0
-            $0.cell.textField.borderStyle = .roundedRect
-            $0.cell.textField.placeholder = NSLocalizedString("RemoteDataURLSettingViewController_URLTextFieldPlaceholder", comment: "URLを入力してください")
-            $0.value = globalState?.defaultRegexpSpeechModURL ?? ""
-        }.onChange({ (row) in
-            let value = row.value ?? ""
-            RealmUtil.RealmBlock { (realm) -> Void in
-                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
-                    globalState.defaultSpeechModURL = value
-                }
-            }
-        })
-        <<< ButtonRow() {
-            $0.title = NSLocalizedString("RemoteDataURLSettingViewController_RegexpSpeechModSampleButton", comment: "標準設定データのURLを開く")
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection({ (cellOf, row) in
             if let url = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/IceCream/NovelSpeaker/DefaultSpeechModList.json") {

@@ -199,7 +199,7 @@
 "RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSampleButton" = "標準設定データのURLを開く";
 "RemoteDataURLSettingViewController_FallbackSiteInfoSection_Title" = "次点のSiteInfo";
 "RemoteDataURLSettingViewController_FallbackSiteInfoSampleButton" = "標準設定データのURLを開く";
-"RemoteDataURLSettingViewController_SpeechModSection_Title" = "標準の読み替え設定(正規表現ではないもの)";
+"RemoteDataURLSettingViewController_SpeechModSection_Title" = "標準の読み替え設定";
 "RemoteDataURLSettingViewController_SpeechModSampleButton" = "標準設定データのURLを開く";
 "RemoteDataURLSettingViewController_RegexpSpeechModSection_Title" = "標準の読み替え設定(正規表現のもの)";
 "RemoteDataURLSettingViewController_RegexpSpeechModSampleButton" = "標準設定データのURLを開く";

@@ -178,7 +178,6 @@ class RealmToRealmCopyTool: NSObject {
             newObj.novelSpeakerSiteInfoURL = obj.novelSpeakerSiteInfoURL
             newObj.autopagerizeSiteInfoURL = obj.autopagerizeSiteInfoURL
             newObj.defaultSpeechModURL = obj.defaultSpeechModURL
-            newObj.defaultRegexpSpeechModURL = obj.defaultRegexpSpeechModURL
             newObj.searchInfoURL = obj.searchInfoURL
             newObj.speechViewButtonSettingArrayData = obj.speechViewButtonSettingArrayData
             newObj.cookieArrayData = obj.cookieArrayData

@@ -1974,7 +1974,6 @@ extension HTTPCookie {
     @objc dynamic var novelSpeakerSiteInfoURL = ""
     @objc dynamic var autopagerizeSiteInfoURL = ""
     @objc dynamic var defaultSpeechModURL = ""
-    @objc dynamic var defaultRegexpSpeechModURL = ""
     @objc dynamic var searchInfoURL = ""
     @objc dynamic var speechViewButtonSettingArrayData = Data()
     @objc dynamic var cookieArrayData = Data()

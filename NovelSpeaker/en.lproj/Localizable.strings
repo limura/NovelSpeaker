@@ -202,7 +202,7 @@
 "RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSampleButton" = "Open the URL of the standard setting data";
 "RemoteDataURLSettingViewController_FallbackSiteInfoSection_Title" = "fallback SiteInfo";
 "RemoteDataURLSettingViewController_FallbackSiteInfoSampleButton" = "Open the URL of the standard setting data";
-"RemoteDataURLSettingViewController_SpeechModSection_Title" = "Standard replacement settings (non-regular expressions)";
+"RemoteDataURLSettingViewController_SpeechModSection_Title" = "Standard replacement settings";
 "RemoteDataURLSettingViewController_SpeechModSampleButton" = "Open the URL of the standard setting data";
 "RemoteDataURLSettingViewController_RegexpSpeechModSection_Title" = "Standard replacement settings (regular expression)";
 "RemoteDataURLSettingViewController_RegexpSpeechModSampleButton" = "Open the URL of the standard setting data";

@@ -28,26 +28,27 @@ class NovelSpeakerUtility: NSObject {
         "([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)\\s*[〜]\\s*([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)": "$1から$2", // 100〜200 → 100から200
         "([0-9０-９零壱弐参肆伍陸漆捌玖拾什陌佰阡仟萬〇一二三四五六七八九十百千万億兆]+)\\s*話": "$1は"
     ]
-    static func getSpeechModSettings(completion:([String:String], [String:String])->Void) {
-        var speechModSettings:[String:String]? = nil
-        var regexpSpeechModSettings:[String:String]? = nil
+    
+    struct SpeechModSetting: Codable {
+        let before:String
+        let after:String
+        let targetNovelUrlArray:[String]?
+        let isRegexp:Bool?
+    }
+    
+    static func getSpeechModSettings(completion:([SpeechModSetting])->Void) {
+        var speechModSettings:[SpeechModSetting]? = nil
         RealmUtil.RealmBlock { (realm) -> Void in
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                if let url = URL(string: globalState.defaultSpeechModURL), let data = try? Data(contentsOf: url), let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments), let result = json as? [String:String] {
+                if let url = URL(string: globalState.defaultSpeechModURL), let data = try? Data(contentsOf: url), let result = try? JSONDecoder().decode([SpeechModSetting].self, from: data) {
                     speechModSettings = result
-                }
-                if let url = URL(string: globalState.defaultRegexpSpeechModURL), let data = try? Data(contentsOf: url), let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments), let result = json as? [String:String] {
-                    regexpSpeechModSettings = result
                 }
             }
         }
-        if speechModSettings == nil, let path = Bundle.main.path(forResource: "DefaultSpeechModList", ofType: "json"), let handle = FileHandle(forReadingAtPath: path), let json = try? JSONSerialization.jsonObject(with: handle.readDataToEndOfFile(), options: .allowFragments), let result = json as? [String:String] {
+        if speechModSettings == nil, let path = Bundle.main.path(forResource: "DefaultSpeechModList", ofType: "json"), let handle = FileHandle(forReadingAtPath: path), let result = try? JSONDecoder().decode([SpeechModSetting].self, from: handle.readDataToEndOfFile()) {
             speechModSettings = result
         }
-        if regexpSpeechModSettings == nil {
-            regexpSpeechModSettings = defaultRegexpSpeechModSettings
-        }
-        completion(speechModSettings ?? [:], regexpSpeechModSettings ?? [:])
+        completion(speechModSettings ?? [])
     }
     /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
     @objc static func ForceOverrideHungSpeakStringToSpeechModSettings() {
@@ -71,32 +72,30 @@ class NovelSpeakerUtility: NSObject {
 
     // 標準の読み替え辞書を上書き登録します。
     static func OverrideDefaultSpeechModSettingsWith(realm:Realm) {
-        getSpeechModSettings { (speechModSettings, regexpModSettings) in
+        getSpeechModSettings { (speechModSettings) in
             RealmUtil.WriteWith(realm: realm) { (realm) in
-                for (before, after) in speechModSettings {
+                for modSetting in speechModSettings {
+                    let before = modSetting.before
+                    let after = modSetting.after
+                    
                     if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) {
                         setting.after = after
-                        setting.isUseRegularExpression = false
+                        setting.isUseRegularExpression = modSetting.isRegexp ?? false
+                        if let targetNovelURLArray = modSetting.targetNovelUrlArray {
+                            setting.targetNovelIDArray.removeAll()
+                            setting.targetNovelIDArray.append(objectsIn: targetNovelURLArray)
+                        }
                         continue
                     }
                     let speechModSetting = RealmSpeechModSetting()
                     speechModSetting.before = before
                     speechModSetting.after = after
-                    speechModSetting.isUseRegularExpression = false
-                    speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
-                    realm.add(speechModSetting, update: .modified)
-                }
-                for (before, after) in regexpModSettings {
-                    if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) {
-                        setting.after = after
-                        setting.isUseRegularExpression = true
-                        continue
+                    speechModSetting.isUseRegularExpression = modSetting.isRegexp ?? false
+                    if let targetNovelURLArray = modSetting.targetNovelUrlArray {
+                        speechModSetting.targetNovelIDArray.append(objectsIn: targetNovelURLArray)
+                    }else{
+                        speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
                     }
-                    let speechModSetting = RealmSpeechModSetting()
-                    speechModSetting.before = before
-                    speechModSetting.after = after
-                    speechModSetting.isUseRegularExpression = true
-                    speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
                     realm.add(speechModSetting, update: .modified)
                 }
             }
@@ -105,22 +104,16 @@ class NovelSpeakerUtility: NSObject {
 
     // 保存されている読み替え辞書の中から、標準の読み替え辞書を全て削除します
     static func RemoveAllDefaultSpeechModSettings() {
-        getSpeechModSettings { (speechModSettings, regexpModSettings) in
+        getSpeechModSettings { (speechModSettings) in
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let allSpeechModSettings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
                 var removeTargetArray:[RealmSpeechModSetting] = []
                 for targetSpeechModSetting in allSpeechModSettings {
-                    var hit = false
-                    for (before, after) in speechModSettings {
-                        if targetSpeechModSetting.before == before && targetSpeechModSetting.after == after && targetSpeechModSetting.isUseRegularExpression != true {
-                            removeTargetArray.append(targetSpeechModSetting)
-                            hit = true
-                            break
-                        }
-                    }
-                    if hit { continue }
-                    for (before, after) in regexpModSettings {
-                        if targetSpeechModSetting.before == before && targetSpeechModSetting.after == after && targetSpeechModSetting.isUseRegularExpression == true {
+                    for modSetting in speechModSettings {
+                        let before = modSetting.before
+                        let after = modSetting.after
+                        let isUseRegularExpression = modSetting.isRegexp ?? false
+                        if targetSpeechModSetting.before == before && targetSpeechModSetting.after == after && targetSpeechModSetting.isUseRegularExpression == isUseRegularExpression {
                             removeTargetArray.append(targetSpeechModSetting)
                             break
                         }
@@ -1405,9 +1398,6 @@ class NovelSpeakerUtility: NSObject {
                 if let defaultSpeechModURL = dic.object(forKey: "defaultSpeechModURL") as? String {
                     globalState.defaultSpeechModURL = defaultSpeechModURL
                 }
-                if let defaultRegexpSpeechModURL = dic.object(forKey: "defaultRegexpSpeechModURL") as? String {
-                    globalState.defaultRegexpSpeechModURL = defaultRegexpSpeechModURL
-                }
                 if let searchInfoURL = dic.object(forKey: "searchInfoURL") as? String {
                     globalState.searchInfoURL = searchInfoURL
                 }
@@ -1892,7 +1882,6 @@ class NovelSpeakerUtility: NSObject {
                 "novelSpeakerSiteInfoURL": globalState.novelSpeakerSiteInfoURL,
                 "autopagerizeSiteInfoURL": globalState.autopagerizeSiteInfoURL,
                 "defaultSpeechModURL": globalState.defaultSpeechModURL,
-                "defaultRegexpSpeechModURL": globalState.defaultRegexpSpeechModURL,
                 "searchInfoURL": globalState.searchInfoURL,
                 "speechViewButtonSettingArrayData": globalState.speechViewButtonSettingArrayData.base64EncodedString(),
                 "cookieArrayData": globalState.cookieArrayData.base64EncodedString(),
