@@ -182,6 +182,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.searchInfoURL = obj.searchInfoURL
             newObj.speechViewButtonSettingArrayData = obj.speechViewButtonSettingArrayData
             newObj.cookieArrayData = obj.cookieArrayData
+            newObj.m_DisplayType = obj.m_DisplayType
 
             to.add(newObj, update: .modified)
             try to.commitWrite()

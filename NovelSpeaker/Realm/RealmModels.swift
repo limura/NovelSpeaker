@@ -1938,6 +1938,10 @@ extension HTTPCookie {
     }
 }
 
+@objc enum NovelDisplayType: Int {
+    case textView = 1
+}
+
 @objc final class RealmGlobalState: Object {
     static public let UniqueID = "only one object"
     @objc dynamic var id = UniqueID
@@ -1974,6 +1978,7 @@ extension HTTPCookie {
     @objc dynamic var searchInfoURL = ""
     @objc dynamic var speechViewButtonSettingArrayData = Data()
     @objc dynamic var cookieArrayData = Data()
+    @objc dynamic var m_DisplayType : Int = NovelDisplayType.textView.rawValue
 
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {
@@ -1992,6 +1997,15 @@ extension HTTPCookie {
         }
         set {
             m_bookSelfSortType = Int(newValue.rawValue)
+        }
+    }
+    // 表示形式用(将来的に縦書きにするとかWebページそのものを表示するとかそういうのに対応しようって奴)
+    var novelDisplayType : NovelDisplayType {
+        get {
+            return NovelDisplayType(rawValue: self.m_DisplayType) ?? NovelDisplayType.textView
+        }
+        set {
+            self.m_DisplayType = newValue.rawValue
         }
     }
     func defaultDisplaySettingWith(realm:Realm) -> RealmDisplaySetting? {

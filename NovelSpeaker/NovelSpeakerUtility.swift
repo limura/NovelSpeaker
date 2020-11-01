@@ -1371,8 +1371,8 @@ class NovelSpeakerUtility: NSObject {
                 if let isPageTurningSoundEnabled = dic.object(forKey: "isPageTurningSoundEnabled") as? NSNumber {
                     globalState.isPageTurningSoundEnabled = isPageTurningSoundEnabled.boolValue
                 }
-                if let bookSelfSortType = dic.object(forKey: "bookSelfSortType") as? NSNumber {
-                    globalState.bookShelfSortType = NarouContentSortType(rawValue: UInt(bookSelfSortType.intValue)) ?? NarouContentSortType.ncode
+                if let m_BookSelfSortType = dic.object(forKey: "bookSelfSortType") as? NSNumber, let bookSelfSortType = NarouContentSortType(rawValue: UInt(m_BookSelfSortType.intValue)) {
+                    globalState.bookShelfSortType = bookSelfSortType
                 }
                 if let currentReadingNovelID = dic.object(forKey: "currentReadingNovelID") as? String {
                     globalState.currentReadingNovelID = currentReadingNovelID
@@ -1416,6 +1416,9 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if let cookieArrayData = dic.object(forKey: "cookieArrayData") as? String, let data = Data(base64Encoded: cookieArrayData) {
                     globalState.cookieArrayData = data
+                }
+                if let m_DisplayType = dic.object(forKey: "novelDisplayType") as? NSNumber, let displayType = NovelDisplayType(rawValue: m_DisplayType.intValue) {
+                    globalState.novelDisplayType = displayType
                 }
             }
         }
@@ -1893,6 +1896,7 @@ class NovelSpeakerUtility: NSObject {
                 "searchInfoURL": globalState.searchInfoURL,
                 "speechViewButtonSettingArrayData": globalState.speechViewButtonSettingArrayData.base64EncodedString(),
                 "cookieArrayData": globalState.cookieArrayData.base64EncodedString(),
+                "novelDisplayType": globalState.novelDisplayType.rawValue,
 
                 "defaultDisplaySettingID": globalState.defaultDisplaySettingID,
                 "defaultSpeakerID": globalState.defaultSpeakerID,

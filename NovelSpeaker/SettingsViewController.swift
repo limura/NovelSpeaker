@@ -77,7 +77,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                  "autopagerizeSiteInfoURL",
                                  "novelSpeakerSiteInfoURL",
                                  "speechViewButtonSettingArrayData",
-                                 "cookieArrayData":
+                                 "cookieArrayData",
+                                 "m_DisplayType"
+                                :
                                 continue
                             default:
                                 isHit = true
