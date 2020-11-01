@@ -652,14 +652,20 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.68
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.69
 
-- 「設定」->「読み上げ時の間の設定」にて「<改行>」を設定している場合に、一部の文書では改行をうまく検出できない場合があった問題を修正
-- アプリ起動時にはバッジが消えなかった問題を修正
+- 本棚画面にて、最後に開いていた小説が選択状態になるように
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.69
+
+インタフェースの変更
+
+- 本棚画面にて、最後に開いていた小説が選択状態になるように
+
+
 # Version 1.1.68
 
 問題の修正

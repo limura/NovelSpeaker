@@ -119,6 +119,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.HilightCurrentReadingNovel()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -1000,4 +1001,32 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
 
+    func HighlightNovel(novelID:String) {
+        DispatchQueue.main.async {
+            for cellItem in self.displayDataArray {
+                // tree が展開されるのは一段目までです(´・ω・`)
+                if let childrens = cellItem.childrens {
+                    for cellItemChild in childrens {
+                        if cellItemChild.novelID == novelID {
+                            self.treeView?.expandRow(forItem: cellItem)
+                            self.treeView?.selectRow(forItem: cellItem, animated: false, scrollPosition: RATreeViewScrollPositionNone)
+                            return
+                        }
+                    }
+                }
+                if cellItem.novelID == novelID {
+                    self.treeView?.selectRow(forItem: cellItem, animated: false, scrollPosition: RATreeViewScrollPositionNone)
+                    return
+                }
+            }
+        }
+    }
+    func HilightCurrentReadingNovel() {
+        let novelID:String? = RealmUtil.RealmBlock { (realm) -> String? in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return nil }
+            return globalState.currentReadingNovelID
+        }
+        guard let targetNovelID = novelID else { return }
+        HighlightNovel(novelID: targetNovelID)
+    }
 }

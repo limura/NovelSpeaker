@@ -659,25 +659,18 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.68
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.69
 
-- Fixed an issue where line breaks could not be detected properly in some documents when \"<Enter>\" was set in \"Settings\" -> \"Setting for punctuation delays\".
-- Fixed an issue where the badge did not disappear when the app was launched.
+- The last open novel is now selected on the bookshelf screen
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
-# Version 1.9
+# Version 1.1.69
 
--Change internal database from CoreData to Realm
--Rewrite almost all ViewController (screen) from Objective-C to Swift
--Remove the function of search search tab
--I tried to support Dynamic Type in various places
--Added \"Check the translated text used for speech\" and \"Add to speech mod settings for this novel\" in the long press menu in the text.
--Change the behavior around download
--Change speaker setting items
--Added a function to separate chapters into text files when importing text files etc.
--Added concept of exclusive setting for each novel (\"Detail\" menu is added in the upper right of the novel text display section)
+Interface change
+
+- The last open novel is now selected on the bookshelf screen
 
 
 # Version 1.1.68
