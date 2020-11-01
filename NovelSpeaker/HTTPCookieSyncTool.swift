@@ -108,6 +108,7 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
     }
     
     func WaitCanUseRealm(method: @escaping (()->Void)) {
+        #if !os(watchOS)
         if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {
             print("WaitCanUseRealmThenDo CoreDataToRealmTool.IsConvertFromCoreDataFinished() return true.")
             method()
@@ -116,6 +117,9 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.WaitCanUseRealm(method: method)
         }
+        #else
+        method()
+        #endif
     }
     
     func StopObservers() {
