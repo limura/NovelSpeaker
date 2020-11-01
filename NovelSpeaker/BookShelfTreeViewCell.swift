@@ -109,34 +109,44 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         self.treeDepthImageViewWidthConstraint = self.treeDepthImageView.widthAnchor.constraint(equalToConstant: depthWidth)
         self.treeDepthImageViewWidthConstraint.isActive = true
     }
+    func applyCurrentReadingPointToIndicatorWith(realm: Realm, novel:RealmNovel) {
+        guard let readingChapterNumber = novel.readingChapterNumber else {
+            DispatchQueue.main.async {
+                self.readProgressView.progress = 0.0
+            }
+            return
+        }
+        let lastChapterNumber = novel.lastChapterNumber ?? 1
+        let readLocation:Float
+        let contentCount:Float
+        if lastChapterNumber == readingChapterNumber, let lastChapter = novel.lastChapterWith(realm: realm) {
+            readLocation = Float(lastChapter.readLocation(realm: realm))
+            contentCount = Float(lastChapter.content.count)
+        }else{
+            readLocation = 1.0
+            contentCount = 1.0
+        }
+        let progress = ((Float(readingChapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
+        if self.watchNovelIDArray != [novel.novelID] { return }
+        DispatchQueue.main.async {
+            if readingChapterNumber == lastChapterNumber && contentCount <= (readLocation + 10) {
+                self.readProgressView.tintColor = UIColor(displayP3Red: 0.6, green: 0.3, blue: 0.9, alpha: 1.0)
+            }else{
+                self.readProgressView.tintColor = UIColor(displayP3Red: 255/256.0, green: 188/256.0, blue: 2/256.0, alpha: 1.0)
+            }
+            self.readProgressView.progress = progress
+        }
+    }
+    
     func applyCurrentReadingPointToIndicator(novelID:String) {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
-            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let readingChapterNumber = novel.readingChapterNumber else {
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else {
                 DispatchQueue.main.async {
                     self.readProgressView.progress = 0.0
                 }
                 return
             }
-            let lastChapterNumber = novel.lastChapterNumber ?? 1
-            let readLocation:Float
-            let contentCount:Float
-            if lastChapterNumber == readingChapterNumber, let lastChapter = novel.lastChapterWith(realm: realm) {
-                readLocation = Float(lastChapter.readLocation(realm: realm))
-                contentCount = Float(lastChapter.content.count)
-            }else{
-                readLocation = 1.0
-                contentCount = 1.0
-            }
-            let progress = ((Float(readingChapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
-            if self.watchNovelIDArray != [novelID] { return }
-            DispatchQueue.main.async {
-                if readingChapterNumber == lastChapterNumber && contentCount <= (readLocation + 10) {
-                    self.readProgressView.tintColor = UIColor(displayP3Red: 0.6, green: 0.3, blue: 0.9, alpha: 1.0)
-                }else{
-                    self.readProgressView.tintColor = UIColor(displayP3Red: 255/256.0, green: 188/256.0, blue: 2/256.0, alpha: 1.0)
-                }
-                self.readProgressView.progress = progress
-            }
+            self.applyCurrentReadingPointToIndicatorWith(realm: realm, novel: novel)
         }
     }
     func applyCurrentDownloadIndicatorVisibleStatus(novelIDArray:[String]) {
@@ -400,6 +410,30 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
             registerNovelArrayObserver(novelIDArray: watchNovelIDArray)
             registerStoryForNovelArrayObserver(novelIDArray: watchNovelIDArray)
         }
+    }
+    
+    func cellSetupWith(realm: Realm, novel:RealmNovel, treeLevel:Int) {
+        self.watchNovelIDArray = [novel.novelID]
+        applyDepth(treeLevel: treeLevel)
+        let title = novel.title
+        if title.count <= 0 {
+            titleLabel.text = NSLocalizedString("BookShelfTreeViewCell_UnknownTitle", comment: "(小説名未設定)")
+        }else{
+            titleLabel.text = title
+        }
+        if novel.isNewFlug {
+            self.activateNewImageView()
+        }else{
+            self.deactivateNewImageView()
+        }
+        assignObservers()
+        let novelID = novel.novelID
+        self.readProgressView.isHidden = false
+        applyCurrentReadingPointToIndicatorWith(realm: realm, novel: novel)
+        applyLikeStarStatus(novelID: novelID)
+        self.likeButton.isHidden = false
+        applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
 
     func cellSetup(title:String, treeLevel: Int, watchNovelIDArray: [String]) {
