@@ -245,7 +245,25 @@ class RealmToRealmCopyTool: NSObject {
             try to.commitWrite()
         }
     }
-    
+
+    static func CopyBookmark(from:Realm, to:Realm, progress:(String)->Void) throws {
+        let objects = from.objects(RealmBookmark.self)
+        let maxCount = objects.count
+        for (index, obj) in objects.enumerated() {
+            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_Bookmark", comment: "栞を移行中") + " (\(index)/\(maxCount))")
+            to.beginWrite()
+            let newObj = RealmBookmark()
+            newObj.id = obj.id
+            newObj.isDeleted = obj.isDeleted
+            newObj.createdDate = obj.createdDate
+            newObj.novelID = obj.novelID
+            newObj.chapterNumber = obj.chapterNumber
+            newObj.location = obj.location
+            to.add(newObj, update: .modified)
+            try to.commitWrite()
+        }
+    }
+
     static func DoCopy(from:Realm, to:Realm, progress:(String)->Void) throws {
         try CopySpeechModSetting(from: from, to: to, progress: progress)
         try CopySpeechWaitConfig(from: from, to: to, progress: progress)
@@ -255,6 +273,7 @@ class RealmToRealmCopyTool: NSObject {
         try CopyDisplaySetting(from: from, to: to, progress: progress)
         try CopyNovelTag(from: from, to: to, progress: progress)
         try CopySpeechOverrideSetting(from: from, to: to, progress: progress)
+        try CopyBookmark(from: from, to: to, progress: progress)
         try CopyNovels(from: from, to: to, progress: progress)
         try CopyStorys(from: from, to: to, progress: progress)
     }

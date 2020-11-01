@@ -586,6 +586,7 @@
 "RealmToRealmCopyTool_Progress_SpeechOverrideSetting" = "読み替え設定を移行中";
 "RealmToRealmCopyTool_Progress_Novel" = "小説情報を移行中";
 "RealmToRealmCopyTool_Progress_Story" = "小説本文を移行中";
+"RealmToRealmCopyTool_Progress_Bookmark" = "栞を移行中";
 
 "NovelSearchViewController_SearchResultZero" = "検索結果はありませんでした";
 "NovelSearchViewController_SearchButtonText" = "検索";
