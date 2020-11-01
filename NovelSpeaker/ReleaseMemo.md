@@ -2525,6 +2525,26 @@ Bug fix
 - Fixed an issue where line breaks could not be detected properly in some documents when "<Enter>" was set in "Settings" -> "Setting for punctuation delays".
 - Fixed an issue where the badge did not disappear when the app was launched.
 
+
+# Version 1.1.69
+
+インタフェースの変更
+
+- 本棚画面にて、最後に開いていた小説が選択状態になるように
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は本棚画面に戻った時に、今まで開いていた小説を見つけやすくする、という修正になります。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 1.1.69
+
+Interface change
+
+- The last open novel is now selected on the bookshelf screen
+
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
