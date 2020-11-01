@@ -128,6 +128,11 @@
     [self ReloadAllTableViewDataAndScrollToCurrentReadingContent];
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self HighlightCurrentReadingNovel];
+}
+
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     if (m_ResumeSpeechFloatingButton != nil) {
@@ -523,5 +528,22 @@
     }
 }
 
+- (void)HighlightNovel:(NSString*)ncode {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSArray* novelArray = [self getNarouContentArray];
+        for (int i = 0; i < [novelArray count]; i++) {
+            NarouContentCacheData* content = novelArray[i];
+            if ([content.ncode compare:ncode] != NSOrderedSame) { continue ; }
+            NSIndexPath* path = [NSIndexPath indexPathForRow:i inSection:0];
+            [self.tableView selectRowAtIndexPath:path animated:false scrollPosition:UITableViewScrollPositionNone];
+            break;
+        }
+    });
+}
+- (void)HighlightCurrentReadingNovel {
+    NarouContentCacheData* selectedContent = [[GlobalDataSingleton GetInstance] GetCurrentReadingContent];
+    if (selectedContent == nil) { return; }
+    [self HighlightNovel:selectedContent.ncode];
+}
 
 @end
