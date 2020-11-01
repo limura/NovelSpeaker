@@ -1633,7 +1633,7 @@ class NovelSpeakerUtility: NSObject {
                 messageLabel.text = text
             }
         }
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .userInitiated).async {
             defer {
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
