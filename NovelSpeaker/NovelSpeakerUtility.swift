@@ -2265,14 +2265,8 @@ class NovelSpeakerUtility: NSObject {
         // 根拠はこれ https://developer.apple.com/documentation/foundation/nscharacterset/1416730-newlines
         // で、
         // U+000A~U+000D はそれぞれ \r\v\f\n になる(Swift だと \v, \f は無いみたいなので \u{} で書く
-        var result = string
-        let targetArray = ["\r\n", "\r", "\u{000B}", "\u{000C}", "\u{0085}", "\u{2028}", "\u{2029}"]
+        let targetPattern = "(\r\n|[\r\u{000B}\u{000C}\u{0085}\u{2028}\u{2029}])"
         let convertTo = "\n"
-        for target in targetArray {
-            if result.contains(target) {
-                result = result.replacingOccurrences(of: target, with: convertTo)
-            }
-        }
-        return result
+        return string.replacingOccurrences(of: targetPattern, with: convertTo, options: [.regularExpression], range: string.range(of: string))
     }
 }
