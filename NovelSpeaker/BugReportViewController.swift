@@ -502,7 +502,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
                     .build()
                 dialog.show()
-                DispatchQueue.global(qos: .utility).async {
+                DispatchQueue.global(qos: .userInitiated).async {
                     if let backupDataURL = NovelSpeakerUtility.CreateBackupData(withAllStoryContent: false, progress: { (description) in
                         DispatchQueue.main.async {
                             if let label = dialog.view.viewWithTag(labelTag) as? UILabel {

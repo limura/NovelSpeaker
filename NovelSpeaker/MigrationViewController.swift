@@ -19,7 +19,7 @@ class MigrationViewController: UIViewController {
         self.navigationItem.setHidesBackButton(true, animated: false)
         
         RealmUtil.CheckCloudAccountStatus { (result, error) in
-            DispatchQueue.global(qos: .utility).async {
+            DispatchQueue.global(qos: .userInitiated).async {
                 self.CheckAndDoCoreDataMigration()
                 self.CheckAndDoCoreDataToRealmMigration()
                 if self.CheckAndiCloudStatusInvalidNotice(isiCloudAccountStatusValid: result, icloudAccountStatusCheckError: error) {
@@ -58,7 +58,7 @@ class MigrationViewController: UIViewController {
         DispatchQueue.main.async {
             NiftyUtilitySwift.EasyDialogLongMessageTwoButton(viewController: self, title: NSLocalizedString("MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Title", comment: "iCloud が使用できません"), message: NSLocalizedString("MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Message", comment: "iCloud が利用できない状態のようなのですが、iCloud を利用する形で起動されています。このまま利用を続けた場合、後で iCloud の利用が可能になった時などに動作が不安定になる可能性があるかもしれません(そのような場合の動作不良についての対応は致しかねます事は予めご承知おきください)。このまま iCloud を利用する設定のままで起動しますか？") + "\n\n" + NSLocalizedString("MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_Message_AppendErrorDescription", comment: "検知されたエラー: ") + (icloudAccountStatusCheckError ?? NSLocalizedString("MigrationViewController_InvalidiCloudStatus_UnknowniCloudError", comment: "不明な iCloud 状態エラー")), button1Title: NSLocalizedString("MigrationViewController_InvalidiCloudStatus_HasiCloudRealmData_ConvertToLocalButton", comment: "iCloudを利用しない"), button1Action: {
                 RealmUtil.SetIsUseCloudRealm(isUse: false)
-                DispatchQueue.global(qos: .utility).async {
+                DispatchQueue.global(qos: .userInitiated).async {
                     self.CopyLocalToCloud()
                     NovelSpeakerUtility.AddFirstStoryIfNeeded()
                     self.goToMainStoryBoard()

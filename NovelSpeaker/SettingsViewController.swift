@@ -1063,7 +1063,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         DispatchQueue.main.async {
             NiftyUtilitySwift.EasyDialogNoButton(
                 viewController: self, title: NSLocalizedString("SettingsViewController_CopyingCloudToLocal", comment: "iCloud側のデータを端末側のデータへ変換中"), message: "-", completion: { (dialog) in
-                    DispatchQueue.global(qos: .utility).async {
+                    DispatchQueue.global(qos: .userInitiated).async {
                         autoreleasepool {
                             guard let cloudRealm = try? RealmUtil.GetCloudRealm(), let localRealm = try? RealmUtil.GetLocalRealm() else {
                                 DispatchQueue.main.async {
@@ -1140,7 +1140,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         DispatchQueue.main.async {
             NiftyUtilitySwift.EasyDialogNoButton(
                 viewController: self, title: NSLocalizedString("SettingsViewController_CopyingLocalToCloud", comment: "現在のデータをiCloud側に登録中"), message: "-", completion: { (dialog) in
-                    DispatchQueue.global(qos: .utility).async {
+                    DispatchQueue.global(qos: .userInitiated).async {
                         autoreleasepool {
                             RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
                             RealmUtil.CloudPull()
@@ -1649,7 +1649,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         DispatchQueue.main.async {
             dialog.show()
         }
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .userInitiated).async {
             guard let backupData = NovelSpeakerUtility.CreateBackupData(withAllStoryContent: withAllStoryContent, progress: { (description) in
                 DispatchQueue.main.async {
                     if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
