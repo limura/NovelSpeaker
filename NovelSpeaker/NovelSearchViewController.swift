@@ -349,26 +349,31 @@ class SearchResultViewController: FormViewController {
                 }
                 return true
             }
-            NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
-                DispatchQueue.main.async {
-                    guard let searchResult = self.searchResult else {
+            NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: NSLocalizedString("NovelSearchViewController_LoadingNextLink_Title", comment: "読込中……"), message: nil) { (dialog) in
+                NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
+                    DispatchQueue.main.async {
+                        guard let searchResult = self.searchResult else {
+                            self.removeLoadingRow()
+                            dialog.dismiss(animated: false, completion: nil)
+                            return
+                        }
+                        let (resultBlockArray, nextURL) = searchResult.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: nextURL)
                         self.removeLoadingRow()
-                        return
+                        self.resultBlockArray.append(contentsOf: resultBlockArray)
+                        self.nextURL = nextURL
+                        for novel in resultBlockArray {
+                            section <<< novel.CreateForm(parent: self)
+                        }
+                        if let nextURL = nextURL {
+                            section <<< self.generateLoadNextButton(nextURL: nextURL, section: section)
+                        }
+                        dialog.dismiss(animated: false, completion: nil)
                     }
-                    let (resultBlockArray, nextURL) = searchResult.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: nextURL)
-                    self.removeLoadingRow()
-                    self.resultBlockArray.append(contentsOf: resultBlockArray)
-                    self.nextURL = nextURL
-                    for novel in resultBlockArray {
-                        section <<< novel.CreateForm(parent: self)
+                }) { (err) in
+                    DispatchQueue.main.async {
+                        self.removeLoadingRow()
+                        dialog.dismiss(animated: false, completion: nil)
                     }
-                    if let nextURL = nextURL {
-                        section <<< self.generateLoadNextButton(nextURL: nextURL, section: section)
-                    }
-                }
-            }) { (err) in
-                DispatchQueue.main.async {
-                    self.removeLoadingRow()
                 }
             }
         }
