@@ -394,6 +394,7 @@
 "NiftyUtility_iCloudDataVersionIsLow_Message" = "The data stored on the iCloud side seems to be a newer version than the data handled by this app. To continue iCloud synchronization as it is, you need to upgrade the app.\nIf you cannot upgrade the app, such as when you are using an old iOS, you need to cancel iCloud synchronization. Please choose either one.";
 "NiftyUtility_iCloudDataVersionIsLow_AppVersionUpButton" = "Version upgrade";
 "NiftyUtility_iCloudDataVersionIsLow_DisableiCloudButton" = "cancel iCloud synchronization";
+"NiftyUtilitySwift_ImportRetryToWebImportTabButton" = "Try it on the Web Import tab (If it doesn't work and you need to log in)";
 
 "BugReportViewController_SectionHeader" = "Problem report";
 "BugReportViewController_BugReportTitle" = "In case of inconvenience, you can input from this form and report it.";

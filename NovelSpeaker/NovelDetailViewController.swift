@@ -169,13 +169,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
     }
     
     func openInWebImportTab(url:URL) {
-        DispatchQueue.main.async {
-            /// XXX 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
-            let targetTabIndex = 2
-            guard let viewController = self.tabBarController?.viewControllers?[targetTabIndex] as? ImportFromWebPageViewController else { return }
-            viewController.openTargetUrl = url
-            self.tabBarController?.selectedIndex = targetTabIndex
-        }
+        BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
     }
     
     func createCells() {

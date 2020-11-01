@@ -208,7 +208,7 @@ class SearchResultBlock {
         }.onCellSelection { (buttonCellOf, row) in
             func download() {
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: parent, url: self.url, cookieString: "")
+                    NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: parent, url: self.url, cookieString: "", isNeedFallbackImportFromWebPageTab: false)
                 }
             }
             if let description = self.description, description.count > 0 {

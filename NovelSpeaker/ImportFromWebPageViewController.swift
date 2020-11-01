@@ -400,12 +400,12 @@ li {
                     RealmUtil.RealmBlockWrite { (realm) in
                         HTTPCookieSyncTool.shared.SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: cookieArray)
                     }
-                    NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: "")
+                    NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: "", isNeedFallbackImportFromWebPageTab: false)
                 }
                 return
             }
         }
-        NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: self.cookiesString ?? "")
+        NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: self.cookiesString ?? "", isNeedFallbackImportFromWebPageTab: false)
     }
     @IBAction func bookmarkButtonClicked(_ sender: Any) {
         guard let url = self.wkWebView?.url else {

@@ -633,14 +633,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     @objc func safariButtonClicked(_ sender: UIBarButtonItem) {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let storyID = self.storyID, let urlString = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.url else {
+            guard let storyID = self.storyID, let urlString = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.url, let url = URL(string: urlString) else {
                 return
             }
-            /// XXX TODO: 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
-            let targetTabIndex = 2
-            guard let viewController = self.tabBarController?.viewControllers?[targetTabIndex] as? ImportFromWebPageViewController, let url = URL(string: urlString) else { return }
-            viewController.openTargetUrl = url
-            self.tabBarController?.selectedIndex = targetTabIndex
+            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
         }
     }
     @objc func startStopButtonClicked(_ sender: UIBarButtonItem) {

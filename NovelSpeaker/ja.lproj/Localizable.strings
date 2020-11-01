@@ -385,6 +385,7 @@
 "NiftyUtility_iCloudDataVersionIsLow_Message" = "iCloud側に保存されているデータは、この ことせかい の扱っているデータよりも新しいバージョンになっているようです。このまま iCloud同期 を行い続けるにはアプリのバージョンアップが必要となります。\nなお、古いiOSでご利用中などでアプリのバージョンアップができない場合など、アプリのバージョンアップができない場合には iCloud同期 を解除して頂く必要があります。どちらかを選択してください。";
 "NiftyUtility_iCloudDataVersionIsLow_AppVersionUpButton" = "バージョンアップ";
 "NiftyUtility_iCloudDataVersionIsLow_DisableiCloudButton" = "iCloud同期を停止";
+"NiftyUtilitySwift_ImportRetryToWebImportTabButton" = "Web取込タブで試してみる(駄目だった場合でログイン等が必要なサイトの場合はこちらをお試し下さい)";
 
 "BugReportViewController_SectionHeader" = "不都合の報告";
 "BugReportViewController_BugReportTitle" = "不都合がある場合にはこのフォームで不都合報告ができます。";

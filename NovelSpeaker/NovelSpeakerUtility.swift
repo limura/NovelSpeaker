@@ -315,7 +315,7 @@ class NovelSpeakerUtility: NSObject {
             }
             guard let targetURL = URL(string: targetUrlString), let rootViewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return false }
             DispatchQueue.main.async {
-                NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: rootViewController, url: targetURL, cookieString: cookieString)
+                NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: rootViewController, url: targetURL, cookieString: cookieString, isNeedFallbackImportFromWebPageTab: true)
             }
             return true
         }

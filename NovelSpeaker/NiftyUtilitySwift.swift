@@ -120,12 +120,12 @@ class NiftyUtilitySwift: NSObject {
         return true
     }
     
-    static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieString:String?) {
+    static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieString:String?, isNeedFallbackImportFromWebPageTab:Bool) {
         if isRecoverbleErrorString(error: error) && MFMailComposeViewController.canSendMail() {
             var errorMessage = error
             errorMessage += NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
-            EasyDialogBuilder(viewController)
-            .title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
+            var builder = EasyDialogBuilder(viewController)
+            builder = builder.title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
             .textView(content: errorMessage, heightMultiplier: 0.55)
             .addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportButton", comment: "報告メールを作成"), callback: { (dialog) in
                 dialog.dismiss(animated: false) {
@@ -149,18 +149,28 @@ class NiftyUtilitySwift: NSObject {
                     }
                 }
             })
-            .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
+            if isNeedFallbackImportFromWebPageTab == true, let url = url {
+                builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportRetryToWebImportTabButton", comment: "Web取込タブで開き直してみる(ログインが必要な場合はこちらで直るかもしれません)"), callback: { (dialog) in
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false) {
+                            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
+                        }
+                    }
+                })
+            }
+            builder = builder.addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                 dialog.dismiss(animated: false, completion: nil)
                 })
-            .build().show()
+            
+            builder.build().show()
         }else{
             NiftyUtilitySwift.EasyDialogMessageDialog(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"), message: error, completion: nil)
         }
     }
     
-    static func ImportStoryStateConifirmToUser(viewController:UIViewController, state:StoryState) {
+    static func ImportStoryStateConifirmToUser(viewController:UIViewController, state:StoryState, isNeedFallbackImportFromWebPageTab: Bool = false) {
         guard let content = state.content else {
-            checkUrlAndConifirmToUser_ErrorHandle(error: NSLocalizedString("NiftyUtilitySwift_ImportStoryStateConifirmToUser_NoContent", comment: "本文がありませんでした。"), viewController: viewController, url: state.url, cookieString: state.cookieString ?? "")
+            checkUrlAndConifirmToUser_ErrorHandle(error: NSLocalizedString("NiftyUtilitySwift_ImportStoryStateConifirmToUser_NoContent", comment: "本文がありませんでした。"), viewController: viewController, url: state.url, cookieString: state.cookieString ?? "", isNeedFallbackImportFromWebPageTab: isNeedFallbackImportFromWebPageTab)
             return
         }
         let titleString:String
@@ -230,19 +240,21 @@ class NiftyUtilitySwift: NSObject {
                     RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: titleString)
                 })
             }
+            if isNeedFallbackImportFromWebPageTab == true {
+                builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportRetryToWebImportTabButton", comment: "Web取込タブで開き直してみる(ログインが必要な場合はこちらで直るかもしれません)"), callback: { (dialog) in
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false) {
+                            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: state.url)
+                        }
+                    }
+                })
+            }
             print("builder.build().show() call.")
             builder.build().show()
         }
     }
     
-    public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieArray:[HTTPCookie]) {
-        // update Realm cookie store
-        // update Session cookie store
-        // update WkWebView cookie store
-        // call original method with cookieString = nil
-    }
-    
-    public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieString:String?) {
+    public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieString:String?, isNeedFallbackImportFromWebPageTab:Bool) {
         BehaviorLogger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
             let builder = EasyDialogBuilder(viewController)
@@ -256,10 +268,10 @@ class NiftyUtilitySwift: NSObject {
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: {
                             if let state = state, (state.content?.count ?? 0) > 0 {
-                                ImportStoryStateConifirmToUser(viewController: viewController, state: state)
+                                ImportStoryStateConifirmToUser(viewController: viewController, state: state, isNeedFallbackImportFromWebPageTab: isNeedFallbackImportFromWebPageTab)
                                 return
                             }
-                            checkUrlAndConifirmToUser_ErrorHandle(error: errorString ?? NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー"), viewController: viewController, url: url, cookieString: cookieString)
+                            checkUrlAndConifirmToUser_ErrorHandle(error: errorString ?? NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー"), viewController: viewController, url: url, cookieString: cookieString, isNeedFallbackImportFromWebPageTab: isNeedFallbackImportFromWebPageTab)
                         })
                     }
                 }

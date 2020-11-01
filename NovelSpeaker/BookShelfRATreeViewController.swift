@@ -39,9 +39,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     var isNextViewNeedResumeSpeech:Bool = false
     
     var novelArrayNotificationToken : NotificationToken? = nil
+    
+    static var instance:BookShelfRATreeViewController? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        BookShelfRATreeViewController.instance = self
         StoryHtmlDecoder.shared.LoadSiteInfoIfNeeded()
 
         let treeView = RATreeView()
@@ -1028,5 +1031,16 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         guard let targetNovelID = novelID else { return }
         HighlightNovel(novelID: targetNovelID)
+    }
+    
+    static func LoadWebPageOnWebImportTab(url:URL) {
+        guard let instance = instance else { return }
+        DispatchQueue.main.async {
+            /// XXX TODO: 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
+            let targetTabIndex = 2
+            guard let viewController = instance.tabBarController?.viewControllers?[targetTabIndex] as? ImportFromWebPageViewController else { return }
+            viewController.openTargetUrl = url
+            instance.tabBarController?.selectedIndex = targetTabIndex
+        }
     }
 }

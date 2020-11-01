@@ -56,10 +56,39 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             if let globalData = RealmGlobalState.GetInstanceWith(realm: realm) {
                 self.globalDataNotificationToken = globalData.observe({ (change) in
                     switch change {
-                    case .change(_, _):
-                        DispatchQueue.main.async {
-                            self.form.removeAll()
-                            self.createSettingsTable()
+                    case .change(_, let properties):
+                        var isHit = false
+                        for property in properties {
+                            switch property.name {
+                            case "isSpeechWaitSettingUseExperimentalWait",
+                                 "webImportBookmarkArray",
+                                 "readedPrivacyPolicy",
+                                 "m_bookSelfSortType",
+                                 "fgColor",
+                                 "bgColor",
+                                 "currentWebSearchSite",
+                                 "currentReadingNovelID",
+                                 "defaultSpeechOverrideSettingID",
+                                 "defaultSpeakerID",
+                                 "defaultDisplaySettingID",
+                                 "searchInfoURL",
+                                 "defaultSpeechModURL",
+                                 "defaultRegexpSpeechModURL",
+                                 "autopagerizeSiteInfoURL",
+                                 "novelSpeakerSiteInfoURL",
+                                 "speechViewButtonSettingArrayData",
+                                 "cookieArrayData":
+                                continue
+                            default:
+                                isHit = true
+                                break
+                            }
+                        }
+                        if isHit {
+                            DispatchQueue.main.async {
+                                self.form.removeAll()
+                                self.createSettingsTable()
+                            }
                         }
                     case .deleted:
                         break
@@ -112,15 +141,21 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< LabelRow() { (row) in
                 row.tag = "SettingsTableViewController_Information_TAG"
                 row.title = NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ")
-                NiftyUtilitySwift.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
-                    if text.count > 0 {
-                        row.value = "❗"
-                    }else{
-                        row.value = ""
-                    }
-                }, hasNoNewInformation: {
-                    row.value = ""
-                })
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
+                        DispatchQueue.main.async {
+                            if text.count > 0 {
+                                row.value = "❗"
+                            }else{
+                                row.value = ""
+                            }
+                        }
+                    }, hasNoNewInformation: {
+                        DispatchQueue.main.async {
+                            row.value = ""
+                        }
+                    })
+                }
                 row.cell.accessoryType = .disclosureIndicator
             }.onCellSelection({ (butonCellof, buttonRow) in
                 NiftyUtilitySwift.FetchNewImportantImformation(fetched: { (text, holeText) in
@@ -896,6 +931,123 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: "次回起動時に CoreData(旧データベース) の情報に書き戻すように設定しました。", buttonTitle: nil, buttonAction: nil)
                 }
             })
+        
+            <<< LabelRow() {
+                $0.title = "以下は cookie 周りの処理を行う物です。一部は Xcode でログを確認しないと意味が無いボタンになります。"
+                $0.cell.textLabel?.numberOfLines = 0
+            }
+            <<< ButtonRow() {
+                $0.title = "dump(URLSession.shared)"
+            }.onCellSelection({ (cellOf, row) in
+                NiftyUtilitySwift.getAllCookies { (cookieArray) in
+                    guard let cookieArray = cookieArray else {
+                        print("NiftyUtilitySwift.getAllCookies return nil")
+                        return
+                    }
+                    NiftyUtilitySwift.DumpHTTPCookieArray(cookieArray: cookieArray)
+                }
+            })
+            <<< ButtonRow() {
+                $0.title = "dump(WkWebView)"
+            }.onCellSelection({ (cellOf, row) in
+                let headlessClient = HeadlessHttpClient()
+                headlessClient.getAllCookies { (cookieArray) in
+                    guard let cookieArray = cookieArray else {
+                        print("headlessClient.getAllCookies return nil")
+                        return
+                    }
+                    NiftyUtilitySwift.DumpHTTPCookieArray(cookieArray: cookieArray)
+                }
+            })
+            <<< ButtonRow() {
+                $0.title = "dump(Realm)"
+            }.onCellSelection({ (cellOf, row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let cookieArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetCookieArray() else {
+                        print("dump(Realm) failed. cookieArray is nil")
+                        return
+                    }
+                    NiftyUtilitySwift.DumpHTTPCookieArray(cookieArray: cookieArray)
+                }
+            })
+            <<< ButtonRow() {
+                $0.title = "save to Realm(URLSession.shared)"
+            }.onCellSelection({ (cellOf, row) in
+                HTTPCookieSyncTool.shared.Save()
+            })
+            <<< ButtonRow() {
+                $0.title = "save to Realm(WkWebView)"
+            }.onCellSelection({ (cellOf, row) in
+                let headlessClient = HeadlessHttpClient()
+                headlessClient.getAllCookies { (cookieArray) in
+                    guard let cookieArray = cookieArray else {
+                        print("headlessClient.getAllCookies return nil")
+                        return
+                    }
+                    RealmUtil.RealmBlockWrite { (realm) in
+                        HTTPCookieSyncTool.shared.SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: cookieArray)
+                    }
+                }
+            })
+            <<< ButtonRow() {
+                $0.title = "load to URLSession.shared"
+            }.onCellSelection({ (cellOf, row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let cookieArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetCookieArray() else {
+                        print("load to URLSession.shared error. can not get cookieArray.")
+                        return
+                    }
+                    guard let cookieStorage = URLSession.shared.configuration.httpCookieStorage else {
+                        print("load to URLSession.shared error. can not get cookieStorage for URLSession.shared")
+                        return
+                    }
+                    NiftyUtilitySwift.AssignCookieArrayToCookieStorage(cookieArray: cookieArray, cookieStorage: cookieStorage)
+                }
+            })
+            <<< ButtonRow() {
+                $0.title = "load to WkWebView"
+            }.onCellSelection({ (cellOf, row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let cookieArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetCookieArray() else {
+                        print("load to URLSession.shared error. can not get cookieArray.")
+                        return
+                    }
+                    let client = HeadlessHttpClient()
+                    client.AssignCookieArray(cookieArray: cookieArray) {
+                        print("load to WkWebview done.")
+                    }
+                }
+            })
+            <<< ButtonRow() {
+                $0.title = "RemoveAll(URLSession.shared)"
+            }.onCellSelection({ (cellOf, row) in
+                guard let cookieStorage = URLSession.shared.configuration.httpCookieStorage else {
+                    print("cookieStorage is nil")
+                    return
+                }
+                NiftyUtilitySwift.RemoveAllCookieInCookieStorage(cookieStorage: cookieStorage)
+                print("RemoveAllCookieInCookieStorage executed.")
+            })
+            <<< ButtonRow() {
+                $0.title = "RemoveAll(headless)"
+            }.onCellSelection({ (cellOf, row) in
+                let headlessClient = HeadlessHttpClient()
+                headlessClient.removeAllCookies {
+                    print("headlessClient.removeAllCookies done.")
+                }
+            })
+            <<< ButtonRow() {
+                $0.title = "RemoveAll(realm)"
+            }.onCellSelection({ (cellOf, row) in
+                RealmUtil.RealmBlockWrite { (realm) in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
+                        print("RemoveAll(realm) failed. globalState is nil")
+                        return
+                    }
+                    globalState.MergeCookieArrayWith(realm: realm, cookieArray: [])
+                }
+            })
+
     }
 
     func AssignMessageTo(tag:Int, text:String, dialog:EasyDialog) {
