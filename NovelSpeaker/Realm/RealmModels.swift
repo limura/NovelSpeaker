@@ -14,7 +14,7 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 1
+    static let currentSchemaVersion : UInt64 = 2
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -697,6 +697,9 @@ struct Story: Codable {
     }
     func SetCurrentReadLocationWith(realm:Realm, location:Int) {
         Story.SetReadLocationWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber, location: location)
+        if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+            novel.m_readingChapterReadingPoint = location
+        }
     }
     func GetSubtitle() -> String {
         if subtitle.count > 0 {
@@ -1175,6 +1178,8 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     @objc dynamic var m_readingChapterStoryID : String = ""
     @objc dynamic var lastReadDate : Date = Date(timeIntervalSince1970: 0)
     let downloadDateArray = List<Date>()
+    @objc dynamic var m_readingChapterReadingPoint : Int = 0
+    @objc dynamic var m_readingChapterContentCount : Int = 0
     
     var id:String { get {return novelID} }
 
@@ -1205,6 +1210,8 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         obj.lastReadDate = lastReadDate
         obj.downloadDateArray.removeAll()
         obj.downloadDateArray.append(objectsIn: downloadDateArray)
+        obj.m_readingChapterReadingPoint = m_readingChapterReadingPoint
+        obj.m_readingChapterContentCount = m_readingChapterContentCount
         return obj
     }
     

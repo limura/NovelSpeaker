@@ -759,7 +759,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
         RealmUtil.RealmBlock { (realm) -> Void in
             if let novelID = item.novelID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                cell.cellSetupWith(realm: realm, novel: novel, treeLevel: level)
+                cell.cellSetup(novel: novel, treeLevel: level)
             }else if let title = item.title {
                 func getChildNovelIDs(itemArray:[BookShelfRATreeViewCellData]) -> [String] {
                     var childrenArray:[String] = []

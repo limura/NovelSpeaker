@@ -109,7 +109,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         self.treeDepthImageViewWidthConstraint = self.treeDepthImageView.widthAnchor.constraint(equalToConstant: depthWidth)
         self.treeDepthImageViewWidthConstraint.isActive = true
     }
-    func applyCurrentReadingPointToIndicatorWith(realm: Realm, novel:RealmNovel) {
+    func applyCurrentReadingPointToIndicatorWith(novel:RealmNovel) {
         guard let readingChapterNumber = novel.readingChapterNumber else {
             DispatchQueue.main.async {
                 self.readProgressView.progress = 0.0
@@ -117,15 +117,8 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
             return
         }
         let lastChapterNumber = novel.lastChapterNumber ?? 1
-        let readLocation:Float
-        let contentCount:Float
-        if lastChapterNumber == readingChapterNumber, let lastChapter = novel.lastChapterWith(realm: realm) {
-            readLocation = Float(lastChapter.readLocation(realm: realm))
-            contentCount = Float(lastChapter.content.count)
-        }else{
-            readLocation = 1.0
-            contentCount = 1.0
-        }
+        let readLocation:Float = Float(novel.m_readingChapterReadingPoint)
+        let contentCount:Float = Float(novel.m_readingChapterContentCount)
         let progress = ((Float(readingChapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
         if self.watchNovelIDArray != [novel.novelID] { return }
         DispatchQueue.main.async {
@@ -146,7 +139,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                 }
                 return
             }
-            self.applyCurrentReadingPointToIndicatorWith(realm: realm, novel: novel)
+            self.applyCurrentReadingPointToIndicatorWith(novel: novel)
         }
     }
     func applyCurrentDownloadIndicatorVisibleStatus(novelIDArray:[String]) {
@@ -253,7 +246,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                             self.applyLikeStarStatus(novelID: novelID)
                             NovelSpeakerNotificationTool.AnnounceLikeLevelChanged()
                         }
-                        if property.name == "m_readingChapterStoryID" {
+                        if property.name == "m_readingChapterStoryID" /*|| property.name == "m_readingChapterReadingPoint" || property.name == "m_readingChapterContentCount"*/ {
                             self.applyCurrentReadingPointToIndicator(novelID: novelID)
                         }
                         if property.name == "lastDownloadDate" || property.name == "lastReadDate" {
@@ -415,7 +408,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
     }
     
-    func cellSetupWith(realm: Realm, novel:RealmNovel, treeLevel:Int) {
+    func cellSetup(novel:RealmNovel, treeLevel:Int) {
         self.watchNovelIDArray = [novel.novelID]
         applyDepth(treeLevel: treeLevel)
         let title = novel.title
@@ -432,7 +425,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         assignObservers()
         let novelID = novel.novelID
         self.readProgressView.isHidden = false
-        applyCurrentReadingPointToIndicatorWith(realm: realm, novel: novel)
+        applyCurrentReadingPointToIndicatorWith(novel: novel)
         applyLikeStarStatus(novelID: novelID)
         self.likeButton.isHidden = false
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)

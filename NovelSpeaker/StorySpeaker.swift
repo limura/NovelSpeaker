@@ -133,7 +133,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.queuedSetStoryStoryLock.unlock()
 
             self.storyID = storyID
-            self.updateReadDate(realm: realm, storyID: storyID)
+            self.updateReadDate(realm: realm, storyID: storyID, contentCount: story.content.count)
             self.observeStory(storyID: self.storyID)
             self.observeBookmark(novelID: story.novelID)
 
@@ -333,13 +333,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
-    func updateReadDate(realm: Realm, storyID:String) {
+    func updateReadDate(realm: Realm, storyID:String, contentCount:Int) {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         DispatchQueue.main.async {
             RealmUtil.WriteWith(realm: realm) { (realm) in
                 if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
                     novel.lastReadDate = Date()
                     novel.m_readingChapterStoryID = storyID
+                    novel.m_readingChapterContentCount = contentCount
                 }
                 if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                     if globalState.currentReadingNovelID != novelID {

@@ -710,6 +710,7 @@ class NovelSpeakerUtility: NSObject {
                 realmNovel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: currentReadingChapterNumber)
                 if let currentReadLocation = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
                     Story.SetReadLocationWith(realm: realm, novelID: novelID, chapterNumber: currentReadingChapterNumber, location: currentReadLocation.intValue)
+                    realmNovel.m_readingChapterReadingPoint = currentReadLocation.intValue
                 }
             }else{
                 currentReadingChapterNumber = 0
@@ -765,6 +766,9 @@ class NovelSpeakerUtility: NSObject {
                     story.content = NormalizeNewlineString(string: content)
                     story.url = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: no, end: end.boolValue)
                     storyArray.append(story)
+                    if no == currentReadingChapterNumber {
+                        realmNovel.m_readingChapterContentCount = story.content.count
+                    }
                     if storyArray.count >= RealmStoryBulk.bulkCount {
                         RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
                         storyArray.removeAll()
@@ -812,6 +816,7 @@ class NovelSpeakerUtility: NSObject {
                 currentReadingChapterNumber = current_reading_chapter_number
                 if let currentReadLocation = novel.object(forKey: "current_reading_chapter_read_location") as? NSNumber {
                     Story.SetReadLocationWith(realm: realm, novelID: novelID, chapterNumber: currentReadingChapterNumber, location: currentReadLocation.intValue)
+                    realmNovel.m_readingChapterReadingPoint = currentReadLocation.intValue
                 }
             }else{
                 currentReadingChapterNumber = 0
@@ -862,6 +867,9 @@ class NovelSpeakerUtility: NSObject {
                     story.novelID = novelID
                     story.chapterNumber = no
                     story.content = NormalizeNewlineString(string: content)
+                    if no == currentReadingChapterNumber {
+                        realmNovel.m_readingChapterContentCount = story.content.count
+                    }
                     storyArray.append(story)
                     if storyArray.count >= RealmStoryBulk.bulkCount {
                         RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
@@ -1473,6 +1481,12 @@ class NovelSpeakerUtility: NSObject {
                         }
                     }
                 }
+                if let readingChapterReadingPoint = novelDic.object(forKey: "readingChapterReadingPoint") as? NSNumber {
+                    novel.m_readingChapterReadingPoint = readingChapterReadingPoint.intValue
+                }
+                if let readingChapterContentCount = novelDic.object(forKey: "readingChapterContentCount") as? NSNumber {
+                    novel.m_readingChapterContentCount = readingChapterContentCount.intValue
+                }
                 realm.add(novel, update: .modified)
             }
             var hasInvalidData = false
@@ -1724,6 +1738,8 @@ class NovelSpeakerUtility: NSObject {
                     "downloadDateArray": Array(novel.downloadDateArray.map({ (date) -> String in
                         NiftyUtilitySwift.Date2ISO8601String(date: date)
                     })),
+                    "readingChapterReadingPoint": novel.m_readingChapterReadingPoint,
+                    "readingChapterContentCount": novel.m_readingChapterContentCount,
                     "contentDirectory": "\(novelCount)"
                 ]
                 if !withAllStoryContent && novel.m_type != NovelType.UserCreated.rawValue {

@@ -313,7 +313,10 @@ class CoreDataToRealmTool: NSObject {
                     novel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: chapterNumber)
                     if let readLocation = currentReadingStory.readLocation as? Int {
                         Story.SetReadLocationWith(realm: realm, novelID: novel.novelID, chapterNumber: chapterNumber, location: readLocation)
+                        novel.m_readingChapterReadingPoint = readLocation
                     }
+                    let normalizedContent = NovelSpeakerUtility.NormalizeNewlineString(string: currentReadingStory.content)
+                    novel.m_readingChapterContentCount = normalizedContent.count
                 }
             }
             // new flug が立っている場合は downloadDate を新しくしておくことでNEWフラグをつける
