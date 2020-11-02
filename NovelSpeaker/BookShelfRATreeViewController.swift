@@ -145,6 +145,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 self.registObserver()
             }
         }
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.LikeLevelChanged, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.reloadAllData()
+            }
+        }
     }
     
     func unregistNotificationCenter() {
@@ -162,11 +167,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     if deletions.count > 0 || insertions.count > 0 {
                         DispatchQueue.main.async {
                             self.reloadAllData()
-                            return
                         }
+                        return
                     }
                     RealmUtil.RealmBlock { (realm) -> Void in
-                        if modifications.count > 0, let sortType = RealmGlobalState.GetInstanceWith(realm: realm)?.bookShelfSortType, sortType == .lastReadDate {
+                        guard modifications.count > 0, let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                        let sortType = globalState.bookShelfSortType
+                        if sortType == .lastReadDate {
                             let gapDate = Date(timeIntervalSinceNow: -5) // 5秒前までなら今書き変わったと思い込む
                             for index in modifications {
                                 if objects.count > index {
@@ -182,6 +189,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                 }
                             }
                         }
+                        // likeLevel が書き換わったのはここでは確認できないぽいので、
+                        // 個別に RealmNovel を監視している TableViewCell 側から Notification を送ってもらう事にします。
+                        //if sortType == .likeLevel {
+                        //}
                     }
                 case .error(_):
                     break
@@ -207,6 +218,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return Array(allNovels.sorted(byKeyPath: "lastReadDate", ascending: false))
         case .writer:
             return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
+        case .likeLevel:
+            return Array(allNovels.sorted(byKeyPath: "likeLevel", ascending: false))
         case .title:
             fallthrough
         case .selfCreatedBookshelf:
@@ -432,7 +445,23 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return result
         }
     }
-    
+
+    // 小説のお気に入りレベルで並べ替えます
+    func createLikeLevelBookShelfRATreeViewCellDataTreeWithoutFolder() -> [BookShelfRATreeViewCellData] {
+        return RealmUtil.RealmBlock { (realm) -> [BookShelfRATreeViewCellData] in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.likeLevel) else { return [] }
+            var result = [] as [BookShelfRATreeViewCellData]
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.childrens = nil
+                data.novelID = novel.novelID
+                data.title = novel.title
+                result.append(data)
+            }
+            return result
+        }
+    }
+
     func getBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
         var sortType:NarouContentSortType = .title
         RealmUtil.RealmBlock { (realm) -> Void in
@@ -455,6 +484,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return createBookShelfTagBookShelfRATreeViewCellDataTree()
         case .keywordTag:
             return createBookShelfKeywordTagRATreeViewCellDataTree()
+        case .likeLevel:
+            return createLikeLevelBookShelfRATreeViewCellDataTreeWithoutFolder()
         default:
             break
         }
@@ -537,6 +568,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeKeywardTag", comment: "タグ名順"): NarouContentSortType.keywordTag
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeUpdateDateWithFilder", comment: "最終ダウンロード順(フォルダ分類版)"): NarouContentSortType.novelUpdatedAtWithFolder
             , NSLocalizedString("BookShelfRATreeViewController_StoryTypeLastReadDate", comment: "小説を開いた日時順"): NarouContentSortType.lastReadDate
+            , NSLocalizedString("BookShelfRATreeViewController_SortTypeLikeLevel", comment: "お気に入り順"): NarouContentSortType.likeLevel
         ]
     }
 
