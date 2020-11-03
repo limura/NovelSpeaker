@@ -143,7 +143,10 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func enqueueSpeechBlock(){
-        guard currentSpeechBlockIndex < speechBlockArray.count else { return }
+        guard currentSpeechBlockIndex < speechBlockArray.count else {
+            self.finishSpeak()
+            return
+        }
         let block = speechBlockArray[currentSpeechBlockIndex]
         self.delegate?.willSpeakRange(range: NSMakeRange(currentDisplayStringOffset, 1))
         let speechText = block.GenerateSpeechTextFrom(displayLocation: currentBlockDisplayOffset)
