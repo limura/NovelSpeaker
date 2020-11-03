@@ -462,7 +462,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 let noRepeat = NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
                 let rewindToFirstStory = NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
                 let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
-                row.options = [noRepeat, rewindToFirstStory, rewindToThisStory]
+                let goToNextLikeNovel =  NSLocalizedString("SettingTableViewController_RepeatType_GoToNextLikeNovel", comment: "お気に入りのうち未読の物")
+                row.options = [noRepeat, rewindToFirstStory, rewindToThisStory, goToNextLikeNovel]
                 row.value = noRepeat
                 row.cell.textLabel?.numberOfLines = 0
                 RealmUtil.RealmBlock { (realm) -> Void in
@@ -470,15 +471,19 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     let type = speechOverrideSetting.repeatSpeechType
                     if type == .rewindToFirstStory {
                         row.value = rewindToFirstStory
-                    }
+                    }else
                     if type == .rewindToThisStory {
                         row.value = rewindToThisStory
+                    }else
+                    if type == .goToNextLikeNovel {
+                        row.value = goToNextLikeNovel
                     }
                 }
             }.onChange({ (row) in
                 let noRepeat = NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
                 let rewindToFirstStory = NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
                 let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
+                let goToNextLikeNovel =  NSLocalizedString("SettingTableViewController_RepeatType_GoToNextLikeNovel", comment: "お気に入りのうち未読の物")
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let typeString = row.value else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
@@ -488,6 +493,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             speechOverrideSetting.repeatSpeechType = .rewindToFirstStory
                         }else if typeString == rewindToThisStory {
                             speechOverrideSetting.repeatSpeechType = .rewindToThisStory
+                        }else if typeString == goToNextLikeNovel {
+                            speechOverrideSetting.repeatSpeechType = .goToNextLikeNovel
                         }
                     }
                 }

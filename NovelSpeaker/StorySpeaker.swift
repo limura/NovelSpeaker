@@ -18,11 +18,21 @@ protocol StorySpeakerDeletgate {
     func storySpeakerStoryChanged(story:Story)
 }
 
+class AnnounceSpeakerFinishEventReceiver : SpeakRangeDelegate {
+    var handler:(()->Void)? = nil
+    
+    func willSpeakRange(range:NSRange) {}
+    func finishSpeak() {
+        self.handler?()
+    }
+}
+
 class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     static let shared = StorySpeaker()
     
     let speaker = SpeechBlockSpeaker()
     let announceSpeaker = Speaker()
+    let announceSpeakerFinishEventReceiver = AnnounceSpeakerFinishEventReceiver()
     let dummySoundLooper = DummySoundLooper()
     let pageTurningSoundPlayer = DuplicateSoundPlayer()
     var delegateArray = NSHashTable<AnyObject>.weakObjects()
@@ -62,6 +72,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
         ApplyDefaultSpeakerSettingToAnnounceSpeaker()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
+        announceSpeaker.delegate = announceSpeakerFinishEventReceiver
     }
     
     deinit {
@@ -473,11 +484,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
-    func AnnounceSpeech(text:String) {
+    func AnnounceSpeech(text:String, completion:(()->Void)? = nil) {
         if isNeedApplySpeechConfigs {
             ApplyDefaultSpeakerSettingToAnnounceSpeaker()
         }
+        announceSpeakerFinishEventReceiver.handler = nil
         announceSpeaker.Stop()
+        announceSpeakerFinishEventReceiver.handler = completion
         announceSpeaker.Speech(text: text)
     }
     
@@ -1011,33 +1024,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             RealmUtil.RealmBlock { (realm) -> RepeatSpeechType? in
                 return RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm)?.repeatSpeechType
         }
-        if let repeatSpeechType = repeatSpeechType {
-            switch repeatSpeechType {
-            case .rewindToFirstStory:
-                let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
-                let processSuccess = RealmUtil.RealmBlock { (realm) -> Bool in
-                    if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let lastChapterNumber = novel.lastChapterNumber, let currentStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), lastChapterNumber == currentStory.chapterNumber, let firstStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
-                        self.SetStory(story: firstStory)
-                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
-                        return true
-                    }
-                    return false
-                }
-                if processSuccess {
-                    return
-                }
-            case .rewindToThisStory:
-                self.readLocation = 0
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
-                }
-                return
-            case .noRepeat:
-                break
-            @unknown default:
-                break
+        if let repeatSpeechType = repeatSpeechType, repeatSpeechType == .rewindToThisStory {
+            self.readLocation = 0
+            RealmUtil.RealmBlock { (realm) -> Void in
+                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
             }
+            return
         }
+
         NiftyUtilitySwift.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
                 if let nextStory = self.SearchNextChapterWith(realm: realm, storyID: self.storyID) {
@@ -1051,6 +1045,31 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                     })
                 }else{
+                    if let repeatSpeechType = repeatSpeechType {
+                        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
+                        if repeatSpeechType == .rewindToFirstStory {
+                            if let firstStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
+                                self.SetStory(story: firstStory)
+                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                                return
+                            }
+                        }else if repeatSpeechType == .goToNextLikeNovel, let novel = RealmNovel.GetAllObjectsWith(realm: realm)?.filter({$0.likeLevel > 0 && $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}).first, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) {
+                            self.StopSpeech(realm: realm)
+                            self.AnnounceSpeech(text: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), novel.title)) {
+                                DispatchQueue.main.async {
+                                    self.SetStory(story: story) { (story) in
+                                        DispatchQueue.main.async {
+                                            RealmUtil.RealmBlock { (realm) -> Void in
+                                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            return
+                        }
+                    }
+                    
                     self.StopSpeech(realm: realm)
                     self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
                 }

@@ -234,6 +234,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         RealmUtil.RealmBlock { (realm) -> Void in
             let content = story.content
             let storyID = story.storyID
+            let novelID = story.novelID
+            if let currentStoryID = self.storyID, novelID != RealmStoryBulk.StoryIDToNovelID(storyID: currentStoryID), let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                self.loadNovel(novel: novel, aliveButtonSettings: RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting)
+            }
             let readLocation = story.readLocation(realm: realm)
             if let currentStoryID = self.storyID, currentStoryID != storyID {
                 self.observeStory(storyID: storyID)
