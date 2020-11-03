@@ -330,7 +330,7 @@ import AVFoundation
     /// timeout については、
     /// minimumTimeoutLimit の間、iCloud 上のデータのRecord数が 0 のまま新しい record を取得できないのであれば false
     /// record数は増えていたが、timeoutLimit の間に有効なデータが取得できなければ false を返す事になります。
-    static func CheckCloudDataIsValid(minimumTimeoutLimit: TimeInterval = 10.0, timeoutLimit: TimeInterval = 60.0 * 1, completion: ((CheckCloudDataIsValidResult) -> Void)?) {
+    static func CheckCloudDataIsValid(minimumTimeoutLimit: TimeInterval = 10.0, timeoutLimit: TimeInterval = 60.0 * 5, completion: ((CheckCloudDataIsValidResult) -> Void)?) {
 
         // カンジ悪く必要そうなものを別途 fetch してしまいます(というか、RealmNovel や RealmStory は数が多すぎるので fetch したくないんですけど、syncEngine を起動した時に fetch が走ってしまいます)
         FetchCloudData(syncObjectType: RealmCloudVersionChecker.self, predicate: NSPredicate(format: "id = %@", RealmCloudVersionChecker.uniqueID))
