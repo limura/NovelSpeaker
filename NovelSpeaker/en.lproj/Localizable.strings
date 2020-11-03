@@ -145,7 +145,8 @@
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud" = "Use iCloud data as it is";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal" = "Overwrite data on iCloud with current data";
 "SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_Cancel" = "Stop iCloud sync";
-"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "Checking iCloud data.\nIf you have used iCloud in the past with NovelSpeaker, or if iCloud is stored in another device such as NovelSpeaker, this work may take a long time if the iCloud side stores a large amount of data.";
+"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling_Title" = "Checking iCloud data.";
+"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling" = "If you have used iCloud in the past with NovelSpeaker, or if iCloud is stored in another device such as NovelSpeaker, this work may take a long time if the iCloud side stores a large amount of data.";
 "SettingsViewController_IsUseiCloud_FailedSyncEngineStart" = "Failed to connect to iCloud.";
 "SettingsViewController_CloudPullProcessingDialog" = "Loading data from iCloud.";
 "SettingsViewController_CloudPushProcessingDialog" = "Writing data to iCloud side.";

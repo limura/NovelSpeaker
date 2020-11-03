@@ -1302,7 +1302,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             NovelDownloadQueue.shared.ClearAllDownloadQueue()
             NiftyUtilitySwift.EasyDialogNoButton(
                 viewController: self,
-                title: nil,
+                title: NSLocalizedString("SettingsViewController_IsUseiCloud_CheckiCloudData_pulling_Title", comment: "iCloud側のデータを確認しています"),
                 message: NSLocalizedString("SettingsViewController_IsUseiCloud_CheckiCloudData_pulling", comment: "iCloud側のデータを確認しています"),
                 completion: { (dialog) in
                     // SyncEngine 周りを綺麗さっぱり消しておきます
