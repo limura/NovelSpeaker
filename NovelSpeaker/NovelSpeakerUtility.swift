@@ -1713,7 +1713,13 @@ class NovelSpeakerUtility: NSObject {
         var result:[[String:Any]] = []
         var fileArray:[URL] = []
         return RealmUtil.RealmBlock { (realm) -> ([[String:Any]], [URL]) in
-            guard let novelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.filter({forNovelIDArray.contains($0.novelID)}) else { return (result, []) }
+            guard let novelArrayTmp = RealmNovel.GetAllObjectsWith(realm: realm) else { return (result, []) }
+            let novelArray:Array<RealmNovel>
+            if forNovelIDArray.count > 0 {
+                novelArray = novelArrayTmp.filter({forNovelIDArray.contains($0.novelID)})
+            }else{
+                novelArray = Array(novelArrayTmp)
+            }
             var novelCount = 1
             let novelArrayCount = novelArray.count
             for novel in novelArray {
