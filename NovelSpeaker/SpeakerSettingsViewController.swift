@@ -15,7 +15,9 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
     let speaker = SpeechBlockSpeaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     var isRateSettingSync = true
+    var rateSyncValue:Float? = nil
     var hideCache:[String:Bool] = [:]
+    var sliderMoveDate:Date = Date(timeIntervalSince1970: 0)
     
     var speakerSettingNotificationToken:NotificationToken? = nil
 
@@ -43,21 +45,24 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
     }
     
     func registNotificationToken() {
-        RealmUtil.RealmBlock { (realm) -> Void in
-            guard let speakerSettings = RealmSpeakerSetting.GetAllObjectsWith(realm: realm) else { return }
-            self.speakerSettingNotificationToken = speakerSettings.observe({ (change) in
-                switch change {
-                case .update(_, deletions: _, insertions: _, modifications: _):
-                    DispatchQueue.main.async {
-                        self.form.removeAll()
-                        self.createSettingsTable()
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let speakerSettings = RealmSpeakerSetting.GetAllObjectsWith(realm: realm) else { return }
+                self.speakerSettingNotificationToken = speakerSettings.observe({ (change) in
+                    switch change {
+                    case .update(_, deletions: _, insertions: _, modifications: _):
+                        if self.sliderMoveDate > Date(timeIntervalSinceNow: -1) { return }
+                        DispatchQueue.main.async {
+                            self.form.removeAll()
+                            self.createSettingsTable()
+                        }
+                    case .initial(_):
+                        break
+                    default:
+                        break
                     }
-                case .initial(_):
-                    break
-                default:
-                    break
-                }
-            })
+                })
+            }
         }
     }
     
@@ -137,11 +142,14 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 return self.hideCache[targetID] ?? false
             })
         }.onChange({ (row) in
+            self.sliderMoveDate = Date()
             if let value = row.value {
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
-                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
-                            setting.pitch = value
+                DispatchQueue.main.async {
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
+                            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
+                                setting.pitch = value
+                            }
                         }
                     }
                 }
@@ -162,10 +170,14 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 return self.hideCache[targetID] ?? false
             })
         }.onChange({ (row) in
+            self.sliderMoveDate = Date()
             guard let rate = row.value else{
                 return
             }
+            let currentRowTag = row.tag
             if self.isRateSettingSync {
+                if let syncValue = self.rateSyncValue, syncValue == rate { return }
+                self.rateSyncValue = rate
                 for row in self.form.rows.filter({ (row) -> Bool in
                     guard let row = row as? SliderRow else {
                         return false
@@ -182,21 +194,26 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                         continue
                     }
                     let targetID = String(targetTag.suffix(targetTag.count - 14))
+                    DispatchQueue.main.async {
+                        RealmUtil.RealmBlock { (realm) -> Void in
+                            if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
+                                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
+                                    setting.rate = rate
+                                }
+                            }
+                        }
+                    }
+                    if let thisRowTag = row.tag, let currentRowTag = currentRowTag, thisRowTag == currentRowTag { continue }
                     targetRow.value = rate
                     targetRow.updateCell()
+                }
+            }else{
+                DispatchQueue.main.async {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
                             RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
                                 setting.rate = rate
                             }
-                        }
-                    }
-                }
-            }else{
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
-                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
-                            setting.rate = rate
                         }
                     }
                 }
