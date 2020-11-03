@@ -1999,7 +1999,7 @@ class NovelSpeakerUtility: NSObject {
         return CreateBackupData(forNovelIDArray: [], progress: progress)
     }
     
-    static func CreateBackupData(forNovelIDArray:[String], isOnlyNovelData:Bool = false, progress:((_ description:String)->Void)?) -> URL? {
+    static func CreateBackupData(forNovelIDArray:[String], isOnlyNovelData:Bool = false, fileNamePrefix:String = "", progress:((_ description:String)->Void)?) -> URL? {
         let directoryName = "NovelSpeakerBackup"
         // 一旦対象のディレクトリを作って、中身を全部消します。
         if let outputPath = NiftyUtilitySwift.CreateTemporaryDirectory(directoryName: directoryName) {
@@ -2076,7 +2076,7 @@ class NovelSpeakerUtility: NSObject {
             print("zip file create error", zipFilePath.absoluteString, err)
             return nil
         }
-        let backupFilePath = NiftyUtilitySwift.GetTemporaryFilePath(fileName: String.init(format: "%@.novelspeaker-backup+zip", dateString))
+        let backupFilePath = NiftyUtilitySwift.GetTemporaryFilePath(fileName: String.init(format: "%@%@.novelspeaker-backup+zip", fileNamePrefix, dateString))
         do {
             try FileManager.default.moveItem(at: zipFilePath, to: backupFilePath)
         }catch let err{
@@ -2197,8 +2197,16 @@ class NovelSpeakerUtility: NSObject {
         DispatchQueue.main.async {
             dialog.show()
         }
+        let fileNamePrefix:String
+        if novelIDArray.count == 1, let novelID = novelIDArray.first, let title = RealmUtil.RealmBlock(block: { (realm) -> String? in
+                return RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.title
+        }), title.count > 0 {
+            fileNamePrefix = title + "_"
+        }else{
+            fileNamePrefix = ""
+        }
         DispatchQueue.global(qos: .utility).async {
-            guard let backupData = NovelSpeakerUtility.CreateBackupData(forNovelIDArray: novelIDArray, isOnlyNovelData: true, progress: { (description) in
+            guard let backupData = NovelSpeakerUtility.CreateBackupData(forNovelIDArray: novelIDArray, isOnlyNovelData: true, fileNamePrefix: fileNamePrefix, progress: { (description) in
                 DispatchQueue.main.async {
                     if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
                         label.text = NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……") + "\r\n"
