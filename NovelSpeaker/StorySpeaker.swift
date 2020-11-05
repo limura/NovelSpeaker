@@ -1049,8 +1049,24 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
                         if repeatSpeechType == .rewindToFirstStory {
                             if let firstStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
-                                self.SetStory(story: firstStory) { (story) in
-                                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                                // 何故か self.SetStory() した後に
+                                // self.readLocation = 0
+                                // とした場合はうまく反映されないぽいので
+                                // SetStory()する前に読み上げ位置を最初に戻します。
+                                RealmUtil.WriteWith(realm: realm) { (realm) in
+                                    firstStory.SetCurrentReadLocationWith(realm: realm, location: 0)
+                                }
+                                self.AnnounceSpeech(text: NSLocalizedString("StorySpeaker_SpeechStopedAndRewindFirstStory", comment: "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。")) {
+                                    DispatchQueue.main.async {
+                                        self.ringPageTurningSound()
+                                        self.SetStory(story: firstStory) { (story) in
+                                            DispatchQueue.main.async {
+                                                RealmUtil.RealmBlock { (realm) -> Void in
+                                                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 return
                             }

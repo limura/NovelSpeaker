@@ -472,6 +472,7 @@
 "FontSelectViewController_DefaultFontTitle" = "DefaultFont";
 
 "StorySpeaker_SpeechStopedAndSpeechNextStory_Format" = "Now that the reading has reached the end, it's time to play %@";
+"StorySpeaker_SpeechStopedAndRewindFirstStory" = "Since the reading has reached the end, go back to the first chapter and repeat the playback.";
 
 "CoreDataToRealmTool_DefaultSpeaker" = "Default";
 "CoreDataToRealmTool_ProgressNovel" = "Converting novel data";
