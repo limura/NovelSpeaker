@@ -337,9 +337,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 // ヘッドフォンが抜けた
                 if self.isPlayng == false { return }
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    StopSpeech(realm: realm)
-                    SkipBackward(realm: realm, length: 25) {
-                        self.readLocation = self.speaker.currentLocation
+                    StopSpeech(realm: realm) {
+                        self.SkipBackward(realm: realm, length: 25) {
+                            self.readLocation = self.speaker.currentLocation
+                            self.willSpeakRange(range: NSMakeRange(self.speaker.currentLocation, 0))
+                        }
                     }
                 }
             }
