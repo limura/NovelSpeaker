@@ -108,6 +108,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     func initWidgets() {
+        self.textView.text = NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……")
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 return

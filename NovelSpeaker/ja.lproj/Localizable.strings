@@ -184,7 +184,7 @@
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "小説を削除する時に確認する";
 "SettingTableViewController_RepeatTypeTitle" = "再生終了時の動作";
 "SettingTableViewController_RepeatType_NoRepeat" = "そのまま停止する";
-"SettingTableViewController_RepeatType_RewindToFirstStory" = "最初から再生しなおす";
+"SettingTableViewController_RepeatType_RewindToFirstStory" = "最初の章から再生し直す";
 "SettingTableViewController_RepeatType_RewindToThisStory" = "現在の章を再生しなおす";
 "SettingTableViewController_RepeatType_GoToNextLikeNovel" = "お気に入りのうち未読の物を再生";
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する";
@@ -257,6 +257,8 @@
 "SpeechViewController_SearchDialogPlaceholderText" = "空文字列で検索すると全ての章がリストされます";
 "SpeechViewController_SearchDialog_NotFoundTitle" = "指定された文字列は存在しませんでした。";
 "SpeechViewController_NowSearchingTitle" = "検索中";
+"SpeechViewController_NowLoadingText" = "本文を読込中……";
+
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
 "SpeechWaitConfigSettingView_PleaseSetSpeechText" = "読み上げテスト用の文字列を設定してください";

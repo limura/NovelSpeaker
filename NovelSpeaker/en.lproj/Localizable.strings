@@ -274,6 +274,8 @@
 "SpeechViewController_SearchDialogPlaceholderText" = "Searching with an empty string will list all chapters";
 "SpeechViewController_SearchDialog_NotFoundTitle" = "The specified phrase does not exist.";
 "SpeechViewController_NowSearchingTitle" = "Searching";
+"SpeechViewController_NowLoadingText" = "loading...";
+
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";
 "SpeechWaitConfigSettingView_PleaseSetSpeechText" = "Please input a test read phrase";
