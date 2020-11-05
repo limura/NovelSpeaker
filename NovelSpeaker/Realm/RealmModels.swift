@@ -14,7 +14,7 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 2
+    static let currentSchemaVersion : UInt64 = 3
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -1808,6 +1808,57 @@ struct SpeechViewButtonSetting: Codable {
     }
 }
 
+enum BookshelfViewButtonTypes:String, Codable {
+    case search = "search"
+    case edit = "edit"
+    case reload = "reaload"
+    case order = "order"
+    case downloadStatus = "downloadStatus"
+}
+
+struct BookshelfViewButtonSetting: Codable {
+    let type:BookshelfViewButtonTypes
+    var isOn:Bool
+    
+    static let defaultSetting:[BookshelfViewButtonSetting] = [
+        //BookshelfViewButtonSetting(type: .search, isOn: false),
+        BookshelfViewButtonSetting(type: .downloadStatus, isOn: false),
+        BookshelfViewButtonSetting(type: .order, isOn: true),
+        BookshelfViewButtonSetting(type: .reload, isOn: true),
+        BookshelfViewButtonSetting(type: .edit, isOn: true),
+    ]
+    // 与えられた配列を、defaultSetting に存在するtypeの物を全て含んだ状態にして返します。
+    // つまり、壊れていて空の配列になっていれば defaultSetting そのものになるし、
+    // 新しい要素が将来的に追加された時に、その要素が含まれないデータを読み込んだ場合でも
+    // その新しい要素が追加された状態の配列に修正する、という事をします。
+    static func ValidateAndFixSettingArray(settingArray:[BookshelfViewButtonSetting]) -> [BookshelfViewButtonSetting] {
+        var result:[BookshelfViewButtonSetting] = []
+        var aliveSet:Set<BookshelfViewButtonTypes> = Set<BookshelfViewButtonTypes>()
+        for setting in defaultSetting {
+            aliveSet.insert(setting.type)
+        }
+        for setting in settingArray {
+            result.append(setting)
+            aliveSet.remove(setting.type)
+        }
+        for type in aliveSet {
+            for setting in defaultSetting {
+                if type == setting.type {
+                    result.append(setting)
+                    break
+                }
+            }
+        }
+        return result
+    }
+    static func DataToSettingArray(data:Data) -> [BookshelfViewButtonSetting] {
+        guard let result = try? JSONDecoder().decode([BookshelfViewButtonSetting].self, from: data) else { return defaultSetting }
+        return ValidateAndFixSettingArray(settingArray: result)
+    }
+    static func SettingArrayToData(settingArray:[BookshelfViewButtonSetting]) -> Data? {
+        return try? JSONEncoder().encode(settingArray)
+    }
+}
 // HTTPCookie を Codable にするのが難しそうだったのでwrapperでごまかします。
 // で、HTTPCookie.name とかを参照しても良さそうなのですが、
 // アクセサからは全ての情報を参照できなさそうなので
@@ -1985,6 +2036,7 @@ extension HTTPCookie {
     @objc dynamic var speechViewButtonSettingArrayData = Data()
     @objc dynamic var cookieArrayData = Data()
     @objc dynamic var m_DisplayType : Int = NovelDisplayType.textView.rawValue
+    @objc dynamic var bookshelfViewButtonSettingArrayData = Data()
 
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {
@@ -2121,6 +2173,13 @@ extension HTTPCookie {
     }
     func SetSpeechViewButtonSettingWith(realm:Realm, newValue:[SpeechViewButtonSetting]) {
         self.speechViewButtonSettingArrayData = SpeechViewButtonSetting.SettingArrayToData(settingArray: newValue) ?? Data()
+    }
+    
+    func GetBookshelfViewButtonSetting() -> [BookshelfViewButtonSetting] {
+        return BookshelfViewButtonSetting.DataToSettingArray(data: self.bookshelfViewButtonSettingArrayData)
+    }
+    func SetBookshelfViewButtonSettingWith(realm:Realm, newValue:[BookshelfViewButtonSetting]) {
+        self.bookshelfViewButtonSettingArrayData = BookshelfViewButtonSetting.SettingArrayToData(settingArray: newValue) ?? Data()
     }
     
     @discardableResult
