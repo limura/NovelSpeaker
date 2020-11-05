@@ -156,6 +156,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         }
         if isStopping {
             speechQueue.removeAll()
+            finishDelegate = delegate
             return
         }
         if let queue = speechQueue.first {

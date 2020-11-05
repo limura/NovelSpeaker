@@ -317,9 +317,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     @objc func didChangeAudioSessionRoute(notification:Notification) {
         func isJointHeadphone(outputs:[AVAudioSessionPortDescription]) -> Bool {
             for desc in outputs {
-                if desc.portType == AVAudioSession.Port.headphones
-                    || desc.portType == AVAudioSession.Port.bluetoothA2DP
-                    || desc.portType == AVAudioSession.Port.bluetoothHFP {
+                if desc.portType == .headphones
+                    || desc.portType == .bluetoothA2DP
+                    || desc.portType == .bluetoothHFP {
                     return true
                 }
             }
@@ -333,13 +333,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 // ヘッドフォンが刺さった
             }
         }else{
-            if !isJointHeadphone(outputs: previousDesc.outputs) {
+            if isJointHeadphone(outputs: previousDesc.outputs) {
                 // ヘッドフォンが抜けた
+                if self.isPlayng == false { return }
                 RealmUtil.RealmBlock { (realm) -> Void in
                     StopSpeech(realm: realm)
-                    SkipBackward(realm: realm, length: 25)
+                    SkipBackward(realm: realm, length: 25) {
+                        self.readLocation = self.speaker.currentLocation
+                    }
                 }
-                self.readLocation = speaker.currentLocation
             }
         }
     }
@@ -536,6 +538,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
             let newLocation = self.speaker.currentLocation
             if story.readLocation(realm: realm) != newLocation {
+                self.speaker.SetSpeechLocation(location: newLocation)
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                     story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
                 }
@@ -547,8 +550,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
-    func SkipForward(realm: Realm, length:Int) {
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+    func SkipForward(realm: Realm, length:Int, completion: @escaping (()->Void)) {
+        DispatchQueue.main.async {
             guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else {
                 return
             }
@@ -556,10 +559,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             let nextReadingPoint = readingPoint + length
             let contentLength = story.content.count
             if nextReadingPoint > contentLength {
-                if !self.LoadNextChapter(realm: realm) && story.readLocation(realm: realm) != contentLength {
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
-                        story.SetCurrentReadLocationWith(realm: realm, location: contentLength)
+                self.LoadNextChapter(realm: realm) { (result) in
+                    if result == true, story.readLocation(realm: realm) != contentLength {
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                            story.SetCurrentReadLocationWith(realm: realm, location: contentLength)
+                        }
                     }
+                    completion()
                 }
             }else{
                 self.speaker.SetSpeechLocation(location: nextReadingPoint)
@@ -569,10 +575,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
                     }
                 }
+                completion()
             }
         }
     }
-    func SkipBackward(realm: Realm, length:Int){
+    func SkipBackward(realm: Realm, length:Int, completion: @escaping (()->Void)){
         let readingPoint = self.speaker.currentLocation
         if readingPoint >= length {
             self.speaker.SetSpeechLocation(location: readingPoint - length)
@@ -586,11 +593,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     }
                 }
             }
+            completion()
             return
         }
         var targetLength = length - readingPoint
         var targetStory:Story? = nil
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        DispatchQueue.main.async {
             targetStory = self.SearchPreviousChapterWith(realm: realm, storyID: self.storyID)
             while let story = targetStory {
                 let contentLength = story.content.count
@@ -602,7 +610,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         }
                     }
                     self.ringPageTurningSound()
-                    self.SetStory(story: story)
+                    self.SetStory(story: story) { (story) in
+                        completion()
+                    }
                     return
                 }
                 targetStory = self.SearchPreviousChapterWith(realm: realm, storyID: story.storyID)
@@ -618,8 +628,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 if firstStory.storyID != self.storyID {
                     self.ringPageTurningSound()
                 }
-                self.SetStory(story: firstStory)
+                self.SetStory(story: firstStory) { (story) in
+                    completion()
+                }
+                return
             }
+            completion()
         }
     }
     
@@ -628,10 +642,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let nextChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID) + 1
         return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: nextChapterNumber))
     }
-    @discardableResult
-    func LoadNextChapter(realm: Realm) -> Bool{
-        var result:Bool = false
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+
+    func LoadNextChapter(realm: Realm, completion: ((Bool)->Void)? = nil){
+        DispatchQueue.main.async {
             if let nextStory = self.SearchNextChapterWith(realm: realm, storyID: self.storyID) {
                 if nextStory.readLocation(realm: realm) != 0 {
                     RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
@@ -639,13 +652,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     }
                 }
                 self.ringPageTurningSound()
-                self.SetStory(story: nextStory)
-                result = true
+                self.SetStory(story: nextStory) { (story) in
+                    completion?(true)
+                }
             }else{
-                result = false
+                completion?(false)
             }
         }
-        return result
     }
 
     func SearchPreviousChapterWith(realm: Realm, storyID:String) -> Story? {
@@ -656,10 +669,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: previousChapterNumber))
     }
-    @discardableResult
-    func LoadPreviousChapter(realm: Realm) -> Bool{
-        var result = false
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+    func LoadPreviousChapter(realm: Realm, completion: ((Bool)->Void)? = nil){
+        DispatchQueue.main.async {
             if let previousStory = self.SearchPreviousChapterWith(realm: realm, storyID: self.storyID) {
                 if previousStory.readLocation(realm: realm) != 0 {
                     RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
@@ -667,13 +678,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     }
                 }
                 self.ringPageTurningSound()
-                self.SetStory(story: previousStory)
-                result = true
+                self.SetStory(story: previousStory) { (story) in
+                    completion?(true)
+                }
             }else{
-                result = false
+                completion?(false)
             }
         }
-        return result
     }
     
     func ringPageTurningSound() {
@@ -861,8 +872,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         self.isSeeking = false
         RealmUtil.RealmBlock { (realm) -> Void in
             StopSpeech(realm: realm)
-            if LoadNextChapter(realm: realm) {
-                StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+            LoadNextChapter(realm: realm) { (result) in
+                if result == true {
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
             }
         }
         return .success
@@ -872,22 +885,29 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         self.isSeeking = false
         RealmUtil.RealmBlock { (realm) -> Void in
             StopSpeech(realm: realm)
-            if LoadPreviousChapter(realm: realm) {
-                StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-            }
+            LoadPreviousChapter(realm: realm, completion: { (result) in
+                if result == true {
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
+            })
         }
         return .success
     }
     var skipForwardCount = 0
+    var isNowSkipping = false
     @objc func skipForwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: skipForwardEvent")
         skipForwardCount += 100
+        if isNowSkipping == true { return .success }
         RealmUtil.RealmBlock { (realm) -> Void in
             StopSpeech(realm: realm) {
                 let count = self.skipForwardCount
                 self.skipForwardCount = 0
-                self.SkipForward(realm: realm, length: count)
-                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                self.isNowSkipping = true
+                self.SkipForward(realm: realm, length: count) {
+                    self.isNowSkipping = false
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
             }
         }
         return .success
@@ -895,12 +915,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     @objc func skipBackwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: skipBackwardEvent")
         skipForwardCount += 100
+        if isNowSkipping == true { return .success }
         RealmUtil.RealmBlock { (realm) -> Void in
             StopSpeech(realm: realm) {
                 let count = self.skipForwardCount
                 self.skipForwardCount = 0
-                self.SkipBackward(realm: realm, length: count)
-                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                self.SkipBackward(realm: realm, length: count) {
+                    self.isNowSkipping = false
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
             }
         }
         return .success
@@ -911,14 +934,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         RealmUtil.RealmBlock { (realm) -> Void in
             self.StopSpeech(realm: realm) {
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    self.SkipForward(realm: realm, length: 50)
-                    NiftyUtilitySwift.DispatchSyncMainQueue {
-                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                    }
-                    if self.isSeeking == false { return }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    self.SkipForward(realm: realm, length: 50) {
+                        NiftyUtilitySwift.DispatchSyncMainQueue {
+                            self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                        }
                         if self.isSeeking == false { return }
-                        self.seekForwardInterval()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            if self.isSeeking == false { return }
+                            self.seekForwardInterval()
+                        }
                     }
                 }
             }
@@ -944,14 +968,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         RealmUtil.RealmBlock { (realm) -> Void in
             self.StopSpeech(realm: realm) {
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    self.SkipBackward(realm: realm, length: 60)
-                    NiftyUtilitySwift.DispatchSyncMainQueue {
-                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                    }
-                    if self.isSeeking == false { return }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    self.SkipBackward(realm: realm, length: 60) {
+                        NiftyUtilitySwift.DispatchSyncMainQueue {
+                            self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                        }
                         if self.isSeeking == false { return }
-                        self.seekBackwardInterval()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            if self.isSeeking == false { return }
+                            self.seekBackwardInterval()
+                        }
                     }
                 }
             }
