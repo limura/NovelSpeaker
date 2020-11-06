@@ -48,6 +48,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     var novelIDSpeechOverrideSettingArrayObserverToken:NotificationToken? = nil
     var speechModSettingArrayObserverToken:NotificationToken? = nil
     var bookmarkObserverToken:NotificationToken? = nil
+    var speakerSettingObserverToken:NotificationToken? = nil
     var bookmarkObserverNovelID:String = ""
     var maxSpeechInSecTimer:Timer? = nil
     var isMaxSpeechTimeExceeded = false
@@ -65,6 +66,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         speaker.delegate = self
         audioSessionInit(isActive: false)
         observeGlobalState()
+        observeSpeakerSetting()
         dummySoundLooper.setMediaFile(forResource: "Silent3sec", ofType: "mp3")
         registerAudioNotifications()
         if !pageTurningSoundPlayer.setMediaFile(forResource: "nc48625", ofType: "m4a", maxDuplicateCount: 1) {
@@ -90,6 +92,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         novelIDSpeechOverrideSettingArrayObserverToken = nil
         speechModSettingArrayObserverToken = nil
         bookmarkObserverToken = nil
+        speakerSettingObserverToken = nil
     }
     func RestartObservers() {
         StopObservers()
@@ -99,6 +102,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         observeSpeechConfig(novelID: novelID)
         observeBookmark(novelID: novelID)
         observeStory(storyID: storyID)
+        observeSpeakerSetting()
     }
     
     func ApplyStoryToSpeaker(realm: Realm, story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {
@@ -298,6 +302,21 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     }
                 })
             }
+        }
+    }
+    
+    func observeSpeakerSetting() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            self.speakerSettingObserverToken = RealmSpeakerSetting.GetAllObjectsWith(realm: realm)?.observe({ (change) in
+                switch change {
+                case .update(_, deletions: _, insertions: _, modifications: _):
+                    self.isNeedApplySpeechConfigs = true
+                case .error(_):
+                    break
+                case .initial(_):
+                    break
+                }
+            })
         }
     }
     
