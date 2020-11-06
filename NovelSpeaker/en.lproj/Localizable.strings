@@ -656,6 +656,7 @@
 "SpeechViewButtonType_Backup" = "Back up this novel";
 "SpeechViewButtonSettingsViewController_Title" = "Settings for the buttons displayed in the upper right corner of the novel text screen";
 "SpeechViewButtonType_Detail" = "Show novel detail";
+"SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "Go to the updated %d chapter on the other device";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

@@ -258,6 +258,7 @@
 "SpeechViewController_SearchDialog_NotFoundTitle" = "指定された文字列は存在しませんでした。";
 "SpeechViewController_NowSearchingTitle" = "検索中";
 "SpeechViewController_NowLoadingText" = "本文を読込中……";
+"SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "他端末で更新された %d章 へ移動";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";

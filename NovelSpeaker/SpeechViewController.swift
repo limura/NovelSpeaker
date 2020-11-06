@@ -36,6 +36,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     
     var lastChapterNumber:Int = -1
     
+    var currentReadStoryIDChangeAlertFloatingButton:FloatingButton? = nil
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -88,6 +90,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         let range = self.textView.selectedRange
         if range.location >= 0 && range.location < self.textView.text.count {
             storySpeaker.readLocation = range.location
+        }
+        if let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton {
+            floatingButton.hide()
+            self.currentReadStoryIDChangeAlertFloatingButton = nil
         }
     }
     
@@ -320,6 +326,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                                 self.lastChapterNumber = chapterNumber
                                 self.applyChapterListChange()
                             }
+                        }
+                        if property.name == "m_readingChapterStoryID", let newReadingChapterStoryID = property.newValue as? String, let currentStoryID = self.storyID, newReadingChapterStoryID != currentStoryID {
+                            self.currentReadingStoryIDChangedEventHandler(newReadingStoryID: newReadingChapterStoryID)
                         }
                      }
                 case .deleted:
@@ -701,6 +710,28 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             DispatchQueue.main.async {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
+            }
+        }
+    }
+    
+    func currentReadingStoryIDChangedEventHandler(newReadingStoryID:String) {
+        guard let currentStoryID = self.storyID, newReadingStoryID != currentStoryID else { return }
+        NiftyUtilitySwift.DispatchSyncMainQueue {
+            if let oldFloatingButton = self.currentReadStoryIDChangeAlertFloatingButton {
+                oldFloatingButton.hide()
+                self.currentReadStoryIDChangeAlertFloatingButton = nil
+            }
+        }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: newReadingStoryID) else { return }
+            let newChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: newReadingStoryID)
+            self.currentReadStoryIDChangeAlertFloatingButton = FloatingButton.createNewFloatingButton()
+            guard let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
+            DispatchQueue.main.async {
+                floatingButton.assignToView(view: self.view, text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true) {
+                    self.storySpeaker.SetStory(story: story)
+                    floatingButton.hideAnimate()
                 }
             }
         }
