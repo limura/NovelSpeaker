@@ -672,8 +672,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     
     // 次のビューに飛ばします。
     func pushNextView(novelID:String, isNeedSpeech: Bool){
+        NovelDownloader.flushWritePool(novelID: novelID)
         RealmUtil.RealmBlock { (realm) -> Void in
-            NovelDownloader.flushWritePool(novelID: novelID)
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
             guard let story = novel.readingChapterWith(realm: realm) ?? novel.firstChapterWith(realm: realm) else {
                 let targetChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_readingChapterStoryID)
