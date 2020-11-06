@@ -569,6 +569,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         performSegue(withIdentifier: "NovelDetailViewPushSegue", sender: self)
     }
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.StopSpeech(realm: realm)
             func searchFunc(searchString:String?){
@@ -658,17 +659,20 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             if self.storySpeaker.isPlayng {
                 self.storySpeaker.StopSpeech(realm: realm)
             }else{
+                disableCurrentReadingStoryChangeFloatingButton()
                 storySpeaker.readLocation = self.textView.selectedRange.location
                 self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
             }
         }
     }
     @objc func leftSwipe(_ sender: UISwipeGestureRecognizer) {
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.LoadNextChapter(realm: realm)
         }
     }
     @objc func rightSwipe(_ sender: UISwipeGestureRecognizer) {
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.LoadPreviousChapter(realm: realm)
         }
@@ -715,21 +719,24 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
     }
     
+    func disableCurrentReadingStoryChangeFloatingButton() {
+        guard let oldFloatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
+        self.currentReadStoryIDChangeAlertFloatingButton = nil
+        DispatchQueue.main.async {
+            oldFloatingButton.hide()
+        }
+    }
+    
     func currentReadingStoryIDChangedEventHandler(newReadingStoryID:String) {
         guard let currentStoryID = self.storyID, newReadingStoryID != currentStoryID else { return }
-        NiftyUtilitySwift.DispatchSyncMainQueue {
-            if let oldFloatingButton = self.currentReadStoryIDChangeAlertFloatingButton {
-                oldFloatingButton.hide()
-                self.currentReadStoryIDChangeAlertFloatingButton = nil
-            }
-        }
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: newReadingStoryID) else { return }
             let newChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: newReadingStoryID)
             self.currentReadStoryIDChangeAlertFloatingButton = FloatingButton.createNewFloatingButton()
             guard let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
             DispatchQueue.main.async {
-                floatingButton.assignToView(view: self.view, text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true) {
+                floatingButton.assignToView(view: self.view, text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true, bottomConstraintAppend: -32.0) {
                     self.storySpeaker.SetStory(story: story)
                     floatingButton.hideAnimate()
                 }
@@ -738,6 +745,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
 
     @IBAction func chapterSliderValueChanged(_ sender: Any) {
+        disableCurrentReadingStoryChangeFloatingButton()
         guard let storyID = self.storyID else {
             return
         }
@@ -751,11 +759,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
     }
     @IBAction func previousChapterButtonClicked(_ sender: Any) {
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.LoadPreviousChapter(realm: realm)
         }
     }
     @IBAction func nextChapterButtonClicked(_ sender: Any) {
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.LoadNextChapter(realm: realm)
         }
