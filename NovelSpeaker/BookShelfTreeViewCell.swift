@@ -187,6 +187,23 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
     }
     
+    func applyLikeStarStatus(novel:RealmNovel) {
+        if self.watchNovelIDArray.count != 1 {
+            return
+        }
+        if let currentNovelID = self.watchNovelIDArray.first, currentNovelID != novel.novelID {
+            return
+        }
+        let likeLevel = novel.likeLevel
+        DispatchQueue.main.async {
+            if likeLevel > 0 {
+                self.likeButton.imageView?.image = BookShelfTreeViewCell.likeStarImage
+            }else{
+                self.likeButton.imageView?.image = BookShelfTreeViewCell.notLikeStarImage
+            }
+        }
+    }
+    
     static let likeStarImage:UIImage? = UIImage(named: "LikeStar.png")
     static let notLikeStarImage:UIImage? = UIImage(named: "NotLikeStar.png")
     func applyLikeStarStatus(novelID:String) {
@@ -197,20 +214,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                 }
                 return
             }
-            if self.watchNovelIDArray.count != 1 {
-                return
-            }
-            if let currentNovelID = self.watchNovelIDArray.first, currentNovelID != novelID {
-                return
-            }
-            let likeLevel = novel.likeLevel
-            DispatchQueue.main.async {
-                if likeLevel > 0 {
-                    self.likeButton.imageView?.image = BookShelfTreeViewCell.likeStarImage
-                }else{
-                    self.likeButton.imageView?.image = BookShelfTreeViewCell.notLikeStarImage
-                }
-            }
+            self.applyLikeStarStatus(novel: novel)
         }
     }
     
@@ -423,10 +427,9 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
             self.deactivateNewImageView()
         }
         assignObservers()
-        let novelID = novel.novelID
         self.readProgressView.isHidden = false
         applyCurrentReadingPointToIndicatorWith(novel: novel)
-        applyLikeStarStatus(novelID: novelID)
+        applyLikeStarStatus(novel: novel)
         self.likeButton.isHidden = false
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
         RealmObserverHandler.shared.AddDelegate(delegate: self)
