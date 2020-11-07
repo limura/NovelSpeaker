@@ -358,7 +358,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     StopSpeech(realm: realm) {
                         self.SkipBackward(realm: realm, length: 25) {
-                            self.readLocation = self.speaker.currentLocation
+                            self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
                             self.willSpeakRange(range: NSMakeRange(self.speaker.currentLocation, 0))
                         }
                     }
@@ -1035,7 +1035,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }
             
             StopSpeech(realm: realm)
-            self.readLocation = newLocation
+            NiftyUtilitySwift.DispatchSyncMainQueue {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    self.setReadLocationWith(realm: realm, location: newLocation)
+                }
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
@@ -1065,21 +1069,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     }
     
     func finishSpeak() {
-        self.readLocation = speaker.currentLocation
-        let repeatSpeechType:RepeatSpeechType? =
-            RealmUtil.RealmBlock { (realm) -> RepeatSpeechType? in
-                return RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm)?.repeatSpeechType
-        }
-        if let repeatSpeechType = repeatSpeechType, repeatSpeechType == .rewindToThisStory {
-            self.readLocation = 0
-            RealmUtil.RealmBlock { (realm) -> Void in
-                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
-            }
-            return
-        }
-
         NiftyUtilitySwift.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
+                self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
+                let repeatSpeechType = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm)?.repeatSpeechType
+
+                if let repeatSpeechType = repeatSpeechType, repeatSpeechType == .rewindToThisStory {
+                    self.setReadLocationWith(realm: realm, location: 0)
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                    return
+                }
+
                 if let nextStory = self.SearchNextChapterWith(realm: realm, storyID: self.storyID) {
                     self.ringPageTurningSound()
                     if nextStory.readLocation(realm: realm) != 0 {
@@ -1151,17 +1151,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         get {
             return speaker.currentLocation
         }
-        set {
-            NiftyUtilitySwift.DispatchSyncMainQueue {
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.count > newValue && newValue >= 0 {
-                        self.speaker.SetSpeechLocation(location: newValue)
-                        if story.readLocation(realm: realm) != newValue {
-                            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
-                                story.SetCurrentReadLocationWith(realm: realm, location: newValue)
-                            }
-                        }
-                    }
+    }
+    func setReadLocationWith(realm:Realm, location:Int) {
+        if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.count > location && location >= 0 {
+            self.speaker.SetSpeechLocation(location: location)
+            if story.readLocation(realm: realm) != location {
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                    story.SetCurrentReadLocationWith(realm: realm, location: location)
                 }
             }
         }

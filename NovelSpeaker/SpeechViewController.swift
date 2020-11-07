@@ -89,7 +89,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         resumeTheme()
         let range = self.textView.selectedRange
         if range.location >= 0 && range.location < self.textView.text.count {
-            storySpeaker.readLocation = range.location
+            RealmUtil.RealmBlock { (realm) -> Void in
+                self.storySpeaker.setReadLocationWith(realm: realm, location: range.location)
+            }
         }
         if let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton {
             floatingButton.hide()
@@ -660,7 +662,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 self.storySpeaker.StopSpeech(realm: realm)
             }else{
                 disableCurrentReadingStoryChangeFloatingButton()
-                storySpeaker.readLocation = self.textView.selectedRange.location
+                storySpeaker.setReadLocationWith(realm: realm, location: self.textView.selectedRange.location)
                 self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
             }
         }
