@@ -382,6 +382,7 @@ class StoryTextClassifier {
             let c = sectionConfig.startText[sectionConfig.startText.startIndex]
             if var list = indexedSectionConfigList[c] {
                 list.append(sectionConfig)
+                indexedSectionConfigList[c] = list
             }else{
                 indexedSectionConfigList[c] = [sectionConfig]
             }
@@ -391,6 +392,7 @@ class StoryTextClassifier {
             let c = waitConfig.targetText[waitConfig.targetText.startIndex]
             if var list = indexedWaitConfigList[c] {
                 list.append(waitConfig)
+                indexedWaitConfigList[c] = list
             }else{
                 indexedWaitConfigList[c] = [waitConfig]
             }
@@ -400,6 +402,7 @@ class StoryTextClassifier {
             let c = modSetting.before[modSetting.before.startIndex]
             if var list = indexedSpeechModArray[c] {
                 list.append(modSetting)
+                indexedSpeechModArray[c] = list
             }else{
                 indexedSpeechModArray[c] = [modSetting]
             }
