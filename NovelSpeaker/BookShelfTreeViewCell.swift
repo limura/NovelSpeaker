@@ -187,6 +187,22 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
     }
     
+    func applyLikeStarStatus(likeLevel:Int, novelID:String) {
+        if self.watchNovelIDArray.count != 1 {
+            return
+        }
+        if let currentNovelID = self.watchNovelIDArray.first, currentNovelID != novelID {
+            return
+        }
+        DispatchQueue.main.async {
+            if likeLevel > 0 {
+                self.likeButton.imageView?.image = BookShelfTreeViewCell.likeStarImage
+            }else{
+                self.likeButton.imageView?.image = BookShelfTreeViewCell.notLikeStarImage
+            }
+        }
+    }
+    
     func applyLikeStarStatus(novel:RealmNovel) {
         if self.watchNovelIDArray.count != 1 {
             return
@@ -246,8 +262,8 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                     break
                 case .change(_, let properties):
                     for property in properties {
-                        if property.name == "likeLevel" {
-                            self.applyLikeStarStatus(novelID: novelID)
+                        if property.name == "likeLevel", let likeLevel = property.newValue as? Int {
+                            self.applyLikeStarStatus(likeLevel: likeLevel, novelID: novelID)
                             NovelSpeakerNotificationTool.AnnounceLikeLevelChanged()
                         }
                         if property.name == "m_readingChapterStoryID" /*|| property.name == "m_readingChapterReadingPoint" || property.name == "m_readingChapterContentCount"*/ {
