@@ -188,57 +188,6 @@
         }
     },
     {
-        "title": "Yahoo! ニュース",
-        "HTTPMethod": "GET",
-        "url": "https://news.yahoo.co.jp/search/?",
-        "values": [
-            {"queryType": "text", "displayText": "キーワードを入力(何も入れないと失敗します)", "queryName": "p"},
-            {"queryType": "hidden", "queryName": "ei", "value": "utf-8"},
-            {"queryType": "hidden", "queryName": "fr", "value": "news_sw"}
-        ],
-        "result": {
-            "block": "//div[@id='NSm']/div",
-            "nextLink": "//div[@id='Sp1']/p/span[@class='m']/a",
-            "title": "//h2/a",
-            "url": "//h2/a/@href"
-        }
-    },
-    {
-        "title": "はてなブックマーク(のリンク先の記事)",
-        "HTTPMethod": "GET",
-        "url": "https://b.hatena.ne.jp/search/text?",
-        "values": [
-            {"queryType": "text", "displayText": "検索文字列(何も入れないと失敗します)", "queryName": "q"},
-            {"queryType": "radio", "queryName": "users", "displayText": "ブックマーク数", "defaultValue": "50",
-                "radio": {
-                    "  1 user": "1",
-                    "  3 user": "3",
-                    " 50 user": "50",
-                    "100 user": "100",
-                    "500 user": "500"
-                }
-            }
-        ],
-        "result": {
-            "block": "//li[contains(@class,'bookmark-item')]",
-            "nextLink": "//div[contains(@class,'centerarticle-pager')]/span[contains(@class,'centerarticle-pager-next')]/a",
-            "title": "//h3/a",
-            "url": "//h3/a/@href"
-        }
-    },
-    {
-        "title": "BBC NEWS Japan(新着記事)",
-        "HTTPMethod": "GET",
-        "url": "https://www.bbc.com/japanese",
-        "values": [
-        ],
-        "result": {
-            "block": "//li[@role='listitem']/div[contains(@class,'StoryPromoWrapper')]",
-            "title": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/')]/text()",
-            "url": "//h3[contains(@class,'Headline')]/a[contains(@href,'/japanese/') and text()]/@href"
-        }
-    },
-    {
         "title": "暁",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
