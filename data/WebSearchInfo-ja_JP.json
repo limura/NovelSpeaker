@@ -633,5 +633,72 @@
             "title": "//span[@class='SearchResult_Headline']/em",
             "url": "//a/@href"
         }
+    },
+    {
+        "title": "AUTOMATON",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://automaton-media.com/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "s"}
+        ],
+        "result": {
+            "block": "//div[contains(@class,'td-main-content')]//div[contains(@class,'td-animation-stack')]",
+            "nextLink": "//div[contains(@class,'page-nav')]/a[contains(@href,'/page/') and child::i[@class='td-icon-menu-right']]/@href",
+            "title": "//h3[contains(@class,'entry-title')]/a[contains(@href,'/articles/') and @title]",
+            "url": "//h3[contains(@class,'entry-title')]/a[contains(@href,'/articles/') and @title]/@href"
+        }
+    },
+    {
+        "title": "Yahoo! Japan ニュース",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://news.yahoo.co.jp/search?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "p"},
+            {"queryType": "hidden", "queryName": "ei", "value": "utf-8"}
+        ],
+        "result": {
+            "block": "//div[@class='newsFeed']/ol[@class='newsFeed_list']/li[contains(@class,'newsFeed_item')]",
+            "nextLink": "",
+            "title": "//a//div[@class='newsFeed_item_title']",
+            "url": "//a/@href"
+        }
+    },
+    {
+        "title": "All About",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://search.allabout.co.jp/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "q"}
+        ],
+        "result": {
+            "block": "//div[@class='newsFeed']/ol[@class='newsFeed_list']/li[contains(@class,'newsFeed_item')]",
+            "nextLink": "",
+            "title": "//a//div[@class='newsFeed_item_title']",
+            "url": "//a/@href"
+        }
+    },
+    {
+        "title": "毎日新聞",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://mainichi.jp/search?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "q"},
+            {"queryType": "radio", "displayText": "順番", "queryName": "", "defaultValue": "s=date", "radio":
+                {
+                    "新着順": "s=date",
+                    "関連順": ""
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='main-box']/ul/li",
+            "nextLink": "//div[@class='pager']/ul/li[@class='next']/a/@href",
+            "title": "//a/span[contains(@class,'midashi')]",
+            "url": "//a/@href"
+        }
     }
 ]
