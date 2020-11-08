@@ -633,47 +633,5 @@
             "title": "//span[@class='SearchResult_Headline']/em",
             "url": "//a/@href"
         }
-    },
-    {
-        "title": "NHK NEWS WEB",
-        "HTTPMethod": "GET",
-        "isNeedHeadless": false,
-        "url": "https://www2.nhk.or.jp/news/nsearch/query.cgi?",
-        "values": [
-            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "qt"},
-            {"queryType": "hidden", "queryName": "nh", "value": "10"},
-            {"queryType": "radio", "displayText": "順番", "queryName": "rf", "defaultValue": "1", "radio":
-                {
-                    "更新日順": "1",
-                    "ヒット順": "0"
-                }
-            }
-        ],
-        "result": {
-            "block": "//article//section/ul[@class='search--list']/li",
-            "nextLink": "//article/footer//li[@class='nav--pager-next']/a[contains(@href,'query.cgi?')]/@href",
-            "title": "//a//em[@class='title']",
-            "url": "//a/@href"
-        }
-    },
-    {
-        "title": "Wikipedia(ja)",
-        "HTTPMethod": "GET",
-        "isNeedHeadless": false,
-        "url": "https://ja.wikipedia.org/w/index.php?",
-        "values": [
-            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "search"},
-            {"queryType": "hidden", "queryName": "title", "value": "特別:検索"},
-            {"queryType": "hidden", "queryName": "profile", "value": "advanced"},
-            {"queryType": "hidden", "queryName": "fulltext", "value": "1"},
-            {"queryType": "hidden", "queryName": "advancedSearch-current", "value": "{}"},
-            {"queryType": "hidden", "queryName": "ns0", "value": "1"}
-        ],
-        "result": {
-            "block": "//div[contains(@class,'searchresults')]/ul/li[@class='mw-search-result']",
-            "nextLink": "//p[@class='mw-search-pager-bottom']/a[@class='mw-nextlink' and contains(@href,'/w/index.php')]/@href",
-            "title": "//div[@class='mw-search-result-heading']",
-            "url": "//div[@class='mw-search-result-heading']/a[contains(@href,'/wiki/') and @title]/@href"
-        }
     }
 ]
