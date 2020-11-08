@@ -657,12 +657,12 @@
         }
     },
     {
-        "title": "Wikipedia(jp)",
+        "title": "Wikipedia(ja)",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
         "url": "https://ja.wikipedia.org/w/index.php?",
         "values": [
-            {"queryType": "text", "displayText": "これらの単語を含む", "queryName": "search"},
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "search"},
             {"queryType": "hidden", "queryName": "title", "value": "特別:検索"},
             {"queryType": "hidden", "queryName": "profile", "value": "advanced"},
             {"queryType": "hidden", "queryName": "fulltext", "value": "1"},
