@@ -615,5 +615,45 @@
             "title": "//div[@class='book_main']//a[contains(@href,'/book/')]//h4",
             "url": "//div[@class='book_main']//a[contains(@href,'/book/') and descendant::h4]/@href"
         }
+    },
+    {
+        "title": "朝日新聞 DIGITAL",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://sitesearch.asahi.com/.cgi/sitesearch/sitesearch.pl?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "Keywords"},
+            {"queryType": "hidden", "queryName": "Searchsubmit", "value": "検索"},
+            {"queryType": "hidden", "queryName": "Searchsubmit2", "value": "検索"},
+            {"queryType": "hidden", "queryName": "iref", "value": "pc_gnavi"}
+        ],
+        "result": {
+            "block": "//*[@id='SiteSearchResult']/li[@class='webronza' or @class='digital' or @class='EduA']",
+            "nextLink": "//div[@class='Section']/div[@class='Pagination']/a[contains(@href,'/sitesearch/index.php?') and @class='Next']/@href",
+            "title": "//span[@class='SearchResult_Headline']/em",
+            "url": "//a/@href"
+        }
+    },
+    {
+        "title": "NHK NEWS WEB",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www2.nhk.or.jp/news/nsearch/query.cgi?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "qt"},
+            {"queryType": "hidden", "queryName": "nh", "value": "10"},
+            {"queryType": "radio", "displayText": "順番", "queryName": "rf", "defaultValue": "1", "radio":
+                {
+                    "更新日順": "1",
+                    "ヒット順": "0"
+                }
+            }
+        ],
+        "result": {
+            "block": "//article//section/ul[@class='search--list']/li",
+            "nextLink": "//article/footer//li[@class='nav--pager-next']/a[contains(@href,'query.cgi?')]/@href",
+            "title": "//a//em[@class='title']",
+            "url": "//a/@href"
+        }
     }
 ]
