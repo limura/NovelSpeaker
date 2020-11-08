@@ -668,7 +668,7 @@
     {
         "title": "All About",
         "HTTPMethod": "GET",
-        "isNeedHeadless": false,
+        "isNeedHeadless": true,
         "url": "https://search.allabout.co.jp/?",
         "values": [
             {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "q"}
