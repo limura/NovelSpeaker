@@ -272,24 +272,19 @@ struct SearchResult : Decodable {
         //print("ConvertHTMLToSearchResultDataArray: phase 1: baseURL: \(baseURL.absoluteString), data.count: \(data.count), \(String(bytes: data, encoding: .utf8) ?? "nil")")
         for blockHTML in doc.xpath(self.blockXpath) {
             //print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.toHTML ?? "nil")")
-            // TODO: 何かうまい方法があれば書き直す
-            // 何故か blockHTML.xpath() をすると doc(文章全体) に対して xpath が適用されてしまうので、
-            // 仕方がないので blockHTML.rawXML(これは文字列を再生成しているみたいなので負荷が気になる)を
-            // XMLDocumentとして再度読み込んでそれを使う事にします。
-            guard let rawHtml = blockHTML.innerHTML, let block = try? HTML(html: rawHtml, url: baseURL.absoluteString, encoding: headerEncoding ?? .utf8) else { continue }
             let title:String
             if let titleXpath = self.titleXpath {
-                title = NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: block, xpath: titleXpath).trimmingCharacters(in: .whitespacesAndNewlines)
+                title = NiftyUtilitySwift.FilterXpathWithConvertString(xmlElement: blockHTML, xpath: titleXpath).trimmingCharacters(in: .whitespacesAndNewlines)
             }else{
                 title = ""
             }
             if title.count <= 0 {
                 continue
             }
-            guard let urlXpath = self.urlXpath, let url = NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlDocument: block, xpath: urlXpath, baseURL: baseURL) else {
+            guard let urlXpath = self.urlXpath, let url = NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlElement: blockHTML, xpath: urlXpath, baseURL: baseURL) else {
                 continue
             }
-            let description = NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: block, xpath: "/html")
+            let description = NiftyUtilitySwift.FilterXpathWithConvertString(xmlElement: blockHTML, xpath: "/*")
             let resultBlock = SearchResultBlock(title: title, url: url, description: description)
             result.append(resultBlock)
         }

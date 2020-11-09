@@ -1512,6 +1512,25 @@ class NiftyUtilitySwift: NSObject {
         }
         return resultHTML
     }
+    static func FilterXpathToHtml(xmlElement:XMLElement, xpath:String) -> String {
+        var resultHTML = ""
+        //print("FilterXpathToHtml(xmlElement:, xpath:\(xpath)): \(xmlElement.innerHTML ?? "nil")")
+        for element in xmlElement.xpath(xpath) {
+            var elementXML = element.toHTML ?? ""
+            //print("FilterXpathToHtml element: tagName: \(element.tagName ?? "nil"), xml: \(elementXML)")
+            if let parent = element.parent, let parentTag = parent.tagName {
+                if element.nextSibling == nil && element.previousSibling == nil {
+                    elementXML = "<\(parentTag)>\(elementXML)</\(parentTag)>"
+                }else if element.nextSibling == nil {
+                    elementXML = "\(elementXML)</\(parentTag)>"
+                }else if element.previousSibling == nil {
+                    elementXML = "<\(parentTag)>\(elementXML)"
+                }
+            }
+            resultHTML += elementXML
+        }
+        return resultHTML
+    }
     
     static func FilterXpathWithConvertString(xmlDocument:XMLDocument, xpath:String, injectStyle:String? = nil) -> String {
         let filterdHTML = FilterXpathToHtml(xmlDocument: xmlDocument, xpath: xpath)
@@ -1526,9 +1545,28 @@ class NiftyUtilitySwift: NSObject {
         }
         return xmlDocument.xpath(xpath).reduce(""){ $0 + ($1.content ?? "") }
     }
+    static func FilterXpathWithConvertString(xmlElement:XMLElement, xpath:String, injectStyle:String? = nil) -> String {
+        let filterdHTML = FilterXpathToHtml(xmlElement: xmlElement, xpath: xpath)
+        let resultHTML:String
+        if let injectStyle = injectStyle, injectStyle.count > 0 {
+            resultHTML = "<style>" + injectStyle + "</style>" + filterdHTML
+        }else{
+            resultHTML = filterdHTML
+        }
+        if let result = HTMLToString(htmlString: resultHTML) {
+            return result
+        }
+        return xmlElement.xpath(xpath).reduce(""){ $0 + ($1.content ?? "") }
+    }
     
     static func FilterXpathWithExtructFirstHrefLink(xmlDocument:XMLDocument, xpath:String, baseURL:URL) -> URL? {
         guard let urlNode = xmlDocument.xpath(xpath).first else { return nil }
+        let urlString = urlNode["href"] ?? urlNode.content ?? ""
+        return URL(string: urlString, relativeTo: baseURL)
+    }
+    
+    static func FilterXpathWithExtructFirstHrefLink(xmlElement:XMLElement, xpath:String, baseURL:URL) -> URL? {
+        guard let urlNode = xmlElement.xpath(xpath).first else { return nil }
         let urlString = urlNode["href"] ?? urlNode.content ?? ""
         return URL(string: urlString, relativeTo: baseURL)
     }
@@ -1543,7 +1581,18 @@ class NiftyUtilitySwift: NSObject {
         }
         return tagSet
     }
-    
+
+    static func FilterXpathWithExtructTagString(xmlElement:XMLElement, xpath:String) -> Set<String> {
+        var tagSet = Set<String>()
+        for element in xmlElement.xpath(xpath) {
+            guard let elementXML = element.toHTML, let tagString = HTMLToString(htmlString: elementXML) else { continue }
+            let trimedString = tagString.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "#＃♯"))
+            if trimedString.count <= 0 { continue }
+            tagSet.insert(trimedString)
+        }
+        return tagSet
+    }
+
     // a を b で xor します。b が a より短い場合はループして適用します
     static func xorData(a:Data, b:Data) -> Data {
         var result:Data = Data(capacity: a.count)
