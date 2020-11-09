@@ -700,5 +700,72 @@
             "title": "//a/span[contains(@class,'midashi')]",
             "url": "//a/@href"
         }
+    },
+    {
+        "title": "novelba",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://novelba.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "searchWord"},
+            {"queryType": "hidden", "queryName": "isMajorType", "value": "0"},
+            {"queryType": "hidden", "queryName": "isIndiesType", "value": "1"},
+            {"queryType": "onOff", "displayText": "作品名を検索対象に含まない", "queryName": "isWorkName", "value": "0"},
+            {"queryType": "onOff", "displayText": "作者名を検索対象に含まない", "queryName": "isAuthorName", "value": "0"},
+            {"queryType": "onOff", "displayText": "キーワード名を検索対象に含まない", "queryName": "isKeywords", "value": "0"},
+            {"queryType": "onOff", "displayText": "あらすじを検索対象に含まない", "queryName": "isOutline", "value": "0"},
+            {"queryType": "radio", "displayText": "作品名", "queryName": "genreId", "defaultValue": "", "radio":
+                {
+                    "01: すべて": "",
+                    "02: ファンタジー": "5",
+                    "03: 恋愛": "2",
+                    "04: 現代ドラマ": "18",
+                    "05: 学園": "10",
+                    "06: SF": "6",
+                    "07: エッセイ": "14",
+                    "08: コメディー": "8",
+                    "09: 文学": "1",
+                    "10: ホラー": "7",
+                    "11: 詩": "13",
+                    "12: 現代アクション": "17",
+                    "13: 冒険": "9",
+                    "14: 推理": "4",
+                    "15: 戦記": "11",
+                    "16: 歴史": "3",
+                    "17: 童話": "12",
+                    "18: リプレイ": "15",
+                    "19: その他": "16"
+                }
+            },
+            {"queryType": "radio", "displayText": "話数", "queryName": "episodeCountCohort", "defaultValue": "", "radio":
+                {
+                    "1: すべて": "",
+                    "2: 1話": "0",
+                    "3: 2話〜10話": "1",
+                    "4: 11話〜100話": "2",
+                    "5: 101話以上": "3"
+                }
+            },
+            {"queryType": "radio", "displayText": "種別", "queryName": "serializeStatus", "defaultValue": "", "radio":
+                {
+                    "1: すべて": "",
+                    "2: 連載中": "serializing",
+                    "3: 完結済": "completed"
+                }
+            },
+            {"queryType": "radio", "displayText": "並び順", "queryName": "showOrder", "defaultValue": "", "radio":
+                {
+                    "1: おすすめ順": "",
+                    "2: 更新日が新しい順": "updates",
+                    "3: 話数が多い順": "episodeCount"
+                }
+            }
+        ],
+        "result": {
+            "block": "//section[@class='search_section']/ul[@class='result_list']/li[child::a[contains(@href,'/works/')]]",
+            "nextLink": "//ul[@class='pager']/li[preceding-sibling::li[child::a[@class='picked']]]/a/@href",
+            "title": "/a/div[@class='info_list']/p[@class='title']",
+            "url": "//a/@href"
+        }
     }
 ]
