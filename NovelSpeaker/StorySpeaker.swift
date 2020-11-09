@@ -661,7 +661,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func SearchNextChapterWith(realm:Realm, storyID:String) -> Story? {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         let nextChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID) + 1
-        return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: nextChapterNumber))
+        return RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapterNumber)
     }
 
     func LoadNextChapter(realm: Realm, completion: ((Bool)->Void)? = nil){

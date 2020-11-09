@@ -214,7 +214,7 @@ class SearchResultBlock {
             if let description = self.description, description.count > 0 {
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogBuilder(parent)
-                        .title(title: self.title)
+                        .title(title: self.title, numberOfLines: 1)
                         .textView(content: description, heightMultiplier: 0.6)
                         .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
                             dialog.dismiss(animated: false, completion: nil)

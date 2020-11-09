@@ -263,13 +263,13 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
         }
         
         /// Set the title of the dialog
-        public func title(title: String) -> Self {
+        public func title(title: String, numberOfLines:Int = 0) -> Self {
             let label = UILabel()
             label.text = title
             label.textAlignment = .center
             label.font = theme.titleFont
             label.textColor = theme.titleColor
-            label.numberOfLines = 0
+            label.numberOfLines = numberOfLines
             views.append(label)
             return self
         }
