@@ -224,7 +224,7 @@ class SearchResultBlock {
                                 download()
                             }
                         })
-                    .build().show()
+                    .build(isForMessageDialog: true).show()
                 }
             }else{
                 download()

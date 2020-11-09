@@ -51,7 +51,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                             dialog.dismiss(animated: true, completion: nil)
                         }
                     })
-                    .build().show()
+                    .build(isForMessageDialog: true).show()
                 }
             }, failedAction: nil)
         }

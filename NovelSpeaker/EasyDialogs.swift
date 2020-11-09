@@ -410,7 +410,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
         
         // MARK: Buiding
         
-        public func build() -> EasyDialog {
+        public func build(isForMessageDialog:Bool = false) -> EasyDialog {
             let dialog = EasyDialog()
             dialog.builder = self
             if #available(iOS 13.0, *) {
@@ -433,27 +433,23 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             baseView.translatesAutoresizingMaskIntoConstraints = false
             baseView.clipsToBounds = true
             baseView.layer.cornerRadius = theme.cornerRadius
-            
-            if #available(iOS 9.0, *) {
-                NSLayoutConstraint.activate([
-                    baseView.leadingAnchor.constraint(equalTo: dialog.view.leadingAnchor, constant: 24),
-                    baseView.trailingAnchor.constraint(equalTo: dialog.view.trailingAnchor, constant: -24),
-                    baseView.heightAnchor.constraint(greaterThanOrEqualToConstant: 1),
-                    baseView.centerXAnchor.constraint(equalTo: dialog.view.centerXAnchor),
-                    // baseView.centerYAnchor.constraint(equalTo: dialog.view.centerYAnchor)
-                    dialog.forKeyboardConstraint
-                    ])
-            } else {
-                // Fallback on earlier versions
-                NSLayoutConstraint.activate([
-                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.leading, relatedBy: NSLayoutConstraint.Relation.equal, toItem: dialog.view, attribute: NSLayoutConstraint.Attribute.leading, multiplier: 1.0, constant: 24),
-                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.trailing, relatedBy: NSLayoutConstraint.Relation.equal, toItem: dialog.view, attribute: NSLayoutConstraint.Attribute.trailing, multiplier: 1.0, constant: -24),
-                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.greaterThanOrEqual, toItem: nil, attribute: NSLayoutConstraint.Attribute.height, multiplier: 1.0, constant: 1),
-                    NSLayoutConstraint.init(item: baseView, attribute: NSLayoutConstraint.Attribute.centerX, relatedBy: NSLayoutConstraint.Relation.equal, toItem: dialog.view, attribute: NSLayoutConstraint.Attribute.centerX, multiplier: 1.0, constant: 0),
-                    //NSLayoutConstraint.init(item: baseView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: dialog.view, attribute: NSLayoutAttribute.centerY, multiplier: 1.0, constant: 0)
-                    dialog.forKeyboardConstraint
-                    ])
+
+            let heightAnchor:NSLayoutConstraint
+            if isForMessageDialog, let dialogView = dialog.view {
+                heightAnchor = baseView.heightAnchor.constraint(equalTo: dialogView.heightAnchor, multiplier: 0.92)
+            }else{
+                heightAnchor = baseView.heightAnchor.constraint(greaterThanOrEqualToConstant: 1)
             }
+            
+            NSLayoutConstraint.activate([
+                baseView.leadingAnchor.constraint(equalTo: dialog.view.leadingAnchor, constant: 24),
+                baseView.trailingAnchor.constraint(equalTo: dialog.view.trailingAnchor, constant: -24),
+                //baseView.heightAnchor.constraint(greaterThanOrEqualToConstant: 1),
+                heightAnchor,
+                baseView.centerXAnchor.constraint(equalTo: dialog.view.centerXAnchor),
+                // baseView.centerYAnchor.constraint(equalTo: dialog.view.centerYAnchor)
+                dialog.forKeyboardConstraint
+                ])
 
             var previousView: UIView?
             func addViewToBaseView(view: UIView, index: Int, sideInset: CGFloat = 12.0) {
@@ -468,7 +464,12 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
                 
                 if let view = view as? EasyDialogCustomUITextView {
                     if let toplevelView = dialog.view {
-                        let equal = NSLayoutConstraint.init(item: view, attribute: .height, relatedBy: .equal, toItem: toplevelView, attribute: .height, multiplier: view.heightMultiplier, constant: 0)
+                        let equal:NSLayoutConstraint
+                        if isForMessageDialog {
+                            equal = view.heightAnchor.constraint(greaterThanOrEqualTo: toplevelView.heightAnchor, multiplier: 0.1)
+                        }else{
+                            equal = NSLayoutConstraint.init(item: view, attribute: .height, relatedBy: .equal, toItem: toplevelView, attribute: .height, multiplier: view.heightMultiplier, constant: 0)
+                        }
                         equal.priority = UILayoutPriority(rawValue: 999)
                         dialog.forTextViewConstraintArray.append(equal)
                         NSLayoutConstraint.activate([equal])

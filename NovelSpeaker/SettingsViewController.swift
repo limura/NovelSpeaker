@@ -186,7 +186,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: false, completion: nil)
                             }
-                        }).build().show()
+                        }).build(isForMessageDialog: true).show()
                     }
                 }, err: {
                     DispatchQueue.main.async {
@@ -774,7 +774,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         dialog.dismiss(animated: true)
                                     }
                                 })
-                                .build().show()
+                                .build(isForMessageDialog: true).show()
                         }
                         return
                     }catch{

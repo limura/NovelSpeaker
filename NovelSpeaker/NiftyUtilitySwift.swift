@@ -89,7 +89,7 @@ class NiftyUtilitySwift: NSObject {
                     RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: title)
                 })
             }
-            easyDialog.build().show()
+            easyDialog.build(isForMessageDialog: true).show()
         }
 
     }
@@ -162,7 +162,7 @@ class NiftyUtilitySwift: NSObject {
                 dialog.dismiss(animated: false, completion: nil)
                 })
             
-            builder.build().show()
+            builder.build(isForMessageDialog: true).show()
         }else{
             NiftyUtilitySwift.EasyDialogMessageDialog(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"), message: error, completion: nil)
         }
@@ -250,7 +250,7 @@ class NiftyUtilitySwift: NSObject {
                 })
             }
             print("builder.build().show() call.")
-            builder.build().show()
+            builder.build(isForMessageDialog: true).show()
         }
     }
     
@@ -390,7 +390,7 @@ class NiftyUtilitySwift: NSObject {
             .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
                 dialog.dismiss(animated: false, completion: nil)
             }
-            .build()
+            .build(isForMessageDialog: true)
         dialog.show { completion?(dialog) }
         return dialog
     }
@@ -420,7 +420,7 @@ class NiftyUtilitySwift: NSObject {
                 }
             })
         })
-        let builded = dialog.build()
+        let builded = dialog.build(isForMessageDialog: true)
         builded.show { completion?(builded) }
         return builded
     }
@@ -601,7 +601,7 @@ class NiftyUtilitySwift: NSObject {
             dialog.dismiss(animated: false) {
                 completion?()
             }
-        }.build().show()
+        }.build(isForMessageDialog: true).show()
     }
     #endif
     

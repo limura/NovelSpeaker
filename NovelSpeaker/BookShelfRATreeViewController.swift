@@ -546,7 +546,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }
                 }
             })
-            .build().show()
+            .build(isForMessageDialog: true).show()
     }
 
     @objc func refreshButtonClicked(sender: Any) {
