@@ -764,7 +764,7 @@
         "result": {
             "block": "//section[@class='search_section']/ul[@class='result_list']/li[child::a[contains(@href,'/works/')]]",
             "nextLink": "//ul[@class='pager']/li[preceding-sibling::li[child::a[@class='picked']]]/a/@href",
-            "title": "/a/div[@class='info_list']/p[@class='title']",
+            "title": "//a/div[@class='info_list']/p[@class='title']",
             "url": "//a/@href"
         }
     }
