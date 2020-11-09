@@ -58,10 +58,10 @@ class NiftyUtilitySwift: NSObject {
                 .textField(tag: 100, placeholder: title, content: title, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
                 // TODO: 怪しくheightを画面の縦方向からの比率で指定している。
                 // ここに 1.0 とか書くと他のViewの分の高さが入って全体は画面の縦幅よりも高くなるので全部が表示されない。
-                // つまり、この謎の数字 0.53 というのは、できれば書きたくない値であり、この値でも大きすぎるかもしれず、
+                // つまり、この謎の数字 0.45 というのは、できれば書きたくない値であり、この値でも大きすぎるかもしれず、
                 // 小さすぎるかもしれず、適切な大きさ(baseViewが表示領域の縦幅に入る状態)になるように縮む必要があるのだが、
                 // EasyDialog をそのように修正するのが面倒なのでやっていないという事なのであった。('A`)
-                .textView(content: content, heightMultiplier: 0.53)
+                .textView(content: content, heightMultiplier: 0.45)
                 
             if let hintString = hintString {
                 easyDialog = easyDialog.label(text: hintString)
@@ -126,7 +126,7 @@ class NiftyUtilitySwift: NSObject {
             errorMessage += NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
             var builder = EasyDialogBuilder(viewController)
             builder = builder.title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
-            .textView(content: errorMessage, heightMultiplier: 0.55)
+            .textView(content: errorMessage, heightMultiplier: 0.45)
             .addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportButton", comment: "報告メールを作成"), callback: { (dialog) in
                 dialog.dismiss(animated: false) {
                     DispatchQueue.main.async {
@@ -190,10 +190,10 @@ class NiftyUtilitySwift: NSObject {
             builder = builder.textField(tag: 100, placeholder: titleString, content: titleString, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
                 // TODO: 怪しくheightを画面の縦方向からの比率で指定している。
                 // ここに 1.0 とか書くと他のViewの分の高さが入って全体は画面の縦幅よりも高くなるので全部が表示されない。
-                // つまり、この謎の数字 0.53 というのは、できれば書きたくない値であり、この値でも大きすぎるかもしれず、
+                // つまり、この謎の数字 0.45 というのは、できれば書きたくない値であり、この値でも大きすぎるかもしれず、
                 // 小さすぎるかもしれず、適切な大きさ(baseViewが表示領域の縦幅に入る状態)になるように縮む必要があるのだが、
                 // EasyDialog をそのように修正するのが面倒なのでやっていないという事なのであった。('A`)
-                .textView(content: content, heightMultiplier: 0.53)
+                .textView(content: content, heightMultiplier: 0.45)
                 .label(text: multiPageString)
                 .addButton(title: NSLocalizedString("NiftyUtilitySwift_CancelImport", comment: "取り込まない"), callback: { (dialog) in
                     DispatchQueue.main.async {
