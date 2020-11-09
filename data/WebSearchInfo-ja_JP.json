@@ -714,7 +714,7 @@
             {"queryType": "onOff", "displayText": "作者名を検索対象に含まない", "queryName": "isAuthorName", "value": "0"},
             {"queryType": "onOff", "displayText": "キーワード名を検索対象に含まない", "queryName": "isKeywords", "value": "0"},
             {"queryType": "onOff", "displayText": "あらすじを検索対象に含まない", "queryName": "isOutline", "value": "0"},
-            {"queryType": "radio", "displayText": "作品名", "queryName": "genreId", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genreId", "defaultValue": "", "radio":
                 {
                     "01: すべて": "",
                     "02: ファンタジー": "5",
