@@ -340,13 +340,20 @@ erver certificate.";
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.69
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.70
 
-- The last open novel is now selected on the bookshelf screen
+- Fixed an issue where the last open novel might be deselected when checking for novel updates on the bookshelf screen.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.70
+
+Bug fix
+
+- Fixed an issue where the last open novel might be deselected when checking for novel updates on the bookshelf screen.
+
+
 # Version 1.1.69
 
 Interface change

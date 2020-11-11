@@ -2545,6 +2545,26 @@ Interface change
 
 - The last open novel is now selected on the bookshelf screen
 
+# Version 1.1.70
+
+問題の修正
+
+- 本棚画面で小説の更新確認時に、最後に開いていた小説の選択状態が解除される場合がある問題を修正
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は一つ前のリリースで追加されました、本棚画面に戻った時に、今まで開いていた小説を見つけやすくする、という修正について、小説の更新確認を行っている時に選択状態が解除される場合がありましたので、そこを修正したものになります。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 1.1.70
+
+Bug fix
+
+- Fixed an issue where the last open novel might be deselected when checking for novel updates on the bookshelf screen.
+
+
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
