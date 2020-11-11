@@ -524,6 +524,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func reloadAllData() {
         self.displayDataArray = getBookShelfRATreeViewCellDataTree()
         self.treeView?.reloadData()
+        self.HilightCurrentReadingNovel()
     }
 
     func reloadAllDataAndScrollToCurrentReadingContent(){
@@ -1038,7 +1039,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     for cellItemChild in childrens {
                         if cellItemChild.novelID == novelID {
                             self.treeView?.expandRow(forItem: cellItem)
-                            self.treeView?.selectRow(forItem: cellItem, animated: false, scrollPosition: RATreeViewScrollPositionNone)
+                            self.treeView?.selectRow(forItem: cellItemChild, animated: false, scrollPosition: RATreeViewScrollPositionNone)
                             return
                         }
                     }
