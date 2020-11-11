@@ -376,6 +376,7 @@
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
+        [self HighlightCurrentReadingNovel];
     });
     return;
 }
