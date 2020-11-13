@@ -37,6 +37,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
     RepeatSpeechType_RewindToFirstStory = 1, // 全ての章が対象(全ての章を読み終えたら最初の章に戻る)
     RepeatSpeechType_RewindToThisStory = 2, // 一つの章が対象(一つの章を読み終えたらその章の最初に戻る)
     RepeatSpeechType_GoToNextLikeNovel = 3, // 「お気に入り」に登録されている小説のうち、未読の物に切り替えて再生する
+    RepeatSpeechType_GoToNextSameFolderdNovel = 4, // 同じ「フォルダ」に登録されている小説のうち、未読のものに切り替えて再生する
 };
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)

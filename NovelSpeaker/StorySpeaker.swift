@@ -1091,8 +1091,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                     })
                 }else{
+                    let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
                     if let repeatSpeechType = repeatSpeechType {
-                        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
                         if repeatSpeechType == .rewindToFirstStory {
                             if let firstStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
                                 // 何故か self.SetStory() した後に
@@ -1131,6 +1131,29 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 }
                             }
                             return
+                        }else if repeatSpeechType == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Bookshelf) {
+                            var novelIDSet = Set<String>()
+                            for folder in folderArray {
+                                for novelID in folder.targetNovelIDArray {
+                                    novelIDSet.insert(novelID)
+                                }
+                            }
+                            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: Array(novelIDSet))?.filter({ $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}).first, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) {
+                                self.StopSpeech(realm: realm)
+                                self.AnnounceSpeech(text: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), novel.title)) {
+                                    DispatchQueue.main.async {
+                                        self.ringPageTurningSound()
+                                        self.SetStory(story: story) { (story) in
+                                            DispatchQueue.main.async {
+                                                RealmUtil.RealmBlock { (realm) -> Void in
+                                                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                return
+                            }
                         }
                     }
                     

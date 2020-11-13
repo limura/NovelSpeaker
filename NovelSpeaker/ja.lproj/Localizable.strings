@@ -168,6 +168,7 @@
 "SettingsViewController_ClearWebSearchSiteInfoCache_done" = "Web検索タブに戻ると読み込み直すように設定しました。";
 "SettingsViewController_AutoSplitStringSetting" = "テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)";
 "SettingsViewController_RemoteDataURLSetting" = "内部データ参照用URLの設定";
+"SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "フォルダが一つも作成されていないようです。フォルダを作成されていないとこの設定は利用できません。\nフォルダを作成するには、本棚タブで小説を開いて右上にある「詳細」ボタンを押した後に出てくる小説の詳細画面から「フォルダへ分類」を選択してフォルダを追加してください。";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";
@@ -182,11 +183,12 @@
 "SettingsViewController_ShareBackupSelect_FailedAppendToMail" = "ファイルの添付に失敗しました。";
 "SettingTableViewController_IsDisallowsCellularAccess" = "携帯電話網ではダウンロードしないようにする";
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "小説を削除する時に確認する";
-"SettingTableViewController_RepeatTypeTitle" = "再生終了時の動作";
+"SettingTableViewController_RepeatTypeTitle" = "再生が末尾に達した時の動作";
 "SettingTableViewController_RepeatType_NoRepeat" = "そのまま停止する";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "最初の章から再生し直す";
 "SettingTableViewController_RepeatType_RewindToThisStory" = "現在の章を再生しなおす";
 "SettingTableViewController_RepeatType_GoToNextLikeNovel" = "お気に入りのうち未読の物を再生";
+"SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "同じフォルダの小説のうち未読の物を再生";
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する";
 "SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "確認";
 "SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "この設定は、読み上げ中の読み上げ位置表示がおかしくなる問題への対応です。ただし、対応手法がかなりトリッキーなので適用する前に原理を理解しておいてください。\nこの設定を有効にすると、読み上げ中の読み上げ位置がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ) に読み替えるように設定することでこの問題を回避するようになります。\nこの機能を実装した時点では、iOS の音声合成エンジンでは \"α\"(アルファ) は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により \"α\" が「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われますので iOS 11 以前でご利用の方は必要なさそうです。\n以上の事を理解した上でこの設定を有効にしますか？";

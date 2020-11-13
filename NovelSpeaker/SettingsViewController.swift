@@ -456,46 +456,32 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            <<< AlertRow<String>() { row in
+            <<< AlertRow<String>("RepeatTypeSelectRow") { row in
                 row.title = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
                 row.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
-                let noRepeat = NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
-                let rewindToFirstStory = NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
-                let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
-                let goToNextLikeNovel =  NSLocalizedString("SettingTableViewController_RepeatType_GoToNextLikeNovel", comment: "お気に入りのうち未読の物")
-                row.options = [noRepeat, rewindToFirstStory, rewindToThisStory, goToNextLikeNovel]
-                row.value = noRepeat
+                row.options = NovelSpeakerUtility.GetAllRepeatSpeechStringType().map({NovelSpeakerUtility.RepeatSpeechTypeToString(type: $0) ?? ""})
+                row.value = NovelSpeakerUtility.RepeatSpeechTypeToString(type: .noRepeat)
                 row.cell.textLabel?.numberOfLines = 0
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm) else { return }
                     let type = speechOverrideSetting.repeatSpeechType
-                    if type == .rewindToFirstStory {
-                        row.value = rewindToFirstStory
-                    }else
-                    if type == .rewindToThisStory {
-                        row.value = rewindToThisStory
-                    }else
-                    if type == .goToNextLikeNovel {
-                        row.value = goToNextLikeNovel
+                    if let typeString = NovelSpeakerUtility.RepeatSpeechTypeToString(type: type) {
+                        row.value = typeString
                     }
                 }
             }.onChange({ (row) in
-                let noRepeat = NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
-                let rewindToFirstStory = NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
-                let rewindToThisStory =  NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
-                let goToNextLikeNovel =  NSLocalizedString("SettingTableViewController_RepeatType_GoToNextLikeNovel", comment: "お気に入りのうち未読の物")
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let typeString = row.value else { return }
-                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
-                        if typeString == noRepeat {
-                            speechOverrideSetting.repeatSpeechType = .noRepeat
-                        }else if typeString == rewindToFirstStory {
-                            speechOverrideSetting.repeatSpeechType = .rewindToFirstStory
-                        }else if typeString == rewindToThisStory {
-                            speechOverrideSetting.repeatSpeechType = .rewindToThisStory
-                        }else if typeString == goToNextLikeNovel {
-                            speechOverrideSetting.repeatSpeechType = .goToNextLikeNovel
+                    guard let speechOverrideSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeechOverrideSettingWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.RepeatSpeechStringToType(typeString: typeString) else { return }
+                    if type == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Bookshelf), folderArray.count <= 0, let typeString = NovelSpeakerUtility.RepeatSpeechTypeToString(type: speechOverrideSetting.repeatSpeechType) {
+                        DispatchQueue.main.async {
+                            row.value = typeString
+                            row.updateCell()
+                            NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning", comment: "フォルダが一つも作成されていないようです。フォルダを作成されていないとこの設定は利用できません。\nフォルダを作成するには、本棚タブで小説を開いて右上にある「詳細」ボタンを押した後に出てくる小説の詳細画面から「フォルダへ分類」を選択してフォルダを追加してください。"))
                         }
+                        return
+                    }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken, self.defaultSpeechOverrideSettingNotificationToken]) { (realm) in
+                        speechOverrideSetting.repeatSpeechType = type
                     }
                 }
             })

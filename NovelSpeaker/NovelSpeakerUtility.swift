@@ -2299,4 +2299,40 @@ class NovelSpeakerUtility: NSObject {
         let convertTo = "\n"
         return string.replacingOccurrences(of: targetPattern, with: convertTo, options: [.regularExpression], range: string.range(of: string))
     }
+    
+    static func RepeatSpeechTypeToString(type:RepeatSpeechType) -> String? {
+        switch type {
+        case .noRepeat:
+            return NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
+        case .rewindToFirstStory:
+            return NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
+        case .rewindToThisStory:
+            return NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
+        case .goToNextLikeNovel:
+            return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextLikeNovel", comment: "お気に入りのうち未読の物")
+        case .goToNextSameFolderdNovel:
+            return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameFolderdNovel", comment: "指定フォルダの小説のうち未読の物")
+        @unknown default:
+            return nil
+        }
+    }
+    static func RepeatSpeechStringToType(typeString:String) -> RepeatSpeechType? {
+        switch typeString {
+        case NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない"):
+            return .noRepeat
+        case NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から"):
+            return .rewindToFirstStory
+        case NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章"):
+            return .rewindToThisStory
+        case NSLocalizedString("SettingTableViewController_RepeatType_GoToNextLikeNovel", comment: "お気に入りのうち未読の物"):
+            return .goToNextLikeNovel
+        case NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameFolderdNovel", comment: "指定フォルダの小説のうち未読の物"):
+            return .goToNextSameFolderdNovel
+        default:
+            return nil
+        }
+    }
+    static func GetAllRepeatSpeechStringType() -> [RepeatSpeechType] {
+        return [.noRepeat, .rewindToFirstStory, .rewindToThisStory, .goToNextLikeNovel, .goToNextSameFolderdNovel]
+    }
 }
