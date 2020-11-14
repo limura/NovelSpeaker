@@ -715,18 +715,9 @@ class StoryTextClassifier {
                         isUseRegularExpression: true)
                     speechModSettingList.append(modSetting)
                 }
-                if let defaultSpeechOverrideSetting = globalState.defaultSpeechOverrideSettingWith(realm: realm) {
-                    isOverrideRubyEnabled = defaultSpeechOverrideSetting.isOverrideRubyIsEnabled
-                    notRubyCharactorStringArray = defaultSpeechOverrideSetting.notRubyCharactorStringArray
-                    isIgnoreURIStringSpeechEnabled = defaultSpeechOverrideSetting.isIgnoreURIStringSpeechEnabled
-                }
-            }
-            if let overrideSettingArray = RealmSpeechOverrideSetting.SearchObjectFromWith(realm: realm, novelID: story.novelID) {
-                for overrideSetting in overrideSettingArray {
-                    isOverrideRubyEnabled = overrideSetting.isOverrideRubyIsEnabled
-                    notRubyCharactorStringArray = overrideSetting.notRubyCharactorStringArray
-                    isIgnoreURIStringSpeechEnabled = overrideSetting.isIgnoreURIStringSpeechEnabled
-                }
+                isOverrideRubyEnabled = globalState.isOverrideRubyIsEnabled
+                notRubyCharactorStringArray = globalState.notRubyCharactorStringArray
+                isIgnoreURIStringSpeechEnabled = globalState.isIgnoreURIStringSpeechEnabled
             }
             if isIgnoreURIStringSpeechEnabled {
                 let modSetting = SpeechModSetting(

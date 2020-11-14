@@ -14,7 +14,7 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 3
+    static let currentSchemaVersion : UInt64 = 4
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -227,7 +227,6 @@ import AVFoundation
             SyncObject<RealmGlobalState>(realmConfiguration: realmConfiguration),
             SyncObject<RealmDisplaySetting>(realmConfiguration: realmConfiguration),
             SyncObject<RealmNovelTag>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmSpeechOverrideSetting>(realmConfiguration: realmConfiguration),
             SyncObject<RealmBookmark>(realmConfiguration: realmConfiguration),
             ], databaseScope: .private, container: container)
     }
@@ -294,7 +293,6 @@ import AVFoundation
             RealmGlobalState.self,
             RealmDisplaySetting.self,
             RealmNovelTag.self,
-            RealmSpeechOverrideSetting.self,
             RealmBookmark.self,
         ]
         var count = 0
@@ -339,7 +337,6 @@ import AVFoundation
         FetchCloudData(syncObjectType: RealmSpeechSectionConfig.self, predicate: NSPredicate(value: true))
         FetchCloudData(syncObjectType: RealmSpeechWaitConfig.self, predicate: NSPredicate(value: true))
         FetchCloudData(syncObjectType: RealmSpeechModSetting.self, predicate: NSPredicate(value: true))
-        FetchCloudData(syncObjectType: RealmSpeechOverrideSetting.self, predicate: NSPredicate(value: true))
 
         autoreleasepool {
             guard let realm = try? GetCloudRealm() else {
@@ -1245,11 +1242,6 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             return !novelTag.isDeleted && novelTag.targetNovelIDArray.contains(self.novelID)
         })
     }
-    func linkedRealmSpeechOverrideSettingsWith(realm:Realm) -> [RealmSpeechOverrideSetting]? {
-        return realm.objects(RealmSpeechOverrideSetting.self).filter({ (speechOverrideSetting) -> Bool in
-            return !speechOverrideSetting.isDeleted && speechOverrideSetting.targetNovelIDArray.contains(self.novelID)
-        })
-    }
     func firstChapterWith(realm:Realm) -> Story? {
         return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1))
     }
@@ -1435,11 +1427,6 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         if let tagArray = linkedTagsWith(realm: realm) {
             for tag in tagArray {
                 tag.unref(realm:realm, novelID: self.novelID)
-            }
-        }
-        if let realmSpeechOverrideSettingArray = linkedRealmSpeechOverrideSettingsWith(realm: realm) {
-            for realmSpeechOverrideSetting in realmSpeechOverrideSettingArray {
-                realmSpeechOverrideSetting.unref(realm:realm, novelID: self.novelID)
             }
         }
         RealmUtil.Delete(realm: realm, model: self)
@@ -2025,7 +2012,6 @@ extension HTTPCookie {
     @objc dynamic var bgColor = Data()
     @objc dynamic var defaultDisplaySettingID = ""
     @objc dynamic var defaultSpeakerID = ""
-    @objc dynamic var defaultSpeechOverrideSettingID = ""
     @objc dynamic var currentReadingNovelID = ""
     @objc dynamic var currentWebSearchSite = ""
     let autoSplitStringList = List<String>()
@@ -2037,7 +2023,11 @@ extension HTTPCookie {
     @objc dynamic var cookieArrayData = Data()
     @objc dynamic var m_DisplayType : Int = NovelDisplayType.textView.rawValue
     @objc dynamic var bookshelfViewButtonSettingArrayData = Data()
-
+    @objc dynamic var m_repeatSpeechType : Int = Int(RepeatSpeechType.noRepeat.rawValue)
+    @objc dynamic var isOverrideRubyIsEnabled = false
+    @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
+    @objc dynamic var isIgnoreURIStringSpeechEnabled = false
+    
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {
         let userDefaults = UserDefaults.standard
@@ -2066,14 +2056,19 @@ extension HTTPCookie {
             self.m_DisplayType = newValue.rawValue
         }
     }
+    var repeatSpeechType : RepeatSpeechType {
+        get {
+            return RepeatSpeechType(rawValue: UInt(m_repeatSpeechType)) ?? RepeatSpeechType.noRepeat
+        }
+        set {
+            m_repeatSpeechType = Int(newValue.rawValue)
+        }
+    }
     func defaultDisplaySettingWith(realm:Realm) -> RealmDisplaySetting? {
         return realm.objects(RealmDisplaySetting.self).filter("isDeleted = false AND name = %@", self.defaultDisplaySettingID).first
     }
     func defaultSpeakerWith(realm: Realm) -> RealmSpeakerSetting? {
         return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeakerID).first
-    }
-    func defaultSpeechOverrideSettingWith(realm: Realm) -> RealmSpeechOverrideSetting? {
-        realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeechOverrideSettingID).first
     }
     // background fetch の設定は その端末 だけに依存するようにしないとおかしなことになるので、UserDefaults.standard を使います
     static let isBackgroundNovelFetchEnabledKey = "NovelSpeaker_RealmModels_IsBackgroundNovelFetchEnabled"
@@ -2394,73 +2389,6 @@ extension RealmNovelTag: CKRecordRecoverable {
 }
 extension RealmNovelTag: CanWriteIsDeleted {
 }
-
-@objc final class RealmSpeechOverrideSetting: Object {
-    @objc dynamic var name = "" // primary key
-    @objc dynamic var isDeleted: Bool = false
-    @objc dynamic var createdDate = Date()
-    @objc dynamic var m_repeatSpeechType : Int = Int(RepeatSpeechType.noRepeat.rawValue)
-    @objc dynamic var isOverrideRubyIsEnabled = false
-    @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
-    @objc dynamic var isIgnoreURIStringSpeechEnabled = false
-
-    let targetNovelIDArray = List<String>()
-    
-    var repeatSpeechType : RepeatSpeechType {
-        get {
-            return RepeatSpeechType(rawValue: UInt(m_repeatSpeechType)) ?? RepeatSpeechType.noRepeat
-        }
-        set {
-            m_repeatSpeechType = Int(newValue.rawValue)
-        }
-    }
-    
-    func targetNovelArrayWith(realm: Realm) -> [RealmNovel]? {
-        return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
-            return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
-        })
-    }
-    
-    static func GetAllObjectsWith(realm:Realm) -> Results<RealmSpeechOverrideSetting>? {
-        return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false")
-    }
-    static func SearchObjectFromWith(realm: Realm, novelID:String) -> LazyFilterSequence<Results<RealmSpeechOverrideSetting>>? {
-        return realm.objects(RealmSpeechOverrideSetting.self).filter("isDeleted = false").filter({ (setting) -> Bool in
-            return setting.targetNovelIDArray.contains(novelID)
-        })
-    }
-    static func SearchObjectFromWith(realm: Realm, name:String) -> RealmSpeechOverrideSetting? {
-        guard let obj = realm.object(ofType: RealmSpeechOverrideSetting.self, forPrimaryKey: name) else { return nil }
-        if obj.isDeleted { return nil }
-        return obj
-    }
-    func unref(realm:Realm, novelID:String) {
-        if let index = targetNovelIDArray.index(of: novelID) {
-            targetNovelIDArray.remove(at: index)
-            if targetNovelIDArray.count <= 0 {
-                delete(realm: realm)
-            }
-        }
-    }
-    func delete(realm:Realm) {
-        RealmUtil.Delete(realm: realm, model: self)
-    }
-    
-    override class func primaryKey() -> String? {
-        return "name"
-    }
-
-    override static func indexedProperties() -> [String] {
-        return ["name", "targetNovelArray", "createdDate", "isDeleted"]
-    }
-}
-extension RealmSpeechOverrideSetting: CKRecordConvertible {
-}
-extension RealmSpeechOverrideSetting: CKRecordRecoverable {
-}
-extension RealmSpeechOverrideSetting: CanWriteIsDeleted {
-}
-
 
 @objc final class RealmBookmark: Object {
     @objc dynamic var id = "" // primary key

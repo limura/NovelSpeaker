@@ -172,7 +172,6 @@ class RealmToRealmCopyTool: NSObject {
             newObj.m_bookSelfSortType = obj.m_bookSelfSortType
             newObj.defaultDisplaySettingID = obj.defaultDisplaySettingID
             newObj.defaultSpeakerID = obj.defaultSpeakerID
-            newObj.defaultSpeechOverrideSettingID = obj.defaultSpeechOverrideSettingID
             newObj.currentReadingNovelID = obj.currentReadingNovelID
             newObj.currentWebSearchSite = obj.currentWebSearchSite
             newObj.autoSplitStringList.removeAll()
@@ -184,6 +183,10 @@ class RealmToRealmCopyTool: NSObject {
             newObj.speechViewButtonSettingArrayData = obj.speechViewButtonSettingArrayData
             newObj.cookieArrayData = obj.cookieArrayData
             newObj.m_DisplayType = obj.m_DisplayType
+            newObj.m_repeatSpeechType = obj.m_repeatSpeechType
+            newObj.isOverrideRubyIsEnabled = obj.isOverrideRubyIsEnabled
+            newObj.notRubyCharactorStringArray = obj.notRubyCharactorStringArray
+            newObj.isIgnoreURIStringSpeechEnabled = obj.isIgnoreURIStringSpeechEnabled
 
             to.add(newObj, update: .modified)
             try to.commitWrite()
@@ -227,27 +230,6 @@ class RealmToRealmCopyTool: NSObject {
         }
     }
 
-    static func CopySpeechOverrideSetting(from:Realm, to:Realm, progress:(String)->Void) throws {
-        let objects = from.objects(RealmSpeechOverrideSetting.self)
-        let maxCount = objects.count
-        for (index, obj) in objects.enumerated() {
-            progress(NSLocalizedString("RealmToRealmCopyTool_Progress_SpeechOverrideSetting", comment: "読み替え設定を移行中") + " (\(index)/\(maxCount))")
-            to.beginWrite()
-            let newObj = RealmSpeechOverrideSetting()
-            newObj.isDeleted = obj.isDeleted
-            newObj.name = obj.name
-            newObj.createdDate = obj.createdDate
-            newObj.m_repeatSpeechType = obj.m_repeatSpeechType
-            newObj.isOverrideRubyIsEnabled = obj.isOverrideRubyIsEnabled
-            newObj.notRubyCharactorStringArray = obj.notRubyCharactorStringArray
-            newObj.isIgnoreURIStringSpeechEnabled = obj.isIgnoreURIStringSpeechEnabled
-            newObj.targetNovelIDArray.removeAll()
-            newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)
-            to.add(newObj, update: .modified)
-            try to.commitWrite()
-        }
-    }
-
     static func CopyBookmark(from:Realm, to:Realm, progress:(String)->Void) throws {
         let objects = from.objects(RealmBookmark.self)
         let maxCount = objects.count
@@ -274,7 +256,6 @@ class RealmToRealmCopyTool: NSObject {
         try CopyGlobalState(from: from, to: to, progress: progress)
         try CopyDisplaySetting(from: from, to: to, progress: progress)
         try CopyNovelTag(from: from, to: to, progress: progress)
-        try CopySpeechOverrideSetting(from: from, to: to, progress: progress)
         try CopyBookmark(from: from, to: to, progress: progress)
         try CopyNovels(from: from, to: to, progress: progress)
         try CopyStorys(from: from, to: to, progress: progress)

@@ -601,7 +601,6 @@
 "RealmToRealmCopyTool_Progress_GlobalState" = "Migrating overall settings";
 "RealmToRealmCopyTool_Progress_DisplaySetting" = "Migrating settings such as display characters";
 "RealmToRealmCopyTool_Progress_NovelTag" = "Migrating tags";
-"RealmToRealmCopyTool_Progress_SpeechOverrideSetting" = "Migrating translation settings";
 "RealmToRealmCopyTool_Progress_Novel" = "Migrating novel information";
 "RealmToRealmCopyTool_Progress_Story" = "Migrating the novel text";
 "RealmToRealmCopyTool_Progress_Bookmark" = "Migrating bookmarks";

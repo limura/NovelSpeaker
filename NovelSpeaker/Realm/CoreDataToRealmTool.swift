@@ -29,7 +29,6 @@ class CoreDataToRealmTool: NSObject {
     private static func CreateRealmGlobalStateFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) {
         progress(NSLocalizedString("CoreDataToRealmTool_ProgressGLobalState", comment: "設定項目を変換中"))
         let realmState = RealmGlobalState()
-        let defaultSpeechOverrideSetting = RealmSpeechOverrideSetting()
         let defaultSpeaker = RealmSpeakerSetting()
         let defaultDisplaySetting = RealmDisplaySetting()
         
@@ -75,6 +74,10 @@ class CoreDataToRealmTool: NSObject {
         realmState.isPageTurningSoundEnabled = globalDataSingleton.isPageTurningSoundEnabled()
         realmState.backgroundColor = globalDataSingleton.getReadingColorSettingForBackgroundColor()
         realmState.foregroundColor = globalDataSingleton.getReadingColorSettingForForegroundColor()
+        realmState.repeatSpeechType = globalDataSingleton.getRepeatSpeechType()
+        realmState.isOverrideRubyIsEnabled = globalDataSingleton.getOverrideRubyIsEnabled()
+        realmState.notRubyCharactorStringArray = globalDataSingleton.getNotRubyCharactorStringArray()
+        realmState.isIgnoreURIStringSpeechEnabled = globalDataSingleton.getIsIgnoreURIStringSpeechEnabled()
 
         defaultDisplaySetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
         if let textSizeValue = globalState?.textSizeValue as? Float, textSizeValue >= 1.0 && textSizeValue <= 100 {
@@ -99,18 +102,11 @@ class CoreDataToRealmTool: NSObject {
         }
         defaultSpeaker.type = "AVSpeechThinsesizer"
         defaultSpeaker.locale = "ja-JP"
-        
-        defaultSpeechOverrideSetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
-        defaultSpeechOverrideSetting.repeatSpeechType = globalDataSingleton.getRepeatSpeechType()
-        defaultSpeechOverrideSetting.isOverrideRubyIsEnabled = globalDataSingleton.getOverrideRubyIsEnabled()
-        defaultSpeechOverrideSetting.notRubyCharactorStringArray = globalDataSingleton.getNotRubyCharactorStringArray()
-        defaultSpeechOverrideSetting.isIgnoreURIStringSpeechEnabled = globalDataSingleton.getIsIgnoreURIStringSpeechEnabled()
-        
+
         realmState.defaultDisplaySettingID = defaultDisplaySetting.name
         realmState.defaultSpeakerID = defaultSpeaker.name
-        realmState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.name
 
-        realm.add([defaultSpeechOverrideSetting, defaultSpeaker, defaultDisplaySetting, realmState], update: .modified)
+        realm.add([defaultSpeaker, defaultDisplaySetting, realmState], update: .modified)
     }
     
     private static func CreateRealmSpeakerSettingFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) {

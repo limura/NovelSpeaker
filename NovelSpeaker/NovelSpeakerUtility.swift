@@ -145,7 +145,6 @@ class NovelSpeakerUtility: NSObject {
         guard let globalState = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID) else { return false }
         if globalState.defaultSpeakerID.count <= 0
             || globalState.defaultDisplaySettingID.count <= 0
-            || globalState.defaultSpeechOverrideSettingID.count <= 0
             || globalState.webImportBookmarkArray.count <= 0 { return false }
         if realm.objects(RealmSpeakerSetting.self).count <= 0 { return false }
         if realm.objects(RealmSpeechSectionConfig.self).count <= 0 { return false }
@@ -178,12 +177,6 @@ class NovelSpeakerUtility: NSObject {
                         defaultSpeaker.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
                         globalState.defaultSpeakerID = defaultSpeaker.name
                         realm.add(defaultSpeaker, update: .modified)
-                    }
-                    if globalState.defaultSpeechOverrideSettingWith(realm: realm) == nil {
-                        let defaultSpeechOverrideSetting = RealmSpeechOverrideSetting()
-                        defaultSpeechOverrideSetting.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
-                        globalState.defaultSpeechOverrideSettingID = defaultSpeechOverrideSetting.name
-                        realm.add(defaultSpeechOverrideSetting, update: .modified)
                     }
                     if globalState.webImportBookmarkArray.count <= 0 {
                         let defaultBookmarks = [
@@ -605,7 +598,7 @@ class NovelSpeakerUtility: NSObject {
     
     static func RestoreMiscSettings_V_1_0_0(dic:NSDictionary) -> String? {
         return RealmUtil.RealmBlock { (realm) -> String? in
-            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let defaultSpeaker = globalState.defaultSpeakerWith(realm: realm), let speechOverrideSetting = globalState.defaultSpeechOverrideSettingWith(realm: realm), let defaultDisplaySetting = globalState.defaultDisplaySettingWith(realm: realm) else { return nil }
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let defaultSpeaker = globalState.defaultSpeakerWith(realm: realm), let defaultDisplaySetting = globalState.defaultDisplaySettingWith(realm: realm) else { return nil }
             var currentReadingContent:String? = nil
             RealmUtil.WriteWith(realm: realm) { (realm) in
                 if let max_speech_time_in_sec = dic.value(forKey: "max_speech_time_in_sec") as? NSNumber {
@@ -630,13 +623,13 @@ class NovelSpeakerUtility: NSObject {
                     globalState.isMenuItemIsAddNovelSpeakerItemsOnly = menuitem_is_add_speech_mod_setting_only.boolValue
                 }
                 if let override_ruby_is_enabled = dic.value(forKey: "override_ruby_is_enabled") as? NSNumber {
-                    speechOverrideSetting.isOverrideRubyIsEnabled = override_ruby_is_enabled.boolValue
+                    globalState.isOverrideRubyIsEnabled = override_ruby_is_enabled.boolValue
                 }
                 if let is_ignore_url_speech_enabled = dic.value(forKey: "is_ignore_url_speech_enabled") as? NSNumber {
-                    speechOverrideSetting.isIgnoreURIStringSpeechEnabled = is_ignore_url_speech_enabled.boolValue
+                    globalState.isIgnoreURIStringSpeechEnabled = is_ignore_url_speech_enabled.boolValue
                 }
                 if let not_ruby_charactor_array = dic.value(forKey: "not_ruby_charactor_array") as? String {
-                    speechOverrideSetting.notRubyCharactorStringArray = not_ruby_charactor_array
+                    globalState.notRubyCharactorStringArray = not_ruby_charactor_array
                 }
                 if let force_siteinfo_reload_is_enabled = dic.value(forKey: "force_siteinfo_reload_is_enabled") as? NSNumber {
                     RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: force_siteinfo_reload_is_enabled.boolValue)
@@ -657,7 +650,7 @@ class NovelSpeakerUtility: NSObject {
                     defaultDisplaySetting.fontID = display_font_name
                 }
                 if let repeat_speech_type = dic.value(forKey: "repeat_speech_type") as? NSNumber {
-                    speechOverrideSetting.repeatSpeechType = RepeatSpeechType(rawValue: repeat_speech_type.uintValue) ?? RepeatSpeechType.noRepeat
+                    globalState.repeatSpeechType = RepeatSpeechType(rawValue: repeat_speech_type.uintValue) ?? RepeatSpeechType.noRepeat
                 }
                 /* /// この設定はバックアップデータからの読み込みを停止します
                 if let is_escape_about_speech_position_display_bug_on_ios12_enabled = dic.value(forKey: "is_escape_about_speech_position_display_bug_on_ios12_enabled") as? NSNumber {
@@ -1275,46 +1268,6 @@ class NovelSpeakerUtility: NSObject {
         }
     }
 
-    static func RestoreSpeechOverrideSettings_V_2_0_0(speechOverrideSettingArray:NSArray, defaultSpeechOverrideSettingID:String, progressUpdate:@escaping(String)->Void) {
-        for overrideSettingDic in speechOverrideSettingArray {
-            guard let overrideSettingDic = overrideSettingDic as? NSDictionary,
-                let name = overrideSettingDic.object(forKey: "name") as? String else { continue }
-            RealmUtil.RealmBlock { (realm) -> Void in
-                let setting = RealmSpeechOverrideSetting.SearchObjectFromWith(realm: realm, name: name) ?? RealmSpeechOverrideSetting()
-                if setting.name != name {
-                    setting.name = name
-                }
-                RealmUtil.WriteWith(realm: realm) { (realm) in
-                    if let createdDateString = overrideSettingDic.object(forKey: "createdDate") as? String,
-                        let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
-                        setting.createdDate = createdDate
-                    }
-                    if let repeatSpeechType = overrideSettingDic.object(forKey: "repeatSpeechType") as? NSNumber {
-                        setting.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.uintValue) ?? RepeatSpeechType.noRepeat
-                    }
-                    if let isOverrideRubyIsEnabled = overrideSettingDic.object(forKey: "isOverrideRubyIsEnabled") as?   NSNumber {
-                        setting.isOverrideRubyIsEnabled = isOverrideRubyIsEnabled.boolValue
-                    }
-                    if let notRubyCharactorStringArray = overrideSettingDic.object(forKey:  "notRubyCharactorStringArray") as? String {
-                        setting.notRubyCharactorStringArray = notRubyCharactorStringArray
-                    }
-                    if let isIgnoreURIStringSpeechEnabled = overrideSettingDic.object(forKey:   "isIgnoreURIStringSpeechEnabled") as? NSNumber {
-                        setting.isIgnoreURIStringSpeechEnabled = isIgnoreURIStringSpeechEnabled.boolValue
-                    }
-                    setting.targetNovelIDArray.removeAll()
-                    if let targetNovelIDArray = overrideSettingDic.object(forKey: "targetNovelIDArray") as? NSArray {
-                        for novelID in targetNovelIDArray {
-                            guard let novelID = novelID as? String else { continue }
-                            setting.targetNovelIDArray.append(novelID)
-                        }
-                    }
-                    realm.add(setting, update: .modified)
-                }
-            }
-        }
-    }
-
-
     static func RestoreGlobalState_V_2_0_0(dic:NSDictionary, progressUpdate:@escaping(String)->Void) {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
@@ -1417,6 +1370,18 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if let m_DisplayType = dic.object(forKey: "novelDisplayType") as? NSNumber, let displayType = NovelDisplayType(rawValue: m_DisplayType.intValue) {
                     globalState.novelDisplayType = displayType
+                }
+                if let repeatSpeechType = dic.object(forKey: "repeatSpeechType") as? NSNumber {
+                    globalState.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.uintValue) ?? RepeatSpeechType.noRepeat
+                }
+                if let isOverrideRubyIsEnabled = dic.object(forKey: "isOverrideRubyIsEnabled") as?   NSNumber {
+                    globalState.isOverrideRubyIsEnabled = isOverrideRubyIsEnabled.boolValue
+                }
+                if let notRubyCharactorStringArray = dic.object(forKey:  "notRubyCharactorStringArray") as? String {
+                    globalState.notRubyCharactorStringArray = notRubyCharactorStringArray
+                }
+                if let isIgnoreURIStringSpeechEnabled = dic.object(forKey:   "isIgnoreURIStringSpeechEnabled") as? NSNumber {
+                    globalState.isIgnoreURIStringSpeechEnabled = isIgnoreURIStringSpeechEnabled.boolValue
                 }
             }
         }
@@ -1565,7 +1530,7 @@ class NovelSpeakerUtility: NSObject {
         if let bookmarks = toplevelDictionary.object(forKey: "bookmark") as? NSArray {
             RestoreBookmark_V_2_0_0(bookmarkArray: bookmarks, progressUpdate: progressUpdate)
         }
-        // misc_settings には defaultDisplaySettingID,defaultSpeakerID,defaultSpeechOverrideSettingID が入っているので
+        // misc_settings には defaultDisplaySettingID,defaultSpeakerID が入っているので
         // 先に取り出しておかないと良くないことがおきます(´・ω・`)
         if let globalStateDic = toplevelDictionary.object(forKey: "misc_settings") as? NSDictionary {
             if let defaultSpeakerID = globalStateDic.object(forKey: "defaultSpeakerID") as? String, let speaker_setting = toplevelDictionary.object(forKey: "speaker_setting") as? NSArray {
@@ -1573,9 +1538,6 @@ class NovelSpeakerUtility: NSObject {
             }
             if let defaultDisplaySettingID = globalStateDic.object(forKey: "defaultDisplaySettingID") as? String, let display_setting = toplevelDictionary.object(forKey: "display_setting") as? NSArray {
                 RestoreDisplaySettings_V_2_0_0(displaySettingArray:display_setting, defaultSpeakerSettingID:defaultDisplaySettingID, progressUpdate: progressUpdate)
-            }
-            if let defaultSpeechOverrideSettingID = globalStateDic.object(forKey: "defaultSpeechOverrideSettingID") as? String, let speech_override_setting = toplevelDictionary.object(forKey: "speech_override_setting") as? NSArray {
-                RestoreSpeechOverrideSettings_V_2_0_0(speechOverrideSettingArray:speech_override_setting, defaultSpeechOverrideSettingID:defaultSpeechOverrideSettingID, progressUpdate: progressUpdate)
             }
             
             RestoreGlobalState_V_2_0_0(dic:globalStateDic, progressUpdate: progressUpdate)
@@ -1911,7 +1873,10 @@ class NovelSpeakerUtility: NSObject {
 
                 "defaultDisplaySettingID": globalState.defaultDisplaySettingID,
                 "defaultSpeakerID": globalState.defaultSpeakerID,
-                "defaultSpeechOverrideSettingID": globalState.defaultSpeechOverrideSettingID
+                "repeatSpeechType": globalState.m_repeatSpeechType,
+                "isOverrideRubyIsEnabled": globalState.isOverrideRubyIsEnabled,
+                "notRubyCharactorStringArray": globalState.notRubyCharactorStringArray,
+                "isIgnoreURIStringSpeechEnabled": globalState.isIgnoreURIStringSpeechEnabled,
             ]
         }
     }
@@ -1942,24 +1907,6 @@ class NovelSpeakerUtility: NSObject {
                     "type": setting.type,
                     "hint": setting.hint,
                     "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),
-                    "targetNovelIDArray": Array(setting.targetNovelIDArray)
-                ])
-            }
-            return result
-        }
-    }
-    fileprivate static func CreateBackupDataDictionary_SpeechOverrideSetting() -> [[String:Any]] {
-        return RealmUtil.RealmBlock { (realm) -> [[String:Any]] in
-            var result:[[String:Any]] = []
-            guard let targetArray = RealmSpeechOverrideSetting.GetAllObjectsWith(realm: realm) else { return result }
-            for setting in targetArray {
-                result.append([
-                    "name": setting.name,
-                    "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),
-                    "repeatSpeechType": setting.m_repeatSpeechType,
-                    "isOverrideRubyIsEnabled": setting.isOverrideRubyIsEnabled,
-                    "notRubyCharactorStringArray": setting.notRubyCharactorStringArray,
-                    "isIgnoreURIStringSpeechEnabled": setting.isIgnoreURIStringSpeechEnabled,
                     "targetNovelIDArray": Array(setting.targetNovelIDArray)
                 ])
             }
@@ -2033,7 +1980,6 @@ class NovelSpeakerUtility: NSObject {
                 "misc_settings": CreateBackupDataDictionary_GlobalState(),
                 "display_setting": CreateBackupDataDictionary_DisplaySetting(),
                 "novel_tag": CreateBackupDataDictionary_NovelTag(),
-                "speech_override_setting": CreateBackupDataDictionary_SpeechOverrideSetting(),
                 "bookmark": CreateBackupDataDictionary_Bookmark(),
             ]
         }
