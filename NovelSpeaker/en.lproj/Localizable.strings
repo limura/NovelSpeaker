@@ -659,6 +659,8 @@
 "SpeechViewButtonType_Detail" = "Show novel detail";
 "SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "Go to the updated %d chapter on the other device";
 
+"MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "The specified speaker was not available on this machine. I will use an alternative speaker.";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";

@@ -222,7 +222,7 @@
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotSelectSpeaker_title" = "話者を選択できません";
-"DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeaker_message" = "選択できる話者データが一つ以下です。\n設定アプリ→一般→アクセシビリティ→スピーチ→声→日本語\nと手繰っていった所で音声データをダウンロードしてから、もう一度お試しください。";
+"DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeaker_message" = "選択できる話者データが一つ以下です。\n設定アプリ → アクセシビリティ → 読み上げコンテンツ → 声 → 日本語\nと手繰っていった所で音声データをダウンロードしてから、もう一度お試しください。";
 "SpeakSettingsTableViewController_ReadTheSentenceForTest" = "ここに書いた文をテストで読み上げます。";
 "SpeechModSettingsTableViewController_DisplayPattern" = "\"%@\" を \"%@\" に";
 "SpeechModSettingsTableViewController_SpeakTestPattern" = "%@を%@に";
@@ -493,7 +493,7 @@
 "SpeakSettingsViewController_LangageTitle" = "言語";
 "SpeakSettingsViewController_LanguageDialogTitle" = "言語を選択してください";
 "SpeakSettingsViewController_VoiceIdentifierTitle" = "話者";
-"SpeakSettingsViewController_VoiceIdentifierDialogTitle" = "話者を選択してください\n\n話者は 設定アプリ → 一般 → アクセシビリティ → スピーチ → 声 → 日本語 等からダウンロードすることで増やすこともできます";
+"SpeakSettingsViewController_VoiceIdentifierDialogTitle" = "話者を選択してください\n\n話者は 設定アプリ → アクセシビリティ → 読み上げコンテンツ → 声 → 日本語 等からダウンロードすることで増やすこともできます";
 "SpeakSettingsViewController_TestSpeechButtonTitle" = "発音テスト";
 "SpeakerSettingsViewController_RemoveButtonRow" = "この話者の設定を削除";
 "SpeakSettingsViewController_ConifirmRemoveTitle" = "この設定を削除しますか？";
@@ -651,6 +651,8 @@
 "SpeechViewButtonType_Backup" = "小説をバックアップする";
 "SpeechViewButtonSettingsViewController_Title" = "小説本文画面の右上に表示されるボタン群の設定";
 "SpeechViewButtonType_Detail" = "小説の詳細を表示する";
+
+"MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
