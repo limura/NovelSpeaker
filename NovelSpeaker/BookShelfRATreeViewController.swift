@@ -1040,7 +1040,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                         if cellItemChild.novelID == novelID {
                             self.treeView?.expandRow(forItem: cellItem)
                             self.treeView?.selectRow(forItem: cellItemChild, animated: false, scrollPosition: RATreeViewScrollPositionNone)
-                            return
+                            break
                         }
                     }
                 }
