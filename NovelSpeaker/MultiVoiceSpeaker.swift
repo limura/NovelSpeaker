@@ -73,14 +73,61 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     fileprivate var speechQueue:[SpeechQueue] = []
     var isStopping = false
     
+    // 指定された話者のidentifierに対して「似ていると思われる(要定義)」話者を生成して返します。
+    // 失敗する事は有り得ます。
+    // 仕組みとしては、identifier がこんな感じなので
+    // com.apple.ttsbundle.siri_female_ja-JP_premium
+    // これを ["com", "apple", "ttsbundle", "siri", "female", "ja", "JP", "premium"] という形に分割して、
+    // 同じ文字列が何個あったか、で個数の多い奴が「近い」と判定します。
+    func getNearVoice(voiceIdentifier:String, targetLocale:String?) -> AVSpeechSynthesisVoice? {
+        func voiceNameToWordList(identifier:String) -> [String] {
+            return identifier.components(separatedBy: CharacterSet(charactersIn: "._-"))
+        }
+        func calcNearWordList(from:[String], to:[String]) -> Int {
+            var hit:Int = 0
+            for fromString in from {
+                for toString in to {
+                    if fromString == toString {
+                        hit += 1
+                    }
+                }
+            }
+            return hit
+        }
+        let targetWordList = voiceNameToWordList(identifier: voiceIdentifier)
+        var voiceList = AVSpeechSynthesisVoice.speechVoices()
+        if let locale = targetLocale, let country = locale.components(separatedBy: "_").first {
+            voiceList = voiceList.filter({$0.language.range(of: country)?.lowerBound == $0.language.startIndex})
+        }
+        var currentNearNum:Int = -1
+        var currentVoice:AVSpeechSynthesisVoice? = nil
+        for voice in voiceList {
+            let currentWordList = voiceNameToWordList(identifier: voice.identifier)
+            let nearNum = calcNearWordList(from: targetWordList, to: currentWordList)
+            if nearNum > currentNearNum {
+                currentVoice = voice
+                currentNearNum = nearNum
+            }
+        }
+        return currentVoice
+    }
+    
     func getVoice(voiceIdentifier:String?, fallbackLocale:String?) -> AVSpeechSynthesisVoice {
         if let voiceIdentifierNotNil = voiceIdentifier, let voice = voiceCache[voiceIdentifierNotNil] { return voice }
         if let voiceIdentifierNotNil = voiceIdentifier ,let voice = AVSpeechSynthesisVoice(identifier: voiceIdentifierNotNil) {
             voiceCache[voiceIdentifierNotNil] = voice
             return voice
         }
+        if let voiceIdentifierNotNil = voiceIdentifier, let voice = getNearVoice(voiceIdentifier: voiceIdentifierNotNil, targetLocale: fallbackLocale) {
+            voiceCache[voice.identifier] = voice
+            voiceCache[voiceIdentifierNotNil] = voice
+            return voice
+        }
         if let locale = fallbackLocale, let voice = AVSpeechSynthesisVoice(language: locale) {
             voiceCache[voice.identifier] = voice
+            if let voiceIdentifierNotNil = voiceIdentifier, voiceIdentifierNotNil.count > 0 {
+                voiceCache[voiceIdentifierNotNil] = voice
+            }
             return voice
         }
         return defaultVoice
@@ -93,6 +140,9 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         speaker.voice = voice
         speaker.delegate = self
         speakerCache[voice.identifier] = speaker
+        if let voiceIdentifierNotNil = voiceIdentifier, voiceIdentifierNotNil != voice.identifier {
+            speakerCache[voiceIdentifierNotNil] = speaker
+        }
         return speaker
     }
     
