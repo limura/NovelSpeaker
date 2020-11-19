@@ -52,7 +52,7 @@ class FolderAddButtonRow: TableViewRow, MultipleNovelIDSelectorDelegate {
     }
     @objc func tapGestureEvent() {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let novelIDArray = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Bookshelf)?.targetNovelIDArray, let parent = self.parentViewController else { return }
+            guard let novelIDArray = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Folder)?.targetNovelIDArray, let parent = self.parentViewController else { return }
             DispatchQueue.main.async {
                 let nextViewController = MultipleNovelIDSelectorViewController()
                 var set = Set<String>()
@@ -70,7 +70,7 @@ class FolderAddButtonRow: TableViewRow, MultipleNovelIDSelectorDelegate {
     
     func MultipleNovelIDSelectorSelected(selectedNovelIDSet: Set<String>, hint: String) {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let folder = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Bookshelf) else { return }
+            guard let folder = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Folder) else { return }
             var set = selectedNovelIDSet
             var newNovelIDArray:[String] = []
             for novelID in folder.targetNovelIDArray {
@@ -128,7 +128,7 @@ class FolderDeleteFolderButtonRow: TableViewRow {
             guard let parentViewController = self.parentViewController else { return }
             NiftyUtilitySwift.EasyDialogTwoButton(viewController: parentViewController, title: NSLocalizedString("NovelFolderManageTableViewController_ConifirmRemoveFolder_Title", comment: "フォルダの削除"), message: String(format: NSLocalizedString("NovelFolderManageTableViewController_ConfifirmRemoveFolder_Message_Format", comment: "フォルダ %@ を削除しますか？"), self.folderName), button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("NovelFolderManageTableViewController_ConifirmRemoveFolder_OKButton", comment: "削除")) {
                 RealmUtil.Write { (realm) in
-                    guard let folder = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Bookshelf) else { return }
+                    guard let folder = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Folder) else { return }
                     folder.delete(realm: realm)
                 }
                 guard let parent = self.parentViewController as? NovelFolderManageTableViewController else { return }
@@ -187,7 +187,7 @@ class FolderSection:TableViewSection {
         let row = self.rows.remove(at: index)
         if let folderRow = row as? FolderRow {
             RealmUtil.Write { (realm) in
-                guard let folder = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Bookshelf), let index = folder.targetNovelIDArray.index(of: folderRow.novelID) else { return }
+                guard let folder = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Folder), let index = folder.targetNovelIDArray.index(of: folderRow.novelID) else { return }
                 folder.targetNovelIDArray.remove(at: index)
                 realm.add(folder, update: .modified)
             }
@@ -263,13 +263,13 @@ class ManageSectionAddRow: TableViewRow {
                     return
                 }
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    if let _ = RealmNovelTag.SearchWith(realm: realm, name: name, type: RealmNovelTag.TagType.Bookshelf) {
+                    if let _ = RealmNovelTag.SearchWith(realm: realm, name: name, type: RealmNovelTag.TagType.Folder) {
                         guard let parentViewController = self.parentViewController else { return }
                         NiftyUtilitySwift.EasyDialogOneButton(viewController: parentViewController, title: nil, message: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_Error_SameNameAlive", comment: "同じ名前のフォルダが既に定義されています"), buttonTitle: nil, buttonAction: nil)
                         return
                     }
                     RealmUtil.WriteWith(realm: realm) { (realm) in
-                        let tag = RealmNovelTag.CreateNewTag(name: name, type: RealmNovelTag.TagType.Bookshelf)
+                        let tag = RealmNovelTag.CreateNewTag(name: name, type: RealmNovelTag.TagType.Folder)
                         realm.add(tag, update: .modified)
                     }
                     guard let parentTableViewController = self.parentViewController as? NovelFolderManageTableViewController else { return }
@@ -359,7 +359,7 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
     
     func registerObserver() {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let tagArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Bookshelf) else { return }
+            guard let tagArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
             self.realmNovelTagObserverToken = tagArray.observe({ (change) in
                 switch change {
                 case .update(_, _, _, _):
@@ -482,7 +482,7 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
     func LoadFolder() {
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
-                guard let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Bookshelf) else { return }
+                guard let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
                 var newFolderSectionArray:[TableViewSection] = [ManageSection(parentViewController: self)]
                 for folder in folderArray {
                     let rows:[FolderRow]
@@ -504,7 +504,7 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
     
     func saveFolderOrder() {
         RealmUtil.Write(block: { (realm) in
-            guard let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Bookshelf) else { return }
+            guard let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
             var novelIDArrayDictionary:[String:[String]] = [:]
             for section in self.folderSectionArray {
                 if let folderSection = section as? FolderSection, let title = folderSection.getTitle() {

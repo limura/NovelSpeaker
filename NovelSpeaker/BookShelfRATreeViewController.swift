@@ -222,7 +222,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return Array(allNovels.sorted(byKeyPath: "likeLevel", ascending: false))
         case .title:
             fallthrough
-        case .selfCreatedBookshelf:
+        case .selfCreatedFolder:
             fallthrough
         case .keywordTag:
             fallthrough
@@ -342,9 +342,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     // 自作のフォルダでフォルダ分けします
-    func createBookShelfTagBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
+    func createBookShelfTagFolderRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
         return RealmUtil.RealmBlock { (realm) -> [BookShelfRATreeViewCellData] in
-            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.title), let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Bookshelf) else { return [] }
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.title), let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return [] }
             var result = [BookShelfRATreeViewCellData]()
             var listedNovelIDSet = Set<String>()
             for tag in tags {
@@ -480,8 +480,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return createLastReadDateBookShelfRATreeViewCellDataTreeWithoutFolder()
         case .writer:
             return createWriterBookShelfRATreeViewCellDataTree()
-        case .selfCreatedBookshelf:
-            return createBookShelfTagBookShelfRATreeViewCellDataTree()
+        case .selfCreatedFolder:
+            return createBookShelfTagFolderRATreeViewCellDataTree()
         case .keywordTag:
             return createBookShelfKeywordTagRATreeViewCellDataTree()
         case .likeLevel:
@@ -565,7 +565,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             NSLocalizedString("BookShelfTableViewController_SortTypeWriter", comment: "作者名順"): NarouContentSortType.writer
             , NSLocalizedString("BookShelfTableViewController_SortTypeNovelName", comment: "小説名順"): NarouContentSortType.title
             , NSLocalizedString("BookShelfTableViewController_SortTypeUpdateDate", comment: "更新順"): NarouContentSortType.novelUpdatedAt
-            , NSLocalizedString("BookShelfRATreeViewController_SortTypeBookshelf", comment: "自作フォルダ順"): NarouContentSortType.selfCreatedBookshelf
+            , NSLocalizedString("BookShelfRATreeViewController_SortTypeFolder", comment: "自作フォルダ順"): NarouContentSortType.selfCreatedFolder
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeKeywardTag", comment: "タグ名順"): NarouContentSortType.keywordTag
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeUpdateDateWithFilder", comment: "最終ダウンロード順(フォルダ分類版)"): NarouContentSortType.novelUpdatedAtWithFolder
             , NSLocalizedString("BookShelfRATreeViewController_StoryTypeLastReadDate", comment: "小説を開いた日時順"): NarouContentSortType.lastReadDate

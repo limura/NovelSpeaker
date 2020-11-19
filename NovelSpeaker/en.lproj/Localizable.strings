@@ -583,7 +583,7 @@
 "BookShelfRATreeViewController_UnknownWriter" = "(unknown name)";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseNoStory" = "It seems that no text of the novel has been downloaded. Do you try to redownload this novel?";
 "BookShelfRATreeViewController_BookshelfNoListed" = "(Uncategorized)";
-"BookShelfRATreeViewController_SortTypeBookshelf" = "Original folder order";
+"BookShelfRATreeViewController_SortTypeFolder" = "Original folder order";
 "BookShelfRATreeViewController_SortTypeKeywardTag" = "Keyword Tag order";
 "BookShelfRATreeViewController_SortTypeUpdateDateWithFilder" = "Last download date (with folder)";
 "BookShelfRATreeViewController_StoryTypeLastReadDate" = "Last read date";

@@ -2291,7 +2291,7 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     
     struct TagType {
         static let Keyword = "keyword"
-        static let Bookshelf = "bookshelf"
+        static let Folder = "folder"
     }
     
     func targetNovelArrayWith(realm:Realm) -> [RealmNovel]? {

@@ -1079,7 +1079,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 }
                             }
                             return
-                        }else if repeatSpeechType == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Bookshelf) {
+                        }else if repeatSpeechType == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Folder) {
                             var novelIDSet = Set<String>()
                             for folder in folderArray {
                                 for novelID in folder.targetNovelIDArray {

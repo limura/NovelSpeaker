@@ -574,7 +574,7 @@
 "BookShelfRATreeViewController_UnknownWriter" = "(作者名不明)";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseNoStory" = "本文が何も読み込まれていないようです。この小説の再ダウンロードを試みますか？";
 "BookShelfRATreeViewController_BookshelfNoListed" = "(未分類)";
-"BookShelfRATreeViewController_SortTypeBookshelf" = "自作フォルダ順";
+"BookShelfRATreeViewController_SortTypeFolder" = "自作フォルダ順";
 "BookShelfRATreeViewController_SortTypeKeywardTag" = "タグ名順";
 "BookShelfRATreeViewController_SortTypeUpdateDateWithFilder" = "最終ダウンロード日時順(フォルダ分類版)";
 "BookShelfRATreeViewController_StoryTypeLastReadDate" = "小説を開いた日時順";

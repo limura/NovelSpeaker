@@ -29,7 +29,7 @@ class AssignNovelFolderViewController: FormViewController {
     
     func createCells() {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Bookshelf) else { return }
+            guard let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
             
             let section = Section()
             for tag in tags {
@@ -57,7 +57,7 @@ class AssignNovelFolderViewController: FormViewController {
                         guard let value = row.value, let tag = RealmNovelTag.SearchWith(realm: realm, name: tagName, type: tagType) else { return }
                         if value {
                             RealmUtil.WriteWith(realm: realm, block: { (realm) in
-                                RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: self.targetNovelID, type: RealmNovelTag.TagType.Bookshelf)
+                                RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: self.targetNovelID, type: RealmNovelTag.TagType.Folder)
                             })
                         }else{
                             RealmUtil.WriteWith(realm: realm, block: { (realm) in
@@ -82,14 +82,14 @@ class AssignNovelFolderViewController: FormViewController {
                 placeHolder: NSLocalizedString("AssignNovelFolderViewController_CreateNewTagPlaceHolder", comment: "同じ名前のフォルダは生成できません"),
                 action: { (name) in
                     RealmUtil.RealmBlock { (realm) -> Void in
-                        if RealmNovelTag.SearchWith(realm: realm, name: name, type: RealmNovelTag.TagType.Bookshelf) != nil {
+                        if RealmNovelTag.SearchWith(realm: realm, name: name, type: RealmNovelTag.TagType.Folder) != nil {
                             DispatchQueue.main.async {
                                 NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("AssignNovelFolderViewController_CreateNewTagPlaceHolder", comment: "同じ名前のフォルダは生成できません"))
                             }
                             return
                         }
                         RealmUtil.WriteWith(realm: realm, block: { (realm) in
-                            RealmNovelTag.AddTag(realm: realm, name: name, novelID: self.targetNovelID, type: RealmNovelTag.TagType.Bookshelf)
+                            RealmNovelTag.AddTag(realm: realm, name: name, novelID: self.targetNovelID, type: RealmNovelTag.TagType.Folder)
                         })
                     }
                     DispatchQueue.main.async {

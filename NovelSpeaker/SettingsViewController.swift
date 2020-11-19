@@ -450,7 +450,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.RepeatSpeechStringToType(typeString: typeString) else { return }
-                    if type == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Bookshelf), folderArray.count <= 0, let typeString = NovelSpeakerUtility.RepeatSpeechTypeToString(type: globalState.repeatSpeechType) {
+                    if type == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder), folderArray.count <= 0, let typeString = NovelSpeakerUtility.RepeatSpeechTypeToString(type: globalState.repeatSpeechType) {
                         DispatchQueue.main.async {
                             row.value = typeString
                             row.updateCell()
