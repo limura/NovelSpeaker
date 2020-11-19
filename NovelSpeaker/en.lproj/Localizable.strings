@@ -183,7 +183,8 @@
 "SettingsViewController_ClearWebSearchSiteInfoCache_done" = "I set it to reload when I return to the Web search tab.";
 "SettingsViewController_AutoSplitStringSetting" = "Text segmentation character string setting (setting to divide and read by a specific character string when trying to read a sentence of only one page)";
 "SettingsViewController_RemoteDataURLSetting" = "Setting URL for internal data reference";
-"SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "It seems that no folders have been created. This setting is not available unless the folder has been created.\nTo create a folder, open the novel on the bookshelf tab, press the \"Details\" button in the upper right, and then select \"Classify to folder\" from the novel details screen that appears to add the folder.";
+"SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "It seems that no folder has been created. This setting is not available unless the folder has been created.\nTo create a folder, edit it by selecting \"Settings tab\" -> \"Edit your own folder\", or open the novel in the \"Bookshelf tab\" and press the \"Details\" button in the upper right corner. Select \"Classify to Folder\" from the details screen of and add a folder.";
+"SettingsViewController_ManageFolderOrderButton" = "Edit folder";
 
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "Confirm when deleting a novel";
 "SettingTableViewController_RepeatTypeTitle" = "Operation at the end of playback";
@@ -191,7 +192,7 @@
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "Play from the beginning";
 "SettingTableViewController_RepeatType_RewindToThisStory" = "Replay the current chapter";
 "SettingTableViewController_RepeatType_GoToNextLikeNovel" = "Play unread ones out of your favorites";
-"SettingTableViewController_RepeatType_GoToNextFolderdNovel" = "Play unread novels in the same folder";
+"SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "Play unread novels in the same folder";
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "A hotfix to unsynced audio and reading progress to IOS 12";
 "SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "Confirm";
 "SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "When this setting is enabled, it is set to change to \"α\"(alpha) for possible characters (such as blanks and line feeds are not displayed) that are thought to be wrong with the reading position display being read aloud.\nAt the time of implementing this function, \"α\"(alpha) is a character that can not be read aloud, so it seems that it will be a problematic operation in general. However, there is a possibility that it will be read aloud as iOS due to change in iOS speech synthesis engine side in the future.\nAlso, iOS 12 (or later) is supposed to need this function.\nDo you enable this setting after understanding the above?";
@@ -660,6 +661,18 @@
 "SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "Go to the updated %d chapter on the other device";
 
 "MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "The specified speaker was not available on this machine. I will use an alternative speaker.";
+
+"NovelFolderManageTableViewController_AddButtonTitle" = "Select a novel to put in this folder";
+"NovelFolderManageTableViewController_DeleteButtonTitle" = "Delete this folder";
+"NovelFolderManageTableViewController_ConifirmRemoveFolder_Title" = "Delete folder";
+"NovelFolderManageTableViewController_ConfifirmRemoveFolder_Message_Format" = "Do you want to delete the folder %@?";
+"NovelFolderManageTableViewController_ConifirmRemoveFolder_OKButton" = "Delete folder";
+"NovelFolderManageTableViewController_ManageRow_AddNewSection_Title" = "Add a new folder";
+"NovelFolderManageTableViewController_CreateNewFolderMessage" = "Please enter the name of the newly created folder";
+"NovelFolderManageTableViewController_CreateNewFolder_PlaceHolderMessage" = "You cannot specify a name or empty string that already exists";
+"NovelFolderManageTableViewController_CreateNewFolder_Error_NoName" = "Empty string cannot be specified";
+"NovelFolderManageTableViewController_CreateNewFolder_Error_SameNameAlive" = "A folder with the same name has already been defined";
+"NovelFolderManageTableViewController_Title" = "Edit folders";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

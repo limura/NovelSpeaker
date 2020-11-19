@@ -597,6 +597,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            <<< ButtonRow() { (row) in
+                row.title = NSLocalizedString("SettingsViewController_ManageFolderOrderButton", comment: "自作フォルダを編集する")
+                row.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                let nextViewController = NovelFolderManageTableViewController()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
             <<< SwitchRow("IsUseiCloud") {
                 $0.title = NSLocalizedString("SettingsViewController_IsUseiCloud_Title", comment: "iCloud 同期を使用する")
                 $0.value = RealmUtil.IsUseCloudRealm()

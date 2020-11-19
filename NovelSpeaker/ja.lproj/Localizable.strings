@@ -168,7 +168,8 @@
 "SettingsViewController_ClearWebSearchSiteInfoCache_done" = "Web検索タブに戻ると読み込み直すように設定しました。";
 "SettingsViewController_AutoSplitStringSetting" = "テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)";
 "SettingsViewController_RemoteDataURLSetting" = "内部データ参照用URLの設定";
-"SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "フォルダが一つも作成されていないようです。フォルダを作成されていないとこの設定は利用できません。\nフォルダを作成するには、本棚タブで小説を開いて右上にある「詳細」ボタンを押した後に出てくる小説の詳細画面から「フォルダへ分類」を選択してフォルダを追加してください。";
+"SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "自作フォルダが一つも作成されていないようです。フォルダを作成されていないとこの設定は利用できません。\nフォルダを作成するには、「設定タブ」→「自作フォルダを編集する」で編集するか、「本棚タブ」で小説を開いて右上にある「詳細」ボタンを押した後に出てくる小説の詳細画面から「フォルダへ分類」を選択してフォルダを追加してください。";
+"SettingsViewController_ManageFolderOrderButton" = "自作フォルダを編集する";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";
@@ -649,10 +650,22 @@
 "SpeechViewButtonType_Edit" = "小説を編集する";
 "SpeechViewButtonType_CopyTitle" = "小説名をコピーする";
 "SpeechViewButtonType_Backup" = "小説をバックアップする";
-"SpeechViewButtonSettingsViewController_Title" = "小説本文画面の右上に表示されるボタン群の設定";
+"SpeechViewButtonSettingsViewController_Title" = "小説本文画面の右上に表示されるボタン群の編集";
 "SpeechViewButtonType_Detail" = "小説の詳細を表示する";
 
 "MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします";
+
+"NovelFolderManageTableViewController_AddButtonTitle" = "このフォルダに入れる小説を選択する";
+"NovelFolderManageTableViewController_DeleteButtonTitle" = "このフォルダを削除する";
+"NovelFolderManageTableViewController_ConifirmRemoveFolder_Title" = "フォルダの削除";
+"NovelFolderManageTableViewController_ConfifirmRemoveFolder_Message_Format" = "フォルダ %@ を削除しますか？";
+"NovelFolderManageTableViewController_ConifirmRemoveFolder_OKButton" = "削除";
+"NovelFolderManageTableViewController_ManageRow_AddNewSection_Title" = "新しいフォルダを追加する";
+"NovelFolderManageTableViewController_CreateNewFolderMessage" = "新しく作成するフォルダ名を入力してください";
+"NovelFolderManageTableViewController_CreateNewFolder_PlaceHolderMessage" = "既に存在する名前や空文字列は指定できません";
+"NovelFolderManageTableViewController_CreateNewFolder_Error_NoName" = "空文字列は指定できません";
+"NovelFolderManageTableViewController_CreateNewFolder_Error_SameNameAlive" = "同じ名前のフォルダが既に定義されています";
+"NovelFolderManageTableViewController_Title" = "自作フォルダの編集";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

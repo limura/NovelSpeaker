@@ -54,7 +54,6 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        print("MultipleNovelIDSelectorViewController.viewWillDisappear()")
         guard let delegate = self.delegate else { return }
         delegate.MultipleNovelIDSelectorSelected(selectedNovelIDSet: self.SelectedNovelIDSet, hint: self.Hint)
     }

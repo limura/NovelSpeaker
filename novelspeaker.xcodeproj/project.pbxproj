@@ -187,6 +187,7 @@
 		21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
 		21A4C75124EF9AF300038883 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
 		21A4C75624F6776500038883 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
+		21AA7FCF25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AA7FCE25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
 		21AFDF3421665B67002F34D9 /* Silent3sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */; };
 		21B539F819603737009658B7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B539F719603737009658B7 /* CoreData.framework */; };
@@ -524,6 +525,7 @@
 		21A4F71D19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F71E19B1B465007CCD32 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		21A4F74119B1B758007CCD32 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
+		21AA7FCE25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelFolderManageTableViewController.swift; sourceTree = "<group>"; };
 		21AED5D419B335CF00CE846D /* ReleaseMemo.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReleaseMemo.md; sourceTree = "<group>"; };
 		21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummySoundLooper.swift; sourceTree = "<group>"; };
 		21AFDF3321665B66002F34D9 /* Silent3sec.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Silent3sec.mp3; sourceTree = "<group>"; };
@@ -1114,6 +1116,7 @@
 				218E81E82518F0BE0041A1B5 /* AutoSplitStringSettingViewController.swift */,
 				218E81FB251997E30041A1B5 /* RemoteDataURLSettingViewController.swift */,
 				21BB5095253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift */,
+				21AA7FCE25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1759,6 +1762,7 @@
 				2191639F19AF7E98003FF7FC /* CoreDataObjectHolder.m in Sources */,
 				217DCC5225119B9A00952A17 /* RealmObserverHandler.swift in Sources */,
 				212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */,
+				21AA7FCF25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
