@@ -1095,7 +1095,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                     result[novel.novelID] = novel
                                     return result
                                 }) {
-                                    print("search next folder novel... \(folder.targetNovelIDArray)")
                                     for novelID in folder.targetNovelIDArray {
                                         print(novelID)
                                         guard let novel = novelDictionary[novelID], let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) else { continue }
