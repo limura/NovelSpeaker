@@ -69,6 +69,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         treeView.rowHeight = UITableView.automaticDimension
         self.treeView = treeView
         
+        if #available(iOS 13.0, *) {
+            self.view.backgroundColor = UIColor.systemBackground
+        }
+        
         // このタイミングで StorySpeaker のインスタンスを作っておきます。
         // Realm observe が走るので、main thread で作っておかねばならぬらしい(´・ω・`)
         _ = StorySpeaker.shared
