@@ -167,9 +167,7 @@ class StoryBulkWritePool {
                     novel.m_readingChapterStoryID = firstStory.storyID
                 }
                 */
-                for story in storyArray {
-                    novel.AppendDownloadDate(realm: realm, date: story.downloadDate)
-                }
+                novel.AppendDownloadDate(realm: realm, dateArray: storyArray.map({$0.downloadDate}))
                 realm.add(novel, update: .modified)
             }
         }

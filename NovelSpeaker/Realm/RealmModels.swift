@@ -1406,6 +1406,15 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             downloadDateArray.remove(at: 0)
         }
     }
+    func AppendDownloadDate(realm:Realm, dateArray:[Date]) {
+        var dateArray = Array(downloadDateArray)
+        dateArray.append(contentsOf: dateArray)
+        while dateArray.count > 10 {
+            dateArray.remove(at: 0)
+        }
+        downloadDateArray.removeAll()
+        downloadDateArray.append(objectsIn: dateArray)
+    }
     
     func delete(realm:Realm) {
         RealmStoryBulk.RemoveAllStoryWith(realm: realm, novelID: self.novelID)
