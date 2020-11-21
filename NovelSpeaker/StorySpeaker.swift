@@ -1017,6 +1017,22 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     }
     
     func finishSpeak() {
+        func speechNextNovelWith(realm:Realm, title:String, story:Story) {
+            self.StopSpeech(realm: realm)
+            self.AnnounceSpeech(text: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), title)) {
+                DispatchQueue.main.async {
+                    self.ringPageTurningSound()
+                    self.SetStory(story: story) { (story) in
+                        DispatchQueue.main.async {
+                            RealmUtil.RealmBlock { (realm) -> Void in
+                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         NiftyUtilitySwift.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
@@ -1065,42 +1081,28 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 return
                             }
                         }else if repeatSpeechType == .goToNextLikeNovel, let novel = RealmNovel.GetAllObjectsWith(realm: realm)?.filter({$0.likeLevel > 0 && $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}).first, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) {
-                            self.StopSpeech(realm: realm)
-                            self.AnnounceSpeech(text: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), novel.title)) {
-                                DispatchQueue.main.async {
-                                    self.ringPageTurningSound()
-                                    self.SetStory(story: story) { (story) in
-                                        DispatchQueue.main.async {
-                                            RealmUtil.RealmBlock { (realm) -> Void in
-                                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            speechNextNovelWith(realm: realm, title: novel.title, story: story)
                             return
                         }else if repeatSpeechType == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Folder) {
-                            var novelIDSet = Set<String>()
                             for folder in folderArray {
-                                for novelID in folder.targetNovelIDArray {
-                                    novelIDSet.insert(novelID)
-                                }
-                            }
-                            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: Array(novelIDSet))?.filter({ $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}).first, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) {
-                                self.StopSpeech(realm: realm)
-                                self.AnnounceSpeech(text: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), novel.title)) {
-                                    DispatchQueue.main.async {
-                                        self.ringPageTurningSound()
-                                        self.SetStory(story: story) { (story) in
-                                            DispatchQueue.main.async {
-                                                RealmUtil.RealmBlock { (realm) -> Void in
-                                                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
-                                                }
-                                            }
-                                        }
+                                if let novelDictionary = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: Array(folder.targetNovelIDArray))?.filter({ (novel) in
+                                    if novel.novelID == novelID { return false }
+                                    if novel.m_readingChapterStoryID != novel.m_lastChapterStoryID { return true }
+                                    if novel.m_readingChapterReadingPoint + 5 >= novel.m_readingChapterContentCount { return false }
+                                    return true
+                                }).reduce([:] as [String:RealmNovel], { (result, novel) -> [String:RealmNovel] in
+                                    var result = result
+                                    result[novel.novelID] = novel
+                                    return result
+                                }) {
+                                    print("search next folder novel... \(folder.targetNovelIDArray)")
+                                    for novelID in folder.targetNovelIDArray {
+                                        print(novelID)
+                                        guard let novel = novelDictionary[novelID], let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) else { continue }
+                                        speechNextNovelWith(realm: realm, title: novel.title, story: story)
+                                        return
                                     }
                                 }
-                                return
                             }
                         }
                     }
