@@ -20,8 +20,6 @@ import AVFoundation
 
     static var syncEngine: SyncEngine? = nil
     static let lock = NSLock()
-    static var realmLocalCache:[String:Realm] = [:]
-    static var realmCloudCache:[String:Realm] = [:]
     
     static var writeCount = 0
     static let writeCountPullInterval = 1000 // realm.write を何回したら pull するか
@@ -65,11 +63,6 @@ import AVFoundation
                 print("file \(path.absoluteString) remove failed.")
             }
         }
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
-        realmLocalCache.removeAll()
     }
     static func GetLocalRealmConfiguration() -> Realm.Configuration {
         return Realm.Configuration(
@@ -86,13 +79,8 @@ import AVFoundation
         defer {
             lock.unlock()
         }
-        let threadID = "\(Thread.current)"
-        if let realm = realmLocalCache[threadID] {
-            return realm
-        }
         let config = GetLocalRealmConfiguration()
         let realm = try Realm(configuration: config, queue: queue)
-        //realmLocalCache[threadID] = realm
         return realm
     }
     static func GetCloudRealmFilePath() -> URL? {
@@ -119,11 +107,6 @@ import AVFoundation
                 print("file \(path.absoluteString) remove failed.")
             }
         }
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
-        realmCloudCache.removeAll()
     }
     static func ClearCloudRealmModels() {
         // とりあえず中身を消す
@@ -164,23 +147,7 @@ import AVFoundation
         }catch{
         }
     }
-    static func ClearCloudRealmCache() {
-        // 注意：
-        // Cloud側(というかIceCream側)では
-        // SyncEngine にも Realm object を渡しているため、
-        // 自分で持っている Realm object の cache を消してもあまり良い事は無いかもしれない。
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
-        // cache を削除する (これをやると別threadからの呼び出しになっちゃうのでできません)
-        /*
-        for r in realmCloudCache.values {
-            r.invalidate()
-        }
-        */
-        realmCloudCache.removeAll()
-    }
+
     fileprivate static func GetCloudRealmConfiguration() -> Realm.Configuration {
         return Realm.Configuration(
             fileURL: GetCloudRealmFilePath(),
@@ -202,12 +169,7 @@ import AVFoundation
         defer {
             lock.unlock()
         }
-        let threadID = "\(Thread.current)"
-        if let realm = realmCloudCache[threadID] {
-            return realm
-        }
         let realm = try GetCloudRealmWithoutLock(queue: queue)
-        //realmCloudCache[threadID] = realm
         return realm
     }
     static func GetContainer() -> CKContainer {
