@@ -65,6 +65,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         audioSessionInit(isActive: false)
         observeGlobalState()
         observeSpeakerSetting()
+        observeSpeechModSetting()
         dummySoundLooper.setMediaFile(forResource: "Silent3sec", ofType: "mp3")
         registerAudioNotifications()
         if !pageTurningSoundPlayer.setMediaFile(forResource: "nc48625", ofType: "m4a", maxDuplicateCount: 1) {
@@ -98,12 +99,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         observeBookmark(novelID: novelID)
         observeStory(storyID: storyID)
         observeSpeakerSetting()
+        observeSpeechModSetting()
     }
     
-    func ApplyStoryToSpeaker(realm: Realm, story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int) {
+    func ApplyStoryToSpeaker(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, readLocation:Int) {
         speaker.SetStory(story: story, withMoreSplitTargets:withMoreSplitTargets, moreSplitMinimumLetterCount:moreSplitMinimumLetterCount)
         observeSpeechConfig(novelID: story.novelID)
-        speaker.SetSpeechLocation(location: story.readLocation(realm: realm))
+        speaker.SetSpeechLocation(location: readLocation)
         self.isNeedApplySpeechConfigs = false
     }
     
@@ -130,7 +132,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: DispatchQueue.main) { (realm) in
             self.speaker.StopSpeech()
             let storyID = story.storyID
-            self.ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
+            let readLocation = story.readLocation(realm: realm)
+            self.ApplyStoryToSpeaker(story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount, readLocation: readLocation)
             // self.ApplyStoryToSpeaker() はやたら重いので
             // この時点でqueueが入っているならやり直します。
             self.queuedSetStoryStoryLock.lock()
@@ -142,7 +145,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.queuedSetStoryStoryLock.unlock()
 
             self.storyID = storyID
-            self.updateReadDate(realm: realm, storyID: storyID, contentCount: story.content.count)
+            self.updateReadDate(realm: realm, storyID: storyID, contentCount: story.content.count, readLocation: readLocation)
             self.observeStory(storyID: self.storyID)
             self.observeBookmark(novelID: story.novelID)
 
@@ -208,6 +211,25 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let center = NotificationCenter.default
         center.removeObserver(self)
     }
+    func observeSpeechModSetting() {
+        DispatchQueue.main.async {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let modSettings = RealmSpeechModSetting.GetAllObjectsWith(realm: realm) else { return }
+                self.speechModSettingArrayObserverToken = modSettings.observe({ [weak self] (change) in
+                    guard let self = self else { return }
+                    switch change {
+                    case .update(_, _, _, _):
+                        self.isNeedApplySpeechConfigs = true
+                    case .initial(_):
+                        break
+                    case .error(_):
+                        break
+                    }
+                })
+            }
+        }
+    }
+    
     func observeGlobalState() {
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
@@ -364,20 +386,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
-    func updateReadDate(realm: Realm, storyID:String, contentCount:Int) {
+    func updateReadDate(realm: Realm, storyID:String, contentCount:Int, readLocation:Int) {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
-        DispatchQueue.main.async {
-            RealmUtil.WriteWith(realm: realm) { (realm) in
-                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                    novel.lastReadDate = Date()
-                    novel.m_readingChapterStoryID = storyID
-                    novel.m_readingChapterContentCount = contentCount
-                }
-                if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                    if globalState.currentReadingNovelID != novelID {
-                        globalState.currentReadingNovelID = novelID
-                    }
-                }
+        RealmUtil.WriteWith(realm: realm) { (realm) in
+            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+                novel.lastReadDate = Date()
+                novel.m_readingChapterStoryID = storyID
+                novel.m_readingChapterContentCount = contentCount
+                novel.m_readingChapterReadingPoint = readLocation
+            }
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.currentReadingNovelID != novelID {
+                globalState.currentReadingNovelID = novelID
             }
         }
     }
@@ -473,7 +492,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             updatePlayngInfo(realm: realm, story: story)
             // story をここでも参照するので怪しくこの if の中に入れます
             if self.isNeedApplySpeechConfigs {
-                self.ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
+                self.ApplyStoryToSpeaker(story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount, readLocation: story.readLocation(realm: realm))
                 self.isNeedApplySpeechConfigs = false
             }
         }
@@ -1001,7 +1020,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         if self.isNeedApplySpeechConfigs {
             RealmUtil.RealmBlock { (realm) -> Void in
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
-                    self.ApplyStoryToSpeaker(realm: realm, story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount)
+                    self.ApplyStoryToSpeaker(story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount, readLocation: story.readLocation(realm: realm))
                     self.isNeedApplySpeechConfigs = false
                 }
             }
