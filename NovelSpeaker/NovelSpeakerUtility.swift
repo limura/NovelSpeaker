@@ -2281,4 +2281,71 @@ class NovelSpeakerUtility: NSObject {
     static func GetAllRepeatSpeechStringType() -> [RepeatSpeechType] {
         return [.noRepeat, .rewindToFirstStory, .rewindToThisStory, .goToNextLikeNovel, .goToNextSameFolderdNovel]
     }
+    
+    /// 保存されているStoryを調べて、chapterNumber が 1 から順についている事を確認しつつ、
+    /// それに沿っていない Story があったら、そこから後ろの Story は全部消すという事をして
+    /// 「chapterNumber は必ず 1 から順に1ずつ増加する形になっている」という状態に保とうとします。
+    /// - Parameter novelID: 対象の小説の NovelID
+    static func CleanInvalidStory(novelID:String) {
+        RealmUtil.Write { (realm) in
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
+            guard let storyBulkArray = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID) else { return }
+            var isInvalidFound:Bool = false
+            var lastChapterStoryID:String? = nil
+            var chapterNumber = 1
+            for storyBulk in storyBulkArray {
+                if isInvalidFound {
+                    realm.delete(storyBulk)
+                    continue
+                }
+                guard let storyArray = storyBulk.LoadStoryArray() else { continue }
+                var validStoryArray:[Story] = []
+                for story in storyArray {
+                    if story.chapterNumber == chapterNumber {
+                        validStoryArray.append(story)
+                        chapterNumber += 1
+                        continue
+                    }
+                    lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber)
+                    break
+                }
+                if validStoryArray.count != storyArray.count {
+                    realm.delete(storyBulk)
+                    RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: validStoryArray)
+                    isInvalidFound = true
+                }
+            }
+            if let lastChapterStoryID = lastChapterStoryID {
+                novel.m_lastChapterStoryID = lastChapterStoryID
+            }
+        }
+    }
+    
+    
+    /// 「chapterNumber は必ず 1 から順に1ずつ増加する形になっている」という状態になっていない小説を検索して
+    /// その NovelID のリストを返します
+    /// - Returns: 不正な状態になっている小説の NovelID のリスト
+    static func FindInvalidStoryArrayNovelID() -> [String] {
+        return RealmUtil.RealmBlock { (realm) -> [String] in
+            guard let novelIDArray = RealmNovel.GetAllObjectsWith(realm: realm)?.map({$0.novelID}) else { return [] }
+            var result:[String] = []
+            for novelID in novelIDArray {
+                guard let storyBulkArray = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID) else { continue }
+                var chapterNumber = 0
+                for storyBulk in storyBulkArray {
+                    guard let storyArray = storyBulk.LoadStoryArray() else {
+                        result.append(novelID)
+                        break
+                    }
+                    for story in storyArray {
+                        chapterNumber += 1
+                        if story.chapterNumber == chapterNumber { continue }
+                        result.append(novelID)
+                        break
+                    }
+                }
+            }
+            return result
+        }
+    }
 }
