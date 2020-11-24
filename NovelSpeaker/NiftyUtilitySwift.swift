@@ -1754,4 +1754,8 @@ class NiftyUtilitySwift: NSObject {
         }
     }
     #endif
+    
+    static func GetStackTrace() -> String {
+        return Thread.callStackSymbols.map({$0.description}).joined(separator: "\n")
+    }
 }
