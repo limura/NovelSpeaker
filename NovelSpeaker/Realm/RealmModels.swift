@@ -932,7 +932,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
                     lastChapterNumber = story.chapterNumber
                 }
                 if lastChapterNumber != chapterNumber - 1 {
-                    print("WARN: chapterNumber が期待していない値になっている。(既にある奴の末尾: \(lastChapterNumber), 追加される奴の先頭: \(chapterNumber), bulk.chapterNumber: \(bulk.chapterNumber), currentStoryArray.count: \(currentStoryArray.count)")
+                    AppInformationLogger.AddLog(message: NSLocalizedString("RealmStoryBulk_", comment: "WARN: chapterNumber が期待していない値になっている。(既にある奴の末尾: \(lastChapterNumber), 追加される奴の先頭: \(chapterNumber), bulk.chapterNumber: \(bulk.chapterNumber), currentStoryArray.count: \(currentStoryArray.count)"), appendix: [:], isForDebug: true)
                 }
                 tmpStoryArray.append(contentsOf: targetStoryArray)
                 targetStoryArray = tmpStoryArray

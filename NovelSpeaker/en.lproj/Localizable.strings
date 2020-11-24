@@ -186,6 +186,7 @@
 "SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "It seems that no folder has been created. This setting is not available unless the folder has been created.\nTo create a folder, edit it by selecting \"Settings tab\" -> \"Edit your own folder\", or open the novel in the \"Bookshelf tab\" and press the \"Details\" button in the upper right corner. Select \"Classify to Folder\" from the details screen of and add a folder.";
 "SettingsViewController_ManageFolderOrderButton" = "Edit folder";
 "SettingsTableViewController_AppInformation" = "In-app error notification";
+"SettingsTableViewController_AppInformation_IncludedForDebug" = "In-app error notification (including for debugging)";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "Clear log";
 
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "Confirm when deleting a novel";

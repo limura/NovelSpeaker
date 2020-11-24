@@ -221,10 +221,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onCellSelection({ (butonCellof, buttonRow) in
                 DispatchQueue.main.async {
                     AppInformationLogger.CheckLogShowed()
-                    NiftyUtilitySwift.EasyDialogLongMessageTwoButton(viewController: self, title: nil, message: AppInformationLogger.LoadLogString(), button1Title: NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるログを全て消す"), button1Action: {
+                    NiftyUtilitySwift.EasyDialogLongMessageTwoButton(viewController: self, title: nil, message: AppInformationLogger.LoadLogString(isIncludeDebugLog: false), button1Title: NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるログを全て消す"), button1Action: {
                         AppInformationLogger.ClearLogs()
                     }, button2Title: nil, button2Action: nil)
-                    NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: AppInformationLogger.LoadLogString())
                     buttonRow.value = ""
                     buttonRow.updateCell()
                     self.updateTabBadge()
@@ -907,6 +906,17 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0
             }
+            <<< LabelRow() { (row) in
+                row.title = NSLocalizedString("SettingsTableViewController_AppInformation_IncludedForDebug", comment: "アプリ内エラーのお知らせ(デバッグ用も含む)")
+                row.cell.accessoryType = .disclosureIndicator
+            }.onCellSelection({ (butonCellof, buttonRow) in
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.EasyDialogLongMessageTwoButton(viewController: self, title: nil, message: AppInformationLogger.LoadLogString(isIncludeDebugLog: true), button1Title: NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるログを全て消す"), button1Action: {
+                        AppInformationLogger.ClearLogs()
+                    }, button2Title: nil, button2Action: nil)
+                }
+            })
+
             /*
             <<< ButtonRow() {
                 $0.title = "iCloud pull (with remove server change token)"

@@ -12,6 +12,7 @@ struct AppInfomationLog: Codable, CustomStringConvertible {
     let message:String
     let date:Date
     let appendix:[String:String]
+    let isForDebug:Bool
     
     var description: String {
         get {
@@ -38,8 +39,8 @@ class AppInformationLogger {
     static let MAX_LOG_COUNTS = 1000;
     static var delegate:AppInformationAliveDelegate? = nil
     
-    static func AddLog(message:String, appendix:[String:String]) {
-        let log = AppInfomationLog(message: message, date: Date(), appendix: appendix)
+    static func AddLog(message:String, appendix:[String:String] = [:], isForDebug:Bool) {
+        let log = AppInfomationLog(message: message, date: Date(), appendix: appendix, isForDebug: isForDebug)
         print(log)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -56,8 +57,11 @@ class AppInformationLogger {
             }else{
                 userDefaults.set([logJSONString], forKey: LOG_KEY)
             }
-            userDefaults.setValue(NiftyUtilitySwift.Date2ISO8601String(date: Date()), forKey: WRITE_DATE_KEY)
+            if isForDebug == false {
+                userDefaults.setValue(NiftyUtilitySwift.Date2ISO8601String(date: Date()), forKey: WRITE_DATE_KEY)
+            }
             userDefaults.synchronize()
+            if isForDebug == true { return }
             delegate?.NewAppInformationAlive()
             #if !os(watchOS)
             NiftyUtilitySwift.UpdateSettingsTabBadge(badge: "!")
@@ -76,12 +80,13 @@ class AppInformationLogger {
         userDefaults.synchronize()
     }
     
-    static func LoadLogString() -> String {
+    static func LoadLogString(isIncludeDebugLog:Bool) -> String {
         guard let userDefaults = UserDefaults.init(suiteName: USERDEFAULTS_NAME), let logArray = userDefaults.array(forKey: LOG_KEY) as? [String] else { return "" }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return logArray.map({ (jsonString) in
             guard let data = jsonString.data(using: .utf8), let info = try? decoder.decode(AppInfomationLog.self, from: data) else { return "" }
+            if isIncludeDebugLog == false && info.isForDebug == true { return "" }
             return info.description
         }).filter({$0 != ""}).reversed().joined(separator: "\n")
     }

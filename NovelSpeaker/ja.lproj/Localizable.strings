@@ -171,6 +171,7 @@
 "SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "自作フォルダが一つも作成されていないようです。フォルダを作成されていないとこの設定は利用できません。\nフォルダを作成するには、「設定タブ」→「自作フォルダを編集する」で編集するか、「本棚タブ」で小説を開いて右上にある「詳細」ボタンを押した後に出てくる小説の詳細画面から「フォルダへ分類」を選択してフォルダを追加してください。";
 "SettingsViewController_ManageFolderOrderButton" = "自作フォルダを編集する";
 "SettingsTableViewController_AppInformation" = "アプリ内エラーのお知らせ";
+"SettingsTableViewController_AppInformation_IncludedForDebug" = "アプリ内エラーのお知らせ(デバッグ用も含む)";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "今あるログを全て消す";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
