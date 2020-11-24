@@ -173,6 +173,7 @@
 "SettingsTableViewController_AppInformation" = "アプリ内エラーのお知らせ";
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "アプリ内エラーのお知らせ(デバッグ用も含む)";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "今あるログを全て消す";
+"SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "このログをコピーする";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";

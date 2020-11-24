@@ -220,10 +220,22 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.cell.accessoryType = .disclosureIndicator
             }.onCellSelection({ (butonCellof, buttonRow) in
                 DispatchQueue.main.async {
+                    let logText = AppInformationLogger.LoadLogString(isIncludeDebugLog: false)
                     AppInformationLogger.CheckLogShowed()
-                    NiftyUtilitySwift.EasyDialogLongMessageTwoButton(viewController: self, title: nil, message: AppInformationLogger.LoadLogString(isIncludeDebugLog: false), button1Title: NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるログを全て消す"), button1Action: {
-                        AppInformationLogger.ClearLogs()
-                    }, button2Title: nil, button2Action: nil)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    .textView(content: logText, heightMultiplier: 0.6)
+                        .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_CopyLogButtonTitle", comment: "このログをコピーする")) { (dialog) in
+                            let pasteBoard = UIPasteboard.general
+                            pasteBoard.setValue(logText, forPasteboardType: "public.text")
+                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
+                        }
+                        .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるログを全て消す")) { (dialog) in
+                            AppInformationLogger.ClearLogs()
+                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
+                        }
+                        .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
+                        }.build().show()
                     buttonRow.value = ""
                     buttonRow.updateCell()
                     self.updateTabBadge()
@@ -911,9 +923,21 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.cell.accessoryType = .disclosureIndicator
             }.onCellSelection({ (butonCellof, buttonRow) in
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogLongMessageTwoButton(viewController: self, title: nil, message: AppInformationLogger.LoadLogString(isIncludeDebugLog: true), button1Title: NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるログを全て消す"), button1Action: {
-                        AppInformationLogger.ClearLogs()
-                    }, button2Title: nil, button2Action: nil)
+                    let logText = AppInformationLogger.LoadLogString(isIncludeDebugLog: true)
+                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    .textView(content: logText, heightMultiplier: 0.6)
+                        .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_CopyLogButtonTitle", comment: "このログをコピーする")) { (dialog) in
+                            let pasteBoard = UIPasteboard.general
+                            pasteBoard.setValue(logText, forPasteboardType: "public.text")
+                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
+                        }
+                        .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるログを全て消す")) { (dialog) in
+                            AppInformationLogger.ClearLogs()
+                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
+                        }
+                        .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
+                            DispatchQueue.main.async { dialog.dismiss(animated: true, completion: nil) }
+                        }.build().show()
                 }
             })
 
