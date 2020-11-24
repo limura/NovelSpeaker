@@ -625,10 +625,26 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
-    func SearchNextChapterWith(realm:Realm, storyID:String) -> Story? {
+    func SearchNextChapterWith(realm:Realm, storyID:String, isEnd:Bool = false) -> Story? {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         let nextChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID) + 1
-        return RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapterNumber)
+        let nextStory = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapterNumber)
+        if isEnd == false, let nextStory = nextStory, nextStory.chapterNumber != nextChapterNumber {
+            let chapterNumberArrayString:String
+            if let chapterNumberArray = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID))?.map({"\($0.chapterNumber)"}) {
+                chapterNumberArrayString = chapterNumberArray.description
+            }else{
+                chapterNumberArrayString = "nil"
+            }
+            AppInformationLogger.AddLog(message: "次の章を検索したところ、次の章ではない物が出てきました。リカバリを試みます。", appendix: [
+                "現在の StoryID": self.storyID,
+                "取得された章の StoryID": nextStory.storyID,
+                "全ての章の chapterNumber": chapterNumberArrayString,
+            ], isForDebug: true)
+            NovelSpeakerUtility.CleanInvalidStory(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))
+            return SearchNextChapterWith(realm: realm, storyID: storyID, isEnd: true)
+        }
+        return nextStory
     }
 
     func LoadNextChapter(realm: Realm, completion: ((Bool)->Void)? = nil){
