@@ -91,6 +91,7 @@ void uncaughtExceptionHandler(NSException *exception)
     }
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = toplevelViewController;
+    [NiftyUtilitySwift RegisterToplevelViewControllerWithViewController:toplevelViewController];
     [self.window makeKeyAndVisible];
     
     // CookieStorageを健全化しておきます……(´・ω・`)

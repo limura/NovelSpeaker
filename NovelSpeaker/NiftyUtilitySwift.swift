@@ -1390,6 +1390,30 @@ class NiftyUtilitySwift: NSObject {
     }
     #endif
     
+    #if !os(watchOS)
+    static func UpdateSettingsTabBadge(badge:String?) {
+        DispatchQueue.main.async {
+            print(#function)
+            guard let viewController = GetRegisterdToplevelViewController() else { return }
+            @discardableResult
+            func searchTabBarController(badge:String?, viewController:UIViewController, depth:Int) -> Bool {
+                if depth > 2 { return false }
+                if let tabBarController = viewController.tabBarController {
+                    tabBarController.tabBar.items?[3].badgeValue = badge
+                    return true
+                }
+                for vc in viewController.children {
+                    if searchTabBarController(badge: badge, viewController: vc, depth: depth + 1) {
+                        return true
+                    }
+                }
+                return false
+            }
+            searchTabBarController(badge: badge, viewController: viewController, depth: 0)
+        }
+    }
+    #endif
+    
     // https://qiita.com/mosson/items/c4c329d433d99e3583ec
     static func DetectEncoding(data:Data) -> String.Encoding {
         let encoding:String.Encoding = .utf8

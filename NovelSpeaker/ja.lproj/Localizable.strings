@@ -61,7 +61,7 @@
 
 "DebugLogViewControllerSwift_Copied" = "コピーしました";
 
-"SettingsTableViewController_Information" = "お知らせ";
+"SettingsTableViewController_Information" = "開発者からのお知らせ";
 "SettingsTableViewController_Information_CanNotGetInformation" = "お知らせの読み込みに失敗しました。";
 "SettingsTableViewController_Information_NoImportantInformationAlived" = "今現在、重要なお知らせはありません。";
 "SettingsTableViewController_Information_ShowOutdatedInformation" = "過去のお知らせを確認する";
@@ -170,6 +170,8 @@
 "SettingsViewController_RemoteDataURLSetting" = "内部データ参照用URLの設定";
 "SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "自作フォルダが一つも作成されていないようです。フォルダを作成されていないとこの設定は利用できません。\nフォルダを作成するには、「設定タブ」→「自作フォルダを編集する」で編集するか、「本棚タブ」で小説を開いて右上にある「詳細」ボタンを押した後に出てくる小説の詳細画面から「フォルダへ分類」を選択してフォルダを追加してください。";
 "SettingsViewController_ManageFolderOrderButton" = "自作フォルダを編集する";
+"SettingsTableViewController_AppInformation" = "アプリ内エラーのお知らせ";
+"SettingsTableViewController_AppInformation_ClearButtonTitle" = "今あるログを全て消す";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";

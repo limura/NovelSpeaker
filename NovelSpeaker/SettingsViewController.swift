@@ -11,7 +11,7 @@ import MessageUI
 import Eureka
 import RealmSwift
 
-class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate, RealmObserverResetDelegate {
+class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate, RealmObserverResetDelegate, AppInformationAliveDelegate {
     var m_NarouContentCacheData:NarouContentCacheData? = nil
     var m_RubySwitchToggleHitCount = 0
     var notificationTokens:[NSObjectProtocol] = []
@@ -24,6 +24,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         createSettingsTable()
         registerObserver()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
+        AppInformationLogger.delegate = self
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -37,6 +38,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     }
     
     deinit {
+        AppInformationLogger.delegate = nil
         RealmObserverHandler.shared.RemoveDelegate(delegate: self)
     }
     
@@ -119,6 +121,33 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
+    func NewAppInformationAlive() {
+        DispatchQueue.main.async {
+            if let row = self.form.rowBy(tag: "SettingsTableViewController_AppInformation_TAG") as? LabelRow {
+                row.value = "❗"
+                row.updateCell()
+            }
+        }
+    }
+    
+    func updateTabBadge() {
+        if AppInformationLogger.isNewLogAlive() == true {
+            DispatchQueue.main.async {
+                self.tabBarController?.tabBar.items?[3].badgeValue = "!"
+            }
+            return
+        }
+        NiftyUtilitySwift.CheckNewImportantImformation { (text) in
+            DispatchQueue.main.async {
+                self.tabBarController?.tabBar.items?[3].badgeValue = "!"
+            }
+        } hasNoNewInformation: {
+            DispatchQueue.main.async {
+                self.tabBarController?.tabBar.items?[3].badgeValue = nil
+            }
+        }
+    }
+    
     func createSettingsTable(){
         form +++ Section()
             <<< LabelRow() { (row) in
@@ -148,7 +177,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                     DispatchQueue.main.async {
                         NiftyUtilitySwift.SaveCheckedImportantInformation(text: text)
-                        self.tabBarController?.tabBar.items?[3].badgeValue = nil
+                        self.updateTabBadge()
                         if let row = self.form.rowBy(tag: "SettingsTableViewController_Information_TAG") as? LabelRow {
                             row.value = ""
                             row.updateCell()
@@ -179,6 +208,27 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             buttonTitle: nil, buttonAction: nil)
                     }
                 })
+            })
+            <<< LabelRow() { (row) in
+                row.tag = "SettingsTableViewController_AppInformation_TAG"
+                row.title = NSLocalizedString("SettingsTableViewController_AppInformation", comment: "アプリ内エラーのお知らせ")
+                if AppInformationLogger.isNewLogAlive() {
+                    row.value = "❗"
+                }else{
+                    row.value = ""
+                }
+                row.cell.accessoryType = .disclosureIndicator
+            }.onCellSelection({ (butonCellof, buttonRow) in
+                DispatchQueue.main.async {
+                    AppInformationLogger.CheckLogShowed()
+                    NiftyUtilitySwift.EasyDialogLongMessageTwoButton(viewController: self, title: nil, message: AppInformationLogger.LoadLogString(), button1Title: NSLocalizedString("SettingsTableViewController_AppInformation_ClearButtonTitle", comment: "今あるログを全て消す"), button1Action: {
+                        AppInformationLogger.ClearLogs()
+                    }, button2Title: nil, button2Action: nil)
+                    NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: AppInformationLogger.LoadLogString())
+                    buttonRow.value = ""
+                    buttonRow.updateCell()
+                    self.updateTabBadge()
+                }
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SpeakerSettingsViewController_TitleText", comment:"話者・声色設定")

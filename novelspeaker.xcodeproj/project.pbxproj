@@ -222,6 +222,8 @@
 		21D397B01FC97A380018F883 /* home@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D397AD1FC97A360018F883 /* home@2x.png */; };
 		21D397B11FC97A380018F883 /* home@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D397AE1FC97A370018F883 /* home@3x.png */; };
 		21D397B21FC97A380018F883 /* home.png in Resources */ = {isa = PBXBuildFile; fileRef = 21D397AF1FC97A370018F883 /* home.png */; };
+		21D7B10F256D0FB700056E28 /* AppInformationLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D7B10E256D0FB700056E28 /* AppInformationLogger.swift */; };
+		21D7B110256D0FB700056E28 /* AppInformationLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D7B10E256D0FB700056E28 /* AppInformationLogger.swift */; };
 		21D8FC4F19FC985B00CCF1B6 /* LPPerformanceChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */; };
 		21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */; };
 		21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */; };
@@ -566,6 +568,7 @@
 		21D397AD1FC97A360018F883 /* home@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "home@2x.png"; sourceTree = "<group>"; };
 		21D397AE1FC97A370018F883 /* home@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "home@3x.png"; sourceTree = "<group>"; };
 		21D397AF1FC97A370018F883 /* home.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = home.png; sourceTree = "<group>"; };
+		21D7B10E256D0FB700056E28 /* AppInformationLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInformationLogger.swift; sourceTree = "<group>"; };
 		21D8FC4D19FC985B00CCF1B6 /* LPPerformanceChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LPPerformanceChecker.h; sourceTree = "<group>"; };
 		21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LPPerformanceChecker.m; sourceTree = "<group>"; };
 		21D8FC5019FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModel4to5.xcmappingmodel; sourceTree = "<group>"; };
@@ -932,6 +935,7 @@
 				2104EDEB24B9D6C800E275D1 /* SloppyError.swift */,
 				212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */,
 				214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */,
+				21D7B10E256D0FB700056E28 /* AppInformationLogger.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1715,6 +1719,7 @@
 				2193094D23BBE56A00035EF0 /* NotificationController.swift in Sources */,
 				2124B38D23BBF2E7002EBC31 /* NovelSpeakerUtility.swift in Sources */,
 				2193094B23BBE56A00035EF0 /* ExtensionDelegate.swift in Sources */,
+				21D7B110256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
 				2124B39923BBFB7A002EBC31 /* CoreDataObjectHolder.m in Sources */,
 				2124B39823BBFAF4002EBC31 /* GlobalStateCacheData.m in Sources */,
 				2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */,
@@ -1749,6 +1754,7 @@
 				2164800C2290F3F900A183DF /* StorySpeaker.swift in Sources */,
 				216FF44E2098C5D3003BA9C7 /* FontSelectViewController.swift in Sources */,
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
+				21D7B10F256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
 				2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */,
 				212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */,
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
