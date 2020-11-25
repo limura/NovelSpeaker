@@ -1160,7 +1160,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     func setReadLocationWith(realm:Realm, location:Int) {
-        if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.count > location && location >= 0 {
+        if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.count >= location && location >= 0 {
             self.speaker.SetSpeechLocation(location: location)
             if story.readLocation(realm: realm) != location {
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in

@@ -230,6 +230,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex)")
             return true
         }
+        currentSpeakingLocation = location
         //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex) (return false)")
         return false
     }
