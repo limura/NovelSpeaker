@@ -230,6 +230,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex)")
             return true
         }
+        // ここで currentSpeakingLocation を更新しておかないと、読み上げ開始位置が 0 に戻ってしまう。
         currentSpeakingLocation = location
         //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex) (return false)")
         return false
