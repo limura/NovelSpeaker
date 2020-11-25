@@ -391,16 +391,19 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
-            settingSection <<< SwitchRow() {
-                $0.title = NSLocalizedString("NovelDetailViewController_LikeLevelStepperRowTitle", comment: "お気に入り")
-                $0.value = novel.likeLevel > 0
+            settingSection <<< StepperRow() { (row) in
+                row.value = Double(novel.likeLevel)
+                row.cell.stepper.minimumValue = 0.0
+                row.cell.stepper.maximumValue = 100.0
+                row.cell.stepper.stepValue = 1
+                row.title = NSLocalizedString("NovelDetailViewController_LikeLevelStepperRowTitle", comment: "お気に入り度合い")
             }.onChange({ (row) in
                 RealmUtil.Write(block: { (realm) in
                     guard let value = row.value, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else { return }
-                    if value {
-                        novel.likeLevel = 1
-                    }else{
+                    if value < 1 {
                         novel.likeLevel = 0
+                    }else{
+                        novel.likeLevel = Int8(value)
                     }
                 })
             })

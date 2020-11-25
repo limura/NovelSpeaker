@@ -316,7 +316,6 @@
 "NovelDetailViewController_RubyNotFound" = "有効なルビ表記を発見できませんでした。";
 "NovelDetailViewController_SpeechModAdded" = "この小説用に以下の読み替えを登録しました";
 "NovelDetailViewController_AddToFolderButtonTitle" = "フォルダへ分類";
-"NovelDetailViewController_LikeLevelStepperRowTitle" = "お気に入り";
 "NovelDetailViewController_Tags" = "タグ";
 "NovelDetailViewController_CurrentPage" = "現在開いているページ";
 "NovelDetailViewController_ActionSectionTitle" = "この小説に対する操作";
@@ -329,6 +328,7 @@
 "NovelDetailViewController_ActionSection_CreateBackupForThisNovelButton" = "この小説のバックアップを生成する";
 "NovelDetailViewController_ActionSection_SearchButton_Title" = "この小説内を検索(何も入れずに検索すると章のリストを表示します)";
 "NovelDetailViewController_ActionSection_EditNovelButton" = "この小説を編集する";
+"NovelDetailViewController_LikeLevelStepperRowTitle" = "お気に入り度合い(0〜100)";
 
 "NovelKeywordTagSelectorViewController_Title" = "タグを選択";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "タグの追加";

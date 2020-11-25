@@ -338,7 +338,6 @@
 "NovelDetailViewController_RubyNotFound" = "Could not find a valid ruby notation.";
 "NovelDetailViewController_SpeechModAdded" = "I have registered the following replacement for this novel";
 "NovelDetailViewController_AddToFolderButtonTitle" = "Classify to folder";
-"NovelDetailViewController_LikeLevelStepperRowTitle" = "Favorite";
 "NovelDetailViewController_Tags" = "Tags";
 "NovelDetailViewController_CurrentPage" = "URL of the page currently open";
 "NovelDetailViewController_ActionSectionTitle" = "Manipulation on this novel";
@@ -352,6 +351,7 @@
 "NovelDetailViewController_ActionSection_CreateBackupForThisNovelButton" = "Create backup file for this novel";
 "NovelDetailViewController_ActionSection_SearchButton_Title" = "Search within this novel (searching without anything will display a list of chapters)";
 "NovelDetailViewController_ActionSection_EditNovelButton" = "Edit this novel";
+"NovelDetailViewController_LikeLevelStepperRowTitle" = "Degree of favorite (0-100)";
 
 "NovelKeywordTagSelectorViewController_Title" = "Select Tag";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "Add Tag";

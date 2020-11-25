@@ -1115,7 +1115,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 }
                                 return
                             }
-                        }else if repeatSpeechType == .goToNextLikeNovel, let novel = RealmNovel.GetAllObjectsWith(realm: realm)?.filter({$0.likeLevel > 0 && $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}).first, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) {
+                        }else if repeatSpeechType == .goToNextLikeNovel, let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "likeLevel", ascending: false).filter({$0.likeLevel > 0 && $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}), let novel = filterdNovelArray.first, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) {
                             speechNextNovelWith(realm: realm, title: novel.title, story: story)
                             return
                         }else if repeatSpeechType == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Folder) {
