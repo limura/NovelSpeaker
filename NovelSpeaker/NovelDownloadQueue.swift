@@ -175,6 +175,39 @@ class StoryBulkWritePool {
     }
     
     public func AddStory(story:Story) {
+        // TODO: 同じStoryが登録されている場合があるのでチェックしています。
+        // 本来ならこの操作は必要無いはずです。
+        if storyArray.count <= 0 {
+            if RealmUtil.RealmBlock(block: { (realm) -> Bool in
+                let lastChapterNumber = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: story.novelID)?.last?.chapterNumber ?? 0
+                if story.chapterNumber != (lastChapterNumber + 1) {
+                    AppInformationLogger.AddLog(message: "StoryBulkWritePool.AddStory() で不正なchapterNumberのStoryが登録されようとしている", appendix: [
+                        "StoryID": story.storyID,
+                        "novel.lastChapterNumber": "\(lastChapterNumber)",
+                        "既に writePool に保存されている Story の数": "なし",
+                        "stackTrace": NiftyUtilitySwift.GetStackTrace(),
+                    ], isForDebug: true)
+                    if story.chapterNumber == lastChapterNumber {
+                        return true
+                    }
+                }
+                return false
+            }) {
+                AppInformationLogger.AddLog(message: "リカバリできそうなのでこの Story は無視します。", appendix: ["StoryID": story.storyID], isForDebug: true)
+                return
+            }
+        }else if let lastChapterNumber = storyArray.last?.chapterNumber, story.chapterNumber != (lastChapterNumber + 1) {
+            AppInformationLogger.AddLog(message: "StoryBulkWritePool.AddStory() で不正なchapterNumberのStoryが登録されようとしている", appendix: [
+                "StoryID": story.storyID,
+                "novel.lastChapterNumber": "\(lastChapterNumber)",
+                "既に writePool に保存されている Story の数": "\(storyArray.count)",
+                "stackTrace": NiftyUtilitySwift.GetStackTrace(),
+            ], isForDebug: true)
+            if story.chapterNumber == lastChapterNumber {
+                AppInformationLogger.AddLog(message: "リカバリできそうなのでこの Story は無視します。", appendix: ["StoryID": story.storyID], isForDebug: true)
+                return
+            }
+        }
         lock.lock()
         storyArray.append(story)
         let storyArrayCount:Int = storyArray.count
