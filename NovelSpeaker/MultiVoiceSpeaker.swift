@@ -119,7 +119,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
             return voice
         }
         if let voiceIdentifierNotNil = voiceIdentifier, let voice = getNearVoice(voiceIdentifier: voiceIdentifierNotNil, targetLocale: fallbackLocale) {
-            BehaviorLogger.AddLog(description: NSLocalizedString("MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning", comment: "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします"), data: ["from": voiceIdentifierNotNil, "to": voice.identifier])
+            AppInformationLogger.AddLog(message: NSLocalizedString("MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning", comment: "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします"), appendix: ["from": voiceIdentifierNotNil, "to": "\(voice.identifier): \(voice.name)"], isForDebug: false)
             voiceCache[voice.identifier] = voice
             voiceCache[voiceIdentifierNotNil] = voice
             return voice

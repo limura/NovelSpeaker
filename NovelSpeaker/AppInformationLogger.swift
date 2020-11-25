@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct AppInfomationLog: Codable, CustomStringConvertible {
+struct AppInformationLog: Codable, CustomStringConvertible {
     let message:String
     let date:Date
     let appendix:[String:String]
@@ -17,7 +17,7 @@ struct AppInfomationLog: Codable, CustomStringConvertible {
     var description: String {
         get {
             if appendix.count <= 0 {
-                return "\(date.description(with: Locale.current)): \(message)"
+                return "\(date.description(with: Locale.current)):\n\(message)"
             }
             let adix = appendix.map({"\($0): \($1)"}).map({"  \($0)"}).joined(separator: "\n")
             return "\(date.description(with: Locale.current)): \(message)\n\(adix))"
@@ -40,7 +40,7 @@ class AppInformationLogger {
     static var delegate:AppInformationAliveDelegate? = nil
     
     static func AddLog(message:String, appendix:[String:String] = [:], isForDebug:Bool) {
-        let log = AppInfomationLog(message: message, date: Date(), appendix: appendix, isForDebug: isForDebug)
+        let log = AppInformationLog(message: message, date: Date(), appendix: appendix, isForDebug: isForDebug)
         print(log)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -48,9 +48,12 @@ class AppInformationLogger {
         
         if let userDefaults = UserDefaults.init(suiteName: USERDEFAULTS_NAME) {
             userDefaults.register(defaults: [LOG_KEY: []])
-            if var logArray = userDefaults.array(forKey: LOG_KEY) {
+            if var logArray = userDefaults.stringArray(forKey: LOG_KEY) {
                 if logArray.count > MAX_LOG_COUNTS {
-                    logArray = Array(logArray.suffix(MAX_LOG_COUNTS - 1))
+                    logArray = ReduceLogStringArray(logStringArray: logArray)
+                    if logArray.count > MAX_LOG_COUNTS {
+                        logArray = Array(logArray.suffix(MAX_LOG_COUNTS - 1))
+                    }
                 }
                 logArray.append(logJSONString)
                 userDefaults.set(logArray, forKey: LOG_KEY)
@@ -80,12 +83,67 @@ class AppInformationLogger {
         userDefaults.synchronize()
     }
     
+    /// 同じlogが続いている場合にはそれを減らします。
+    static func ReduceLogStringArray(logStringArray:[String]) -> [String] {
+        let currentLogArray = LogStringArrayToObjectArray(logStringArray: logStringArray)
+        let reducedLogArray = MergeSameLog(logArray: currentLogArray)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let logJSONStringArray = reducedLogArray.map({ (info) -> String in
+            guard let logJSONData = try? encoder.encode(info), let logJSONString = String(data: logJSONData, encoding: .utf8) else { return "" }
+            return logJSONString
+        }).filter({$0 != ""})
+        return logJSONStringArray
+    }
+    static func MergeSameLog(logArray:[AppInformationLog]) -> [AppInformationLog] {
+        var result:[AppInformationLog] = []
+        var prevLog:AppInformationLog? = nil
+        var sameCount:Int = 1
+        var sameLogDate = Date()
+        var sameLogIsForDebug = false
+        for log in logArray {
+            if let prevLog = prevLog, prevLog.message == log.message, prevLog.isForDebug == log.isForDebug, prevLog.appendix == log.appendix {
+                sameCount += 1
+                sameLogDate = prevLog.date
+                sameLogIsForDebug = prevLog.isForDebug
+            }else{
+                if sameCount > 1 {
+                    result.append(AppInformationLog(message: String(format: NSLocalizedString("AppInformationLogger_SameLogFoundMessage_Format", comment: "%d回同じメッセージが繰り返されています。"), sameCount), date: sameLogDate, appendix: [:], isForDebug: sameLogIsForDebug))
+                }
+                sameCount = 1
+                prevLog = log
+                result.append(log)
+            }
+        }
+        return result
+    }
+    
+    static func LogStringArrayToObjectArray(logStringArray:[String]) -> [AppInformationLog] {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let logObjArray = logStringArray.map { (jsonString) -> AppInformationLog? in
+            guard let data = jsonString.data(using: .utf8), let info = try? decoder.decode(AppInformationLog.self, from: data) else { return nil }
+            return info
+        }
+        return logObjArray.reduce([]) { (result, info) -> [AppInformationLog] in
+            guard let info = info else { return result }
+            var result = result
+            result.append(info)
+            return result
+        }
+    }
+    
+    static func LoadLogObjectArray(isIncludeDebugLog:Bool) -> [AppInformationLog] {
+        guard let userDefaults = UserDefaults.init(suiteName: USERDEFAULTS_NAME), let logArray = userDefaults.array(forKey: LOG_KEY) as? [String] else { return [] }
+        return LogStringArrayToObjectArray(logStringArray: logArray)
+    }
+    
     static func LoadLogString(isIncludeDebugLog:Bool) -> String {
         guard let userDefaults = UserDefaults.init(suiteName: USERDEFAULTS_NAME), let logArray = userDefaults.array(forKey: LOG_KEY) as? [String] else { return "" }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return logArray.map({ (jsonString) in
-            guard let data = jsonString.data(using: .utf8), let info = try? decoder.decode(AppInfomationLog.self, from: data) else { return "" }
+            guard let data = jsonString.data(using: .utf8), let info = try? decoder.decode(AppInformationLog.self, from: data) else { return "" }
             if isIncludeDebugLog == false && info.isForDebug == true { return "" }
             return info.description
         }).filter({$0 != ""}).reversed().joined(separator: "\n")
