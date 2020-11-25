@@ -70,20 +70,47 @@ class NovelSpeakerUtility: NSObject {
         }
     }
 
+    fileprivate static func targetNovelURLArrayToNovelIDArrayWith(novelIDArray:[String], urlArray:[String]?) -> [String] {
+        guard let urlArray = urlArray else { return [] }
+        var resultSet = Set<String>()
+        for urlPattern in urlArray {
+            if let firstChar = urlPattern.first, firstChar == "^" {
+                // 最初の文字が "^" なら正規表現として扱う
+                if let regex = try? NSRegularExpression(pattern: urlPattern, options: []) {
+                    for novelID in novelIDArray {
+                        if regex.matches(in: novelID, options: [], range: NSMakeRange(0, novelID.count)).count > 0 {
+                            resultSet.insert(novelID)
+                        }
+                    }
+                }
+            }else{
+                // そうでなければ NovelID として扱う
+                resultSet.insert(urlPattern)
+            }
+        }
+        return Array(resultSet)
+    }
     // 標準の読み替え辞書を上書き登録します。
     static func OverrideDefaultSpeechModSettingsWith(realm:Realm) {
         getSpeechModSettings { (speechModSettings) in
+            let novelIDArray:[String]
+            if let lazyNovelIDArray = RealmNovel.GetAllObjectsWith(realm: realm)?.map({$0.novelID}) {
+                novelIDArray = Array(lazyNovelIDArray)
+            }else{
+                novelIDArray = []
+            }
             RealmUtil.WriteWith(realm: realm) { (realm) in
                 for modSetting in speechModSettings {
                     let before = modSetting.before
                     let after = modSetting.after
+                    let targetNovelIDArray = targetNovelURLArrayToNovelIDArrayWith(novelIDArray: novelIDArray, urlArray: modSetting.targetNovelUrlArray)
                     
                     if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) {
                         setting.after = after
                         setting.isUseRegularExpression = modSetting.isRegexp ?? false
-                        if let targetNovelURLArray = modSetting.targetNovelUrlArray {
+                        if targetNovelIDArray.count > 0 {
                             setting.targetNovelIDArray.removeAll()
-                            setting.targetNovelIDArray.append(objectsIn: targetNovelURLArray)
+                            setting.targetNovelIDArray.append(objectsIn: targetNovelIDArray)
                         }
                         continue
                     }
@@ -91,8 +118,8 @@ class NovelSpeakerUtility: NSObject {
                     speechModSetting.before = before
                     speechModSetting.after = after
                     speechModSetting.isUseRegularExpression = modSetting.isRegexp ?? false
-                    if let targetNovelURLArray = modSetting.targetNovelUrlArray {
-                        speechModSetting.targetNovelIDArray.append(objectsIn: targetNovelURLArray)
+                    if targetNovelIDArray.count > 0 {
+                        speechModSetting.targetNovelIDArray.append(objectsIn: targetNovelIDArray)
                     }else{
                         speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
                     }
