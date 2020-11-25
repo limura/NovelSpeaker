@@ -157,38 +157,6 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
                 row.updateCell()
             }
         })
-            /* primary key になったので作成後には書き換えをできなくします。
-        <<< TextRow("SpeechWaitSettingTextRow-\(targetText)") {
-            $0.title = NSLocalizedString("SpeechWaitSettingViewController_TargetStringTitle", comment: "対象文字列")
-            $0.value = speechWaitSetting.targetText.replacingOccurrences(of: "\n", with: NSLocalizedString("SpeechWaitConfigTableView_TargetText_Enter", comment: "<改行>"))
-            $0.add(rule: RuleRequired())
-            $0.validationOptions = .validatesOnChange
-            $0.cell.textField.borderStyle = .roundedRect
-            $0.hidden = Condition.function(["TitleLabelRow-\(targetText)"], { (form) -> Bool in
-                return self.hideCache[targetText] ?? true
-            })
-        }.onChange({ (row) in
-            guard let text = row.value, let waitSetting = RealmSpeechWaitConfig.SearchFrom(targetText: targetText) else {
-                return
-            }
-            let newTargetText = text.replacingOccurrences(of: NSLocalizedString("SpeechWaitConfigTableView_TargetText_Enter", comment: "<改行>"), with: "\n")
-            RealmUtil.Write { (realm) in
-                waitSetting.targetText = newTargetText
-            }
-            self.updateTestText(targetString: newTargetText)
-            self.updateTitleCell(speechWaitConfig: waitSetting)
-        }).onCellSelection({ (_, row) in
-            guard let text = row.value else {
-                return
-            }
-             self.updateTestText(targetString: text)
-        }).cellUpdate({ (textCell, textRow) in
-            if !textRow.isValid {
-                textCell.titleLabel?.textColor = .red
-            }
-            textCell.textField.clearButtonMode = .always
-        })
-            */
         <<< StepperRow("DelayTimeSliderRow-\(targetText)") {
             $0.value = Double(speechWaitSetting.delayTimeInSec)
             $0.cell.stepper.minimumValue = 0.0
