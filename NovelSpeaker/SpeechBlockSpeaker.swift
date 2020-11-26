@@ -58,7 +58,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         let startOffset = DisplayLocationToSpeechLocation(location: range.location)
         let endOffset = DisplayLocationToSpeechLocation(location: range.location + range.length)
         let speechText = self.speechText
-        if speechText.count < startOffset || speechText.count < endOffset { return "" }
+        let speechTextCount = speechText.unicodeScalars.count
+        if speechTextCount < startOffset || speechTextCount < endOffset { return "" }
         let startIndex = speechText.index(speechText.startIndex, offsetBy: startOffset)
         let endIndex = speechText.index(speechText.startIndex, offsetBy: endOffset)
         return String(speechText[startIndex..<endIndex])
@@ -69,8 +70,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         var speechLocation = 0
         
         for blockInfo in speechBlockArray {
-            let displayTextCount = blockInfo.displayText.count
-            let speechTextCount = blockInfo.speechText.count
+            let displayTextCount = blockInfo.displayText.unicodeScalars.count
+            let speechTextCount = blockInfo.speechText.unicodeScalars.count
             if displayLocation + displayTextCount > location {
                 let displayOffset = Float(location - displayLocation)
                 let speechOffset = displayOffset * Float(speechTextCount) / Float(displayTextCount)
@@ -87,8 +88,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         var speechLocation = 0
         
         for blockInfo in speechBlockArray {
-            let displayTextCount = blockInfo.displayText.count
-            let speechTextCount = blockInfo.speechText.count
+            let displayTextCount = blockInfo.displayText.unicodeScalars.count
+            let speechTextCount = blockInfo.speechText.unicodeScalars.count
             if speechLocation + speechTextCount > location {
                 let speechOffset = Float(location - speechLocation)
                 let displayOffset = speechOffset * Float(displayTextCount) / Float(speechTextCount)
@@ -105,7 +106,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         var result = ""
         var location = 0
         for block in speechBlockArray {
-            let currentBlockDisplayTextLength = block.displayText.count
+            let currentBlockDisplayTextLength = block.displayText.unicodeScalars.count
             if currentBlockDisplayTextLength <= 0 { continue }
             if location + currentBlockDisplayTextLength <= displayTextRange.location
                 || location > (displayTextRange.location + displayTextRange.length) {
@@ -133,7 +134,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         guard currentSpeechBlockIndex < speechBlockArray.count else { return false }
         let currentBlock = speechBlockArray[currentSpeechBlockIndex]
         currentSpeechBlockIndex += 1
-        currentDisplayStringOffset += currentBlock.displayText.count
+        currentDisplayStringOffset += currentBlock.displayText.unicodeScalars.count
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
         currentSpeakingLocation = currentDisplayStringOffset
@@ -217,7 +218,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         currentSpeechBlockIndex = 0
         currentDisplayStringOffset = 0
         for speechBlock in speechBlockArray {
-            let blockDisplayTextLength = speechBlock.displayText.count
+            let blockDisplayTextLength = speechBlock.displayText.unicodeScalars.count
             if currentLocation >= blockDisplayTextLength {
                 currentSpeechBlockIndex += 1
                 currentDisplayStringOffset += blockDisplayTextLength
@@ -249,7 +250,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             if index < 0 {
                 break
             }
-            let blockDisplayTextLength = speechBlock.displayText.count
+            let blockDisplayTextLength = speechBlock.displayText.unicodeScalars.count
             currentDisplayStringOffset += blockDisplayTextLength
             currentSpeechBlockIndex += 1
             index -= 1

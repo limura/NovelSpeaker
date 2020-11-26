@@ -145,7 +145,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.queuedSetStoryStoryLock.unlock()
 
             self.storyID = storyID
-            self.updateReadDate(realm: realm, storyID: storyID, contentCount: story.content.count, readLocation: readLocation)
+            self.updateReadDate(realm: realm, storyID: storyID, contentCount: story.content.unicodeScalars.count, readLocation: readLocation)
             self.observeStory(storyID: self.storyID)
             self.observeBookmark(novelID: story.novelID)
 
@@ -545,7 +545,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }
             let readingPoint = self.speaker.currentLocation
             let nextReadingPoint = readingPoint + length
-            let contentLength = story.content.count
+            let contentLength = story.content.unicodeScalars.count
             if nextReadingPoint > contentLength {
                 self.LoadNextChapter(realm: realm) { (result) in
                     if result == true, story.readLocation(realm: realm) != contentLength {
@@ -589,7 +589,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         DispatchQueue.main.async {
             targetStory = self.SearchPreviousChapterWith(realm: realm, storyID: self.storyID)
             while let story = targetStory {
-                let contentLength = story.content.count
+                let contentLength = story.content.unicodeScalars.count
                 if targetLength <= contentLength {
                     let newLocation = contentLength - targetLength
                     if story.readLocation(realm: realm) != newLocation {
@@ -738,7 +738,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             MPMediaItemPropertyArtist: writer
         ]
         if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.isPlaybackDurationEnabled == true, let speakerSetting = globalState.defaultSpeakerWith(realm: realm) {
-            let textLength = story.content.count
+            let textLength = story.content.unicodeScalars.count
             let duration = GuessSpeakDuration(textLength: textLength, speechConfig: speakerSetting)
             let position = GuessSpeakDuration(textLength: story.readLocation(realm: realm), speechConfig: speakerSetting)
             songInfo[MPMediaItemPropertyPlaybackDuration] = duration
@@ -1005,7 +1005,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             guard let event = event, let defaultSpeakerSetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultSpeakerWith(realm: realm), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else {
                 return MPRemoteCommandHandlerStatus.commandFailed
             }
-             let contentLength = story.content.count
+            let contentLength = story.content.unicodeScalars.count
             
             print("MPChangePlaybackPositionCommandEvent in: \(event.positionTime)")
             var newLocation = self.GuessSpeakLocationFromDulation(dulation: Float(event.positionTime), speechConfig: defaultSpeakerSetting)
@@ -1160,7 +1160,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     func setReadLocationWith(realm:Realm, location:Int) {
-        if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.count >= location && location >= 0 {
+        if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.unicodeScalars.count >= location && location >= 0 {
             self.speaker.SetSpeechLocation(location: location)
             if story.readLocation(realm: realm) != location {
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in

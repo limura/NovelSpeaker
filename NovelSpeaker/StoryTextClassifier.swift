@@ -163,8 +163,9 @@ class CombinedSpeechBlock: Identifiable {
                 }
                 continue
             }
-            if location > block.displayText.count {
-                location -= block.displayText.count
+            let displayTextCount = block.displayText.unicodeScalars.count
+            if location > displayTextCount {
+                location -= displayTextCount
                 continue
             }
             let blockSpeechText:String
@@ -173,8 +174,9 @@ class CombinedSpeechBlock: Identifiable {
             }else{
                 blockSpeechText = block.displayText
             }
-            let displayTextLength = Float(block.displayText.count)
-            let speechTextLength = Float(blockSpeechText.count)
+            let blockSpeechTextCount = blockSpeechText.unicodeScalars.count
+            let displayTextLength = Float(displayTextCount)
+            let speechTextLength = Float(blockSpeechTextCount)
             let speechStartLocation = Int(Float(location) * speechTextLength / displayTextLength)
             let speechTextStartIndex = blockSpeechText.index(blockSpeechText.startIndex, offsetBy: speechStartLocation)
             speechText = String(blockSpeechText[speechTextStartIndex..<blockSpeechText.endIndex])
@@ -189,7 +191,7 @@ class CombinedSpeechBlock: Identifiable {
         if startLocation < 0 || endLocation < startLocation { return "" }
         var result = Substring()
         for block in speechBlockArray {
-            let displayTextLength = block.displayText.count
+            let displayTextLength = block.displayText.unicodeScalars.count
             if displayTextLength <= 0 { continue }
             if location + displayTextLength <= startLocation || location > endLocation {
                 location += displayTextLength
@@ -201,7 +203,7 @@ class CombinedSpeechBlock: Identifiable {
             }else{
                 speechText = block.displayText
             }
-            let speechTextLength = speechText.count
+            let speechTextLength = speechText.unicodeScalars.count
             var blockStartLocation = startLocation - location
             var blockEndLocation = endLocation - location
             if blockStartLocation < 0 {
@@ -236,13 +238,15 @@ class CombinedSpeechBlock: Identifiable {
             }else{
                 blockSpeechText = block.displayText
             }
-            if speechLocation > blockSpeechText.count {
-                speechLocation -= blockSpeechText.count
-                displayLocation += block.displayText.count
+            let blockSpeechTextCount = blockSpeechText.unicodeScalars.count
+            let blockDisplayTextCount = block.displayText.unicodeScalars.count
+            if speechLocation > blockSpeechTextCount {
+                speechLocation -= blockSpeechTextCount
+                displayLocation += blockDisplayTextCount
                 continue
             }
-            let displayTextLength = Float(block.displayText.count)
-            let speechTextLength = Float(blockSpeechText.count)
+            let displayTextLength = Float(blockDisplayTextCount)
+            let speechTextLength = Float(blockSpeechTextCount)
             let displayStartLocation = Int(Float(speechLocation) * displayTextLength / speechTextLength)
             displayLocation += displayStartLocation
             break
@@ -260,13 +264,15 @@ class CombinedSpeechBlock: Identifiable {
             }else{
                 blockSpeechText = block.displayText
             }
-            if displayLocation > block.displayText.count {
-                displayLocation -= block.displayText.count
-                speechLocation += blockSpeechText.count
+            let blockDisplayTextCount = block.displayText.unicodeScalars.count
+            let blockSpeechTextCount = blockSpeechText.unicodeScalars.count
+            if displayLocation > blockDisplayTextCount {
+                displayLocation -= blockDisplayTextCount
+                speechLocation += blockSpeechTextCount
                 continue
             }
-            let displayTextLength = Float(block.displayText.count)
-            let speechTextLength = Float(blockSpeechText.count)
+            let displayTextLength = Float(blockDisplayTextCount)
+            let speechTextLength = Float(blockSpeechTextCount)
             let speechStartLocation = Int(Float(displayLocation) * speechTextLength / displayTextLength)
             speechLocation += speechStartLocation
             break
