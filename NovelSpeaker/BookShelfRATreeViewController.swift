@@ -1032,6 +1032,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             floatingButton.assignToView(view: (self.treeView?.scrollView)!, text: String(format: NSLocalizedString("BookShelfTableViewController_Resume:", comment: "再生:%@"), lastReadNovelTitle), animated: true) {
                 self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true)
                 floatingButton.hideAnimate()
+                self.resumeSpeechFloatingButton = nil
             }
         }
     }
