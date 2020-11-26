@@ -695,7 +695,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange){
         DispatchQueue.main.async {
-            let contentLength = self.textView.text.count
+            let contentLength = self.textView.text.unicodeScalars.count
             let newRange:NSRange
             if range.length == 0 && contentLength >= (range.location + 1) {
                 newRange = NSMakeRange(range.location, 1)
