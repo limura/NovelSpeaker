@@ -347,7 +347,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             storyObserverBulkStoryID = storyBulk.id
             self.storyObserverToken = storyBulk.observe({ [weak self] (change) in
                 guard let self = self else { return }
-                guard let targetStoryID = self.storyID, self.storyObserverBulkStoryID != RealmStoryBulk.StoryIDToBulkID(storyID: targetStoryID) else {
+                guard let targetStoryID = self.storyID, self.storyObserverBulkStoryID == RealmStoryBulk.StoryIDToBulkID(storyID: targetStoryID) else {
                     return
                 }
                 switch change {
