@@ -70,7 +70,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         likeButton.imageView?.contentMode = .scaleAspectFit
         likeButton.contentHorizontalAlignment = .fill
         likeButton.contentVerticalAlignment = .fill
-        likeButton.imageView?.image = UIImage(named: "NotLikeStar.png")
+        likeButton.setImage(UIImage(named: "NotLikeStar.png"), for: .normal)
         downloadingActivityIndicator.isHidden = true
         newImageView.isHidden = true
         readProgressView.isHidden = true
@@ -196,9 +196,9 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
         DispatchQueue.main.async {
             if likeLevel > 0 {
-                self.likeButton.imageView?.image = BookShelfTreeViewCell.likeStarImage
+                self.likeButton.setImage(BookShelfTreeViewCell.likeStarImage, for: .normal)
             }else{
-                self.likeButton.imageView?.image = BookShelfTreeViewCell.notLikeStarImage
+                self.likeButton.setImage(BookShelfTreeViewCell.notLikeStarImage, for: .normal)
             }
         }
     }
@@ -213,9 +213,9 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         let likeLevel = novel.likeLevel
         DispatchQueue.main.async {
             if likeLevel > 0 {
-                self.likeButton.imageView?.image = BookShelfTreeViewCell.likeStarImage
+                self.likeButton.setImage(BookShelfTreeViewCell.likeStarImage, for: .normal)
             }else{
-                self.likeButton.imageView?.image = BookShelfTreeViewCell.notLikeStarImage
+                self.likeButton.setImage(BookShelfTreeViewCell.notLikeStarImage, for: .normal)
             }
         }
     }
