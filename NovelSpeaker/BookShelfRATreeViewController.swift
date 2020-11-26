@@ -138,6 +138,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         // Dispose of any resources that can be recreated.
     }
     
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        self.treeView?.setEditing(editing, animated: animated)
+    }
+    
     func registNotificationCenter() {
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
             DispatchQueue.main.async {
