@@ -178,8 +178,8 @@ class CombinedSpeechBlock: Identifiable {
             let displayTextLength = Float(displayTextCount)
             let speechTextLength = Float(blockSpeechTextCount)
             let speechStartLocation = Int(Float(location) * speechTextLength / displayTextLength)
-            let speechTextStartIndex = blockSpeechText.index(blockSpeechText.startIndex, offsetBy: speechStartLocation)
-            speechText = String(blockSpeechText[speechTextStartIndex..<blockSpeechText.endIndex])
+            let speechTextStartIndex = blockSpeechText.unicodeScalars.index(blockSpeechText.startIndex, offsetBy: speechStartLocation)
+            speechText = String(blockSpeechText.unicodeScalars[speechTextStartIndex..<blockSpeechText.unicodeScalars.endIndex])
             location = 0
         }
         return speechText
@@ -218,9 +218,9 @@ class CombinedSpeechBlock: Identifiable {
             if blockStartLocation > 0 || blockEndLocation < displayTextLength {
                 let speechStartLocation = Int(Float(blockStartLocation) * Float(speechTextLength) / Float(displayTextLength))
                 let speechEndLocation = Int(Float(blockEndLocation) * Float(speechTextLength) / Float(displayTextLength))
-                let speechStartIndex = speechText.index(speechText.startIndex, offsetBy: speechStartLocation)
-                let speechEndIndex = speechText.index(speechText.startIndex, offsetBy: speechEndLocation)
-                result += speechText[speechStartIndex..<speechEndIndex]
+                let speechStartIndex = speechText.unicodeScalars.index(speechText.unicodeScalars.startIndex, offsetBy: speechStartLocation)
+                let speechEndIndex = speechText.unicodeScalars.index(speechText.unicodeScalars.startIndex, offsetBy: speechEndLocation)
+                result += String(speechText.unicodeScalars[speechStartIndex..<speechEndIndex])
             }else{
                 result += speechText
             }
