@@ -2080,8 +2080,13 @@ class NovelSpeakerUtility: NSObject {
     }
 
     #if !os(watchOS)
+    static let LongLivedOperationIDWatcherID = "AllLongLivedOperationIDWatcher"
+    static func GetLongLivedOperationIDWatcherID() -> String {
+        return LongLivedOperationIDWatcherID
+    }
+    
     @objc static func StartAllLongLivedOperationIDWatcher() {
-        let activityIndicatorID = "AllLongLivedOperationIDWatcher"
+        let activityIndicatorID = LongLivedOperationIDWatcherID
         func AllLongLivedOperationIDWatcher() {
             RealmUtil.FetchAllLongLivedOperationIDs { (operationIDArray, error) in
                 if error == nil, let operationIDArray = operationIDArray, operationIDArray.count > 0 {

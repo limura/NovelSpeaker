@@ -14,6 +14,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     
     public var storyID : String? = nil
     public var isNeedResumeSpeech : Bool = false
+    public var isNeedUpdateReadDate : Bool = true
 
     @IBOutlet weak var textView : UITextView!
     @IBOutlet weak var previousChapterButton : UIButton!
@@ -54,7 +55,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     loadNovel(novel: novel, aliveButtonSettings: RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting)
                 }
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
-                    self.storySpeaker.SetStory(story: story, withUpdateReadDate: false)
+                    self.storySpeaker.SetStory(story: story, withUpdateReadDate: isNeedUpdateReadDate)
                 }
             }
             self.observeStory(storyID: storyID)

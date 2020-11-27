@@ -37,6 +37,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     var resumeSpeechFloatingButton:FloatingButton? = nil
     var nextViewStoryID: String?
     var isNextViewNeedResumeSpeech:Bool = false
+    var isNextViewNeedUpdateReadDate:Bool = true
     
     var novelArrayNotificationToken : NotificationToken? = nil
     
@@ -88,7 +89,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         RealmUtil.RealmBlock { (realm) -> Void in
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let novel = RealmGlobalState.GetLastReadNovel(realm: realm), globalState.isOpenRecentNovelInStartTime {
-                self.pushNextView(novelID: novel.novelID, isNeedSpeech: false)
+                self.pushNextView(novelID: novel.novelID, isNeedSpeech: false, isNeedUpdateReadDate: false)
             }
         }
         reloadAllDataAndScrollToCurrentReadingContent()
@@ -547,7 +548,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                     if globalState.isOpenRecentNovelInStartTime {
                         if let lastReadNovel = RealmGlobalState.GetLastReadNovel(realm: realm) {
-                            self.pushNextView(novelID: lastReadNovel.novelID, isNeedSpeech: false)
+                            self.pushNextView(novelID: lastReadNovel.novelID, isNeedSpeech: false, isNeedUpdateReadDate: false)
                         }
                     }
                 }
@@ -667,6 +668,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             if let nextViewController = segue.destination as? SpeechViewController {
                 nextViewController.storyID = nextViewStoryID
                 nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
+                nextViewController.isNeedUpdateReadDate = isNextViewNeedUpdateReadDate
             }
         }
     }
@@ -677,7 +679,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     // 次のビューに飛ばします。
-    func pushNextView(novelID:String, isNeedSpeech: Bool){
+    func pushNextView(novelID:String, isNeedSpeech: Bool, isNeedUpdateReadDate: Bool){
         NovelDownloader.flushWritePool(novelID: novelID)
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
@@ -717,6 +719,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                     if let nextViewStoryID = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.firstChapterWith(realm: realm)?.storyID {
                                         self.nextViewStoryID = nextViewStoryID
                                         self.isNextViewNeedResumeSpeech = isNeedSpeech
+                                        self.isNextViewNeedUpdateReadDate = isNeedUpdateReadDate
                                         self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
                                         return
                                     }
@@ -733,12 +736,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     nextViewStoryID = story.storyID
                     print("sendStoryID: \(nextViewStoryID ?? "unknown"), story.chapterNumber \(story.chapterNumber)")
                     self.isNextViewNeedResumeSpeech = isNeedSpeech
+                    self.isNextViewNeedUpdateReadDate = isNeedUpdateReadDate
                     self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
                 }
                 return
             }
             nextViewStoryID = story.storyID
             self.isNextViewNeedResumeSpeech = isNeedSpeech
+            self.isNextViewNeedUpdateReadDate = isNeedUpdateReadDate
             self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
         }
     }
@@ -809,7 +814,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func treeView(_ treeView: RATreeView, didSelectRowForItem item: Any) {
         if let data = item as? BookShelfRATreeViewCellData {
             if let novelID = data.novelID {
-                pushNextView(novelID: novelID, isNeedSpeech: false)
+                pushNextView(novelID: novelID, isNeedSpeech: false, isNeedUpdateReadDate: true)
             }
         }
     }
@@ -1030,9 +1035,50 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }
             
             floatingButton.assignToView(view: (self.treeView?.scrollView)!, text: String(format: NSLocalizedString("BookShelfTableViewController_Resume:", comment: "再生:%@"), lastReadNovelTitle), animated: true) {
-                self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true)
                 floatingButton.hideAnimate()
                 self.resumeSpeechFloatingButton = nil
+                if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
+                    DispatchQueue.main.async {
+                        let lock = NSLock()
+                        var isDismiss:Bool = false
+                        let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
+                            .text(content: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_Message", comment: "iCloud上のデータ同期を待っています。\n同期が完了した場合、自動で再生を開始します。(なお、完了判定は失敗する事があります)"))
+                            .addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_DismissButton", comment: "同期を待たずに再生を開始する")) { (dialog) in
+                                lock.lock()
+                                defer { lock.unlock() }
+                                if isDismiss == true { return }
+                                isDismiss = true
+                                dialog.dismiss(animated: false) {
+                                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
+                                }
+                            }.addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_CancelButton", comment: "再生をキャンセルする")) { (dialog) in
+                                lock.lock()
+                                defer { lock.unlock() }
+                                if isDismiss == true { return }
+                                isDismiss = true
+                                dialog.dismiss(animated: true, completion: nil)
+                            }.build()
+                        dialog.show()
+                        func syncWatcher() {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                                lock.lock()
+                                defer { lock.unlock() }
+                                guard let self = self, isDismiss == false else { return }
+                                if ActivityIndicatorManager.isEnable(id: NovelSpeakerUtility.GetLongLivedOperationIDWatcherID()) {
+                                    syncWatcher()
+                                    return
+                                }
+                                isDismiss = true
+                                dialog.dismiss(animated: false) {
+                                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
+                                }
+                            }
+                        }
+                        syncWatcher()
+                    }
+                }else{
+                    self.pushNextView(novelID: lastReadNovelID, isNeedSpeech: true, isNeedUpdateReadDate: false)
+                }
             }
         }
     }

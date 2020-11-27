@@ -597,6 +597,9 @@
 "BookShelfRATreeViewController_NovelDeletingTitle" = "Deleting novel...";
 "BookShelfRATreeViewController_ShowNovelInformationButtonTitle" = "Show novel information";
 "BookShelfRATreeViewController_SortTypeLikeLevel" = "Favorite order";
+"BookShelfRATreeViewController_WaitingiCloudSync_Message" = "Waiting for data sync on iCloud...\nWhen synchronization is complete, playback will start automatically. (Note that the completion judgment may fail)";
+"BookShelfRATreeViewController_WaitingiCloudSync_DismissButton" = "Start playback without waiting for synchronization";
+"BookShelfRATreeViewController_WaitingiCloudSync_CancelButton" = "Cancel playback";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";

@@ -588,6 +588,9 @@
 "BookShelfRATreeViewController_NovelDeletingTitle" = "小説を削除しています……";
 "BookShelfRATreeViewController_ShowNovelInformationButtonTitle" = "小説情報を表示する";
 "BookShelfRATreeViewController_SortTypeLikeLevel" = "お気に入り順";
+"BookShelfRATreeViewController_WaitingiCloudSync_Message" = "iCloud上のデータ同期を待っています……\n同期が完了した場合、自動で再生を開始します。(なお、完了判定は失敗する事があります)";
+"BookShelfRATreeViewController_WaitingiCloudSync_DismissButton" = "同期を待たずに再生を開始";
+"BookShelfRATreeViewController_WaitingiCloudSync_CancelButton" = "再生をキャンセル";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 

@@ -46,4 +46,8 @@ class ActivityIndicatorManager {
         }
         lock.unlock()
     }
+    
+    static func isEnable(id:String) ->Bool {
+        return enableIDSet.contains(id)
+    }
 }
