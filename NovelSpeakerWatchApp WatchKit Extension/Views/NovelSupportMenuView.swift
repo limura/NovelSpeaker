@@ -73,7 +73,7 @@ struct StorySelectorView: View {
                     DispatchQueue.main.async {
                         RealmUtil.RealmBlock { (realm) -> Void in
                             guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: self.novelID, chapterNumber: index)) else { return }
-                            StorySpeaker.shared.SetStory(story: story)
+                            StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
                             self.storyViewData.isSupportMenuVisible = false
                         }
                     }

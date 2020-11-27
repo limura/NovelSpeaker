@@ -66,7 +66,7 @@ struct ContentView: View {
     func GetContentText(novelID:String, chapterNumber:Int) -> String? {
         return RealmUtil.RealmBlock { (realm) -> String? in
             guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber) else { return nil }
-            StorySpeaker.shared.SetStory(story: story)
+            StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
             return story.content
         }
     }
@@ -114,7 +114,7 @@ struct CheckiCloudSyncView: View {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     var story = Story()
                     story.content = self.speechText
-                    StorySpeaker.shared.SetStory(story: story)
+                    StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: false)
                     StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                 }
             }) {

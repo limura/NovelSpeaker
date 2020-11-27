@@ -133,7 +133,7 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
         storyID = story.storyID
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
-                StorySpeaker.shared.SetStory(story: story)
+                StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
                 self.combinedBlockArray = StorySpeaker.shared.speechBlockArray
                 if let novel = story.ownerNovel(realm: realm) {
                     self.realoadTitleText(title: novel.title)

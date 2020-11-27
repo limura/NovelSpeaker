@@ -27,9 +27,11 @@ struct SpeechContorlView: View {
                     }
                     DispatchQueue.global(qos: .background).async {
                         RealmUtil.RealmBlock { (realm) -> Void in
-                            if speaker.LoadPreviousChapter(realm: realm) && isPlaying {
-                                speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                            }
+                            speaker.LoadPreviousChapter(realm: realm, completion: { (result) in
+                                if result && isPlaying {
+                                    speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                                }
+                            })
                         }
                         self.storyViewData.setLoadingIndicator(isVisible: false)
                     }
@@ -42,13 +44,14 @@ struct SpeechContorlView: View {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         speaker.StopSpeech(realm: realm) {
                             RealmUtil.RealmBlock { (realm) -> Void in
-                                speaker.SkipBackward(realm: realm, length: 30)
-                                if isPlaying {
-                                    speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                                }else{
-                                    self.storyViewData.displayIndex = speaker.currentBlockIndex
+                                speaker.SkipBackward(realm: realm, length: 30) {
+                                    if isPlaying {
+                                        speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                                    }else{
+                                        self.storyViewData.displayIndex = speaker.currentBlockIndex
+                                    }
+                                    self.storyViewData.setLoadingIndicator(isVisible: false)
                                 }
-                                self.storyViewData.setLoadingIndicator(isVisible: false)
                             }
                         }
                     }
@@ -87,13 +90,14 @@ struct SpeechContorlView: View {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         speaker.StopSpeech(realm: realm) {
                             RealmUtil.RealmBlock { (realm) -> Void in
-                                speaker.SkipForward(realm: realm, length: 30)
-                                if isPlaying {
-                                    speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                                }else{
-                                    self.storyViewData.displayIndex = speaker.currentBlockIndex
+                                speaker.SkipForward(realm: realm, length: 30) {
+                                    if isPlaying {
+                                        speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                                    }else{
+                                        self.storyViewData.displayIndex = speaker.currentBlockIndex
+                                    }
+                                    self.storyViewData.setLoadingIndicator(isVisible: false)
                                 }
-                                self.storyViewData.setLoadingIndicator(isVisible: false)
                             }
                         }
                     }
@@ -111,8 +115,10 @@ struct SpeechContorlView: View {
                     }
                     DispatchQueue.global(qos: .background).async {
                         RealmUtil.RealmBlock { (realm) -> Void in
-                            if speaker.LoadNextChapter(realm: realm) && isPlaying {
-                                speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                            speaker.LoadNextChapter(realm: realm) { (result) in
+                                if result && isPlaying {
+                                    speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                                }
                             }
                         }
                         self.storyViewData.setLoadingIndicator(isVisible: false)
