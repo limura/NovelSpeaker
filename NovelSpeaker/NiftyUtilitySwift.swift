@@ -7,7 +7,10 @@
 //
 
 import UIKit
-import RealmSwift
+// import RealmSwift にすると Erik の Document が
+// Realm 10.* 以降の BSON.swiftで定義されてる Document とかち合ってしまうので、
+// struct Realm だけを取り込む
+import struct RealmSwift.Realm
 import UserNotifications
 import Kanna
 import DataCompression
