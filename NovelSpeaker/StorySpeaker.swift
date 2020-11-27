@@ -128,7 +128,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     var queuedSetStoryStory:Story? = nil
     var queuedSetStoryCompletionArray:[((_ story:Story)->Void)] = []
 
-    func SetStoryAsync(story:Story) {
+    func SetStoryAsync(story:Story, withUpdateReadDate:Bool) {
         RealmUtil.RealmDispatchQueueAsyncBlock(queue: DispatchQueue.main) { (realm) in
             self.speaker.StopSpeech()
             let storyID = story.storyID
@@ -139,13 +139,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.queuedSetStoryStoryLock.lock()
             if let queuedStory = self.queuedSetStoryStory, queuedStory.storyID != story.storyID {
                 self.queuedSetStoryStoryLock.unlock()
-                self.SetStoryAsync(story: queuedStory)
+                self.SetStoryAsync(story: queuedStory, withUpdateReadDate: withUpdateReadDate)
                 return
             }
             self.queuedSetStoryStoryLock.unlock()
 
             self.storyID = storyID
-            self.updateReadDate(realm: realm, storyID: storyID, contentCount: story.content.unicodeScalars.count, readLocation: readLocation)
+            if withUpdateReadDate {
+                self.updateReadDate(realm: realm, storyID: storyID, contentCount: story.content.unicodeScalars.count, readLocation: readLocation)
+            }
             self.observeStory(storyID: self.storyID)
             self.observeBookmark(novelID: story.novelID)
 
@@ -153,7 +155,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.queuedSetStoryStoryLock.lock()
             defer { self.queuedSetStoryStoryLock.unlock() }
             if let queuedStory = self.queuedSetStoryStory, queuedStory.storyID != story.storyID {
-                self.SetStoryAsync(story: queuedStory)
+                self.SetStoryAsync(story: queuedStory, withUpdateReadDate: withUpdateReadDate)
                 return
             }
             self.queuedSetStoryStory = nil
@@ -171,7 +173,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
 
-    func EnqueueSetStory(story:Story, completion:((_ story:Story)->Void)?) {
+    func EnqueueSetStory(story:Story, withUpdateReadDate:Bool, completion:((_ story:Story)->Void)?) {
         queuedSetStoryStoryLock.lock()
         let currentQueuedStory = queuedSetStoryStory
         queuedSetStoryStory = story
@@ -180,15 +182,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
         queuedSetStoryStoryLock.unlock()
         if currentQueuedStory == nil {
-            SetStoryAsync(story: story)
+            SetStoryAsync(story: story, withUpdateReadDate: withUpdateReadDate)
         }
         self.AnnounceSetStory(story: story)
     }
 
     // 読み上げに用いられる小説の章を設定します。
     // 読み上げが行われていた場合、読み上げは停止します。
-    func SetStory(story:Story, completion:((_ story:Story)->Void)? = nil) {
-        EnqueueSetStory(story: story, completion: completion)
+    func SetStory(story:Story, withUpdateReadDate:Bool, completion:((_ story:Story)->Void)? = nil) {
+        EnqueueSetStory(story: story, withUpdateReadDate: withUpdateReadDate, completion: completion)
     }
     
     func ForceOverrideHungSpeakString(text:String) -> String {
@@ -598,7 +600,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         }
                     }
                     self.ringPageTurningSound()
-                    self.SetStory(story: story) { (story) in
+                    self.SetStory(story: story, withUpdateReadDate: true) { (story) in
                         completion()
                     }
                     return
@@ -616,7 +618,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 if firstStory.storyID != self.storyID {
                     self.ringPageTurningSound()
                 }
-                self.SetStory(story: firstStory) { (story) in
+                self.SetStory(story: firstStory, withUpdateReadDate: true) { (story) in
                     completion()
                 }
                 return
@@ -656,7 +658,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     }
                 }
                 self.ringPageTurningSound()
-                self.SetStory(story: nextStory) { (story) in
+                self.SetStory(story: nextStory, withUpdateReadDate: true) { (story) in
                     completion?(true)
                 }
             }else{
@@ -682,7 +684,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     }
                 }
                 self.ringPageTurningSound()
-                self.SetStory(story: previousStory) { (story) in
+                self.SetStory(story: previousStory, withUpdateReadDate: true) { (story) in
                     completion?(true)
                 }
             }else{
@@ -1057,7 +1059,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.AnnounceSpeech(text: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), title)) {
                 DispatchQueue.main.async {
                     self.ringPageTurningSound()
-                    self.SetStory(story: story) { (story) in
+                    self.SetStory(story: story, withUpdateReadDate: true) { (story) in
                         DispatchQueue.main.async {
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
@@ -1086,7 +1088,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                             nextStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                         }
                     }
-                    self.SetStory(story: nextStory, completion: { (story) in
+                    self.SetStory(story: nextStory, withUpdateReadDate: true, completion: { (story) in
                         self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                     })
                 }else{
@@ -1104,7 +1106,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 self.AnnounceSpeech(text: NSLocalizedString("StorySpeaker_SpeechStopedAndRewindFirstStory", comment: "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。")) {
                                     DispatchQueue.main.async {
                                         self.ringPageTurningSound()
-                                        self.SetStory(story: firstStory) { (story) in
+                                        self.SetStory(story: firstStory, withUpdateReadDate: true) { (story) in
                                             DispatchQueue.main.async {
                                                 RealmUtil.RealmBlock { (realm) -> Void in
                                                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)

@@ -54,7 +54,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     loadNovel(novel: novel, aliveButtonSettings: RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting)
                 }
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
-                    self.storySpeaker.SetStory(story: story)
+                    self.storySpeaker.SetStory(story: story, withUpdateReadDate: false)
                 }
             }
             self.observeStory(storyID: storyID)
@@ -601,7 +601,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         }
                         let picker = PickerViewDialog.createNewDialog(displayTextArray, firstSelectedString: selectedText, parentView: self.view) { (selectedText) in
                             guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)) else { return }
-                            self.storySpeaker.SetStory(story: story)
+                            self.storySpeaker.SetStory(story: story, withUpdateReadDate: true)
                         }
                         searchingDialog.dismiss(animated: false) {
                             picker?.popup(nil)
@@ -739,7 +739,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             guard let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
             DispatchQueue.main.async {
                 floatingButton.assignToView(view: self.view, text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true, bottomConstraintAppend: -32.0) {
-                    self.storySpeaker.SetStory(story: story)
+                    self.storySpeaker.SetStory(story: story, withUpdateReadDate: false)
                     floatingButton.hideAnimate()
                 }
             }
@@ -756,7 +756,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         //self.chapterSlider.value = Float(chapterNumber)
         RealmUtil.RealmBlock { (realm) -> Void in
             if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: targetStoryID) {
-                self.storySpeaker.SetStory(story: story)
+                self.storySpeaker.SetStory(story: story, withUpdateReadDate: true)
             }
         }
     }

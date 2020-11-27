@@ -496,6 +496,7 @@ import AVFoundation
     // TODO: 書き込み失敗を無視している
     static func WriteWith(realm:Realm, withoutNotifying:[NotificationToken?] = [], block:((_ realm:Realm)->Void)) {
         //realm.refresh()
+        print("RealmModel.WriteWith in.")
         let withoutNotifying = withoutNotifying.filter { (token) -> Bool in
             token != nil
             } as! [NotificationToken]

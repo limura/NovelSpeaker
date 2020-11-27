@@ -245,7 +245,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                         guard let chapterNumber = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID)?.readingChapterNumber else { return }
                         StorySpeaker.shared.StopSpeech(realm: realm)
                         NovelSpeakerUtility.SearchStoryFor(storyID: RealmStoryBulk.CreateUniqueBulkID(novelID: self.novelID, chapterNumber: chapterNumber), viewController: self) { (story) in
-                            StorySpeaker.shared.SetStory(story: story)
+                            StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
                             self.navigationController?.popViewController(animated: true)
                         }
                     }

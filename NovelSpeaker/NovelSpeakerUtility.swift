@@ -53,19 +53,28 @@ class NovelSpeakerUtility: NSObject {
     /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
     @objc static func ForceOverrideHungSpeakStringToSpeechModSettings() {
         let targets = ["*": " "]
-        RealmUtil.Write { (realm) in
+        RealmUtil.RealmBlock { (realm) in
+            var writeQueue:[String:String] = [:]
             for (before, after) in targets {
-                if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before) {
-                    setting.after = after
-                    setting.isUseRegularExpression = false
+                if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before){
+                    if setting.after != after {
+                        writeQueue[before] = after
+                    }
                     continue
                 }
-                let speechModSetting = RealmSpeechModSetting()
-                speechModSetting.before = before
-                speechModSetting.after = after
-                speechModSetting.isUseRegularExpression = false
-                speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
-                realm.add(speechModSetting, update: .modified)
+                writeQueue[before] = after
+            }
+            if writeQueue.count > 0 {
+                RealmUtil.WriteWith(realm: realm) { (realm) in
+                    for (before, after) in writeQueue {
+                        let speechModSetting = RealmSpeechModSetting()
+                        speechModSetting.before = before
+                        speechModSetting.after = after
+                        speechModSetting.isUseRegularExpression = false
+                        speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
+                        realm.add(speechModSetting, update: .modified)
+                    }
+                }
             }
         }
     }
@@ -2089,13 +2098,14 @@ class NovelSpeakerUtility: NSObject {
     }
     #endif
     
-    // 注: 内部で realm write するので、 RealmUtil.Write 等で括られている必要があります。
     static func CheckAndRecoverStoryCountWith(realm:Realm, novel:RealmNovel) {
         guard let storyList = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novel.novelID), let lastStory = storyList.last else { return }
         let storyCount = storyList.count
         let lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: storyCount)
         if novel.m_lastChapterStoryID != lastChapterStoryID && RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: lastStory.chapterNumber) == lastChapterStoryID {
-            novel.m_lastChapterStoryID = lastChapterStoryID
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                novel.m_lastChapterStoryID = lastChapterStoryID
+            }
         }
     }
     
@@ -2109,7 +2119,7 @@ class NovelSpeakerUtility: NSObject {
         // これ、いろんな所から呼ばれる(NovelDownloadQueue.addQueue() から呼ばれる)
         // のにもかかわらず RealmUtil.Write を呼び出すので別threadから呼ぶ事にします。(´・ω・`)
         DispatchQueue.main.async {
-            RealmUtil.Write { (realm) in
+            RealmUtil.RealmBlock { (realm) in
                 CheckAndRecoverStoryCountWith(realm: realm, novelID: novelID)
             }
         }
