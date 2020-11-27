@@ -1072,14 +1072,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         
         NiftyUtilitySwift.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
                 let repeatSpeechType = RealmGlobalState.GetInstanceWith(realm: realm)?.repeatSpeechType
-
                 if let repeatSpeechType = repeatSpeechType, repeatSpeechType == .rewindToThisStory {
                     self.setReadLocationWith(realm: realm, location: 0)
                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                     return
                 }
+                self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
 
                 if let nextStory = self.SearchNextChapterWith(realm: realm, storyID: self.storyID) {
                     self.ringPageTurningSound()

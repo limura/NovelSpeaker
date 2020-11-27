@@ -406,29 +406,32 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate {
     }
     
     func saveCurrentStory() {
+        guard let content = storyTextView.text else { return }
         RealmUtil.RealmBlock { (realm) -> Void in
-            let content = storyTextView.text
             var story:Story
             if let storyObj = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.currentStoryID) {
                 story = storyObj
+                if story.content == content { return }
             }else{
                 story = Story()
                 story.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.currentStoryID)
                 story.chapterNumber = 1
             }
-            story.content = content ?? ""
+            story.content = content
             RealmUtil.WriteWith(realm: realm) { (realm) in
                 RealmStoryBulk.SetStoryWith(realm: realm, story: story)
             }
         }
     }
     func saveCurrentNovel() {
-        RealmUtil.Write { (realm) in
-            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID) else { return }
-            if let title = titleTextField.text, title.count > 0 {
-                novel.title = title
+        RealmUtil.RealmBlock { (realm) in
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), novel.title != title else { return }
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                if let title = titleTextField.text, title.count > 0 {
+                    novel.title = title
+                }
+                realm.add(novel, update: .modified)
             }
-            realm.add(novel, update: .modified)
         }
     }
 
@@ -454,11 +457,14 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate {
     }
     @IBAction func addChapterButtonClicked(_ sender: Any) {
         saveCurrentStory()
-        RealmUtil.Write { (realm) in
+        RealmUtil.RealmBlock { (realm) in
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.lastChapterWith(realm: realm) {
                 let newStoryID = RealmStoryBulk.CreateUniqueID(novelID: targetNovelID, chapterNumber: lastStory.chapterNumber + 1)
-                novel.m_lastChapterStoryID = newStoryID
-                novel.lastDownloadDate = Date()
+                RealmUtil.WriteWith(realm: realm) { (realm) in
+                    novel.m_lastChapterStoryID = newStoryID
+                    novel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
+                    novel.lastReadDate = Date(timeIntervalSinceNow: 0)
+                }
                 setStory(storyID: newStoryID)
             }
         }
@@ -467,14 +473,12 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate {
         // memo: 削除できるのは最後の章だけ(のはず)です。
         RealmUtil.RealmBlock { (realm) -> Void in
             if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: currentStoryID), story.storyID == currentStoryID {
-                RealmStoryBulk.RemoveLastStoryWithCheckWith(realm: realm, storyID: currentStoryID)
-            }
-            RealmUtil.WriteWith(realm: realm) { (realm) in
-                if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.linkedStorysWith(realm: realm)?.last {
-                    novel.m_lastChapterStoryID = lastStory.storyID
-                    setStory(storyID: lastStory.storyID)
-                }else{
-                    print("last chapter not found")
+                RealmUtil.WriteWith(realm: realm) { (realm) in
+                    RealmStoryBulk.RemoveLastStoryWithCheckWith(realm: realm, storyID: currentStoryID)
+                    if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.linkedStorysWith(realm: realm)?.last {
+                        novel.m_lastChapterStoryID = lastStory.storyID
+                        setStory(storyID: lastStory.storyID)
+                    }
                 }
             }
         }

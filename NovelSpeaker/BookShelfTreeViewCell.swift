@@ -482,12 +482,14 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
     }
     
     @IBAction func likeButtonClicked(_ sender: Any) {
-        RealmUtil.Write { (realm) in
+        RealmUtil.RealmBlock { (realm) -> Void in
             guard self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
-            if novel.likeLevel > 0 {
-                novel.likeLevel = 0
-            }else{
-                novel.likeLevel = 1
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                if novel.likeLevel > 0 {
+                    novel.likeLevel = 0
+                }else{
+                    novel.likeLevel = 1
+                }
             }
         }
     }

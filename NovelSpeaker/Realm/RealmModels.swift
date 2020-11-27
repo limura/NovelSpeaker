@@ -464,13 +464,6 @@ import AVFoundation
             return try block(realm)
         }
     }
-    static func RealmBlockWrite(block: (_ realm:Realm)->Void) {
-        RealmBlock { (realm) in
-            WriteWith(realm: realm, withoutNotifying: []) { (realm) in
-                block(realm)
-            }
-        }
-    }
     static func RealmDispatchQueueAsyncBlock(queue: DispatchQueue? = nil, block: @escaping (_ realm:Realm) -> Void) {
         (queue ?? DispatchQueue.main).async {
             autoreleasepool {
@@ -496,7 +489,6 @@ import AVFoundation
     // TODO: 書き込み失敗を無視している
     static func WriteWith(realm:Realm, withoutNotifying:[NotificationToken?] = [], block:((_ realm:Realm)->Void)) {
         //realm.refresh()
-        print("RealmModel.WriteWith in.")
         let withoutNotifying = withoutNotifying.filter { (token) -> Bool in
             token != nil
             } as! [NotificationToken]
@@ -735,17 +727,14 @@ struct Story: Codable {
     // このバイナリの期待している RealmUtil.currentSchemaVersion よりも大きい値だったという意味になります。
     static func RunChecker(checkerHandler:((_ newSchemaVersion:Int)->Void)?) {
         if !RealmUtil.IsUseCloudRealm() { return }
-        print("RunChecker in.")
         RealmUtil.RealmBlock { (realm) -> Void in
             let obj:RealmCloudVersionChecker
             if let currentObj = realm.object(ofType: RealmCloudVersionChecker.self, forPrimaryKey: uniqueID) {
-                print("RunChecker obj get: \(currentObj.currentSchemaVersion)")
                 obj = currentObj
             }else{
                 obj = RealmCloudVersionChecker()
                 obj.currentSchemaVersion = Int(RealmUtil.currentSchemaVersion)
                 RealmUtil.WriteWith(realm: realm) { (realm) in
-                    print("RunChecker realm.add. \(obj.currentSchemaVersion)")
                     realm.add(obj, update: .modified)
                 }
             }
@@ -753,9 +742,7 @@ struct Story: Codable {
                 checkerHandler?(obj.currentSchemaVersion)
                 return
             }
-            print("RunChecker observe.")
             checkerObserverToken = obj.observe({ (change) in
-                print("RunChecker observe event got.")
                 switch change {
                 case .change(_, let propertys):
                     for property in propertys {
@@ -776,7 +763,6 @@ struct Story: Codable {
             // 保存されている currentSchemaVersion より新しければ、
             // その値で上書きしておきます。
             if obj.currentSchemaVersion < RealmUtil.currentSchemaVersion {
-                print("RunChecker update currentVersion: \(RealmUtil.currentSchemaVersion)")
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [checkerObserverToken]) { (realm) in
                     obj.currentSchemaVersion = Int(RealmUtil.currentSchemaVersion)
                 }
@@ -1018,11 +1004,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             realm.delete(lastStoryBulk)
         }else{
             storyArray.removeLast()
-            guard let data = try? JSONEncoder().encode(storyArray) else {
-                print("WARN: [Story] の JSONEncode に失敗(RemoveLastStoryWith)")
-                return
-            }
-            lastStoryBulk.storyListAsset = CreamAsset.create(object: lastStoryBulk, propName: "", data: data)
+            lastStoryBulk.OverrideStoryListAsset(storyArray: storyArray)
             realm.add(lastStoryBulk, update: .modified)
         }
     }
@@ -1353,8 +1335,6 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             RealmUtil.WriteWith(realm: realm) { (realm) in
                 realm.add(novel, update: .modified)
                 RealmStoryBulk.SetStoryWith(realm: realm, story: story)
-            }
-            RealmUtil.WriteWith(realm: realm) { (realm) in
                 for tagName in state.tagArray {
                     RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: "keyword")
                 }
@@ -2400,14 +2380,17 @@ extension RealmNovelTag: CanWriteIsDeleted {
     }
 
     static func SetBookmarkWith(realm: Realm, type:BookmarkType, hint:String, novelID:String, chapterNumber:Int, location:Int){
-        RealmUtil.WriteWith(realm: realm) { (realm) in
-            if let obj = SearchObjectFromWith(realm: realm, type: type, hint: hint) {
+        if let obj = SearchObjectFromWith(realm: realm, type: type, hint: hint) {
+            if obj.novelID == novelID, obj.chapterNumber == chapterNumber, obj.location == location { return }
+            RealmUtil.WriteWith(realm: realm) { (realm) in
                 obj.novelID = novelID
                 obj.chapterNumber = chapterNumber
                 obj.location = location
                 realm.add(obj, update: .modified)
-                return
             }
+            return
+        }
+        RealmUtil.WriteWith(realm: realm) { (realm) in
             let obj = RealmBookmark()
             obj.id = CreateUniqueID(type: type, hint: hint)
             obj.novelID = novelID
@@ -2418,22 +2401,7 @@ extension RealmNovelTag: CanWriteIsDeleted {
     }
     
     static func SetSpeechBookmarkWith(realm: Realm, novelID: String, chapterNumber:Int, location: Int) {
-        RealmUtil.WriteWith(realm: realm) { (realm) in
-            let obj:RealmBookmark
-            if let oldObj = SearchObjectFromWith(realm: realm, type: .novelSpeechLocation, hint: novelID) {
-                obj = oldObj
-                if obj.location == location && obj.novelID == novelID && obj.chapterNumber == chapterNumber {
-                    return
-                }
-            }else{
-                obj = RealmBookmark()
-                obj.id = CreateUniqueID(type: .novelSpeechLocation, hint: novelID)
-            }
-            obj.novelID = novelID
-            obj.chapterNumber = chapterNumber
-            obj.location = location
-            realm.add(obj, update: .modified)
-        }
+        SetBookmarkWith(realm: realm, type: .novelSpeechLocation, hint: novelID, novelID: novelID, chapterNumber: chapterNumber, location: location)
     }
     
     static func GetSpeechBookmark(realm: Realm, novelID: String) -> RealmBookmark? {

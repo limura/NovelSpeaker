@@ -42,7 +42,7 @@ class SpeechViewButtonSettingsViewController: FormViewController {
             let rowSetting = SpeechViewButtonSetting(type: type, isOn: value)
             newSetting.append(rowSetting)
         }
-        RealmUtil.RealmBlockWrite { (realm) in
+        RealmUtil.Write { (realm) in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
             globalState.SetSpeechViewButtonSettingWith(realm: realm, newValue: newSetting)
         }

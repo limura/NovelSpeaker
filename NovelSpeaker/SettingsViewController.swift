@@ -1052,7 +1052,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         print("headlessClient.getAllCookies return nil")
                         return
                     }
-                    RealmUtil.RealmBlockWrite { (realm) in
+                    RealmUtil.Write { (realm) in
                         HTTPCookieSyncTool.shared.SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: cookieArray)
                     }
                 }
@@ -1107,7 +1107,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< ButtonRow() {
                 $0.title = "RemoveAll(realm)"
             }.onCellSelection({ (cellOf, row) in
-                RealmUtil.RealmBlockWrite { (realm) in
+                RealmUtil.Write { (realm) in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                         print("RemoveAll(realm) failed. globalState is nil")
                         return

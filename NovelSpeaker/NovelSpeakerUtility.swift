@@ -2109,7 +2109,6 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
-    // 注: 内部で realm write するので、 RealmUtil.Write 等で括られている必要があります。
     static func CheckAndRecoverStoryCountWith(realm:Realm, novelID:String) {
         guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
         CheckAndRecoverStoryCountWith(realm: realm, novel: novel)

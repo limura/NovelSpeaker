@@ -358,9 +358,22 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         // content が書き換わった時のみを監視します。
                         // でないと lastReadDate とかが書き換わった時にも表示の更新が走ってしまいます。
                         let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: targetStoryID)
-                        if property.name == "storyListAsset", let newValue = property.newValue as? CreamAsset, let storyArray = RealmStoryBulk.StoryCreamAssetToStoryArray(asset: newValue), let story = RealmStoryBulk.StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber), story.chapterNumber == chapterNumber, let currentText = self.textView.text, story.content != currentText {
-                            DispatchQueue.main.async {
-                                self.setStoryWithoutSetToStorySpeaker(story: story)
+                        if property.name == "storyListAsset", let newValue = property.newValue as? CreamAsset, let storyArray = RealmStoryBulk.StoryCreamAssetToStoryArray(asset: newValue) {
+                            // [Story] に変換できた
+                            if let story = RealmStoryBulk.StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber) {
+                                // 今開いている Story が存在した
+                                if story.chapterNumber == chapterNumber, let currentText = self.textView.text, story.content != currentText {
+                                    DispatchQueue.main.async {
+                                        self.setStoryWithoutSetToStorySpeaker(story: story)
+                                    }
+                                }
+                            }else{
+                                // 今開いている Story が存在しなかった(恐らくは最後の章を開いていて、その章が削除された)
+                                if let lastStory = storyArray.last {
+                                    DispatchQueue.main.async {
+                                        self.storySpeaker.SetStory(story: lastStory, withUpdateReadDate: true)
+                                    }
+                                }
                             }
                         }
                     }

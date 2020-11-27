@@ -397,7 +397,7 @@ li {
         if #available(iOS 11.0, *) {
             if let store = self.wkWebView?.configuration.websiteDataStore.httpCookieStore {
                 store.getAllCookies { (cookieArray) in
-                    RealmUtil.RealmBlockWrite { (realm) in
+                    RealmUtil.Write { (realm) in
                         HTTPCookieSyncTool.shared.SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: cookieArray)
                     }
                     NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: "", isNeedFallbackImportFromWebPageTab: false)

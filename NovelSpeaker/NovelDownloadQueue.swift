@@ -546,27 +546,23 @@ class NovelDownloadQueue : NSObject {
         self.queueHolder.addQueue(novelID: novelID)
         self.downloadStart()
     }
-    // 注: ここで呼び出す realm は RealmUtil.Write 等で write が許可されている状態で呼び出してください
-    func addQueueArray(realm: Realm, novelArray:Results<RealmNovel>) {
+
+    func addQueueArray(novelArray:Results<RealmNovel>) {
         self.downloadStop()
         for novel in novelArray {
-            //NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novel: novel)
             if novel.type != .URL { continue }
             self.queueHolder.addQueue(novelID: novel.novelID)
-            NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
         }
+        NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
         self.downloadStart()
     }
     
     func addQueueArray(novelIDArray:[String]) {
         self.downloadStop()
-        RealmUtil.Write { (realm) in
-            for novelID in novelIDArray {
-                //NovelSpeakerUtility.CheckAndRecoverStoryCountWith(realm: realm, novelID: novelID)
-                if novelID.hasPrefix(NovelSpeakerUtility.UserCreatedContentPrefix) { continue }
-                self.queueHolder.addQueue(novelID: novelID)
-                NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
-            }
+        for novelID in novelIDArray {
+            if novelID.hasPrefix(NovelSpeakerUtility.UserCreatedContentPrefix) { continue }
+            self.queueHolder.addQueue(novelID: novelID)
+            NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
         }
         self.downloadStart()
     }

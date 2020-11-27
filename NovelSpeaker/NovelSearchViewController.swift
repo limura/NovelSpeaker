@@ -699,7 +699,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
                 guard let selectedSite = self.searchInfoArray.filter({$0.title == selectedTitle}).first else { return }
                 if let currentSelectedSiteTitle = self.currentSelectedSite?.title, currentSelectedSiteTitle == selectedTitle { return }
                 self.currentSelectedSite = selectedSite
-                RealmUtil.RealmBlockWrite { (realm) in
+                RealmUtil.Write { (realm) in
                     if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                         globalState.currentWebSearchSite = selectedSite.title
                     }
