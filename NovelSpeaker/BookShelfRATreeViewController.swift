@@ -814,7 +814,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func treeView(_ treeView: RATreeView, didSelectRowForItem item: Any) {
         if let data = item as? BookShelfRATreeViewCellData {
             if let novelID = data.novelID {
-                pushNextView(novelID: novelID, isNeedSpeech: false, isNeedUpdateReadDate: true)
+                // currentReadingNovelID の小説を開いた(最後に開いていた小説を開いた)なら、
+                // updateReadDate は呼ばないで良いという事にします。
+                let currentReadingNovelID:String = RealmUtil.RealmBlock { (realm) -> String in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return "" }
+                    return globalState.currentReadingNovelID
+                }
+                pushNextView(novelID: novelID, isNeedSpeech: false, isNeedUpdateReadDate: currentReadingNovelID != novelID)
             }
         }
     }

@@ -497,6 +497,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 self.ApplyStoryToSpeaker(story: story, withMoreSplitTargets: self.withMoreSplitTargets, moreSplitMinimumLetterCount: self.moreSplitMinimumLetterCount, readLocation: story.readLocation(realm: realm))
                 self.isNeedApplySpeechConfigs = false
             }
+            if withMaxSpeechTimeReset == true {
+                // withMaxSpeechTimeReset == true なら、ユーザからの手動操作であるという事として
+                // 読み上げ位置を更新します。
+                self.updateReadDate(realm: realm, storyID: story.storyID, contentCount: story.content.unicodeScalars.count, readLocation: story.readLocation(realm: realm))
+            }
         }
         for case let delegate as StorySpeakerDeletgate in self.delegateArray.allObjects {
             delegate.storySpeakerStartSpeechEvent(storyID: self.storyID)
