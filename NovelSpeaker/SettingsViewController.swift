@@ -940,6 +940,48 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         }.build().show()
                 }
             })
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus", comment: "iCloud上のデータを全て読み込み直す")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                if RealmUtil.IsUseCloudRealm() == false {
+                    DispatchQueue.main.async {
+                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_iCloudNotEnabled_Message", comment: "iCloudを利用していません。"), buttonTitle: nil, buttonAction: nil)
+                    }
+                    return
+                }
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus", comment: "iCloud上のデータを全て読み込み直す"), message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message", comment: "iCloud上のデータを全て読み込み直しますか？\nこの操作を行うとiCloud上に保存されているデータを全て読み込み直す事になりますので、iCloud上に保存されているデータの量が多い場合はかなりの時間がかかる事になります。"), button1Title: nil, button1Action: nil, button2Title: nil) {
+                        NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPullProcessingDialog", comment: "iCloud からデータを読み込み中です。"), completion: { (dialog) in
+                            RealmUtil.stopSyncEngine()
+                            RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
+                            try! RealmUtil.EnableSyncEngine()
+                            RealmUtil.WaitAllLongLivedOperationIDCleared(completion: {
+                                RealmUtil.CheckCloudDataIsValid { (result) in
+                                    DispatchQueue.main.async {
+                                        dialog.dismiss(animated: false, completion: nil)
+                                    }
+                                }
+                            })
+                        })
+                    }
+                }
+            })
+            <<< ButtonRow(){
+                $0.title = NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_Title", comment: "現在のデータを全てiCloudにアップロードする")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                if RealmUtil.IsUseCloudRealm() == false {
+                    DispatchQueue.main.async {
+                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_iCloudNotEnabled_Message", comment: "iCloudを利用していません。"), buttonTitle: nil, buttonAction: nil)
+                    }
+                    return
+                }
+                RealmUtil.CloudPush()
+                DispatchQueue.main.async {
+                    NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_Message", comment: "全てのデータをiCloudにアップロードし始めました。データ量が多ければ多いほどアップロード完了まで時間がかかります。"), buttonTitle: nil, buttonAction: nil)
+                }
+            })
 
             /*
             <<< ButtonRow() {
@@ -1000,6 +1042,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
         
+            /*
             <<< LabelRow() {
                 $0.title = "以下は cookie 周りの処理を行う物です。一部は Xcode でログを確認しないと意味が無いボタンになります。"
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1115,7 +1158,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     globalState.MergeCookieArrayWith(realm: realm, cookieArray: [])
                 }
             })
-
+            */
     }
 
     func AssignMessageTo(tag:Int, text:String, dialog:EasyDialog) {
