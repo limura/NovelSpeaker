@@ -191,6 +191,7 @@
 "SettingsViewController_UploadAllDataToiCloud_Message" = "全てのデータをiCloudにアップロードし始めました。データ量が多ければ多いほどアップロード完了まで時間がかかります。";
 "SettingsViewController_iCloudPullWithRefreshiCloudStatus" = "iCloud上のデータを全て読み込み直す";
 "SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message" = "iCloud上のデータを全て読み込み直しますか？\nこの操作を行うとiCloud上に保存されているデータを全て読み込み直す事になりますので、iCloud上に保存されているデータの量が多い場合はかなりの時間がかかる事になります。";
+"SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message" = "iCloudのデータを読み込み直しはじめました。";
 "SettingTableViewController_IsDisallowsCellularAccess" = "携帯電話網ではダウンロードしないようにする";
 "SettingTableViewController_IsNeedConfirmDeleteBook" = "小説を削除する時に確認する";
 "SettingTableViewController_RepeatTypeTitle" = "再生が末尾に達した時の動作";

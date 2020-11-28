@@ -28,8 +28,7 @@ func == (lhs: BookShelfRATreeViewCellData, rhs: BookShelfRATreeViewCellData) -> 
 }
 extension BookShelfRATreeViewCellData: Equatable {}
 
-class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RATreeViewDelegate, UIScrollViewDelegate {
-
+class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RATreeViewDelegate, UIScrollViewDelegate, RealmObserverResetDelegate {
     var displayDataArray : [BookShelfRATreeViewCellData] = [];
     var treeView:RATreeView?
     var searchText:String? = nil
@@ -143,7 +142,16 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         super.setEditing(editing, animated: animated)
         self.treeView?.setEditing(editing, animated: animated)
     }
+
+    func StopObservers() {
+        novelArrayNotificationToken = nil
+    }
     
+    func RestartObservers() {
+        StopObservers()
+        registObserver()
+    }
+
     func registNotificationCenter() {
         NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.RealmSettingChanged, queue: .main) { (notification) in
             DispatchQueue.main.async {

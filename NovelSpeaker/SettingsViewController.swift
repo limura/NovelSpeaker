@@ -952,18 +952,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus", comment: "iCloud上のデータを全て読み込み直す"), message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message", comment: "iCloud上のデータを全て読み込み直しますか？\nこの操作を行うとiCloud上に保存されているデータを全て読み込み直す事になりますので、iCloud上に保存されているデータの量が多い場合はかなりの時間がかかる事になります。"), button1Title: nil, button1Action: nil, button2Title: nil) {
-                        NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPullProcessingDialog", comment: "iCloud からデータを読み込み中です。"), completion: { (dialog) in
-                            RealmUtil.stopSyncEngine()
-                            RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
-                            try! RealmUtil.EnableSyncEngine()
-                            RealmUtil.WaitAllLongLivedOperationIDCleared(completion: {
-                                RealmUtil.CheckCloudDataIsValid { (result) in
-                                    DispatchQueue.main.async {
-                                        dialog.dismiss(animated: false, completion: nil)
-                                    }
-                                }
-                            })
-                        })
+                        RealmObserverHandler.shared.AnnounceStopObservers()
+                        RealmUtil.stopSyncEngine()
+                        RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
+                        RealmObserverHandler.shared.AnnounceRestartObservers()
+                        try! RealmUtil.EnableSyncEngine()
+                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message", comment: "iCloudのデータを読み込み直しはじめました。"), buttonTitle: nil, buttonAction: nil)
                     }
                 }
             })
