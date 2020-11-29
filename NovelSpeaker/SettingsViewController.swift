@@ -150,6 +150,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     func createSettingsTable(){
         form +++ Section()
+            /*
+            <<< ButtonRow() {
+                $0.title = "テストボタン"
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (_, _) in
+            })
+             */
             <<< LabelRow() { (row) in
                 row.tag = "SettingsTableViewController_Information_TAG"
                 row.title = NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ")
