@@ -609,16 +609,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     @objc func sortTypeSelectButtonClicked(sender:Any) {
-        let targetView = self.view
-        let dialog = PickerViewDialog.createNewDialog(
+        let dialog = PickerViewDialog.createNewDialog(displayTextArray:
             getDisplayStringToSortTypeDictionary().map({ (arg0) -> String in
                 let (key, _) = arg0
                 return key
             }).sorted(by: { (a:String, b:String) -> Bool in
                 a < b
             }),
-            firstSelectedString: getCurrentSortTypeDisplayString(), parentView: targetView) { (selectedText) in
-                guard let selectedText = selectedText else { return }
+            firstSelectedString: getCurrentSortTypeDisplayString()) { (selectedText) in
                 let sortType = self.convertDisplayStringToSortType(key: selectedText)
                 RealmUtil.RealmBlock { (realm) -> Void in
                     if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
@@ -629,7 +627,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 }
                 self.reloadAllData()
         }
-        dialog?.popup(nil)
+        dialog?.popup(completion: nil)
     }
     
     @objc func searchButtonClicked(sender:Any) {

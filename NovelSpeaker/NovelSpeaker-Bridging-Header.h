@@ -6,6 +6,5 @@
 #import "GlobalDataSingleton.h"
 //#import "UriLoader.h"
 //#import "NiftyUtility.h"
-#import "PickerViewDialog.h"
 #import <MSColorPicker/MSColorPicker.h>
 #import <CommonCrypto/CommonHMAC.h>

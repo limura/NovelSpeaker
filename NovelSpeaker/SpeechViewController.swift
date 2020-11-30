@@ -613,12 +613,12 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
                             selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
                         }
-                        let picker = PickerViewDialog.createNewDialog(displayTextArray, firstSelectedString: selectedText, parentView: self.view) { (selectedText) in
-                            guard let selectedText = selectedText, let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)) else { return }
+                        let picker = PickerViewDialog.createNewDialog(displayTextArray: displayTextArray, firstSelectedString: selectedText) { (selectedText) in
+                            guard let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)) else { return }
                             self.storySpeaker.SetStory(story: story, withUpdateReadDate: true)
                         }
                         searchingDialog.dismiss(animated: false) {
-                            picker?.popup(nil)
+                            picker?.popup(completion: nil)
                         }
                     }
                 }

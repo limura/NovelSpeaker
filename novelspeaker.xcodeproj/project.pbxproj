@@ -34,7 +34,6 @@
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
 		212137CE24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */; };
 		212137CF24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */; };
-		2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */; };
 		212323F522B7049E00543543 /* RealmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212323F422B7049E00543543 /* RealmTests.swift */; };
 		2123240E22B7101000543543 /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
 		2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
@@ -136,6 +135,7 @@
 		2164800C2290F3F900A183DF /* StorySpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800B2290F3F900A183DF /* StorySpeaker.swift */; };
 		2164800E22910E6300A183DF /* UIImageExtensionSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */; };
 		21652E6B23EDB8F300B64F9E /* SpeechContorlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */; };
+		2166693C257548DB00B5B735 /* PickerViewDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2166693B257548DB00B5B735 /* PickerViewDialog.swift */; };
 		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
 		216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */; };
@@ -363,8 +363,6 @@
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
 		212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotsFileTool.swift; sourceTree = "<group>"; };
 		212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 5.xcdatamodel"; sourceTree = "<group>"; };
-		2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PickerViewDialog.h; sourceTree = "<group>"; };
-		2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PickerViewDialog.m; sourceTree = "<group>"; };
 		212323F422B7049E00543543 /* RealmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmTests.swift; sourceTree = "<group>"; };
 		21245BD81A8FBA2A00D3B376 /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		21245BDA1A8FBB6800D3B376 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
@@ -456,6 +454,7 @@
 		2164800B2290F3F900A183DF /* StorySpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorySpeaker.swift; sourceTree = "<group>"; };
 		2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensionSwift.swift; sourceTree = "<group>"; };
 		21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechContorlView.swift; sourceTree = "<group>"; };
+		2166693B257548DB00B5B735 /* PickerViewDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewDialog.swift; sourceTree = "<group>"; };
 		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
 		216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIDeviceModelNameExtension.swift; sourceTree = "<group>"; };
@@ -793,8 +792,7 @@
 		21724EE51972C7B400DF6DC4 /* CustomViews */ = {
 			isa = PBXGroup;
 			children = (
-				2122B65B1D4BBAE700C8AFAE /* PickerViewDialog.h */,
-				2122B65C1D4BBAE700C8AFAE /* PickerViewDialog.m */,
+				2166693B257548DB00B5B735 /* PickerViewDialog.swift */,
 				2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */,
 				213AB8811FB7407E00EE302D /* TimeIntervalCountDownRow.swift */,
 				2173A6BE21CC529F002E9EA8 /* FloatingButton.swift */,
@@ -1785,7 +1783,7 @@
 				2173A6B321C9260C002E9EA8 /* SyncHttpSession.swift in Sources */,
 				21D8FC5119FCA64300CCF1B6 /* SettingDataModel4to5.xcmappingmodel in Sources */,
 				21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */,
-				2122B65D1D4BBAE700C8AFAE /* PickerViewDialog.m in Sources */,
+				2166693C257548DB00B5B735 /* PickerViewDialog.swift in Sources */,
 				21E975BA22A06CC60027A0A0 /* MigrationViewController.swift in Sources */,
 				21648000228D5EE000A183DF /* EditBookViewController.swift in Sources */,
 				21C759FA2287123500956B73 /* RealmModels.swift in Sources */,
