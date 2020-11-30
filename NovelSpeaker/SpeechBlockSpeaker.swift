@@ -295,4 +295,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     var currentBlock:CombinedSpeechBlock {
         get { return speechBlockArray[currentSpeechBlockIndex] }
     }
+    
+    func isDummySpeechAlive() -> Bool {
+        return speaker.isDummySpeechAlive()
+    }
 }

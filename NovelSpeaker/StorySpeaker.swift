@@ -1189,4 +1189,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     var currentBlockIndex:Int {
         get { return speaker.currentBlockIndex }
     }
+    
+    func isDummySpeechAlive() -> Bool {
+        return speaker.isDummySpeechAlive()
+    }
 }

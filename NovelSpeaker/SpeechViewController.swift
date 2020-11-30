@@ -678,6 +678,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 disableCurrentReadingStoryChangeFloatingButton()
                 storySpeaker.setReadLocationWith(realm: realm, location: self.textView.selectedRange.location)
                 self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                self.checkDummySpeechFinished()
             }
         }
     }
@@ -691,6 +692,31 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.LoadPreviousChapter(realm: realm)
+        }
+    }
+    
+    func checkDummySpeechFinished() {
+        if self.storySpeaker.isDummySpeechAlive() {
+            print("self.storySpeaker.isDummySpeechAlive() return true")
+            DispatchQueue.main.async {
+                let dialog = NiftyUtilitySwift.EasyDialogBuilder(self).text(content: NSLocalizedString("SpeechViewController_WaitingSpeakerReady", comment: "話者の準備が整うのを待っています。"))
+                    .build()
+                dialog.show()
+                func waitDummySpeechFinish() {
+                    if self.storySpeaker.isDummySpeechAlive() == false {
+                        DispatchQueue.main.async {
+                            dialog.dismiss(animated: false, completion: nil)
+                        }
+                        return
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        waitDummySpeechFinish()
+                    }
+                }
+                waitDummySpeechFinish()
+            }
+        }else{
+            print("self.storySpeaker.isDummySpeechAlive() return false")
         }
     }
     
@@ -731,6 +757,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
                 }
+                self.checkDummySpeechFinished()
             }
         }
     }

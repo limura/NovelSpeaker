@@ -288,6 +288,8 @@
 "SpeechViewController_SearchDialog_NotFoundTitle" = "The specified phrase does not exist.";
 "SpeechViewController_NowSearchingTitle" = "Searching";
 "SpeechViewController_NowLoadingText" = "loading...";
+"SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "Go to the updated %d chapter on the other device";
+"SpeechViewController_WaitingSpeakerReady" = "Waiting for the speaker to be ready.";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";
@@ -671,7 +673,6 @@
 "SpeechViewButtonType_Backup" = "Back up this novel";
 "SpeechViewButtonSettingsViewController_Title" = "Settings for the buttons displayed in the upper right corner of the novel text screen";
 "SpeechViewButtonType_Detail" = "Show novel detail";
-"SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "Go to the updated %d chapter on the other device";
 
 "MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "The specified speaker was not available on this machine. I will use an alternative speaker.";
 

@@ -222,4 +222,15 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         print("register: \(voiceIdentifier ?? "nil"), \(locale ?? "nil")")
         enqueue(text: " ", voiceIdentifier: voiceIdentifier, locale: locale, pitch: 1, rate: 1, delay: 0, isDummy: true)
     }
+    
+    func isDummySpeechAlive() -> Bool {
+        self.speechQueueLock.lock()
+        defer {
+            self.speechQueueLock.unlock()
+        }
+        for queue in self.speechQueue {
+            if queue.isDummy { return true }
+        }
+        return false
+    }
 }

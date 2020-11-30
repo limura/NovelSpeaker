@@ -272,6 +272,7 @@
 "SpeechViewController_NowSearchingTitle" = "検索中";
 "SpeechViewController_NowLoadingText" = "本文を読込中……";
 "SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "他端末で更新された %d章 へ移動";
+"SpeechViewController_WaitingSpeakerReady" = "話者の準備が整うのを待っています。";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
