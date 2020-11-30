@@ -12,6 +12,7 @@ import UserNotifications
 #if !os(watchOS)
 import FTLinearActivityIndicator
 #endif
+import BackgroundTasks
 
 fileprivate class QueueItem {
     let novelID:String
@@ -595,6 +596,61 @@ class NovelDownloadQueue : NSObject {
         return self.queueHolder.GetCurrentQueuedNovelIDArray()
     }
 
+    // Background Process で 30秒の壁を破るの話
+    // https://grandbig.github.io/blog/2019/09/22/backgroundtasks/
+    let BackgroundProcessIdentifier = "com.limuraproducts.novelspeaker.backgroundprocessingtask"
+    @objc func RegisterBackgroundProcessIfNeeded() {
+        #if !os(watchOS)
+        if #available(iOS 13.0, macOS 11.0, *) {
+            if CoreDataToRealmTool.IsNeedMigration() {
+                // 起動時に background fetch を叩くのだけれど、Realm への移行が行われる段階の時は Realm object を作ってしまうとファイルができてしまうので実行させません。
+                // TODO: つまり、移行が終わったら StartBackgroundFetchIfNeeded() を呼び出す必要があるのだけれどそれをやっていないはず。
+                return
+            }
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                if !globalState.isBackgroundNovelFetchEnabled {
+                    return
+                }
+                DispatchQueue.main.async {
+                    BGTaskScheduler.shared.register(forTaskWithIdentifier: self.BackgroundProcessIdentifier, using: nil) { (task) in
+                        // Operation class を使ってゴニョゴニョやるのが普通っぽいけど
+                        // どうせ一つしかタスク走らないしコレでいいのではないかしらん……？
+                        guard let task = task as? BGProcessingTask else { return }
+                        self.scheduleBackgroundProcess()
+                        task.expirationHandler = {
+                            NovelDownloadQueue.shared.downloadStop()
+                            task.setTaskCompleted(success: false)
+                        }
+                        // ここで main thread にして DoBackgroundFetch() を呼び出さないと Timer が発火しないのでダウンロードがいつまでも回り続けてしまう
+                        DispatchQueue.main.async {
+                            NovelDownloadQueue.shared.DoBackgroundFetch(timeoutTimeInterval: 60*5) { (successCount) in
+                                task.setTaskCompleted(success: true)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #endif
+    }
+    
+    #if !os(watchOS)
+    @objc func scheduleBackgroundProcess() {
+        if #available(iOS 13.0, macOS 11.0, *) {
+            let request = BGProcessingTaskRequest(identifier: self.BackgroundProcessIdentifier)
+            request.requiresNetworkConnectivity = true
+            request.requiresExternalPower = false
+            request.earliestBeginDate = Date(timeIntervalSinceNow: 60*60)
+            do {
+                try BGTaskScheduler.shared.submit(request)
+            }catch{
+                print("BGTask schedule failed. \(error)")
+            }
+        }
+    }
+    #endif
+
     @objc func StartBackgroundFetchIfNeeded() {
         #if !os(watchOS)
         if CoreDataToRealmTool.IsNeedMigration() {
@@ -614,8 +670,13 @@ class NovelDownloadQueue : NSObject {
             if hour < UIApplication.backgroundFetchIntervalMinimum {
                 hour = UIApplication.backgroundFetchIntervalMinimum
             }
-            DispatchQueue.main.async {
-                UIApplication.shared.setMinimumBackgroundFetchInterval(hour)
+            if #available(iOS 13.0, macOS 11.0, *) {
+                // shceduleBackgroundProcess() は applicationDidEnterBackground 側で仕込む必要があるぽいです
+                //scheduleBackgroundProcess()
+            }else{
+                DispatchQueue.main.async {
+                    UIApplication.shared.setMinimumBackgroundFetchInterval(hour)
+                }
             }
         }
         #endif
@@ -659,10 +720,10 @@ class NovelDownloadQueue : NSObject {
     }
     
     #if !os(watchOS)
-    @objc func HandleBackgroundFetch(application:UIApplication, performFetchWithCompletionHandler:@escaping (UIBackgroundFetchResult) -> Void) {
+    func DoBackgroundFetch(timeoutTimeInterval:TimeInterval, completion:((Int)->Void)?) {
         let startTime = Date()
         if GetCurrentQueuedNovelIDArray().count > 0 || StorySpeaker.shared.isPlayng {
-            performFetchWithCompletionHandler(.noData)
+            completion?(0)
             return
         }
         let fetchedNovelIDList = GetAlreadyBackgroundFetchedNovelIDList()
@@ -679,14 +740,14 @@ class NovelDownloadQueue : NSObject {
         }
         if targetNovelIDList.count <= 0 {
             ClearAlreadyBackgroundFetchedNovelIDListKey()
-            performFetchWithCompletionHandler(.noData)
+            completion?(0)
             return
         }
         
         self.downloadSuccessNovelIDSet.removeAll()
         self.downloadEndedNovelIDSet.removeAll()
         // 30秒で処理を終わらねばならないのでタイマを使います
-        let deadlineTimeInterval = backgroundFetchDeadlineTimeInSec - (Date().timeIntervalSince1970 - startTime.timeIntervalSince1970)
+        let deadlineTimeInterval = timeoutTimeInterval - (Date().timeIntervalSince1970 - startTime.timeIntervalSince1970)
 
         // この処理は結構重いのでタイマの基準時間はこれよりも先にとっておきます
         self.addQueueArray(novelIDArray: targetNovelIDList)
@@ -703,7 +764,7 @@ class NovelDownloadQueue : NSObject {
                 
                 let novelIDArray = self.downloadSuccessNovelIDSet
                 if novelIDArray.count <= 0 {
-                    performFetchWithCompletionHandler(.noData)
+                    completion?(0)
                     return
                 }
                 let downloadSuccessTitle = String(format: NSLocalizedString("GlobalDataSingleton_NovelUpdateAlertBody", comment: "%d個の更新があります。"), novelIDArray.count)
@@ -719,7 +780,19 @@ class NovelDownloadQueue : NSObject {
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.InvokeNotificationNow(title: downloadSuccessTitle, message: novelTitleArray.joined(separator: "\n"), badgeNumber: displayDownloadCount)
                 }
-                performFetchWithCompletionHandler(.newData)
+                completion?(novelIDArray.count)
+            }
+        }
+    }
+    
+    @objc func HandleBackgroundFetch(application:UIApplication, performFetchWithCompletionHandler:@escaping (UIBackgroundFetchResult) -> Void) {
+        DispatchQueue.main.async {
+            self.DoBackgroundFetch(timeoutTimeInterval: self.backgroundFetchDeadlineTimeInSec) { (successCount) in
+                if successCount > 0 {
+                    performFetchWithCompletionHandler(.newData)
+                }else{
+                    performFetchWithCompletionHandler(.noData)
+                }
             }
         }
     }

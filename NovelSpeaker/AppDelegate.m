@@ -103,6 +103,7 @@ void uncaughtExceptionHandler(NSException *exception)
     // DynamicType 対応
     [self setPreferredFontForTextStyleByAppearance];
     
+    [[NovelDownloadQueue shared] RegisterBackgroundProcessIfNeeded];
     [[NovelDownloadQueue shared] StartBackgroundFetchIfNeeded];
     [[NovelDownloadQueue shared] ClearDownloadCountBadge];
     [NiftyUtilitySwift StartiCloudDataVersionChecker];
@@ -123,6 +124,7 @@ void uncaughtExceptionHandler(NSException *exception)
     NSLog(@"application did enter background.");
     [[GlobalDataSingleton GetInstance] saveContext];
     [RealmUtil SetCheckCloudDataIsValidInterruptWithIsInterrupt:true];
+    [[NovelDownloadQueue shared] scheduleBackgroundProcess];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
