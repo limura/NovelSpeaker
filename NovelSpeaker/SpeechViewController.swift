@@ -697,7 +697,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     
     func checkDummySpeechFinished() {
         if self.storySpeaker.isDummySpeechAlive() {
-            print("self.storySpeaker.isDummySpeechAlive() return true")
             DispatchQueue.main.async {
                 let dialog = NiftyUtilitySwift.EasyDialogBuilder(self).text(content: NSLocalizedString("SpeechViewController_WaitingSpeakerReady", comment: "話者の準備が整うのを待っています。"))
                     .build()
@@ -715,8 +714,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
                 waitDummySpeechFinish()
             }
-        }else{
-            print("self.storySpeaker.isDummySpeechAlive() return false")
         }
     }
     
