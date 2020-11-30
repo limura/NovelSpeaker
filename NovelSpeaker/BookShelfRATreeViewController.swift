@@ -110,10 +110,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         treeView.scrollView.addSubview(refreshControl)
         registObserver()
         registNotificationCenter()
-
-        autoreleasepool {
-            view.layoutIfNeeded()
-        }
     }
     
     deinit {
