@@ -298,27 +298,30 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.presentationMode = .segueName(segueName: "textSizeSettingSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0
             }
-            
-            <<< TimeIntervalCountDownRow() { (row) in
+            <<< CountDownInlineRow() { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
-                row.minuteInterval = 5
-                row.cell.textLabel?.numberOfLines = 0
+                row.minuteInterval = 1
+                let offset = Double(TimeZone.current.secondsFromGMT())
                 RealmUtil.RealmBlock { (realm) -> Void in
                     if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                        row.value = Double(globalState.maxSpeechTimeInSec)
+                        row.value = Date(timeIntervalSinceReferenceDate: -offset + Double(globalState.maxSpeechTimeInSec))
                     }else{
-                        row.value = 60*60*24-60
+                        row.value = Date(timeIntervalSinceReferenceDate: -offset + 60*60*24-60)
                     }
                 }
-            }.onChange({ row in
+            }.onChange({ (row) in
+                guard let value = row.value else { return }
+                let offset = Double(TimeZone.current.secondsFromGMT())
+                let referenceDate = Date(timeIntervalSinceReferenceDate: -offset)
+                let timeInterval = Int(value.timeIntervalSince(referenceDate))
+                print("timeInterval: \(timeInterval)")
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.maxSpeechTimeInSec != timeInterval else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                        globalState.maxSpeechTimeInSec = Int(value)
+                        globalState.maxSpeechTimeInSec = timeInterval
                     }
                 }
             })
-            
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_CreateNewUserText", comment:"新規自作本の追加")
                 $0.cell.textLabel?.numberOfLines = 0
