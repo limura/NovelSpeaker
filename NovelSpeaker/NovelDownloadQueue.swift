@@ -638,6 +638,30 @@ class NovelDownloadQueue : NSObject {
     #if !os(watchOS)
     @objc func scheduleBackgroundProcess() {
         if #available(iOS 13.0, macOS 11.0, *) {
+            if CoreDataToRealmTool.IsNeedMigration() {
+                return
+            }
+            let isBackgroundNovelFetchEnabled = RealmUtil.RealmBlock { (realm) -> Bool in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return false }
+                return globalState.isBackgroundNovelFetchEnabled
+            }
+            if isBackgroundNovelFetchEnabled == false { return }
+            BGTaskScheduler.shared.register(forTaskWithIdentifier: self.BackgroundProcessIdentifier, using: nil) { (task) in
+                // Operation class を使ってゴニョゴニョやるのが普通っぽいけど
+                // どうせ一つしかタスク走らないしコレでいいのではないかしらん……？
+                guard let task = task as? BGProcessingTask else { return }
+                self.scheduleBackgroundProcess()
+                task.expirationHandler = {
+                    NovelDownloadQueue.shared.downloadStop()
+                    task.setTaskCompleted(success: false)
+                }
+                // ここで main thread にして DoBackgroundFetch() を呼び出さないと Timer が発火しないのでダウンロードがいつまでも回り続けてしまう
+                DispatchQueue.main.async {
+                    NovelDownloadQueue.shared.DoBackgroundFetch(timeoutTimeInterval: 60*5) { (successCount) in
+                        task.setTaskCompleted(success: true)
+                    }
+                }
+            }
             let request = BGProcessingTaskRequest(identifier: self.BackgroundProcessIdentifier)
             request.requiresNetworkConnectivity = true
             request.requiresExternalPower = false
