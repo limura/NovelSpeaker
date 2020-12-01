@@ -103,6 +103,7 @@ void uncaughtExceptionHandler(NSException *exception)
     // DynamicType 対応
     [self setPreferredFontForTextStyleByAppearance];
     
+    [[NovelDownloadQueue shared] RegisterBackgroundProcess];
     [[NovelDownloadQueue shared] StartBackgroundFetchIfNeeded];
     [[NovelDownloadQueue shared] ClearDownloadCountBadge];
     [NiftyUtilitySwift StartiCloudDataVersionChecker];
