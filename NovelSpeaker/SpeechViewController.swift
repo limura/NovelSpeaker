@@ -447,7 +447,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         guard let text = self.textView.text, readLocation >= 0 else {
             return
         }
-        let textLength = text.count
+        let textLength = text.unicodeScalars.count
         var location = readLocation
         
         if textLength <= 0 {
