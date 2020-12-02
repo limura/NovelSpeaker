@@ -444,10 +444,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
 
     func textViewScrollTo(readLocation:Int) {
-        guard let text = self.textView.text, readLocation >= 0 else {
+        guard let swiftText = self.textView.text, readLocation >= 0 else {
             return
         }
-        let textLength = text.unicodeScalars.count
+        let text = swiftText as NSString
+        let textLength = text.length
         var location = readLocation
         
         if textLength <= 0 {
@@ -462,11 +463,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         let maxAppendLength = 120
         var appendLength = 0
         var lineCount = 0
-        var index = text.index(text.startIndex, offsetBy: location)
-        while index < text.endIndex {
-            if text[index].unicodeScalars.contains(where: { (s) -> Bool in
-                return CharacterSet.newlines.contains(s)
-            }) {
+        var index = location
+        while index < textLength {
+            if let c = UnicodeScalar(text.character(at: index)), CharacterSet.newlines.contains(c) {
                 lineCount += 1
                 if lineCount > maxLineCount && appendLength > minAppendLength {
                     break
@@ -476,7 +475,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             if appendLength > maxAppendLength {
                 break
             }
-            index = text.index(index, offsetBy: 1)
+            index += 1
         }
         range.location = location;
         range.length = appendLength
