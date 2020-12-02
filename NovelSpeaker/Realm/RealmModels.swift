@@ -376,6 +376,25 @@ import AVFoundation
             watcher(completion: completion, startCount: startCount, minimumTimelimitDate: minimumTimelimitDate, timelimitDate: timelimitDate)
         }
     }
+    
+    /// IceCream の使っている Custom Zone が作られたよフラグを管理している UserDefaults 値を消します。
+    /// IceCream/IceCream/Classes/SyncObject.swift では
+    /// UserDefaults.standard.set(newValue, forKey: T.className() + IceCreamKey.hasCustomZoneCreatedKey.value)
+    /// とやっているようなので、それっぽいキーがあったら消す、という事をするわけです。
+    static func ForceClearIceCreamCustomZoneCreatedFlug() {
+        let defaults = UserDefaults.standard
+        let targetIceCreamKeyArray = [ // wow! magic word!
+            "icecream.keys.hasCustomZoneCreatedKey",
+        ]
+        for key in defaults.dictionaryRepresentation().keys {
+            for targetKey in targetIceCreamKeyArray {
+                if key.contains(targetKey) {
+                    print("delete IceCream Key: \(key)")
+                    defaults.removeObject(forKey: key)
+                }
+            }
+        }
+    }
     // IceCream の使っている iCloud 同期の状態管理をしている UserDefaults 値を消します。
     // (WARN: targetIceCreamKeyArray に書かれている値は IceCream の source code から推測して作られた値なので、
     // 将来的にこのままではおかしな動作になる可能性があります)

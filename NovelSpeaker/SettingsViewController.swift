@@ -981,6 +981,16 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                     return
                 }
+                // 設定アプリ → iCloud → ストレージを管理 → ことせかい で
+                // iCloud上 の ことせかい のデータをユーザが削除できるのですが、
+                // これをやられると IceCream の作った Zone が消えます。
+                // んで、Zone が消えるとそれらの Zone へのアクセスができなくなります。
+                // これを回避するにはもう一回 Zone を作ってやらないといけないのですが、
+                // Zone を作ったかどうかは IceCream 側で UserDefaults を使って保存されているため、
+                // これを消し飛ばした後、SyncEngine を作り直す事で初期化処理時に Zone を再生成するcodeが走ります。
+                RealmUtil.ForceClearIceCreamCustomZoneCreatedFlug()
+                RealmUtil.stopSyncEngine()
+                try! RealmUtil.EnableSyncEngine()
                 RealmUtil.CloudPush()
                 DispatchQueue.main.async {
                     NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_Message", comment: "全てのデータをiCloudにアップロードし始めました。データ量が多ければ多いほどアップロード完了まで時間がかかります。"), buttonTitle: nil, buttonAction: nil)
