@@ -644,6 +644,7 @@ class StoryTextClassifier {
             notRubyRegexp = notRubyRe
         }
         var result:[SpeechModSetting] = []
+        let nsString = text as NSString
         for pattern in rubyPatternList {
             guard let regexp = try? NSRegularExpression(pattern: pattern, options: []) else { continue }
             let hitList = regexp.matches(in: text, options: [], range: NSMakeRange(0, text.count))
@@ -652,13 +653,18 @@ class StoryTextClassifier {
                 let allRange = hit.range(at: 0)
                 if allRange.length <= 0 { continue }
                 let toRange = hit.range(at: 2)
-                let fromIndex = text.index(text.startIndex, offsetBy: toRange.location)
-                let toIndex = text.index(text.startIndex, offsetBy: toRange.location + toRange.length)
-                let toString = String(text[fromIndex..<toIndex])
+                // String.index(_,offsetBy:)が非常に遅い
+                // 参考: https://stackoverflow.com/questions/47336928/swift-4-string-index-offset-by-too-slow-while-processing-a-large-string
+                // ので、NSString.substring(with:) を使う事にします。
+                let toString = nsString.substring(with: toRange)
+//                let fromIndex = text.index(text.startIndex, offsetBy: toRange.location)
+//                let toIndex = text.index(text.startIndex, offsetBy: toRange.location + toRange.length)
+//                let toString = String(text[fromIndex..<toIndex])
                 if let notRubyRegexp = notRubyRegexp, notRubyRegexp.matches(in: toString, options: [], range: NSMakeRange(0, toString.count)).count > 0 { continue }
-                let allFromIndex = text.index(text.startIndex, offsetBy: allRange.location)
-                let allToIndex = text.index(text.startIndex, offsetBy: allRange.location + allRange.length)
-                let fromString = String(text[allFromIndex..<allToIndex])
+                let fromString = nsString.substring(with: allRange)
+//                let allFromIndex = text.index(text.startIndex, offsetBy: allRange.location)
+//                let allToIndex = text.index(text.startIndex, offsetBy: allRange.location + allRange.length)
+//                let fromString = String(text[allFromIndex..<allToIndex])
                 
                 let setting = SpeechModSetting(before: fromString, after: toString, isUseRegularExpression: false)
                 result.append(setting)
