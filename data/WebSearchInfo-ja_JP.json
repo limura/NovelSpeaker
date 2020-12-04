@@ -348,6 +348,7 @@
         }
     },
     {
+	"isDisabled": true,
         "title": "エブリスタ(今の所30件目以降の検索ができません)",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
@@ -617,6 +618,7 @@
         }
     },
     {
+	"isDisabled": true,
         "title": "朝日新聞 DIGITAL",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
@@ -683,6 +685,7 @@
         }
     },
     {
+	"isDisabled": true,
         "title": "毎日新聞",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
