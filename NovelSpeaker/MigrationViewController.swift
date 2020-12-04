@@ -141,6 +141,7 @@ class MigrationViewController: UIViewController {
                             self.progressLabel.text = text
                         }
                     }
+                    NovelSpeakerUtility.RemoveCoreDataDataFile()
                     return
                 }else{
                     // CoreData のものはなかったので CoreData からの移行は完了したと印をつけておく
@@ -180,6 +181,7 @@ class MigrationViewController: UIViewController {
                 }
             }
             NovelSpeakerUtility.InsertDefaultSettingsIfNeeded()
+            NovelSpeakerUtility.RemoveCoreDataDataFile()
         }
     }
     

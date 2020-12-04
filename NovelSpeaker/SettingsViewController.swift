@@ -883,7 +883,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             // それらはこの下に記述されます
             +++ Section("Debug") {
                 $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
-                    return self.m_RubySwitchToggleHitCount < -10
+                    return self.m_RubySwitchToggleHitCount < 10
                 })
             }
             <<< ButtonRow() {
@@ -1046,6 +1046,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             */
+            /*
             <<< ButtonRow() {
                 $0.title = "次回起動時に CoreData(旧データベース) の情報に書き戻す"
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1055,6 +1056,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: "次回起動時に CoreData(旧データベース) の情報に書き戻すように設定しました。", buttonTitle: nil, buttonAction: nil)
                 }
             })
+            */
         
             /*
             <<< LabelRow() {

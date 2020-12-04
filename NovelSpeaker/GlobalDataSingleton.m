@@ -1027,4 +1027,9 @@ static DummySoundLooper* dummySoundLooper = nil;
     return modifiedArray;
 }
 
+/// CoreData の sqlite ファイルを削除します
+- (void)RemoveCoreDataDataFile {
+    [m_CoreDataObjectHolder removeCoreDataDataFile];
+}
+
 @end

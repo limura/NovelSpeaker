@@ -55,6 +55,28 @@
     return [[NSString alloc] initWithFormat:@"%@", [NSThread currentThread]];
 }
 
+- (void)removeSqliteFile:(NSString*)sqliteFilePath {
+    NSFileManager* defaultManager = [NSFileManager defaultManager];
+    if (sqliteFilePath == nil || [defaultManager fileExistsAtPath:sqliteFilePath] == false) {
+        return;
+    }
+    NSArray* fileList = @[@"", @"-shm", @"-wal"];
+    for (NSString* fileTypes in fileList) {
+        NSString* targetFile = [sqliteFilePath stringByAppendingString:fileTypes];
+        [defaultManager removeItemAtPath:targetFile error:nil];
+    }
+}
+
+/// CoreData の sqlite ファイルを削除します
+- (void)removeCoreDataDataFile {
+    m_PersistentStoreCoordinator = nil;
+    m_ManagedObjectModel = nil;
+    [m_Thread_to_NSManagedObjectContext_Dictionary removeAllObjects];
+    m_Thread_to_NSManagedObjectContext_Dictionary = nil;
+    [self removeSqliteFile:[[self GetSqlFileURL_Old] path]];
+    [self removeSqliteFile:[[self GetSqlFileURL] path]];
+}
+
 /// SQLiteのファイルが存在するかどうかを取得します
 - (BOOL)isAliveSaveDataFile
 {

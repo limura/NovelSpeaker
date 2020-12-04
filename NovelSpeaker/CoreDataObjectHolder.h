@@ -113,4 +113,7 @@ typedef enum {
 /// 現在のthreadでの NSManagedObjectContext で、performBlockAndWait を実行します。
 - (void)performBlockAndWait:(void(^)(void))block;
 
+/// CoreData の sqlite ファイルを削除します
+- (void)removeCoreDataDataFile;
+
 @end

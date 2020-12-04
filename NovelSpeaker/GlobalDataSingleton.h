@@ -211,4 +211,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// Web取り込み用のBookmarkを取得します
 - (NSArray*)GetWebImportBookmarks;
 
+/// CoreData の sqlite ファイルを削除します
+- (void)RemoveCoreDataDataFile;
+
 @end

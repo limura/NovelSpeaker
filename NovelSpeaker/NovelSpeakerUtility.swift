@@ -2389,4 +2389,10 @@ class NovelSpeakerUtility: NSObject {
             return result
         }
     }
+    
+    
+    /// CoreData側の sqlite ファイルを削除します
+    static func RemoveCoreDataDataFile() {
+        GlobalDataSingleton.getInstance()?.removeCoreDataDataFile()
+    }
 }
