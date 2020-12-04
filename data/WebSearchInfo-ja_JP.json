@@ -650,7 +650,7 @@
         }
     },
     {
-	"disabled": true,
+	"isDisabled": true,
         "title": "Yahoo! Japan ニュース",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
@@ -667,7 +667,7 @@
         }
     },
     {
-	"disabled": true,
+	"isDisabled": true,
         "title": "All About",
         "HTTPMethod": "GET",
         "isNeedHeadless": true,
