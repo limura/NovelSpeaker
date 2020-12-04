@@ -477,6 +477,7 @@ class NovelDownloadQueue : NSObject {
         fetcherPoolLock.lock()
         defer { fetcherPoolLock.unlock() }
         if let (_, fetcher) = fetcherPool[uuid] {
+            fetcher.LoadAboutPage()
             fetcherPool[uuid] = (false, fetcher)
         }
     }

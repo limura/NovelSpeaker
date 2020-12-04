@@ -464,6 +464,10 @@ class StoryFetcher {
         self.httpClient = HeadlessHttpClient()
         #endif
     }
+
+    func LoadAboutPage() {
+        self.httpClient.LoadAboutPage()
+    }
     
     func DecodeDocument(currentState:StoryState, html:String?, encoding:String.Encoding, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
         guard let html = html, let htmlDocument = try? HTML(html: html, encoding: encoding) else {

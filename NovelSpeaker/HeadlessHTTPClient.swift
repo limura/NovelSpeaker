@@ -121,7 +121,9 @@ class HeadlessHttpClient {
     }
     
     public func LoadAboutPage() {
-        self.erik.visit(urlString: "about:blank", completionHandler: nil)
+        DispatchQueue.main.async {
+            self.erik.visit(urlString: "about:blank", completionHandler: nil)
+        }
     }
     
     // ErikのUserAgentを取得します。
