@@ -128,7 +128,7 @@ class AutoSplitStringSettingViewController: UITableViewController, RealmObserver
     func assignNewSplitString(text:String) {
         let text = text.replacingOccurrences(of: NSLocalizedString("SpeechWaitConfigTableView_TargetText_Enter", comment: "<改行>"), with: "\n")
         if text.count <= 0 {
-            NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("AutoSplitStringSettingViewController_AddSplitTargetDialog_Error_NoText", comment: "空文字列は指定できません"), buttonTitle: nil) {
+            NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("AutoSplitStringSettingViewController_AddSplitTargetDialog_Error_NoText", comment: "空文字列は指定できません"), buttonTitle: nil) {
                 self.addButtonClicked()
             }
             return
@@ -139,7 +139,7 @@ class AutoSplitStringSettingViewController: UITableViewController, RealmObserver
                 return
             }
             if globalState.autoSplitStringList.contains(text) {
-                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("AutoSplitStringSettingViewController_AddSplitTargetDialog_AlreadyAssigned", comment: "既に存在する設定です"), buttonTitle: nil) {
+                NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("AutoSplitStringSettingViewController_AddSplitTargetDialog_AlreadyAssigned", comment: "既に存在する設定です"), buttonTitle: nil) {
                     self.addButtonClicked()
                 }
                 return
@@ -153,7 +153,7 @@ class AutoSplitStringSettingViewController: UITableViewController, RealmObserver
     
     @objc func addButtonClicked(){
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
             .title(title: NSLocalizedString("AutoSplitStringSettingViewController_AddSplitTargetDialog_Title", comment: "分割対象文字の追加"))
             .textField(tag: 100, placeholder: NSLocalizedString("AutoSplitStringSettingViewController_AddSplitTargetDialog_PlaceHolder", comment: "改行を表現するには <改行> と入力します"), content: nil, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .roundedRect, clearButtonMode: .always) { (dialog) -> (Void) in
                 let text:String

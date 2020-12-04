@@ -37,7 +37,7 @@
 		212323F522B7049E00543543 /* RealmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212323F422B7049E00543543 /* RealmTests.swift */; };
 		2123240E22B7101000543543 /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
 		2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
-		2124B38523BBEE38002EBC31 /* NiftyUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */; };
+		2124B38523BBEE38002EBC31 /* NiftyUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtility.swift */; };
 		2124B38D23BBF2E7002EBC31 /* NovelSpeakerUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */; };
 		2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759F92287123500956B73 /* RealmModels.swift */; };
 		2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
@@ -104,7 +104,7 @@
 		213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC51A63CF8B00E9EC13 /* SpeechWaitConfig.m */; };
 		213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
 		213A76EB1FB66FC400B98C11 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */; };
-		214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */; };
+		214141D01FC0A1C30076DEC2 /* NiftyUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtility.swift */; };
 		21429D84209F45E3001426F5 /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
 		21429D86209F45FD001426F5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21429D85209F45FD001426F5 /* AudioToolbox.framework */; };
 		214A400123D838C10034DFB2 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
@@ -425,7 +425,7 @@
 		213A4DC71A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechWaitConfigCacheData.h; sourceTree = "<group>"; };
 		213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechWaitConfigCacheData.m; sourceTree = "<group>"; };
 		213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
-		214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiftyUtilitySwift.swift; sourceTree = "<group>"; };
+		214141CF1FC0A1C30076DEC2 /* NiftyUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NiftyUtility.swift; sourceTree = "<group>"; };
 		21429D82209F4516001426F5 /* nc48625.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = nc48625.m4a; sourceTree = "<group>"; };
 		21429D85209F45FD001426F5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPCookieSyncTool.swift; sourceTree = "<group>"; };
@@ -904,7 +904,7 @@
 		21D8FC4C19FC97DB00CCF1B6 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
-				214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */,
+				214141CF1FC0A1C30076DEC2 /* NiftyUtility.swift */,
 				21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */,
 				21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */,
 				2124B38623BBF118002EBC31 /* NovelSpeakerWatchApp-Bridging-Header.h */,
@@ -1728,7 +1728,7 @@
 				2104EDED24B9D6C800E275D1 /* SloppyError.swift in Sources */,
 				21CE8EA6241677ED00C9DB7F /* ScrollableVStack.swift in Sources */,
 				2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */,
-				2124B38523BBEE38002EBC31 /* NiftyUtilitySwift.swift in Sources */,
+				2124B38523BBEE38002EBC31 /* NiftyUtility.swift in Sources */,
 				2193095123BBE56A00035EF0 /* ComplicationController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1805,7 +1805,7 @@
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
 				2104EDEC24B9D6C800E275D1 /* SloppyError.swift in Sources */,
 				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
-				214141D01FC0A1C30076DEC2 /* NiftyUtilitySwift.swift in Sources */,
+				214141D01FC0A1C30076DEC2 /* NiftyUtility.swift in Sources */,
 				212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */,
 				21DFB3FC22ADA1390006A933 /* ActivityIndicatorManager.swift in Sources */,
 				212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */,

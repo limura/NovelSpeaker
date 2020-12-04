@@ -335,9 +335,9 @@ class NovelSpeakerUtility: NSObject {
             }else{
                 cookieString = ""
             }
-            guard let targetURL = URL(string: targetUrlString), let rootViewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return false }
+            guard let targetURL = URL(string: targetUrlString), let rootViewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return false }
             DispatchQueue.main.async {
-                NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: rootViewController, url: targetURL, cookieString: cookieString, isNeedFallbackImportFromWebPageTab: true)
+                NiftyUtility.checkUrlAndConifirmToUser(viewController: rootViewController, url: targetURL, cookieString: cookieString, isNeedFallbackImportFromWebPageTab: true)
             }
             return true
         }
@@ -347,10 +347,10 @@ class NovelSpeakerUtility: NSObject {
     
     #if !os(watchOS)
     static func ProcessPDFFile(url:URL) -> Bool {
-        guard let text = NiftyUtilitySwift.FilePDFToString(url: url) else {
+        guard let text = NiftyUtility.FilePDFToString(url: url) else {
             DispatchQueue.main.async {
-                guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
-                NiftyUtilitySwift.EasyDialogOneButton(
+                guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
+                NiftyUtility.EasyDialogOneButton(
                     viewController: viewController,
                     title: NSLocalizedString("GlobalDataSingleton_PDFToStringFailed_Title", comment: "PDFのテキスト読み込みに失敗"),
                     message: NSLocalizedString("GlobalDataSingleton_PDFToStringFailed_Body", comment: "PDFファイルからの文字列読み込みに失敗しました。\nPDFファイルによっては文字列を読み込めない場合があります。また、iOS11より前のiOSではPDF読み込み機能は動作しません。"),
@@ -360,18 +360,18 @@ class NovelSpeakerUtility: NSObject {
         }
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
-            guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
-            NiftyUtilitySwift.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+            guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
         return true
     }
     #endif
     #if !os(watchOS)
     static func ProcessRTFFile(url:URL) -> Bool {
-        guard let text = NiftyUtilitySwift.FileRTFToAttributedString(url: url)?.string else {
+        guard let text = NiftyUtility.FileRTFToAttributedString(url: url)?.string else {
             DispatchQueue.main.async {
-                guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
-                NiftyUtilitySwift.EasyDialogOneButton(
+                guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
+                NiftyUtility.EasyDialogOneButton(
                     viewController: viewController,
                     title: nil,
                     message: NSLocalizedString("GlobalDataSingleton_RTFToStringFailed_Title", comment: "RTFのテキスト読み込みに失敗"),
@@ -381,18 +381,18 @@ class NovelSpeakerUtility: NSObject {
         }
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
-            guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
-            NiftyUtilitySwift.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+            guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
         return true
     }
     #endif
     #if !os(watchOS)
     static func ProcessRTFDFile(url:URL) -> Bool {
-        guard let text = NiftyUtilitySwift.FileRTFDToAttributedString(url: url)?.string else {
+        guard let text = NiftyUtility.FileRTFDToAttributedString(url: url)?.string else {
             DispatchQueue.main.async {
-                guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
-                NiftyUtilitySwift.EasyDialogOneButton(
+                guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
+                NiftyUtility.EasyDialogOneButton(
                     viewController: viewController,
                     title: nil,
                     message: NSLocalizedString("GlobalDataSingleton_RTFToStringFailed_Title", comment: "RTFのテキスト読み込みに失敗"),
@@ -402,19 +402,19 @@ class NovelSpeakerUtility: NSObject {
         }
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
-            guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
-            NiftyUtilitySwift.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+            guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
         return true
     }
     #endif
     #if !os(watchOS)
     static func ProcessTextFile(url:URL) -> Bool {
-        guard let data = try? Data(contentsOf: url), let text = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data)) else { return false }
+        guard let data = try? Data(contentsOf: url), let text = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data)) else { return false }
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
-            guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return }
-            NiftyUtilitySwift.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+            guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
         return true
     }
@@ -750,7 +750,7 @@ class NovelSpeakerUtility: NSObject {
             }else{
                 isNewFlug = false
             }
-            if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
+            if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtility.ISO8601String2Date(iso8601String: novelupdated_at) {
                 realmNovel.lastDownloadDate = lastDownloadDate
                 if isNewFlug {
                     realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(-1)
@@ -788,7 +788,7 @@ class NovelSpeakerUtility: NSObject {
                 repeat {
                     no += 1
                     let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
-                    guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data))  else { break }
+                    guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data))  else { break }
                     var story = Story()
                     story.novelID = novelID
                     story.chapterNumber = no
@@ -829,8 +829,8 @@ class NovelSpeakerUtility: NSObject {
             // とりあえず path は '/' 固定で、最終ダウンロード日時から1日後まで有効、という事にします。
             guard let fullPathURL = URL(string: urlString), let host = fullPathURL.host, let scheme = fullPathURL.scheme, let url = URL(string: "\(scheme)://\(host)") else { return }
             let expireDate = lastUpdateDate.addingTimeInterval(60*60*24)
-            let newCookieArray = NiftyUtilitySwift.ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString: urlSecret, targetURL: url, expireDate: expireDate)
-            cookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: cookieArray, newCookieArray: newCookieArray))
+            let newCookieArray = NiftyUtility.ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString: urlSecret, targetURL: url, expireDate: expireDate)
+            cookieArray = NiftyUtility.RemoveExpiredCookie(cookieArray: NiftyUtility.MergeCookieArray(currentCookieArray: cookieArray, newCookieArray: newCookieArray))
         }
         RealmUtil.Write { (realm) in
             let realmNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: url) ?? RealmNovel()
@@ -856,7 +856,7 @@ class NovelSpeakerUtility: NSObject {
             }else{
                 isNewFlug = false
             }
-            if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: novelupdated_at) {
+            if let novelupdated_at = novel.object(forKey: "novelupdated_at") as? String, let lastDownloadDate = NiftyUtility.ISO8601String2Date(iso8601String: novelupdated_at) {
                 realmNovel.lastDownloadDate = lastDownloadDate
                 if isNewFlug {
                     realmNovel.lastReadDate = lastDownloadDate.addingTimeInterval(-1)
@@ -875,7 +875,7 @@ class NovelSpeakerUtility: NSObject {
             if let title = novel.object(forKey: "title") as? String {
                 realmNovel.title = title
             }
-            if let secret = novel.object(forKey: "secret") as? String, let urlSecret = NiftyUtilitySwift.stringDecrypt(string: secret, key: url) {
+            if let secret = novel.object(forKey: "secret") as? String, let urlSecret = NiftyUtility.stringDecrypt(string: secret, key: url) {
                 addNewCookie(urlSecret: urlSecret, urlString: novelID, lastUpdateDate: realmNovel.lastDownloadDate)
             }
             if let author = novel.object(forKey: "author") as? String {
@@ -891,7 +891,7 @@ class NovelSpeakerUtility: NSObject {
                 repeat {
                     no += 1
                     let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
-                    guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtilitySwift.DetectEncoding(data: data))  else { break }
+                    guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data))  else { break }
                     var story = Story()
                     story.novelID = novelID
                     story.chapterNumber = no
@@ -981,7 +981,7 @@ class NovelSpeakerUtility: NSObject {
                 RestoreBookshelf_ncode_V_1_0_0(novel:novel, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
             case "url":
                 let newCookieArray = RestoreBookshelf_url_V_1_0_0(novel:novel, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
-                cookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: cookieArray, newCookieArray: newCookieArray))
+                cookieArray = NiftyUtility.RemoveExpiredCookie(cookieArray: NiftyUtility.MergeCookieArray(currentCookieArray: cookieArray, newCookieArray: newCookieArray))
             case "user":
                 RestoreBookshelf_user_V_1_0_0(novel:novel, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
             default:
@@ -1103,7 +1103,7 @@ class NovelSpeakerUtility: NSObject {
                     mod.before = before
                 }
                 mod.after = after
-                if let createdDateString = speechMod.object(forKey: "createdDate") as? String, let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                if let createdDateString = speechMod.object(forKey: "createdDate") as? String, let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
                     mod.createdDate = createdDate
                 }
                 mod.isUseRegularExpression = isUseRegularExpression.boolValue
@@ -1132,7 +1132,7 @@ class NovelSpeakerUtility: NSObject {
                 RealmUtil.WriteWith(realm: realm) { (realm) in
                     speechWaitConfig.delayTimeInSec = delayTimeInSec.floatValue
                     if let createdDateString = speechWait.object(forKey: "createdDate") as? String,
-                        let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                        let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
                         speechWaitConfig.createdDate = createdDate
                     }
                     realm.add(speechWaitConfig, update: .modified)
@@ -1182,7 +1182,7 @@ class NovelSpeakerUtility: NSObject {
                     speakerSetting.voiceIdentifier = voiceIdentifier
                     speakerSetting.locale = locale
                     if let createdDateString = speaker.object(forKey: "createdDate") as? String,
-                        let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                        let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
                         speakerSetting.createdDate = createdDate
                     }
                     realm.add(speakerSetting, update: .modified)
@@ -1208,7 +1208,7 @@ class NovelSpeakerUtility: NSObject {
                     sectionConfig.startText = startText
                     sectionConfig.endText = endText
                     if let createdDateString = sectionConfigDic.object(forKey: "createdDate") as? String,
-                        let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                        let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
                         sectionConfig.createdDate = createdDate
                     }
                     sectionConfig.speakerID = speakerID
@@ -1249,7 +1249,7 @@ class NovelSpeakerUtility: NSObject {
                         setting.isVertical = isVertical.boolValue
                     }
                     if let createdDateString = displaySettingDic.object(forKey: "createdDate") as? String,
-                        let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                        let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
                         setting.createdDate = createdDate
                     }
                     setting.targetNovelIDArray.removeAll()
@@ -1272,7 +1272,7 @@ class NovelSpeakerUtility: NSObject {
                     let type = tagDic.object(forKey: "type") as? String else { continue }
                 let tag = RealmNovelTag.SearchWith(realm: realm, name: name, type: type) ?? RealmNovelTag.CreateNewTag(name: name, type: type)
                 if let createdDateString = tagDic.object(forKey: "createdDate") as? String,
-                    let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString){
+                    let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString){
                     tag.createdDate = createdDate
                 }
                 if let hint = tagDic.object(forKey: "hint") as? String {
@@ -1292,7 +1292,7 @@ class NovelSpeakerUtility: NSObject {
     static func RestoreBookmark_V_2_0_0(bookmarkArray:NSArray, progressUpdate:@escaping(String)->Void) {
         RealmUtil.Write { (realm) in
             for bookmark in bookmarkArray {
-                guard let bookmarkDic = bookmark as? NSDictionary, let id = bookmarkDic.object(forKey: "id") as? String, let createdDateString = bookmarkDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString), let novelID = bookmarkDic.object(forKey: "novelID") as? String, let chapterNumber = (bookmarkDic.object(forKey: "chapterNumber") as? NSNumber)?.intValue, chapterNumber > 0, let location = (bookmarkDic.object(forKey: "location") as? NSNumber)?.intValue else { continue }
+                guard let bookmarkDic = bookmark as? NSDictionary, let id = bookmarkDic.object(forKey: "id") as? String, let createdDateString = bookmarkDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString), let novelID = bookmarkDic.object(forKey: "novelID") as? String, let chapterNumber = (bookmarkDic.object(forKey: "chapterNumber") as? NSNumber)?.intValue, chapterNumber > 0, let location = (bookmarkDic.object(forKey: "location") as? NSNumber)?.intValue else { continue }
                 let realmBookmark = RealmBookmark()
                 realmBookmark.id = id
                 realmBookmark.createdDate = createdDate
@@ -1450,7 +1450,7 @@ class NovelSpeakerUtility: NSObject {
                 if let url = novelDic.object(forKey: "url") as? String {
                     novel.url = url
                 }
-                if let createdDateString = novelDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: createdDateString) {
+                if let createdDateString = novelDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
                     novel.createdDate = createdDate
                 }
                 if let likeLevel = novelDic.object(forKey: "likeLevel") as? NSNumber {
@@ -1468,19 +1468,19 @@ class NovelSpeakerUtility: NSObject {
                 if let lastChapterStoryID = novelDic.object(forKey: "lastChapterStoryID") as? String {
                     novel.m_lastChapterStoryID = lastChapterStoryID
                 }
-                if let lastDownloadDateString = novelDic.object(forKey: "lastDownloadDate") as? String, let lastDownloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: lastDownloadDateString) {
+                if let lastDownloadDateString = novelDic.object(forKey: "lastDownloadDate") as? String, let lastDownloadDate = NiftyUtility.ISO8601String2Date(iso8601String: lastDownloadDateString) {
                     novel.lastDownloadDate = lastDownloadDate
                 }
                 if let readingChapterStoryID = novelDic.object(forKey: "readingChapterStoryID") as? String {
                     novel.m_readingChapterStoryID = readingChapterStoryID
                 }
-                if let lastReadDateString = novelDic.object(forKey: "lastReadDate") as? String, let lastReadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: lastReadDateString) {
+                if let lastReadDateString = novelDic.object(forKey: "lastReadDate") as? String, let lastReadDate = NiftyUtility.ISO8601String2Date(iso8601String: lastReadDateString) {
                     novel.lastReadDate = lastReadDate
                 }
                 if let downloadDateArray = novelDic.object(forKey: "downloadDateArray") as? NSArray {
                     novel.downloadDateArray.removeAll()
                     for downloadDateStringObj in downloadDateArray {
-                        if let downloadDateString = downloadDateStringObj as? String, let downloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: downloadDateString) {
+                        if let downloadDateString = downloadDateStringObj as? String, let downloadDate = NiftyUtility.ISO8601String2Date(iso8601String: downloadDateString) {
                             novel.AppendDownloadDate(realm: realm, date: downloadDate)
                         }
                     }
@@ -1521,7 +1521,7 @@ class NovelSpeakerUtility: NSObject {
                             }
                             data = contentData
                         }
-                        guard let content = NiftyUtilitySwift.stringDecompress(data: data) else { continue }
+                        guard let content = NiftyUtility.stringDecompress(data: data) else { continue }
                         var story = Story()
                         story.novelID = novelID
                         story.chapterNumber = chapterNumber.intValue
@@ -1532,7 +1532,7 @@ class NovelSpeakerUtility: NSObject {
                         if let subtitle = storyDic.object(forKey: "subtitle") as? String {
                             story.subtitle = subtitle
                         }
-                        if let downloadDateString = storyDic.object(forKey: "downloadDate") as? String, let downloadDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: downloadDateString) {
+                        if let downloadDateString = storyDic.object(forKey: "downloadDate") as? String, let downloadDate = NiftyUtility.ISO8601String2Date(iso8601String: downloadDateString) {
                             story.downloadDate = downloadDate
                         }
                         storyArray.append(story)
@@ -1605,14 +1605,14 @@ class NovelSpeakerUtility: NSObject {
     @discardableResult
     static func ProcessNovelSpeakerBackupFile_ZIPType(url:URL, progressUpdate:@escaping (String)->Void) -> Bool {
         let temporaryDirectoryName = "NovelSpeakerBackup"
-        if let temporaryDirectory = NiftyUtilitySwift.CreateTemporaryDirectory(directoryName: temporaryDirectoryName) {
+        if let temporaryDirectory = NiftyUtility.CreateTemporaryDirectory(directoryName: temporaryDirectoryName) {
             do {
                 try FileManager.default.removeItem(at: temporaryDirectory)
             }catch{
                 // nothing to do.
             }
         }
-        guard let temporaryDirectory = NiftyUtilitySwift.CreateTemporaryDirectory(directoryName: temporaryDirectoryName) else { return false }
+        guard let temporaryDirectory = NiftyUtility.CreateTemporaryDirectory(directoryName: temporaryDirectoryName) else { return false }
         do {
             Zip.addCustomFileExtension("novelspeaker-backup+zip")
             try Zip.unzipFile(url, destination: temporaryDirectory, overwrite: true, password: nil, progress: { (progressDouble) in
@@ -1632,8 +1632,8 @@ class NovelSpeakerUtility: NSObject {
     }
 
     static func ProcessNovelSpeakerBackupFile(url:URL) -> Bool {
-        guard let viewController = NiftyUtilitySwift.GetToplevelViewController(controller: nil) else { return false }
-        var builder = NiftyUtilitySwift.EasyDialogBuilder(viewController)
+        guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return false }
+        var builder = NiftyUtility.EasyDialogBuilder(viewController)
         let titleTag = 100
         let messageTag = 101
         builder = builder.label(text: NSLocalizedString("NovelSpeakerUtility_RestoreBackupTitle", comment: "バックアップデータを読み込んでいます"), textAlignment: .center, tag: titleTag)
@@ -1690,9 +1690,9 @@ class NovelSpeakerUtility: NSObject {
                     storyData["subtitle"] = story.subtitle
                 }
                 if story.downloadDate > Date(timeIntervalSince1970: 0) {
-                    storyData["downloadDate"] = NiftyUtilitySwift.Date2ISO8601String(date: story.downloadDate)
+                    storyData["downloadDate"] = NiftyUtility.Date2ISO8601String(date: story.downloadDate)
                 }
-                if let contentZiped = NiftyUtilitySwift.stringCompress(string: story.content) {
+                if let contentZiped = NiftyUtility.stringCompress(string: story.content) {
                     if let contentWriteTo = contentWriteTo {
                         do {
                             let filePath = contentWriteTo.appendingPathComponent("\(story.chapterNumber)")
@@ -1734,17 +1734,17 @@ class NovelSpeakerUtility: NSObject {
                     "writer": novel.writer,
                     "title": novel.title,
                     "url": novel.url,
-                    "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: novel.createdDate),
+                    "createdDate": NiftyUtility.Date2ISO8601String(date: novel.createdDate),
                     "likeLevel": novel.likeLevel,
                     "isNeedSpeechAfterDelete": novel.isNeedSpeechAfterDelete,
                     "defaultSpeakerID": novel.defaultSpeakerID,
                     "isNotNeedUpdateCheck": novel.isNotNeedUpdateCheck,
                     "lastChapterStoryID": novel.m_lastChapterStoryID,
-                    "lastDownloadDate": NiftyUtilitySwift.Date2ISO8601String(date: novel.lastDownloadDate),
+                    "lastDownloadDate": NiftyUtility.Date2ISO8601String(date: novel.lastDownloadDate),
                     "readingChapterStoryID": novel.m_readingChapterStoryID,
-                    "lastReadDate": NiftyUtilitySwift.Date2ISO8601String(date: novel.lastReadDate),
+                    "lastReadDate": NiftyUtility.Date2ISO8601String(date: novel.lastReadDate),
                     "downloadDateArray": Array(novel.downloadDateArray.map({ (date) -> String in
-                        NiftyUtilitySwift.Date2ISO8601String(date: date)
+                        NiftyUtility.Date2ISO8601String(date: date)
                     })),
                     "readingChapterReadingPoint": novel.m_readingChapterReadingPoint,
                     "readingChapterContentCount": novel.m_readingChapterContentCount,
@@ -1758,7 +1758,7 @@ class NovelSpeakerUtility: NSObject {
                 if !withAllStoryContent && novel.m_type == NovelType.UserCreated.rawValue {
                     contentDirectory = nil
                 }else{
-                    contentDirectory = NiftyUtilitySwift.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
+                    contentDirectory = NiftyUtility.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
                 }
                 switch novel.type {
                 case .URL:
@@ -1784,7 +1784,7 @@ class NovelSpeakerUtility: NSObject {
             for setting in targetArray {
                 result[setting.before] = [
                     "afterString": setting.after,
-                    "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),
+                    "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate),
                     "isUseRegularExpression": setting.isUseRegularExpression,
                     "targetNovelIDArray": Array(setting.targetNovelIDArray)
                 ]
@@ -1800,7 +1800,7 @@ class NovelSpeakerUtility: NSObject {
                 result.append([
                     "targetText": setting.targetText,
                     "delayTimeInSec": setting.delayTimeInSec,
-                    "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate)
+                    "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate)
                 ])
             }
             return result
@@ -1822,7 +1822,7 @@ class NovelSpeakerUtility: NSObject {
                     "type": setting.type,
                     "voiceIdentifier": setting.voiceIdentifier,
                     "locale": setting.locale,
-                    "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate)
+                    "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate)
                 ])
             }
             return result
@@ -1837,7 +1837,7 @@ class NovelSpeakerUtility: NSObject {
                     "name": setting.name,
                     "startText": setting.startText,
                     "endText": setting.endText,
-                    "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),
+                    "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate),
                     "speakerID": setting.speakerID,
                     "targetNovelIDArray": Array(setting.targetNovelIDArray)
                 ])
@@ -1930,7 +1930,7 @@ class NovelSpeakerUtility: NSObject {
                     "fontID": setting.fontID,
                     "name": setting.name,
                     "isVertical": setting.isVertical,
-                    "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),
+                    "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate),
                     "targetNovelIDArray": Array(setting.targetNovelIDArray)
                 ])
             }
@@ -1946,7 +1946,7 @@ class NovelSpeakerUtility: NSObject {
                     "name": setting.name,
                     "type": setting.type,
                     "hint": setting.hint,
-                    "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: setting.createdDate),
+                    "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate),
                     "targetNovelIDArray": Array(setting.targetNovelIDArray)
                 ])
             }
@@ -1960,7 +1960,7 @@ class NovelSpeakerUtility: NSObject {
             for bookmark in targetArray {
                 result.append([
                     "id": bookmark.id,
-                    "createdDate": NiftyUtilitySwift.Date2ISO8601String(date: bookmark.createdDate),
+                    "createdDate": NiftyUtility.Date2ISO8601String(date: bookmark.createdDate),
                     "novelID": bookmark.novelID,
                     "chapterNumber": bookmark.chapterNumber,
                     "location": bookmark.location,
@@ -1989,15 +1989,15 @@ class NovelSpeakerUtility: NSObject {
     static func CreateBackupData(forNovelIDArray:[String], isOnlyNovelData:Bool = false, fileNamePrefix:String = "", progress:((_ description:String)->Void)?) -> URL? {
         let directoryName = "NovelSpeakerBackup"
         // 一旦対象のディレクトリを作って、中身を全部消します。
-        if let outputPath = NiftyUtilitySwift.CreateTemporaryDirectory(directoryName: directoryName) {
-            NiftyUtilitySwift.RemoveDirectory(directoryPath: outputPath)
+        if let outputPath = NiftyUtility.CreateTemporaryDirectory(directoryName: directoryName) {
+            NiftyUtility.RemoveDirectory(directoryPath: outputPath)
         }
         // 改めてディレクトリを作り直します。
-        guard let outputPath = NiftyUtilitySwift.CreateTemporaryDirectory(directoryName: directoryName) else {
+        guard let outputPath = NiftyUtility.CreateTemporaryDirectory(directoryName: directoryName) else {
             return nil
         }
         let bookshelfResult = CreateBackupDataDictionary_Bookshelf(forNovelIDArray: forNovelIDArray, contentWriteTo: outputPath, progress: progress)
-        defer { NiftyUtilitySwift.RemoveDirectory(directoryPath: outputPath) }
+        defer { NiftyUtility.RemoveDirectory(directoryPath: outputPath) }
         if isOnlyNovelData && forNovelIDArray.count > 0 && bookshelfResult.0.count <= 0 {
             // forNovelIDArray が 0以上 で bookshelfResult に内容が無いようであるなら、それは失敗している(恐らくは指定されたNovelIDの小説が全て存在しなかった)
             return nil
@@ -2034,7 +2034,7 @@ class NovelSpeakerUtility: NSObject {
             backupDataFilePath = outputPath.appendingPathComponent("backup_data.json")
             ziptargetFiles.append(backupDataFilePath)
         }else{
-            backupDataFilePath = NiftyUtilitySwift.GetTemporaryFilePath(fileName: String.init(format: "%@.novelspeaker-backup-json", dateString))
+            backupDataFilePath = NiftyUtility.GetTemporaryFilePath(fileName: String.init(format: "%@.novelspeaker-backup-json", dateString))
         }
         
         do {
@@ -2050,7 +2050,7 @@ class NovelSpeakerUtility: NSObject {
         if let progress = progress {
             progress(NSLocalizedString("NovelSpeakerBackup_CompressingBackupData", comment: "圧縮準備中"))
         }
-        let zipFilePath = NiftyUtilitySwift.GetTemporaryFilePath(fileName: NiftyUtilitySwift.Date2ISO8601String(date: Date()) + ".zip")
+        let zipFilePath = NiftyUtility.GetTemporaryFilePath(fileName: NiftyUtility.Date2ISO8601String(date: Date()) + ".zip")
         do {
             try Zip.zipFiles(paths: ziptargetFiles, zipFilePath: zipFilePath, password: nil, compression: .BestCompression, progress: { (progressPercent) in
                 let description = NSLocalizedString("NovelSpeakerBackup_CompressingBackupDataProgress", comment: "バックアップデータを圧縮中") + " (\(Int(progressPercent * 100))%)"
@@ -2062,7 +2062,7 @@ class NovelSpeakerUtility: NSObject {
             print("zip file create error", zipFilePath.absoluteString, err)
             return nil
         }
-        let backupFilePath = NiftyUtilitySwift.GetTemporaryFilePath(fileName: String.init(format: "%@%@.novelspeaker-backup+zip", fileNamePrefix, dateString))
+        let backupFilePath = NiftyUtility.GetTemporaryFilePath(fileName: String.init(format: "%@%@.novelspeaker-backup+zip", fileNamePrefix, dateString))
         do {
             try FileManager.default.moveItem(at: zipFilePath, to: backupFilePath)
         }catch let err{
@@ -2182,7 +2182,7 @@ class NovelSpeakerUtility: NSObject {
     #if !os(watchOS)
     static func CreateNovelOnlyBackup(novelIDArray:[String], viewController:UIViewController, successAction:((_ filePath:URL, _ fileName: String)->Void)? = nil) {
         let labelTag = 100
-        let dialog = NiftyUtilitySwift.EasyDialogBuilder(viewController)
+        let dialog = NiftyUtility.EasyDialogBuilder(viewController)
             .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
             .build()
         DispatchQueue.main.async {
@@ -2208,7 +2208,7 @@ class NovelSpeakerUtility: NSObject {
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false) {
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                            NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
                         }
                     }
                 }
@@ -2227,7 +2227,7 @@ class NovelSpeakerUtility: NSObject {
     #if !os(watchOS)
     static func SearchStoryFor(storyID:String, viewController:UIViewController, selectedResultHandler:((_ story:Story)->Void)? = nil) {
         func searchFunc(searchString:String?){
-            NiftyUtilitySwift.EasyDialogNoButton(
+            NiftyUtility.EasyDialogNoButton(
                 viewController: viewController,
                 title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
                 message: nil) { (searchingDialog) in
@@ -2237,7 +2237,7 @@ class NovelSpeakerUtility: NSObject {
                         if searchString.count <= 0 { return true }
                         return story.content.contains(searchString)
                     }) else {
-                        NiftyUtilitySwift.EasyDialogOneButton(
+                        NiftyUtility.EasyDialogOneButton(
                             viewController: viewController,
                             title: nil,
                             message: NSLocalizedString("SpeechViewController_CanNotGetStorys", comment: "小説情報を参照できませんでした。"),
@@ -2263,7 +2263,7 @@ class NovelSpeakerUtility: NSObject {
             }
         }
         
-        NiftyUtilitySwift.EasyDialogTextInput2Button(
+        NiftyUtility.EasyDialogTextInput2Button(
             viewController: viewController,
             title: NSLocalizedString("SpeechViewController_SearchDialogTitle", comment: "検索"),
             message: NSLocalizedString("SpeechViewController_SearchDialogMessage", comment: "本文中から文字列を検索します"),

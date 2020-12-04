@@ -268,8 +268,8 @@ class CoreDataToRealmTool: NSObject {
             // とりあえず path は '/' 固定で、最終ダウンロード日時から1日後まで有効、という事にします。
             guard let fullPathURL = URL(string: novelID), let host = fullPathURL.host, let scheme = fullPathURL.scheme, let url = URL(string: "\(scheme)://\(host)") else { return }
             let expireDate = lastUpdateDate.addingTimeInterval(60*60*24)
-            let newCookieArray = NiftyUtilitySwift.ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString: urlSecret, targetURL: url, expireDate: expireDate)
-            cookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: cookieArray, newCookieArray: newCookieArray))
+            let newCookieArray = NiftyUtility.ConvertJavaScriptCookieStringToHTTPCookieArray(javaScriptCookieString: urlSecret, targetURL: url, expireDate: expireDate)
+            cookieArray = NiftyUtility.RemoveExpiredCookie(cookieArray: NiftyUtility.MergeCookieArray(currentCookieArray: cookieArray, newCookieArray: newCookieArray))
         }
         
         for novelObj in novelArray {

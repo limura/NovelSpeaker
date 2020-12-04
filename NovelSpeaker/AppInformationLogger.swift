@@ -61,25 +61,25 @@ class AppInformationLogger {
                 userDefaults.set([logJSONString], forKey: LOG_KEY)
             }
             if isForDebug == false {
-                userDefaults.setValue(NiftyUtilitySwift.Date2ISO8601String(date: Date()), forKey: WRITE_DATE_KEY)
+                userDefaults.setValue(NiftyUtility.Date2ISO8601String(date: Date()), forKey: WRITE_DATE_KEY)
             }
             userDefaults.synchronize()
             if isForDebug == true { return }
             delegate?.NewAppInformationAlive()
             #if !os(watchOS)
-            NiftyUtilitySwift.UpdateSettingsTabBadge(badge: "!")
+            NiftyUtility.UpdateSettingsTabBadge(badge: "!")
             #endif
         }
     }
     
     static func isNewLogAlive() -> Bool {
-        guard let userDefaults = UserDefaults.init(suiteName: USERDEFAULTS_NAME), let writeDateString = userDefaults.string(forKey: WRITE_DATE_KEY), let writeDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: writeDateString), let readDateString = userDefaults.string(forKey: READ_DATE_KEY), let readDate = NiftyUtilitySwift.ISO8601String2Date(iso8601String: readDateString) else { return false }
+        guard let userDefaults = UserDefaults.init(suiteName: USERDEFAULTS_NAME), let writeDateString = userDefaults.string(forKey: WRITE_DATE_KEY), let writeDate = NiftyUtility.ISO8601String2Date(iso8601String: writeDateString), let readDateString = userDefaults.string(forKey: READ_DATE_KEY), let readDate = NiftyUtility.ISO8601String2Date(iso8601String: readDateString) else { return false }
         return readDate < writeDate
     }
     
     static func CheckLogShowed() {
         guard let userDefaults = UserDefaults.init(suiteName: USERDEFAULTS_NAME) else { return }
-        userDefaults.setValue(NiftyUtilitySwift.Date2ISO8601String(date: Date()), forKey: READ_DATE_KEY)
+        userDefaults.setValue(NiftyUtility.Date2ISO8601String(date: Date()), forKey: READ_DATE_KEY)
         userDefaults.synchronize()
     }
     

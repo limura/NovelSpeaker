@@ -11,7 +11,6 @@ import IceCream
 import CloudKit
 import UIKit
 import AVFoundation
-//import MessagePacker
 
 @objc class RealmUtil : NSObject {
     static let currentSchemaVersion : UInt64 = 3
@@ -359,7 +358,7 @@ import AVFoundation
                             // minimumTimeoutLimit秒経っても count が 0 から何も増えてないということは多分何も入っていない
                             // ……と、思うんだけれど、ネットワークが繋がっていなくてもここに来てしまうので、
                             // 一応インターネットから何かを取り出せるかどうかを確認する。
-                            NiftyUtilitySwift.httpGet(url: URL(string: NiftyUtilitySwift.IMPORTANT_INFORMATION_TEXT_URL)!, successAction: { (_, _) in
+                            NiftyUtility.httpGet(url: URL(string: NiftyUtility.IMPORTANT_INFORMATION_TEXT_URL)!, successAction: { (_, _) in
                                 // 取り出せるのなら本当にデータは無いのだろうということで
                                 // データは無かったと報告する
                                 completion?(.validDataNotAlive)
@@ -832,7 +831,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         if tmpString.count < 250 {
             return tmpString
         }
-        guard let data = urlString.data(using: .utf8), let zipedData = NiftyUtilitySwift.compress(data: data) else {
+        guard let data = urlString.data(using: .utf8), let zipedData = NiftyUtility.compress(data: data) else {
             return tmpString
         }
         let base64ZipedData = zipedData.base64EncodedString()
@@ -844,7 +843,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     // deflate の後 base64 にされたものか、"/" を "%2F" に変換されたもののどちらかが入っているはずなので
     // とりあえず base64 decode できるかを試して失敗したら "%2F" を元に戻したものを返します。
     static func UniqueIDToURI(uniqueID:String) -> String {
-        guard let zipedData = Data(base64Encoded: uniqueID), let data = NiftyUtilitySwift.decompress(data: zipedData), let uri = String(data: data, encoding: .utf8) else {
+        guard let zipedData = Data(base64Encoded: uniqueID), let data = NiftyUtility.decompress(data: zipedData), let uri = String(data: data, encoding: .utf8) else {
             return uniqueID.removingPercentEncoding ?? uniqueID
         }
         return uri
@@ -881,7 +880,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             print("LoadStoryArray storedData() return nil. filePath: \(asset.filePath.absoluteString)")
             return nil
         }
-        guard let data = NiftyUtilitySwift.decompress(data: zipedData) else {
+        guard let data = NiftyUtility.decompress(data: zipedData) else {
             print("LoadStoryArray dataInflate() failed.")
             return nil
         }
@@ -905,7 +904,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             print("WARN: [Story] の JSONEncode に失敗")
             return
         }
-        guard let zipedData = NiftyUtilitySwift.compress(data: data) else {
+        guard let zipedData = NiftyUtility.compress(data: data) else {
             print("WARN: [Story] を JSON に変換した後、compress で失敗した")
             return
         }
@@ -938,7 +937,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
                     lastChapterNumber = story.chapterNumber
                 }
                 if lastChapterNumber != chapterNumber - 1 {
-                    AppInformationLogger.AddLog(message: "WARN: chapterNumber が期待していない値になっている。(既にある奴の末尾: \(lastChapterNumber), 追加される奴の先頭: \(chapterNumber), bulk.chapterNumber: \(bulk.chapterNumber), currentStoryArray.count: \(currentStoryArray.count)", appendix: ["stackTrace":NiftyUtilitySwift.GetStackTrace()], isForDebug: true)
+                    AppInformationLogger.AddLog(message: "WARN: chapterNumber が期待していない値になっている。(既にある奴の末尾: \(lastChapterNumber), 追加される奴の先頭: \(chapterNumber), bulk.chapterNumber: \(bulk.chapterNumber), currentStoryArray.count: \(currentStoryArray.count)", appendix: ["stackTrace":NiftyUtility.GetStackTrace()], isForDebug: true)
                 }
                 tmpStoryArray.append(contentsOf: targetStoryArray)
                 targetStoryArray = tmpStoryArray
@@ -2152,7 +2151,7 @@ extension HTTPCookie {
     @discardableResult
     func MergeCookieArrayWith(realm:Realm, cookieArray:[HTTPCookie]) -> Bool {
         let currentCookieArray = GetCookieArray() ?? []
-        let filterdCookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: currentCookieArray, newCookieArray: cookieArray))
+        let filterdCookieArray = NiftyUtility.RemoveExpiredCookie(cookieArray: NiftyUtility.MergeCookieArray(currentCookieArray: currentCookieArray, newCookieArray: cookieArray))
         let codableArray = CodableHTTPCookie.ConvertArrayToCodable(cookieArray: filterdCookieArray)
         guard let cookieData = try? JSONEncoder().encode(codableArray) else { return false }
         self.cookieArrayData = cookieData
@@ -2161,7 +2160,7 @@ extension HTTPCookie {
     
     func GetCookieArray() -> [HTTPCookie]? {
         guard let codableArray = try? JSONDecoder().decode([CodableHTTPCookie].self, from: self.cookieArrayData) else { return nil }
-        return NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: CodableHTTPCookie.ConvertArrayFromCodable(cookieArray: codableArray).0)
+        return NiftyUtility.RemoveExpiredCookie(cookieArray: CodableHTTPCookie.ConvertArrayFromCodable(cookieArray: codableArray).0)
     }
 
     override class func primaryKey() -> String? {

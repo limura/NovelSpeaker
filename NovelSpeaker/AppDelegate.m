@@ -91,7 +91,7 @@ void uncaughtExceptionHandler(NSException *exception)
     }
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = toplevelViewController;
-    [NiftyUtilitySwift RegisterToplevelViewControllerWithViewController:toplevelViewController];
+    [NiftyUtility RegisterToplevelViewControllerWithViewController:toplevelViewController];
     [self.window makeKeyAndVisible];
     
     // CookieStorageを健全化しておきます……(´・ω・`)
@@ -106,7 +106,7 @@ void uncaughtExceptionHandler(NSException *exception)
     [[NovelDownloadQueue shared] RegisterBackgroundProcess];
     [[NovelDownloadQueue shared] StartBackgroundFetchIfNeeded];
     [[NovelDownloadQueue shared] ClearDownloadCountBadge];
-    [NiftyUtilitySwift StartiCloudDataVersionChecker];
+    [NiftyUtility StartiCloudDataVersionChecker];
 
     return YES;
 }

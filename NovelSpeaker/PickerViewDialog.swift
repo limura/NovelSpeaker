@@ -34,7 +34,7 @@ class PickerViewDialog : UIView, UITextFieldDelegate, UIPickerViewDelegate, UIPi
     }
     
     static func createNewDialog(displayTextArray:[String], firstSelectedString:String?, resultReceiver:((String)->Void)?) -> PickerViewDialog? {
-        guard let toplevelViewController = NiftyUtilitySwift.GetRegisterdToplevelViewController() else { return nil }
+        guard let toplevelViewController = NiftyUtility.GetRegisterdToplevelViewController() else { return nil }
 
         let nib = UINib.init(nibName: "PickerViewDialog", bundle: nil)
         guard let dialog = nib.instantiate(withOwner: self, options: nil).first as? PickerViewDialog else { return nil }
@@ -85,7 +85,7 @@ class PickerViewDialog : UIView, UITextFieldDelegate, UIPickerViewDelegate, UIPi
         completion?()
         return
 
-        guard let toplevelView = NiftyUtilitySwift.GetRegisterdToplevelViewController()?.view else { return }
+        guard let toplevelView = NiftyUtility.GetRegisterdToplevelViewController()?.view else { return }
         let height = UIScreen.main.bounds.height
         setYAnchorConstraint(constraint: self.centerYAnchor.constraint(equalTo: toplevelView.centerYAnchor, constant: height))
         UIView.animate(withDuration: 0.2) {
@@ -100,7 +100,7 @@ class PickerViewDialog : UIView, UITextFieldDelegate, UIPickerViewDelegate, UIPi
         completion?()
         return
         
-        guard let toplevelView = NiftyUtilitySwift.GetRegisterdToplevelViewController()?.view else { return }
+        guard let toplevelView = NiftyUtility.GetRegisterdToplevelViewController()?.view else { return }
         let height = UIScreen.main.bounds.height
         setYAnchorConstraint(constraint: self.centerYAnchor.constraint(equalTo: toplevelView.centerYAnchor, constant: 0))
         UIView.animate(withDuration: 0.2) {

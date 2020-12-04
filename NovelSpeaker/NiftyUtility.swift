@@ -1,5 +1,5 @@
 //
-//  NiftyUtilitySwift.swift
+//  NiftyUtility.swift
 //  NovelSpeaker
 //
 //  Created by 飯村卓司 on 2017/11/19.
@@ -22,7 +22,7 @@ import Erik
 import MessageUI
 #endif
 
-class NiftyUtilitySwift: NSObject {
+class NiftyUtility: NSObject {
     // 分割すべき大きさで、分割できそうな文字列であれば分割して返します
     static func CheckShouldSeparate(text:String) -> [String]? {
         guard let realm = try? RealmUtil.GetRealm(), let textCountSeparatorArray = RealmGlobalState.GetInstanceWith(realm: realm)?.autoSplitStringList else { return nil }
@@ -69,12 +69,12 @@ class NiftyUtilitySwift: NSObject {
             if let hintString = hintString {
                 easyDialog = easyDialog.label(text: hintString)
             }
-            easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtilitySwift_CancelImport", comment: "取り込まない"), callback: { (dialog) in
+            easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtility_CancelImport", comment: "取り込まない"), callback: { (dialog) in
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
                 }
             })
-            easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
+            easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtility_Import", comment: "このまま取り込む"), callback: { (dialog) in
                 let titleTextField = dialog.view.viewWithTag(100) as! UITextField
                 let title = titleTextField.text ?? title
                 DispatchQueue.main.async {
@@ -85,7 +85,7 @@ class NiftyUtilitySwift: NSObject {
             if let separatedText = CheckShouldSeparate(text: content), separatedText.reduce(0, { (result, body) -> Int in
                 return result + (body.count > 0 ? 1 : 0)
             }) > 1 {
-                easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportSeparatedContent", comment: "テキトーに分割して取り込む"), callback: { (dialog) in
+                easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtility_ImportSeparatedContent", comment: "テキトーに分割して取り込む"), callback: { (dialog) in
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: nil)
                     }
@@ -126,18 +126,18 @@ class NiftyUtilitySwift: NSObject {
     static func checkUrlAndConifirmToUser_ErrorHandle(error:String, viewController:UIViewController, url: URL?, cookieString:String?, isNeedFallbackImportFromWebPageTab:Bool) {
         if isRecoverbleErrorString(error: error) && MFMailComposeViewController.canSendMail() {
             var errorMessage = error
-            errorMessage += NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
+            errorMessage += NSLocalizedString("NiftyUtility_ImportError_SendProblemReportMessage", comment: "\n\n問題の起こった小説について開発者に送信する事もできます。ただし、この報告への返信は基本的には致しません。返信が欲しい場合には、「設定」→「開発者に問い合わせる」からお問い合わせください。")
             var builder = EasyDialogBuilder(viewController)
-            builder = builder.title(title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"))
+            builder = builder.title(title: NSLocalizedString("NiftyUtility_ImportError", comment: "取り込み失敗"))
             .textView(content: errorMessage, heightMultiplier: 0.45)
-            .addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReportButton", comment: "報告メールを作成"), callback: { (dialog) in
+            .addButton(title: NSLocalizedString("NiftyUtility_ImportError_SendProblemReportButton", comment: "報告メールを作成"), callback: { (dialog) in
                 dialog.dismiss(animated: false) {
                     DispatchQueue.main.async {
                         let picker = MFMailComposeViewController()
                         //picker.mailComposeDelegate = self;
                         picker.setToRecipients(["limuraproducts@gmail.com"])
-                        picker.setSubject(NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Title", comment:"ことせかい 取り込み失敗レポート"))
-                        let messageBody = NSLocalizedString("NiftyUtilitySwift_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n") + error
+                        picker.setSubject(NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Title", comment:"ことせかい 取り込み失敗レポート"))
+                        let messageBody = NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n") + error
                         picker.setMessageBody(messageBody, isHTML: false)
                         let sendData:[String:String] = [
                             "url": url?.absoluteString ?? "-",
@@ -153,7 +153,7 @@ class NiftyUtilitySwift: NSObject {
                 }
             })
             if isNeedFallbackImportFromWebPageTab == true, let url = url {
-                builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportRetryToWebImportTabButton", comment: "Web取込タブで開き直してみる(ログインが必要な場合はこちらで直るかもしれません)"), callback: { (dialog) in
+                builder = builder.addButton(title: NSLocalizedString("NiftyUtility_ImportRetryToWebImportTabButton", comment: "Web取込タブで開き直してみる(ログインが必要な場合はこちらで直るかもしれません)"), callback: { (dialog) in
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false) {
                             BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
@@ -167,13 +167,13 @@ class NiftyUtilitySwift: NSObject {
             
             builder.build(isForMessageDialog: true).show()
         }else{
-            NiftyUtilitySwift.EasyDialogMessageDialog(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_ImportError", comment: "取り込み失敗"), message: error, completion: nil)
+            NiftyUtility.EasyDialogMessageDialog(viewController: viewController, title: NSLocalizedString("NiftyUtility_ImportError", comment: "取り込み失敗"), message: error, completion: nil)
         }
     }
     
     static func ImportStoryStateConifirmToUser(viewController:UIViewController, state:StoryState, isNeedFallbackImportFromWebPageTab: Bool = false) {
         guard let content = state.content else {
-            checkUrlAndConifirmToUser_ErrorHandle(error: NSLocalizedString("NiftyUtilitySwift_ImportStoryStateConifirmToUser_NoContent", comment: "本文がありませんでした。"), viewController: viewController, url: state.url, cookieString: state.cookieString ?? "", isNeedFallbackImportFromWebPageTab: isNeedFallbackImportFromWebPageTab)
+            checkUrlAndConifirmToUser_ErrorHandle(error: NSLocalizedString("NiftyUtility_ImportStoryStateConifirmToUser_NoContent", comment: "本文がありませんでした。"), viewController: viewController, url: state.url, cookieString: state.cookieString ?? "", isNeedFallbackImportFromWebPageTab: isNeedFallbackImportFromWebPageTab)
             return
         }
         let titleString:String
@@ -184,9 +184,9 @@ class NiftyUtilitySwift: NSObject {
         }
         let multiPageString:String
         if state.IsNextAlive {
-            multiPageString = NSLocalizedString("NiftyUtilitySwift_FollowingPageAreAvailable", comment: "続ページ：有り")
+            multiPageString = NSLocalizedString("NiftyUtility_FollowingPageAreAvailable", comment: "続ページ：有り")
         }else {
-            multiPageString = NSLocalizedString("NiftyUtilitySwift_FollowingPageAreNotAvailable", comment: "続ページ：無し")
+            multiPageString = NSLocalizedString("NiftyUtility_FollowingPageAreNotAvailable", comment: "続ページ：無し")
         }
         DispatchQueue.main.async {
             var builder = EasyDialogBuilder(viewController)
@@ -198,13 +198,13 @@ class NiftyUtilitySwift: NSObject {
                 // EasyDialog をそのように修正するのが面倒なのでやっていないという事なのであった。('A`)
                 .textView(content: content, heightMultiplier: 0.45)
                 .label(text: multiPageString)
-                .addButton(title: NSLocalizedString("NiftyUtilitySwift_CancelImport", comment: "取り込まない"), callback: { (dialog) in
+                .addButton(title: NSLocalizedString("NiftyUtility_CancelImport", comment: "取り込まない"), callback: { (dialog) in
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: nil)
                     }
                 })
             print("builder.addButton(title: このまま取り込む)")
-            builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_Import", comment: "このまま取り込む"), callback: { (dialog) in
+            builder = builder.addButton(title: NSLocalizedString("NiftyUtility_Import", comment: "このまま取り込む"), callback: { (dialog) in
                     let titleTextField = dialog.view.viewWithTag(100) as! UITextField
                     let titleString = titleTextField.text ?? titleString
                     DispatchQueue.main.async {
@@ -212,19 +212,19 @@ class NiftyUtilitySwift: NSObject {
                         dialog.dismiss(animated: false, completion: {
                             guard let novelID = RealmNovel.AddNewNovelWithFirstStoryState(state:state.TitleChanged(title:titleString)) else {
                                 DispatchQueue.main.async {
-                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"), message: NSLocalizedString("NiftyUtilitySwift_FailedAboutAddNewNovelFromWithStoryMessage", comment: "既に登録されている小説などの原因が考えられます。"), buttonTitle: nil, buttonAction: nil)
+                                    NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"), message: NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryMessage", comment: "既に登録されている小説などの原因が考えられます。"), buttonTitle: nil, buttonAction: nil)
                                 }
                                 return
                             }
                             NovelDownloadQueue.shared.addQueue(novelID: novelID)
                             DispatchQueue.main.async {
                                 if let floatingButton = FloatingButton.createNewFloatingButton() {
-                                    floatingButton.assignToView(view: viewController.view, text: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), animated: true, buttonClicked: {})
+                                    floatingButton.assignToView(view: viewController.view, text: NSLocalizedString("NiftyUtility_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), animated: true, buttonClicked: {})
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                                         floatingButton.hideAnimate()
                                     })
                                 }else{
-                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), message: NSLocalizedString("NiftyUtilitySwift_AddNewNovelToBookshelfMessage", comment: "続く章があればダウンロードを続けます。"), buttonTitle: nil, buttonAction: nil)
+                                    NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtility_AddNewNovelToBookshelfTitle", comment: "本棚に小説を追加しました"), message: NSLocalizedString("NiftyUtility_AddNewNovelToBookshelfMessage", comment: "続く章があればダウンロードを続けます。"), buttonTitle: nil, buttonAction: nil)
                                 }
                             }
                         })
@@ -234,7 +234,7 @@ class NiftyUtilitySwift: NSObject {
             if state.IsNextAlive != true, let separatedText = CheckShouldSeparate(text: content), separatedText.reduce(0, { (result, body) -> Int in
                 return result + (body.count > 0 ? 1 : 0)
             }) > 1 {
-                builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportSeparatedContent", comment: "テキトーに分割して取り込む"), callback: { (dialog) in
+                builder = builder.addButton(title: NSLocalizedString("NiftyUtility_ImportSeparatedContent", comment: "テキトーに分割して取り込む"), callback: { (dialog) in
                     let titleTextField = dialog.view.viewWithTag(100) as! UITextField
                     let titleString = titleTextField.text ?? titleString
                     DispatchQueue.main.async {
@@ -244,7 +244,7 @@ class NiftyUtilitySwift: NSObject {
                 })
             }
             if isNeedFallbackImportFromWebPageTab == true {
-                builder = builder.addButton(title: NSLocalizedString("NiftyUtilitySwift_ImportRetryToWebImportTabButton", comment: "Web取込タブで開き直してみる(ログインが必要な場合はこちらで直るかもしれません)"), callback: { (dialog) in
+                builder = builder.addButton(title: NSLocalizedString("NiftyUtility_ImportRetryToWebImportTabButton", comment: "Web取込タブで開き直してみる(ログインが必要な場合はこちらで直るかもしれません)"), callback: { (dialog) in
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false) {
                             BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: state.url)
@@ -274,7 +274,7 @@ class NiftyUtilitySwift: NSObject {
                                 ImportStoryStateConifirmToUser(viewController: viewController, state: state, isNeedFallbackImportFromWebPageTab: isNeedFallbackImportFromWebPageTab)
                                 return
                             }
-                            checkUrlAndConifirmToUser_ErrorHandle(error: errorString ?? NSLocalizedString("NiftyUtilitySwift_CanNotAddToBookshelfTitle", comment: "不明なエラー"), viewController: viewController, url: url, cookieString: cookieString, isNeedFallbackImportFromWebPageTab: isNeedFallbackImportFromWebPageTab)
+                            checkUrlAndConifirmToUser_ErrorHandle(error: errorString ?? NSLocalizedString("NiftyUtility_CanNotAddToBookshelfTitle", comment: "不明なエラー"), viewController: viewController, url: url, cookieString: cookieString, isNeedFallbackImportFromWebPageTab: isNeedFallbackImportFromWebPageTab)
                         })
                     }
                 }
@@ -864,7 +864,7 @@ class NiftyUtilitySwift: NSObject {
                 if let data = data {
                     let contentType = getContentTypeHeaderFromURLResponse(urlResponse: response)
                     #if !os(watchOS)
-                    if isPDFFileByContentTypeString(contentType: contentType), let pdfString = NiftyUtilitySwift.BinaryPDFToString(data: data) {
+                    if isPDFFileByContentTypeString(contentType: contentType), let pdfString = NiftyUtility.BinaryPDFToString(data: data) {
                         let fileName = (url.lastPathComponent as NSString).deletingPathExtension
                         let dummyHtml = "<html><head><title>\(fileName)</title><meta charset=\"UTF-8\"></head><body><pre>\(pdfString)</pre></body></html>"
                         if let dummyData = dummyHtml.data(using: .utf8) {
@@ -884,7 +884,7 @@ class NiftyUtilitySwift: NSObject {
                     return
                     #endif
                 }
-                failedAction?(SloppyError(msg: String(format: NSLocalizedString("NiftyUtilitySwift_URLSessionRequestFailedAboutError", comment: "サーバからのデータの取得に失敗しました。(末尾に示されているエラー内容とエラーの起こったURLとエラーが起こるまでの操作手順を添えて、サポートサイト下部にありますご意見ご要望フォームか、設定→開発者に問い合わせるよりお問い合わせ頂けますと、あるいは何かできるかもしれません。\nエラー内容: %@)"), error?.localizedDescription ?? "unknown error(nil)")))
+                failedAction?(SloppyError(msg: String(format: NSLocalizedString("NiftyUtility_URLSessionRequestFailedAboutError", comment: "サーバからのデータの取得に失敗しました。(末尾に示されているエラー内容とエラーの起こったURLとエラーが起こるまでの操作手順を添えて、サポートサイト下部にありますご意見ご要望フォームか、設定→開発者に問い合わせるよりお問い合わせ頂けますと、あるいは何かできるかもしれません。\nエラー内容: %@)"), error?.localizedDescription ?? "unknown error(nil)")))
             }.resume()
         }
     }
@@ -1063,7 +1063,7 @@ class NiftyUtilitySwift: NSObject {
                 return
             }
         }
-        NiftyUtilitySwift.httpGet(url: url, successAction: { (data, encoding) in
+        NiftyUtility.httpGet(url: url, successAction: { (data, encoding) in
             let cache = dataCache(data: data, cachedDate: Date(timeIntervalSinceNow: 0), error: nil, encoding: encoding)
             httpCache[url] = cache
             if let successAction = successAction {
@@ -1102,12 +1102,12 @@ class NiftyUtilitySwift: NSObject {
             return
         }
         let dispatchSemaphore = DispatchSemaphore(value: 0)
-        NiftyUtilitySwift.backgroundQueue.asyncAfter(deadline: .now() + 0.05) {
+        NiftyUtility.backgroundQueue.asyncAfter(deadline: .now() + 0.05) {
             block()
             dispatchSemaphore.signal()
         }
         while dispatchSemaphore.wait(timeout: DispatchTime.now()) == DispatchTimeoutResult.timedOut {
-            NiftyUtilitySwift.sleep(second: 0.1)
+            NiftyUtility.sleep(second: 0.1)
         }
     }
     
@@ -1719,7 +1719,7 @@ class NiftyUtilitySwift: NSObject {
             }
             RealmUtil.ChangeToLocalRealm()
             dialog.dismiss(animated: false) {
-                NiftyUtilitySwift.EasyDialogOneButton(
+                NiftyUtility.EasyDialogOneButton(
                 viewController: viewController,
                 title: nil,
                 message: NSLocalizedString("SettingsViewController_iCloudDisable_done", comment: "iCloud同期を停止しました"),

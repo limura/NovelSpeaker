@@ -132,7 +132,7 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
     }
     
     func observeGlobalState() {
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                 self.globalStateNotificationToken = globalState.observe({ (change) in
@@ -163,7 +163,7 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
         }
     }
     func SaveSync(){
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.Write(withoutNotifying: [self.globalStateNotificationToken]) { (realm) in
                 self.SaveCookiesFromURLSessionSharedConfigurationWith(realm: realm)
             }
@@ -181,8 +181,8 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
         guard let realmCookieArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetCookieArray() else { return }
         if let cookieStorage = URLSession.shared.configuration.httpCookieStorage {
             let sharedCookieArray = cookieStorage.cookies ?? []
-            let newCookieArray = NiftyUtilitySwift.RemoveExpiredCookie(cookieArray: NiftyUtilitySwift.MergeCookieArray(currentCookieArray: sharedCookieArray, newCookieArray: realmCookieArray))
-            NiftyUtilitySwift.AssignCookieArrayToCookieStorage(cookieArray: newCookieArray, cookieStorage: cookieStorage)
+            let newCookieArray = NiftyUtility.RemoveExpiredCookie(cookieArray: NiftyUtility.MergeCookieArray(currentCookieArray: sharedCookieArray, newCookieArray: realmCookieArray))
+            NiftyUtility.AssignCookieArrayToCookieStorage(cookieArray: newCookieArray, cookieStorage: cookieStorage)
         }
     }
     func SaveCookiesFromCookieArrayWith(realm:Realm, cookieArray:[HTTPCookie]) {

@@ -41,7 +41,7 @@ class DebugLogViewControllerSwift: UIViewController {
     */
     
     func getLogText() -> String {
-        return NiftyUtilitySwift.getLogText(searchString: m_SearchString)
+        return NiftyUtility.getLogText(searchString: m_SearchString)
     }
     
     func updateLogText() {
@@ -53,7 +53,7 @@ class DebugLogViewControllerSwift: UIViewController {
         updateLogText()
     }
     @IBAction func searchButtonClicked(_ sender: Any) {
-        NiftyUtilitySwift.EasyDialogBuilder(self)
+        NiftyUtility.EasyDialogBuilder(self)
         .textField(tag: 100, placeholder: "search string", content: m_SearchString, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .roundedRect)
         .addButton(title: "Search") { (dialog) in
             let searchTextField = dialog.view.viewWithTag(100) as! UITextField
@@ -70,7 +70,7 @@ class DebugLogViewControllerSwift: UIViewController {
     @IBAction func copyButtonClicked(_ sender: Any) {
         let pasteBoard = UIPasteboard.general
         pasteBoard.setValue(getLogText(), forPasteboardType: "public.text")
-        NiftyUtilitySwift.EasyDialogBuilder(self)
+        NiftyUtility.EasyDialogBuilder(self)
         .label(text: NSLocalizedString("DebugLogViewControllerSwift_Copied", comment: "コピーしました"))
         .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
             dialog.dismiss(animated: false, completion: nil)

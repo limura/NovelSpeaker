@@ -27,7 +27,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     /// 最新のプライバシーポリシーを読んだことがあるか否かを判定して、読んだことがなければ表示して同意を求めます
     func CheckAndDisplayPrivacyPolicy(){
         if let privacyPolicyUrl = NovelSpeakerUtility.privacyPolicyURL {
-            NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data, encoding) in
+            NiftyUtility.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data, encoding) in
                 guard let currentPrivacyPolicy = String(data: data, encoding: encoding ?? .utf8) else {
                     return
                 }
@@ -36,7 +36,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     return
                 }
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                     .text(content: NSLocalizedString("BugReportViewController_PrivacyPolicyAgreementNeeded", comment: "ことせかい のプライバシーポリシーについての同意が必要です"))
                     .textView(content: currentPrivacyPolicy, heightMultiplier: 0.5)
                     .addButton(title: NSLocalizedString("Disagree_Button", comment:"同意しない"), callback: { dialog in
@@ -70,7 +70,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         }
         print("can not send mail")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
             .title(title: NSLocalizedString("BugReportViewController_NoEMailApp_Title", comment: "メールが送信できません"))
             .textView(content: NSLocalizedString("BugReportViewController_NoEMailApp_Message", comment: "メールを送信する事ができないようです。\nメールアプリにメールアドレスを設定していないか、メールアプリが削除されていると思われます。\nことせかい へのお問い合わせにはe-mailをご利用頂く事が必要となりますので適切に設定して頂けますようお願い致します。"), heightMultiplier: 0.65)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
@@ -182,7 +182,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 let description = BugReportViewController.value.DescriptionOfNewFeature
                 let needResponse = BugReportViewController.value.IsNeedResponse
                 if BugReportViewController.value.DescriptionOfNewFeature == "" {
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                         .title(title: NSLocalizedString("BugReportViewController_ErrorDialog", comment: "問題のある入力項目があります"))
                         .label(text: NSLocalizedString("BugReportViewController_NoDescriptionOfTheNewFeature", comment: "ご提案の内容が空になっています"), textAlignment: .left)
                         .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
@@ -266,7 +266,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 }.onChange({ (row) in
                     let judge = row.value
                     if judge! {
-                        NiftyUtilitySwift.EasyDialogBuilder(self)
+                        NiftyUtility.EasyDialogBuilder(self)
                             .title(title: NSLocalizedString("BugReportViewController_ConfirmEnableLogSend_title", comment:"確認"))
                             .textView(content: NSLocalizedString("BugReportViewController_ConfirmEnableLogSend", comment:"ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合にはOFFのままにしておく必要があります。\nなお、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), heightMultiplier: 0.6)
                             .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
@@ -295,7 +295,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 }.onChange({ (row) in
                     let judge = row.value
                     if judge! {
-                        NiftyUtilitySwift.EasyDialogBuilder(self)
+                        NiftyUtility.EasyDialogBuilder(self)
                             .title(title: NSLocalizedString("BugReportViewController_ConfirmEnableBackupFileSend_title", comment:"確認"))
                             .textView(content: NSLocalizedString("BugReportViewController_ConfirmEnableBackupFileSend", comment:"ことせかい の軽量バックアップファイルを不都合報告mailに添付しますか？\n\n軽量バックアップファイルにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合にはOFFのままにしておく必要があります。\nなお、軽量バックアップファイルが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), heightMultiplier: 0.6)
                             .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
@@ -348,7 +348,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     warningMessage += NSLocalizedString("BugReportViewController_NoDescriptonOfTheProblem", comment: "問題の説明欄が空欄になっています。")
                 }
                 if warningMessage.count > 0 {
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                         .title(title: NSLocalizedString("BugReportViewController_ErrorDialog", comment: "問題のある入力項目があります"))
                         .label(text: warningMessage, textAlignment: .left)
                         .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
@@ -360,7 +360,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     return;
                 }
                 if BehaviorLogger.LOGGER_ENABLED {
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                         .label(text: NSLocalizedString("BugReportViewController_AddBehaviourLogAnnounce", comment: "ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合には「いいえ」を選択する必要があります。\nまた、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), textAlignment: .left)
                         .addButton(title: NSLocalizedString("BugReportViewController_NO", comment: "いいえ"), callback: { (dialog) in
                             self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend, completion: {
@@ -379,7 +379,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     .build().show()
                 }else{
                     if BugReportViewController.value.IsEnabledLogSend {
-                        self.sendBugReportMail(log: NiftyUtilitySwift.getLogText(searchString: nil), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend)
+                        self.sendBugReportMail(log: NiftyUtility.getLogText(searchString: nil), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend)
                     }else{
                         self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend)
                     }
@@ -388,7 +388,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         
 
         if let url = URL(string: "https://limura.github.io/NovelSpeaker/ImportantInformation.txt") {
-            NiftyUtilitySwift.cashedHTTPGet(url: url, delay: 60*60,
+            NiftyUtility.cashedHTTPGet(url: url, delay: 60*60,
                 successAction: { (data, encoding) in
                     if let str = String(data: data, encoding: encoding ?? .utf8) {
                         var text = ""
@@ -442,7 +442,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         if !MFMailComposeViewController.canSendMail() {
             return false;
         }
-        let appVersionString = NiftyUtilitySwift.GetAppVersionString()
+        let appVersionString = NiftyUtility.GetAppVersionString()
         
         let picker = MFMailComposeViewController()
         picker.mailComposeDelegate = self;
@@ -498,7 +498,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         if isNeedBackupFile == true {
             DispatchQueue.main.async {
                 let labelTag = 100
-                let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
+                let dialog = NiftyUtility.EasyDialogBuilder(self)
                     .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
                     .build()
                 dialog.show()

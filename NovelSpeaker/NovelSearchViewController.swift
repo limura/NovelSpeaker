@@ -208,12 +208,12 @@ class SearchResultBlock {
         }.onCellSelection { (buttonCellOf, row) in
             func download() {
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: parent, url: self.url, cookieString: "", isNeedFallbackImportFromWebPageTab: false)
+                    NiftyUtility.checkUrlAndConifirmToUser(viewController: parent, url: self.url, cookieString: "", isNeedFallbackImportFromWebPageTab: false)
                 }
             }
             if let description = self.description, description.count > 0 {
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogBuilder(parent)
+                    NiftyUtility.EasyDialogBuilder(parent)
                         .title(title: self.title, numberOfLines: 1)
                         .textView(content: description, heightMultiplier: 0.6)
                         .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
@@ -262,7 +262,7 @@ struct SearchResult : Decodable {
     func ConvertHTMLToSearchResultDataArray(data:Data, headerEncoding: String.Encoding?, baseURL: URL) -> ([SearchResultBlock], URL?) {
         var result:[SearchResultBlock] = []
         let doc:HTMLDocument
-        let (htmlOptional, encoding) = NiftyUtilitySwift.decodeHTMLStringFrom(data: data, headerEncoding: headerEncoding)
+        let (htmlOptional, encoding) = NiftyUtility.decodeHTMLStringFrom(data: data, headerEncoding: headerEncoding)
         if let html = htmlOptional, let htmlDocument = try? HTML(html: html, url: baseURL.absoluteString, encoding: headerEncoding ?? .utf8) {
             doc = htmlDocument
         }else{
@@ -274,22 +274,22 @@ struct SearchResult : Decodable {
             //print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.toHTML ?? "nil")")
             let title:String
             if let titleXpath = self.titleXpath {
-                title = NiftyUtilitySwift.FilterXpathWithConvertString(xmlElement: blockHTML, xpath: titleXpath).trimmingCharacters(in: .whitespacesAndNewlines)
+                title = NiftyUtility.FilterXpathWithConvertString(xmlElement: blockHTML, xpath: titleXpath).trimmingCharacters(in: .whitespacesAndNewlines)
             }else{
                 title = ""
             }
             if title.count <= 0 {
                 continue
             }
-            guard let urlXpath = self.urlXpath, let url = NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlElement: blockHTML, xpath: urlXpath, baseURL: baseURL) else {
+            guard let urlXpath = self.urlXpath, let url = NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlElement: blockHTML, xpath: urlXpath, baseURL: baseURL) else {
                 continue
             }
-            let description = NiftyUtilitySwift.FilterXpathWithConvertString(xmlElement: blockHTML, xpath: "/*")
+            let description = NiftyUtility.FilterXpathWithConvertString(xmlElement: blockHTML, xpath: "/*")
             let resultBlock = SearchResultBlock(title: title, url: url, description: description)
             result.append(resultBlock)
         }
         let nextURL:URL?
-        if let nextLinkXpath = self.nextLinkXpath, let nextLinkURL = NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlDocument: doc, xpath: nextLinkXpath, baseURL: baseURL) {
+        if let nextLinkXpath = self.nextLinkXpath, let nextLinkURL = NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlDocument: doc, xpath: nextLinkXpath, baseURL: baseURL) {
             nextURL = nextLinkURL
         }else{
             nextURL = nil
@@ -344,8 +344,8 @@ class SearchResultViewController: FormViewController {
                 }
                 return true
             }
-            NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: NSLocalizedString("NovelSearchViewController_LoadingNextLink_Title", comment: "読込中……"), message: nil) { (dialog) in
-                NiftyUtilitySwift.httpRequest(url: nextURL, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
+            NiftyUtility.EasyDialogNoButton(viewController: self, title: NSLocalizedString("NovelSearchViewController_LoadingNextLink_Title", comment: "読込中……"), message: nil) { (dialog) in
+                NiftyUtility.httpRequest(url: nextURL, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
                     DispatchQueue.main.async {
                         guard let searchResult = self.searchResult else {
                             self.removeLoadingRow()
@@ -523,14 +523,14 @@ class WebSiteSection : Decodable {
                     }
                     return true
                 }
-                NiftyUtilitySwift.EasyDialogNoButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
+                NiftyUtility.EasyDialogNoButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
                     print("query: \(url.absoluteString)")
-                    NiftyUtilitySwift.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
+                    NiftyUtility.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
                         DispatchQueue.main.async {
                             guard let result = self.result else {
                                 dialog.dismiss(animated: false) {
                                     DispatchQueue.main.async {
-                                        NiftyUtilitySwift.EasyDialogOneButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailed_Title", comment: "検索失敗"), message: NSLocalizedString("NovelSearchViewController_SearchField_Message", comment: "検索に失敗しました。\n恐らくは検索に利用されたWebサイト様側の仕様変更(HTML内容の変更)が影響していると思われます。「Web取込」側で取込を行うか、「Web検索」タブ用のデータが更新されるのをお待ち下さい。"), buttonTitle: nil, buttonAction: nil)
+                                        NiftyUtility.EasyDialogOneButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailed_Title", comment: "検索失敗"), message: NSLocalizedString("NovelSearchViewController_SearchField_Message", comment: "検索に失敗しました。\n恐らくは検索に利用されたWebサイト様側の仕様変更(HTML内容の変更)が影響していると思われます。「Web取込」側で取込を行うか、「Web検索」タブ用のデータが更新されるのをお待ち下さい。"), buttonTitle: nil, buttonAction: nil)
                                     }
                                 }
                                 return
@@ -551,7 +551,7 @@ class WebSiteSection : Decodable {
                         DispatchQueue.main.async {
                             dialog.dismiss(animated: false) {
                                 DispatchQueue.main.async {
-                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailedTitle", comment: "検索に失敗しました"), message: nil, buttonTitle: nil, buttonAction: nil)
+                                    NiftyUtility.EasyDialogOneButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailedTitle", comment: "検索に失敗しました"), message: nil, buttonTitle: nil, buttonAction: nil)
                                 }
                             }
                         }
@@ -588,7 +588,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     
     static func SearchInfoCacheClear() {
         lastSearchInfoLoadDate = Date(timeIntervalSince1970: 0)
-        NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: SearchInfoCacheFileName)
+        NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: SearchInfoCacheFileName)
     }
     
     func checkAndReloadSearchInfoIfNeeded() {
@@ -598,7 +598,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     }
     
     func fetchSearchInfoJSON(url: URL, successAction: ((Data) -> Void)?, failedAction:((Error?) -> Void)? ) {
-        NiftyUtilitySwift.FileCachedHttpGet(url: url, cacheFileName: NovelSearchViewController.SearchInfoCacheFileName, expireTimeinterval: searchInfoExpireTimeInterval, canRecoverOldFile: true, successAction: { (data) in
+        NiftyUtility.FileCachedHttpGet(url: url, cacheFileName: NovelSearchViewController.SearchInfoCacheFileName, expireTimeinterval: searchInfoExpireTimeInterval, canRecoverOldFile: true, successAction: { (data) in
             successAction?(data)
         }) { (err) in
             failedAction?(err)
@@ -678,7 +678,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     
     func reloadCells() {
         DispatchQueue.main.async {
-            NiftyUtilitySwift.headlessClientLoadAboutPage()
+            NiftyUtility.headlessClientLoadAboutPage()
             self.form.removeAll()
             self.form +++ Section()
             <<< LabelRow() {

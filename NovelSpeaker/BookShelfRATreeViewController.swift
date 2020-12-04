@@ -82,9 +82,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         self.searchButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .done, target: self, action: #selector(searchButtonClicked))
         self.navigationItem.leftBarButtonItems = [self.searchButton]
 
-        if NiftyUtilitySwift.IsVersionUped() {
+        if NiftyUtility.IsVersionUped() {
             showVersionUpNotice()
-            NiftyUtilitySwift.UpdateCurrentVersionSaveData()
+            NiftyUtility.UpdateCurrentVersionSaveData()
         }
         RealmUtil.RealmBlock { (realm) -> Void in
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let novel = RealmGlobalState.GetLastReadNovel(realm: realm), globalState.isOpenRecentNovelInStartTime {
@@ -93,7 +93,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         reloadAllDataAndScrollToCurrentReadingContent()
         
-        NiftyUtilitySwift.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
+        NiftyUtility.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
             if text.count > 0 {
                 DispatchQueue.main.async {
                     if let item = self.tabBarController?.tabBar.items?[3] {
@@ -543,7 +543,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
 
     func showVersionUpNotice(){
-        NiftyUtilitySwift.EasyDialogBuilder(self)
+        NiftyUtility.EasyDialogBuilder(self)
             .title(title: NSLocalizedString("BookShelfTableViewController_AnnounceNewViersion", comment: "アップデートされました"))
             .textView(content: NSLocalizedString("BookShelfTableViewController_AnnounceNewVersionMessage", comment: "Version 1.1.2\r\n..."), heightMultiplier: 0.63)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { dialog in
@@ -646,7 +646,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             dialog.dismiss(animated: false, completion: nil)
         }
         if let parent = self.parent {
-            NiftyUtilitySwift.EasyDialogBuilder(parent)
+            NiftyUtility.EasyDialogBuilder(parent)
             .title(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"))
             .label(text: NSLocalizedString("BookShelfTableViewController_SearchMessage", comment: "小説名 と 作者名 が対象となります"), textAlignment: .left)
             .textField(tag: 100, placeholder: nil, content: searchText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: UITextField.BorderStyle.none, clearButtonMode: .always, shouldReturnEventHandler: assignNewSearchText)
@@ -690,7 +690,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 guard let novelCount = novel.linkedStorysWith(realm: realm)?.count, novelCount > 0 else {
                     if novel.type == .URL {
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogForButton(
+                            NiftyUtility.EasyDialogForButton(
                                 viewController: self,
                                 title: nil,
                                 message: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseNoStory", comment: "本文が何も読み込まれていないようです。この小説の再ダウンロードを試みますか？"),
@@ -711,7 +711,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 //print("targetChapterNumber: \(targetChapterNumber), novelList.count: \(novelList.count)")
                 if novelCount < targetChapterNumber {
                     DispatchQueue.main.async {
-                        NiftyUtilitySwift.EasyDialogTwoButton(
+                        NiftyUtility.EasyDialogTwoButton(
                             viewController: self,
                             title: nil,
                             message: NSLocalizedString("BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber", comment: "読み上げ位置がダウンロードされていない章を示しています。この小説の追加の章のダウンロードを試みますか？"),
@@ -862,7 +862,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }
         }
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogNoButton(
+            NiftyUtility.EasyDialogNoButton(
                 viewController: self,
                 title: NSLocalizedString("BookShelfRATreeViewController_NovelDeletingTitle", comment: "小説を削除しています……"),
                 message: nil,
@@ -903,7 +903,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }
             RealmUtil.RealmBlock { (realm) -> Void in
                 if RealmGlobalState.GetInstanceWith(realm: realm)?.IsNeedConfirmDeleteBook ?? false {
-                    NiftyUtilitySwift.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("BookShelfTableViewController_WarningForDeleteBookTitle", comment: "本の削除"), message: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookMessage", comment: "本を削除しますか？\n") + title, button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookOKButtonTitle", comment: "削除"), button2Action: {
+                    NiftyUtility.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("BookShelfTableViewController_WarningForDeleteBookTitle", comment: "本の削除"), message: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookMessage", comment: "本を削除しますか？\n") + title, button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("BookShelfTableViewController_WarningDeleteBookOKButtonTitle", comment: "削除"), button2Action: {
                         self.deleteNovel(item: item, novelID: novelID)
                     })
                 }else{
@@ -1049,7 +1049,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     DispatchQueue.main.async {
                         let lock = NSLock()
                         var isDismiss:Bool = false
-                        let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
+                        let dialog = NiftyUtility.EasyDialogBuilder(self)
                             .text(content: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_Message", comment: "iCloud上のデータ同期を待っています。\n同期が完了した場合、自動で再生を開始します。(なお、完了判定は失敗する事があります)"))
                             .addButton(title: NSLocalizedString("BookShelfRATreeViewController_WaitingiCloudSync_DismissButton", comment: "同期を待たずに再生を開始する")) { (dialog) in
                                 lock.lock()

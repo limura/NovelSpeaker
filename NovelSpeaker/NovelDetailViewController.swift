@@ -188,7 +188,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
             }.onCellSelection({ (cellOf, row) in
                 UIPasteboard.general.string = novel.title.trimmingCharacters(in: .whitespacesAndNewlines)
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CopyNovelTitleDone_Message", comment: "小説名をコピーしました"), buttonTitle: nil, buttonAction: nil)
+                    NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CopyNovelTitleDone_Message", comment: "小説名をコピーしました"), buttonTitle: nil, buttonAction: nil)
                 }
             })
             if novel.type == .URL {
@@ -198,7 +198,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 }.onCellSelection({ (cellOf, row) in
                     UIPasteboard.general.string = novel.writer.trimmingCharacters(in: .whitespacesAndNewlines)
                     DispatchQueue.main.async {
-                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CopyNovelWriterNameDone_Message", comment: "著者名をコピーしました"), buttonTitle: nil, buttonAction: nil)
+                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CopyNovelWriterNameDone_Message", comment: "著者名をコピーしました"), buttonTitle: nil, buttonAction: nil)
                     }
                 })
 
@@ -260,7 +260,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 }.onCellSelection({ (cellOf, row) in
                     NovelDownloadQueue.shared.addQueue(novelID: self.novelID)
                     DispatchQueue.main.async {
-                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CheckUpdateDone_Message", comment: "更新チェックを開始しました"), buttonTitle: nil, buttonAction: nil)
+                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CheckUpdateDone_Message", comment: "更新チェックを開始しました"), buttonTitle: nil, buttonAction: nil)
                     }
                 })
             }
@@ -358,19 +358,19 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let storys = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.linkedStorysWith(realm: realm) else {
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_CanNotGetNovelData", comment: "小説本文データの抽出に失敗しました。"))
+                            NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_CanNotGetNovelData", comment: "小説本文データの抽出に失敗しました。"))
                         }
                         return
                     }
                     for story in storys {
-                        let rubyDictionary =  NiftyUtilitySwift.FindRubyNotation(text: story.content)
+                        let rubyDictionary =  NiftyUtility.FindRubyNotation(text: story.content)
                         for (before, after) in rubyDictionary {
                             result[before] = after
                         }
                     }
                 }
                 if result.count <= 0 {
-                    NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_RubyNotFound", comment: "有効なルビ表記を発見できませんでした。"))
+                    NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_RubyNotFound", comment: "有効なルビ表記を発見できませんでした。"))
                     return
                 }
                 var message = ""
@@ -387,7 +387,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                     }
                 })
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                     .title(title: NSLocalizedString("NovelDetailViewController_SpeechModAdded", comment: "この小説用に以下の読み替えを登録しました"))
                     .textView(content: message.trimmingCharacters(in: .whitespacesAndNewlines), heightMultiplier: 0.7)
                     .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in

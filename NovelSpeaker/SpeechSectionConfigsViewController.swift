@@ -263,7 +263,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                 return self.hideCache[name] ?? true
             })
         }.onCellSelection({ (buttonCellOf, button) in
-            NiftyUtilitySwift.EasyDialogTwoButton(
+            NiftyUtility.EasyDialogTwoButton(
                 viewController: self,
                 title: NSLocalizedString("SpeakSettingsViewController_ConifirmRemoveTitle", comment: "この設定を削除しますか？"),
                 message: nil,
@@ -301,7 +301,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_AddNewSettingButtonTitle", comment: "新しい話者変更設定を追加する")
         }.onCellSelection({ (_, button) in
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogTextInput2Button(
+                NiftyUtility.EasyDialogTextInput2Button(
                     viewController: self,
                     title: NSLocalizedString("SpeechSectionConfigsViewController_AddNewSettingDialogTitle", comment: "話者設定の名前を指定してください"),
                     message: nil,
@@ -313,7 +313,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                     rightButtonAction: { (name) in
                         if name.count <= 0 {
                             DispatchQueue.main.async {
-                                NiftyUtilitySwift.EasyDialogOneButton(
+                                NiftyUtility.EasyDialogOneButton(
                                     viewController: self,
                                     title: NSLocalizedString("SpeechSectionConfigsViewController_AddNewSettingDialogPlaceHolder", comment: "空文字列は指定できません"),
                                     message: nil,
@@ -340,7 +340,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
                             self.form.append(self.createSpeechSectionConfigCells(realm: realm, speechSectionConfig: newSpeechSectionConfig))
                         }
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogOneButton(
+                            NiftyUtility.EasyDialogOneButton(
                                 viewController: self,
                                 title: NSLocalizedString("SpeechSectionConfigsViewController_SpeakerSettingAdded", comment: "末尾に話者変更設定を追加しました。\n(恐らくはスクロールする必要があります)"),
                                 message: nil,
@@ -397,7 +397,7 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
             guard let row = self.form.rowBy(tag: "TargetNovelIDLabelRow-\(name)") as? LabelRow else { return }
             if selectedNovelIDSet.count <= 0 {
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogTwoButton(
+                    NiftyUtility.EasyDialogTwoButton(
                         viewController: self,
                         title: nil,
                         message: NSLocalizedString("SpeechSectionConfigsViewController_ConifirmDeleteSettingBecauseNoTargetNovelID", comment: "適用対象の小説が何もない状態になっています。\nこの話者変更設定を削除してもよろしいですか？"),

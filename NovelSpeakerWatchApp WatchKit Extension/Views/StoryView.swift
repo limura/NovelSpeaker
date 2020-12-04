@@ -143,30 +143,30 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     }
     
     func realoadTitleText(title:String) {
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             self.titleText = title
         }
     }
     func storySpeakerStartSpeechEvent(storyID:String) {
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             self.isSpeaking = true
             print("storySPeakerStartSpeechEvent set displayIndex to \(StorySpeaker.shared.currentBlockIndex)")
             self.displayIndex = StorySpeaker.shared.currentBlockIndex
         }
     }
     func storySpeakerStopSpeechEvent(storyID:String) {
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             self.isSpeaking = false
         }
     }
     func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange) {
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             print("storySpeakerUpdateReadingPoint set displayIndex to \(StorySpeaker.shared.currentBlockIndex)")
             self.displayIndex = StorySpeaker.shared.currentBlockIndex
         }
     }
     func storySpeakerStoryChanged(story:Story) {
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             self.displayIndex = 0
             self.combinedBlockArray = StorySpeaker.shared.speechBlockArray
             print("storySpeakerStoryChanged set displayIndex to \(StorySpeaker.shared.currentBlockIndex)")
@@ -175,7 +175,7 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
         }
     }
     func setLoadingIndicator(isVisible:Bool) {
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             self.isLoadingIndicatorVisible = isVisible
         }
     }

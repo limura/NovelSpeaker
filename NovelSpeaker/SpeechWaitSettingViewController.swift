@@ -201,7 +201,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
                 return self.hideCache[targetText] ?? true
             })
         }.onCellSelection({ (buttonCellOf, button) in
-            NiftyUtilitySwift.EasyDialogTwoButton(
+            NiftyUtility.EasyDialogTwoButton(
                 viewController: self,
                 title: NSLocalizedString("SpeakSettingsViewController_ConifirmRemoveTitle", comment: "この設定を削除しますか？"),
                 message: nil,
@@ -243,7 +243,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
             $0.title = NSLocalizedString("SpeechWaitSettingViewController_AddNewSettingButtonTitle", comment: "新しく間の設定を追加する")
         }.onCellSelection({ (_, button) in
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogTextInput2Button(
+                NiftyUtility.EasyDialogTextInput2Button(
                     viewController: self,
                     title: NSLocalizedString("SpeechWaitSettingViewController_CreateNewSettingTitle", comment: "間の設定対象となる文字列を指定してください"),
                     message: nil,
@@ -256,7 +256,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
                         if RealmUtil.RealmBlock(block: { (realm) -> Bool in
                             if RealmSpeechWaitConfig.SearchFromWith(realm: realm, targetText: text) != nil {
                                 DispatchQueue.main.async {
-                                    NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechWaitSettingViewController_IsAlreadyDefined", comment: "既に定義されている文字列が指定されました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                                    NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechWaitSettingViewController_IsAlreadyDefined", comment: "既に定義されている文字列が指定されました。"), message: nil, buttonTitle: nil, buttonAction: nil)
                                 }
                                 return true
                             }
@@ -273,7 +273,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
                             self.form.append(self.createSpeechWaitCells(speechWaitSetting: newSpeechWaitConfig))
                         }
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogOneButton(
+                            NiftyUtility.EasyDialogOneButton(
                                 viewController: self,
                                 title: NSLocalizedString("SpeechWaitSettingViewController_SpeakerSettingAdded", comment: "末尾に間の設定を追加しました。\n(恐らくはスクロールする必要があります)"),
                                 message: nil,

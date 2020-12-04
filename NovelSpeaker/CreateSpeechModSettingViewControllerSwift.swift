@@ -204,7 +204,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
                 return
             }
             if self.targetNovelIDSet.count <= 0 {
-                NiftyUtilitySwift.EasyDialogTwoButton(
+                NiftyUtility.EasyDialogTwoButton(
                     viewController: self,
                     title: nil,
                     message: NSLocalizedString("CreateSpeechModSettingViewControllerSwift_ConifirmDeleteSettingBecauseNoTargetNovelID", comment: "適用対象の小説が何もない状態になっています。\nこの読みの修正を削除してもよろしいですか？"),
@@ -265,7 +265,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
     func validateDataAndAlert(before:String, after:String, isUseRegexp:Bool) -> Bool {
         if !validateBeforeString(text: before, isUseRegexp: isUseRegexp) {
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogOneButton(
+                NiftyUtility.EasyDialogOneButton(
                     viewController: self,
                     title: NSLocalizedString("CreateSpeechModSettingViewControllerSwift_ValidateBeforeFailedTitle", comment: "読み替え前の文字列に問題があります"),
                     message: NSLocalizedString("CreateSpeechModSettingViewControllerSwift_ValidateBeforeFieldMessage", comment: "空文字列であるか、正規表現に不備があるようです。"),
@@ -276,7 +276,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
         }
         if !validateAfterString(text: after) {
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogOneButton(
+                NiftyUtility.EasyDialogOneButton(
                     viewController: self,
                     title: NSLocalizedString("CreateSpeechModSettingViewControllerSwift_ValidateAfterFailedTitle", comment: "読み替え後の文字列に問題があります"),
                     message: NSLocalizedString("CreateSpeechModSettingViewControllerSwift_ValidateAfterFieldMessage", comment: "空文字列は設定できません。\n読み替え後に発話させないようにするには空白に読み替えさせる必要があります。"),

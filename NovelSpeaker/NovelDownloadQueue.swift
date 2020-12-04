@@ -11,8 +11,8 @@ import RealmSwift
 import UserNotifications
 #if !os(watchOS)
 import FTLinearActivityIndicator
-#endif
 import BackgroundTasks
+#endif
 
 fileprivate class QueueItem {
     let novelID:String
@@ -186,7 +186,7 @@ class StoryBulkWritePool {
                         "StoryID": story.storyID,
                         "novel.lastChapterNumber": "\(lastChapterNumber)",
                         "既に writePool に保存されている Story の数": "なし",
-                        "stackTrace": NiftyUtilitySwift.GetStackTrace(),
+                        "stackTrace": NiftyUtility.GetStackTrace(),
                     ], isForDebug: true)
                     if story.chapterNumber == lastChapterNumber {
                         return true
@@ -202,7 +202,7 @@ class StoryBulkWritePool {
                 "StoryID": story.storyID,
                 "novel.lastChapterNumber": "\(lastChapterNumber)",
                 "既に writePool に保存されている Story の数": "\(storyArray.count)",
-                "stackTrace": NiftyUtilitySwift.GetStackTrace(),
+                "stackTrace": NiftyUtility.GetStackTrace(),
             ], isForDebug: true)
             if story.chapterNumber == lastChapterNumber {
                 AppInformationLogger.AddLog(message: "リカバリできそうなのでこの Story は無視します。", appendix: ["StoryID": story.storyID], isForDebug: true)
@@ -596,6 +596,7 @@ class NovelDownloadQueue : NSObject {
         return self.queueHolder.GetCurrentQueuedNovelIDArray()
     }
 
+    #if !os(watchOS)
     // Background Process で 30秒の壁を破るの話
     // https://grandbig.github.io/blog/2019/09/22/backgroundtasks/
     let BackgroundProcessIdentifier = "com.limuraproducts.novelspeaker.backgroundprocessingtask"
@@ -641,6 +642,7 @@ class NovelDownloadQueue : NSObject {
             }
         }
     }
+    #endif
 
     @objc func StartBackgroundFetchIfNeeded() {
         #if !os(watchOS)
@@ -769,7 +771,7 @@ class NovelDownloadQueue : NSObject {
                 let displayDownloadCount = self.GetCurrentDownloadCount() + novelIDArray.count
                 self.SetCurrentDownloadCount(count: displayDownloadCount)
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.InvokeNotificationNow(title: downloadSuccessTitle, message: novelTitleArray.joined(separator: "\n"), badgeNumber: displayDownloadCount)
+                    NiftyUtility.InvokeNotificationNow(title: downloadSuccessTitle, message: novelTitleArray.joined(separator: "\n"), badgeNumber: displayDownloadCount)
                 }
                 completion?(novelIDArray.count)
             }

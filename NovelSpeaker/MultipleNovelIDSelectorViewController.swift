@@ -129,7 +129,7 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
     }
 
     @objc func filterButtonClicked(sender: UIBarButtonItem) {
-        NiftyUtilitySwift.EasyDialogTextInput(
+        NiftyUtility.EasyDialogTextInput(
             viewController: self,
             title: NSLocalizedString("SpeechModSettingsTableView_SearchTitle", comment: "検索"),
             message: nil,

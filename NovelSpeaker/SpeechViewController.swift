@@ -440,7 +440,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         let startOffset = self.textView.offset(from: self.textView.beginningOfDocument, to: range.start)
         let endOffset = self.textView.offset(from: self.textView.beginningOfDocument, to: range.end)
         let speechText = storySpeaker.GenerateSpeechTextFrom(displayTextRange: NSMakeRange(startOffset, endOffset - startOffset))
-        NiftyUtilitySwift.EasyDialogLongMessageDialog(viewController: self, message: speechText)
+        NiftyUtility.EasyDialogLongMessageDialog(viewController: self, message: speechText)
     }
 
     func textViewScrollTo(readLocation:Int) {
@@ -588,7 +588,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.StopSpeech(realm: realm)
             func searchFunc(searchString:String?){
-                NiftyUtilitySwift.EasyDialogNoButton(
+                NiftyUtility.EasyDialogNoButton(
                     viewController: self,
                     title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
                     message: nil) { (searchingDialog) in
@@ -598,7 +598,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                             if searchString.count <= 0 { return true }
                             return story.content.contains(searchString)
                         }) else {
-                            NiftyUtilitySwift.EasyDialogOneButton(
+                            NiftyUtility.EasyDialogOneButton(
                                 viewController: self,
                                 title: nil,
                                 message: NSLocalizedString("SpeechViewController_CanNotGetStorys", comment: "小説情報を参照できませんでした。"),
@@ -623,7 +623,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
             }
             
-            NiftyUtilitySwift.EasyDialogTextInput2Button(
+            NiftyUtility.EasyDialogTextInput2Button(
                 viewController: self,
                 title: NSLocalizedString("SpeechViewController_SearchDialogTitle", comment: "検索"),
                 message: NSLocalizedString("SpeechViewController_SearchDialogMessage", comment: "本文中から文字列を検索します"),
@@ -643,7 +643,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     @objc func shareButtonClicked(_ sender: UIBarButtonItem) {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID)) else {
-                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechViewController_UnknownErrorForShare", comment: "不明なエラーでシェアできませんでした。"), message: nil, buttonTitle: NSLocalizedString("OK_button", comment: "OK"), buttonAction: nil)
+                NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechViewController_UnknownErrorForShare", comment: "不明なエラーでシェアできませんでした。"), message: nil, buttonTitle: NSLocalizedString("OK_button", comment: "OK"), buttonAction: nil)
                 return
             }
             let urlString:String
@@ -653,7 +653,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 urlString = ""
             }
             let message = String(format: NSLocalizedString("SpeechViewController_TweetMessage", comment: "%@ %@ #ことせかい %@ %@"), novel.title, novel.writer, urlString, "https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185")
-            NiftyUtilitySwift.Share(message: message, viewController: self, barButton: self.shareButtonItem)
+            NiftyUtility.Share(message: message, viewController: self, barButton: self.shareButtonItem)
         }
     }
     
@@ -697,7 +697,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     func checkDummySpeechFinished() {
         if self.storySpeaker.isDummySpeechAlive() {
             DispatchQueue.main.async {
-                let dialog = NiftyUtilitySwift.EasyDialogBuilder(self).text(content: NSLocalizedString("SpeechViewController_WaitingSpeakerReady", comment: "話者の準備が整うのを待っています。"))
+                let dialog = NiftyUtility.EasyDialogBuilder(self).text(content: NSLocalizedString("SpeechViewController_WaitingSpeakerReady", comment: "話者の準備が整うのを待っています。"))
                     .build()
                 dialog.show()
                 func waitDummySpeechFinish() {

@@ -137,7 +137,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }
             return
         }
-        NiftyUtilitySwift.CheckNewImportantImformation { (text) in
+        NiftyUtility.CheckNewImportantImformation { (text) in
             DispatchQueue.main.async {
                 self.tabBarController?.tabBar.items?[3].badgeValue = "!"
             }
@@ -161,7 +161,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.tag = "SettingsTableViewController_Information_TAG"
                 row.title = NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ")
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
+                    NiftyUtility.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
                         DispatchQueue.main.async {
                             if text.count > 0 {
                                 row.value = "❗"
@@ -177,25 +177,25 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
                 row.cell.accessoryType = .disclosureIndicator
             }.onCellSelection({ (butonCellof, buttonRow) in
-                NiftyUtilitySwift.FetchNewImportantImformation(fetched: { (text, holeText) in
+                NiftyUtility.FetchNewImportantImformation(fetched: { (text, holeText) in
                     var informationText = NSLocalizedString("SettingsTableViewController_Information_NoImportantInformationAlived", comment: "今現在、重要なお知らせはありません。")
                     if text.count > 0 {
                         informationText = text
                     }
                     DispatchQueue.main.async {
-                        NiftyUtilitySwift.SaveCheckedImportantInformation(text: text)
+                        NiftyUtility.SaveCheckedImportantInformation(text: text)
                         self.updateTabBadge()
                         if let row = self.form.rowBy(tag: "SettingsTableViewController_Information_TAG") as? LabelRow {
                             row.value = ""
                             row.updateCell()
                         }
-                        NiftyUtilitySwift.EasyDialogBuilder(self)
+                        NiftyUtility.EasyDialogBuilder(self)
                         .title(title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"))
                         .textView(content: informationText, heightMultiplier: 0.6)
                             .addButton(title: NSLocalizedString("SettingsTableViewController_Information_ShowOutdatedInformation", comment: "過去のお知らせを確認する"), callback: { (dialog) in
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false, completion: {
-                                        NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, title: NSLocalizedString("SettingsTableViewController_Information_PastInformationTitle", comment: "過去のお知らせ"), message: holeText.replacingOccurrences(of: "#", with: "\n"), completion: nil)
+                                        NiftyUtility.EasyDialogMessageDialog(viewController: self, title: NSLocalizedString("SettingsTableViewController_Information_PastInformationTitle", comment: "過去のお知らせ"), message: holeText.replacingOccurrences(of: "#", with: "\n"), completion: nil)
                                     })
                                 }
                             })
@@ -208,7 +208,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }, err: {
                     DispatchQueue.main.async {
-                        NiftyUtilitySwift.EasyDialogOneButton(
+                        NiftyUtility.EasyDialogOneButton(
                             viewController: self,
                             title: NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ"),
                             message: NSLocalizedString("SettingsTableViewController_Information_CanNotGetInformation", comment: "お知らせの読み込みに失敗しました。"),
@@ -229,7 +229,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 DispatchQueue.main.async {
                     let logText = AppInformationLogger.LoadLogString(isIncludeDebugLog: false)
                     AppInformationLogger.CheckLogShowed()
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                     .textView(content: logText, heightMultiplier: 0.6)
                         .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_CopyLogButtonTitle", comment: "このログをコピーする")) { (dialog) in
                             let pasteBoard = UIPasteboard.general
@@ -338,7 +338,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ row in
                 guard let judge = row.value else { return }
                 if judge {
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                         .title(title: NSLocalizedString("SettingTableViewController_ConfirmEnableBackgroundFetch_title", comment:"確認"))
                         .label(text: NSLocalizedString("SettingtableViewController_ConfirmEnableBackgroundFetch", comment:"この設定を有効にすると、ことせかい を使用していない時等に小説の更新を確認するようになるため、ネットワーク通信が発生するようになります。よろしいですか？"))
                         .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
@@ -349,7 +349,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             }
                         })
                         .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
-                            NiftyUtilitySwift.RegisterUserNotification()
+                            NiftyUtility.RegisterUserNotification()
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
@@ -525,7 +525,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         DispatchQueue.main.async {
                             row.value = typeString
                             row.updateCell()
-                            NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning", comment: "フォルダが一つも作成されていないようです。フォルダを作成されていないとこの設定は利用できません。\nフォルダを作成するには、本棚タブで小説を開いて右上にある「詳細」ボタンを押した後に出てくる小説の詳細画面から「フォルダへ分類」を選択してフォルダを追加してください。"))
+                            NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning", comment: "フォルダが一つも作成されていないようです。フォルダを作成されていないとこの設定は利用できません。\nフォルダを作成するには、本棚タブで小説を開いて右上にある「詳細」ボタンを押した後に出てくる小説の詳細画面から「フォルダへ分類」を選択してフォルダを追加してください。"))
                         }
                         return
                     }
@@ -545,7 +545,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 let judge = row.value
                 if judge! {
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                         .title(title: NSLocalizedString("SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title", comment:"確認"))
                         .textView(content: NSLocalizedString("SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12", comment:"この設定を有効にすると、読み上げ中の読み上げ位置表示がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ)に読み替えるように設定することで回避するようになります。\nこの機能を実装した時点では、\"α\"(アルファ)は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われます。\n以上の事を理解した上でこの設定を有効にしますか？"), heightMultiplier: 0.6)
                         .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
@@ -731,7 +731,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogTwoButton(
+                    NiftyUtility.EasyDialogTwoButton(
                         viewController: self,
                         title: NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmTitle", comment: "確認"),
                         message: NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings_ConifirmMessage", comment: "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除します。よろしいですか？"),
@@ -741,7 +741,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         button2Action: {
                             NovelSpeakerUtility.RemoveAllDefaultSpeechModSettings()
                             DispatchQueue.main.async {
-                                NiftyUtilitySwift.EasyDialogOneButton(
+                                NiftyUtility.EasyDialogOneButton(
                                     viewController: self,
                                     title: nil,
                                     message: NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings_DeletedMessage", comment: "読みの修正に登録されているもののうち、標準の読みの修正と同じものを削除しました。"),
@@ -796,9 +796,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCellof, buttonRow) in
-                NiftyUtilitySwift.EasyDialogBuilder(self)
+                NiftyUtility.EasyDialogBuilder(self)
                 .label(text: NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について"))
-                .label(text: "Version: " + NiftyUtilitySwift.GetAppVersionString())
+                .label(text: "Version: " + NiftyUtility.GetAppVersionString())
                     .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                         dialog.dismiss(animated: false, completion: nil)
                     })
@@ -813,7 +813,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     do {
                         let license = try String(contentsOfFile: path)
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogBuilder(self)
+                            NiftyUtility.EasyDialogBuilder(self)
                                 .textView(content: license, heightMultiplier: 0.7)
                                 .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                     NovelSpeakerUtility.SetLicenseReaded(isRead: true)
@@ -829,7 +829,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                         .textView(content: NSLocalizedString("SettingTableViewController_LISENSE_file_can_not_read", comment: "LICENSE.txt を読み込めませんでした。ことせかい の GitHub 側の LICENSE.txt を参照してください。"), heightMultiplier: 0.7)
                         .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                             DispatchQueue.main.async {
@@ -847,7 +847,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 if let privacyPolicyUrl = NovelSpeakerUtility.privacyPolicyURL {
                     func privacyPolycyLoadFailed(){
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogBuilder(self)
+                            NiftyUtility.EasyDialogBuilder(self)
                             .textView(content: NSLocalizedString("SettingTableViewController_PrivacyPolicy_can_not_load", comment: "最新のプライバシーポリシーを読み込めませんでした。\nSafariでの表示を試みます。"), heightMultiplier: 0.6)
                             .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                 DispatchQueue.main.async {
@@ -858,10 +858,10 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             .build().show()
                         }
                     }
-                    NiftyUtilitySwift.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data, encoding) in
+                    NiftyUtility.cashedHTTPGet(url: privacyPolicyUrl, delay: 60*60, successAction: { (data, encoding) in
                         if let currentPrivacyPolicy = String(data: data, encoding: encoding ?? .utf8) {
                             DispatchQueue.main.async {
-                                NiftyUtilitySwift.EasyDialogBuilder(self)
+                                NiftyUtility.EasyDialogBuilder(self)
                                 .textView(content: currentPrivacyPolicy, heightMultiplier: 0.6)
                                 .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                                     DispatchQueue.main.async {
@@ -892,7 +892,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onCellSelection({ (cellOf, row) in
                 StoryHtmlDecoder.shared.ClearSiteInfo()
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogOneButton(
+                    NiftyUtility.EasyDialogOneButton(
                         viewController: self,
                         title: nil,
                         message: NSLocalizedString("SettingsViewController_ClearSiteInfoCache_done", comment: "保存されている SiteInfo 情報を削除しました。"),
@@ -915,7 +915,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onCellSelection({ (cellOf, row) in
                 NovelSearchViewController.SearchInfoCacheClear()
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogOneButton(
+                    NiftyUtility.EasyDialogOneButton(
                         viewController: self,
                         title: nil,
                         message: NSLocalizedString("SettingsViewController_ClearWebSearchSiteInfoCache_done", comment: "Web検索タブに戻ると読み込み直すように設定しました。"),
@@ -934,7 +934,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onCellSelection({ (butonCellof, buttonRow) in
                 DispatchQueue.main.async {
                     let logText = AppInformationLogger.LoadLogString(isIncludeDebugLog: true)
-                    NiftyUtilitySwift.EasyDialogBuilder(self)
+                    NiftyUtility.EasyDialogBuilder(self)
                     .textView(content: logText, heightMultiplier: 0.6)
                         .addButton(title: NSLocalizedString("SettingsTableViewController_AppInformation_CopyLogButtonTitle", comment: "このログをコピーする")) { (dialog) in
                             let pasteBoard = UIPasteboard.general
@@ -956,18 +956,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onCellSelection({ (cellOf, row) in
                 if RealmUtil.IsUseCloudRealm() == false {
                     DispatchQueue.main.async {
-                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_iCloudNotEnabled_Message", comment: "iCloudを利用していません。"), buttonTitle: nil, buttonAction: nil)
+                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_iCloudNotEnabled_Message", comment: "iCloudを利用していません。"), buttonTitle: nil, buttonAction: nil)
                     }
                     return
                 }
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus", comment: "iCloud上のデータを全て読み込み直す"), message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message", comment: "iCloud上のデータを全て読み込み直しますか？\nこの操作を行うとiCloud上に保存されているデータを全て読み込み直す事になりますので、iCloud上に保存されているデータの量が多い場合はかなりの時間がかかる事になります。"), button1Title: nil, button1Action: nil, button2Title: nil) {
+                    NiftyUtility.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus", comment: "iCloud上のデータを全て読み込み直す"), message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message", comment: "iCloud上のデータを全て読み込み直しますか？\nこの操作を行うとiCloud上に保存されているデータを全て読み込み直す事になりますので、iCloud上に保存されているデータの量が多い場合はかなりの時間がかかる事になります。"), button1Title: nil, button1Action: nil, button2Title: nil) {
                         RealmObserverHandler.shared.AnnounceStopObservers()
                         RealmUtil.stopSyncEngine()
                         RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
                         RealmObserverHandler.shared.AnnounceRestartObservers()
                         try! RealmUtil.EnableSyncEngine()
-                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message", comment: "iCloudのデータを読み込み直しはじめました。"), buttonTitle: nil, buttonAction: nil)
+                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message", comment: "iCloudのデータを読み込み直しはじめました。"), buttonTitle: nil, buttonAction: nil)
                     }
                 }
             })
@@ -977,7 +977,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onCellSelection({ (cellOf, row) in
                 if RealmUtil.IsUseCloudRealm() == false {
                     DispatchQueue.main.async {
-                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_iCloudNotEnabled_Message", comment: "iCloudを利用していません。"), buttonTitle: nil, buttonAction: nil)
+                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_iCloudNotEnabled_Message", comment: "iCloudを利用していません。"), buttonTitle: nil, buttonAction: nil)
                     }
                     return
                 }
@@ -993,7 +993,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 try! RealmUtil.EnableSyncEngine()
                 RealmUtil.CloudPush()
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_Message", comment: "全てのデータをiCloudにアップロードし始めました。データ量が多ければ多いほどアップロード完了まで時間がかかります。"), buttonTitle: nil, buttonAction: nil)
+                    NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_Message", comment: "全てのデータをiCloudにアップロードし始めました。データ量が多ければ多いほどアップロード完了まで時間がかかります。"), buttonTitle: nil, buttonAction: nil)
                 }
             })
 
@@ -1003,7 +1003,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPullProcessingDialog", comment: "iCloud からデータを読み込み中です。"), completion: { (dialog) in
+                    NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPullProcessingDialog", comment: "iCloud からデータを読み込み中です。"), completion: { (dialog) in
                         RealmUtil.stopSyncEngine()
                         RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
                         try! RealmUtil.EnableSyncEngine()
@@ -1022,7 +1022,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPullProcessingDialog", comment: "iCloud からデータを読み込み中です。"), completion: { (dialog) in
+                    NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPullProcessingDialog", comment: "iCloud からデータを読み込み中です。"), completion: { (dialog) in
                         DispatchQueue.main.async {
                             try! RealmUtil.EnableSyncEngine()
                             RealmUtil.CloudPull()
@@ -1036,7 +1036,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPushProcessingDialog", comment: "iCloud 側へデータを書き込み中です。"), completion: { (dialog) in
+                    NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_CloudPushProcessingDialog", comment: "iCloud 側へデータを書き込み中です。"), completion: { (dialog) in
                         DispatchQueue.main.async {
                             try! RealmUtil.EnableSyncEngine()
                             RealmUtil.CloudPush()
@@ -1053,7 +1053,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onCellSelection({ (cellOf, row) in
                 CoreDataToRealmTool.UnregisterConvertFromCoreDataFinished()
                 DispatchQueue.main.async {
-                    NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: "次回起動時に CoreData(旧データベース) の情報に書き戻すように設定しました。", buttonTitle: nil, buttonAction: nil)
+                    NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: "次回起動時に CoreData(旧データベース) の情報に書き戻すように設定しました。", buttonTitle: nil, buttonAction: nil)
                 }
             })
             */
@@ -1066,12 +1066,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< ButtonRow() {
                 $0.title = "dump(URLSession.shared)"
             }.onCellSelection({ (cellOf, row) in
-                NiftyUtilitySwift.getAllCookies { (cookieArray) in
+                NiftyUtility.getAllCookies { (cookieArray) in
                     guard let cookieArray = cookieArray else {
-                        print("NiftyUtilitySwift.getAllCookies return nil")
+                        print("NiftyUtility.getAllCookies return nil")
                         return
                     }
-                    NiftyUtilitySwift.DumpHTTPCookieArray(cookieArray: cookieArray)
+                    NiftyUtility.DumpHTTPCookieArray(cookieArray: cookieArray)
                 }
             })
             <<< ButtonRow() {
@@ -1083,7 +1083,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         print("headlessClient.getAllCookies return nil")
                         return
                     }
-                    NiftyUtilitySwift.DumpHTTPCookieArray(cookieArray: cookieArray)
+                    NiftyUtility.DumpHTTPCookieArray(cookieArray: cookieArray)
                 }
             })
             <<< ButtonRow() {
@@ -1094,7 +1094,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         print("dump(Realm) failed. cookieArray is nil")
                         return
                     }
-                    NiftyUtilitySwift.DumpHTTPCookieArray(cookieArray: cookieArray)
+                    NiftyUtility.DumpHTTPCookieArray(cookieArray: cookieArray)
                 }
             })
             <<< ButtonRow() {
@@ -1128,7 +1128,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         print("load to URLSession.shared error. can not get cookieStorage for URLSession.shared")
                         return
                     }
-                    NiftyUtilitySwift.AssignCookieArrayToCookieStorage(cookieArray: cookieArray, cookieStorage: cookieStorage)
+                    NiftyUtility.AssignCookieArrayToCookieStorage(cookieArray: cookieArray, cookieStorage: cookieStorage)
                 }
             })
             <<< ButtonRow() {
@@ -1152,7 +1152,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     print("cookieStorage is nil")
                     return
                 }
-                NiftyUtilitySwift.RemoveAllCookieInCookieStorage(cookieStorage: cookieStorage)
+                NiftyUtility.RemoveAllCookieInCookieStorage(cookieStorage: cookieStorage)
                 print("RemoveAllCookieInCookieStorage executed.")
             })
             <<< ButtonRow() {
@@ -1187,7 +1187,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     func overrideiCloudToLocal() {
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogNoButton(
+            NiftyUtility.EasyDialogNoButton(
                 viewController: self, title: NSLocalizedString("SettingsViewController_CopyingCloudToLocal", comment: "iCloud側のデータを端末側のデータへ変換中"), message: "-", completion: { (dialog) in
                     DispatchQueue.global(qos: .userInitiated).async {
                         autoreleasepool {
@@ -1195,7 +1195,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false, completion: {
                                         DispatchQueue.main.async {
-                                            NiftyUtilitySwift.EasyDialogOneButton(
+                                            NiftyUtility.EasyDialogOneButton(
                                                 viewController: self,
                                                 title: nil,
                                                 message: NSLocalizedString("SettingsViewController_CopyCloudToLocalFailed", comment: "iCloudのデータの取得に失敗しました。") + "(1)",
@@ -1217,7 +1217,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             }catch {
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false, completion: {
-                                        NiftyUtilitySwift.EasyDialogOneButton(
+                                        NiftyUtility.EasyDialogOneButton(
                                             viewController: self,
                                             title: nil,
                                             message: NSLocalizedString("SettingsViewController_CopyCloudToLocalFailed", comment: "iCloudのデータの取得に失敗しました。") + "(2)",
@@ -1233,7 +1233,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: false) {
                                     RealmUtil.ChangeToLocalRealm()
-                                    NiftyUtilitySwift.EasyDialogOneButton(
+                                    NiftyUtility.EasyDialogOneButton(
                                         viewController: self,
                                         title: nil,
                                         message: NSLocalizedString("SettingsViewController_iCloudDisable_done", comment: "iCloud同期を停止しました"),
@@ -1251,7 +1251,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     func removeICloudDataAndUploadLocalData() {
         // TODO RealmUtil.ClearCloudRealmModels() は iCloud 同期が終わっていない状態で呼び出すと消し損ないが発生するのであまりよろしくありません。
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogNoButton(viewController: self, title: NSLocalizedString("SettingsViewController_RemoveICloudData", comment: "iCloud側に残っているデータを消去しています"), message: nil) { (dialog) in
+            NiftyUtility.EasyDialogNoButton(viewController: self, title: NSLocalizedString("SettingsViewController_RemoveICloudData", comment: "iCloud側に残っているデータを消去しています"), message: nil) { (dialog) in
                 RealmUtil.ClearCloudRealmModels()
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false) {
@@ -1264,7 +1264,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     func overrideLocalToiCloud() {
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogNoButton(
+            NiftyUtility.EasyDialogNoButton(
                 viewController: self, title: NSLocalizedString("SettingsViewController_CopyingLocalToCloud", comment: "現在のデータをiCloud側に登録中"), message: "-", completion: { (dialog) in
                     DispatchQueue.global(qos: .userInitiated).async {
                         autoreleasepool {
@@ -1274,7 +1274,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false, completion: {
                                         DispatchQueue.main.async {
-                                            NiftyUtilitySwift.EasyDialogOneButton(
+                                            NiftyUtility.EasyDialogOneButton(
                                                 viewController: self,
                                                 title: nil,
                                                 message: NSLocalizedString("SettingsViewController_CopyLocalToCloudFailed", comment: "現在のデータのiCloud側への登録に失敗しました。") + "(1)",
@@ -1295,7 +1295,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             }catch {
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false, completion: {
-                                        NiftyUtilitySwift.EasyDialogOneButton(
+                                        NiftyUtility.EasyDialogOneButton(
                                             viewController: self,
                                             title: nil,
                                             message: NSLocalizedString("SettingsViewController_CopyLocalToCloudFailed", comment: "現在のデータのiCloud側への登録に失敗しました。") + "(2)",
@@ -1311,7 +1311,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             DispatchQueue.main.async {
                                 dialog.dismiss(animated: false) {
                                     RealmUtil.ChangeToCloudRealm()
-                                    NiftyUtilitySwift.EasyDialogLongMessageDialog(
+                                    NiftyUtility.EasyDialogLongMessageDialog(
                                         viewController: self,
                                         message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました。\n同期は開始されましたが、端末側に保存されているデータをiCloud側へ登録する作業は続いています。\n端末側に保存されているデータが多い場合には、iCloud側への転送が終わるまでかなりの時間がかかる可能性があります。\nなお、残念ながらiCloud側への転送が終わったかどうかを知るすべが(開発者の知る限りでは)ありません。Appleの解説によると24時間の間はアプリを再度立ち上げれば転送を継続してくれるそうですが、機内モードにすると全てを諦められてしまうなどといった問題があるという話をWeb上でみかけたりしましたので、あまり安心はできないかもしれません。\n一応未送信や未受信のデータがある場合には通信中のインジケータを回すように努力はしますが、このインジケータが消えた事で送信が終了したというわけではないかもしれない、という事を理解しておいてください。"))
                                 }
@@ -1325,13 +1325,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     func ChooseUseiCloudDataOrOverrideLocalData() {
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
             .label(text: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData", comment: "iCloud側に利用可能なデータが存在するようです。iCloud側のデータをそのまま利用するか、現在のデータでiCloud上のデータを上書きするかを選択してください。"))
             .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud", comment: "iCloudのデータをそのまま利用する"), callback: { (dialog) in
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false) {
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogTwoButton(
+                            NiftyUtility.EasyDialogTwoButton(
                                 viewController: self,
                                 title: nil,
                                 message: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmRemoveLocalData", comment: "iCloud上のデータを利用する事にします。現在のデータは破棄されます。この操作は元に戻せません。よろしいですか？"),
@@ -1348,8 +1348,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                 button2Action: {
                                     DispatchQueue.main.async {
                                         RealmUtil.ChangeToCloudRealm()
-                                        NiftyUtilitySwift.StartiCloudDataVersionChecker()
-                                        NiftyUtilitySwift.EasyDialogLongMessageDialog(
+                                        NiftyUtility.StartiCloudDataVersionChecker()
+                                        NiftyUtility.EasyDialogLongMessageDialog(
                                             viewController: self,
                                             message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました"))
                                     }
@@ -1400,7 +1400,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     // とユーザに尋ねる
     func ChooseInvalidiCloudDataProcess() {
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
             .textView(content: NSLocalizedString("SettingsViewController_ChooseInvalidiCloudData_Message", comment: "iCloud 側にデータが存在する事は確認したのですが、ことせかい で利用するために必須のデータを取得できませんでした。\n\nネットワークの状態が悪い場合や iCloud側 に保存されているデータの量が多かった場合、以前 iCloud同期 を行った端末のデータが iCloud側 へ転送しきれていなかった場合といったような色々な場合が考えられますが、とにかくこのままでは正常に利用する事はできそうにありません。\n\nなお、この端末にあるデータを iCloud側 に上書き保存する形で iCloud同期 を ON にする事もできます。iCloud側 に上書き保存する場合、iCloud側とこの端末側の両方に存在する設定や小説はこの端末側の値に、iCloud側にしか存在しない設定や小説はiCloud側の物が残るという形になります。\n\n上書き保存する形でiCloud同期を開始しますか？"), heightMultiplier: 0.65)
             .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal", comment: "現在のデータでiCloud上のデータを上書きする"), callback: { (dialog) in
                 DispatchQueue.main.async {
@@ -1426,7 +1426,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         DispatchQueue.main.async {
             // 全てのダウンロードを止めてから作業を行います。
             NovelDownloadQueue.shared.ClearAllDownloadQueue()
-            NiftyUtilitySwift.EasyDialogNoButton(
+            NiftyUtility.EasyDialogNoButton(
                 viewController: self,
                 title: NSLocalizedString("SettingsViewController_IsUseiCloud_CheckiCloudData_pulling_Title", comment: "iCloud側のデータを確認しています"),
                 message: NSLocalizedString("SettingsViewController_IsUseiCloud_CheckiCloudData_pulling", comment: "iCloud側のデータを確認しています"),
@@ -1440,7 +1440,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }catch{
                         DispatchQueue.main.async {
                             dialog.dismiss(animated: false, completion: {
-                                NiftyUtilitySwift.EasyDialogOneButton(
+                                NiftyUtility.EasyDialogOneButton(
                                     viewController: self,
                                     title: nil,
                                     message: NSLocalizedString("SettingsViewController_IsUseiCloud_FailedSyncEngineStart", comment: "iCloud への接続に失敗しました。"),
@@ -1463,7 +1463,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                     row.value = false
                                     row.updateCell()
                                     RealmUtil.ChangeToLocalRealm()
-                                    NiftyUtilitySwift
+                                    NiftyUtility
                                         .EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Title", comment: "アプリのバージョンアップが必要です"), message: NSLocalizedString("SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Message", comment: "iCloud側に保存されているデータは新しいバージョンで作成された物でした。iCloud同期を行うにはアプリのバージョンアップを行う必要があります。"), buttonTitle: nil, buttonAction: nil)
                                     return true
                                 }
@@ -1497,7 +1497,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         row.value = false
                                         row.updateCell()
                                         RealmUtil.ChangeToLocalRealm()
-                                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_FailedCheck_NetworkError", comment: "iCloud側のデータ確認に失敗しました。ネットワークに接続されていないようです。機内モードになっていたり電波の届かない場所に居るなどの問題があるかもしれません。iCloud同期の初回チェックは安定したインターネット接続ができる環境で行ってください。"), buttonTitle: nil, buttonAction: nil)
+                                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_FailedCheck_NetworkError", comment: "iCloud側のデータ確認に失敗しました。ネットワークに接続されていないようです。機内モードになっていたり電波の届かない場所に居るなどの問題があるかもしれません。iCloud同期の初回チェックは安定したインターネット接続ができる環境で行ってください。"), buttonTitle: nil, buttonAction: nil)
                                     }
                                 }
                             case .validDataNotAlive:
@@ -1513,7 +1513,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                         row.value = false
                                         row.updateCell()
                                         RealmUtil.ChangeToLocalRealm()
-                                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_FailedCheckIcloudDataIsValid", comment: "iCloud側のデータ確認に失敗しました。"), buttonTitle: nil, buttonAction: nil)
+                                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_FailedCheckIcloudDataIsValid", comment: "iCloud側のデータ確認に失敗しました。"), buttonTitle: nil, buttonAction: nil)
                                     }
                                 }
                             }
@@ -1526,7 +1526,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     func ConifirmiCloudEnable() {
         if RealmUtil.CheckIsCloudRealmCreated() {
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Title", comment: "アプリの再起動が必要です"), message: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Message", comment: "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。"), buttonTitle: nil, buttonAction: {
+                NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Title", comment: "アプリの再起動が必要です"), message: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Message", comment: "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。"), buttonTitle: nil, buttonAction: {
                     DispatchQueue.main.async {
                         guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                         row.value = false
@@ -1539,7 +1539,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         
         CheckiCloudAccountStatusIsValid(okHandler: {
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogLongMessageTwoButton(
+                NiftyUtility.EasyDialogLongMessageTwoButton(
                     viewController: self,
                     title: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmTitle", comment: "iCloud 同期を有効にしますか？"),
                     message: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmMessage", comment: "iCloud 同期を有効にすると、ことせかい 内のデータを書き換えるたびに iCloud による通信が試みるようになります。例えば小説を開いたり、読み上げを行ったりしただけでもデータが書き換わりますので、頻繁に通信が発生する事になります。"),
@@ -1562,7 +1562,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 
                 row.value = false
                 row.updateCell()
-                NiftyUtilitySwift.EasyDialogOneButton(
+                NiftyUtility.EasyDialogOneButton(
                     viewController: self,
                     title: NSLocalizedString("SettingsViewController_InvalidiCloudStatus", comment: "iCloud の状態に問題がありました。"),
                     message: errorDescription,
@@ -1596,7 +1596,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     func ConifirmiCloudDisable() {
         if RealmUtil.CheckIsLocalRealmCreated() {
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Title", comment: "アプリの再起動が必要です"), message: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Message", comment: "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。"), buttonTitle: nil, buttonAction: {
+                NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Title", comment: "アプリの再起動が必要です"), message: NSLocalizedString("SettingsViewController_IsNeedRestartApp_Message", comment: "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。"), buttonTitle: nil, buttonAction: {
                     DispatchQueue.main.async {
                         guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                         row.value = true
@@ -1608,7 +1608,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
         CheckiCloudAccountStatusIsValid(okHandler: {
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogTwoButton(
+                NiftyUtility.EasyDialogTwoButton(
                     viewController: self,
                     title: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmTitle_disable", comment: "iCloud 同期を無効にしますか？"),
                     message: nil,
@@ -1630,7 +1630,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
                 row.value = true
                 row.updateCell()
-                NiftyUtilitySwift.EasyDialogOneButton(
+                NiftyUtility.EasyDialogOneButton(
                     viewController: self,
                     title: NSLocalizedString("SettingsViewController_InvalidiCloudStatus", comment: "iCloud の状態に問題がありました。"),
                     message: errorDescription,
@@ -1656,7 +1656,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             NovelSpeakerUtility.OverrideDefaultSpeechModSettingsWith(realm: realm)
         }
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
                 .label(text: NSLocalizedString("SettingTableViewController_AnAddressAddedAStandardParaphrasingDictionary", comment: "標準の読み替え辞書を上書き追加しました。"))
                 .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: {dialog in
                     DispatchQueue.main.async {
@@ -1669,7 +1669,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     /// 標準で用意された読み上げ辞書で上書きして良いか確認した上で、上書き追加します。
     func ConfirmAddDefaultSpeechModSetting(){
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
                 .title(title: NSLocalizedString("SettingTableViewController_ConfirmAddDefaultSpeechModSetting", comment:"確認"))
                 .label(text: NSLocalizedString("SettingtableViewController_ConfirmAddDefaultSpeechModSettingMessage", comment:"用意された読み替え辞書を追加・上書きします。よろしいですか？"))
                 .addButton(title: NSLocalizedString("Cancel_button", comment:"Cancel"), callback: { dialog in
@@ -1697,7 +1697,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         picker.setSubject(NSLocalizedString("SettingTableView_SendEmailForBackupTitle", comment:"ことせかい バックアップ"))
         var messageBody = NSLocalizedString("SettingTableView_SendEmailForBackupBody", comment:"添付されたファイルを ことせかい で読み込む事で、小説のリストが再生成されます。")
         if data.count >= 1024*1024*5 { // 5MBytes以上
-            messageBody += "\r\n" + String(format: NSLocalizedString("SettingTableView_SendEmailWithLargeFileWarning", comment: "なお、今回添付されているファイルは %@ ととても大きいため、メールの転送経路によってはエラーを引き起こす可能性があります。\r\niCloud DriveのMail Dropという機能を使うとかなり大きなファイル(最大5GBytesまで)のファイルを送信できるようになるので、そちらの利用を検討したほうが良いかもしれません。"), NiftyUtilitySwift.ByteSizeToVisibleString(byteSize: data.count)) 
+            messageBody += "\r\n" + String(format: NSLocalizedString("SettingTableView_SendEmailWithLargeFileWarning", comment: "なお、今回添付されているファイルは %@ ととても大きいため、メールの転送経路によってはエラーを引き起こす可能性があります。\r\niCloud DriveのMail Dropという機能を使うとかなり大きなファイル(最大5GBytesまで)のファイルを送信できるようになるので、そちらの利用を検討したほうが良いかもしれません。"), NiftyUtility.ByteSizeToVisibleString(byteSize: data.count)) 
         }
         picker.setMessageBody(messageBody, isHTML: false)
         picker.addAttachmentData(data, mimeType: mimeType, fileName: fileName)
@@ -1708,7 +1708,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     /// 現在の本棚にある小説のリストを再ダウンロードするためのURLを取得して、シェアします。
     func ShareNcodeListURLScheme(){
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
             .text(content: NSLocalizedString("SettingsViewController_IsCreateFullBackup?", comment: "小説の本文まで含めた完全なバックアップファイルを生成しますか？\r\n登録小説数が多い場合は生成に膨大な時間と本体容量が必要となります。"))
             .addButton(title: NSLocalizedString("SettingsViewController_ChooseFullBackup", comment: "完全バックアップを生成する(時間がかかります)")) { (dialog) in
                 DispatchQueue.main.async {
@@ -1746,7 +1746,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             return
         }
         DispatchQueue.main.async {
-            let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
+            let dialog = NiftyUtility.EasyDialogBuilder(self)
             dialog.title(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_Title", comment: "バックアップデータの送信方式を選んで下さい"))
                 .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
                     dialog.dismiss(animated: false, completion: nil)
@@ -1756,7 +1756,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     if let data = try? Data(contentsOf: dataFileURL, options: .dataReadingMapped) {
                         self.sendMailWithBinary(data: data, fileName: fileName, mimeType: "application/octet-stream")
                     }else{
-                        NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_ShareBackupSelect_FailedAppendToMail", comment: "メールへのファイルの添付に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                        NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_ShareBackupSelect_FailedAppendToMail", comment: "メールへのファイルの添付に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
                     }
                 }
             }).addButton(title: NSLocalizedString("SettingsViewController_ShareBackupDataSelectHow_ShareButton", comment: "シェア")) { (dialog) in
@@ -1769,7 +1769,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     /// 現在の状態をファイルにして mail に添付します。
     func ShareBackupData(withAllStoryContent:Bool){
         let labelTag = 100
-        let dialog = NiftyUtilitySwift.EasyDialogBuilder(self)
+        let dialog = NiftyUtility.EasyDialogBuilder(self)
             .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
             .build()
         DispatchQueue.main.async {
@@ -1786,7 +1786,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }) else {
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
-                    NiftyUtilitySwift.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
+                    NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SettingsViewController_GenerateBackupDataFailed", comment: "バックアップデータの生成に失敗しました。"), message: nil, buttonTitle: nil, buttonAction: nil)
                 }
                 return
             }

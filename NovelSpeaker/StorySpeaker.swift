@@ -578,7 +578,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let readingPoint = self.speaker.currentLocation
         if readingPoint >= length {
             self.speaker.SetSpeechLocation(location: readingPoint - length)
-            NiftyUtilitySwift.DispatchSyncMainQueue {
+            NiftyUtility.DispatchSyncMainQueue {
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
                     let newLocation = self.speaker.currentLocation
                     if story.readLocation(realm: realm) != newLocation {
@@ -946,7 +946,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.StopSpeech(realm: realm) {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.SkipForward(realm: realm, length: 50) {
-                        NiftyUtilitySwift.DispatchSyncMainQueue {
+                        NiftyUtility.DispatchSyncMainQueue {
                             self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
                         }
                         if self.isSeeking == false { return }
@@ -980,7 +980,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.StopSpeech(realm: realm) {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.SkipBackward(realm: realm, length: 60) {
-                        NiftyUtilitySwift.DispatchSyncMainQueue {
+                        NiftyUtility.DispatchSyncMainQueue {
                             self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
                         }
                         if self.isSeeking == false { return }
@@ -1025,7 +1025,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }
             
             StopSpeech(realm: realm)
-            NiftyUtilitySwift.DispatchSyncMainQueue {
+            NiftyUtility.DispatchSyncMainQueue {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.setReadLocationWith(realm: realm, location: newLocation)
                 }
@@ -1075,7 +1075,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }
         }
         
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
                 let repeatSpeechType = RealmGlobalState.GetInstanceWith(realm: realm)?.repeatSpeechType
                 if let repeatSpeechType = repeatSpeechType, repeatSpeechType == .rewindToThisStory {

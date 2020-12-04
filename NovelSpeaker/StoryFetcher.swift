@@ -115,31 +115,31 @@ struct StorySiteInfo {
     }
     
     func decodePageElement(xmlDocument:XMLDocument) -> String {
-        return NovelSpeakerUtility.NormalizeNewlineString(string: NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: pageElement, injectStyle: injectStyle).trimmingCharacters(in: .whitespacesAndNewlines) )
+        return NovelSpeakerUtility.NormalizeNewlineString(string: NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: pageElement, injectStyle: injectStyle).trimmingCharacters(in: .whitespacesAndNewlines) )
     }
     func decodeTitle(xmlDocument:XMLDocument) -> String? {
         guard let xpath = title else { return nil }
-        return NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
+        return NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     func decodeSubtitle(xmlDocument:XMLDocument) -> String? {
         guard let xpath = subtitle else { return nil }
-        return NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
+        return NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     func decodeFirstPageLink(xmlDocument:XMLDocument, baseURL: URL) -> URL? {
         guard let xpath = firstPageLink else { return nil }
-        return NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlDocument: xmlDocument, xpath: xpath, baseURL: baseURL)
+        return NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlDocument: xmlDocument, xpath: xpath, baseURL: baseURL)
     }
     func decodeNextLink(xmlDocument:XMLDocument, baseURL: URL) -> URL? {
         guard let xpath = nextLink else { return nil }
-        return NiftyUtilitySwift.FilterXpathWithExtructFirstHrefLink(xmlDocument: xmlDocument, xpath: xpath, baseURL: baseURL)
+        return NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlDocument: xmlDocument, xpath: xpath, baseURL: baseURL)
     }
     func decodeAuthor(xmlDocument:XMLDocument) -> String? {
         guard let xpath = author else { return nil }
-        return NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
+        return NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     func decodeTag(xmlDocument:XMLDocument) -> [String] {
         guard let xpath = tag else { return [] }
-        return Array(NiftyUtilitySwift.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath))
+        return Array(NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath))
     }
 }
 
@@ -297,8 +297,8 @@ class StoryHtmlDecoder {
         siteInfoArray.removeAll()
         customSiteInfoArray.removeAll()
         self.lock.unlock()
-        NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: cacheFileName)
-        NiftyUtilitySwift.FileCachedHttpGet_RemoveCacheFile(cacheFileName: customCacheFileName)
+        NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: cacheFileName)
+        NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: customCacheFileName)
         LoadSiteInfoIfNeeded()
     }
     
@@ -422,9 +422,9 @@ class StoryHtmlDecoder {
         // watchOS では Autopagerize の SiteInfo については読み込まないようにします
         // WARN: TODO: つまり、ことせかい用の SiteInfo が巨大になった場合同様に問題が発生しえます
         #if !os(watchOS)
-        NiftyUtilitySwift.FileCachedHttpGet(url: siteInfoURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
+        NiftyUtility.FileCachedHttpGet(url: siteInfoURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
             siteInfoData = data
-            NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
+            NiftyUtility.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
                 customSiteInfoData = data
                 let result = updateSiteInfo(siteInfoData: siteInfoData, customSiteInfoData: customSiteInfoData)
                 completion?(result)
@@ -433,7 +433,7 @@ class StoryHtmlDecoder {
                 completion?(result)
             }
         }) { (err) in
-            NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
+            NiftyUtility.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
                 customSiteInfoData = data
                 let result = updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData)
                 completion?(result)
@@ -443,7 +443,7 @@ class StoryHtmlDecoder {
             }
         }
         #else
-        NiftyUtilitySwift.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
+        NiftyUtility.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
             customSiteInfoData = data
             completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
         }) { (err) in
@@ -627,7 +627,7 @@ class StoryFetcher {
             BehaviorLogger.AddLog(description: "Fetch URL", data: ["url": url.absoluteString, "isNeedHeadless": currentState.isNeedHeadless])
             #if !os(watchOS)
             if currentState.isNeedHeadless {
-                NiftyUtilitySwift.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, successAction: { (doc) in
+                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, successAction: { (doc) in
                     let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton)
                     self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
@@ -644,13 +644,13 @@ class StoryFetcher {
                 return RealmGlobalState.GetInstanceWith(realm: realm)?.IsDisallowsCellularAccess ?? false
             }
             
-            NiftyUtilitySwift.httpRequest(url: url, postData: nil, cookieString: currentState.cookieString, isNeedHeadless: currentState.isNeedHeadless, mainDocumentURL: url, allowsCellularAccess: isDisallowsCellularAccess ? false : true, successAction: { (data, encoding) in
+            NiftyUtility.httpRequest(url: url, postData: nil, cookieString: currentState.cookieString, isNeedHeadless: currentState.isNeedHeadless, mainDocumentURL: url, allowsCellularAccess: isDisallowsCellularAccess ? false : true, successAction: { (data, encoding) in
                 #if !os(watchOS)
                 let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, document: currentState.document, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton)
                 #else
                 let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless)
                 #endif
-                let (html, guessedEncoding) = NiftyUtilitySwift.decodeHTMLStringFrom(data: data, headerEncoding: encoding)
+                let (html, guessedEncoding) = NiftyUtility.decodeHTMLStringFrom(data: data, headerEncoding: encoding)
                 self.DecodeDocument(currentState: newState, html: html, encoding: guessedEncoding ?? encoding ?? .utf8, successAction: { (state) in
                     self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, successAction: successAction, failedAction: failedAction)
                 }, failedAction: failedAction)

@@ -126,7 +126,7 @@ class FolderDeleteFolderButtonRow: TableViewRow {
     @objc func tapGestureEvent() {
         DispatchQueue.main.async {
             guard let parentViewController = self.parentViewController else { return }
-            NiftyUtilitySwift.EasyDialogTwoButton(viewController: parentViewController, title: NSLocalizedString("NovelFolderManageTableViewController_ConifirmRemoveFolder_Title", comment: "フォルダの削除"), message: String(format: NSLocalizedString("NovelFolderManageTableViewController_ConfifirmRemoveFolder_Message_Format", comment: "フォルダ %@ を削除しますか？"), self.folderName), button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("NovelFolderManageTableViewController_ConifirmRemoveFolder_OKButton", comment: "削除")) {
+            NiftyUtility.EasyDialogTwoButton(viewController: parentViewController, title: NSLocalizedString("NovelFolderManageTableViewController_ConifirmRemoveFolder_Title", comment: "フォルダの削除"), message: String(format: NSLocalizedString("NovelFolderManageTableViewController_ConfifirmRemoveFolder_Message_Format", comment: "フォルダ %@ を削除しますか？"), self.folderName), button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("NovelFolderManageTableViewController_ConifirmRemoveFolder_OKButton", comment: "削除")) {
                 RealmUtil.Write { (realm) in
                     guard let folder = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Folder) else { return }
                     folder.delete(realm: realm)
@@ -256,16 +256,16 @@ class ManageSectionAddRow: TableViewRow {
     @objc func tapGestureEvent() {
         DispatchQueue.main.async {
             guard let parentViewController = self.parentViewController else { return }
-            NiftyUtilitySwift.EasyDialogTextInput(viewController: parentViewController, title: nil, message: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolderMessage", comment: "新しく作成するフォルダ名を入力してください"), textFieldText: nil, placeHolder: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_PlaceHolderMessage", comment: "既に存在する名前や空文字列は指定できません")) { (name) in
+            NiftyUtility.EasyDialogTextInput(viewController: parentViewController, title: nil, message: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolderMessage", comment: "新しく作成するフォルダ名を入力してください"), textFieldText: nil, placeHolder: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_PlaceHolderMessage", comment: "既に存在する名前や空文字列は指定できません")) { (name) in
                 if name.count <= 0 {
                     guard let parentViewController = self.parentViewController else { return }
-                    NiftyUtilitySwift.EasyDialogOneButton(viewController: parentViewController, title: nil, message: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_Error_NoName", comment: "空文字列は指定できません"), buttonTitle: nil, buttonAction: nil)
+                    NiftyUtility.EasyDialogOneButton(viewController: parentViewController, title: nil, message: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_Error_NoName", comment: "空文字列は指定できません"), buttonTitle: nil, buttonAction: nil)
                     return
                 }
                 RealmUtil.RealmBlock { (realm) -> Void in
                     if let _ = RealmNovelTag.SearchWith(realm: realm, name: name, type: RealmNovelTag.TagType.Folder) {
                         guard let parentViewController = self.parentViewController else { return }
-                        NiftyUtilitySwift.EasyDialogOneButton(viewController: parentViewController, title: nil, message: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_Error_SameNameAlive", comment: "同じ名前のフォルダが既に定義されています"), buttonTitle: nil, buttonAction: nil)
+                        NiftyUtility.EasyDialogOneButton(viewController: parentViewController, title: nil, message: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_Error_SameNameAlive", comment: "同じ名前のフォルダが既に定義されています"), buttonTitle: nil, buttonAction: nil)
                         return
                     }
                     RealmUtil.WriteWith(realm: realm) { (realm) in

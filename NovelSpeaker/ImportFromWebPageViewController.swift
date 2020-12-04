@@ -400,19 +400,19 @@ li {
                     RealmUtil.Write { (realm) in
                         HTTPCookieSyncTool.shared.SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: cookieArray)
                     }
-                    NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: "", isNeedFallbackImportFromWebPageTab: false)
+                    NiftyUtility.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: "", isNeedFallbackImportFromWebPageTab: false)
                 }
                 return
             }
         }
-        NiftyUtilitySwift.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: self.cookiesString ?? "", isNeedFallbackImportFromWebPageTab: false)
+        NiftyUtility.checkUrlAndConifirmToUser(viewController: self, url: url, cookieString: self.cookiesString ?? "", isNeedFallbackImportFromWebPageTab: false)
     }
     @IBAction func bookmarkButtonClicked(_ sender: Any) {
         guard let url = self.wkWebView?.url else {
             return
         }
         if isBookmarked(targetUrl: url) {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
             .label(text: NSLocalizedString("ImportFromWebPageViewController_ConifirmDeleteBookmark", comment: "このページのブックマークを削除します。よろしいですか？"))
             .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel")) { (dialog) in
                 DispatchQueue.main.async {
@@ -427,7 +427,7 @@ li {
             }.build().show()
         }else{
             let titleString = self.wkWebView?.title
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
                 .label(text: NSLocalizedString("ImportFromWebPageViewController_CreateBookmark", comment: "ブックマークします。名前を入力してください。"))
                 .textField(tag: 100, placeholder: "name", content: (titleString != nil) ? titleString! : url.absoluteString, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .roundedRect)
                 .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
@@ -515,7 +515,7 @@ li {
             case .recoverableTrustFailure: // リカバリしてもいいけど問題のあるTrustFailure
                 print("SecTrustEvaluate: .recoverableTrustFailure")
                 // recoverable だけれど、結局後で fetch しようとすると失敗するので見せない事にします。
-                NiftyUtilitySwift.EasyDialogBuilder(self)
+                NiftyUtility.EasyDialogBuilder(self)
                     .label(text: NSLocalizedString("ImportFromWebPageViewController_InvalidServerCertificate", comment: "サーバの証明書に何らかの問題がありました。"))
                     /*
                     .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
@@ -542,7 +542,7 @@ li {
                 return
             case .fatalTrustFailure: // リカバリしちゃ駄目なTrustFailure
                 print("SecTrustEvaluate: .fatalTrustFailure")
-                NiftyUtilitySwift.EasyDialogBuilder(self)
+                NiftyUtility.EasyDialogBuilder(self)
                     .label(text: NSLocalizedString("ImportFromWebPageViewController_InvalidServerCertificate", comment: "サーバの証明書に何らかのエラーがありました。"))
                     .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
                         DispatchQueue.main.async {
@@ -585,7 +585,7 @@ li {
             || challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodNegotiate
             || challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodNTLM
             {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
             .title(title: NSLocalizedString("ImportFromWebPageViewController_AuthenticationRequired", comment: "認証が必要です"))
             .textField(tag: 100, placeholder: "user id", content: "", keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
             .textField(tag: 101, placeholder: "password", content: "", keyboardType: .default, secure: true, focusKeyboard: false, borderStyle: .roundedRect)
@@ -657,7 +657,7 @@ li {
         }
         alertCount += 1
         if alertCount > 3 {
-            NiftyUtilitySwift.EasyDialogBuilder(self)
+            NiftyUtility.EasyDialogBuilder(self)
             .title(title: String.localizedStringWithFormat(NSLocalizedString("ImportFromWebPageViewController_MessageFrom...", comment: "%@からのメッセージ"), hostString))
             .label(text: message)
             .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
@@ -669,7 +669,7 @@ li {
             })
             .build().show()
         }
-        NiftyUtilitySwift.EasyDialogBuilder(self)
+        NiftyUtility.EasyDialogBuilder(self)
         .title(title: String.localizedStringWithFormat(NSLocalizedString("ImportFromWebPageViewController_MessageFrom...", comment: "%@からのメッセージ"), hostString))
         .label(text: message)
         .addButton(title: NSLocalizedString("OK_button", comment: "OK")) { (dialog) in
@@ -685,7 +685,7 @@ li {
         if let host = self.wkWebView?.url?.host {
             hostString = host
         }
-        NiftyUtilitySwift.EasyDialogBuilder(self)
+        NiftyUtility.EasyDialogBuilder(self)
         .title(title: String.localizedStringWithFormat(NSLocalizedString("ImportFromWebPageViewController_ImputRequiredFrom...", comment: "%@が入力を求めています"), hostString))
         .label(text: prompt)
         .textField(tag: 100, placeholder: defaultText, content: defaultText, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .roundedRect)
@@ -703,7 +703,7 @@ li {
         if let host = self.wkWebView?.url?.host {
             hostString = host
         }
-        NiftyUtilitySwift.EasyDialogBuilder(self)
+        NiftyUtility.EasyDialogBuilder(self)
         .title(title: String.localizedStringWithFormat(NSLocalizedString("ImportFromWebPageViewController_MessageFrom...", comment: "%@からのメッセージ"), hostString))
         .label(text: message)
         .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel")) { (dialog) in

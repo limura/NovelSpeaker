@@ -214,7 +214,7 @@ class StoryFetcherTest: XCTestCase {
         guard let data = try? Data(contentsOf: url) else { return }
         guard let htmlString = String(data: data, encoding: .shiftJIS) else { return }
         let doc = try HTMLDocument(string: htmlString, encoding: .shiftJIS)
-        let string = NiftyUtilitySwift.FilterXpathWithConvertString(xmlDocument: doc, xpath: "//body", injectStyle: nil).trimmingCharacters(in: .whitespacesAndNewlines)
+        let string = NiftyUtility.FilterXpathWithConvertString(xmlDocument: doc, xpath: "//body", injectStyle: nil).trimmingCharacters(in: .whitespacesAndNewlines)
         print(string)
     }
     #else

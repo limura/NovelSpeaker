@@ -120,7 +120,7 @@ class NovelKeywordTagSelecterViewController: FormViewController, RealmObserverRe
     
     @objc func addButtonClicked(_ sender: UIBarButtonItem) {
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogTextInput(
+            NiftyUtility.EasyDialogTextInput(
                 viewController: self,
                 title: NSLocalizedString("NovelKeywordTagSelectorViewController_AddTagTitle", comment: "タグの追加"),
                 message: nil,
@@ -129,7 +129,7 @@ class NovelKeywordTagSelecterViewController: FormViewController, RealmObserverRe
                 action: { (name) in
                     if name.count <= 0 {
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogOneButton(
+                            NiftyUtility.EasyDialogOneButton(
                                 viewController: self,
                                 title: nil,
                                 message: NSLocalizedString("NovelKeywordTagSelectorViewController_AddTagTitlePlaceHolder", comment: "空文字列は指定できません"),
@@ -148,7 +148,7 @@ class NovelKeywordTagSelecterViewController: FormViewController, RealmObserverRe
     
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogTextInput(
+            NiftyUtility.EasyDialogTextInput(
                 viewController: self,
                 title: NSLocalizedString("NovelKeywordTagSelectorViewController_SearchButtonTitle", comment: "検索"),
                 message: nil,

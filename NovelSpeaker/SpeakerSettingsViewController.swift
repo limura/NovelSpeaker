@@ -45,7 +45,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
     }
     
     func registNotificationToken() {
-        NiftyUtilitySwift.DispatchSyncMainQueue {
+        NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let speakerSettings = RealmSpeakerSetting.GetAllObjectsWith(realm: realm) else { return }
                 self.speakerSettingNotificationToken = speakerSettings.observe({ (change) in
@@ -319,7 +319,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                         settingName = setting.name
                     }
                 }
-                NiftyUtilitySwift.EasyDialogTwoButton(
+                NiftyUtility.EasyDialogTwoButton(
                 viewController: self,
                 title: settingName,
                 message: NSLocalizedString("SpeakSettingsViewController_ConifirmRemoveTitle", comment: "この設定を削除しますか？"),
@@ -365,7 +365,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
             $0.title = NSLocalizedString("SpeakSettingsViewController_AddNewSettingButtonTitle", comment: "新しく話者設定を追加する")
         }.onCellSelection({ (_, button) in
             DispatchQueue.main.async {
-                NiftyUtilitySwift.EasyDialogTextInput2Button(
+                NiftyUtility.EasyDialogTextInput2Button(
                     viewController: self,
                     title: NSLocalizedString("SpeakerSettingsViewController_AddNewSpeakerTitle", comment: "追加される話者の名前を入力してください"),
                     message: nil,
@@ -378,7 +378,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                         if RealmUtil.RealmBlock(block: { (realm) -> Bool in
                             if RealmSpeakerSetting.SearchFromWith(realm: realm, name: name) != nil {
                                 DispatchQueue.main.async {
-                                    NiftyUtilitySwift.EasyDialogOneButton(
+                                    NiftyUtility.EasyDialogOneButton(
                                         viewController: self,
                                         title: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorAlready", comment: "既に同じ名前の話者設定が存在します。"),
                                         message: nil, buttonTitle: nil, buttonAction: nil)
@@ -386,7 +386,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                                 return true
                             }else if name.count <= 0 {
                                 DispatchQueue.main.async {
-                                    NiftyUtilitySwift.EasyDialogOneButton(
+                                    NiftyUtility.EasyDialogOneButton(
                                         viewController: self,
                                         title: NSLocalizedString("SpeakerSettingViewController_NameValidateErrorNil", comment: "名前に空文字列は設定できません"),
                                         message: nil, buttonTitle: nil, buttonAction: nil)
@@ -406,7 +406,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                             self.form.append(self.createSpeakSettingRows(currentSetting: newSpeakerSetting))
                         }
                         DispatchQueue.main.async {
-                            NiftyUtilitySwift.EasyDialogOneButton(
+                            NiftyUtility.EasyDialogOneButton(
                                 viewController: self,
                                 title: NSLocalizedString("SpeakSettingsViewController_SpeakerSettingAdded", comment: "末尾に話者設定を追加しました。\n(恐らくはスクロールする必要があります)"),
                                 message: nil,

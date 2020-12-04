@@ -74,7 +74,7 @@ class AssignNovelFolderViewController: FormViewController {
     
     @objc func addButtonClicked(_ sender: UIBarButtonItem) {
         DispatchQueue.main.async {
-            NiftyUtilitySwift.EasyDialogTextInput(
+            NiftyUtility.EasyDialogTextInput(
                 viewController: self,
                 title: NSLocalizedString("AssignNovelFolderViewController_CreateNewTagTitle", comment: "新規フォルダ作成"),
                 message: nil,
@@ -84,7 +84,7 @@ class AssignNovelFolderViewController: FormViewController {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         if RealmNovelTag.SearchWith(realm: realm, name: name, type: RealmNovelTag.TagType.Folder) != nil {
                             DispatchQueue.main.async {
-                                NiftyUtilitySwift.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("AssignNovelFolderViewController_CreateNewTagPlaceHolder", comment: "同じ名前のフォルダは生成できません"))
+                                NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("AssignNovelFolderViewController_CreateNewTagPlaceHolder", comment: "同じ名前のフォルダは生成できません"))
                             }
                             return
                         }

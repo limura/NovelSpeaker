@@ -41,7 +41,7 @@ class RealmTests: XCTestCase {
             }
         }
         while true {
-            NiftyUtilitySwift.RunLoopSleep(deltaSecond: 1)
+            NiftyUtility.RunLoopSleep(deltaSecond: 1)
         }
     }
     

@@ -273,7 +273,7 @@ class RobotsFileTool {
         }
         let port = url.port ?? -1
         let cacheFileName = "robotsCache_\(scheme):\(host):\(port)"
-        NiftyUtilitySwift.FileCachedHttpGet(url: targetURL, cacheFileName: cacheFileName, expireTimeinterval: fileCacheTimeoutSecond, canRecoverOldFile: true, successAction: { (data) in
+        NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: cacheFileName, expireTimeinterval: fileCacheTimeoutSecond, canRecoverOldFile: true, successAction: { (data) in
             completion?(RobotsCache.Decode(robotsURL: targetURL, data: data))
         }) { (err) in
             // リクエストに失敗した場合、404 などの 4** なら arrow だけれど、ネットワークエラーやサーバエラー(5**)なら disarrow らしいんだけどどうしたら
