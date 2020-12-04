@@ -904,6 +904,8 @@
 		21D8FC4C19FC97DB00CCF1B6 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
+				214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */,
+				21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */,
 				21F37B7B1EC2379000BE0452 /* NovelSpeaker-Bridging-Header.h */,
 				2124B38623BBF118002EBC31 /* NovelSpeakerWatchApp-Bridging-Header.h */,
 				2191639D19AF7E98003FF7FC /* CoreDataObjectHolder.h */,
@@ -913,7 +915,6 @@
 				21C372DB21DFC41600FB2D52 /* UIImageExtension.h */,
 				21C372DC21DFC41600FB2D52 /* UIImageExtension.m */,
 				21E76BF81FB487B1003C659F /* EasyDialogs.swift */,
-				214141CF1FC0A1C30076DEC2 /* NiftyUtilitySwift.swift */,
 				21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */,
 				2167419F2043D592008A578D /* BehaviorLogger.swift */,
 				216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */,
@@ -923,7 +924,6 @@
 				2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */,
 				21A2CDBA2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift */,
 				21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */,
-				21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */,
 				21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */,
 				21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */,
 				2104EDE824B985A100E275D1 /* StoryFetcher.swift */,

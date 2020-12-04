@@ -1462,6 +1462,9 @@ class NovelSpeakerUtility: NSObject {
                 if let defaultSpeakerID = novelDic.object(forKey: "defaultSpeakerID") as? String {
                     novel.defaultSpeakerID = defaultSpeakerID
                 }
+                if let isNotNeedUpdateCheck = novelDic.object(forKey: "isNotNeedUpdateCheck") as? Bool {
+                    novel.isNotNeedUpdateCheck = isNotNeedUpdateCheck
+                }
                 if let lastChapterStoryID = novelDic.object(forKey: "lastChapterStoryID") as? String {
                     novel.m_lastChapterStoryID = lastChapterStoryID
                 }
@@ -1735,6 +1738,7 @@ class NovelSpeakerUtility: NSObject {
                     "likeLevel": novel.likeLevel,
                     "isNeedSpeechAfterDelete": novel.isNeedSpeechAfterDelete,
                     "defaultSpeakerID": novel.defaultSpeakerID,
+                    "isNotNeedUpdateCheck": novel.isNotNeedUpdateCheck,
                     "lastChapterStoryID": novel.m_lastChapterStoryID,
                     "lastDownloadDate": NiftyUtilitySwift.Date2ISO8601String(date: novel.lastDownloadDate),
                     "readingChapterStoryID": novel.m_readingChapterStoryID,

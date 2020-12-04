@@ -46,6 +46,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.likeLevel = obj.likeLevel
             newObj.isNeedSpeechAfterDelete = obj.isNeedSpeechAfterDelete
             newObj.defaultSpeakerID = obj.defaultSpeakerID
+            newObj.isNotNeedUpdateCheck = obj.isNotNeedUpdateCheck
             newObj.m_lastChapterStoryID = obj.m_lastChapterStoryID
             newObj.lastDownloadDate = obj.lastDownloadDate
             newObj.m_readingChapterStoryID = obj.m_readingChapterStoryID
