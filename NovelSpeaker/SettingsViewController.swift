@@ -883,7 +883,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             // それらはこの下に記述されます
             +++ Section("Debug") {
                 $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
-                    return self.m_RubySwitchToggleHitCount < 10
+                    return self.m_RubySwitchToggleHitCount < 10 && (NovelSpeakerUtility.isDebugMenuAlwaysEnabled == false)
                 })
             }
             <<< ButtonRow() {
@@ -1005,6 +1005,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let value = row.value else { return }
                 NovelSpeakerUtility.isUseWebSearchTabDisabledSite = value
                 NovelSearchViewController.SearchInfoCacheClear()
+            })
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingsViewController_isDebugMenuAlreadyEnabled_Title", comment: "このデバッグ用メニューを常にONにする")
+                $0.value = NovelSpeakerUtility.isDebugMenuAlwaysEnabled
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                guard let value = row.value else { return }
+                NovelSpeakerUtility.isDebugMenuAlwaysEnabled = value
             })
 
             /*

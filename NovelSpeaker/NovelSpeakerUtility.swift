@@ -2408,6 +2408,20 @@ class NovelSpeakerUtility: NSObject {
         }
         set {
             UserDefaults.standard.set(newValue, forKey: isUseWebSearchTabDisabledSite_Key)
+            UserDefaults.standard.synchronize()
+        }
+    }
+    
+    fileprivate static let isDebugMenuAlwaysEnabled_Key = "isDebugMenuAlwaysEnabled_Key"
+    static var isDebugMenuAlwaysEnabled: Bool {
+        get {
+            let defaults = UserDefaults.standard
+            defaults.register(defaults: [isDebugMenuAlwaysEnabled_Key : false])
+            return defaults.bool(forKey: isDebugMenuAlwaysEnabled_Key)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: isDebugMenuAlwaysEnabled_Key)
+            UserDefaults.standard.synchronize()
         }
     }
 }
