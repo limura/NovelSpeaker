@@ -882,7 +882,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、
             // それらはこの下に記述されます
             +++ Section("Debug") {
-                $0.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
+                $0.hidden = .function(["OverrideRubySwitchRow", "isDebugMenuAlreadyEnabledSwitchRow"], { form -> Bool in
                     return self.m_RubySwitchToggleHitCount < 10 && (NovelSpeakerUtility.isDebugMenuAlwaysEnabled == false)
                 })
             }
@@ -1006,7 +1006,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 NovelSpeakerUtility.isUseWebSearchTabDisabledSite = value
                 NovelSearchViewController.SearchInfoCacheClear()
             })
-            <<< SwitchRow() {
+            <<< SwitchRow("isDebugMenuAlreadyEnabledSwitchRow") {
                 $0.title = NSLocalizedString("SettingsViewController_isDebugMenuAlreadyEnabled_Title", comment: "このデバッグ用メニューを常にONにする")
                 $0.value = NovelSpeakerUtility.isDebugMenuAlwaysEnabled
                 $0.cell.textLabel?.numberOfLines = 0
