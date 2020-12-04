@@ -14,7 +14,7 @@ import AVFoundation
 //import MessagePacker
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 1
+    static let currentSchemaVersion : UInt64 = 3
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -1132,6 +1132,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     @objc dynamic var likeLevel : Int8 = 0
     @objc dynamic var isNeedSpeechAfterDelete : Bool = false
     @objc dynamic var defaultSpeakerID : String = ""
+    @objc dynamic var isNotNeedUpdateCheck: Bool = false
 
     // RealmStory等 に保存していて参照時にはそこから生成しようと思ったのだけれどアホみたいに遅いのでこちらに保存するようにします。
     @objc dynamic var m_lastChapterStoryID : String = ""
@@ -1415,7 +1416,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        return ["writer", "title", "novelID", "likeLevel", "isDeleted", "lastDownloadDate", "lastReadDate"]
+        return ["writer", "title", "novelID", "likeLevel", "isDeleted", "lastDownloadDate", "lastReadDate", "isNotNeedUpdateCheck"]
     }
 }
 extension RealmNovel: CKRecordConvertible {

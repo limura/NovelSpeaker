@@ -720,7 +720,7 @@ class NovelDownloadQueue : NSObject {
         let fetchedNovelIDList = GetAlreadyBackgroundFetchedNovelIDList()
         var targetNovelIDList:[String] = []
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) else {
+            guard let novelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.filter("isNotNeedUpdateCheck = false") else {
                 return
             }
             for novel in novelArray {

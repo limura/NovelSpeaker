@@ -336,6 +336,7 @@
 "NovelDetailViewController_ActionSection_SearchButton_Title" = "この小説内を検索(何も入れずに検索すると章のリストを表示します)";
 "NovelDetailViewController_ActionSection_EditNovelButton" = "この小説を編集する";
 "NovelDetailViewController_LikeLevelStepperRowTitle" = "お気に入り度合い(0〜100)";
+"NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle" = "この小説の更新確認を行わない";
 
 "NovelKeywordTagSelectorViewController_Title" = "タグを選択";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "タグの追加";

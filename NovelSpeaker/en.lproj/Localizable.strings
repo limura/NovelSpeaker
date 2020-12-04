@@ -360,6 +360,8 @@
 "NovelDetailViewController_ActionSection_SearchButton_Title" = "Search within this novel (searching without anything will display a list of chapters)";
 "NovelDetailViewController_ActionSection_EditNovelButton" = "Edit this novel";
 "NovelDetailViewController_LikeLevelStepperRowTitle" = "Degree of favorite (0-100)";
+"NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle" = "Do not check for updates to this novel";
+
 
 "NovelKeywordTagSelectorViewController_Title" = "Select Tag";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "Add Tag";

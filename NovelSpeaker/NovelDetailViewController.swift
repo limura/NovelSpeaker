@@ -331,6 +331,23 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 $0.title = NSLocalizedString("SettingTableViewController_CorrectionOfTheReading", comment:"読みの修正")
                 $0.presentationMode = .segueName(segueName: "speechModSettingSegue", onDismiss: nil)
             }
+            settingSection <<< SwitchRow() {
+                $0.title = NSLocalizedString("NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle", comment: "この小説の更新確認を行わない")
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.value = RealmUtil.RealmBlock { (realm) -> Bool in
+                    guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else { return false }
+                    return novel.isNotNeedUpdateCheck
+                }
+            }.onChange({ (row) in
+                guard let value = row.value else { return }
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID), novel.isNotNeedUpdateCheck != value else { return }
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                        novel.isNotNeedUpdateCheck = value
+                        realm.add(novel, update: .modified)
+                    }
+                }
+            })
             /*
             settingSection <<< ButtonRow() {
                 $0.title = NSLocalizedString("NovelDetailViewController_AddRubyToSpeechModButtonTitle", comment: "小説中に出てくるルビ表記をこの小説用の読みの修正に上書き追加する")
