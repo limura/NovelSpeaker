@@ -996,6 +996,16 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_Message", comment: "全てのデータをiCloudにアップロードし始めました。データ量が多ければ多いほどアップロード完了まで時間がかかります。"), buttonTitle: nil, buttonAction: nil)
                 }
             })
+        
+            <<< SwitchRow() {
+                $0.title = NSLocalizedString("SettingsViewController_isUseWebSearchTabDisabledSite_Title", comment: "Web検索タブ で実験中のサイトを表示する")
+                $0.value = NovelSpeakerUtility.isUseWebSearchTabDisabledSite
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                guard let value = row.value else { return }
+                NovelSpeakerUtility.isUseWebSearchTabDisabledSite = value
+                NovelSearchViewController.SearchInfoCacheClear()
+            })
 
             /*
             <<< ButtonRow() {

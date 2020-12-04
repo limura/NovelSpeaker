@@ -191,6 +191,7 @@
 "SettingsViewController_iCloudPullWithRefreshiCloudStatus" = "Reload all data on iCloud";
 "SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message" = "Would you like to reload all the data on iCloud?\nIf you perform this operation, all the data saved on iCloud will be reloaded, so if the amount of data saved on iCloud is large, it will take a considerable amount of time.";
 "SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message" = "Started reloading iCloud data.";
+"SettingsViewController_isUseWebSearchTabDisabledSite_Title" = "View the site you are experimenting with on the Web Search tab";
 "SettingsTableViewController_AppInformation" = "In-app error notification";
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "In-app error notification (including for debugging)";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "Clear notification";

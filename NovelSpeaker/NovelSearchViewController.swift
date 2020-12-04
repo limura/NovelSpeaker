@@ -406,6 +406,7 @@ class WebSiteSection : Decodable {
     var mainDocumentURL:String = ""
     var values:[SearchQuery] = []
     var result:SearchResult? = nil
+    var isDisabled:Bool? = false
     //var parentViewController:ParentViewController
     
     enum CodingKeys: String, CodingKey {
@@ -418,6 +419,7 @@ class WebSiteSection : Decodable {
         case mainDocumentURL
         case values
         case result
+        case isDisabled
     }
     required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -429,6 +431,7 @@ class WebSiteSection : Decodable {
         querySeparator = (try? values.decode(String.self, forKey: .querySeparator)) ?? "&"
         queryJoinner = (try? values.decode(String.self, forKey: .queryJoinner)) ?? "="
         mainDocumentURL = (try? values.decode(String.self, forKey: .mainDocumentURL)) ?? ""
+        isDisabled = (try? values.decodeIfPresent(Bool.self, forKey: .isDisabled)) ?? false
 
         // 怪しく全てを読み込める struct を作って一旦読み込みます(´・ω・`)
         struct DummySearchQuery: Decodable {
@@ -637,7 +640,11 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     func extractSearchInfoArray(jsonData:Data) -> [WebSiteSection] {
         let decorder = JSONDecoder()
         guard let result = try? decorder.decode([WebSiteSection].self, from: jsonData) else { return [] }
-        return result
+        if NovelSpeakerUtility.isUseWebSearchTabDisabledSite { return result }
+        return result.filter {
+            guard let isDisabled = $0.isDisabled else {return true}
+            return isDisabled == false
+        }
     }
     
     func loadSearchInfo() {

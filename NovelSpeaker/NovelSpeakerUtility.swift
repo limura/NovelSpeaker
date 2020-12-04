@@ -2394,9 +2394,20 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
-    
     /// CoreData側の sqlite ファイルを削除します
     static func RemoveCoreDataDataFile() {
         GlobalDataSingleton.getInstance()?.removeCoreDataDataFile()
+    }
+    
+    fileprivate static let isUseWebSearchTabDisabledSite_Key = "isUseWebSearchTabDisabledSite_Key"
+    static var isUseWebSearchTabDisabledSite: Bool {
+        get {
+            let defaults = UserDefaults.standard
+            defaults.register(defaults: [isUseWebSearchTabDisabledSite_Key : false])
+            return defaults.bool(forKey: isUseWebSearchTabDisabledSite_Key)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: isUseWebSearchTabDisabledSite_Key)
+        }
     }
 }
