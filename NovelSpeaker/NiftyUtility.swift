@@ -257,13 +257,14 @@ class NiftyUtility: NSObject {
         }
     }
     
+    static let staticFetcher = StoryFetcher()
     public static func checkUrlAndConifirmToUser(viewController: UIViewController, url: URL, cookieString:String?, isNeedFallbackImportFromWebPageTab:Bool) {
         BehaviorLogger.AddLog(description: "checkUrlAndConifirmToUser called.", data: ["url": url.absoluteString])
         DispatchQueue.main.async {
             let builder = EasyDialogBuilder(viewController)
             .text(content: NSLocalizedString("ImportFromWebPageViewController_loading", comment: "loading"))
             let dialog = builder.build()
-            let fetcher = StoryFetcher()
+            let fetcher = staticFetcher
             dialog.show {
                 print("FetchFirstContent calling.")
                 fetcher.FetchFirstContent(url: url, cookieString: cookieString) { (url, state, errorString) in
