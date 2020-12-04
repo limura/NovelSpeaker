@@ -36,7 +36,6 @@ class NiftyUtility: NSObject {
             separated = newSeparated
         }
         separated = separated.map({$0.trimmingCharacters(in: .whitespacesAndNewlines)}).filter({$0.count > 0})
-        print("separated.count: \(separated.count)")
         if separated.count > 1 {
             return separated
         }
@@ -203,7 +202,6 @@ class NiftyUtility: NSObject {
                         dialog.dismiss(animated: false, completion: nil)
                     }
                 })
-            print("builder.addButton(title: このまま取り込む)")
             builder = builder.addButton(title: NSLocalizedString("NiftyUtility_Import", comment: "このまま取り込む"), callback: { (dialog) in
                     let titleTextField = dialog.view.viewWithTag(100) as! UITextField
                     let titleString = titleTextField.text ?? titleString
@@ -230,7 +228,6 @@ class NiftyUtility: NSObject {
                         })
                     }
                 })
-            print("check IsNextAlive != true")
             if state.IsNextAlive != true, let separatedText = CheckShouldSeparate(text: content), separatedText.reduce(0, { (result, body) -> Int in
                 return result + (body.count > 0 ? 1 : 0)
             }) > 1 {
@@ -252,7 +249,6 @@ class NiftyUtility: NSObject {
                     }
                 })
             }
-            print("builder.build().show() call.")
             builder.build(isForMessageDialog: true).show()
         }
     }
@@ -266,9 +262,7 @@ class NiftyUtility: NSObject {
             let dialog = builder.build()
             let fetcher = staticFetcher
             dialog.show {
-                print("FetchFirstContent calling.")
                 fetcher.FetchFirstContent(url: url, cookieString: cookieString) { (url, state, errorString) in
-                    print("FetchFirstContent out.")
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: {
                             if let state = state, (state.content?.count ?? 0) > 0 {
@@ -616,7 +610,7 @@ class NiftyUtility: NSObject {
             client.LoadAboutPage()
         }
     }
-    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
+    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, withWaitSecond:TimeInterval? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
         // TODO: おおよそ関係の無い所で Realm を触る必要があってうぅむ。
         let allowsCellularAccess:Bool = RealmUtil.RealmBlock { (realm) -> Bool in
             if let globalData = RealmGlobalState.GetInstanceWith(realm: realm), globalData.IsDisallowsCellularAccess {
@@ -635,7 +629,19 @@ class NiftyUtility: NSObject {
                 headlessHttpClientObj = client
             }
             client.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (doc) in
-                successAction?(doc)
+                if let withWaitSecond = withWaitSecond, withWaitSecond > 0.0 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + withWaitSecond) {
+                        client.GetCurrentContent { (document, err) in
+                            if let document = document {
+                                successAction?(document)
+                            }else{
+                                failedAction?(err)
+                            }
+                        }
+                    }
+                }else{
+                    successAction?(doc)
+                }
             }) { (err) in
                 failedAction?(err)
             }

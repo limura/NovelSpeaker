@@ -534,7 +534,12 @@ class StoryFetcher {
             return
         }
         
+        var withWaitSecond:TimeInterval? = nil
         #if !os(watchOS)
+        // waitSecondInHeadless が指定されていたらその秒だけ待ちます
+        if let waitSecondInHeadless = currentState.waitSecondInHeadless {
+            withWaitSecond = waitSecondInHeadless
+        }
         // Erik の機能を使ってボタンをクリックして、その後本文を取り出します。
         // TODO: この関数内部でのエラーを返す手段が(nil を返す以外に)ありません
         func buttonClick(buttonElement:Element, currentState:StoryState, completionHandler:((StoryState?, Error?)->Void)?) {
@@ -631,7 +636,7 @@ class StoryFetcher {
             BehaviorLogger.AddLog(description: "Fetch URL", data: ["url": url.absoluteString, "isNeedHeadless": currentState.isNeedHeadless])
             #if !os(watchOS)
             if currentState.isNeedHeadless {
-                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, successAction: { (doc) in
+                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, successAction: { (doc) in
                     let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton)
                     self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
