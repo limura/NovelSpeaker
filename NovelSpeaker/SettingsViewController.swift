@@ -76,7 +76,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                  "novelSpeakerSiteInfoURL",
                                  "speechViewButtonSettingArrayData",
                                  "cookieArrayData",
-                                 "m_DisplayType"
+                                 "m_DisplayType",
+                                 "bookshelfViewButtonSettingArrayData"
                                 :
                                 continue
                             default:

@@ -1407,6 +1407,9 @@ class NovelSpeakerUtility: NSObject {
                 if let m_DisplayType = dic.object(forKey: "novelDisplayType") as? NSNumber, let displayType = NovelDisplayType(rawValue: m_DisplayType.intValue) {
                     globalState.novelDisplayType = displayType
                 }
+                if let bookshelfViewButtonSettingArrayData = dic.object(forKey: "bookshelfViewButtonSettingArrayData") as? String, let data = Data(base64Encoded: bookshelfViewButtonSettingArrayData) {
+                    globalState.bookshelfViewButtonSettingArrayData = data
+                }
                 if let repeatSpeechType = dic.object(forKey: "repeatSpeechType") as? NSNumber {
                     globalState.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.uintValue) ?? RepeatSpeechType.noRepeat
                 }
@@ -1910,6 +1913,7 @@ class NovelSpeakerUtility: NSObject {
                 "speechViewButtonSettingArrayData": globalState.speechViewButtonSettingArrayData.base64EncodedString(),
                 "cookieArrayData": globalState.cookieArrayData.base64EncodedString(),
                 "novelDisplayType": globalState.novelDisplayType.rawValue,
+                "bookshelfViewButtonSettingArrayData": globalState.bookshelfViewButtonSettingArrayData.base64EncodedString(),
 
                 "defaultDisplaySettingID": globalState.defaultDisplaySettingID,
                 "defaultSpeakerID": globalState.defaultSpeakerID,
