@@ -491,11 +491,13 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
                 guard let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
                 var newFolderSectionArray:[TableViewSection] = [ManageSection(parentViewController: self)]
                 for folder in folderArray {
-                    let rows:[FolderRow]
+                    var rows:[FolderRow] = []
                     if let novelArray = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: Array(folder.targetNovelIDArray)){
-                        rows = novelArray.map({FolderRow(novelTitle: $0.title, novelID: $0.novelID)})
-                    }else{
-                        rows = []
+                        for novelID in folder.targetNovelIDArray {
+                            if let novel = novelArray.filter({$0.novelID == novelID}).first {
+                                rows.append(FolderRow(novelTitle: novel.title, novelID: novel.novelID))
+                            }
+                        }
                     }
                     let section = FolderSection(folderName: folder.name, rows: rows, parentViewController: self)
                     newFolderSectionArray.append(section)
