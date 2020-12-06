@@ -344,8 +344,14 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
         registerObserver()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        RestartObservers()
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        StopObservers()
         saveFolderOrder()
     }
     
