@@ -466,7 +466,9 @@ class StoryFetcher {
     }
 
     func LoadAboutPage() {
+        #if !os(watchOS)
         self.httpClient.LoadAboutPage()
+        #endif
     }
     
     func DecodeDocument(currentState:StoryState, html:String?, encoding:String.Encoding, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
