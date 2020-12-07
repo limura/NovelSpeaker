@@ -705,13 +705,28 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.70
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.0.0
 
-- Fixed an issue where the last open novel might be deselected when checking for novel updates on the bookshelf screen.
+- Change internal database
+- Rewrite almost all source code from Objective-C to Swift
+- Many other changes
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.0.0
+
+- Change internal database
+- Rewrite almost all source code from Objective-C to Swift
+- Function addition
+  - Added iCloud synchronization function between devices
+  - To be able to change the speaker itself in conversational sentences, etc.
+  - Add elements in order on the bookshelf screen
+  - Now you can register novels as \"favorites\"
+  - Added \"Details\" button to the novel text screen. Settings for each novel will be added
+  - Added Web search screen
+  - Added the concept of self-made folders
+
 # Version 1.1.70
 
 Bug fix

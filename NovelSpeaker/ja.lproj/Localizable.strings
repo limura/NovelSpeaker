@@ -697,13 +697,28 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.70
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.0.0
 
-- 本棚画面で小説の更新確認時に、最後に開いていた小説の選択状態が解除される場合がある問題を修正
+- 内部データベースを変更
+- ほぼ全てのソースコードをObjective-CからSwiftに書き換え
+- 多数の新要素を追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.0.0
+
+- 内部データベースを変更
+- ほぼ全てのソースコードをObjective-CからSwiftに書き換え
+- 機能追加
+  - iCloudによる端末間同期機能を追加
+  - 会話文等で話者自体を変更できるように
+  - 本棚画面での順番に要素を追加
+  - 本棚画面でお気に入りの表示を追加
+  - 小説本文画面に「詳細」ボタンを追加。小説毎の設定が追加されます
+  - Web検索画面を追加 (なろう検索画面は削除されました)
+  - 自作フォルダの概念を追加
+
 # Version 1.1.70
 
 問題の修正
