@@ -68,6 +68,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                  "bgColor",
                                  "currentWebSearchSite",
                                  "currentReadingNovelID",
+                                 "autoSplitStringList",
                                  "defaultSpeakerID",
                                  "defaultDisplaySettingID",
                                  "searchInfoURL",
