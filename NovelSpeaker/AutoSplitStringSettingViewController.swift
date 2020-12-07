@@ -25,17 +25,19 @@ class AutoSplitStringSettingViewController: UITableViewController, RealmObserver
         self.tableView.isEditing = false
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: defaultCellID)
         self.title = NSLocalizedString("AutoSplitStringSettingViewController_Title", comment: "テキスト分割文字列の設定")
-        
-        registerObserver()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        registerObserver()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        if (self.navigationController?.viewControllers.contains(self) ?? false) == false {
+            StopObservers()
+        }
     }
     
     deinit {
