@@ -2428,4 +2428,22 @@ class NovelSpeakerUtility: NSObject {
             UserDefaults.standard.synchronize()
         }
     }
+    
+    static func ShareStory(viewController:UIViewController, novelID:String, barButton:UIBarButtonItem?) {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else {
+                NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("SpeechViewController_UnknownErrorForShare", comment: "不明なエラーでシェアできませんでした。"), message: nil, buttonTitle: NSLocalizedString("OK_button", comment: "OK"), buttonAction: nil)
+                return
+            }
+            let urlString:String
+            if novel.type == .URL {
+                urlString = novel.url
+            }else{
+                urlString = ""
+            }
+            let message = String(format: NSLocalizedString("SpeechViewController_TweetMessage", comment: "%@ %@ #ことせかい %@ %@"), novel.title, novel.writer, urlString, "https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185")
+            NiftyUtility.Share(message: message, viewController: viewController, barButton: barButton)
+        }
+
+    }
 }

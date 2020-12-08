@@ -641,20 +641,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
 
     @objc func shareButtonClicked(_ sender: UIBarButtonItem) {
-        RealmUtil.RealmBlock { (realm) -> Void in
-            guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID)) else {
-                NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("SpeechViewController_UnknownErrorForShare", comment: "不明なエラーでシェアできませんでした。"), message: nil, buttonTitle: NSLocalizedString("OK_button", comment: "OK"), buttonAction: nil)
-                return
-            }
-            let urlString:String
-            if novel.type == .URL {
-                urlString = novel.url
-            }else{
-                urlString = ""
-            }
-            let message = String(format: NSLocalizedString("SpeechViewController_TweetMessage", comment: "%@ %@ #ことせかい %@ %@"), novel.title, novel.writer, urlString, "https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185")
-            NiftyUtility.Share(message: message, viewController: self, barButton: self.shareButtonItem)
-        }
+        guard let storyID = self.storyID else { return }
+        NovelSpeakerUtility.ShareStory(viewController: self, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), barButton: self.shareButtonItem)
     }
     
     @objc func urlRefreshButtonClicked(_ sender: UIBarButtonItem) {

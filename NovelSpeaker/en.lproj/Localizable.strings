@@ -363,6 +363,7 @@
 "NovelDetailViewController_ActionSection_EditNovelButton" = "Edit this novel";
 "NovelDetailViewController_LikeLevelStepperRowTitle" = "Degree of favorite (0-100)";
 "NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle" = "Do not check for updates to this novel";
+"NovelDetailViewController_ActionSection_ShareButton" = "Share the URL of this novel";
 
 
 "NovelKeywordTagSelectorViewController_Title" = "Select Tag";

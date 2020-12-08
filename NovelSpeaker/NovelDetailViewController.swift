@@ -281,6 +281,14 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 }
             })
             
+            if novel.type == .URL {
+                actionSection <<< ButtonRow() {
+                    $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_ShareButton", comment: "この小説のURLをシェアする")
+                }.onCellSelection({ (cellOf, row) in
+                    NovelSpeakerUtility.ShareStory(viewController: self, novelID: self.novelID, barButton: nil)
+                })
+            }
+            
             actionSection <<< ButtonRow() {
                 $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_EditNovelButton", comment: "この小説を編集する")
             }.onCellSelection({ (cellOf, row) in

@@ -339,6 +339,7 @@
 "NovelDetailViewController_ActionSection_EditNovelButton" = "この小説を編集する";
 "NovelDetailViewController_LikeLevelStepperRowTitle" = "お気に入り度合い(0〜100)";
 "NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle" = "この小説の更新確認を行わない";
+"NovelDetailViewController_ActionSection_ShareButton" = "この小説のURLをシェアする";
 
 "NovelKeywordTagSelectorViewController_Title" = "タグを選択";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "タグの追加";
