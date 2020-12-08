@@ -9,7 +9,4 @@
 #ifndef NovelSpeakerWatchApp_Bridging_Header_h
 #define NovelSpeakerWatchApp_Bridging_Header_h
 
-//#import "GlobalDataSingleton.h"
-#import <CommonCrypto/CommonHMAC.h>
-
 #endif /* NovelSpeakerWatchApp_Bridging_Header_h */

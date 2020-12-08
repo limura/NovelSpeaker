@@ -1636,6 +1636,7 @@ class NiftyUtility: NSObject {
         return result
     }
     
+    #if !os(watchOS)
     static func sha256(data: Data) -> Data {
         let nsData = NSData(data: data)
         var digest = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
@@ -1661,6 +1662,7 @@ class NiftyUtility: NSObject {
         guard let unzipedData = decryptedData.unzip() else { return nil }
         return String(data: unzipedData, encoding: .utf8)
     }
+    #endif
     
     // 通知を表示させます。
     static func InvokeNotificationNow(title:String, message:String, badgeNumber:Int) {
