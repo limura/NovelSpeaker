@@ -488,7 +488,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                 if novel.likeLevel > 0 {
                     novel.likeLevel = 0
                 }else{
-                    novel.likeLevel = 1
+                    novel.likeLevel = 10
                 }
             }
         }
