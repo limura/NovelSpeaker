@@ -653,7 +653,7 @@ class NovelSpeakerUtility: NSObject {
                     defaultSpeaker.voiceIdentifier = default_voice_identifier
                 }
                 if let content_sort_type = dic.value(forKey: "content_sort_type") as? NSNumber {
-                    globalState.bookShelfSortType = NarouContentSortType(rawValue: content_sort_type.uintValue) ?? NarouContentSortType.title
+                    globalState.bookShelfSortType = NarouContentSortType(rawValue: content_sort_type.intValue) ?? NarouContentSortType.Title
                 }
                 if let menuitem_is_add_speech_mod_setting_only = dic.value(forKey: "menuitem_is_add_speech_mod_setting_only") as? NSNumber {
                     globalState.isMenuItemIsAddNovelSpeakerItemsOnly = menuitem_is_add_speech_mod_setting_only.boolValue
@@ -686,7 +686,7 @@ class NovelSpeakerUtility: NSObject {
                     defaultDisplaySetting.fontID = display_font_name
                 }
                 if let repeat_speech_type = dic.value(forKey: "repeat_speech_type") as? NSNumber {
-                    globalState.repeatSpeechType = RepeatSpeechType(rawValue: repeat_speech_type.uintValue) ?? RepeatSpeechType.noRepeat
+                    globalState.repeatSpeechType = RepeatSpeechType(rawValue: repeat_speech_type.intValue) ?? RepeatSpeechType.NoRepeat
                 }
                 /* /// この設定はバックアップデータからの読み込みを停止します
                 if let is_escape_about_speech_position_display_bug_on_ios12_enabled = dic.value(forKey: "is_escape_about_speech_position_display_bug_on_ios12_enabled") as? NSNumber {
@@ -1361,7 +1361,7 @@ class NovelSpeakerUtility: NSObject {
                 if let isPageTurningSoundEnabled = dic.object(forKey: "isPageTurningSoundEnabled") as? NSNumber {
                     globalState.isPageTurningSoundEnabled = isPageTurningSoundEnabled.boolValue
                 }
-                if let m_BookSelfSortType = dic.object(forKey: "bookSelfSortType") as? NSNumber, let bookSelfSortType = NarouContentSortType(rawValue: UInt(m_BookSelfSortType.intValue)) {
+                if let m_BookSelfSortType = dic.object(forKey: "bookSelfSortType") as? NSNumber, let bookSelfSortType = NarouContentSortType(rawValue: Int(m_BookSelfSortType.intValue)) {
                     globalState.bookShelfSortType = bookSelfSortType
                 }
                 if let currentReadingNovelID = dic.object(forKey: "currentReadingNovelID") as? String {
@@ -1411,7 +1411,7 @@ class NovelSpeakerUtility: NSObject {
                     globalState.bookshelfViewButtonSettingArrayData = data
                 }
                 if let repeatSpeechType = dic.object(forKey: "repeatSpeechType") as? NSNumber {
-                    globalState.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.uintValue) ?? RepeatSpeechType.noRepeat
+                    globalState.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.intValue) ?? RepeatSpeechType.NoRepeat
                 }
                 if let isOverrideRubyIsEnabled = dic.object(forKey: "isOverrideRubyIsEnabled") as?   NSNumber {
                     globalState.isOverrideRubyIsEnabled = isOverrideRubyIsEnabled.boolValue
@@ -2297,15 +2297,15 @@ class NovelSpeakerUtility: NSObject {
     
     static func RepeatSpeechTypeToString(type:RepeatSpeechType) -> String? {
         switch type {
-        case .noRepeat:
+        case .NoRepeat:
             return NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない")
-        case .rewindToFirstStory:
+        case .RewindToFirstStory:
             return NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から")
-        case .rewindToThisStory:
+        case .RewindToThisStory:
             return NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章")
-        case .goToNextLikeNovel:
+        case .GoToNextLikeNovel:
             return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextLikeNovel", comment: "お気に入りのうち未読の物")
-        case .goToNextSameFolderdNovel:
+        case .GoToNextSameFolderdNovel:
             return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameFolderdNovel", comment: "指定フォルダの小説のうち未読の物")
         @unknown default:
             return nil
@@ -2314,21 +2314,21 @@ class NovelSpeakerUtility: NSObject {
     static func RepeatSpeechStringToType(typeString:String) -> RepeatSpeechType? {
         switch typeString {
         case NSLocalizedString("SettingTableViewController_RepeatType_NoRepeat", comment: "しない"):
-            return .noRepeat
+            return .NoRepeat
         case NSLocalizedString("SettingTableViewController_RepeatType_RewindToFirstStory", comment: "最初から"):
-            return .rewindToFirstStory
+            return .RewindToFirstStory
         case NSLocalizedString("SettingTableViewController_RepeatType_RewindToThisStory", comment: "一つの章"):
-            return .rewindToThisStory
+            return .RewindToThisStory
         case NSLocalizedString("SettingTableViewController_RepeatType_GoToNextLikeNovel", comment: "お気に入りのうち未読の物"):
-            return .goToNextLikeNovel
+            return .GoToNextLikeNovel
         case NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameFolderdNovel", comment: "指定フォルダの小説のうち未読の物"):
-            return .goToNextSameFolderdNovel
+            return .GoToNextSameFolderdNovel
         default:
             return nil
         }
     }
     static func GetAllRepeatSpeechStringType() -> [RepeatSpeechType] {
-        return [.noRepeat, .rewindToFirstStory, .rewindToThisStory, .goToNextLikeNovel, .goToNextSameFolderdNovel]
+        return [.NoRepeat, .RewindToFirstStory, .RewindToThisStory, .GoToNextLikeNovel, .GoToNextSameFolderdNovel]
     }
     
     /// 保存されているStoryを調べて、chapterNumber が 1 から順についている事を確認しつつ、

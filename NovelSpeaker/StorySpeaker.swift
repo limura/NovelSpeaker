@@ -1074,7 +1074,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
                 let repeatSpeechType = RealmGlobalState.GetInstanceWith(realm: realm)?.repeatSpeechType
-                if let repeatSpeechType = repeatSpeechType, repeatSpeechType == .rewindToThisStory {
+                if let repeatSpeechType = repeatSpeechType, repeatSpeechType == .RewindToThisStory {
                     self.setReadLocationWith(realm: realm, location: 0)
                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                     return
@@ -1094,7 +1094,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 }else{
                     let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
                     if let repeatSpeechType = repeatSpeechType {
-                        if repeatSpeechType == .rewindToFirstStory {
+                        if repeatSpeechType == .RewindToFirstStory {
                             if let firstStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
                                 // 何故か self.SetStory() した後に
                                 // self.readLocation = 0
@@ -1117,10 +1117,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 }
                                 return
                             }
-                        }else if repeatSpeechType == .goToNextLikeNovel, let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "likeLevel", ascending: false).filter({$0.likeLevel > 0 && $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}), let novel = filterdNovelArray.first, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) {
+                        }else if repeatSpeechType == .GoToNextLikeNovel, let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(byKeyPath: "likeLevel", ascending: false).filter({$0.likeLevel > 0 && $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}), let novel = filterdNovelArray.first, let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) {
                             speechNextNovelWith(realm: realm, title: novel.title, story: story)
                             return
-                        }else if repeatSpeechType == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Folder) {
+                        }else if repeatSpeechType == .GoToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Folder) {
                             for folder in folderArray {
                                 if let novelDictionary = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: Array(folder.targetNovelIDArray))?.filter({ (novel) in
                                     if novel.novelID == novelID { return false }

@@ -209,20 +209,20 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
 #endif
 
-+ (NSString*)SortTypeToSortAttributeName:(NarouContentSortType)sortType
++ (NSString*)SortTypeToSortAttributeName:(int)sortType
 {
     NSString* sortAttributeName = @"novelupdated_at";
     switch (sortType) {
-        case NarouContentSortType_NovelUpdatedAt:
+        case NarouContentSortTypeNovelUpdatedAt:
             sortAttributeName = @"novelupdated_at";
             break;
-        case NarouContentSortType_Title:
+        case NarouContentSortTypeTitle:
             sortAttributeName = @"title";
             break;
-        case NarouContentSortType_Writer:
+        case NarouContentSortTypeWriter:
             sortAttributeName = @"writer";
             break;
-        case NarouContentSortType_Ncode:
+        case NarouContentSortTypeNcode:
             sortAttributeName = @"ncode";
             break;
         default:
@@ -234,7 +234,7 @@ static DummySoundLooper* dummySoundLooper = nil;
 
 /// NarouContent の全てを NarouContentCacheData の NSArray で取得します
 /// novelupdated_at で sort されて返されます。
-- (NSArray*) GetAllNarouContent:(NarouContentSortType)sortType
+- (NSArray*) GetAllNarouContent:(int)sortType
 {
     __block NSError* err;
     __block NSMutableArray* fetchResults = nil;
@@ -732,9 +732,9 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
 
 /// 本棚のソートタイプを取得します
-- (NarouContentSortType)GetBookSelfSortType {
+- (int)GetBookSelfSortType {
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults registerDefaults:@{USER_DEFAULTS_BOOKSELF_SORT_TYPE: [[NSNumber alloc] initWithInteger: NarouContentSortType_Title]}];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_BOOKSELF_SORT_TYPE: [[NSNumber alloc] initWithInteger: NarouContentSortTypeTitle]}];
     NSInteger sortTypeInteger = [userDefaults integerForKey:USER_DEFAULTS_BOOKSELF_SORT_TYPE];
     NarouContentSortType sortType = sortTypeInteger;
     return sortType;
@@ -873,16 +873,16 @@ static DummySoundLooper* dummySoundLooper = nil;
 }
 
 /// リピート再生の設定を取得します
-- (RepeatSpeechType)GetRepeatSpeechType{
+- (int)GetRepeatSpeechType{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults registerDefaults:@{USER_DEFAULTS_REPEAT_SPEECH_TYPE: [[NSNumber alloc] initWithInt:RepeatSpeechType_NoRepeat]}];
+    [userDefaults registerDefaults:@{USER_DEFAULTS_REPEAT_SPEECH_TYPE: [[NSNumber alloc] initWithInt:RepeatSpeechTypeNoRepeat]}];
     NSInteger type = [userDefaults integerForKey:USER_DEFAULTS_REPEAT_SPEECH_TYPE];
-    if (type != RepeatSpeechType_NoRepeat
-        && type != RepeatSpeechType_RewindToFirstStory
-        && type != RepeatSpeechType_RewindToThisStory) {
-        type = RepeatSpeechType_NoRepeat;
+    if (type != RepeatSpeechTypeNoRepeat
+        && type != RepeatSpeechTypeRewindToFirstStory
+        && type != RepeatSpeechTypeRewindToThisStory) {
+        type = RepeatSpeechTypeNoRepeat;
     }
-    return type;
+    return (int)type;
 }
 
 /// 起動時に前回開いていた小説を開くか否かの設定を取得します

@@ -511,7 +511,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.title = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
                 row.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
                 row.options = NovelSpeakerUtility.GetAllRepeatSpeechStringType().map({NovelSpeakerUtility.RepeatSpeechTypeToString(type: $0) ?? ""})
-                row.value = NovelSpeakerUtility.RepeatSpeechTypeToString(type: .noRepeat)
+                row.value = NovelSpeakerUtility.RepeatSpeechTypeToString(type: .NoRepeat)
                 row.cell.textLabel?.numberOfLines = 0
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
@@ -523,7 +523,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ (row) in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.RepeatSpeechStringToType(typeString: typeString) else { return }
-                    if type == .goToNextSameFolderdNovel, let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder), folderArray.count <= 0, let typeString = NovelSpeakerUtility.RepeatSpeechTypeToString(type: globalState.repeatSpeechType) {
+                    if type == .GoToNextSameFolderdNovel, let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder), folderArray.count <= 0, let typeString = NovelSpeakerUtility.RepeatSpeechTypeToString(type: globalState.repeatSpeechType) {
                         DispatchQueue.main.async {
                             row.value = typeString
                             row.updateCell()

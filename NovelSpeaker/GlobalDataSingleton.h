@@ -19,6 +19,7 @@
 #import "CoreDataObjectHolder.h"
 #import "SpeechWaitConfigCacheData.h"
 
+#if 0
 typedef NS_ENUM(NSUInteger,NarouContentSortType) {
     NarouContentSortType_NovelUpdatedAt = 0,
     NarouContentSortType_Title,
@@ -30,7 +31,9 @@ typedef NS_ENUM(NSUInteger,NarouContentSortType) {
     NarouContentSortType_LastReadDate,
     NarouContentSortType_LikeLevel,
 };
+#endif
 
+#if 0
 /// 繰り返し再生の対象タイプ
 typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
     RepeatSpeechType_NoRepeat = 0, // 繰り返し再生はしない
@@ -39,6 +42,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
     RepeatSpeechType_GoToNextLikeNovel = 3, // 「お気に入り」に登録されている小説のうち、未読の物に切り替えて再生する
     RepeatSpeechType_GoToNextSameFolderdNovel = 4, // 同じ「フォルダ」に登録されている小説のうち、未読のものに切り替えて再生する
 };
+#endif
 
 /// 全体で共有するようなデータを保持させちゃいます！(ﾟ∀ﾟ)
 @interface GlobalDataSingleton : NSObject
@@ -98,7 +102,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 
 /// NarouContent の全てを NSArray で取得します
 /// novelupdated_at で sort されて返されます。
-- (NSArray*) GetAllNarouContent:(NarouContentSortType)sortType;
+- (NSArray*) GetAllNarouContent:(int)sortType;
 
 /// 指定された ncode の小説で、保存されている Story を全て取得します。
 - (NSArray*)GeAllStoryForNcode:(NSString*)ncode;
@@ -138,7 +142,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 - (NSString*)GetVoiceIdentifier;
 
 /// 本棚のソートタイプを取得します
-- (NarouContentSortType)GetBookSelfSortType;
+- (int)GetBookSelfSortType;
 
 /// 新規小説の自動ダウンロード機能のON/OFF状態を取得します
 - (BOOL)GetBackgroundNovelFetchEnabled;
@@ -186,7 +190,7 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 - (BOOL)IsLicenseReaded;
 
 /// リピート再生の設定を取得します
-- (RepeatSpeechType)GetRepeatSpeechType;
+- (int)GetRepeatSpeechType;
 
 /// 起動時に前回開いていた小説を開くか否かの設定を取得します
 - (BOOL)IsOpenRecentNovelInStartTime;

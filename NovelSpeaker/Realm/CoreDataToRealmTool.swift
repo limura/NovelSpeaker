@@ -70,11 +70,11 @@ class CoreDataToRealmTool: NSObject {
         RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: globalDataSingleton.getForceSiteInfoReloadIsEnabled())
         realmState.isMenuItemIsAddNovelSpeakerItemsOnly = globalDataSingleton.getMenuItemIsAddSpeechModSettingOnly()
         //realmState.isBackgroundNovelFetchEnabled = globalDataSingleton.getBackgroundNovelFetchEnabled()
-        realmState.bookShelfSortType = globalDataSingleton.getBookSelfSortType()
+        realmState.bookShelfSortType = NarouContentSortType(rawValue: Int(globalDataSingleton.getBookSelfSortType())) ?? .Title
         realmState.isPageTurningSoundEnabled = globalDataSingleton.isPageTurningSoundEnabled()
         realmState.backgroundColor = globalDataSingleton.getReadingColorSettingForBackgroundColor()
         realmState.foregroundColor = globalDataSingleton.getReadingColorSettingForForegroundColor()
-        realmState.repeatSpeechType = globalDataSingleton.getRepeatSpeechType()
+        realmState.repeatSpeechType = RepeatSpeechType(rawValue: Int(globalDataSingleton.getRepeatSpeechType())) ?? RepeatSpeechType.NoRepeat
         realmState.isOverrideRubyIsEnabled = globalDataSingleton.getOverrideRubyIsEnabled()
         realmState.notRubyCharactorStringArray = globalDataSingleton.getNotRubyCharactorStringArray()
         realmState.isIgnoreURIStringSpeechEnabled = globalDataSingleton.getIsIgnoreURIStringSpeechEnabled()
@@ -258,7 +258,7 @@ class CoreDataToRealmTool: NSObject {
     }
     
     private static func CreateRealmNovelFromCoreData(realm: Realm, globalDataSingleton:GlobalDataSingleton, progress:(String)->Void) -> [HTTPCookie] {
-        guard let novelArray = globalDataSingleton.getAllNarouContent(.ncode) else {
+        guard let novelArray = globalDataSingleton.getAllNarouContent(Int32(NarouContentSortType.Ncode.rawValue)) else {
             return []
         }
         var count = 0

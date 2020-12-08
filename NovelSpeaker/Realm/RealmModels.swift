@@ -1958,6 +1958,28 @@ extension HTTPCookie {
     case textView = 1
 }
 
+/// 本棚の並び替え順
+@objc enum NarouContentSortType: Int {
+    case NovelUpdatedAt = 0
+    case Title = 1
+    case Writer = 2
+    case Ncode = 3
+    case SelfCreatedFolder = 4
+    case KeywordTag = 5
+    case NovelUpdatedAtWithFolder = 6
+    case LastReadDate = 7
+    case LikeLevel = 8
+}
+
+/// 繰り返し再生の対象タイプ
+@objc enum RepeatSpeechType: Int {
+    case NoRepeat = 0 // 繰り返し再生はしない
+    case RewindToFirstStory = 1 // 全ての章が対象(全ての章を読み終えたら最初の章に戻る)
+    case RewindToThisStory = 2 // 一つの章が対象(一つの章を読み終えたらその章の最初に戻る)
+    case GoToNextLikeNovel = 3 // 「お気に入り」に登録されている小説のうち、未読の物に切り替えて再生する
+    case GoToNextSameFolderdNovel = 4 // 同じ「フォルダ」に登録されている小説のうち、未読のものに切り替えて再生する
+}
+
 @objc final class RealmGlobalState: Object {
     static public let UniqueID = "only one object"
     @objc dynamic var id = UniqueID
@@ -1976,7 +1998,7 @@ extension HTTPCookie {
     @objc dynamic var isReadingProgressDisplayEnabled = false
     @objc dynamic var isMenuItemIsAddNovelSpeakerItemsOnly = false
     @objc dynamic var isPageTurningSoundEnabled = false
-    @objc dynamic var m_bookSelfSortType : Int = Int(NarouContentSortType.ncode.rawValue)
+    @objc dynamic var m_bookSelfSortType : Int = Int(NarouContentSortType.Title.rawValue)
     @objc dynamic var IsDisallowsCellularAccess = false
     @objc dynamic var IsNeedConfirmDeleteBook = false
     @objc dynamic var fgColor = Data()
@@ -1994,7 +2016,7 @@ extension HTTPCookie {
     @objc dynamic var cookieArrayData = Data()
     @objc dynamic var m_DisplayType : Int = NovelDisplayType.textView.rawValue
     @objc dynamic var bookshelfViewButtonSettingArrayData = Data()
-    @objc dynamic var m_repeatSpeechType : Int = Int(RepeatSpeechType.noRepeat.rawValue)
+    @objc dynamic var m_repeatSpeechType : Int = Int(RepeatSpeechType.NoRepeat.rawValue)
     @objc dynamic var isOverrideRubyIsEnabled = false
     @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
     @objc dynamic var isIgnoreURIStringSpeechEnabled = false
@@ -2012,7 +2034,7 @@ extension HTTPCookie {
     
     var bookShelfSortType : NarouContentSortType {
         get {
-            return NarouContentSortType(rawValue: UInt(m_bookSelfSortType)) ?? NarouContentSortType.ncode
+            return NarouContentSortType(rawValue: Int(m_bookSelfSortType)) ?? NarouContentSortType.Title
         }
         set {
             m_bookSelfSortType = Int(newValue.rawValue)
@@ -2029,7 +2051,7 @@ extension HTTPCookie {
     }
     var repeatSpeechType : RepeatSpeechType {
         get {
-            return RepeatSpeechType(rawValue: UInt(m_repeatSpeechType)) ?? RepeatSpeechType.noRepeat
+            return RepeatSpeechType(rawValue: Int(m_repeatSpeechType)) ?? RepeatSpeechType.NoRepeat
         }
         set {
             m_repeatSpeechType = Int(newValue.rawValue)
