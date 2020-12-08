@@ -34,7 +34,9 @@ class BehaviorLogger: NSObject {
         } catch {
             return;
         }
+        #if !os(watchOS)
         GlobalDataSingleton.getInstance()?.addLogString(logJSONString)
+        #endif
         if !LOGGER_ENABLED {
             return
         }

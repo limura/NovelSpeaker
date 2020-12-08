@@ -2398,10 +2398,12 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
+    #if !os(watchOS)
     /// CoreData側の sqlite ファイルを削除します
     static func RemoveCoreDataDataFile() {
         GlobalDataSingleton.getInstance()?.removeCoreDataDataFile()
     }
+    #endif
     
     fileprivate static let isUseWebSearchTabDisabledSite_Key = "isUseWebSearchTabDisabledSite_Key"
     static var isUseWebSearchTabDisabledSite: Bool {

@@ -36,24 +36,16 @@
 		212137CF24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */; };
 		212323F522B7049E00543543 /* RealmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212323F422B7049E00543543 /* RealmTests.swift */; };
 		2123240E22B7101000543543 /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2195FBC41D2FD14A00ADDCAB /* libxml2.2.tbd */; };
-		2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916377199F1463003FF7FC /* SpeechModSettingCacheData.m */; };
 		2124B38523BBEE38002EBC31 /* NiftyUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214141CF1FC0A1C30076DEC2 /* NiftyUtility.swift */; };
 		2124B38D23BBF2E7002EBC31 /* NovelSpeakerUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E975B522983D2F0027A0A0 /* NovelSpeakerUtility.swift */; };
 		2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C759F92287123500956B73 /* RealmModels.swift */; };
 		2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		2124B39023BBF392002EBC31 /* NovelSpeakerNotificationTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBA2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift */; };
-		2124B39123BBF4C3002EBC31 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
 		2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
-		2124B39423BBF9FC002EBC31 /* SpeakPitchConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191636E199E6610003FF7FC /* SpeakPitchConfigCacheData.m */; };
-		2124B39523BBFA04002EBC31 /* SpeechWaitConfigCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 213A4DC81A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m */; };
-		2124B39623BBFA0B002EBC31 /* StoryCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21724EEE1974163700DF6DC4 /* StoryCacheData.m */; };
-		2124B39723BBFA10002EBC31 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
-		2124B39823BBFAF4002EBC31 /* GlobalStateCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 2177635019756781004F22FD /* GlobalStateCacheData.m */; };
 		2124B39923BBFB7A002EBC31 /* CoreDataObjectHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = 2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */; };
 		2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = 21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */; };
 		2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800B2290F3F900A183DF /* StorySpeaker.swift */; };
 		2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */; };
-		2124B39E23BBFCDA002EBC31 /* SpeechModSetting.m in Sources */ = {isa = PBXBuildFile; fileRef = 21916374199F143E003FF7FC /* SpeechModSetting.m */; };
 		2124B3A023BC37EE002EBC31 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B39F23BC37EE002EBC31 /* CloudKit.framework */; };
 		2124B3A223BC37F7002EBC31 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B3A123BC37F7002EBC31 /* AVFoundation.framework */; };
 		2124B3A423BC37FD002EBC31 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B3A323BC37FD002EBC31 /* libz.tbd */; };
@@ -1686,9 +1678,6 @@
 			files = (
 				21949BD723EEBA6100BCC5B9 /* WKInterfaceVolumeControlView.swift in Sources */,
 				2193094923BBE56A00035EF0 /* HostingController.swift in Sources */,
-				2124B39623BBFA0B002EBC31 /* StoryCacheData.m in Sources */,
-				2124B39E23BBFCDA002EBC31 /* SpeechModSetting.m in Sources */,
-				2124B39123BBF4C3002EBC31 /* GlobalDataSingleton.m in Sources */,
 				21652E6B23EDB8F300B64F9E /* SpeechContorlView.swift in Sources */,
 				21949BD523EDE75A00BCC5B9 /* NovelSupportMenuView.swift in Sources */,
 				214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */,
@@ -1698,21 +1687,16 @@
 				215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */,
 				2124B39C23BBFBE7002EBC31 /* DuplicateSoundPlayer.swift in Sources */,
 				2124B39223BBF544002EBC31 /* DummySoundLooper.swift in Sources */,
-				2124B39723BBFA10002EBC31 /* NarouContentCacheData.m in Sources */,
 				215BFB4223EDB15F0078E158 /* SystemIconButtonView.swift in Sources */,
 				2193094723BBE56A00035EF0 /* ContentView.swift in Sources */,
 				219CCF4924BC7FFA00AE35A9 /* StoryFetcher.swift in Sources */,
 				2100A42C2496441500F54A5D /* MultiVoiceSpeaker.swift in Sources */,
-				2124B37F23BBEB47002EBC31 /* SpeechModSettingCacheData.m in Sources */,
-				2124B39423BBF9FC002EBC31 /* SpeakPitchConfigCacheData.m in Sources */,
-				2124B39523BBFA04002EBC31 /* SpeechWaitConfigCacheData.m in Sources */,
 				2193094D23BBE56A00035EF0 /* NotificationController.swift in Sources */,
 				2124B38D23BBF2E7002EBC31 /* NovelSpeakerUtility.swift in Sources */,
 				2193094B23BBE56A00035EF0 /* ExtensionDelegate.swift in Sources */,
 				21D7B110256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
 				2124B39923BBFB7A002EBC31 /* CoreDataObjectHolder.m in Sources */,
 				21B56C69257F77F10065EDD4 /* UIImageExtensionSwift.swift in Sources */,
-				2124B39823BBFAF4002EBC31 /* GlobalStateCacheData.m in Sources */,
 				2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */,
 				217DCC5325121FA400952A17 /* RealmObserverHandler.swift in Sources */,
 				2193094F23BBE56A00035EF0 /* NotificationView.swift in Sources */,
