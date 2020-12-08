@@ -2429,6 +2429,7 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
+    #if !os(watchOS)
     static func ShareStory(viewController:UIViewController, novelID:String, barButton:UIBarButtonItem?) {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else {
@@ -2444,6 +2445,6 @@ class NovelSpeakerUtility: NSObject {
             let message = String(format: NSLocalizedString("SpeechViewController_TweetMessage", comment: "%@ %@ #ことせかい %@ %@"), novel.title, novel.writer, urlString, "https://itunes.apple.com/jp/app/kotosekai-xiao-shuo-jianinarou/id914344185")
             NiftyUtility.Share(message: message, viewController: viewController, barButton: barButton)
         }
-
     }
+    #endif
 }

@@ -906,6 +906,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     return [userDefaults boolForKey:USER_DEFAULTS_IS_NEED_CONFIRM_DELETE_BOOK];
 }
 
+#if TARGET_OS_WATCH == 0
 /// 小説を読む部分での表示色設定を読み出します(背景色分)。標準設定の場合は nil が返ります。
 - (UIColor*)GetReadingColorSettingForBackgroundColor{
     // 標準では JSON を入れておかずに JSON からの変換に失敗させます。
@@ -974,6 +975,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return [[UIColor alloc] initWithRed:red green:green blue:blue alpha:alpha];
 }
+#endif // TARGET_OS_WATCH == 0
 /// 一度読んだ事のあるプライバシーポリシーを取得します(読んだことがなければ @"" が取得されます)
 - (NSString*)GetReadedPrivacyPolicy{
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];

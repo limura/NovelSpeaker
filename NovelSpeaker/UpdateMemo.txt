@@ -8,7 +8,7 @@
 
 ことせかい 更新履歴
 
-Version 2.* では Version 1.* から多数の変更点がありますので、初めて Version 2.* を導入する場合は事前に以下の文章を深く読み込んだ上でご参加いただけますようお願いいたします。
+Version 2.* では Version 1.* から多数の変更点がありますので、初めて Version 2.* を導入する場合は事前に以下のURLの内容を深く読み込んだ上でご参加いただけますようお願いいたします。
 https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/Version2.0TestIntroduction.txt
 
 Version 2.0.0 (2.0.2)
