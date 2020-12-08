@@ -19,7 +19,7 @@
 #if TARGET_OS_WATCH == 0
 #import "NovelSpeaker-Swift.h"
 //#import "UIViewControllerExtension.h"
-#import "UIImageExtension.h"
+//#import "UIImageExtension.h"
 #else
 #import "NovelSpeakerWatchApp-Bridging-Header.h"
 #endif

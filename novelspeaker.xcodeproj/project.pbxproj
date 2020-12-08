@@ -184,7 +184,6 @@
 		21A291F822A3F9DA000AA58C /* NovelDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A291F722A3F9DA000AA58C /* NovelDetailViewController.swift */; };
 		21A2CDBB2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBA2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift */; };
 		21A2CDC022947D140080AEE6 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
-		21A4C75124EF9AF300038883 /* UIImageExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C372DC21DFC41600FB2D52 /* UIImageExtension.m */; };
 		21A4C75624F6776500038883 /* NovelDownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */; };
 		21AA7FCF25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AA7FCE25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift */; };
 		21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */; };
@@ -542,8 +541,6 @@
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
 		21B96ED32338124100112B5F /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ja-JP"; path = "ja-JP.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		21BB5095253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechViewButtonSettingsViewController.swift; sourceTree = "<group>"; };
-		21C372DB21DFC41600FB2D52 /* UIImageExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UIImageExtension.h; sourceTree = "<group>"; };
-		21C372DC21DFC41600FB2D52 /* UIImageExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UIImageExtension.m; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
 		21C74F941964502A0039A706 /* arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@2x.png"; sourceTree = "<group>"; };
 		21C74F9C1965A5300039A706 /* NarouContentCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContentCacheData.h; sourceTree = "<group>"; };
@@ -913,8 +910,6 @@
 				2191639E19AF7E98003FF7FC /* CoreDataObjectHolder.m */,
 				21D8FC4D19FC985B00CCF1B6 /* LPPerformanceChecker.h */,
 				21D8FC4E19FC985B00CCF1B6 /* LPPerformanceChecker.m */,
-				21C372DB21DFC41600FB2D52 /* UIImageExtension.h */,
-				21C372DC21DFC41600FB2D52 /* UIImageExtension.m */,
 				21E76BF81FB487B1003C659F /* EasyDialogs.swift */,
 				21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */,
 				2167419F2043D592008A578D /* BehaviorLogger.swift */,
@@ -1698,7 +1693,6 @@
 				21949BD523EDE75A00BCC5B9 /* NovelSupportMenuView.swift in Sources */,
 				214A400223D88EEC0034DFB2 /* Speaker.swift in Sources */,
 				210EFEDD23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
-				21A4C75124EF9AF300038883 /* UIImageExtension.m in Sources */,
 				212137CF24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */,
 				214E60D825493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */,
 				215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */,
