@@ -230,6 +230,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
         case .LikeLevel:
             return Array(allNovels.sorted(byKeyPath: "likeLevel", ascending: false))
+        case .WebSite:
+            return Array(allNovels.sorted(by: { (a, b) -> Bool in
+                guard let ah = URL(string: a.novelID)?.host, let bh = URL(string: b.novelID)?.host else {
+                    return a.novelID < b.novelID
+                }
+                return ah < bh
+            }))
         case .Title:
             fallthrough
         case .SelfCreatedFolder:
@@ -471,6 +478,60 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return result
         }
     }
+    
+    func HostStringToLocalizedString(host:String) -> String {
+        let convertTable:[String:String] = [
+            "novelspeaker.example.com": NSLocalizedString("BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com", comment: "自作小説"),
+        ]
+        guard let name = convertTable[host] else { return host }
+        return name
+    }
+    
+    // Webサイト(host)で並べ替えます
+    func createWebSiteBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
+        return RealmUtil.RealmBlock { (realm) -> [BookShelfRATreeViewCellData] in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.WebSite) else { return [] }
+            let hosts = novels.map { (novel) -> String in
+                guard let host = URL(string: novel.novelID)?.host else { return NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)") }
+                return host
+            }.reduce([], {$0.contains($1) ? $0 : $0 + [$1]}).sorted()
+            var result = [BookShelfRATreeViewCellData]()
+            var listedNovelIDSet = Set<String>()
+            for host in hosts {
+                let folder = BookShelfRATreeViewCellData()
+                folder.childrens = [BookShelfRATreeViewCellData]()
+                folder.title = HostStringToLocalizedString(host: host)
+                for novel in novels.filter({ (novel) -> Bool in
+                    guard let novelHost = URL(string: novel.novelID)?.host else { return false }
+                    return novelHost == host
+                }).sorted(by: {$0.title < $1.title}) {
+                    let data = BookShelfRATreeViewCellData()
+                    data.novelID = novel.novelID
+                    data.title = novel.title
+                    folder.childrens?.append(data)
+                    listedNovelIDSet.insert(novel.novelID)
+                }
+                result.append(folder)
+            }
+            result.sort(by: { (a, b) -> Bool in
+                a.title! < b.title!
+            })
+            let noListedNovels = novels.filter({listedNovelIDSet.contains($0.novelID) == false})
+            if noListedNovels.count > 0 {
+                let folder = BookShelfRATreeViewCellData()
+                folder.title = NSLocalizedString("BookShelfRATreeViewController_BookshelfNoListed", comment: "(未分類)")
+                folder.childrens = [BookShelfRATreeViewCellData]()
+                for novel in noListedNovels {
+                    let data = BookShelfRATreeViewCellData()
+                    data.title = novel.title
+                    data.novelID = novel.novelID
+                    folder.childrens?.append(data)
+                }
+                result.append(folder)
+            }
+            return result
+        }
+    }
 
     func getBookShelfRATreeViewCellDataTree() -> [BookShelfRATreeViewCellData] {
         var sortType:NarouContentSortType = .Title
@@ -496,6 +557,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return createBookShelfKeywordTagRATreeViewCellDataTree()
         case .LikeLevel:
             return createLikeLevelBookShelfRATreeViewCellDataTreeWithoutFolder()
+        case .WebSite:
+            return createWebSiteBookShelfRATreeViewCellDataTree()
         default:
             break
         }
@@ -580,6 +643,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeUpdateDateWithFilder", comment: "最終ダウンロード順(フォルダ分類版)"): NarouContentSortType.NovelUpdatedAtWithFolder
             , NSLocalizedString("BookShelfRATreeViewController_StoryTypeLastReadDate", comment: "小説を開いた日時順"): NarouContentSortType.LastReadDate
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeLikeLevel", comment: "お気に入り順"): NarouContentSortType.LikeLevel
+            , NSLocalizedString("BookShelfRATreeViewController_SorteTypeWebSite", comment: "Webサイト順"): NarouContentSortType.WebSite
         ]
     }
 

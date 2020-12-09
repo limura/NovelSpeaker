@@ -1969,6 +1969,7 @@ extension HTTPCookie {
     case NovelUpdatedAtWithFolder = 6
     case LastReadDate = 7
     case LikeLevel = 8
+    case WebSite = 9
 }
 
 /// 繰り返し再生の対象タイプ

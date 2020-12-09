@@ -613,6 +613,8 @@
 "BookShelfRATreeViewController_WaitingiCloudSync_Message" = "Waiting for data sync on iCloud...\nWhen synchronization is complete, playback will start automatically. (Note that the completion judgment may fail)";
 "BookShelfRATreeViewController_WaitingiCloudSync_DismissButton" = "Start playback without waiting for synchronization";
 "BookShelfRATreeViewController_WaitingiCloudSync_CancelButton" = "Cancel playback";
+"BookShelfRATreeViewController_SorteTypeWebSite" = "Web site order";
+"BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com" = "Self-made novel";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
