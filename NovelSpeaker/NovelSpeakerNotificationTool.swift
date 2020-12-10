@@ -21,8 +21,6 @@ extension Notification.Name {
         static let GlobalStateChanged = Notification.Name("NovelSpeaker_Notification_GlobalStateChanged")
         // 利用する Realm の設定等が変わった時(localRelam から cloud realm になった等)
         static let RealmSettingChanged = Notification.Name("NovelSpeaker_Notification_RealmSettingChanged")
-        // お気に入りレベルが変わった時
-        static let LikeLevelChanged = Notification.Name("NovelSpeaker_Notification_LikeLevelChanged")
     }
 }
 extension Notification {
@@ -85,12 +83,6 @@ class NovelSpeakerNotificationTool {
     static func AnnounceRealmSettingChanged() {
         let notificationCenter = NotificationCenter.default
         let notification = Notification(name: Notification.Name.NovelSpeaker.RealmSettingChanged)
-        notificationCenter.post(notification)
-    }
-    
-    static func AnnounceLikeLevelChanged() {
-        let notificationCenter = NotificationCenter.default
-        let notification = Notification(name: Notification.Name.NovelSpeaker.LikeLevelChanged)
         notificationCenter.post(notification)
     }
 }

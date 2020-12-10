@@ -265,7 +265,6 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                     for property in properties {
                         if property.name == "likeLevel", let likeLevel = property.newValue as? Int {
                             self.applyLikeStarStatus(likeLevel: likeLevel, novelID: novelID)
-                            NovelSpeakerNotificationTool.AnnounceLikeLevelChanged()
                         }
                         if property.name == "m_readingChapterStoryID" /*|| property.name == "m_readingChapterReadingPoint" || property.name == "m_readingChapterContentCount"*/ {
                             self.applyCurrentReadingPointToIndicator(novelID: novelID)

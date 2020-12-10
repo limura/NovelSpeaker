@@ -155,11 +155,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 self.registObserver()
             }
         }
-        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.LikeLevelChanged, queue: .main) { (notification) in
-            DispatchQueue.main.async {
-                self.reloadAllData()
-            }
-        }
     }
     
     func unregistNotificationCenter() {
