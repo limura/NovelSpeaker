@@ -28,6 +28,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
     var novelArrayObserverToken: NotificationToken? = nil
     var bookmarkObserverToken: NotificationToken? = nil
     var watchNovelIDArray:[String] = []
+    var hasChildFolder:Bool = false
     
     static let staticRealmQueue:DispatchQueue? = DispatchQueue(label: "NovelSpeakerBookShelfTableCellQueue")
     let realmQueue:DispatchQueue? = BookShelfTreeViewCell.staticRealmQueue
@@ -367,7 +368,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
             let isDisplay = globalState.isReadingProgressDisplayEnabled
             DispatchQueue.main.async {
-                if isDisplay && self.watchNovelIDArray.count == 1 {
+                if isDisplay && self.hasChildFolder == false {
                     self.readProgressView.isHidden = false
                 }else{
                     self.readProgressView.isHidden = true
@@ -383,7 +384,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                         if property.name == "isReadingProgressDisplayEnabled" {
                             if let isDisplayEnabled = property.newValue as? Bool {
                                 DispatchQueue.main.async {
-                                    if isDisplayEnabled && self.watchNovelIDArray.count == 1 {
+                                    if isDisplayEnabled && self.hasChildFolder == false {
                                         self.readProgressView.isHidden = false
                                     }else{
                                         self.readProgressView.isHidden = true
@@ -443,6 +444,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
             self.deactivateNewImageView()
         }
         assignObservers()
+        self.hasChildFolder = false
         self.readProgressView.isHidden = false
         applyCurrentReadingPointToIndicatorWith(novel: novel)
         applyLikeStarStatus(novel: novel)
@@ -461,16 +463,9 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
         self.checkAndUpdateNewImage(novelIDArray: watchNovelIDArray)
         assignObservers()
-        if watchNovelIDArray.count == 1 {
-            let novelID = watchNovelIDArray[0]
-            self.readProgressView.isHidden = false
-            applyCurrentReadingPointToIndicator(novelID: novelID)
-            applyLikeStarStatus(novelID: novelID)
-            self.likeButton.isHidden = false
-        }else{
-            self.readProgressView.isHidden = true
-            self.likeButton.isHidden = true
-        }
+        self.hasChildFolder = true
+        self.readProgressView.isHidden = true
+        self.likeButton.isHidden = true
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
         RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
