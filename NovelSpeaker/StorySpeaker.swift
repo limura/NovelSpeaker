@@ -692,11 +692,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }
         }
     }
-    
-    func ringPageTurningSound() {
-        RealmUtil.RealmBlock { (realm) -> Void in
-            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.isPageTurningSoundEnabled == true else { return }
+
+    /// ページめくりの音を鳴らす場合はtrueを返します
+    @discardableResult
+    func ringPageTurningSound() -> Bool {
+        return RealmUtil.RealmBlock { (realm) -> Bool in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.isPageTurningSoundEnabled == true else { return false }
             self.pageTurningSoundPlayer.startPlay()
+            return true
         }
     }
     
@@ -1050,13 +1053,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     }
     
     func finishSpeak() {
+        let nextStorySpeechWaitSecond = 0.5
         func speechNextNovelWith(realm:Realm, title:String, story:Story) {
             self.StopSpeech(realm: realm)
             self.AnnounceSpeech(text: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), title)) {
                 DispatchQueue.main.async {
                     self.ringPageTurningSound()
                     self.SetStory(story: story, withUpdateReadDate: true) { (story) in
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + nextStorySpeechWaitSecond) {
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                             }
@@ -1084,7 +1088,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         }
                     }
                     self.SetStory(story: nextStory, withUpdateReadDate: true, completion: { (story) in
-                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + nextStorySpeechWaitSecond) {
+                            self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                        }
                     })
                 }else{
                     let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
@@ -1102,7 +1108,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                     DispatchQueue.main.async {
                                         self.ringPageTurningSound()
                                         self.SetStory(story: firstStory, withUpdateReadDate: true) { (story) in
-                                            DispatchQueue.main.async {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + nextStorySpeechWaitSecond) {
                                                 RealmUtil.RealmBlock { (realm) -> Void in
                                                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
                                                 }
