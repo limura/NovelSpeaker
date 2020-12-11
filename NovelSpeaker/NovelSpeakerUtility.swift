@@ -358,8 +358,10 @@ class NovelSpeakerUtility: NSObject {
             }
             return false
         }
+        let isSecureURL = url.startAccessingSecurityScopedResource()
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
+            defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
@@ -379,8 +381,10 @@ class NovelSpeakerUtility: NSObject {
             }
             return false
         }
+        let isSecureURL = url.startAccessingSecurityScopedResource()
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
+            defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
@@ -400,8 +404,10 @@ class NovelSpeakerUtility: NSObject {
             }
             return false
         }
+        let isSecureURL = url.startAccessingSecurityScopedResource()
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
+            defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
@@ -411,8 +417,10 @@ class NovelSpeakerUtility: NSObject {
     #if !os(watchOS)
     static func ProcessTextFile(url:URL) -> Bool {
         guard let data = try? Data(contentsOf: url), let text = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data)) else { return false }
+        let isSecureURL = url.startAccessingSecurityScopedResource()
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
+            defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
@@ -423,9 +431,6 @@ class NovelSpeakerUtility: NSObject {
     #if !os(watchOS)
     @objc public static func ProcessURL(url:URL?) -> Bool {
         guard let url = url else { return false }
-        /* let isSecurityScopedURL */ _ = url.startAccessingSecurityScopedResource()
-        defer { url.stopAccessingSecurityScopedResource()}
-
         if let scheme = url.scheme, scheme == "novelspeaker" || scheme == "limuraproducts.novelspeaker" {
             return ProcessNovelSpeakerURLScheme(url: url)
         }
@@ -889,21 +894,28 @@ class NovelSpeakerUtility: NSObject {
                 var no = 0
                 var storyArray:[Story] = []
                 repeat {
-                    no += 1
-                    let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
-                    guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data))  else { break }
-                    var story = Story()
-                    story.novelID = novelID
-                    story.chapterNumber = no
-                    story.content = NormalizeNewlineString(string: content)
-                    if no == currentReadingChapterNumber {
-                        realmNovel.m_readingChapterContentCount = story.content.count
+                    var result:Bool = false
+                    autoreleasepool {
+                        no += 1
+                        let targetFilePath = contentDirectory.appendingPathComponent("\(no).txt")
+                        guard let data = try? Data(contentsOf: targetFilePath), let content = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data))  else { return }
+                        var story = Story()
+                        story.novelID = novelID
+                        story.chapterNumber = no
+                        story.content = NormalizeNewlineString(string: content)
+                        if no == currentReadingChapterNumber {
+                            realmNovel.m_readingChapterContentCount = story.content.count
+                        }
+                        storyArray.append(story)
+                        if storyArray.count >= RealmStoryBulk.bulkCount {
+                            autoreleasepool {
+                                RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                            }
+                            storyArray.removeAll()
+                        }
+                        result = true
                     }
-                    storyArray.append(story)
-                    if storyArray.count >= RealmStoryBulk.bulkCount {
-                        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
-                        storyArray.removeAll()
-                    }
+                    if result == false { break }
                 }while(true)
                 if storyArray.count > 0 {
                     RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
@@ -1618,7 +1630,13 @@ class NovelSpeakerUtility: NSObject {
         guard let temporaryDirectory = NiftyUtility.CreateTemporaryDirectory(directoryName: temporaryDirectoryName) else { return false }
         let unzipResult = SSZipArchive.unzipFile(atPath: url.path, toDestination: temporaryDirectory.path, overwrite: true, password: nil) { (fileName, fileInfo, progressCurrent, progressAllCount) in
             let progressFloat = Float(progressCurrent) / Float(progressAllCount)
-            progressUpdate(NSLocalizedString("NovelSpeakerUtility_UnzipProgress", comment: "バックアップファイルを解凍しています") + " (\(Int(progressFloat * 100))%)")
+            let warningMessage:String
+            if progressAllCount >= 65535 {
+                warningMessage = NSLocalizedString("NovelSpeakerBackup_ProgressExtractingZip_WarningInvalidPercentage", comment: "\n展開中のバックアップファイル中のファイル数が多いため、進捗(%表示)が不正な値を指すことがあります")
+            }else{
+                warningMessage = ""
+            }
+            progressUpdate(NSLocalizedString("NovelSpeakerUtility_UnzipProgress", comment: "バックアップファイルを解凍しています") + " (\(Int(progressFloat * 100))%)\(warningMessage)")
         } completionHandler: { (text, result, err) in
             // nothing to do.
         }
@@ -1642,26 +1660,29 @@ class NovelSpeakerUtility: NSObject {
         builder = builder.label(text: NSLocalizedString("NovelSpeakerUtility_RestoreBackupMessage", comment: "-"), textAlignment: .center, tag: messageTag)
         let dialog = builder.build()
         DispatchQueue.main.async {
-            dialog.show()
-        }
-        func applyProgress(text:String) {
-            DispatchQueue.main.async {
-                guard let messageLabel = dialog.view.viewWithTag(messageTag) as? UILabel else { return }
-                messageLabel.text = text
-            }
-        }
-        DispatchQueue.global(qos: .userInitiated).async {
-            defer {
-                DispatchQueue.main.async {
-                    dialog.dismiss(animated: false, completion: nil)
+            dialog.show {
+                func applyProgress(text:String) {
+                    DispatchQueue.main.async {
+                        guard let messageLabel = dialog.view.viewWithTag(messageTag) as? UILabel else { return }
+                        messageLabel.text = text
+                    }
                 }
-                NovelSpeakerNotificationTool.AnnounceGlobalStateChanged()
-            }
-            if url.pathExtension == "novelspeaker-backup+zip" {
-                ProcessNovelSpeakerBackupFile_ZIPType(url: url, progressUpdate: applyProgress(text:))
-                return
-            }else{
-                ProcessNovelSpeakerBackupFile_JSONType(url: url, progressUpdate: applyProgress(text:), extractedDirectory: nil)
+                DispatchQueue.global(qos: .userInitiated).async {
+                    defer {
+                        DispatchQueue.main.async {
+                            dialog.dismiss(animated: false, completion: nil)
+                        }
+                        NovelSpeakerNotificationTool.AnnounceGlobalStateChanged()
+                    }
+                    let isSecureUrl = url.startAccessingSecurityScopedResource()
+                    defer { if isSecureUrl { url.stopAccessingSecurityScopedResource() } }
+                    if url.pathExtension == "novelspeaker-backup+zip" {
+                        ProcessNovelSpeakerBackupFile_ZIPType(url: url, progressUpdate: applyProgress(text:))
+                        return
+                    }else{
+                        ProcessNovelSpeakerBackupFile_JSONType(url: url, progressUpdate: applyProgress(text:), extractedDirectory: nil)
+                    }
+                }
             }
         }
         return true
