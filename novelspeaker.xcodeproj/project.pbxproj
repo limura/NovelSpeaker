@@ -1488,7 +1488,7 @@
 				"${BUILT_PRODUCTS_DIR}/Kanna-watchOS/Kanna.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm-watchOS/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift-watchOS/RealmSwift.framework",
-				"${BUILT_PRODUCTS_DIR}/Zip-watchOS/Zip.framework",
+				"${BUILT_PRODUCTS_DIR}/SSZipArchive-watchOS/SSZipArchive.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -1496,7 +1496,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kanna.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Zip.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SSZipArchive.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1541,8 +1541,8 @@
 				"${BUILT_PRODUCTS_DIR}/RATreeView/RATreeView.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm-iOS/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift-iOS/RealmSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SSZipArchive-iOS/SSZipArchive.framework",
 				"${BUILT_PRODUCTS_DIR}/SZTextView/SZTextView.framework",
-				"${BUILT_PRODUCTS_DIR}/Zip-iOS/Zip.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -1555,8 +1555,8 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RATreeView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SSZipArchive.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SZTextView.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Zip.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

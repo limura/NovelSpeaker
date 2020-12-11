@@ -78,6 +78,9 @@
 /// novelupdated_at で sort されて返されます。
 - (NSArray*) GetAllNarouContent:(int)sortType;
 
+/// 指定された ncode に登録されている全ての Story の内容(文章)を配列にして取得します(block版)
+- (void)GetAllStoryTextForNcodeWithBlock:(NSString*)ncode block:(void(^)(NSString*))block;
+
 /// 指定された ncode の小説で、保存されている Story を全て取得します。
 - (NSArray*)GeAllStoryForNcode:(NSString*)ncode;
 

@@ -11,8 +11,8 @@ target 'NovelSpeaker' do
   pod "MSColorPicker"
 
   source 'https://github.com/CocoaPods/Specs.git'
-  pod 'Zip', '~> 1.1'
   pod 'FTLinearActivityIndicator'
+  pod 'SSZipArchive'
 
   pod "RATreeView", "~> 2.1.2"
   #pod 'IceCream', :git => 'https://github.com/caiyue1993/IceCream.git'
@@ -37,7 +37,7 @@ target 'NovelSpeaker' do
   target 'NovelSpeakerWatchApp WatchKit Extension' do
     platform :watchos, '6.1'
     use_frameworks!
-    pod 'Zip', '~> 1.1'
+    pod 'SSZipArchive'
     pod 'IceCream'
     pod 'Kanna'
     pod 'DataCompression'

@@ -446,6 +446,51 @@
     [LPPerformanceChecker CheckTimeInterval:@"DeleteEntity時間かかりすぎ" startDate:startDate logTimeInterval:1.0f];
 }
 
+- (void)FetchAllEntityWithBlock:(NSString*)entityName sortAttributeName:(NSString*)sortAttributeName ascending:(BOOL)ascending block:(void(^)(NSObject*))block {
+    NSUInteger count = [self CountEntity:entityName];
+    if (count <= 1000) {
+        NSArray* allEntity = [self FetchAllEntity:entityName];
+        if (allEntity != nil) {
+            for (NSObject* obj in allEntity) {
+                if (block != nil) {
+                    block(obj);
+                }
+            }
+        }
+        return;
+    }
+
+    NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
+
+    NSUInteger bulkCount = 500;
+    for (NSUInteger index = 0; index < count; index += bulkCount) {
+        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+        NSEntityDescription* entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
+        [fetchRequest setEntity:entity];
+        NSSortDescriptor* sortDescriptor = [[NSSortDescriptor alloc] initWithKey:sortAttributeName ascending:ascending];
+        NSArray* sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+        [fetchRequest setSortDescriptors:sortDescriptors];
+        fetchRequest.fetchLimit = bulkCount;
+        fetchRequest.fetchOffset = index;
+        __block NSError* err = nil;
+        __block NSArray* results = nil;
+        [context performBlockAndWait:^{
+            results = [context executeFetchRequest:fetchRequest error:&err];
+        }];
+        if (err != nil) {
+            NSLog(@"CoreData fetchRequest failed. %@ %@", err, err.userInfo);
+            results = nil;
+        }
+        if (results != nil) {
+            for (NSObject* obj in results) {
+                if (block != nil) {
+                    block(obj);
+                }
+            }
+        }
+    }
+}
+
 /// 全ての Entity を検索して返します
 - (NSArray*)FetchAllEntity:(NSString*)entityName
 {
@@ -523,6 +568,38 @@
     }
 
     return results;
+}
+
+- (void)SearchEntityWithBlock:(NSString*)entityName predicate:(NSPredicate*)predicate block:(void(^)(NSObject*))block {
+    if (block == nil) {
+        return;
+    }
+    NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
+
+    NSUInteger bulkSize = 500;
+    for (NSUInteger offset = 0; ; offset += bulkSize) {
+        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc] init];
+        NSEntityDescription* entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setPredicate:predicate];
+        fetchRequest.fetchLimit = bulkSize;
+        fetchRequest.fetchOffset = offset;
+
+        __block NSError* err = nil;
+        __block NSArray* results;
+        [context performBlockAndWait:^{
+            results = [context executeFetchRequest:fetchRequest error:&err];
+        }];
+        if (err != nil) {
+            break;
+        }
+        if (results.count <= 0) {
+            break;
+        }
+        for (NSObject* obj in results) {
+            block(obj);
+        }
+    }
 }
 
 /// Entity を検索して返します(検索用の NSPredicate 指定版)
@@ -616,6 +693,13 @@
             block();
         }];
     //}
+}
+
+/// [NSManagedObjectContext refreshAllObjects] 呼び出しを行います
+/// 強制的に NSManagedObjectContext が掴んでいる NSManagedObject を開放させたい時に使用します。
+- (void)refreshAllObjects {
+    NSManagedObjectContext* context = [self GetManagedObjectContextForThisThread];
+    [context refreshAllObjects];
 }
 
 

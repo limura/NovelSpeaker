@@ -150,6 +150,17 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
     
+    func addNewContent(globalData:GlobalDataSingleton, novelID:String, firstContent:String) -> String? {
+        guard let url = URL(string: "https://test.example.com/\(novelID)") else { return nil }
+        globalData.addNewContent(for: url, nextUrl: url, cookieParameter: "", title: novelID, author: "", firstContent: firstContent, viewController: self)
+        return url.absoluteString
+    }
+    func addStory(globalData:GlobalDataSingleton, content:NarouContentCacheData, storyContent:String, count:Int) {
+        for chapterNumber in 1..<(count+1) {
+            globalData.updateStory(storyContent, chapter_number: Int32(chapterNumber), parentContent: content)
+        }
+    }
+    
     func createSettingsTable(){
         form +++ Section()
             /*
@@ -159,6 +170,35 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onCellSelection({ (_, _) in
             })
              */
+            <<< ButtonRow() {
+                $0.title = "ファイルサイズを見る"
+            }.onCellSelection({ (cellOf, row) in
+                let fileManager = FileManager.default
+                let path = "file:///var/mobile/Containers/Data/Application/F21AE010-D322-4F16-8B7B-6C92EB4FDA2A/Documents/Backup/NovelSpeakerBackup-202012110205.zip"
+                guard let url = URL(string: path) else { return }
+                print("target URL: \(url.absoluteString)")
+                guard let attribute = try? fileManager.attributesOfItem(atPath: path) else {
+                    print("attributesOfItem() failed.")
+                    return
+                }
+                print(attribute)
+            })
+            <<< ButtonRow() {
+                $0.title = "小説追加"
+            }.onCellSelection({ (cellOf, row) in
+                guard let globalData = GlobalDataSingleton.getInstance() else { return }
+                var storyText:String = ""
+                for _ in 0..<1000 {
+                    storyText += "0123456789あいうえおかきくけこかな漢字変換\n"
+                }
+                for no in 0..<1 {
+                    let novelID = String(format: "%08d", no+1)
+                    print(novelID)
+                    if let ncode = self.addNewContent(globalData: globalData, novelID: novelID, firstContent: storyText), let content = globalData.searchNarouContent(fromNcode: ncode) {
+                        self.addStory(globalData: globalData, content: content, storyContent: storyText, count: 100000)
+                    }
+                }
+            })
             <<< LabelRow() { (row) in
                 row.tag = "SettingsTableViewController_Information_TAG"
                 row.title = NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ")

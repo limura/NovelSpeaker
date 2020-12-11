@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Zip
+import SSZipArchive
 import RealmSwift
 import AVFoundation
 
@@ -1616,13 +1616,11 @@ class NovelSpeakerUtility: NSObject {
             }
         }
         guard let temporaryDirectory = NiftyUtility.CreateTemporaryDirectory(directoryName: temporaryDirectoryName) else { return false }
-        do {
-            Zip.addCustomFileExtension("novelspeaker-backup+zip")
-            try Zip.unzipFile(url, destination: temporaryDirectory, overwrite: true, password: nil, progress: { (progressDouble) in
-                progressUpdate(NSLocalizedString("NovelSpeakerUtility_UnzipProgress", comment: "バックアップファイルを解凍しています") + " (\(Int(progressDouble * 100))%)")
-            }, fileOutputHandler: nil)
-        }catch{
-            return false
+        let unzipResult = SSZipArchive.unzipFile(atPath: url.path, toDestination: temporaryDirectory.path, overwrite: true, password: nil) { (fileName, fileInfo, progressCurrent, progressAllCount) in
+            let progressFloat = Float(progressCurrent) / Float(progressAllCount)
+            progressUpdate(NSLocalizedString("NovelSpeakerUtility_UnzipProgress", comment: "バックアップファイルを解凍しています") + " (\(Int(progressFloat * 100))%)")
+        } completionHandler: { (text, result, err) in
+            // nothing to do.
         }
         defer {
             do {
@@ -1631,6 +1629,7 @@ class NovelSpeakerUtility: NSObject {
                 // nothing to do
             }
         }
+        if unzipResult == false { return false }
         return ProcessNovelSpeakerBackupFile_JSONType(url: temporaryDirectory.appendingPathComponent("backup_data.json"), progressUpdate: progressUpdate, extractedDirectory: temporaryDirectory)
     }
 
@@ -2051,19 +2050,15 @@ class NovelSpeakerUtility: NSObject {
         if forNovelIDArray.count <= 0 {
             return backupDataFilePath
         }
-        if let progress = progress {
-            progress(NSLocalizedString("NovelSpeakerBackup_CompressingBackupData", comment: "圧縮準備中"))
-        }
+        progress?(NSLocalizedString("NovelSpeakerBackup_CompressingBackupData", comment: "圧縮準備中"))
         let zipFilePath = NiftyUtility.GetTemporaryFilePath(fileName: NiftyUtility.Date2ISO8601String(date: Date()) + ".zip")
-        do {
-            try Zip.zipFiles(paths: ziptargetFiles, zipFilePath: zipFilePath, password: nil, compression: .BestCompression, progress: { (progressPercent) in
-                let description = NSLocalizedString("NovelSpeakerBackup_CompressingBackupDataProgress", comment: "バックアップデータを圧縮中") + " (\(Int(progressPercent * 100))%)"
-                if let progress = progress {
-                    progress(description)
-                }
-            })
-        }catch let err{
-            print("zip file create error", zipFilePath.absoluteString, err)
+        let zipResult = SSZipArchive.createZipFile(atPath: zipFilePath.path, withContentsOfDirectory: outputPath.path, keepParentDirectory: false, compressionLevel: 9, password: nil, aes: false) { (progressCount, progressAllCount) in
+            let progressFloat = Float(progressCount) / Float(progressAllCount)
+            let description = NSLocalizedString("NovelSpeakerBackup_CompressingBackupDataProgress", comment: "バックアップデータを圧縮中") + " (\(Int(progressFloat * 100))%)"
+            progress?(description)
+        }
+        if zipResult == false {
+            print("zip file create error", zipFilePath.absoluteString)
             return nil
         }
         let backupFilePath = NiftyUtility.GetTemporaryFilePath(fileName: String.init(format: "%@%@.novelspeaker-backup+zip", fileNamePrefix, dateString))

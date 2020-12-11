@@ -232,8 +232,10 @@
 "NovelSpeakerBackup_CompressingBackupData" = "Step 2/2\r\nPreparing for compression";
 "NovelSpeakerBackup_CompressingBackupDataProgress" = "Step 2/2\r\nCompressing";
 "NovelSpeakerBackup_Restoreing" = "Restore backups";
-"NovelSpeakerBackup_ProgressExtractingZip" = "Step 1/2\r\nExpanding";
-"NovelSpeakerBackup_RestoreingBackupData" = "Step 2/2\r\nApplying";
+"NovelSpeakerBackup_ProgressExtractingZip" = "Step 1/3\r\nExpanding";
+"NovelSpeakerBackup_RestoreingBackupData" = "Step 2/3\r\nApplying";
+"NovelSpeakerBackup_RemovingStoryFiles" = "Step 3/3\r\nIn post-processing";
+"NovelSpeakerBackup_ProgressExtractingZip_WarningInvalidPercentage" = "\nDue to the large number of files in the backup file being expanded, the progress (% display) may point to an incorrect value.";
     
 "EditUserBookViewController_ChapterDeleted" = "Last chapter deleted.";
 "EditUserBookViewController_NewChapterCreated" = "New chapter added.";
@@ -729,6 +731,14 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
   - Added \"Details\" button to the novel text screen. Settings for each novel will be added
   - Added Web search screen
   - Added the concept of self-made folders
+
+
+# Version 1.1.71
+
+Bug fix
+
+- Addressed an issue where a large number of novels (text) were registered, and when trying to create a backup file with the Settings tab -> Generate backup data-> Complete backup
+
 
 # Version 1.1.70
 

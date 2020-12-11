@@ -91,6 +91,9 @@ typedef enum {
 /// Entity を一つ削除します
 - (void)DeleteEntity:(NSManagedObject*)entity;
 
+/// 全ての Entity を取得します(block で結果を一つづつ返すので場合によってはメモリに優しい)
+- (void)FetchAllEntityWithBlock:(NSString*)entityName sortAttributeName:(NSString*)sortAttributeName ascending:(BOOL)ascending block:(void(^)(NSObject*))block;
+
 /// 全ての Entity を検索して返します
 - (NSArray*)FetchAllEntity:(NSString*)entityName;
 
@@ -100,7 +103,10 @@ typedef enum {
 /// 全ての Entity を検索して返します(sort用のattribute指定版)
 - (NSArray*)FetchAllEntity:(NSString*)entityName sortAttributeName:(NSString*)sortAttributeName ascending:(BOOL)ascending;
 
-/// Entity を検索して返します(検索用の NSPredicate 指定版)
+// Entity を検索して返します。(相手が巨大の場合のblockでイテレーションする版)
+- (void)SearchEntityWithBlock:(NSString*)entityName predicate:(NSPredicate*)predicate block:(void(^)(NSObject*))block;
+
+    /// Entity を検索して返します(検索用の NSPredicate 指定版)
 /// NSPredicate は [NSPredicate predicateWithFormat:@"ncode == %@", ncode] とかそんな感じで作ります。
 - (NSArray*)SearchEntity:(NSString*)entityName predicate:(NSPredicate*)predicate;
 
@@ -115,5 +121,9 @@ typedef enum {
 
 /// CoreData の sqlite ファイルを削除します
 - (void)removeCoreDataDataFile;
+
+/// [NSManagedObjectContext refreshAllObjects] 呼び出しを行います
+/// 強制的に NSManagedObjectContext が掴んでいる NSManagedObject を開放させたい時に使用します。
+- (void)refreshAllObjects;
 
 @end

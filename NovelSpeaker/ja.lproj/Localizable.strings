@@ -231,6 +231,8 @@
 "NovelSpeakerBackup_Restoreing" = "バックアップより復元";
 "NovelSpeakerBackup_ProgressExtractingZip" = "工程 1/2\r\n展開中";
 "NovelSpeakerBackup_RestoreingBackupData" = "工程 2/2\r\n適用中";
+"NovelSpeakerBackup_RemovingStoryFiles" = "工程 3\r\n後処理中";
+"NovelSpeakerBackup_ProgressExtractingZip_WarningInvalidPercentage" = "\n展開中のバックアップファイル中のファイル数が多いため、進捗(%表示)が不正な値を指すことがあります";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";
@@ -721,6 +723,14 @@
   - 小説本文画面に「詳細」ボタンを追加。小説毎の設定が追加されます
   - Web検索画面を追加 (なろう検索画面は削除されました)
   - 自作フォルダの概念を追加
+
+
+# Version 1.1.71
+
+問題の修正
+
+- 大量の小説(本文)が登録されている ことせかい で、設定タブ -> バックアップ用データの生成 -> 完全バックアップ〜 でバックアップファイルを作成しようとすると落ちる問題に対応
+
 
 # Version 1.1.70
 

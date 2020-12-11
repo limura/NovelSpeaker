@@ -276,7 +276,19 @@ static DummySoundLooper* dummySoundLooper = nil;
     return resultArray;
 }
 
-/// 指定された ncode の小説で、保存されている Story を全て取得します。
+- (void)GetAllStoryTextForNcodeWithBlock:(NSString*)ncode block:(void(^)(NSString*))block {
+    if (block == nil) {
+        return;
+    }
+    [self coreDataPerfomBlockAndWait:^{
+        [self->m_CoreDataObjectHolder SearchEntityWithBlock:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode] block:^(NSObject* obj) {
+            Story* story = (Story*)obj;
+            block(story.content);
+        }];
+    }];
+}
+
+    /// 指定された ncode の小説で、保存されている Story を全て取得します。
 - (NSArray*)GeAllStoryForNcode:(NSString*)ncode
 {
     __block NSArray* result = 0;
