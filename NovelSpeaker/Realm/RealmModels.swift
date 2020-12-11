@@ -1827,6 +1827,7 @@ enum BookshelfViewButtonTypes:String, Codable {
     case reload = "reaload"
     case order = "order"
     case downloadStatus = "downloadStatus"
+    case expandFolder = "expandFolder"
 }
 
 struct BookshelfViewButtonSetting: Codable {
@@ -1835,7 +1836,8 @@ struct BookshelfViewButtonSetting: Codable {
     
     static let defaultSetting:[BookshelfViewButtonSetting] = [
         //BookshelfViewButtonSetting(type: .search, isOn: false),
-        BookshelfViewButtonSetting(type: .downloadStatus, isOn: false),
+        BookshelfViewButtonSetting(type: .expandFolder, isOn: true),
+        //BookshelfViewButtonSetting(type: .downloadStatus, isOn: false),
         BookshelfViewButtonSetting(type: .order, isOn: true),
         BookshelfViewButtonSetting(type: .reload, isOn: true),
         BookshelfViewButtonSetting(type: .edit, isOn: true),

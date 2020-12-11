@@ -617,6 +617,7 @@
 "BookShelfRATreeViewController_WaitingiCloudSync_CancelButton" = "Cancel playback";
 "BookShelfRATreeViewController_SorteTypeWebSite" = "Web site order";
 "BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com" = "Self-made novel";
+"BookShelfTableViewController_ExpandFolderButton" = "SwitchFolder";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";

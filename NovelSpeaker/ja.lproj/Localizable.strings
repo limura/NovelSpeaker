@@ -606,6 +606,7 @@
 "BookShelfRATreeViewController_WaitingiCloudSync_CancelButton" = "再生をキャンセル";
 "BookShelfRATreeViewController_SorteTypeWebSite" = "Webサイト順";
 "BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com" = "自作小説";
+"BookShelfTableViewController_ExpandFolderButton" = "フォルダ開閉";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 
