@@ -760,14 +760,23 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     @objc func switchFolderButtonClicked(sender:Any) {
         DispatchQueue.main.async {
             let isExpanded = self.isFolderExpanded()
-            for cellItem in self.displayDataArray {
-                if let childrens = cellItem.childrens, childrens.count > 0 {
-                    if isExpanded {
-                        self.treeView?.collapseRow(forItem: cellItem)
-                    }else{
-                        self.treeView?.expandRow(forItem: cellItem)
+            NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("BookShelfRATreeViewController_NowSwitchingFolderMessage", comment: "フォルダ開閉中……")) { (dialog) in
+                DispatchQueue.main.async {
+                    for cellItem in self.displayDataArray {
+                        if let childrens = cellItem.childrens, childrens.count > 0 {
+                            if isExpanded {
+                                if self.treeView?.isCell(forItemExpanded: cellItem) ?? false {
+                                    self.treeView?.collapseRow(forItem: cellItem, with: RATreeViewRowAnimationNone)
+                                }
+                            }else{
+                                if self.treeView?.isCell(forItemExpanded: cellItem) ?? true == false {
+                                self.treeView?.expandRow(forItem: cellItem, with: RATreeViewRowAnimationNone)
+                                }
+                            }
+                            self.checkAndUpdateSwitchFolderButtonImage()
+                        }
                     }
-                    self.checkAndUpdateSwitchFolderButtonImage()
+                    dialog.dismiss(animated: false, completion: nil)
                 }
             }
         }

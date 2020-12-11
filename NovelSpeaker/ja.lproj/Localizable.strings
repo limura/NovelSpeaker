@@ -607,6 +607,7 @@
 "BookShelfRATreeViewController_SorteTypeWebSite" = "Webサイト順";
 "BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com" = "自作小説";
 "BookShelfRATreeViewController_ExpandFolderButton" = "フォルダ開閉";
+"BookShelfRATreeViewController_NowSwitchingFolderMessage" = "フォルダ開閉中……";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 

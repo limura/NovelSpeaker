@@ -618,6 +618,7 @@
 "BookShelfRATreeViewController_SorteTypeWebSite" = "Web site order";
 "BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com" = "Self-made novel";
 "BookShelfRATreeViewController_ExpandFolderButton" = "SwitchFolder";
+"BookShelfRATreeViewController_NowSwitchingFolderMessage" = "Switching folder...";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
