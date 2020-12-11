@@ -746,7 +746,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
             guard let story = novel.readingChapterWith(realm: realm) ?? novel.firstChapterWith(realm: realm) else {
                 let targetChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_readingChapterStoryID)
-                guard let novelCount = novel.linkedStorysWith(realm: realm)?.count, novelCount > 0 else {
+                let (novelCount, _) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
+                guard novelCount > 0 else {
                     if novel.type == .URL {
                         DispatchQueue.main.async {
                             NiftyUtility.EasyDialogForButton(

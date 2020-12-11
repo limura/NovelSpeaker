@@ -637,12 +637,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let nextChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID) + 1
         let nextStory = RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novelID, chapterNumber: nextChapterNumber)
         if isEnd == false, let nextStory = nextStory, nextStory.chapterNumber != nextChapterNumber {
-            let chapterNumberArrayString:String
-            if let chapterNumberArray = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID))?.map({"\($0.chapterNumber)"}) {
-                chapterNumberArrayString = chapterNumberArray.description
-            }else{
-                chapterNumberArrayString = "nil"
-            }
+            let chapterNumberArrayString = RealmStoryBulk.GetAllChapterNumberFor(realm: realm, novelID: novelID).description
             AppInformationLogger.AddLog(message: "次の章を検索したところ、次の章ではない物が出てきました。リカバリを試みます。", appendix: [
                 "現在の StoryID": self.storyID,
                 "取得された章の StoryID": nextStory.storyID,

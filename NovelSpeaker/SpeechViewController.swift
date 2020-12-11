@@ -593,11 +593,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
                     message: nil) { (searchingDialog) in
                     RealmUtil.RealmBlock { (realm) -> Void in
-                        guard let storyID = self.storyID, let storys = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.filter({ (story) -> Bool in
-                            guard let searchString = searchString else { return true }
-                            if searchString.count <= 0 { return true }
-                            return story.content.contains(searchString)
-                        }) else {
+                        var displayTextArray:[String] = []
+                        guard let storyID = self.storyID else {
                             NiftyUtility.EasyDialogOneButton(
                                 viewController: self,
                                 title: nil,
@@ -605,9 +602,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                                 buttonTitle: nil, buttonAction: nil)
                             return
                         }
-                        let displayTextArray = Array(storys.map { (story) -> String in
-                            return "\(story.chapterNumber): " + story.GetSubtitle()
-                        })
+                        RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID)) { (story) -> Bool in
+                            guard let searchString = searchString else { return true }
+                            if searchString.count <= 0 { return true }
+                            return story.content.contains(searchString)
+                        } iterate: { (story) in
+                            displayTextArray.append("\(story.chapterNumber): \(story.GetSubtitle())")
+                        }
                         var selectedText:String? = nil
                         if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
                             selectedText = "\(story.chapterNumber): " + story.GetSubtitle()

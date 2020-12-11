@@ -1082,6 +1082,60 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         return SearchStoryWith(realm:realm, novelID: StoryIDToNovelID(storyID: storyID), chapterNumber: StoryIDToChapterNumber(storyID: storyID))
     }
     
+    // 対象の小説について保存されている Story の個数と最後のStoryの chapterNumber のタプルを返します
+    static func CountStoryFor(realm:Realm, novelID:String) -> (Int, Int) {
+        var count:Int = 0
+        var lastStoryChapterNumber:Int = -1
+        let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
+        for storyBulk in storyBulkArray {
+            autoreleasepool {
+                if let storyArray = storyBulk.LoadStoryArray() {
+                    count += storyArray.count
+                    lastStoryChapterNumber = storyArray.last?.chapterNumber ?? lastStoryChapterNumber
+                }else{
+                    print("WARN: SearchAllStoryFor LoadStoryArray() failed in \(storyBulk.id)")
+                }
+            }
+        }
+        return (count, lastStoryChapterNumber)
+    }
+    
+    static func GetAllChapterNumberFor(realm: Realm, novelID:String) -> [Int] {
+        var result:[Int] = []
+        let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
+        for storyBulk in storyBulkArray {
+            autoreleasepool {
+                if let storyArray = storyBulk.LoadStoryArray() {
+                    for story in storyArray {
+                        result.append(story.chapterNumber)
+                    }
+                }else{
+                    print("WARN: SearchAllStoryFor LoadStoryArray() failed in \(storyBulk.id)")
+                }
+            }
+        }
+        return result
+    }
+
+    static func SearchAllStoryFor(realm: Realm, novelID:String, filterFunc:((Story)->Bool)? = nil, iterate:((Story)->Void)) {
+        print("SearchAllStoryFor(\"\(novelID)\")")
+        let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
+        for storyBulk in storyBulkArray {
+            autoreleasepool {
+            if let storyArray = storyBulk.LoadStoryArray() {
+                    for story in storyArray {
+                        if let filterFunc = filterFunc, filterFunc(story) == false {
+                            continue
+                        }
+                        iterate(story)
+                    }
+                }else{
+                    print("WARN: SearchAllStoryFor LoadStoryArray() failed in \(storyBulk.id)")
+                }
+            }
+        }
+    }
+    /*
     static func SearchAllStoryFor(realm: Realm, novelID:String) -> [Story]? {
         print("SearchAllStoryFor(\"\(novelID)\")")
         let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
@@ -1094,7 +1148,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             }
         }
         return result
-    }
+    }*/
     
     static func GetAllObjectsWith(realm: Realm) -> Results<RealmStoryBulk>? {
         return realm.objects(RealmStoryBulk.self).filter("isDeleted = false")
@@ -1176,16 +1230,6 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         return obj
     }
     
-    // 1対多や1対1といったリレーションシップがあると、IceCream と相性が悪いというか
-    // 一つのobjectの書き換えがリレーションがついたobject全ての書き換えイベントになってしまって
-    // 大量の sync request(?) が飛んでしまうということらしいので、
-    // とりあえずリレーションについては相手のIDを保存するという弱い結合形式で行きます。
-    // 何故そうなるのかは詳しくはこの issue を参照。
-    // https://github.com/caiyue1993/IceCream/issues/88
-    // ということで、以下のような link されているものを検索するようなクエリは遅くなるかもしれん。というか多分遅い。
-    func linkedStorysWith(realm:Realm) -> Array<Story>? {
-        return RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: self.novelID)
-    }
     func linkedSpeechModSettingsWith(realm:Realm) -> [RealmSpeechModSetting]? {
         return realm.objects(RealmSpeechModSetting.self).filter({ (speechModSetting) -> Bool in
             return !speechModSetting.isDeleted && speechModSetting.targetNovelIDArray.contains(self.novelID)

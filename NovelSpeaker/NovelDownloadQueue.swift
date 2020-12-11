@@ -180,7 +180,7 @@ class StoryBulkWritePool {
         // 本来ならこの操作は必要無いはずです。
         if storyArray.count <= 0 {
             if RealmUtil.RealmBlock(block: { (realm) -> Bool in
-                let lastChapterNumber = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: story.novelID)?.last?.chapterNumber ?? 0
+                let (_, lastChapterNumber) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: story.novelID)
                 if story.chapterNumber != (lastChapterNumber + 1) {
                     AppInformationLogger.AddLog(message: "StoryBulkWritePool.AddStory() で不正なchapterNumberのStoryが登録されようとしている", appendix: [
                         "StoryID": story.storyID,

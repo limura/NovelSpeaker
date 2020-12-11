@@ -113,8 +113,11 @@ struct NovelSupportMenuView: View {
                 Button(action: {
                     DispatchQueue.main.async {
                         RealmUtil.RealmBlock { (realm) -> Void in
-                            guard let storyArray = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: self.storyViewData.storyID)) else { return }
-                            self.viewData.titleAndIndexArray = StorySelectorView.GenerateTitleAndIndexArray(storyArray: storyArray)
+                            var titleAndIndexArray:[String] = []
+                            RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novelID, filterFunc: nil) { (story) in
+                                titleAndIndexArray.append("\(story.chapterNumber):\(story.subtitle)")
+                            }
+                            self.viewData.titleAndIndexArray = titleAndIndexArray
                             self.viewData.viewState = .StorySelect
                         }
                     }

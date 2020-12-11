@@ -1672,11 +1672,10 @@ class NovelSpeakerUtility: NSObject {
     #if !os(watchOS)
     fileprivate static func CreateBackupDataDictionary_Story(novelID:String, contentWriteTo:URL?, progressString:String, progress:((_ description:String)->Void)?) -> [[String:Any]] {
         return RealmUtil.RealmBlock { (realm) -> [[String:Any]] in
-            var result:[[String:Any]] = []
-            guard let storyArray = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novelID) else { return result }
             var index = 0
-            let max = storyArray.count
-            for story in storyArray {
+            var result:[[String:Any]] = []
+            let max = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.lastChapterNumber?.description ?? "?"
+            RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novelID) { (story) in
                 index += 1
                 if let progress = progress {
                     progress(progressString + " (\(index)/\(max))")
@@ -2107,10 +2106,9 @@ class NovelSpeakerUtility: NSObject {
     #endif
     
     static func CheckAndRecoverStoryCountWith(realm:Realm, novel:RealmNovel) {
-        guard let storyList = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novel.novelID), let lastStory = storyList.last else { return }
-        let storyCount = storyList.count
+        let (storyCount, lastStoryChapterNumber) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
         let lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: storyCount)
-        if novel.m_lastChapterStoryID != lastChapterStoryID && RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: lastStory.chapterNumber) == lastChapterStoryID {
+        if novel.m_lastChapterStoryID != lastChapterStoryID && RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: lastStoryChapterNumber) == lastChapterStoryID {
             RealmUtil.WriteWith(realm: realm) { (realm) in
                 novel.m_lastChapterStoryID = lastChapterStoryID
             }
@@ -2231,21 +2229,14 @@ class NovelSpeakerUtility: NSObject {
                 title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
                 message: nil) { (searchingDialog) in
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let storys = RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.filter({ (story) -> Bool in
+                    var displayTextArray:[String] = []
+                    RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID)) { (story) -> Bool in
                         guard let searchString = searchString else { return true }
                         if searchString.count <= 0 { return true }
                         return story.content.contains(searchString)
-                    }) else {
-                        NiftyUtility.EasyDialogOneButton(
-                            viewController: viewController,
-                            title: nil,
-                            message: NSLocalizedString("SpeechViewController_CanNotGetStorys", comment: "小説情報を参照できませんでした。"),
-                            buttonTitle: nil, buttonAction: nil)
-                        return
+                    } iterate: { (story) in
+                        displayTextArray.append("\(story.chapterNumber): \(story.GetSubtitle())")
                     }
-                    let displayTextArray = Array(storys.map { (story) -> String in
-                        return "\(story.chapterNumber): " + story.GetSubtitle()
-                    })
                     var selectedText:String? = nil
                     if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
                         selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
