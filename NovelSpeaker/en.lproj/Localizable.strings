@@ -342,13 +342,20 @@ erver certificate.";
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.70
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.71
 
-- Fixed an issue where the last open novel might be deselected when checking for novel updates on the bookshelf screen.
+- Addressed an issue where a large number of novels (text) were registered, and when trying to create a backup file with the Settings tab -> Generate backup data-> Complete backup
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.71
+
+Bug fix
+
+- Addressed an issue where a large number of novels (text) were registered, and when trying to create a backup file with the Settings tab -> Generate backup data-> Complete backup
+
+
 # Version 1.1.70
 
 Bug fix
