@@ -1116,6 +1116,17 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         }
         return result
     }
+    
+    static func SearchAllStoryBulkFor(realm: Realm, novelID:String, iterate:((RealmStoryBulk)->Void)){
+        autoreleasepool {
+            let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
+            for storyBulk in storyBulkArray {
+                autoreleasepool {
+                    iterate(storyBulk)
+                }
+            }
+        }
+    }
 
     static func SearchAllStoryFor(realm: Realm, novelID:String, filterFunc:((Story)->Bool)? = nil, iterate:((Story)->Void)) {
         print("SearchAllStoryFor(\"\(novelID)\")")
