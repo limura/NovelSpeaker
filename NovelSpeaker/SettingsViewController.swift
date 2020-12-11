@@ -150,6 +150,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
     
+    #if false
     func addNewContent(globalData:GlobalDataSingleton, novelID:String, firstContent:String) -> String? {
         guard let url = URL(string: "https://test.example.com/\(novelID)") else { return nil }
         globalData.addNewContent(for: url, nextUrl: url, cookieParameter: "", title: novelID, author: "", firstContent: firstContent, viewController: self)
@@ -160,6 +161,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             globalData.updateStory(storyContent, chapter_number: Int32(chapterNumber), parentContent: content)
         }
     }
+    #endif
     
     func createSettingsTable(){
         form +++ Section()
@@ -169,7 +171,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (_, _) in
             })
-             */
             <<< ButtonRow() {
                 $0.title = "ファイルサイズを見る"
             }.onCellSelection({ (cellOf, row) in
@@ -199,6 +200,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            */
             <<< LabelRow() { (row) in
                 row.tag = "SettingsTableViewController_Information_TAG"
                 row.title = NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ")
