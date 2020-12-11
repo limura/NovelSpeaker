@@ -40,6 +40,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     var isNextViewNeedUpdateReadDate:Bool = true
     
     var novelArrayNotificationToken : NotificationToken? = nil
+    var globalStateNotificationToken: NotificationToken? = nil
     
     static var instance:BookShelfRATreeViewController? = nil
 
@@ -78,7 +79,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         
         // 編集ボタン等を配置
         self.searchButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .done, target: self, action: #selector(searchButtonClicked))
-        self.switchFolderButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_ExpandFolderButton", comment: "フォルダ開閉"), style: UIBarButtonItem.Style.done, target: self, action: #selector(switchFolderButtonClicked))
+        if #available(iOS 13.0, *) {
+            self.switchFolderButton = UIBarButtonItem.init(image: UIImage(systemName: "rectangle.expand.vertical"), style: .plain, target: self, action: #selector(switchFolderButtonClicked))
+        }else{
+            self.switchFolderButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfRATreeViewController_ExpandFolderButton", comment: "フォルダ開閉"), style: UIBarButtonItem.Style.done, target: self, action: #selector(switchFolderButtonClicked))
+        }
         self.assinButtons()
 
         if NiftyUtility.IsVersionUped() {
@@ -140,6 +145,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     func StopObservers() {
         novelArrayNotificationToken = nil
+        globalStateNotificationToken = nil
     }
     
     func RestartObservers() {
@@ -160,7 +166,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
-    func registObserver() {
+    func registNovelArrayObserver() {
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) else { return }
             novelArrayNotificationToken = novelArray.observe { (change) in
@@ -205,6 +211,34 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
     
+    func registGlobalStateObserver() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+            self.globalStateNotificationToken = globalState.observe({ (change) in
+                switch change {
+                case .change(_, let propertyArray):
+                    for property in propertyArray {
+                        if property.name == "bookshelfViewButtonSettingArrayData" {
+                            DispatchQueue.main.async {
+                                self.assinButtons()
+                            }
+                        }
+                    }
+                    break
+                case .deleted:
+                    break
+                case .error(_):
+                    break
+                }
+            })
+        }
+    }
+    
+    func registObserver() {
+        registNovelArrayObserver()
+        registGlobalStateObserver()
+    }
+    
     func assignRightBarButtons() {
         let buttonSettingArray = RealmUtil.RealmBlock { (realm) -> [BookshelfViewButtonSetting] in
             guard let settingArray = RealmGlobalState.GetInstanceWith(realm: realm)?.GetBookshelfViewButtonSetting() else { return BookshelfViewButtonSetting.defaultSetting }
@@ -212,12 +246,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
         var barButtonItemArray:[UIBarButtonItem] = []
         for buttonSetting in buttonSettingArray {
+            if buttonSetting.isOn == false { continue }
             switch buttonSetting.type {
             case .downloadStatus:
                 break
             case .edit:
                 barButtonItemArray.append(self.editButtonItem)
-            case .expandFolder:
+            case .switchFolder:
                 barButtonItemArray.append(self.switchFolderButton)
             case .order:
                 barButtonItemArray.append(UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SortTypeSelectButton", comment: "sort"), style: UIBarButtonItem.Style.done, target: self, action: #selector(sortTypeSelectButtonClicked)))
@@ -617,21 +652,33 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }
                 }, completion: { (finished) in
                     self.addPreviousNovelSpeakButtonIfNeeded()
+                    self.checkAndUpdateSwitchFolderButtonImage()
                 })
+            }
+        }
+    }
+    
+    func checkAndUpdateSwitchFolderButtonImage() {
+        if #available(iOS 13.0, *) {
+            if isFolderExpanded() {
+                self.switchFolderButton.image = UIImage(systemName: "rectangle.compress.vertical")
+            }else{
+                self.switchFolderButton.image = UIImage(systemName: "rectangle.expand.vertical")
             }
         }
     }
     
     func reloadAllData() {
         let (isUseFolder, displayDataArray) = getBookShelfRATreeViewCellDataTree()
-        if isUseFolder {
-            self.switchFolderButton.isEnabled = true
-        }else{
-            self.switchFolderButton.isEnabled = false
-        }
         self.displayDataArray = displayDataArray
         self.treeView?.reloadData()
         self.HilightCurrentReadingNovel()
+        if isUseFolder {
+            self.switchFolderButton.isEnabled = true
+            checkAndUpdateSwitchFolderButtonImage()
+        }else{
+            self.switchFolderButton.isEnabled = false
+        }
     }
 
     func reloadAllDataAndScrollToCurrentReadingContent(){
@@ -702,13 +749,17 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         return NarouContentSortType.NovelUpdatedAt
     }
     
+    func isFolderExpanded() -> Bool {
+        return self.treeView?.visibleCells()?.reduce(false, { (result, cell) -> Bool in
+            if result { return result }
+            guard let cell = cell as? UITableViewCell else { return false }
+            return self.treeView?.isCellExpanded(cell) ?? false
+        }) ?? false
+    }
+    
     @objc func switchFolderButtonClicked(sender:Any) {
         DispatchQueue.main.async {
-            let isExpanded = self.treeView?.visibleCells()?.reduce(false, { (result, cell) -> Bool in
-                if result { return result }
-                guard let cell = cell as? UITableViewCell else { return false }
-                return self.treeView?.isCellExpanded(cell) ?? false
-            }) ?? false
+            let isExpanded = self.isFolderExpanded()
             for cellItem in self.displayDataArray {
                 if let childrens = cellItem.childrens, childrens.count > 0 {
                     if isExpanded {
@@ -716,6 +767,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }else{
                         self.treeView?.expandRow(forItem: cellItem)
                     }
+                    self.checkAndUpdateSwitchFolderButtonImage()
                 }
             }
         }
@@ -956,6 +1008,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
     
+    func treeView(_ treeView: RATreeView, didExpandRowForItem item: Any) {
+        self.checkAndUpdateSwitchFolderButtonImage()
+    }
+    
+    func treeView(_ treeView: RATreeView, didCollapseRowForItem item: Any) {
+        self.checkAndUpdateSwitchFolderButtonImage()
+    }
+
     func deleteNovel(item: Any, novelID: String) {
         let parent = self.treeView?.parent(forItem: item)
         var isNeedReload:Bool = false

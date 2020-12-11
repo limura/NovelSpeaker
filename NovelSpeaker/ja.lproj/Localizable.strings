@@ -606,7 +606,7 @@
 "BookShelfRATreeViewController_WaitingiCloudSync_CancelButton" = "再生をキャンセル";
 "BookShelfRATreeViewController_SorteTypeWebSite" = "Webサイト順";
 "BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com" = "自作小説";
-"BookShelfTableViewController_ExpandFolderButton" = "フォルダ開閉";
+"BookShelfRATreeViewController_ExpandFolderButton" = "フォルダ開閉";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 
@@ -689,6 +689,14 @@
 "NovelFolderManageTableViewController_CreateNewFolder_Error_NoName" = "空文字列は指定できません";
 "NovelFolderManageTableViewController_CreateNewFolder_Error_SameNameAlive" = "同じ名前のフォルダが既に定義されています";
 "NovelFolderManageTableViewController_Title" = "自作フォルダの編集";
+
+"BookshelfViewButtonSettingsViewController_Title" = "本棚画面の右上に表示されるボタン群の編集";
+"BookshelfViewButtonType_DownloadStatus" = "ダウンロード状態の確認";
+"BookshelfViewButtonType_Reload" = "小説の更新確認";
+"BookshelfViewButtonType_SwitchFolder" = "フォルダ開閉";
+"BookshelfViewButtonType_Search" = "小説検索";
+"BookshelfViewButtonType_Edit" = "小説リストを編集(小説の削除)";
+"BookshelfViewButtonType_Order" = "小説の並び替え(順番)";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

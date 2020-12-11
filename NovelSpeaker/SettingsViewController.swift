@@ -765,6 +765,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.textLabel?.textColor = nil
             })
             <<< ButtonRow() {
+                $0.title = NSLocalizedString("BookshelfViewButtonSettingsViewController_Title", comment: "本棚画面の右上に表示されるボタン群の設定")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (buttonCellOf, button) in
+                let nextViewController = BookshelfViewButtonSettingsViewController()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
+            <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
