@@ -132,6 +132,9 @@ typedef NS_ENUM(NSUInteger,RepeatSpeechType) {
 /// 指定された文字列がタイトルか作者名に含まれる小説を取得します
 - (NSArray*) SearchNarouContentWithString:(NSString*)string sortType:(NarouContentSortType)sortType;
 
+/// 指定された ncode に登録されている全ての Story の内容(文章)を配列にして取得します(block版)
+- (void)GetAllStoryTextForNcodeWithBlock:(NSString*)ncode block:(void(^)(NSString*))block;
+
 /// 指定された ncode に登録されている全ての Story の内容(文章)を配列にして取得します
 - (NSArray*)GetAllStoryTextForNcode:(NSString*)ncode;
 

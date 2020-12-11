@@ -428,6 +428,18 @@ static DummySoundLooper* dummySoundLooper = nil;
     return fetchResults;
 }
 
+- (void)GetAllStoryTextForNcodeWithBlock:(NSString*)ncode block:(void(^)(NSString*))block {
+    if (block == nil) {
+        return;
+    }
+    [self coreDataPerfomBlockAndWait:^{
+        [self->m_CoreDataObjectHolder SearchEntityWithBlock:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode] block:^(NSObject* obj) {
+            Story* story = (Story*)obj;
+            block(story.content);
+        }];
+    }];
+}
+
 /// 指定された ncode に登録されている全ての Story の内容(文章)を配列にして取得します
 - (NSArray*)GetAllStoryTextForNcode:(NSString*)ncode{
     __block NSMutableArray* resultArray = nil;
@@ -682,14 +694,16 @@ static DummySoundLooper* dummySoundLooper = nil;
         Story* coreDataStory = [self SearchCoreDataStoryThreadUnsafe:parentContent.ncode chapter_no:chapter_number];
         if (coreDataStory == nil) {
             //NSLog(@"UpdateStoryThreadUnsafe: create new story for \"%@\" chapter: %d", parentContent.ncode, chapter_number);
-            coreDataStory = [self CreateNewStoryThreadUnsafe:parentCoreDataContent content:content chapter_number: chapter_number];
+            [self CreateNewStoryThreadUnsafe:parentCoreDataContent content:content chapter_number: chapter_number];
+        }else{
+            coreDataStory.content = content;
+            coreDataStory.parentContent = parentCoreDataContent;
+            coreDataStory.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
+            if(![m_CoreDataObjectHolder save]){
+                //NSLog(@"UpdateStoryThreadUnsafe: m_CoreDataObjectHolder save failed.");
+            }
         }
-        coreDataStory.content = content;
-        coreDataStory.parentContent = parentCoreDataContent;
-        coreDataStory.chapter_number = [[NSNumber alloc] initWithInt:chapter_number];
-        if(![m_CoreDataObjectHolder save]){
-            //NSLog(@"UpdateStoryThreadUnsafe: m_CoreDataObjectHolder save failed.");
-        }
+        coreDataStory = nil;
         result = true;
     }
 
@@ -709,6 +723,7 @@ static DummySoundLooper* dummySoundLooper = nil;
     [self coreDataPerfomBlockAndWait:^{
     //dispatch_sync(m_CoreDataAccessQueue, ^{
         result = [self UpdateStoryThreadUnsafe:content chapter_number:chapter_number parentContent:parentContent];
+        [m_CoreDataObjectHolder refreshAllObjects];
     //});
     }];
     
@@ -4292,32 +4307,34 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     long fileNum = 0;
     long maxStoryNum = 0;
     for (NSURL* fileURL in fileURLArray) {
-        NSString* lastPathComponent = [fileURL lastPathComponent];
-        NSRange extensionLocation = [lastPathComponent rangeOfString:@".txt"];
-        if (extensionLocation.location == NSNotFound) {
-            NSLog(@"\".txt\" not found: %@", [fileURL absoluteString]);
-            continue;
-        }
-        NSString* chapterNumberString = [lastPathComponent substringToIndex:extensionLocation.location];
-        long chapterNumber = [chapterNumberString integerValue];
-        if (chapterNumber <= 0) {
-            NSLog(@"invalid fileNumber: %ld (%@)", chapterNumber, [fileURL absoluteString]);
-            continue;
-        }
-        NSError* error = nil;
-        NSString* story = [[NSString alloc] initWithContentsOfURL:fileURL encoding:NSUTF8StringEncoding error:&error];
-        if (error != nil) {
-            NSLog(@"file read error: %@", error);
-            continue;
-        }
-        if (maxStoryNum < chapterNumber) {
-            maxStoryNum = chapterNumber;
-        }
-        [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
-            [self UpdateStory:story chapter_number:(int)chapterNumber parentContent:content];
-        }];
+        @autoreleasepool {
+            NSString* lastPathComponent = [fileURL lastPathComponent];
+            NSRange extensionLocation = [lastPathComponent rangeOfString:@".txt"];
+            if (extensionLocation.location == NSNotFound) {
+                NSLog(@"\".txt\" not found: %@", [fileURL absoluteString]);
+                continue;
+            }
+            NSString* chapterNumberString = [lastPathComponent substringToIndex:extensionLocation.location];
+            long chapterNumber = [chapterNumberString integerValue];
+            if (chapterNumber <= 0) {
+                NSLog(@"invalid fileNumber: %ld (%@)", chapterNumber, [fileURL absoluteString]);
+                continue;
+            }
+            NSError* error = nil;
+            NSString* story = [[NSString alloc] initWithContentsOfURL:fileURL encoding:NSUTF8StringEncoding error:&error];
+            if (error != nil) {
+                NSLog(@"file read error: %@", error);
+                continue;
+            }
+            if (maxStoryNum < chapterNumber) {
+                maxStoryNum = chapterNumber;
+            }
+            [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+                [self UpdateStory:story chapter_number:(int)chapterNumber parentContent:content];
+            }];
 
-        fileNum += 1;
+            fileNum += 1;
+        }
     }
     content.general_all_no = [[NSNumber alloc] initWithLong:maxStoryNum];
     [self UpdateNarouContent:content];
@@ -4506,55 +4523,57 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     NSMutableDictionary* requestedURLHosts = [NSMutableDictionary new];
     int n = 0;
     for (id obj in bookshelfDataArray) {
-        n += 1;
-        if (progress != nil) {
-            progress([[NSString alloc] initWithFormat:@"%@ (%d/%lu)"
-                      , NSLocalizedString(@"GlobalDataSingleton_RestoreingBookProgress", @"小説の復元中")
-                      , n, (unsigned long)[bookshelfDataArray count]]);
-        }
-        if (![obj isKindOfClass:[NSDictionary class]]) {
-            continue;
-        }
-        NSDictionary* bookshelfDictionary = obj;
-        NSString* type = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"type"];
-        //NSLog(@"type: %@", type);
-        if ([type compare:@"ncode"] == NSOrderedSame) {
-            [self LoadBookshelfNcodeType_V1_0_0:bookshelfDictionary dataDirectory:dataDirectory];
-        }else if([type compare:@"url"] == NSOrderedSame) {
-            [self LoadBookshelfURLType_V1_0_0:bookshelfDictionary dataDirectory:dataDirectory requestedURLHosts:requestedURLHosts];
-        }else if([type compare:@"user"] == NSOrderedSame) {
-            NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
-            NSString* ncode = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"id"];
-            NSArray* storyArray = [NiftyUtility validateNSDictionaryForArray:bookshelfDictionary key:@"storys"];
-            //NSLog(@"title: %@", title);
-            //NSLog(@"ncode: %@", ncode);
-            if (title == nil) {
-                title = NSLocalizedString(@"GlobalDataSingleton_NewUserBookTitle", @"新規ユーザ小説");
+        @autoreleasepool {
+            n += 1;
+            if (progress != nil) {
+                progress([[NSString alloc] initWithFormat:@"%@ (%d/%lu)"
+                          , NSLocalizedString(@"GlobalDataSingleton_RestoreingBookProgress", @"小説の復元中")
+                          , n, (unsigned long)[bookshelfDataArray count]]);
             }
-            if (ncode == nil || [ncode length] != 10) {
-                NSLog(@"ユーザ小説で、不正な ncode　が指定されているため無視します。");
+            if (![obj isKindOfClass:[NSDictionary class]]) {
                 continue;
             }
-            if (storyArray == nil || [storyArray count] <= 0) {
-                continue;
-            }
-            NarouContentCacheData* content = [self CreateNewUserBook]; // で作った奴の ncode を上書きすれば良い
-            content.ncode = ncode;
-            content.title = title;
-            content.general_all_no = [[NSNumber alloc] initWithUnsignedInteger:[storyArray count]];
-            [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
-                [self UpdateNarouContent:content];
-            }];
-            int chapterNumber = 1;
-            for (id storyObj in storyArray) {
-                if (![storyObj isKindOfClass:[NSString class]]) {
+            NSDictionary* bookshelfDictionary = obj;
+            NSString* type = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"type"];
+            //NSLog(@"type: %@", type);
+            if ([type compare:@"ncode"] == NSOrderedSame) {
+                [self LoadBookshelfNcodeType_V1_0_0:bookshelfDictionary dataDirectory:dataDirectory];
+            }else if([type compare:@"url"] == NSOrderedSame) {
+                [self LoadBookshelfURLType_V1_0_0:bookshelfDictionary dataDirectory:dataDirectory requestedURLHosts:requestedURLHosts];
+            }else if([type compare:@"user"] == NSOrderedSame) {
+                NSString* title = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"title"];
+                NSString* ncode = [NiftyUtility validateNSDictionaryForString:bookshelfDictionary key:@"id"];
+                NSArray* storyArray = [NiftyUtility validateNSDictionaryForArray:bookshelfDictionary key:@"storys"];
+                //NSLog(@"title: %@", title);
+                //NSLog(@"ncode: %@", ncode);
+                if (title == nil) {
+                    title = NSLocalizedString(@"GlobalDataSingleton_NewUserBookTitle", @"新規ユーザ小説");
+                }
+                if (ncode == nil || [ncode length] != 10) {
+                    NSLog(@"ユーザ小説で、不正な ncode　が指定されているため無視します。");
                     continue;
                 }
-                NSString* story = storyObj;
+                if (storyArray == nil || [storyArray count] <= 0) {
+                    continue;
+                }
+                NarouContentCacheData* content = [self CreateNewUserBook]; // で作った奴の ncode を上書きすれば良い
+                content.ncode = ncode;
+                content.title = title;
+                content.general_all_no = [[NSNumber alloc] initWithUnsignedInteger:[storyArray count]];
                 [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
-                    [self UpdateStory:story chapter_number:chapterNumber parentContent:content];
+                    [self UpdateNarouContent:content];
                 }];
-                chapterNumber += 1;
+                int chapterNumber = 1;
+                for (id storyObj in storyArray) {
+                    if (![storyObj isKindOfClass:[NSString class]]) {
+                        continue;
+                    }
+                    NSString* story = storyObj;
+                    [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
+                        [self UpdateStory:story chapter_number:chapterNumber parentContent:content];
+                    }];
+                    chapterNumber += 1;
+                }
             }
         }
     }
@@ -4991,24 +5010,22 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
 }
 
 /// JSONData に入っているバックアップを書き戻します。
-- (BOOL)RestoreBackupFromZIPData:(NSURL*)filePath finally:(void(^)(BOOL))finally {
+- (void)RestoreBackupFromZIPData:(NSURL*)filePath finally:(void(^)(BOOL))finally {
     if (filePath == nil) {
         if (finally != nil) {
             finally(false);
         }
-        return false;
+        return;
     }
     __block UIViewController* toplevelViewController = nil;
-    __block BOOL result = false;
     [NiftyUtilitySwift DispatchSyncMainQueueWithBlock:^{
         toplevelViewController = [UIViewController toplevelViewController];
-        result = [NovelSpeakerBackup parseBackupFileWithUrl:filePath toplevelViewController:toplevelViewController finally:^(BOOL finalResult) {
+        [NovelSpeakerBackup parseBackupFileWithUrl:filePath toplevelViewController:toplevelViewController finally:^(BOOL finalResult) {
             if (finally != nil) {
                 finally(finalResult);
             }
         }];
     }];
-    return result;
 }
 
 /// 指定されたファイルを自作小説として読み込む

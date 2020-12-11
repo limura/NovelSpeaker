@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Zip
+import SSZipArchive
 
 class NovelSpeakerBackup: NSObject {
     static func getBackupDirectoryPath() -> String {
@@ -61,6 +61,12 @@ class NovelSpeakerBackup: NSObject {
         }
     }
     
+    @objc public static func updateStory(globalData:GlobalDataSingleton, text:String, chapterNumber:Int, ncode:String) {
+        let content = NarouContentCacheData()
+        content.ncode = ncode
+        globalData.updateStory(text, chapter_number: Int32(chapterNumber), parentContent: content)
+    }
+    
     /// novelspeaker-backup+zip のバイナリを生成して返します。一時的に zip 用のディレクトリやファイルが作成されます。
     @objc public static func createBackupData(progress:((String)->Void)?) -> URL? {
         func UpdateProgress(message:String) {
@@ -68,12 +74,12 @@ class NovelSpeakerBackup: NSObject {
                 progress(message)
             }
         }
+        let fileManager = FileManager.default
         
         UpdateProgress(message: NSLocalizedString("NovelSpeakerBackup_InitializeBackup", comment: "初期化中"))
         // 最初に有無を言わさず作業用ディレクトリの中身を吹き飛ばします
         NovelSpeakerBackup.cleanBackupStoreDirectory()
 
-        var zipPaths:[URL] = []
         guard let tmpDirURL = createBackupDirectory(),
             let globalDataSingleton = GlobalDataSingleton.getInstance(),
             var backupDataDictionary = globalDataSingleton.createBackupDataDictionary(),
@@ -100,58 +106,53 @@ class NovelSpeakerBackup: NSObject {
             }
             func addStoryContent(directory:URL, no:Int, content:String) -> Bool {
                 do {
-                    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
-                    try content.write(to: directory.appendingPathComponent(no.description + ".txt"), atomically: true, encoding: .utf8)
+                    try autoreleasepool {
+                        //try fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
+                        try content.write(to: directory.appendingPathComponent(no.description + ".txt"), atomically: true, encoding: .utf8)
+                    }
                 } catch let error {
                     print("story content write error", error)
                     return false
                 }
                 return true
             }
-            func loadAllStoryContent(ncode:String, bookShelfDictionary:Dictionary<String,Any>) -> (String?, [URL]?) {
-                var zipPaths:[URL] = []
-                if let storyArray = globalDataSingleton.getAllStoryText(forNcode: ncode) {
-                    let contentDirectoryName = createContentDirectory(ncode: ncode)
-                    let contentDirectoryURL = tmpDirURL.appendingPathComponent(contentDirectoryName)
-                    zipPaths.append(contentDirectoryURL)
-                    var isFailed = false
-                    var no = 1
-                    for storyObj in storyArray {
-                        if let storyString = storyObj as? String {
-                            if !addStoryContent(directory: contentDirectoryURL, no: no, content:storyString) {
-                                isFailed = true
-                                break
-                            }
-                            no = no + 1
-                        }else{
-                            isFailed = true
-                            break
-                        }
-                    }
-                    if isFailed {
-                        print("isFailed")
-                        do {
-                            try FileManager.default.removeItem(at: contentDirectoryURL)
-                        }catch{
-                            // nothing to do
-                        }
-                    }else{
-                        return (contentDirectoryName, zipPaths)
-                    }
+            func loadAllStoryContent(ncode:String, progressString:String) -> String? {
+                let contentDirectoryName = createContentDirectory(ncode: ncode)
+                let contentDirectoryURL = tmpDirURL.appendingPathComponent(contentDirectoryName)
+                var isFailed = false
+                var no = 1
+                let storyCount = globalDataSingleton.getStoryCount(forNcode: ncode)
+                
+                do {
+                    try fileManager.createDirectory(at: contentDirectoryURL, withIntermediateDirectories: true, attributes: nil)
+                }catch let error {
+                    print("createDirectory failed: \(error)")
+                    return nil
                 }
-                print("loadAllStory failed")
-                return (nil, nil)
+                globalDataSingleton.getAllStoryTextForNcode(withBlock: ncode) { (text) in
+                    guard let storyString = text else { return }
+                    if !addStoryContent(directory: contentDirectoryURL, no: no, content:storyString) {
+                        isFailed = true
+                        return
+                    }
+                    no = no + 1
+                    let currentProgressString = "\(progressString) (\(no)/\(storyCount))"
+                    UpdateProgress(message: currentProgressString)
+                }
+                if isFailed {
+                    return nil
+                }
+                return contentDirectoryName
             }
-            UpdateProgress(message: NSLocalizedString("NovelSpeakerBackup_ExportingNovelText", comment: "小説本文を抽出中") + " (" + bookShelfCountForDisplay.description + "/" + bookShelfArray.count.description + ")")
+            let extractingMessage = NSLocalizedString("NovelSpeakerBackup_ExportingNovelText", comment: "小説本文を抽出中") + " (" + bookShelfCountForDisplay.description + "/" + bookShelfArray.count.description + ")"
+            UpdateProgress(message: extractingMessage)
             
             if let type = bookShelfDictionary["type"] as? String {
                 switch type {
                 case "url":
                     if let url = bookShelfDictionary["url"] as? String {
-                        let loadResult = loadAllStoryContent(ncode: url, bookShelfDictionary: bookShelfDictionary)
-                        if let contentDirectoryName = loadResult.0, let appendZipPaths = loadResult.1 {
+                        if let contentDirectoryName = loadAllStoryContent(ncode: url, progressString: extractingMessage) {
                             bookShelfDictionary["content_directory"] = contentDirectoryName
-                            zipPaths.append(contentsOf: appendZipPaths)
                         }
                     }
                     break
@@ -159,10 +160,8 @@ class NovelSpeakerBackup: NSObject {
                     break
                 case "ncode":
                     if let ncode = bookShelfDictionary["ncode"] as? String {
-                        let loadResult = loadAllStoryContent(ncode: ncode, bookShelfDictionary: bookShelfDictionary)
-                        if let contentDirectoryName = loadResult.0, let appendZipPaths = loadResult.1 {
+                        if let contentDirectoryName = loadAllStoryContent(ncode: ncode, progressString: extractingMessage) {
                             bookShelfDictionary["content_directory"] = contentDirectoryName
-                            zipPaths.append(contentsOf: appendZipPaths)
                         }
                     }
                     break
@@ -179,7 +178,6 @@ class NovelSpeakerBackup: NSObject {
             let jsonData = try JSONSerialization.data(withJSONObject: backupDataDictionary, options: .prettyPrinted)
             let backupDataURL = tmpDirURL.appendingPathComponent("backup_data.json")
             try jsonData.write(to: backupDataURL)
-            zipPaths.append(backupDataURL)
         }catch let error {
             print("JSONSerialization or write", error)
             return nil
@@ -191,25 +189,24 @@ class NovelSpeakerBackup: NSObject {
         let zipFilePath = URL(fileURLWithPath: NovelSpeakerBackup.getDocumentsBackupDirectoryPathString()).appendingPathComponent("NovelSpeakerBackup-" + dateString + ".zip")
         let novelSpeakerBackupZipFilePath = URL(fileURLWithPath: NovelSpeakerBackup.getDocumentsBackupDirectoryPathString()).appendingPathComponent("NovelSpeakerBackup-" + dateString + ".novelspeaker-backup+zip")
         UpdateProgress(message: NSLocalizedString("NovelSpeakerBackup_CompressingBackupData", comment: "バックアップデータを圧縮中"))
-        do {
-            print("zipPaths", zipPaths)
-            try Zip.zipFiles(paths: zipPaths, zipFilePath: zipFilePath, password: nil, compression: ZipCompression.BestCompression, progress: { (progress) in
-                print("zip progress:", progress)
-                UpdateProgress(message: NSLocalizedString("NovelSpeakerBackup_CompressingBackupDataProgress", comment: "バックアップデータを圧縮中") + " (" + Int(progress * 100).description + "%)")
-            })
-        }catch let error {
-            print("zip file create error", zipFilePath, error)
+        let result = SSZipArchive.createZipFile(atPath: zipFilePath.path, withContentsOfDirectory: tmpDirURL.path, keepParentDirectory: false, compressionLevel: 9, password: nil, aes: false) { (progressA, progressB) in
+            print("SSZipArchive progress: \(progressA), \(progressB)")
+            UpdateProgress(message: NSLocalizedString("NovelSpeakerBackup_CompressingBackupDataProgress", comment: "バックアップデータを圧縮中") + " (\(Int(Float(progressA)/Float(progressB)*100.0))%)")
+        }
+        if result == false {
+            print("zip file create error", zipFilePath)
             return nil
         }
         do {
-            try FileManager.default.moveItem(at: zipFilePath, to: novelSpeakerBackupZipFilePath)
+            try fileManager.moveItem(at: zipFilePath, to: novelSpeakerBackupZipFilePath)
         }catch let error {
             print("zip file move error", zipFilePath, novelSpeakerBackupZipFilePath, error)
             return nil
         }
+        UpdateProgress(message: NSLocalizedString("NovelSpeakerBackup_RemovingStoryFiles", comment: "後処理中"))
         // zip作成に使ったディレクトリはこのタイミングで消します
         do {
-            try FileManager.default.removeItem(at: tmpDirURL)
+            try fileManager.removeItem(at: tmpDirURL)
         }catch let error {
             print("zip directory delete error", tmpDirURL, error)
             return nil
@@ -227,112 +224,110 @@ class NovelSpeakerBackup: NSObject {
     }
     
     /// novelspeaker-backup+zip へのパス(URL)を受け取って、それを適用します。成否を返します。
-    @objc public static func parseBackupFile(url: URL, toplevelViewController:UIViewController, finally:((Bool)->Void)? = nil) -> Bool {
+    @objc public static func parseBackupFile(url: URL, toplevelViewController:UIViewController, finally:((Bool)->Void)? = nil) {
         let dialog = NiftyUtilitySwift.EasyDialogBuilder(toplevelViewController)
         .label(text: NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元"), textAlignment: .center, tag: 100)
         .build()
-        DispatchQueue.main.async {
-            dialog.show()
-        }
-        
         func announceProgress(text:String){
-            DispatchQueue.main.async {
+            NiftyUtilitySwift.DispatchSyncMainQueue {
                 if let label = dialog.view.viewWithTag(100) as? UILabel {
                     label.text = NSLocalizedString("NovelSpeakerBackup_Restoreing", comment: "バックアップより復元") + "\r\n" + text
+                    RunLoop.main.run(until: Date(timeIntervalSinceNow: 0))
                 }
             }
         }
-        // 最初に有無を言わさず作業用ディレクトリの中身を吹き飛ばします
-        NovelSpeakerBackup.cleanBackupStoreDirectory()
-
-        guard let tmpDirURL = createBackupDirectory(),
-            let globalDataSingleton = GlobalDataSingleton.getInstance() else {
-            print("create backup directory failed.")
-            DispatchQueue.main.async {
-                dialog.dismiss(animated: false, completion: {
-                    if let finally = finally {
-                        finally(false)
-                    }
-                })
-            }
-            return false;
-        }
-
-        do {
-            Zip.addCustomFileExtension("novelspeaker-backup+zip")
-            try Zip.unzipFile(url, destination: tmpDirURL, overwrite: false, password: nil, progress: { (progress) in
-                //print("progress", progress)
-                announceProgress(text: NSLocalizedString("NovelSpeakerBackup_ProgressExtractingZip", comment: "展開中") + " (" + Int(progress * 100).description + "%)")
-            }) { (url) in
-                // print("fileOutput", url)
-            }
-        }catch let error{
-            print("unzip failed", error, url)
-            DispatchQueue.main.async {
-                dialog.dismiss(animated: false, completion: {
-                    if let finally = finally {
-                        finally(false)
-                    }
-                })
-            }
-            return false
-        }
-        var jsonData:Data? = nil
-        do {
-            let backupDataJsonFilePath = tmpDirURL.appendingPathComponent("backup_data.json", isDirectory: false)
-            try jsonData = Data(contentsOf: backupDataJsonFilePath)
-        }catch let error{
-            print("read backup_data.json failed", error)
-            DispatchQueue.main.async {
-                dialog.dismiss(animated: false, completion: {
-                    if let finally = finally {
-                        finally(false)
-                    }
-                })
-            }
-            return false
-        }
-
-        guard let jsonDataClean = jsonData else {
-            print("no jsonData")
-            DispatchQueue.main.async {
-                dialog.dismiss(animated: false, completion: {
-                    if let finally = finally {
-                        finally(false)
-                    }
-                })
-            }
-            return false
-        }
-        announceProgress(text: NSLocalizedString("NovelSpeakerBackup_RestoreingBackupData", comment: "適用中"))
-        let result = globalDataSingleton.restoreBackup(fromJSONData: jsonDataClean, dataDirectory: tmpDirURL) { (text) in
-            if let text = text {
-                announceProgress(text: text)
-            }
-        }
-        
-        // zip展開に使ったディレクトリを消します
-        do {
-            try FileManager.default.removeItem(at: tmpDirURL)
-        }catch let error {
-            print("zip directory delete error", tmpDirURL, error)
-            DispatchQueue.main.async {
-                dialog.dismiss(animated: false, completion: {
-                    if let finally = finally {
-                        finally(false)
-                    }
-                })
-            }
-            return false
-        }
-        
         DispatchQueue.main.async {
-            dialog.dismiss(animated: false, completion: {
-                if let finally = finally {
-                    finally(result)
+            dialog.show {
+                // 最初に有無を言わさず作業用ディレクトリの中身を吹き飛ばします
+                NovelSpeakerBackup.cleanBackupStoreDirectory()
+
+                guard let tmpDirURL = createBackupDirectory(),
+                    let globalDataSingleton = GlobalDataSingleton.getInstance() else {
+                    print("create backup directory failed.")
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false, completion: {
+                            if let finally = finally {
+                                finally(false)
+                            }
+                        })
+                    }
+                    return
                 }
-            })
+
+                let zipResult = SSZipArchive.unzipFile(atPath: url.path, toDestination: tmpDirURL.path, overwrite: true, password: nil) { (fileName, fileInfo, progressA, progressB) in
+                    //print("progress: \(fileName), \(progressA), \(progressB)")
+                    let warningText:String
+                    if progressB >= 65535 {
+                        warningText = NSLocalizedString("NovelSpeakerBackup_ProgressExtractingZip_WarningInvalidPercentage", comment: "\n展開中のバックアップファイル中のファイル数が多いため、進捗(%表示)が不正な値を指すことがあります")
+                    }else{
+                        warningText = ""
+                    }
+                    announceProgress(text: NSLocalizedString("NovelSpeakerBackup_ProgressExtractingZip", comment: "展開中") + " (\(Int(Float(progressA)/Float(progressB)*100.0))%)\(warningText)")
+                } completionHandler: { (str, result, err) in
+                    print("completion: \(str), \(result ? "true": "false"), \(err?.localizedDescription ?? "-")")
+                }
+                if zipResult == false {
+                    print("unzipFile failed.")
+                    return
+                }
+                // TODO: completion でなんとかしないと駄目
+                var jsonData:Data? = nil
+                do {
+                    let backupDataJsonFilePath = tmpDirURL.appendingPathComponent("backup_data.json", isDirectory: false)
+                    try jsonData = Data(contentsOf: backupDataJsonFilePath)
+                }catch let error{
+                    print("read backup_data.json failed", error)
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false, completion: {
+                            if let finally = finally {
+                                finally(false)
+                            }
+                        })
+                    }
+                    return
+                }
+
+                guard let jsonDataClean = jsonData else {
+                    print("no jsonData")
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false, completion: {
+                            if let finally = finally {
+                                finally(false)
+                            }
+                        })
+                    }
+                    return
+                }
+                announceProgress(text: NSLocalizedString("NovelSpeakerBackup_RestoreingBackupData", comment: "適用中"))
+                let result = globalDataSingleton.restoreBackup(fromJSONData: jsonDataClean, dataDirectory: tmpDirURL) { (text) in
+                    if let text = text {
+                        announceProgress(text: text)
+                    }
+                }
+                
+                // zip展開に使ったディレクトリを消します
+                do {
+                    try FileManager.default.removeItem(at: tmpDirURL)
+                }catch let error {
+                    print("zip directory delete error", tmpDirURL, error)
+                    DispatchQueue.main.async {
+                        dialog.dismiss(animated: false, completion: {
+                            if let finally = finally {
+                                finally(false)
+                            }
+                        })
+                    }
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        if let finally = finally {
+                            finally(result)
+                        }
+                    })
+                }
+            }
         }
-        return result
     }
 }

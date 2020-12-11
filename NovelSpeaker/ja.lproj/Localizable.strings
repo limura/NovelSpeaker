@@ -132,11 +132,13 @@
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";
 "NovelSpeakerBackup_ExportingNovelText" = "工程 1\r\n小説本文を抽出中";
-"NovelSpeakerBackup_CompressingBackupData" = "工程 2\r\n圧縮中";
+"NovelSpeakerBackup_CompressingBackupData" = "工程 2\r\n圧縮中(前処理中)";
 "NovelSpeakerBackup_CompressingBackupDataProgress" = "工程 2\r\n圧縮中";
 "NovelSpeakerBackup_Restoreing" = "バックアップより復元";
 "NovelSpeakerBackup_ProgressExtractingZip" = "工程 1\r\n展開中";
 "NovelSpeakerBackup_RestoreingBackupData" = "工程 2\r\n適用中";
+"NovelSpeakerBackup_RemovingStoryFiles" = "工程 3\r\n後処理中";
+"NovelSpeakerBackup_ProgressExtractingZip_WarningInvalidPercentage" = "\n展開中のバックアップファイル中のファイル数が多いため、進捗(%表示)が不正な値を指すことがあります";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "話者を選択できません";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "iOS のバージョンが古いので話者の選択はできません。OS のバージョンを最新のものに変更してください。";

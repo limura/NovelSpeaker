@@ -137,6 +137,8 @@
 "NovelSpeakerBackup_Restoreing" = "Restore backups";
 "NovelSpeakerBackup_ProgressExtractingZip" = "Step 1\r\nExpanding";
 "NovelSpeakerBackup_RestoreingBackupData" = "Step 2\r\nApplying";
+"NovelSpeakerBackup_RemovingStoryFiles" = "Step 3\r\nIn post-processing";
+"NovelSpeakerBackup_ProgressExtractingZip_WarningInvalidPercentage" = "\nDue to the large number of files in the backup file being expanded, the progress (% display) may point to an incorrect value.";
 
 "DefaultSpeakSettingEditTableViewCell_AlertCanNotUseSpeakerSelection_title" = "Cannot selete target speaker";
 "DefaultSpeakSetingEditTableViewCell_AlertCanNotSelectSpeakerSelection_message" = "Please update your OS to the latest version.";
