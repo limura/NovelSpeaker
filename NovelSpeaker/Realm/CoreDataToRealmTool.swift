@@ -216,30 +216,30 @@ class CoreDataToRealmTool: NSObject {
     
     // 保存されているStoryを移行するついでに、最後の chapterNumber の物を返します
     private static func CreateRealmStoryFromCoreDataWithNarouContent(realm: Realm,  globalDataSingleton:GlobalDataSingleton, content: NarouContentCacheData, novelID: String) -> Story? {
-        guard let storyArray = globalDataSingleton.geAllStory(forNcode: content.ncode) else {
-            BehaviorLogger.AddLogSimple(description: "WARN: CreateRealmStoryFromCoreDataWithNarouContent failed by geAllStory: \(content.ncode ?? "unknown ncode")")
-            return nil
-        }
+        var chapterNumber = 0
         var newStoryArray:[Story] = []
-        for storyObj in storyArray {
-            guard let storyCoreData = storyObj as? StoryCacheData, let chapterNumber = storyCoreData.chapter_number as? Int else {
-                BehaviorLogger.AddLogSimple(description: "WARN: CreateRealmStoryFromCoreDataWithNarouContent failed by  storyCoreData or chapterNumber is not valid")
-                continue
+        var lastStory:Story? = nil
+        globalDataSingleton.getAllStoryTextForNcode(withBlock: content.ncode) { (storyText) in
+            guard let storyText = storyText else { return }
+            autoreleasepool {
+                chapterNumber += 1
+                var story = Story()
+                story.novelID = novelID
+                story.chapterNumber = chapterNumber
+                story.content = NovelSpeakerUtility.NormalizeNewlineString(string: storyText)
+                if content.isURLContent() == false, content.isUserCreatedContent() == false, let ncode = content.ncode, let end = content.end as? Bool {
+                    story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
+                }
+                lastStory = story
+                newStoryArray.append(story)
+                if newStoryArray.count > RealmStoryBulk.bulkCount {
+                    RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: newStoryArray)
+                    newStoryArray.removeAll()
+                }
             }
-            var story = Story()
-            story.novelID = novelID
-            story.chapterNumber = chapterNumber
-            story.content = NovelSpeakerUtility.NormalizeNewlineString(string: storyCoreData.content)
-            if content.isURLContent() == false, content.isUserCreatedContent() == false, let ncode = content.ncode, let end = content.end as? Bool {
-                story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
-            }
-            newStoryArray.append(story)
-        }
-        newStoryArray.sort { (a, b) -> Bool in
-            a.chapterNumber < b.chapterNumber
         }
         RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: newStoryArray)
-        return newStoryArray.last
+        return lastStory
     }
     
     private static func NarouContentToNovelID(content:NarouContentCacheData) -> String {

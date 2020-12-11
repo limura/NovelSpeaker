@@ -599,6 +599,7 @@
         for (NSObject* obj in results) {
             block(obj);
         }
+        [self refreshAllObjects];
     }
 }
 

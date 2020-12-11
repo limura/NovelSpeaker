@@ -282,8 +282,10 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     [self coreDataPerfomBlockAndWait:^{
         [self->m_CoreDataObjectHolder SearchEntityWithBlock:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode] block:^(NSObject* obj) {
-            Story* story = (Story*)obj;
-            block(story.content);
+            @autoreleasepool {
+                Story* story = (Story*)obj;
+                block(story.content);
+            }
         }];
     }];
 }
