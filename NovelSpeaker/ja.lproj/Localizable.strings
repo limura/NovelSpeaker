@@ -199,7 +199,7 @@
 "SettingTableViewController_RepeatTypeTitle" = "再生が末尾に達した時の動作";
 "SettingTableViewController_RepeatType_NoRepeat" = "そのまま停止する";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "最初の章から再生し直す";
-"SettingTableViewController_RepeatType_RewindToThisStory" = "現在の章を再生しなおす";
+"SettingTableViewController_RepeatType_RewindToThisStory" = "現在の章を再生し直す";
 "SettingTableViewController_RepeatType_GoToNextLikeNovel" = "お気に入りのうち未読の物を再生";
 "SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "同じフォルダの小説のうち未読の物を再生";
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する";
