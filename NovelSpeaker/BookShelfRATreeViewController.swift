@@ -686,10 +686,15 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     func reloadAllData() {
-        let (_, displayDataArray) = getBookShelfRATreeViewCellDataTree()
+        let (hasFolder, displayDataArray) = getBookShelfRATreeViewCellDataTree()
         self.displayDataArray = displayDataArray
         self.treeView?.reloadData()
         self.HilightCurrentReadingNovel()
+        if hasFolder {
+            self.switchFolderButton.isEnabled = true
+        }else{
+            self.switchFolderButton.isEnabled = false
+        }
     }
 
     func reloadAllDataAndScrollToCurrentReadingContent(){
