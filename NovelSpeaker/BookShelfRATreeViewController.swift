@@ -686,16 +686,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     func reloadAllData() {
-        let (isUseFolder, displayDataArray) = getBookShelfRATreeViewCellDataTree()
+        let (_, displayDataArray) = getBookShelfRATreeViewCellDataTree()
         self.displayDataArray = displayDataArray
         self.treeView?.reloadData()
         self.HilightCurrentReadingNovel()
-        if isUseFolder {
-            self.switchFolderButton.isEnabled = true
-            checkAndUpdateSwitchFolderButtonImage()
-        }else{
-            self.switchFolderButton.isEnabled = false
-        }
     }
 
     func reloadAllDataAndScrollToCurrentReadingContent(){
@@ -1227,7 +1221,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func HighlightNovel(novelID:String) {
         DispatchQueue.main.async {
             self.treeView?.beginUpdates()
-            defer { self.treeView?.endUpdates() }
+            defer {
+                self.treeView?.endUpdates()
+                self.checkAndUpdateSwitchFolderButtonImage()
+            }
             for cellItem in self.displayDataArray {
                 // tree が展開されるのは一段目までです(´・ω・`)
                 if let childrens = cellItem.childrens {
