@@ -169,6 +169,9 @@
 "SpeechViewController_SearchDialogPlaceholderText" = "空文字列で検索すると全ての章がリストされます";
 "SpeechViewController_SearchDialog_NotFoundTitle" = "指定された文字列は存在しませんでした。";
 "SpeechViewController_NowSearchingTitle" = "検索中";
+"SpeechViewController_SafariButton_VoiceOverTitle" = "Web取込タブで開く";
+"SpeechViewController_PrevChapterButton_VoiceOverTitle" = "前のページ";
+"SpeechViewController_NextChapterButton_VoiceOverTitle" = "次のページ";
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
 "SpeechWaitConfigSettingView_PleaseSetSpeechText" = "読み上げテスト用の文字列を設定してください";
@@ -344,12 +347,17 @@
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.71
 
+- 本棚画面と小説本文画面のボタンの一部について、VoiceOverで選択した時の読み上げ文字を設定
 - 大量の小説(本文)が登録されている ことせかい で、設定タブ -> バックアップ用データの生成 -> 完全バックアップ〜 でバックアップファイルを作成しようとすると落ちる問題に対応
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
 # Version 1.1.71
+
+インタフェースの変更
+
+- 本棚画面と小説本文画面のボタンの一部について、VoiceOverで選択した時の読み上げ文字を設定
 
 問題の修正
 

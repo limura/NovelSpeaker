@@ -71,11 +71,15 @@
     }
     if ([self.NarouContentDetail isURLContent] || ![self.NarouContentDetail isUserCreatedContent]) {
         UIBarButtonItem* safariButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"earth"] style:UIBarButtonItemStylePlain target:self action:@selector(safariButtonClick:)];
+        safariButton.accessibilityLabel = NSLocalizedString(@"SpeechViewController_SafariButton_VoiceOverTitle", @"Web取込タブで開く");
         [buttonItemList addObject:safariButton];
     }
     [buttonItemList addObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSearch target:self action:@selector(searchButtonClicked:)]];
     self.navigationItem.rightBarButtonItems = buttonItemList;
     self.navigationItem.title = self.NarouContentDetail.title;
+    
+    self.PrevChapterButton.accessibilityLabel = NSLocalizedString(@"SpeechViewController_PrevChapterButton_VoiceOverTitle", @"前のページ");
+    self.NextChapterButton.accessibilityLabel = NSLocalizedString(@"SpeechViewController_NextChapterButton_VoiceOverTitle", @"次のページ");
 
     // 左右のスワイプを設定します。
     UISwipeGestureRecognizer* rightSwipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(RightSwipe:)];
