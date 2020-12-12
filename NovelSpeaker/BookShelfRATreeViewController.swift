@@ -81,6 +81,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         self.searchButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .done, target: self, action: #selector(searchButtonClicked))
         if #available(iOS 13.0, *) {
             self.switchFolderButton = UIBarButtonItem.init(image: UIImage(systemName: "rectangle.expand.vertical"), style: .plain, target: self, action: #selector(switchFolderButtonClicked))
+            self.switchFolderButton.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle", comment: "フォルダ開閉")
         }else{
             self.switchFolderButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfRATreeViewController_ExpandFolderButton", comment: "フォルダ開閉"), style: UIBarButtonItem.Style.done, target: self, action: #selector(switchFolderButtonClicked))
         }

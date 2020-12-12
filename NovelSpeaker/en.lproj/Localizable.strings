@@ -294,6 +294,9 @@
 "SpeechViewController_NowLoadingText" = "loading...";
 "SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "Go to the updated %d chapter on the other device";
 "SpeechViewController_WaitingSpeakerReady" = "Waiting for the speaker to be ready.";
+"SpeechViewController_WebPageButton_VoiceOverTitle" = "Open in web import tab";
+"SpeechViewController_PreviousChapterButton_VoiceOverTitle" = "Previous page";
+"SpeechViewController_NextChapterButton_VoiceOverTitle" = "Next page";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";
@@ -619,6 +622,7 @@
 "BookShelfRATreeViewController_HostNameTable_novelspeaker.example.com" = "Self-made novel";
 "BookShelfRATreeViewController_ExpandFolderButton" = "SwitchFolder";
 "BookShelfRATreeViewController_NowSwitchingFolderMessage" = "Switching folder...";
+"BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle" = "Switch folder";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";

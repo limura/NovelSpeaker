@@ -137,6 +137,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         previousChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
         nextChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
         chapterPositionLabel.adjustsFontForContentSizeCategory = true
+        
+        previousChapterButton.accessibilityLabel = NSLocalizedString("SpeechViewController_PreviousChapterButton_VoiceOverTitle", comment: "前のページ")
+        nextChapterButton.accessibilityLabel = NSLocalizedString("SpeechViewController_NextChapterButton_VoiceOverTitle", comment: "次のページ")
 
         setCustomUIMenu()
     }
@@ -161,8 +164,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             if buttonSetting.isOn == false { continue }
             switch buttonSetting.type {
             case .openWebPage:
+                let webPageButton = UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(safariButtonClicked(_:)))
+                webPageButton.accessibilityLabel = NSLocalizedString("SpeechViewController_WebPageButton_VoiceOverTitle", comment: "Web取込タブで開く")
                 if novel.type == .URL {
-                    barButtonArray.append(UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(safariButtonClicked(_:))))
+                    barButtonArray.append(webPageButton)
                 }
             case .reload:
                 if novel.type == .URL {
