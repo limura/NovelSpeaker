@@ -749,6 +749,10 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 
 # Version 1.1.71
 
+Interface change
+
+- For some of the buttons on the bookshelf screen and the novel text screen, set the reading characters when selected with VoiceOver.
+
 Bug fix
 
 - Addressed an issue where a large number of novels (text) were registered, and when trying to create a backup file with the Settings tab -> Generate backup data-> Complete backup
