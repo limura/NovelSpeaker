@@ -633,38 +633,52 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let lastReadNovel = RealmGlobalState.GetLastReadNovel(realm: realm) else { return }
                 let novelID = lastReadNovel.novelID
-                UIView.animate(withDuration: 0.3, animations: {
-                    for cellItem in self.displayDataArray {
-                        // tree が展開されるのは一段目までです(´・ω・`)
-                        if let childrens = cellItem.childrens {
-                            for cellItemChild in childrens {
-                                if cellItemChild.novelID == novelID {
-                                    self.treeView?.expandRow(forItem: cellItem)
-                                    self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
-                                    return
-                                }
-                            }
-                        }
-                        if cellItem.novelID == novelID {
-                            self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
-                            return
-                        }
-                    }
-                }, completion: { (finished) in
+                self.treeView?.beginUpdates()
+                defer {
+                    self.treeView?.endUpdates()
                     self.addPreviousNovelSpeakButtonIfNeeded()
                     self.checkAndUpdateSwitchFolderButtonImage()
-                })
+                }
+                for cellItem in self.displayDataArray {
+                    // tree が展開されるのは一段目までです(´・ω・`)
+                    if let childrens = cellItem.childrens {
+                        for cellItemChild in childrens {
+                            if cellItemChild.novelID == novelID {
+                                self.treeView?.expandRow(forItem: cellItem)
+                                self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
+                                return
+                            }
+                        }
+                    }
+                    if cellItem.novelID == novelID {
+                        self.treeView?.scrollToRow(forItem: cellItem, at: RATreeViewScrollPositionTop, animated: false)
+                        return
+                    }
+                }
             }
         }
     }
     
-    func checkAndUpdateSwitchFolderButtonImage() {
+    func setExpandIcon() {
         if #available(iOS 13.0, *) {
-            if isFolderExpanded() {
+            DispatchQueue.main.async {
                 self.switchFolderButton.image = UIImage(systemName: "rectangle.compress.vertical")
-            }else{
+            }
+        }
+    }
+    func setCollapseIcon() {
+        if #available(iOS 13.0, *) {
+            DispatchQueue.main.async {
                 self.switchFolderButton.image = UIImage(systemName: "rectangle.expand.vertical")
             }
+        }
+    }
+
+    func checkAndUpdateSwitchFolderButtonImage() {
+        if isFolderExpanded() {
+            setExpandIcon()
+        }else{
+            setCollapseIcon()
         }
     }
     
@@ -750,32 +764,32 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     func isFolderExpanded() -> Bool {
-        return self.treeView?.visibleCells()?.reduce(false, { (result, cell) -> Bool in
-            if result { return result }
-            guard let cell = cell as? UITableViewCell else { return false }
-            return self.treeView?.isCellExpanded(cell) ?? false
-        }) ?? false
+        for cellData in self.displayDataArray {
+            if cellData.childrens?.count ?? 0 > 0, self.treeView?.isCell(forItemExpanded: cellData) ?? false {
+                return true
+            }
+        }
+        return false
     }
     
     @objc func switchFolderButtonClicked(sender:Any) {
         DispatchQueue.main.async {
             let isExpanded = self.isFolderExpanded()
-            NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("BookShelfRATreeViewController_NowSwitchingFolderMessage", comment: "フォルダ開閉中……")) { (dialog) in
+            NiftyUtility.EasyDialogNoButton(viewController: self, title: NSLocalizedString("BookShelfRATreeViewController_NowSwitchingFolderMessage", comment: "フォルダ開閉中……"), message: nil) { (dialog) in
                 DispatchQueue.main.async {
+                    self.treeView?.beginUpdates()
                     for cellItem in self.displayDataArray {
                         if let childrens = cellItem.childrens, childrens.count > 0 {
                             if isExpanded {
-                                if self.treeView?.isCell(forItemExpanded: cellItem) ?? false {
-                                    self.treeView?.collapseRow(forItem: cellItem, with: RATreeViewRowAnimationNone)
-                                }
+                                self.treeView?.collapseRow(forItem: cellItem, with: RATreeViewRowAnimationNone)
+                                self.setCollapseIcon()
                             }else{
-                                if self.treeView?.isCell(forItemExpanded: cellItem) ?? true == false {
                                 self.treeView?.expandRow(forItem: cellItem, with: RATreeViewRowAnimationNone)
-                                }
+                                self.setExpandIcon()
                             }
-                            self.checkAndUpdateSwitchFolderButtonImage()
                         }
                     }
+                    self.treeView?.endUpdates()
                     dialog.dismiss(animated: false, completion: nil)
                 }
             }
@@ -1063,6 +1077,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: nil)
                         if isNeedReload, let treeView = self.treeView {
+                            self.treeView?.beginUpdates()
                             self.reloadAllData()
                             for currentItem in self.displayDataArray {
                                 for item in expandedItemList {
@@ -1071,6 +1086,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                     }
                                 }
                             }
+                            self.treeView?.endUpdates()
                         }
                     }
                 }
@@ -1207,6 +1223,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
     func HighlightNovel(novelID:String) {
         DispatchQueue.main.async {
+            self.treeView?.beginUpdates()
+            defer { self.treeView?.endUpdates() }
             for cellItem in self.displayDataArray {
                 // tree が展開されるのは一段目までです(´・ω・`)
                 if let childrens = cellItem.childrens {
