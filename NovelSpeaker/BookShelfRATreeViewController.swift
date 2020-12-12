@@ -636,8 +636,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 self.treeView?.beginUpdates()
                 defer {
                     self.treeView?.endUpdates()
-                    self.addPreviousNovelSpeakButtonIfNeeded()
-                    self.checkAndUpdateSwitchFolderButtonImage()
+                    // 多分アニメーションしている間分位は待たないと駄目
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        self.addPreviousNovelSpeakButtonIfNeeded()
+                        self.checkAndUpdateSwitchFolderButtonImage()
+                    }
                 }
                 for cellItem in self.displayDataArray {
                     // tree が展開されるのは一段目までです(´・ω・`)
