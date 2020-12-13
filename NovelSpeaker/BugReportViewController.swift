@@ -473,6 +473,9 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         let novelData = targetNovelSet.map { (content) -> String in
             return content.title + "\n" + content.novelID
         }.joined(separator: "\n---\n")
+        let isBackgroundFetchEnabled = RealmUtil.RealmBlock { (realm) -> Bool in
+            return RealmGlobalState.GetInstanceWith(realm: realm)?.isBackgroundNovelFetchEnabled ?? false
+        }
         
         let picker = MFMailComposeViewController()
         picker.mailComposeDelegate = self;
@@ -485,6 +488,8 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             + "\niOS version: " + UIDevice.current.systemVersion
             + "\nmodel: " + UIDevice.modelName
             + "\nApp version:" + appVersionString
+            + "\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
+            + "\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
             + "\n" + NSLocalizedString("BugReportViewController_TimeOfOccurrence", comment: "問題発生日時") + ": " + date.description(with: Locale.init(identifier: "ja_JP"))
             + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Description", comment: "不都合の概要") + ":\n" + description
             + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Procedure", comment: "不都合の再現方法") + ":\n" + procedure
