@@ -772,5 +772,65 @@
             "title": "//a/div[@class='info_list']/p[@class='title']",
             "url": "//a/@href"
         }
+    },
+    {
+	"isDisabled": true,
+        "title": "Novelism",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://novelism.jp/search/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "search"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude"},
+            {"queryType": "multiSelect", "displayText": "舞台", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "異世界": "worldview=6",
+                    "現代世界": "worldview=5",
+                    "歴史・時代": "worldview=4",
+                    "SF": "worldview=3",
+                    "ゲーム(VRMMO)": "worldview=2",
+                    "その他": "worldview=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "冒険・バトル": "category=10",
+                    "恋愛": "category=9",
+                    "戦争": "category=8",
+                    "日常": "category=7",
+                    "スポーツ": "category=6",
+                    "ミステリー": "category=5",
+                    "ホラー": "category=4",
+                    "コメディ": "category=3",
+                    "ヒューマンドラマ": "category=2",
+                    "二次創作": "category=11",
+                    "その他": "category=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "長さ", "queryName": "is_long_piece", "defaultValue": "", "radio":
+                {
+                    "短編": "false",
+                    "長編": "true"
+                }
+            },
+            {"queryType": "radio", "displayText": "完結状態", "queryName": "is_completed", "defaultValue": "", "radio":
+                {
+                    "連載中": "false",
+                    "完結済": "true"
+                }
+            },
+            {"queryType": "radio", "displayText": "作品状態", "queryName": "is_contracted", "defaultValue": "", "radio":
+                {
+                    "一般作品": "false",
+                    "契約作品": "true"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='flex-1' and descendant::div[@class='flex-1']//div[@class='novel-card-title']]",
+            "nextLink": "",
+            "title": "div[@class='flex-1']//div[@class='novel-card-title']",
+            "url": "//div[@class='flex-1']//div[@class='novel-card-title']/a/@href"
+        }
     }
 ]
