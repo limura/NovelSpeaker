@@ -43,7 +43,6 @@ class RealmToRealmCopyTool: NSObject {
             newObj.title = obj.title
             newObj.url = obj.url
             newObj.createdDate = obj.createdDate
-            newObj.likeLevel = obj.likeLevel
             newObj.isNeedSpeechAfterDelete = obj.isNeedSpeechAfterDelete
             newObj.defaultSpeakerID = obj.defaultSpeakerID
             newObj.isNotNeedUpdateCheck = obj.isNotNeedUpdateCheck
@@ -189,6 +188,8 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isOverrideRubyIsEnabled = obj.isOverrideRubyIsEnabled
             newObj.notRubyCharactorStringArray = obj.notRubyCharactorStringArray
             newObj.isIgnoreURIStringSpeechEnabled = obj.isIgnoreURIStringSpeechEnabled
+            newObj.novelLikeOrder.removeAll()
+            newObj.novelLikeOrder.append(objectsIn: obj.novelLikeOrder)
 
             to.add(newObj, update: .modified)
             try to.commitWrite()

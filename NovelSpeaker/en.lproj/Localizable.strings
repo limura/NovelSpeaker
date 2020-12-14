@@ -185,6 +185,7 @@
 "SettingsViewController_RemoteDataURLSetting" = "Setting URL for internal data reference";
 "SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "It seems that no folder has been created. This setting is not available unless the folder has been created.\nTo create a folder, edit it by selecting \"Settings tab\" -> \"Edit your own folder\", or open the novel in the \"Bookshelf tab\" and press the \"Details\" button in the upper right corner. Select \"Classify to Folder\" from the details screen of and add a folder.";
 "SettingsViewController_ManageFolderOrderButton" = "Edit folder";
+"SettingsViewController_ManageNovelLikeOrderButton" = "Edit like order";
 "SettingsViewController_UploadAllDataToiCloud_Title" = "Upload all current data to iCloud";
 "SettingsViewController_UploadAllDataToiCloud_iCloudNotEnabled_Message" = "Not currently using iCloud.";
 "SettingsViewController_UploadAllDataToiCloud_Message" = "I started uploading all my data to iCloud. The more data you have, the longer it will take to complete the upload.";
@@ -366,7 +367,7 @@
 "NovelDetailViewController_ActionSection_CreateBackupForThisNovelButton" = "Create backup file for this novel";
 "NovelDetailViewController_ActionSection_SearchButton_Title" = "Search within this novel (searching without anything will display a list of chapters)";
 "NovelDetailViewController_ActionSection_EditNovelButton" = "Edit this novel";
-"NovelDetailViewController_LikeLevelStepperRowTitle" = "Degree of favorite (0-100)";
+"NovelDetailViewController_LikeLevelSwitchRowTitle" = "Favorite";
 "NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle" = "Do not check for updates to this novel";
 "NovelDetailViewController_ActionSection_ShareButton" = "Share the URL of this novel";
 

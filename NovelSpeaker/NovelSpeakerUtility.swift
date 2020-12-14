@@ -1434,6 +1434,14 @@ class NovelSpeakerUtility: NSObject {
                 if let isIgnoreURIStringSpeechEnabled = dic.object(forKey:   "isIgnoreURIStringSpeechEnabled") as? NSNumber {
                     globalState.isIgnoreURIStringSpeechEnabled = isIgnoreURIStringSpeechEnabled.boolValue
                 }
+                if let novelLikeOrder = dic.object(forKey: "novelLikeOrder") as? NSArray {
+                    globalState.novelLikeOrder.removeAll()
+                    for novelID in novelLikeOrder {
+                        if let novelID = novelID as? String {
+                            globalState.novelLikeOrder.append(novelID)
+                        }
+                    }
+                }
             }
         }
     }
@@ -1467,9 +1475,6 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if let createdDateString = novelDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
                     novel.createdDate = createdDate
-                }
-                if let likeLevel = novelDic.object(forKey: "likeLevel") as? NSNumber {
-                    novel.likeLevel = likeLevel.int8Value
                 }
                 if let isNeedSpeechAfterDelete = novelDic.object(forKey: "isNeedSpeechAfterDelete") as? NSNumber {
                     novel.isNeedSpeechAfterDelete = isNeedSpeechAfterDelete.boolValue
@@ -1757,7 +1762,6 @@ class NovelSpeakerUtility: NSObject {
                     "title": novel.title,
                     "url": novel.url,
                     "createdDate": NiftyUtility.Date2ISO8601String(date: novel.createdDate),
-                    "likeLevel": novel.likeLevel,
                     "isNeedSpeechAfterDelete": novel.isNeedSpeechAfterDelete,
                     "defaultSpeakerID": novel.defaultSpeakerID,
                     "isNotNeedUpdateCheck": novel.isNotNeedUpdateCheck,
@@ -1940,6 +1944,7 @@ class NovelSpeakerUtility: NSObject {
                 "isOverrideRubyIsEnabled": globalState.isOverrideRubyIsEnabled,
                 "notRubyCharactorStringArray": globalState.notRubyCharactorStringArray,
                 "isIgnoreURIStringSpeechEnabled": globalState.isIgnoreURIStringSpeechEnabled,
+                "novelLikeOrder": Array(globalState.novelLikeOrder),
             ]
         }
     }

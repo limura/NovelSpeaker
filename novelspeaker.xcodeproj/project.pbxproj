@@ -65,6 +65,7 @@
 		212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */ = {isa = PBXBuildFile; fileRef = 212F359B1A8F8857009D0E60 /* GlobalState.m */; };
 		212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */; };
 		212F35A01A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */; };
+		212F6176258723C200822737 /* NovelLikeOrderSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212F6175258723C200822737 /* NovelLikeOrderSettingViewController.swift */; };
 		2133743F2013816D0043D995 /* bookmark-false@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743C2013816C0043D995 /* bookmark-false@2x.png */; };
 		213374402013816D0043D995 /* bookmark-false@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743D2013816C0043D995 /* bookmark-false@3x.png */; };
 		213374412013816D0043D995 /* bookmark-false.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743E2013816C0043D995 /* bookmark-false.png */; };
@@ -384,6 +385,7 @@
 		212F359B1A8F8857009D0E60 /* GlobalState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GlobalState.m; path = DataModelMapping/GlobalState.m; sourceTree = "<group>"; };
 		212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_5to7.xcmappingmodel; sourceTree = "<group>"; };
 		212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_6to7.xcmappingmodel; sourceTree = "<group>"; };
+		212F6175258723C200822737 /* NovelLikeOrderSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelLikeOrderSettingViewController.swift; sourceTree = "<group>"; };
 		212F951D1EB0EB8B005EF253 /* NovelSpeakerURLDownloadExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerURLDownloadExtension-Bridging-Header.h"; sourceTree = "<group>"; };
 		2133743C2013816C0043D995 /* bookmark-false@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@2x.png"; sourceTree = "<group>"; };
 		2133743D2013816C0043D995 /* bookmark-false@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@3x.png"; sourceTree = "<group>"; };
@@ -1107,6 +1109,7 @@
 				21BB5095253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift */,
 				21AA7FCE25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift */,
 				210DD99725840D1000F2B907 /* BookshelfViewButtonSettingsViewController.swift */,
+				212F6175258723C200822737 /* NovelLikeOrderSettingViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1733,6 +1736,7 @@
 				216741A72045B155008A578D /* UIDeviceModelNameExtension.swift in Sources */,
 				21D7B10F256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
 				2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */,
+				212F6176258723C200822737 /* NovelLikeOrderSettingViewController.swift in Sources */,
 				212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */,
 				212F359C1A8F8857009D0E60 /* GlobalState.m in Sources */,
 				21A291F622A2B611000AA58C /* MultipleNovelIDSelectorViewController.swift in Sources */,

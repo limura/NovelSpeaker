@@ -45,7 +45,8 @@ class DownloadQueueHolder: NSObject {
         var updateFrequencyTmp:Double? = nil
         guard novelID.count > 0 else { return }
         RealmUtil.RealmBlock { (realm) -> Void in
-            if let updateFrequency = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.updateFrequency {
+            guard let novelLikeOrder = RealmGlobalState.GetInstanceWith(realm: realm)?.novelLikeOrder else { return }
+            if let updateFrequency = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.updateFrequency(novelLikeOrder: novelLikeOrder) {
                 updateFrequencyTmp = updateFrequency
             }
         }

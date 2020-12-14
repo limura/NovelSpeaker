@@ -78,7 +78,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                                  "speechViewButtonSettingArrayData",
                                  "cookieArrayData",
                                  "m_DisplayType",
-                                 "bookshelfViewButtonSettingArrayData"
+                                 "bookshelfViewButtonSettingArrayData",
+                                 "novelLikeOrder"
                                 :
                                 continue
                             default:
@@ -717,6 +718,18 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 row.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 let nextViewController = NovelFolderManageTableViewController()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
+            <<< ButtonRow() { (row) in
+                row.title = NSLocalizedString("SettingsViewController_ManageNovelLikeOrderButton", comment: "お気に入り順を編集する")
+                row.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                let nextViewController = NovelLikeOrderSettingViewController()
                 self.navigationController?.pushViewController(nextViewController, animated: true)
             }).cellUpdate({ (cell, button) in
                 cell.textLabel?.textAlignment = .left

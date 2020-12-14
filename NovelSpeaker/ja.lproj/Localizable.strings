@@ -170,6 +170,7 @@
 "SettingsViewController_RemoteDataURLSetting" = "内部データ参照用URLの設定";
 "SettingsViewController_RepeatTypeGoToNextSameFolderdNovel_NoFolderFoundWarning" = "自作フォルダが一つも作成されていないようです。フォルダを作成されていないとこの設定は利用できません。\nフォルダを作成するには、「設定タブ」→「自作フォルダを編集する」で編集するか、「本棚タブ」で小説を開いて右上にある「詳細」ボタンを押した後に出てくる小説の詳細画面から「フォルダへ分類」を選択してフォルダを追加してください。";
 "SettingsViewController_ManageFolderOrderButton" = "自作フォルダを編集する";
+"SettingsViewController_ManageNovelLikeOrderButton" = "お気に入り順を編集する";
 "SettingsViewController_isUseWebSearchTabDisabledSite_Title" = "Web検索タブ で非表示設定されているサイトを表示する";
 "SettingsViewController_isDebugMenuAlreadyEnabled_Title" = "このデバッグ用メニューを常にONにする";
 "SettingsTableViewController_AppInformation" = "アプリ内エラーのお知らせ";
@@ -342,7 +343,7 @@
 "NovelDetailViewController_ActionSection_CreateBackupForThisNovelButton" = "この小説のバックアップを生成する";
 "NovelDetailViewController_ActionSection_SearchButton_Title" = "この小説内を検索(何も入れずに検索すると章のリストを表示します)";
 "NovelDetailViewController_ActionSection_EditNovelButton" = "この小説を編集する";
-"NovelDetailViewController_LikeLevelStepperRowTitle" = "お気に入り度合い(0〜100)";
+"NovelDetailViewController_LikeLevelSwitchRowTitle" = "お気に入り";
 "NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle" = "この小説の更新確認を行わない";
 "NovelDetailViewController_ActionSection_ShareButton" = "この小説のURLをシェアする";
 

@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 3
+    static let currentSchemaVersion : UInt64 = 4
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -32,6 +32,35 @@ import AVFoundation
             //newObject["beforeBefore"] = before
         }
     }
+    static func Migrate_Novel_LikeLevelTo_GlobalState_NovelLikeOrder(migration:Migration, oldSchemaVersion:UInt64) {
+        /*
+         RealmNovel.likeLevel で保存していた「お気に入り度合い」を、
+         RealmGlobalState.novelLikeOrder:List<String> に保存するようにします。
+         */
+        struct likeLevelData {
+            let novelID:String
+            let likeLevel:Int
+        }
+        var oldLikeData:[likeLevelData] = []
+        migration.enumerateObjects(ofType: RealmNovel.className()) { (oldObject, newObject) in
+            guard let oldObject = oldObject, let likeLevel = oldObject["likeLevel"] as? Int, likeLevel > 0, let novelID = oldObject["novelID"] as? String else { return }
+            oldLikeData.append(likeLevelData(novelID: novelID, likeLevel: likeLevel))
+        }
+        let novelLikeOrderArray = oldLikeData.sorted { (a, b) -> Bool in
+            a.likeLevel > b.likeLevel
+        }.map({$0.novelID})
+        migration.enumerateObjects(ofType: RealmGlobalState.className()) { (oldObject, newObject) in
+            guard let newObject = newObject else { return }
+            let newNovelLikeOrder = List<String>()
+            newNovelLikeOrder.removeAll()
+            newNovelLikeOrder.append(objectsIn: novelLikeOrderArray)
+            newObject["novelLikeOrder"] = newNovelLikeOrder
+        }
+    }
+    static func Migrate_3_To_4(migration:Migration, oldSchemaVersion:UInt64) {
+        Migrate_Novel_LikeLevelTo_GlobalState_NovelLikeOrder(migration: migration, oldSchemaVersion: oldSchemaVersion)
+    }
+    
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
         if oldSchemaVersion == 0 {
             Migrate_0_To_1(migration: migration, oldSchemaVersion: oldSchemaVersion)
@@ -39,9 +68,9 @@ import AVFoundation
         if oldSchemaVersion == 1 {
             Migrate_1_To_2(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
-    }
-    static func MigrateFuncForRealmStory(migration:Migration, oldSchemaVersion:UInt64) {
-        
+        if oldSchemaVersion == 3 {
+            Migrate_3_To_4(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
     }
     
     static func GetLocalRealmFilePath() -> URL? {
@@ -1193,7 +1222,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     @objc dynamic var title : String = ""
     @objc dynamic var url : String = ""
     @objc dynamic var createdDate : Date = Date()
-    @objc dynamic var likeLevel : Int8 = 0
+    //@objc dynamic var likeLevel : Int8 = 0
     @objc dynamic var isNeedSpeechAfterDelete : Bool = false
     @objc dynamic var defaultSpeakerID : String = ""
     @objc dynamic var isNotNeedUpdateCheck: Bool = false
@@ -1227,7 +1256,6 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         obj.title = title
         obj.url = url
         obj.createdDate = createdDate
-        obj.likeLevel = likeLevel
         obj.isNeedSpeechAfterDelete = isNeedSpeechAfterDelete
         obj.defaultSpeakerID = defaultSpeakerID
         obj.m_lastChapterStoryID = m_lastChapterStoryID
@@ -1307,16 +1335,18 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     // 計算としては 章数 / (現在 - 直近から数えて10個前のものがダウンロードされた日付)[日] なので、最後にダウンロードされた日付が古くても評価は下がる。
     // 最初に1000件とかダウンロードされた小説が既に更新終了していたとしても、10件分しか効果がないので10日経つと1に、100日経てば0.1になる。
     static let updateFrequencyTargetCount = 10
-    var updateFrequency: Double {
-        get {
-            guard let targetDownloadDate = downloadDateArray.suffix(10).first else {
-                return 1.0 / 60.0*60.0*24.0*30.0 // 未ダウンロードのものは30日に1度の頻度とする。
-            }
-            let count = Double(downloadDateArray.suffix(RealmNovel.updateFrequencyTargetCount).count)
-            let diffTimeInSec = Date().timeIntervalSince1970 - targetDownloadDate.timeIntervalSince1970
-            // likeLevel がある場合は updateFrequency を1日分早い感じにします。
-            return count / (diffTimeInSec / (60.0*60.0*24)) + Double(self.likeLevel) * count
+    func updateFrequency(novelLikeOrder:List<String>)-> Double {
+        var likeLevel:Int = 0
+        if let likeOrderIndex = novelLikeOrder.index(of: self.novelID) {
+            likeLevel = novelLikeOrder.count - likeOrderIndex
         }
+        guard let targetDownloadDate = downloadDateArray.suffix(10).first else {
+            return 1.0 / 60.0*60.0*24.0*30.0 // 未ダウンロードのものは30日に1度の頻度とする。
+        }
+        let count = Double(downloadDateArray.suffix(RealmNovel.updateFrequencyTargetCount).count)
+        let diffTimeInSec = Date().timeIntervalSince1970 - targetDownloadDate.timeIntervalSince1970
+        // likeLevel がある場合は updateFrequency を1日分早い感じにします。
+        return count / (diffTimeInSec / (60.0*60.0*24)) + Double(likeLevel) * count
     }
     
     public static func CreateUniqueID() -> String {
@@ -1470,7 +1500,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     }
     
     override static func indexedProperties() -> [String] {
-        return ["writer", "title", "novelID", "likeLevel", "isDeleted", "lastDownloadDate", "lastReadDate", "isNotNeedUpdateCheck"]
+        return ["writer", "title", "novelID", "isDeleted", "lastDownloadDate", "lastReadDate", "isNotNeedUpdateCheck"]
     }
 }
 extension RealmNovel: CKRecordConvertible {
@@ -2078,6 +2108,7 @@ extension HTTPCookie {
     @objc dynamic var isOverrideRubyIsEnabled = false
     @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
     @objc dynamic var isIgnoreURIStringSpeechEnabled = false
+    let novelLikeOrder = List<String>()
     
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {
@@ -2120,6 +2151,10 @@ extension HTTPCookie {
     }
     func defaultSpeakerWith(realm: Realm) -> RealmSpeakerSetting? {
         return realm.objects(RealmSpeakerSetting.self).filter("isDeleted = false AND name = %@", self.defaultSpeakerID).first
+    }
+    func calcLikeLevel(novelID:String) -> Int {
+        guard let index = novelLikeOrder.index(of: novelID) else { return 0 }
+        return novelLikeOrder.count - index
     }
     // background fetch の設定は その端末 だけに依存するようにしないとおかしなことになるので、UserDefaults.standard を使います
     static let isBackgroundNovelFetchEnabledKey = "NovelSpeaker_RealmModels_IsBackgroundNovelFetchEnabled"

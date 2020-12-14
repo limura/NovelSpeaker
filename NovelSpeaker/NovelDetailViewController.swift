@@ -174,7 +174,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
     
     func createCells() {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.RemoveRealmLink() else {
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.RemoveRealmLink(), let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 form +++ Section()
                 <<< LabelRow() {
                     $0.title = NSLocalizedString("NovelDetailViewController_NovelLoadFailed", comment: "小説情報の取得に失敗しました。")
@@ -300,7 +300,6 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
             self.form +++ actionSection
             
             let settingSection = Section(NSLocalizedString("NovelDetailViewController_SettingSectionTitle", comment: "この小説専用の設定"))
-            // novel.likeLevel
             // isNeedSpeechAfterDelete
             if let speaker = novel.defaultSpeakerWith(realm: realm) {
                 settingSection <<< AlertRow<String>("SpeakerAlertRow") { (row) -> Void in
@@ -416,19 +415,20 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
-            settingSection <<< StepperRow() { (row) in
-                row.value = Double(novel.likeLevel)
-                row.cell.stepper.minimumValue = 0.0
-                row.cell.stepper.maximumValue = 100.0
-                row.cell.stepper.stepValue = 1
-                row.title = NSLocalizedString("NovelDetailViewController_LikeLevelStepperRowTitle", comment: "お気に入り度合い")
+            settingSection <<< SwitchRow() { (row) in
+                row.value = globalState.novelLikeOrder.contains(novelID)
+                row.title = NSLocalizedString("NovelDetailViewController_LikeLevelSwitchRowTitle", comment: "お気に入り")
             }.onChange({ (row) in
                 RealmUtil.Write(block: { (realm) in
-                    guard let value = row.value, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else { return }
-                    if value < 1 {
-                        novel.likeLevel = 0
+                    guard let value = row.value, let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    if value {
+                        if globalState.novelLikeOrder.contains(self.novelID) == false {
+                            globalState.novelLikeOrder.append(self.novelID)
+                        }
                     }else{
-                        novel.likeLevel = Int8(value)
+                        if let index = globalState.novelLikeOrder.index(of: self.novelID) {
+                            globalState.novelLikeOrder.remove(at: index)
+                        }
                     }
                 })
             })

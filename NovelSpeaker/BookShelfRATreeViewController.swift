@@ -200,10 +200,6 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                 }
                             }
                         }
-                        // likeLevel が書き換わったのはここでは確認できないぽいので、
-                        // 個別に RealmNovel を監視している TableViewCell 側から Notification を送ってもらう事にします。
-                        //if sortType == .likeLevel {
-                        //}
                     }
                 case .error(_):
                     break
@@ -293,7 +289,11 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         case .Writer:
             return Array(allNovels.sorted(byKeyPath: "writer", ascending: false))
         case .LikeLevel:
-            return Array(allNovels.sorted(byKeyPath: "likeLevel", ascending: false))
+            let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
+            let sortedNovels = allNovels.sorted { (a, b) -> Bool in
+                return globalState?.calcLikeLevel(novelID: a.novelID) ?? 0 > globalState?.calcLikeLevel(novelID: b.novelID) ?? 0
+            }
+            return Array(sortedNovels)
         case .WebSite:
             return Array(allNovels.sorted(by: { (a, b) -> Bool in
                 guard let ah = URL(string: a.novelID)?.host, let bh = URL(string: b.novelID)?.host else {
@@ -968,7 +968,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
 
         RealmUtil.RealmBlock { (realm) -> Void in
             if let novelID = item.novelID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                cell.cellSetup(novel: novel, treeLevel: level)
+                let likeLevel = RealmGlobalState.GetInstanceWith(realm: realm)?.calcLikeLevel(novelID: novelID) ?? 0
+                cell.cellSetup(novel: novel, treeLevel: level, likeLevel: likeLevel)
             }else if let title = item.title {
                 func getChildNovelIDs(itemArray:[BookShelfRATreeViewCellData]) -> [String] {
                     var childrenArray:[String] = []
@@ -1026,8 +1027,9 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func treeView(_ treeView: RATreeView, canEditRowForItem item: Any) -> Bool {
         return RealmUtil.RealmBlock { (realm) -> Bool in
             if let data = item as? BookShelfRATreeViewCellData {
-                if let novelID = data.novelID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                    return novel.likeLevel <= 0
+                if let novelID = data.novelID {
+                    let likeLevel = RealmGlobalState.GetInstanceWith(realm: realm)?.calcLikeLevel(novelID: novelID) ?? 0
+                    return likeLevel <= 0
                 }
             }
             return false

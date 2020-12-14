@@ -188,6 +188,8 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
     }
     
+    static let likeStarImage:UIImage? = UIImage(named: "LikeStar.png")
+    static let notLikeStarImage:UIImage? = UIImage(named: "NotLikeStar.png")
     func applyLikeStarStatus(likeLevel:Int, novelID:String) {
         if self.watchNovelIDArray.count != 1 {
             return
@@ -201,37 +203,6 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
             }else{
                 self.likeButton.setImage(BookShelfTreeViewCell.notLikeStarImage, for: .normal)
             }
-        }
-    }
-    
-    func applyLikeStarStatus(novel:RealmNovel) {
-        if self.watchNovelIDArray.count != 1 {
-            return
-        }
-        if let currentNovelID = self.watchNovelIDArray.first, currentNovelID != novel.novelID {
-            return
-        }
-        let likeLevel = novel.likeLevel
-        DispatchQueue.main.async {
-            if likeLevel > 0 {
-                self.likeButton.setImage(BookShelfTreeViewCell.likeStarImage, for: .normal)
-            }else{
-                self.likeButton.setImage(BookShelfTreeViewCell.notLikeStarImage, for: .normal)
-            }
-        }
-    }
-    
-    static let likeStarImage:UIImage? = UIImage(named: "LikeStar.png")
-    static let notLikeStarImage:UIImage? = UIImage(named: "NotLikeStar.png")
-    func applyLikeStarStatus(novelID:String) {
-        RealmUtil.RealmDispatchQueueAsyncBlock(queue: realmQueue) { (realm) -> Void in
-            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else {
-                DispatchQueue.main.async {
-                    self.likeButton.isHidden = true
-                }
-                return
-            }
-            self.applyLikeStarStatus(novel: novel)
         }
     }
     
@@ -263,9 +234,6 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                     break
                 case .change(_, let properties):
                     for property in properties {
-                        if property.name == "likeLevel", let likeLevel = property.newValue as? Int {
-                            self.applyLikeStarStatus(likeLevel: likeLevel, novelID: novelID)
-                        }
                         if property.name == "m_readingChapterStoryID" /*|| property.name == "m_readingChapterReadingPoint" || property.name == "m_readingChapterContentCount"*/ {
                             self.applyCurrentReadingPointToIndicator(novelID: novelID)
                         }
@@ -390,7 +358,21 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                                     }
                                 }
                             }
-                            break
+                        }
+                        if property.name == "novelLikeOrder", self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let newNovelLikeOrder = property.newValue as? List<String>, let oldNovelLikeOrder = property.oldValue as? List<String> {
+                            let newIndex = newNovelLikeOrder.index(of: novelID)
+                            let oldIndex = oldNovelLikeOrder.index(of: novelID)
+                            if newIndex == nil && oldIndex != nil {
+                                let likeLevel = 0
+                                DispatchQueue.main.async {
+                                    self.applyLikeStarStatus(likeLevel: likeLevel, novelID: novelID)
+                                }
+                            }else if let newIndex = newIndex, oldIndex == nil {
+                                let likeLevel = newNovelLikeOrder.count - newIndex
+                                DispatchQueue.main.async {
+                                    self.applyLikeStarStatus(likeLevel: likeLevel, novelID: novelID)
+                                }
+                            }
                         }
                     }
                 case .deleted:
@@ -428,7 +410,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
     }
     
-    func cellSetup(novel:RealmNovel, treeLevel:Int) {
+    func cellSetup(novel:RealmNovel, treeLevel:Int, likeLevel:Int) {
         self.watchNovelIDArray = [novel.novelID]
         applyDepth(treeLevel: treeLevel)
         let title = novel.title
@@ -446,7 +428,8 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         self.hasChildFolder = false
         self.readProgressView.isHidden = false
         applyCurrentReadingPointToIndicatorWith(novel: novel)
-        applyLikeStarStatus(novel: novel)
+        print("cellSetup likeLevel: \(likeLevel), \(novel.novelID)")
+        applyLikeStarStatus(likeLevel: likeLevel, novelID: novel.novelID)
         self.likeButton.isHidden = false
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
         RealmObserverHandler.shared.AddDelegate(delegate: self)
@@ -477,12 +460,12 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
     
     @IBAction func likeButtonClicked(_ sender: Any) {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
+            guard self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
             RealmUtil.WriteWith(realm: realm) { (realm) in
-                if novel.likeLevel > 0 {
-                    novel.likeLevel = 0
+                if let index = globalState.novelLikeOrder.index(of: novelID) {
+                    globalState.novelLikeOrder.remove(at: index)
                 }else{
-                    novel.likeLevel = 10
+                    globalState.novelLikeOrder.append(novelID)
                 }
             }
         }
