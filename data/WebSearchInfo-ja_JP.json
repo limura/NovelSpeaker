@@ -829,7 +829,7 @@
         "result": {
             "block": "//div[@class='flex-1' and descendant::div[@class='flex-1']//div[@class='novel-card-title']]",
             "nextLink": "",
-            "title": "div[@class='flex-1']//div[@class='novel-card-title']",
+            "title": "//div[@class='flex-1']//div[@class='novel-card-title']",
             "url": "//div[@class='flex-1']//div[@class='novel-card-title']/a/@href"
         }
     }
