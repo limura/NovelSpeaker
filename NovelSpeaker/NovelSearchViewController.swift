@@ -581,7 +581,6 @@ class NovelSearchViewController: FormViewController,ParentViewController {
             $0.title = NSLocalizedString("NovelSearchViewController_LoadingSearchInfoTitle", comment: "Web検索用の情報を読み込んでいます……")
             $0.cell.textLabel?.numberOfLines = 0
         }
-        loadSearchInfo()
     }
     
     override func viewDidAppear(_ animated: Bool) {
