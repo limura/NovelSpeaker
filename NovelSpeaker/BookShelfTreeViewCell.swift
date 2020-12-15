@@ -359,18 +359,17 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                                 }
                             }
                         }
-                        if property.name == "novelLikeOrder", self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let newNovelLikeOrder = property.newValue as? List<String>, let oldNovelLikeOrder = property.oldValue as? List<String> {
-                            let newIndex = newNovelLikeOrder.index(of: novelID)
-                            let oldIndex = oldNovelLikeOrder.index(of: novelID)
-                            if newIndex == nil && oldIndex != nil {
-                                let likeLevel = 0
-                                DispatchQueue.main.async {
-                                    self.applyLikeStarStatus(likeLevel: likeLevel, novelID: novelID)
-                                }
-                            }else if let newIndex = newIndex, oldIndex == nil {
-                                let likeLevel = newNovelLikeOrder.count - newIndex
-                                DispatchQueue.main.async {
-                                    self.applyLikeStarStatus(likeLevel: likeLevel, novelID: novelID)
+                        if property.name == "novelLikeOrder", self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let newNovelLikeOrder = property.newValue as? List<String> {
+                            let likeLevel = newNovelLikeOrder.count - (newNovelLikeOrder.index(of: novelID) ?? newNovelLikeOrder.count)
+                            DispatchQueue.main.async {
+                                if let image = self.likeButton.imageView?.image {
+                                    let isLike = image == BookShelfTreeViewCell.likeStarImage
+                                    if !isLike && likeLevel > 0 {
+                                        self.applyLikeStarStatus(likeLevel: 1, novelID: novelID)
+                                    }
+                                    if isLike && likeLevel <= 0 {
+                                        self.applyLikeStarStatus(likeLevel: 0, novelID: novelID)
+                                    }
                                 }
                             }
                         }
