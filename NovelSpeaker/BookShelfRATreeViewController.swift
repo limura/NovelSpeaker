@@ -698,6 +698,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
 
+    func reloadAllData(completion:(()->Void)?) {
+        UIView.animate(withDuration: 0.0) {
+            self.reloadAllData()
+        } completion: { (finished) in
+            completion?()
+        }
+    }
+
     func reloadAllDataAndScrollToCurrentReadingContent(){
         reloadAllData()
         scrollToCurrentReadingContent()
@@ -1045,53 +1053,36 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
 
     func deleteNovel(item: Any, novelID: String) {
-        let parent = self.treeView?.parent(forItem: item)
-        var isNeedReload:Bool = false
-        var expandedItemList:[BookShelfRATreeViewCellData] = []
-        if parent == nil {
-            // parent が居ない場合は一つだけしか無いはずなので普通に消して良い
-            for (idx, cellData) in self.displayDataArray.enumerated() {
-                if let thisNovelID = cellData.novelID, thisNovelID == novelID {
-                    self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
-                    self.displayDataArray.remove(at: idx)
-                    break
-                }
-            }
-        }else if let _ = parent as? BookShelfRATreeViewCellData{
-            // parent があるということはフォルダ分けされているので削除対象が複数のフォルダ内にある可能性があるため、
-            // データを消して再度フォルダ分けからやり直す必要がある
-            isNeedReload = true
-            for item in self.displayDataArray {
-                if let treeView = self.treeView, let cell = treeView.cell(forItem: item), treeView.isCellExpanded(cell) {
-                    expandedItemList.append(item)
-                }
-            }
-        }
         DispatchQueue.main.async {
             NiftyUtility.EasyDialogNoButton(
                 viewController: self,
                 title: NSLocalizedString("BookShelfRATreeViewController_NovelDeletingTitle", comment: "小説を削除しています……"),
                 message: nil,
                 completion: { (dialog) in
-                DispatchQueue.global(qos: .utility).async {
-                    RealmUtil.Write { (realm) in
+                DispatchQueue.main.async {
+                    RealmUtil.Write(withoutNotifying: [self.novelArrayNotificationToken]) { (realm) in
                         if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
                             novel.delete(realm: realm)
                         }
                     }
                     DispatchQueue.main.async {
-                        dialog.dismiss(animated: false, completion: nil)
-                        if isNeedReload, let treeView = self.treeView {
-                            self.treeView?.beginUpdates()
-                            self.reloadAllData()
-                            for currentItem in self.displayDataArray {
-                                for item in expandedItemList {
-                                    if let currentItemTitle = currentItem.title, let itemTitle = item.title, currentItemTitle == itemTitle {
-                                        treeView.expandRow(forItem: currentItem)
+                        dialog.dismiss(animated: false) {
+                            let parent = self.treeView?.parent(forItem: item)
+                            if let parent = parent as? BookShelfRATreeViewCellData, let childrens = parent.childrens {
+                                for (idx, cellData) in childrens.enumerated() {
+                                    if let thisNovelID = cellData.novelID, novelID == thisNovelID {
+                                        self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
+                                        return
+                                    }
+                                }
+                            }else{
+                                for (idx, cellData) in self.displayDataArray.enumerated() {
+                                    if let thisNovelID = cellData.novelID, novelID == thisNovelID {
+                                        self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
+                                        return
                                     }
                                 }
                             }
-                            self.treeView?.endUpdates()
                         }
                     }
                 }

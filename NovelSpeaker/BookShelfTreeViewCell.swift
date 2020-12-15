@@ -428,7 +428,6 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         self.hasChildFolder = false
         self.readProgressView.isHidden = false
         applyCurrentReadingPointToIndicatorWith(novel: novel)
-        print("cellSetup likeLevel: \(likeLevel), \(novel.novelID)")
         applyLikeStarStatus(likeLevel: likeLevel, novelID: novel.novelID)
         self.likeButton.isHidden = false
         applyCurrentDownloadIndicatorVisibleStatus(novelIDArray: watchNovelIDArray)
