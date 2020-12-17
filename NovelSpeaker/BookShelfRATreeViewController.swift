@@ -41,6 +41,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     
     var novelArrayNotificationToken : NotificationToken? = nil
     var globalStateNotificationToken: NotificationToken? = nil
+    var novelTagNotificationToken : NotificationToken? = nil
     
     static var instance:BookShelfRATreeViewController? = nil
 
@@ -147,6 +148,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     func StopObservers() {
         novelArrayNotificationToken = nil
         globalStateNotificationToken = nil
+        novelTagNotificationToken = nil
     }
     
     func RestartObservers() {
@@ -231,9 +233,33 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         }
     }
     
+    func registNovelTagObserver() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let tagArray = RealmNovelTag.GetAllObjectsWith(realm: realm) else { return }
+            self.novelTagNotificationToken = tagArray.observe({ (change) in
+                switch change {
+                case .error(_):
+                    break
+                case .initial(_):
+                    break
+                case .update(_, deletions: _, insertions: _, modifications: _):
+                    let sortType = RealmUtil.RealmBlock { (realm) -> NarouContentSortType in
+                        guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return .Title }
+                        return globalState.bookShelfSortType
+                    }
+                    if sortType != .KeywordTag { return }
+                    DispatchQueue.main.async {
+                        self.reloadAllData()
+                    }
+                }
+            })
+        }
+    }
+    
     func registObserver() {
         registNovelArrayObserver()
         registGlobalStateObserver()
+        registNovelTagObserver()
     }
     
     func assignRightBarButtons() {
@@ -1052,6 +1078,34 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         self.checkAndUpdateSwitchFolderButtonImage()
     }
 
+    func reloadAllAndReopenCells() {
+        var expandedFolderList:[BookShelfRATreeViewCellData] = []
+        let visibleCells = self.treeView?.visibleCells()
+        for data in self.displayDataArray {
+            if let childrens = data.childrens, childrens.count > 0 {
+                if self.treeView?.isCell(forItemExpanded: data) ?? false {
+                    expandedFolderList.append(data)
+                }
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.reloadAllData {
+                DispatchQueue.main.async {
+                    UIView.animate(withDuration: 0.0) {
+                        for data in expandedFolderList {
+                            self.treeView?.expandRow(forItem: data, with: RATreeViewRowAnimationNone)
+                        }
+                    } completion: { (result) in
+                        if let data = visibleCells?.first as? BookShelfRATreeViewCellData {
+                            print("scroll to: \(data.title ?? "-")")
+                            self.treeView?.scrollToRow(forItem: data, at: RATreeViewScrollPositionTop, animated: true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     func deleteNovel(item: Any, novelID: String) {
         DispatchQueue.main.async {
             NiftyUtility.EasyDialogNoButton(
@@ -1072,17 +1126,18 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                 for (idx, cellData) in childrens.enumerated() {
                                     if let thisNovelID = cellData.novelID, novelID == thisNovelID {
                                         self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
-                                        return
+                                        break
                                     }
                                 }
                             }else{
                                 for (idx, cellData) in self.displayDataArray.enumerated() {
                                     if let thisNovelID = cellData.novelID, novelID == thisNovelID {
                                         self.treeView?.deleteItems(at: IndexSet([idx]), inParent: parent, with: RATreeViewRowAnimationFade)
-                                        return
+                                        break
                                     }
                                 }
                             }
+                            self.reloadAllAndReopenCells()
                         }
                     }
                 }
