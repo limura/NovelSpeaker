@@ -140,7 +140,10 @@ class NiftyUtility: NSObject {
                         picker.setMessageBody(messageBody, isHTML: false)
                         let sendData:[String:String] = [
                             "url": url?.absoluteString ?? "-",
-                            "cookie": cookieString ?? "(nil)"
+                            "cookie": cookieString ?? "(nil)",
+                            "appVersion": NiftyUtility.GetAppVersionString(),
+                            "model": UIDevice.modelName,
+                            "iOS model": UIDevice.current.systemVersion,
                         ]
                         if let data = try? JSONEncoder().encode(sendData) {
                             picker.addAttachmentData(data, mimeType: "application/json", fileName: "import_description.json")

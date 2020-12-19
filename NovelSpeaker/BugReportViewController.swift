@@ -443,7 +443,9 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             return false;
         }
         let appVersionString = NiftyUtility.GetAppVersionString()
-        
+        let isBackgroundFetchEnabled = RealmUtil.RealmBlock { (realm) -> Bool in
+            return RealmGlobalState.GetInstanceWith(realm: realm)?.isBackgroundNovelFetchEnabled ?? false
+        }
         let picker = MFMailComposeViewController()
         picker.mailComposeDelegate = self;
         picker.setSubject(NSLocalizedString("BugReportViewController_SendNewFeatureMailSubject", comment:"ことせかい 新機能等の提案"))
@@ -455,6 +457,8 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             + "\niOS version: " + UIDevice.current.systemVersion
             + "\nmodel: " + UIDevice.modelName
             + "\nApp version:" + appVersionString
+            + "\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
+            + "\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
         , isHTML: false)
         present(picker, animated: true, completion: nil)
         return true;
