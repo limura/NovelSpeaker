@@ -137,17 +137,11 @@ class NiftyUtility: NSObject {
                         picker.setToRecipients(["limuraproducts@gmail.com"])
                         picker.setSubject(NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Title", comment:"ことせかい 取り込み失敗レポート"))
                         let messageBody = NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n") + error
+                            + "\n\n------\nurl: \(url?.absoluteString ?? "-")"
+                            + "\napp version: \(NiftyUtility.GetAppVersionString())"
+                            + "\niOS version: \(UIDevice.current.systemVersion)"
+                            + "\ndevice model: \(UIDevice.modelName)"
                         picker.setMessageBody(messageBody, isHTML: false)
-                        let sendData:[String:String] = [
-                            "url": url?.absoluteString ?? "-",
-                            "cookie": cookieString ?? "(nil)",
-                            "appVersion": NiftyUtility.GetAppVersionString(),
-                            "model": UIDevice.modelName,
-                            "iOS model": UIDevice.current.systemVersion,
-                        ]
-                        if let data = try? JSONEncoder().encode(sendData) {
-                            picker.addAttachmentData(data, mimeType: "application/json", fileName: "import_description.json")
-                        }
                         DummyMailComposeViewController.shared.currentViewController = viewController
                         picker.mailComposeDelegate = DummyMailComposeViewController.shared
                         viewController.present(picker, animated: true, completion: nil)
