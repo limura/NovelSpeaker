@@ -196,7 +196,26 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                                             // 既に先頭がその小説なら表示しなおす必要は無い
                                             continue
                                         }
-                                        self.reloadAllData()
+                                        DispatchQueue.main.async {
+                                            self.reloadAllData()
+                                        }
+                                        return
+                                    }
+                                }
+                            }
+                        }else if sortType == .NovelUpdatedAt || sortType == .NovelUpdatedAtWithFolder {
+                            let gapDate = Date(timeIntervalSinceNow: -5) // 5秒前までなら今書き変わったと思い込む
+                            for index in modifications {
+                                if objects.count > index {
+                                    let obj = objects[index]
+                                    if obj.lastDownloadDate > gapDate {
+                                        if let novelID = self.displayDataArray.first?.novelID, novelID == obj.novelID {
+                                            // 既に先頭がその小説なら表示しなおす必要は無い
+                                            continue
+                                        }
+                                        DispatchQueue.main.async {
+                                            self.reloadAllData()
+                                        }
                                         return
                                     }
                                 }

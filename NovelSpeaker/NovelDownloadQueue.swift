@@ -216,7 +216,7 @@ class StoryBulkWritePool {
         lock.unlock()
         let chapterNumber = story.chapterNumber
         let maxLength = RealmStoryBulk.bulkCount - ((chapterNumber - 1) % RealmStoryBulk.bulkCount)
-        if NovelDownloadQueue.shared.currentDownloadingNovelCount <= 2 || storyArrayCount >= maxLength || RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID) == novelID {
+        if NovelDownloadQueue.shared.currentDownloadingNovelCount <= 1 || storyArrayCount >= maxLength || RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID) == novelID {
             Flush()
         }
     }
