@@ -13,14 +13,23 @@ struct AppInformationLog: Codable, CustomStringConvertible {
     let date:Date
     let appendix:[String:String]
     let isForDebug:Bool
+    let file:String
+    let line:Int
+    let function:String
     
     var description: String {
         get {
+            let fileName:String
+            if let fileNameSubstring = file.split(separator: "/").last {
+                fileName = String(fileNameSubstring)
+            }else{
+                fileName = file
+            }
             if appendix.count <= 0 {
-                return "\(date.description(with: Locale.current)):\n\(message)"
+                return "\(date.description(with: Locale.current)):\n\(message)\n\(fileName):\(line) \(function)"
             }
             let adix = appendix.map({"\($0): \($1)"}).map({"  \($0)"}).joined(separator: "\n")
-            return "\(date.description(with: Locale.current)): \(message)\n\(adix))"
+            return "\(date.description(with: Locale.current)): \(message)\n\(fileName):\(line) \(function)\n\(adix))"
         }
     }
 }
@@ -39,8 +48,8 @@ class AppInformationLogger {
     static let MAX_LOG_COUNTS = 1000;
     static var delegate:AppInformationAliveDelegate? = nil
     
-    static func AddLog(message:String, appendix:[String:String] = [:], isForDebug:Bool) {
-        let log = AppInformationLog(message: message, date: Date(), appendix: appendix, isForDebug: isForDebug)
+    static func AddLog(message:String, appendix:[String:String] = [:], isForDebug:Bool, file:String = #file, line:Int = #line, function:String = #function) {
+        let log = AppInformationLog(message: message, date: Date(), appendix: appendix, isForDebug: isForDebug, file: file, line: line, function: function)
         print(log)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -102,13 +111,13 @@ class AppInformationLogger {
         var sameLogDate = Date()
         var sameLogIsForDebug = false
         for log in logArray {
-            if let prevLog = prevLog, prevLog.message == log.message, prevLog.isForDebug == log.isForDebug, prevLog.appendix == log.appendix {
+            if let prevLog = prevLog, prevLog.message == log.message, prevLog.isForDebug == log.isForDebug, prevLog.appendix == log.appendix, prevLog.file == log.file, prevLog.line == log.line, prevLog.function == log.function {
                 sameCount += 1
                 sameLogDate = prevLog.date
                 sameLogIsForDebug = prevLog.isForDebug
             }else{
                 if sameCount > 1 {
-                    result.append(AppInformationLog(message: String(format: NSLocalizedString("AppInformationLogger_SameLogFoundMessage_Format", comment: "%d回同じメッセージが繰り返されています。"), sameCount), date: sameLogDate, appendix: [:], isForDebug: sameLogIsForDebug))
+                    result.append(AppInformationLog(message: String(format: NSLocalizedString("AppInformationLogger_SameLogFoundMessage_Format", comment: "%d回同じメッセージが繰り返されています。"), sameCount), date: sameLogDate, appendix: [:], isForDebug: sameLogIsForDebug, file: log.file, line: log.line, function: log.function))
                 }
                 sameCount = 1
                 prevLog = log
