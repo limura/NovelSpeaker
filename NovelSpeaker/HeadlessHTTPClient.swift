@@ -220,4 +220,9 @@ class HeadlessHttpClient {
             }
         }
     }
+    
+    @available(iOS 11.0, *)
+    func takeSnapshot(snapshotConfiguration:WKSnapshotConfiguration? = nil, completionHandler: @escaping ((UIImage?, Error?)->Void)) {
+        self.webView.takeSnapshot(with: snapshotConfiguration, completionHandler: completionHandler)
+    }
 }
