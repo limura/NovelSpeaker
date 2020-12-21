@@ -500,17 +500,22 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }) else { return (false,[]) }
             var result = [BookShelfRATreeViewCellData]()
             var listedNovelIDSet = Set<String>()
+            var novelIDToNovelMap:[String:RealmNovel] = [:]
+            for novel in novels {
+                novelIDToNovelMap[novel.novelID] = novel
+            }
             for tag in tags {
-                guard let novels = tag.targetNovelArrayWith(realm: realm) else { continue }
                 let folder = BookShelfRATreeViewCellData()
                 folder.childrens = [BookShelfRATreeViewCellData]()
                 folder.title = tag.name
-                for novel in novels {
-                    let data = BookShelfRATreeViewCellData()
-                    data.novelID = novel.novelID
-                    data.title = novel.title
-                    folder.childrens?.append(data)
-                    listedNovelIDSet.insert(novel.novelID)
+                for novelID in tag.targetNovelIDArray {
+                    if let novel = novelIDToNovelMap[novelID] {
+                        let data = BookShelfRATreeViewCellData()
+                        data.novelID = novel.novelID
+                        data.title = novel.title
+                        folder.childrens?.append(data)
+                        listedNovelIDSet.insert(novel.novelID)
+                    }
                 }
                 result.append(folder)
             }
