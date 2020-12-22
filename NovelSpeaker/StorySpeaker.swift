@@ -534,8 +534,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             let newLocation = self.speaker.currentLocation
             if story.readLocation(realm: realm) != newLocation {
                 self.speaker.SetSpeechLocation(location: newLocation)
-                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
-                    story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
+                NiftyUtility.DispatchSyncMainQueue {
+                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        story.SetCurrentReadLocationWith(realm: realm, location: newLocation)
+                    }
                 }
             }
         }
@@ -1171,8 +1173,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.unicodeScalars.count >= location && location >= 0 {
             self.speaker.SetSpeechLocation(location: location)
             if story.readLocation(realm: realm) != location {
-                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
-                    story.SetCurrentReadLocationWith(realm: realm, location: location)
+                NiftyUtility.DispatchSyncMainQueue {
+                    RealmUtil.Write(withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        story.SetCurrentReadLocationWith(realm: realm, location: location)
+                    }
                 }
             }
         }
