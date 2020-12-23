@@ -56,7 +56,7 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_OpenWebPage", comment: "Web取込タブで開く")
                         $0.value = setting.isOn
-                        $0.cell.imageView?.image = UIImage(named: "earth")
+                        $0.cell.imageView?.image = UIImage(named: "earth")?.withRenderingMode(.alwaysTemplate)
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .reload:
                     section <<< SwitchRow(setting.type.rawValue) {
