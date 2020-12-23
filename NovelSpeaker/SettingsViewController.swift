@@ -163,9 +163,112 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
     #endif
+    #if false
+    func addNewNovel(title:String) -> String {
+        return RealmUtil.RealmBlock { (realm) -> String in
+            let novel = RealmNovel()
+            novel.type = .UserCreated
+            novel.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            novel.lastReadDate = Date(timeIntervalSince1970: 1)
+            novel.lastDownloadDate = Date()
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                realm.add(novel, update: .modified)
+            }
+            return novel.novelID
+        }
+    }
+    func createDummyStoryArray(content:String, novelID:String, count:Int, startChapterNumber: Int) -> [Story] {
+        var result:[Story] = []
+        for index in 0..<count {
+            var story = Story()
+            story.content = content
+            story.novelID = novelID
+            story.chapterNumber = index + startChapterNumber
+            result.append(story)
+        }
+        return result
+    }
+    func addDummDataToNovel(novelID:String, content:String, count:Int, startChapterNumber:Int) {
+        RealmUtil.Write { (realm) in
+            let storyArray = createDummyStoryArray(content: content, novelID: novelID, count: count, startChapterNumber: startChapterNumber)
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let lastStory = storyArray.last else { return }
+            RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+            novel.m_lastChapterStoryID = lastStory.storyID
+        }
+    }
+    func checkBulkCounts(novelID:String) {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let bulkArray = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID) else { return }
+            for bulk in bulkArray {
+                print("bulk: \(bulk.chapterNumber)")
+                if let storyArray = bulk.LoadStoryArray() {
+                    print("  storyArray.count: \(storyArray.count)")
+                    print("  storyArray.first.chapterNumber: \(storyArray.first?.chapterNumber ?? -1)")
+                    print("  storyArray.last.chapterNumber: \(storyArray.last?.chapterNumber ?? -1)")
+                }
+            }
+        }
+    }
+    var testTargetNovelID = ""
+    #endif
     
     func createSettingsTable(){
         form +++ Section()
+            /*
+            <<< ButtonRow() {
+                $0.title = "ダミーログ追加"
+            }.onCellSelection({ (cellOf, row) in
+                AppInformationLogger.AddLog(message: "テスト", isForDebug: true)
+            })
+            <<< ButtonRow() {
+                $0.title = "ターゲット追加"
+            }.onCellSelection({ (cellOf, row) in
+                let novelID = self.addNewNovel(title: "ダミーデータ \(Date().description)")
+                self.testTargetNovelID = novelID
+            })
+            <<< ButtonRow() {
+                $0.title = "ダミーデータ追加(1..50)"
+            }.onCellSelection({ (cellOf, row) in
+                let novelID = self.testTargetNovelID
+                self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ50", count: 50, startChapterNumber: 1)
+                self.checkBulkCounts(novelID: novelID)
+            })
+            <<< ButtonRow() {
+                $0.title = "ダミーデータ追加(1..150)"
+            }.onCellSelection({ (cellOf, row) in
+                let novelID = self.testTargetNovelID
+                self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ150", count: 150, startChapterNumber: 1)
+                self.checkBulkCounts(novelID: novelID)
+            })
+            <<< ButtonRow() {
+                $0.title = "ダミーデータ追加(1..250)"
+            }.onCellSelection({ (cellOf, row) in
+                let novelID = self.testTargetNovelID
+                self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ250", count: 250, startChapterNumber: 1)
+                self.checkBulkCounts(novelID: novelID)
+            })
+            <<< ButtonRow() {
+                $0.title = "ダミーデータ追加(50..150)"
+            }.onCellSelection({ (cellOf, row) in
+                let novelID = self.testTargetNovelID
+                self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ50-150", count: 100, startChapterNumber: 50)
+                self.checkBulkCounts(novelID: novelID)
+            })
+            <<< ButtonRow() {
+                $0.title = "ダミーデータ追加(100..150)"
+            }.onCellSelection({ (cellOf, row) in
+                let novelID = self.testTargetNovelID
+                self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ100-150", count: 50, startChapterNumber: 100)
+                self.checkBulkCounts(novelID: novelID)
+            })
+            <<< ButtonRow() {
+                $0.title = "ダミーデータ追加(150..350)"
+            }.onCellSelection({ (cellOf, row) in
+                let novelID = self.testTargetNovelID
+                self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ150-350", count: 200, startChapterNumber: 150)
+                self.checkBulkCounts(novelID: novelID)
+            })
+             */
             /*
             <<< ButtonRow() {
                 $0.title = "テストボタン"

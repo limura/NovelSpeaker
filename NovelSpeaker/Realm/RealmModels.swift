@@ -880,8 +880,11 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     static func CreateUniqueID(novelID:String, chapterNumber:Int) -> String {
         return "\(chapterNumber):\(URIToUniqueID(urlString: novelID))"
     }
+    static func CalcBulkChapterNumber(chapterNumber:Int) -> Int {
+        return Int((chapterNumber - 1) / bulkCount) * bulkCount
+    }
     static func CreateUniqueBulkID(novelID:String, chapterNumber:Int) -> String {
-        let chapterNumberBulk = Int((chapterNumber - 1) / bulkCount) * bulkCount
+        let chapterNumberBulk = CalcBulkChapterNumber(chapterNumber: chapterNumber)
         return CreateUniqueID(novelID: novelID, chapterNumber: chapterNumberBulk)
     }
     static func StoryIDToNovelID(storyID:String) -> String {
@@ -939,6 +942,178 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         }
         self.storyListAsset = CreamAsset.create(object: self, propName: "", data: zipedData)
     }
+    #if false
+    // 複数同時に登録する奴がチェックをサボっているために壊れたデータを生成してしまう可能性があるのでそれをチェックしながら追加するようなものを作ろうと思ったけれど、うまく作れていない物の残骸
+    //
+    /// Story を複数同時に登録する場合に使います。
+    /// 注意: storyArray は chapterNumber が小さい順に sort されており、かつ、chapterNumber に抜けが無い事が必要です。
+    /// SetStoryArrayWith() 内部ではその事実を"確認しません"。
+    static func SetStoryArrayWith_new(realm:Realm, storyArray:[Story]) {
+        print("SetStoryArrayWith in: \(storyArray.count)")
+        func mergeBulkStoryArray(originalBulkStoryArray:[Story]?, newStoryArray:[Story]) -> [Story] {
+            guard let newFirstStory = newStoryArray.first else {
+                AppInformationLogger.AddLog(message: "newStoryArray に中身がありませんでしたので、空の配列を返します。", isForDebug: true)
+                return []
+            }
+            let novelID = newFirstStory.novelID
+            let bulkChapterNumber = CalcBulkChapterNumber(chapterNumber: newFirstStory.chapterNumber)
+            if let originalFirstStory = originalBulkStoryArray?.first, originalFirstStory.chapterNumber != bulkChapterNumber {
+                AppInformationLogger.AddLog(message: "originalBulkStoryArray が存在するのにその bulk の最初の chapterNumber(\(bulkChapterNumber)) の chapter が最初の chapter になっていない (\(originalFirstStory.chapterNumber) だった) ので、空の配列を返します。", isForDebug: true)
+                return []
+            }
+            // lastChapterNumber: この bulk に保存されるべき chapter の最後の物
+            // これは、newStoryArray の最後の物か、originalBulkStoryArray の最後の物のどちらか大きい値の物になるべき。
+            var lastChapterNumber:Int = bulkChapterNumber
+            lastChapterNumber = max(lastChapterNumber, originalBulkStoryArray?.last?.chapterNumber ?? 0)
+            lastChapterNumber = max(lastChapterNumber, newStoryArray.last?.chapterNumber ?? 0)
+            var currentChapterNumber = bulkChapterNumber
+            var originalIndex:Int = 0
+            var newIndex:Int = 0
+            var result:[Story] = []
+            var dummyDataAlertLogged = false
+            // 一つづつ走査してresultに入れる。入れる優先順位は newStoryArray > originalBulkStoryArray > dummy の順
+            while currentChapterNumber < lastChapterNumber {
+                if newStoryArray.count > newIndex, currentChapterNumber == newStoryArray[newIndex].chapterNumber {
+                    result.append(newStoryArray[newIndex])
+                    newIndex += 1
+                    originalIndex += 1
+                    currentChapterNumber += 1
+                    dummyDataAlertLogged = false
+                    continue
+                }else if let originalArray = originalBulkStoryArray, originalArray.count > originalIndex, currentChapterNumber == originalArray[originalIndex].chapterNumber {
+                    result.append(originalArray[originalIndex])
+                    originalIndex += 1
+                    currentChapterNumber += 1
+                    dummyDataAlertLogged = false
+                    continue
+                }
+                // ここに来るということは、追加するべき物が newStoryArray にも originalBulkStoryArray にもなかった。ということでダミーデータで埋める
+                if dummyDataAlertLogged == false {
+                    AppInformationLogger.AddLog(message: "newStoryArray にも originalBulkStoryArray にも無い chapterNumber(\(currentChapterNumber)) を追加しないといけなかったので、ダミーデータを追加します。", isForDebug: true)
+                    dummyDataAlertLogged = true
+                }
+                var dummyStory = Story()
+                dummyStory.content = "-"
+                dummyStory.chapterNumber = currentChapterNumber
+                dummyStory.novelID = novelID
+                result.append(dummyStory)
+                currentChapterNumber += 1
+            }
+            return result
+        }
+        // [Story] を bulkCount に整列された [[Story]] に変換します
+        func splitStoryArray(storyArray:[Story]) -> [[Story]] {
+            var result:[[Story]] = []
+            var index = 0
+            while index < storyArray.count {
+                let current = storyArray[index]
+                let bulkChapterNumber = CalcBulkChapterNumber(chapterNumber: current.chapterNumber)
+                let sliceMaxIndex = min(bulkCount - (current.chapterNumber - bulkChapterNumber), storyArray.count - index)
+                let slice = storyArray[index..<sliceMaxIndex]
+                result.append(Array(slice))
+                index += sliceMaxIndex
+            }
+            return result
+        }
+        guard let firstChapter = storyArray.first, let lastChapter = storyArray.last else { return }
+        let firstChapterNumber = firstChapter.chapterNumber
+        let lastChapterNumber = lastChapter.chapterNumber
+        for (i, s) in storyArray.enumerated() {
+            if s.chapterNumber != (i + firstChapterNumber) {
+                AppInformationLogger.AddLog(message: "追加されようとしている [Story] は chapterNumber にずれがあるようです。エラーとして追加はせず終了します。\n期待している chapterNumber: \(i + firstChapterNumber), 実際の chapterNumber: \(s.chapterNumber)", isForDebug: true)
+                return
+            }
+        }
+        let firstBulkChapterNumber = CalcBulkChapterNumber(chapterNumber: firstChapterNumber)
+        var bulkIndex = 1
+        while bulkIndex < firstBulkChapterNumber {
+            
+        }
+        let splitedNewStoryArray = splitStoryArray(storyArray: storyArray)
+        for bulkStoryArray in splitedNewStoryArray {
+            guard let first = bulkStoryArray.first else { continue }
+            
+        }
+        // 入力された [Story] よりも前の bulk が存在しなかった場合、それについてはダミーデータを入れておく必要があります。
+        if let firstStory = storyArray.first {
+            var bulkChapterNumber = CalcBulkChapterNumber(chapterNumber: firstStory.chapterNumber)
+            while bulkChapterNumber > 0 {
+                
+            }
+        }
+        
+        while storyArray.count > index {
+            // 入力された [Story] を bulkCount 毎に処理します。
+            // 既存の bulk があった場合には、その bulk の中に入っている [Story] を上書きする形で処理します。
+            // また、bulk 内の [Story] が足りない場合にはダミーの [Story] を追加します。
+            let currentStory = storyArray[index]
+            let currentChapterNumber = currentStory.chapterNumber
+            // 今入れようとしているBulkの [Story] を格納する配列
+            var bulkStoryArray:[Story] = []
+            let bulkOptional = SearchStoryBulkWith(realm: realm, novelID: currentStory.novelID, chapterNumber: currentChapterNumber)
+            let prevBulkStoryArrayOptional = bulkOptional?.LoadStoryArray()
+            if let bulk = bulkOptional, bulk.chapterNumber != currentChapterNumber, var prevBulkStoryArray = prevBulkStoryArrayOptional {
+                // bulkの開始点である chapterNumber(bulkChapterNumber) と、入力された [Story] の(現時点での)先頭の chapterNumber が違うということで、既に保存されている bulk の中の [Story] が必要となる。
+                if bulk.chapterNumber > currentChapterNumber {
+                    AppInformationLogger.AddLog(message: "FATAL: [Story] を追加しようとした時、bulkの先頭の chapterNumber(\(bulk.chapterNumber))の方が追加されようとしている側の chapterNumber(\(currentChapterNumber)) よりも大きくなっています。これはロジック的に起こり得ないはずです。", appendix: [:], isForDebug: true)
+                    return
+                }
+                // bulkChapterNumber != currentChapterNumber で、かつ、bulkChapterNumber > currentChapterNumber なのであるから、bulkChapterNumber < currentChapterNumber である。
+                // 従って、内部に保存されている bulk の側から Story を取り出して埋めてやる必要がある。
+                // lessChapterCount: 内部に保存されている bulk の側から埋められるべき Story の数
+                let lessChapterCount = currentChapterNumber - bulk.chapterNumber
+                if prevBulkStoryArray.count < lessChapterCount {
+                    AppInformationLogger.AddLog(message: "[Story] を追加されようとしたけれど、追加されようとしている Story は Bulk内に保存されている Story よりも未来の物で、その間が存在しないようです。仕方がないので空の Story を追加します。", appendix: [
+                        "既存のBulkの chapterNumber (開始点)": "\(bulk.chapterNumber)",
+                        "既存のBulkの LoadStoryArray().count": "\(prevBulkStoryArray.count)",
+                        "既存のBulkの .last.chapterNumber": "\(prevBulkStoryArray.last?.chapterNumber ?? -1)",
+                        "追加されようとしている [Story].first.chapterNumber": "\(currentStory.chapterNumber)",
+                    ], isForDebug: true)
+                    var dummyStory = Story()
+                    dummyStory.novelID = currentStory.novelID
+                    dummyStory.chapterNumber = bulk.chapterNumber + prevBulkStoryArray.count
+                    dummyStory.content = NSLocalizedString("RealmStoryBulk_DummStoryContent", comment: "-")
+                    while prevBulkStoryArray.count < lessChapterCount {
+                        prevBulkStoryArray.append(dummyStory)
+                    }
+                }
+                bulkStoryArray.append(contentsOf: prevBulkStoryArray)
+            }
+            // この if文 を抜けてきた時点で、bulkStoryArray には入力された [Story] では足りない分の [Story] が格納されている
+            // capacity: bulkCount まで詰めるとあと何個の Story が入れられるか
+            let capacity = bulkCount - bulkStoryArray.count
+            // storyArray から今回bulkに入れる Story の数
+            let insertCount = min(capacity, storyArray.count - index)
+            let sliceStoryArray = storyArray[index..<insertCount + index]
+            bulkStoryArray.append(contentsOf: sliceStoryArray)
+            // この時点で bulkStoryArray.count は bulkCount を上回っていないはずです
+            assert(bulkStoryArray.count <= bulkCount)
+
+            if let prevBulkStoryArray = prevBulkStoryArrayOptional, bulkStoryArray.count < prevBulkStoryArray.count {
+                // 先に bulk に入っていた Story で追加された Story よりも後ろの物があった
+                let sliceStoryArray = prevBulkStoryArray[bulkStoryArray.count..<prevBulkStoryArray.count]
+                bulkStoryArray.append(contentsOf: sliceStoryArray)
+            }
+            // この時点でも bulkStoryArray.count は bulkCount を上回っていないはずです
+            assert(bulkStoryArray.count <= bulkCount)
+
+            let bulk:RealmStoryBulk
+            if let originalBulk = bulkOptional {
+                bulk = originalBulk
+                if let cachedBulk = bulkCache, cachedBulk.id == bulk.id { bulkCache = nil }
+            }else{
+                bulk = RealmStoryBulk()
+                bulk.id = CreateUniqueBulkID(novelID: currentStory.novelID, chapterNumber: currentStory.chapterNumber)
+                bulk.novelID = currentStory.novelID
+                bulk.chapterNumber = StoryIDToChapterNumber(storyID: bulk.id)
+            }
+            print("SetStoryArrayWith bulkChapter: \(bulk.chapterNumber) assign [Story].count: \(bulkStoryArray.count)")
+            bulk.OverrideStoryListAsset(storyArray: Array(bulkStoryArray))
+            realm.add(bulk, update: .modified)
+            index += bulkStoryArray.count
+        }
+    }
+    #endif
     
     /// Story を複数同時に登録する場合に使います。
     /// 注意: storyArray は chapterNumber が小さい順に sort されており、かつ、chapterNumber に抜けが無い事が必要です。
@@ -1071,7 +1246,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
 
     static func SearchStoryBulkWith(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
         //realm.refresh()
-        let chapterNumberBulk = Int((chapterNumber - 1) / bulkCount) * bulkCount
+        let chapterNumberBulk = CalcBulkChapterNumber(chapterNumber: chapterNumber)
         if let cachedBulk = bulkCache, cachedBulk.chapterNumber == chapterNumberBulk && cachedBulk.novelID == novelID { return cachedBulk }
         //print("SearchStoryBulkWith(\"\(novelID)\", \"\(chapterNumber)\")")
         guard let result = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@ AND chapterNumber = %@", novelID, chapterNumberBulk).first else { return nil }
