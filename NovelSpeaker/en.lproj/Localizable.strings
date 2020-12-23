@@ -298,6 +298,7 @@
 "SpeechViewController_WebPageButton_VoiceOverTitle" = "Open in web import tab";
 "SpeechViewController_PreviousChapterButton_VoiceOverTitle" = "Previous page";
 "SpeechViewController_NextChapterButton_VoiceOverTitle" = "Next page";
+"SpeechViewController_SkipBackwardButtonTitle" = "Rewind";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";
@@ -690,6 +691,8 @@
 "SpeechViewButtonType_Backup" = "Back up this novel";
 "SpeechViewButtonSettingsViewController_Title" = "Settings for the buttons displayed in the upper right corner of the novel text screen";
 "SpeechViewButtonType_Detail" = "Show novel detail";
+"SpeechViewButtonType_SkipBackward" = "Rewind a little (during playback)";
+"SpeechViewButtonType_SkipForward" = "Advance a little (during playback)";
 
 "MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "The specified speaker was not available on this machine. I will use an alternative speaker.";
 

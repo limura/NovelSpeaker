@@ -97,6 +97,22 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                     section <<< LabelRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_Detail", comment: "小説の詳細を表示する")
                     }
+                case .skipBackward:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("SpeechViewButtonType_SkipBackward", comment: "少し巻き戻す")
+                        if #available(iOS 13.0, *) {
+                            $0.cell.imageView?.image = UIImage(systemName: "gobackward.30")
+                        }
+                        $0.value = setting.isOn
+                    }.onChange({_ in self.saveCurrentSetting()})
+                case .skipForward:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("SpeechViewButtonType_SkipForward", comment: "少し進める")
+                        if #available(iOS 13.0, *) {
+                            $0.cell.imageView?.image = UIImage(systemName: "goforward.30")
+                        }
+                        $0.value = setting.isOn
+                    }.onChange({_ in self.saveCurrentSetting()})
                 default:
                     continue
                 }

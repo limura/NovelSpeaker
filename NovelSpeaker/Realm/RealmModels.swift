@@ -1978,6 +1978,8 @@ enum SpeechViewButtonTypes:String, Codable {
     case edit = "edit"
     case backup = "backup"
     case detail = "detail"
+    case skipBackward = "skipBackward"
+    case skipForward = "skipForward"
 }
 
 struct SpeechViewButtonSetting: Codable {
@@ -1985,6 +1987,8 @@ struct SpeechViewButtonSetting: Codable {
     var isOn:Bool
     
     static let defaultSetting:[SpeechViewButtonSetting] = [
+        SpeechViewButtonSetting(type: .skipBackward, isOn: false),
+        SpeechViewButtonSetting(type: .skipForward, isOn: false),
         SpeechViewButtonSetting(type: .openWebPage, isOn: true),
         SpeechViewButtonSetting(type: .reload, isOn: true),
         SpeechViewButtonSetting(type: .share, isOn: true),

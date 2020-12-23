@@ -281,6 +281,7 @@
 "SpeechViewController_WebPageButton_VoiceOverTitle" = "Web取込タブで開く";
 "SpeechViewController_PreviousChapterButton_VoiceOverTitle" = "前のページ";
 "SpeechViewController_NextChapterButton_VoiceOverTitle" = "次のページ";
+"SpeechViewController_SkipBackwardButtonTitle" = "巻き戻し";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
@@ -681,6 +682,8 @@
 "SpeechViewButtonType_Backup" = "小説をバックアップする";
 "SpeechViewButtonSettingsViewController_Title" = "小説本文画面の右上に表示されるボタン群の編集";
 "SpeechViewButtonType_Detail" = "小説の詳細を表示する";
+"SpeechViewButtonType_SkipBackward" = "(再生中に)少し巻き戻す";
+"SpeechViewButtonType_SkipForward" = "(再生中に)少し進める";
 
 "MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします";
 

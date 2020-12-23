@@ -25,7 +25,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     
     var startStopButtonItem:UIBarButtonItem? = nil
     var shareButtonItem:UIBarButtonItem? = nil
-    
+    var skipBackwardButtonItem:UIBarButtonItem? = nil
+    var skipForwardButtonItem:UIBarButtonItem? = nil
+
     var novelObserverToken:NotificationToken? = nil
     var novelObserverNovelID:String = ""
     var storyObserverToken:NotificationToken? = nil
@@ -188,6 +190,28 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             case .backup:
                 barButtonArray.append(UIBarButtonItem(title: NSLocalizedString("SpeechViewController_BackupButton", comment: "バックアップ"), style: .plain, target: self, action: #selector(backupButtonClicked(_:))))
                 break
+            case .skipBackward:
+                let skipBackwardButtonItem:UIBarButtonItem
+                if #available(iOS 13.0, *) {
+                    skipBackwardButtonItem = UIBarButtonItem(image: UIImage(systemName: "gobackward.30"), style: .plain, target: self, action: #selector(skipBackwardButtonClicked(_:)))
+                    skipBackwardButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し")
+                } else {
+                    skipBackwardButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_SkipBackwardButtonTitle", comment: "巻き戻し"), style: .plain, target: self, action: #selector(skipBackwardButtonClicked(_:)))
+                }
+                skipBackwardButtonItem.isEnabled = false
+                self.skipBackwardButtonItem = skipBackwardButtonItem
+                barButtonArray.append(skipBackwardButtonItem)
+            case .skipForward:
+                let skipForwardButtonItem:UIBarButtonItem
+                if #available(iOS 13.0, *) {
+                    skipForwardButtonItem = UIBarButtonItem(image: UIImage(systemName: "goforward.30"), style: .plain, target: self, action: #selector(skipForwardButtonClicked(_:)))
+                    skipForwardButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ")
+                } else {
+                    skipForwardButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_SkipForwardButtonTitle", comment: "少し先へ"), style: .plain, target: self, action: #selector(skipForwardButtonClicked(_:)))
+                }
+                skipForwardButtonItem.isEnabled = false
+                self.skipForwardButtonItem = skipForwardButtonItem
+                barButtonArray.append(skipForwardButtonItem)
             default:
                 break
             }
@@ -675,6 +699,26 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
         }
     }
+    @objc func skipBackwardButtonClicked(_ sender: UIBarButtonItem) {
+        if self.storySpeaker.isPlayng == false { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            self.storySpeaker.StopSpeech(realm: realm) {
+                self.storySpeaker.SkipBackward(realm: realm, length: 30) {
+                    self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
+            }
+        }
+    }
+    @objc func skipForwardButtonClicked(_ sender: UIBarButtonItem) {
+        if self.storySpeaker.isPlayng == false { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            self.storySpeaker.StopSpeech(realm: realm) {
+                self.storySpeaker.SkipForward(realm: realm, length: 30) {
+                    self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
+            }
+        }
+    }
     @objc func leftSwipe(_ sender: UISwipeGestureRecognizer) {
         disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
@@ -714,12 +758,16 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     func storySpeakerStartSpeechEvent(storyID:String){
         DispatchQueue.main.async {
             self.startStopButtonItem?.title = NSLocalizedString("SpeechViewController_Stop", comment: "Stop")
+            self.skipBackwardButtonItem?.isEnabled = true
+            self.skipForwardButtonItem?.isEnabled = true
             self.removeCustomUIMenu()
         }
     }
     func storySpeakerStopSpeechEvent(storyID:String){
         DispatchQueue.main.async {
             self.startStopButtonItem?.title = NSLocalizedString("SpeechViewController_Speak", comment: "Speak")
+            self.skipBackwardButtonItem?.isEnabled = false
+            self.skipForwardButtonItem?.isEnabled = false
             self.setCustomUIMenu()
         }
     }
