@@ -259,8 +259,27 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     func getBookmark() -> ([[String:URL]]) {
         return RealmUtil.RealmBlock { (realm) -> [[String:URL]] in
             var resultArray = [[String:URL]]()
-            guard let bookmarks = RealmGlobalState.GetInstanceWith(realm: realm)?.webImportBookmarkArray else {
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 return resultArray
+            }
+            var bookmarks = globalState.webImportBookmarkArray
+            // 「アルファポリスは非対応」と言ってたのを排除します
+            let removeTarget = "アルファポリス(Web取込 非対応サイトになりました。詳細はサポートサイト下部にありますQ&Aを御覧ください)\nhttps://www.alphapolis.co.jp/novel/"
+            let replaceTo = "アルファポリス\nhttps://www.alphapolis.co.jp/novel/"
+            if bookmarks.contains(removeTarget) {
+                var newBookmarkArray:[String] = []
+                for bookmark in bookmarks {
+                    if bookmark == removeTarget {
+                        newBookmarkArray.append(replaceTo)
+                    }else{
+                        newBookmarkArray.append(bookmark)
+                    }
+                }
+                RealmUtil.WriteWith(realm: realm) { (realm) in
+                    globalState.webImportBookmarkArray.removeAll()
+                    globalState.webImportBookmarkArray.append(objectsIn: newBookmarkArray)
+                }
+                bookmarks = globalState.webImportBookmarkArray
             }
             for bookmarkString in bookmarks {
                 let nameAndURL = bookmarkString.components(separatedBy: "\n")

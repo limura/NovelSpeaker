@@ -43,7 +43,11 @@ class CoreDataToRealmTool: NSObject {
         if let bookmarkArray = globalDataSingleton.getWebImportBookmarks() {
             for bookmark in bookmarkArray {
                 if let bookmark = bookmark as? String {
-                    realmState.webImportBookmarkArray.append(bookmark)
+                    if bookmark == "アルファポリス(Web取込 非対応サイトになりました。詳細はサポートサイト下部にありますQ&Aを御覧ください)\nhttps://www.alphapolis.co.jp/novel/" {
+                        realmState.webImportBookmarkArray.append("アルファポリス\nhttps://www.alphapolis.co.jp/novel/")
+                    }else{
+                        realmState.webImportBookmarkArray.append(bookmark)
+                    }
                 }
             }
         }
