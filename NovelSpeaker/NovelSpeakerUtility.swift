@@ -2461,4 +2461,8 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     #endif
+    
+    static func GenerateNSError(msg: String, code: Int = 0) -> NSError {
+        return NSError(domain: "com.limuraproducts.novelspeaker", code: code, userInfo: [NSLocalizedDescriptionKey: msg])
+    }
 }

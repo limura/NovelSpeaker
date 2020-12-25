@@ -860,7 +860,7 @@ class NiftyUtility: NSObject {
                     statusCodeDiv100 %= 10
                     if statusCodeDiv100 != 2 {
                         print("\(url.absoluteString) return \(response.statusCode)")
-                        failedAction?(SloppyError(msg:
+                        failedAction?(NovelSpeakerUtility.GenerateNSError(msg:
                             String(format: NSLocalizedString("UriLoader_HTTPResponseIsInvalid", comment: "サーバから返されたステータスコードが正常値(200 OK等)ではなく、%ld を返されました。ログインが必要なサイトである場合などに発生する場合があります。ことせかい アプリ側でできることはあまり無いかもしれませんが、ことせかい のサポートサイトに設置してあります、ご意見ご要望フォームにこの問題の起こったURLとこの症状が起こった前にやったことを添えて報告して頂けると、あるいはなんとかできるかもしれません。"), response.statusCode)))
                         return
                     }
@@ -888,7 +888,7 @@ class NiftyUtility: NSObject {
                     return
                     #endif
                 }
-                failedAction?(SloppyError(msg: String(format: NSLocalizedString("NiftyUtility_URLSessionRequestFailedAboutError", comment: "サーバからのデータの取得に失敗しました。(末尾に示されているエラー内容とエラーの起こったURLとエラーが起こるまでの操作手順を添えて、サポートサイト下部にありますご意見ご要望フォームか、設定→開発者に問い合わせるよりお問い合わせ頂けますと、あるいは何かできるかもしれません。\nエラー内容: %@)"), error?.localizedDescription ?? "unknown error(nil)")))
+                failedAction?(NovelSpeakerUtility.GenerateNSError(msg: String(format: NSLocalizedString("NiftyUtility_URLSessionRequestFailedAboutError", comment: "サーバからのデータの取得に失敗しました。(末尾に示されているエラー内容とエラーの起こったURLとエラーが起こるまでの操作手順を添えて、サポートサイト下部にありますご意見ご要望フォームか、設定→開発者に問い合わせるよりお問い合わせ頂けますと、あるいは何かできるかもしれません。\nエラー内容: %@)"), error?.localizedDescription ?? "unknown error(nil)")))
             }.resume()
         }
     }

@@ -399,7 +399,7 @@
 "UriLoader_HTMLParseFailed_Xpath" = "Failed to parse HTML. (Illegal xpath was specified, probably the \"information registered in wedata\" for use in the analysis of this site is out of date or wrong.) Opinions on the support site side of NovelSpeaker Request form etc. Please report it with the URL where this error occurred or solve it by editing wedata yourself using OpenID)";
 "UriLoader_HTMLParseFailed_ContentIsNil" = "Failed to parse HTML. (I could not get the contents of the document, it may be solved by reporting from the opinion request form etc. on the support site side of NovelSpeaker together with the URL where this error occurred and the procedure until the error occurred. not)";
 
-"NiftyUtility_URLSessionRequestFailedAboutError" = "Failed to get the data from the server. (You can contact us by adding the error content shown at the end, the URL where the error occurred and the operation procedure until the error occurred, from the opinion request form at the bottom of the support site, or from the setting -> contact developer) Or maybe you can do something.\nError content: %@)";
+"NiftyUtility_URLSessionRequestFailedAboutError" = "Failed to get the data from the server. \nError content: %@";
 "NiftyUtility_FollowingPageAreNotAvailable" = "Following page is not available";
 "NiftyUtility_FollowingPageAreAvailable" = "Following page are available";
 "NiftyUtility_TitleUnknown" = "Title unknown";
@@ -715,6 +715,8 @@
 "BookshelfViewButtonType_Search" = "Novel search";
 "BookshelfViewButtonType_Edit" = "Editing the novel list";
 "BookshelfViewButtonType_Order" = "Sorting of novels (order)";
+
+"HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: I couldn't read anything. Note that this error may occur even if there is a problem with the network connection.";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

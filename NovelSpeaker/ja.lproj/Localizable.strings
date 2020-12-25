@@ -389,7 +389,7 @@
 "UriLoader_HTMLParseFailed_Xpath" = "HTMLの解析に失敗しました。(不正なxpathが指定されました。恐らくはこのサイトの解析に用いるための「wedataに登録されている情報」が古くなっているか書き間違えています。ことせかい のサポートサイト側のご意見ご要望フォームや設定→開発者に問い合わせる等から、このエラーの起こったURLを添えて報告して頂くか、OpenIDを使って自身でwedataを編集することで解決するかもしれません)";
 "UriLoader_HTMLParseFailed_ContentIsNil" = "HTMLの解析に失敗しました。(文書の中身を取り出せませんでした。ことせかい のサポートサイト側のご意見ご要望フォームや設定→開発者に問い合わせる等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません)";
 
-"NiftyUtility_URLSessionRequestFailedAboutError" = "サーバからのデータの取得に失敗しました。(末尾に示されているエラー内容とエラーの起こったURLとエラーが起こるまでの操作手順を添えて、サポートサイト下部にありますご意見ご要望フォームか、設定→開発者に問い合わせるよりお問い合わせ頂けますと、あるいは何かできるかもしれません。\nエラー内容: %@)";
+"NiftyUtility_URLSessionRequestFailedAboutError" = "サーバからのデータの取得に失敗しました。\nエラー内容: %@";
 "NiftyUtility_FollowingPageAreNotAvailable" = "続ページ：無し";
 "NiftyUtility_FollowingPageAreAvailable" = "続ページ：有り";
 "NiftyUtility_TitleUnknown" = "不明なタイトル";
@@ -706,6 +706,8 @@
 "BookshelfViewButtonType_Search" = "小説検索";
 "BookshelfViewButtonType_Edit" = "小説リストを編集(小説の削除)";
 "BookshelfViewButtonType_Order" = "小説の並び替え(順番)";
+
+"HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: 何も読み込めませんでした。なお、ネットワーク接続に問題がある場合などでもこのエラーが発生する場合があります。";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";

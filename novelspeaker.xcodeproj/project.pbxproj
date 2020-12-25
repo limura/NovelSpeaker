@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		2100A42C2496441500F54A5D /* MultiVoiceSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21621085247A62C6002EAA61 /* MultiVoiceSpeaker.swift */; };
 		2104EDE924B985A100E275D1 /* StoryFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDE824B985A100E275D1 /* StoryFetcher.swift */; };
-		2104EDEC24B9D6C800E275D1 /* SloppyError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDEB24B9D6C800E275D1 /* SloppyError.swift */; };
-		2104EDED24B9D6C800E275D1 /* SloppyError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDEB24B9D6C800E275D1 /* SloppyError.swift */; };
 		2104EDEF24B9E33F00E275D1 /* StoryFetcherTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */; };
 		210958C31A0DF55600E9171F /* arrow_down@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958B81A0DF55600E9171F /* arrow_down@3x.png */; };
 		210958C41A0DF55600E9171F /* booksearch.png in Resources */ = {isa = PBXBuildFile; fileRef = 210958B91A0DF55600E9171F /* booksearch.png */; };
@@ -328,7 +326,6 @@
 		076557DFC0C8AD87421204E5 /* Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension.release.xcconfig"; sourceTree = "<group>"; };
 		0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerURLDownloadExtension/Pods-NovelSpeakerURLDownloadExtension.release.xcconfig"; sourceTree = "<group>"; };
 		2104EDE824B985A100E275D1 /* StoryFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryFetcher.swift; sourceTree = "<group>"; };
-		2104EDEB24B9D6C800E275D1 /* SloppyError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SloppyError.swift; sourceTree = "<group>"; };
 		2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryFetcherTest.swift; sourceTree = "<group>"; };
 		210958B81A0DF55600E9171F /* arrow_down@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@3x.png"; sourceTree = "<group>"; };
 		210958B91A0DF55600E9171F /* booksearch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = booksearch.png; sourceTree = "<group>"; };
@@ -919,7 +916,6 @@
 				21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */,
 				21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */,
 				2104EDE824B985A100E275D1 /* StoryFetcher.swift */,
-				2104EDEB24B9D6C800E275D1 /* SloppyError.swift */,
 				212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */,
 				214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */,
 				21D7B10E256D0FB700056E28 /* AppInformationLogger.swift */,
@@ -1711,7 +1707,6 @@
 				21A4C75624F6776500038883 /* NovelDownloadQueue.swift in Sources */,
 				2124B38E23BBF325002EBC31 /* RealmModels.swift in Sources */,
 				2124B39B23BBFBCB002EBC31 /* StorySpeaker.swift in Sources */,
-				2104EDED24B9D6C800E275D1 /* SloppyError.swift in Sources */,
 				21CE8EA6241677ED00C9DB7F /* ScrollableVStack.swift in Sources */,
 				2124B38F23BBF341002EBC31 /* BehaviorLogger.swift in Sources */,
 				2124B38523BBEE38002EBC31 /* NiftyUtility.swift in Sources */,
@@ -1790,7 +1785,6 @@
 				21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */,
 				21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
-				2104EDEC24B9D6C800E275D1 /* SloppyError.swift in Sources */,
 				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
 				214141D01FC0A1C30076DEC2 /* NiftyUtility.swift in Sources */,
 				212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */,

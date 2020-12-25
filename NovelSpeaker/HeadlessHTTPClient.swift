@@ -34,6 +34,27 @@ class HeadlessHttpClient {
         }
     }
     
+    func GenerateNSError(msg: String) -> NSError {
+        return NSError(domain: "com.limuraproducts.headlesshttpclient", code: 0, userInfo: [NSLocalizedDescriptionKey: msg])
+    }
+    
+    func ErikErrorToNSError(error:ErikError) -> NSError {
+        switch error {
+        case .htmlNotParsable(let html, let error):
+            return GenerateNSError(msg: "ErikError.htmlNotParsable: \(error.localizedDescription), html.count: \(html.count), html.firstLine: \(html.split(separator: "\n").first ?? "-")")
+        case .invalidURL(let urlString):
+            return GenerateNSError(msg: "ErikError.invalidURL: \(urlString)")
+        case .javaScriptError(let message):
+            return GenerateNSError(msg: "ErikError.javaScriptError: \(message)")
+        case .noContent:
+            return GenerateNSError(msg: NSLocalizedString("HeadlessHttpClient_ErikError_noContent", comment: "ErikError.noContent: 何も読み込めませんでした。なお、ネットワーク接続に問題がある場合などでもこのエラーが発生する場合があります。"))
+        case .timeOutError(let timeInterval):
+            return GenerateNSError(msg: "ErikError.timeOutError: \(timeInterval)")
+        //default:
+        //    return GenerateNSError(msg: "ErikError.unknown")
+        }
+    }
+    
     func ReloadWebView(config:WKWebViewConfiguration){
         dispatch_sync_on_main_thread {
             let frame = CGRect(x: 0, y: 0, width: 1024, height: 1366)
@@ -79,7 +100,11 @@ class HeadlessHttpClient {
             self.erik.load(urlRequest: request) { (document, err) in
                 ActivityIndicatorManager.disable(id: requestID)
                 if let err = err {
-                    errorResultHandler?(err)
+                    if let err = err as? ErikError {
+                        errorResultHandler?(self.ErikErrorToNSError(error: err))
+                    }else{
+                        errorResultHandler?(err)
+                    }
                     return
                 }
                 guard let doc = document else {
@@ -94,6 +119,10 @@ class HeadlessHttpClient {
     
     public func GetCurrentContent(completionHandler:((Document?, Error?)->Void)?) {
         self.erik.currentContent(completionHandler: { (doc, err) in
+            if let err = err as? ErikError {
+                completionHandler?(doc, self.ErikErrorToNSError(error: err))
+                return
+            }
             completionHandler?(doc, err)
         })
     }
@@ -112,11 +141,15 @@ class HeadlessHttpClient {
     public func ExecuteJavaScript(javaScript:String, resultHandler:((String?, Error?)->Void)?){
         self.erik.evaluate(javaScript: javaScript) { (data, error) in
             if let error = error {
-                resultHandler?(nil, error)
+                if let error = error as? ErikError {
+                    resultHandler?(nil, self.ErikErrorToNSError(error: error))
+                }else{
+                    resultHandler?(nil, error)
+                }
             }else if let resultString = data as? String {
                 resultHandler?(resultString, nil)
             }
-            resultHandler?(nil, SloppyError(msg: "execute JavaScript(\"\(javaScript)\") error."))
+            resultHandler?(nil, self.GenerateNSError(msg: "execute JavaScript(\"\(javaScript)\") error."))
         }
     }
     

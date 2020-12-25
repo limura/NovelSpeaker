@@ -380,7 +380,7 @@ class StoryHtmlDecoder {
         }
         guard let siteInfoURL = userDefinedSiteInfoURL ?? URL(string: StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL),
               let customSiteInfoURL = userDefinedCustomSiteInfoURL ?? URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL) else {
-                completion?(SloppyError(msg: "unknown error. default url decode error."))
+                completion?(NovelSpeakerUtility.GenerateNSError(msg: "unknown error. default url decode error."))
                 announceLoadEnd()
                 return
         }
@@ -413,7 +413,7 @@ class StoryHtmlDecoder {
             }
             announceLoadEnd()
             if isFail {
-                return SloppyError(msg: "siteInfo or customSiteInfo decode error.")
+                return NovelSpeakerUtility.GenerateNSError(msg: "siteInfo or customSiteInfo decode error.")
             }
             return nil
         }
@@ -439,7 +439,7 @@ class StoryHtmlDecoder {
                 completion?(result)
             }) { (err) in
                 announceLoadEnd()
-                completion?(SloppyError(msg: "siteInfo and customSiteInfo fetch failed."))
+                completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
             }
         }
         #else
@@ -448,7 +448,7 @@ class StoryHtmlDecoder {
             completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
         }) { (err) in
             announceLoadEnd()
-            completion?(SloppyError(msg: "siteInfo and customSiteInfo fetch failed."))
+            completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
         }
         #endif
     }
@@ -567,11 +567,11 @@ class StoryFetcher {
                                 return
                             }
                             guard let document = document else {
-                                completionHandler?(nil, SloppyError(msg: "unknown error: (Erik document = nil)"))
+                                completionHandler?(nil, NovelSpeakerUtility.GenerateNSError(msg: "unknown error: (Erik document = nil)"))
                                 return
                             }
                             guard let html = document.innerHTML else {
-                                completionHandler?(nil, SloppyError(msg: "unknown error: (Erik document.innerHTML?.data() return nil)"))
+                                completionHandler?(nil, NovelSpeakerUtility.GenerateNSError(msg: "unknown error: (Erik document.innerHTML?.data() return nil)"))
                                 return
                             }
                             let currentUrl:URL
@@ -586,7 +586,7 @@ class StoryFetcher {
                             self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
                                 completionHandler?(state, nil)
                             }) { (_, err) in
-                                completionHandler?(nil, SloppyError(msg: err))
+                                completionHandler?(nil, NovelSpeakerUtility.GenerateNSError(msg: err))
                             }
                         }
 
