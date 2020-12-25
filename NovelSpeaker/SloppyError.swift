@@ -11,13 +11,17 @@
 
 import UIKit
 
-class SloppyError: Error {
+class SloppyError: Error, LocalizedError {
     let msg:String
     init(msg:String) {
         self.msg = msg
     }
     
     var localizedDescription: String {
+        return self.msg
+    }
+    
+    var errorDescription: String? {
         return self.msg
     }
 }
