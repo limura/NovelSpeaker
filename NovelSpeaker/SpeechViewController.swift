@@ -34,6 +34,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var storyObserverBulkStoryID:String = ""
     var displaySettingObserverToken:NotificationToken? = nil
     var globalStateObserverToken:NotificationToken? = nil
+    var readingChapterStoryUpdateDate:Date = Date()
     
     let storySpeaker = StorySpeaker.shared
     
@@ -270,6 +271,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     func setStoryWithoutSetToStorySpeaker(story:Story) {
+        self.readingChapterStoryUpdateDate = Date()
         RealmUtil.RealmBlock { (realm) -> Void in
             let content = story.content
             let storyID = story.storyID
@@ -359,7 +361,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                                 self.applyChapterListChange()
                             }
                         }
-                        if property.name == "m_readingChapterStoryID", let newReadingChapterStoryID = property.newValue as? String, let currentStoryID = self.storyID, newReadingChapterStoryID != currentStoryID {
+                        if property.name == "m_readingChapterStoryID", let newReadingChapterStoryID = property.newValue as? String, let currentStoryID = self.storyID, newReadingChapterStoryID != currentStoryID, self.readingChapterStoryUpdateDate < Date(timeIntervalSinceNow: -1.5) {
                             self.currentReadingStoryIDChangedEventHandler(newReadingStoryID: newReadingChapterStoryID)
                         }
                      }
