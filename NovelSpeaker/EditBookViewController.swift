@@ -55,6 +55,8 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate {
                 }
             }
         }
+        self.movePreviousButton.accessibilityLabel = NSLocalizedString("SpeechViewController_PreviousChapterButton_VoiceOverTitle", comment: "前のページ")
+        self.moveNextButton.accessibilityLabel = NSLocalizedString("SpeechViewController_NextChapterButton_VoiceOverTitle", comment: "次のページ")
         registNotificationCenter()
         startObserve()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
