@@ -623,6 +623,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
         func fetchOne(queue:[URL], index:Int) {
             if queue.count <= index {
                 failedAction?(lastError)
+                return
             }
             let url = queue[index]
             fetchSearchInfoJSON(url: url, successAction: { (data) in
