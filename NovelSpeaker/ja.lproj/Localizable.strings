@@ -614,11 +614,11 @@
 "BookShelfRATreeViewController_ExpandFolderButton" = "フォルダ開閉";
 "BookShelfRATreeViewController_NowSwitchingFolderMessage" = "フォルダ開閉中……";
 "BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle" = "フォルダ開閉";
-"BookShelfRATreeViewController_iCloudPullButton_VoiceOverText" = "iCloud上のデータの読み込みを開始";
+"BookShelfRATreeViewController_iCloudPullButton_VoiceOverText" = "iCloud上の更新データの強制読み込み";
 "BookShelfRATreeViewController_iCloudPullButtonTitle" = "iCloudから取得";
 "BookShelfRATreeViewController_iCloudPushButton_VoiceOverText" = "iCloudへのデータアップロードを開始";
 "BookShelfRATreeViewController_iCloudPushButtonTitle" = "iCloudへ送信";
-"BookShelfRATreeViewController_iCloudPullButton_Clicked" = "iCloud上のデータの再ダウンロードを開始しました。";
+"BookShelfRATreeViewController_iCloudPullButton_Clicked" = "iCloud上の更新データの取得を開始しました。";
 "BookShelfRATreeViewController_iCloudPushButton_Clicked" = "iCloudへのデータのアップロードを開始しました。";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
@@ -712,7 +712,7 @@
 "BookshelfViewButtonType_Search" = "小説検索";
 "BookshelfViewButtonType_Edit" = "小説リストを編集(小説の削除)";
 "BookshelfViewButtonType_Order" = "小説の並び替え(順番)";
-"BookshelfViewButtonType_iCloudPull" = "iCloud上のデータの強制取り込みを開始する(通常は必要ありませんし、全てのデータをiCloud側から取得しますので通信量が増えますし、全てを受信し終えるには時間がかかるはずです)";
+"BookshelfViewButtonType_iCloudPull" = "iCloud上の更新データの強制取り込みを開始する(通常は必要ありません)";
 "BookshelfViewButtonType_iCloudPush" = "端末側のデータの「全て」をiCloudへ送信ししなおし始める(通常は必要ありませんし、本当に全てのデータをiCloud側に送信しますので通信量が増えますし、全てを送信し終えるには時間がかかるはずです)";
 
 "HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: 何も読み込めませんでした。なお、ネットワーク接続に問題がある場合などでもこのエラーが発生する場合があります。";
