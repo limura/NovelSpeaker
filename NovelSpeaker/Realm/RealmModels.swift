@@ -2031,6 +2031,8 @@ struct SpeechViewButtonSetting: Codable {
 }
 
 enum BookshelfViewButtonTypes:String, Codable {
+    case iCloudPull = "iCloudPull"
+    case iCloudPush = "iCloudPush"
     case search = "search"
     case edit = "edit"
     case reload = "reaload"
@@ -2044,6 +2046,8 @@ struct BookshelfViewButtonSetting: Codable {
     var isOn:Bool
     
     static let defaultSetting:[BookshelfViewButtonSetting] = [
+        //BookshelfViewButtonSetting(type: .iCloudPull, isOn: false),
+        //BookshelfViewButtonSetting(type: .iCloudPush, isOn: false),
         //BookshelfViewButtonSetting(type: .search, isOn: false),
         BookshelfViewButtonSetting(type: .switchFolder, isOn: true),
         //BookshelfViewButtonSetting(type: .downloadStatus, isOn: false),

@@ -625,6 +625,13 @@
 "BookShelfRATreeViewController_ExpandFolderButton" = "SwitchFolder";
 "BookShelfRATreeViewController_NowSwitchingFolderMessage" = "Switching folder...";
 "BookShelfRATreeViewController_SwitchFolderButton_VoiceOverTitle" = "Switch folder";
+"BookShelfRATreeViewController_iCloudPullButton_VoiceOverText" = "Start loading data on iCloud";
+"BookShelfRATreeViewController_iCloudPullButtonTitle" = "Get from iCloud";
+"BookShelfRATreeViewController_iCloudPushButton_VoiceOverText" = "Start uploading data to iCloud";
+"BookShelfRATreeViewController_iCloudPushButtonTitle" = "Send to iCloud";
+"BookShelfRATreeViewController_iCloudPullButton_Clicked" = "We have started re-downloading data on iCloud.";
+"BookShelfRATreeViewController_iCloudPushButton_Clicked" = "We have started uploading data to iCloud.";
+
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
@@ -715,6 +722,8 @@
 "BookshelfViewButtonType_Search" = "Novel search";
 "BookshelfViewButtonType_Edit" = "Editing the novel list";
 "BookshelfViewButtonType_Order" = "Sorting of novels (order)";
+"BookshelfViewButtonType_iCloudPull" = "Initiate forced capture of data on iCloud (usually not needed)";
+"BookshelfViewButtonType_iCloudPush" = "Start sending \"all\" of the data on the terminal side to iCloud again (usually it is not necessary, and since all the data is really sent to iCloud side, the communication volume will increase and it will take time to finish sending all It should take)";
 
 "HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: I couldn't read anything. Note that this error may occur even if there is a problem with the network connection.";
 

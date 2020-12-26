@@ -34,6 +34,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     var searchText:String? = nil
     var searchButton:UIBarButtonItem = UIBarButtonItem()
     var switchFolderButton:UIBarButtonItem = UIBarButtonItem()
+    var iCloudPullButton:UIBarButtonItem = UIBarButtonItem()
+    var iCloudPushButton:UIBarButtonItem = UIBarButtonItem()
     var resumeSpeechFloatingButton:FloatingButton? = nil
     var nextViewStoryID: String?
     var isNextViewNeedResumeSpeech:Bool = false
@@ -125,6 +127,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.HilightCurrentReadingNovel()
+        self.assignCloudPullPushButtonStatus()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -302,6 +305,30 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 barButtonItemArray.append(UIBarButtonItem.init(barButtonSystemItem: UIBarButtonItem.SystemItem.refresh, target: self, action: #selector(refreshButtonClicked)))
             case .search:
                 break
+            case .iCloudPull:
+                let button:UIBarButtonItem
+                if #available(iOS 13.0, *), let image = UIImage(systemName: "icloud.and.arrow.down") {
+                    button = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(iCloudPullButtonClicked))
+                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_VoiceOverText", comment: "iCloud上のデータの読み込みを開始")
+                }else{
+                    button = UIBarButtonItem(title: NSLocalizedString("BookShelfRATreeViewController_iCloudPullButtonTitle", comment: "iCloudから取得"), style: .plain, target: self, action: #selector(iCloudPullButtonClicked))
+                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_VoiceOverText", comment: "iCloud上のデータの読み込みを開始")
+                }
+                button.isEnabled = RealmUtil.IsUseCloudRealm()
+                self.iCloudPullButton = button
+                barButtonItemArray.append(button)
+            case .iCloudPush:
+                let button:UIBarButtonItem
+                if #available(iOS 13.0, *), let image = UIImage(systemName: "icloud.and.arrow.up") {
+                    button = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(iCloudPushButtonClicked))
+                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_VoiceOverText", comment: "iCloudへのデータアップロードを開始")
+                }else{
+                    button = UIBarButtonItem(title: NSLocalizedString("BookShelfRATreeViewController_iCloudPushButtonTitle", comment: "iCloudへ送信"), style: .plain, target: self, action: #selector(iCloudPushButtonClicked))
+                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_VoiceOverText", comment: "iCloudへのデータアップロードを開始")
+                }
+                button.isEnabled = RealmUtil.IsUseCloudRealm()
+                self.iCloudPushButton = button
+                barButtonItemArray.append(button)
             }
         }
         self.navigationItem.rightBarButtonItems = barButtonItemArray.reversed()
@@ -786,6 +813,28 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 NovelDownloadQueue.shared.addQueueArray(novelArray: novels)
             }
         }
+    }
+    
+    @objc func iCloudPullButtonClicked(sender: Any) {
+        if RealmUtil.IsUseCloudRealm() {
+            DispatchQueue.main.async {
+                RealmUtil.CloudPull()
+                NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("BookShelfRATreeViewController_iCloudPullButton_Clicked", comment: "iCloud上のデータの再ダウンロードを開始しました。"), buttonTitle: nil, buttonAction: nil)
+            }
+        }
+    }
+    @objc func iCloudPushButtonClicked(sender: Any) {
+        if RealmUtil.IsUseCloudRealm() {
+            DispatchQueue.main.async {
+                RealmUtil.CloudPush()
+                NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("BookShelfRATreeViewController_iCloudPushButton_Clicked", comment: "iCloudへのデータのアップロードを開始しました。"), buttonTitle: nil, buttonAction: nil)
+            }
+        }
+    }
+    func assignCloudPullPushButtonStatus() {
+        let isEnabled = RealmUtil.IsUseCloudRealm()
+        self.iCloudPullButton.isEnabled = isEnabled
+        self.iCloudPushButton.isEnabled = isEnabled
     }
 
     func getDisplayStringToSortTypeDictionary() -> [String:NarouContentSortType]{

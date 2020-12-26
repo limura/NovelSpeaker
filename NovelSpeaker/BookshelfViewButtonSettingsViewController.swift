@@ -91,6 +91,26 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         $0.title = NSLocalizedString("BookshelfViewButtonType_Order", comment: "小説の並び替え(順番)")
                         $0.value = setting.isOn
                     }.onChange({_ in self.saveCurrentSetting()})
+                case .iCloudPull:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("BookshelfViewButtonType_iCloudPull", comment: "iCloud上のデータの強制取り込みを開始する(通常は必要ありません)")
+                        $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
+                        $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                        if #available(iOS 13.0, *), let image = UIImage(systemName: "icloud.and.arrow.down") {
+                            $0.cell.imageView?.image = image
+                        }
+                    }.onChange({_ in self.saveCurrentSetting()})
+                case .iCloudPush:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("BookshelfViewButtonType_iCloudPush", comment: "端末側のデータの「全て」をiCloudへ送信ししなおし始める(通常は必要ありませんし、本当に全てのデータをiCloud側に送信するため、通信量が増えますし全てを送信し終えるには時間がかかるはずです)")
+                        $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
+                        $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                        if #available(iOS 13.0, *), let image = UIImage(systemName: "icloud.and.arrow.up") {
+                            $0.cell.imageView?.image = image
+                        }
+                    }.onChange({_ in self.saveCurrentSetting()})
                 }
             }
         }
