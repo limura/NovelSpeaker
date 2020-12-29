@@ -119,7 +119,7 @@
         @"<iframe.*?>",
         @"<link.*?>",
         @"<meta.*?>",
-        //@"<img[^>]*?>", // img は将来的に ALT を表示できたらいいのかもしれないなぁと思ったりもする……
+        @"<img[^>]*?>", // img は将来的に ALT を表示できたらいいのかもしれないなぁと思ったりもしたけれど、src で指定されたURLがtimeoutすると NSAttributedString への変換がエラーしてしまうようなので全ての <img> を排除することにします。
     ];
     for (NSString* regexString in targetRegexStrings) {
         NSError* error = nil;
