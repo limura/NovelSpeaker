@@ -763,6 +763,13 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
   - Added the concept of self-made folders
 
 
+# Version 1.1.72
+
+Bug fix
+
+- Addressed an issue where some URLs could fail to load
+
+
 # Version 1.1.71
 
 Interface change
