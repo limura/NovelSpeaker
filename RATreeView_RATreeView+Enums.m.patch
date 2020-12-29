@@ -1,0 +1,11 @@
+--- RATreeView+Enums.m.orig	2020-12-12 20:48:37.000000000 +0900
++++ RATreeView+Enums.m	2020-12-12 20:48:59.000000000 +0900
+@@ -102,6 +102,8 @@
+       return RATreeViewStylePlain;
+     case UITableViewStyleGrouped:
+       return RATreeViewStyleGrouped;
++    case UITableViewStyleInsetGrouped:
++      return RATreeViewStyleGrouped;
+   }
+ }
+ #pragma mark Scroll Positions

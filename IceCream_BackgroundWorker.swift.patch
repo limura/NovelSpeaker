@@ -1,0 +1,18 @@
+--- BackgroundWorker.swift	2020-12-12 17:23:17.000000000 +0900
++++ BackgroundWorker.swift.new	2020-12-12 17:22:52.000000000 +0900
+@@ -28,9 +28,15 @@ class BackgroundWorker: NSObject {
+                     return
+                 }
+                 while (!th.isCancelled) {
++                    let t1 = Date()
+                     RunLoop.current.run(
+                         mode: .default,
+                         before: Date.distantFuture)
++                    let t2 = Date()
++                    let delta = t2.timeIntervalSince(t1)
++                    if delta < 0.01 {
++                        Thread.sleep(forTimeInterval: 0.02)
++                    }
+                 }
+                 Thread.exit()
+             }
