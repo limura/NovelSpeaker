@@ -345,14 +345,20 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.71
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 1.1.72
 
-- 本棚画面と小説本文画面のボタンの一部について、VoiceOverで選択した時の読み上げ文字を設定
-- 大量の小説(本文)が登録されている ことせかい で、設定タブ -> バックアップ用データの生成 -> 完全バックアップ〜 でバックアップファイルを作成しようとすると落ちる問題に対応
+- 一部のURLで読み込みが失敗する可能性があった問題に対処
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 1.1.72
+
+問題の修正
+
+- 一部のURLで読み込みが失敗する可能性があった問題に対処
+
+
 # Version 1.1.71
 
 インタフェースの変更
