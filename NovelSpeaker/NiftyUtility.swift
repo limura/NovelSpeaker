@@ -1487,11 +1487,12 @@ class NiftyUtility: NSObject {
     
     // HTML から String に変換する時に必要なくなるタグ等を削除します。
     static let RemoveNoNeedTagRegexpArray = [
-        //try? NSRegularExpression(pattern: "<script.*?/script>", options: [.caseInsensitive, .dotMatchesLineSeparators]), // AttributedString に変換する場合、そちらで <script> は虫されるのでここで消しておく必要は多分ない
+        //try? NSRegularExpression(pattern: "<script.*?/script>", options: [.caseInsensitive, .dotMatchesLineSeparators]), // AttributedString に変換する場合、そちらで <script> は無視されるのでここで消しておく必要は多分ない
         try? NSRegularExpression(pattern: "<iframe.*?/iframe>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<link.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<meta.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<noscript.*?/noscript>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
+        try? NSRegularExpression(pattern: "<img.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         // <head>や<title>の中はNSAttributedString で取り出そうとしても消えてしまうため、<head>や<title>タグを消してしまうことでこれに対応します。
         try? NSRegularExpression(pattern: "<\\s*head[^>]*>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<\\s*title[^>]*>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
