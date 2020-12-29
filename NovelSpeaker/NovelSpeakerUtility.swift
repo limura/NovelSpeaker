@@ -1934,7 +1934,7 @@ class NovelSpeakerUtility: NSObject {
                 "defaultSpeechModURL": globalState.defaultSpeechModURL,
                 "searchInfoURL": globalState.searchInfoURL,
                 "speechViewButtonSettingArrayData": globalState.speechViewButtonSettingArrayData.base64EncodedString(),
-                "cookieArrayData": globalState.cookieArrayData.base64EncodedString(),
+                //"cookieArrayData": globalState.cookieArrayData.base64EncodedString(),
                 "novelDisplayType": globalState.novelDisplayType.rawValue,
                 "bookshelfViewButtonSettingArrayData": globalState.bookshelfViewButtonSettingArrayData.base64EncodedString(),
 
