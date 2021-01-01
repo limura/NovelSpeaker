@@ -47,6 +47,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     var speechModSettingArrayObserverToken:NotificationToken? = nil
     var bookmarkObserverToken:NotificationToken? = nil
     var speakerSettingObserverToken:NotificationToken? = nil
+    var speechWaitSettingNotificationToken:NotificationToken? = nil
     var bookmarkObserverNovelID:String = ""
     var maxSpeechInSecTimer:Timer? = nil
     var isMaxSpeechTimeExceeded = false
@@ -66,6 +67,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         observeGlobalState()
         observeSpeakerSetting()
         observeSpeechModSetting()
+        observeSpeechWaitSetting()
         dummySoundLooper.setMediaFile(forResource: "Silent3sec", ofType: "mp3")
         registerAudioNotifications()
         if !pageTurningSoundPlayer.setMediaFile(forResource: "nc48625", ofType: "m4a", maxDuplicateCount: 1) {
@@ -90,6 +92,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         speechModSettingArrayObserverToken = nil
         bookmarkObserverToken = nil
         speakerSettingObserverToken = nil
+        speechWaitSettingNotificationToken = nil
     }
     func RestartObservers() {
         StopObservers()
@@ -100,6 +103,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         observeStory(storyID: storyID)
         observeSpeakerSetting()
         observeSpeechModSetting()
+        observeSpeechWaitSetting()
     }
     
     func ApplyStoryToSpeaker(story:Story, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, readLocation:Int) {
@@ -213,6 +217,25 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let center = NotificationCenter.default
         center.removeObserver(self)
     }
+    
+    func observeSpeechWaitSetting() {
+        DispatchQueue.main.async {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let speechWaitSettings = RealmSpeechWaitConfig.GetAllObjectsWith(realm: realm) else { return }
+                self.speechWaitSettingNotificationToken = speechWaitSettings.observe({ (changes) in
+                    switch changes {
+                    case .error(_):
+                        break
+                    case .initial(_):
+                        break
+                    case .update(_, _, _, _):
+                        self.isNeedApplySpeechConfigs = true
+                    }
+                })
+            }
+        }
+    }
+    
     func observeSpeechModSetting() {
         DispatchQueue.main.async {
             RealmUtil.RealmBlock { (realm) -> Void in
