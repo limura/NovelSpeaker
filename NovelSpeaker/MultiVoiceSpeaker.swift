@@ -233,4 +233,10 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         }
         return false
     }
+    
+    func reloadSynthesizer() {
+        for (_, speaker) in self.speakerCache {
+            speaker.reloadSynthesizer()
+        }
+    }
 }

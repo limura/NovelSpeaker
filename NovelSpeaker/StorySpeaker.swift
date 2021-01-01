@@ -549,8 +549,18 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setActive(false, options: [AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation])
-        }catch{
-            print("audioSession.setActive(false) failed.")
+        }catch(let err){
+            print("audioSession.setActive(false) failed: \(err.localizedDescription)")
+            // このエラーが発生した後、読み上げが失敗し続けてしまう場合があります。
+            // そのような場合、AVSpeechSynthesizer を作り直さないと問題は解消しないようです。
+            // ただ、このエラーは上記の問題を踏まなかった場合でも発生する場合があります(というか、上記の問題以外の問題で発生する場合の方が多いようです)。
+            // その場合、下記の reloadSynthesizer() をする必要は無いので回避したいのですが、
+            // 回避する方法が思いつかない……
+            // err を参照しても同じエラーみたい(localizedDescription で出てくるエラーが「操作を完了できませんでした。（OSStatusエラー560030580）」の固定値みたいなのでそれぞれの違いが判断できない)ので頼れないので詰んだ感じ。(´・ω・`)
+            self.speaker.reloadSynthesizer()
+            // で、作り直した後に一度でも発話しておかないと、最初の発話時に時間がかかるんじゃないかな？
+            // と、思ったんですがどうやらそういう小細工は必要なさそうでした。どういう事なんだ。(´・ω・`)
+            //self.speaker.resetRegisterdVoices()
         }
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
         if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {

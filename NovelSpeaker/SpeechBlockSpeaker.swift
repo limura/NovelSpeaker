@@ -163,6 +163,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         currentBlockDisplayOffset = 0
         currentBlockSpeechOffset = 0
         
+        resetRegisterdVoices()
+    }
+    func resetRegisterdVoices() {
         var voiceIdentifierDictionary:[String?:String?] = [:]
         for block in speechBlockArray {
             voiceIdentifierDictionary[block.voiceIdentifier] = block.locale
@@ -298,5 +301,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     
     func isDummySpeechAlive() -> Bool {
         return speaker.isDummySpeechAlive()
+    }
+    
+    func reloadSynthesizer() {
+        speaker.reloadSynthesizer()
     }
 }

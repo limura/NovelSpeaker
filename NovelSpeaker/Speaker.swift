@@ -141,4 +141,9 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     func isSpeaking() -> Bool {
         return self.synthesizer.isSpeaking
     }
+    
+    func reloadSynthesizer() {
+        synthesizer = AVSpeechSynthesizer()
+        synthesizer.delegate = self
+    }
 }
