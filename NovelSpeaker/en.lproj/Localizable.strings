@@ -768,7 +768,7 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 Bug fix
 
 - Addressed an issue where some URLs could fail to load
-
+- Fixed the problem that when you press and hold the image displayed on the Web import tab and select \"Add to \"Photo\"\", it drops.
 
 # Version 1.1.71
 

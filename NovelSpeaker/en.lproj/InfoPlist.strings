@@ -1,3 +1,5 @@
 /* Localized versions of Info.plist keys */
 
 //CFBundleDisplayName = "ことせかい";
+NSPhotoLibraryUsageDescription = "You need permission to save to the photo app side in the long press menu on the web import tab.";
+NSPhotoLibraryAddUsageDescription = "Permission is required to save the image displayed on the Web import tab on the photo app side.";
