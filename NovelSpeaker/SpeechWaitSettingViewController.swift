@@ -266,7 +266,7 @@ class SpeechWaitSettingViewControllerSwift: FormViewController, RealmObserverRes
                         }
                         RealmUtil.RealmBlock { (realm) -> Void in
                             let newSpeechWaitConfig = RealmSpeechWaitConfig()
-                            newSpeechWaitConfig.targetText = text
+                            newSpeechWaitConfig.targetText = text.replacingOccurrences(of: NSLocalizedString("SpeechWaitConfigTableView_TargetText_Enter", comment: "<改行>"), with: "\n")
                             RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speechWaitSettingNotificationToken, self.globalStateNotificationToken]) { (realm) in
                                 realm.add(newSpeechWaitConfig, update: .modified)
                             }
