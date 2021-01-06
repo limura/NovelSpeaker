@@ -184,6 +184,8 @@
 "NovelSpeakerUtility_RestoreingJSONType" = "工程 2/3\nバックアップファイルから設定を読み込んでいます。";
 "NovelSpeakerUtility_RestoreBackupTitle" = "バックアップデータを読み込んでいます";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
+"NovelSpeakerUtility_FirstStoryURLString" = "https://limura.github.io/NovelSpeaker/topics/jp/00001.html";
+"NovelSpeakerUtility_FirstStoryTitleString" = "はじめに(ことせかい の使い方)";
 
 "SettingsViewController_ShareBackupDataSelectHow_Title" = "バックアップデータの送信方式を選んで下さい";
 "SettingsViewController_ShareBackupDataSelectHow_Mail" = "メールに添付する";

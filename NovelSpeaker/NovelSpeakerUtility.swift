@@ -2185,7 +2185,7 @@ class NovelSpeakerUtility: NSObject {
         let userDefaults = UserDefaults.standard
         userDefaults.set(newValue, forKey: NovelSpeakerUtility.isAddedFirstStoryKey)
     }
-    fileprivate static let FirstStoryURLString = "https://limura.github.io/NovelSpeaker/topics/00001.html"
+    fileprivate static let FirstStoryURLString = NSLocalizedString("NovelSpeakerUtility_FirstStoryURLString", comment: "https://limura.github.io/NovelSpeaker/topics/jp/00001.html")
     @objc static func AddFirstStoryIfNeeded() {
         if GetIsAddedFirstStory() { return }
         let novelID = FirstStoryURLString
@@ -2194,6 +2194,7 @@ class NovelSpeakerUtility: NSObject {
             if novel.novelID != novelID {
                 novel.novelID = novelID
                 novel.url = novelID
+                novel.title = NSLocalizedString("NovelSpeakerUtility_FirstStoryTitleString", comment: "はじめに(ことせかい の使い方)")
                 novel.type = .URL
                 realm.add(novel, update: .modified)
             }

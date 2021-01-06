@@ -167,6 +167,8 @@
 "NovelSpeakerUtility_UnzipProgress" = "Decompressing backup file";
 "NovelSpeakerUtility_RestoreBackupTitle" = "Loading backup data";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
+"NovelSpeakerUtility_FirstStoryURLString" = "https://limura.github.io/NovelSpeaker/topics/en/00001.html";
+"NovelSpeakerUtility_FirstStoryTitleString" = "Introduction (How to use NovelSpeaker)";
 
 "SettingsViewController_ChooseFullBackup" = "Generate a full backup (comparably slower)";
 "SettingsViewController_ChooseSmallBackup" = "Generate a lightweight backup (comparably faster)";
