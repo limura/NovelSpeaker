@@ -48,6 +48,7 @@ class DummySoundLooper: NSObject {
                 let player = try AVAudioPlayer(contentsOf: mediaFileURL as URL)
                 player.prepareToPlay()
                 audioPlayer = player;
+                return audioPlayer
             } catch {
                 print("setMediaFile failed by exception")
                 return nil
