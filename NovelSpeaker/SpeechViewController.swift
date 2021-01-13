@@ -816,9 +816,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: newReadingStoryID) else { return }
             let newChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: newReadingStoryID)
-            self.currentReadStoryIDChangeAlertFloatingButton = FloatingButton.createNewFloatingButton()
-            guard let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
             DispatchQueue.main.async {
+                self.currentReadStoryIDChangeAlertFloatingButton = FloatingButton.createNewFloatingButton()
+                guard let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
                 floatingButton.assignToView(view: self.view, text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true, bottomConstraintAppend: -32.0) {
                     self.storySpeaker.SetStory(story: story, withUpdateReadDate: false)
                     floatingButton.hideAnimate()
