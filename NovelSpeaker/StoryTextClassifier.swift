@@ -247,7 +247,13 @@ class CombinedSpeechBlock: Identifiable {
             }
             let displayTextLength = Float(blockDisplayTextCount)
             let speechTextLength = Float(blockSpeechTextCount)
-            let displayStartLocation = Int(Float(speechLocation) * displayTextLength / speechTextLength)
+            let displayStartLocationFloat = Float(speechLocation) * displayTextLength / speechTextLength
+            let displayStartLocation:Int
+            if displayStartLocationFloat.isInfinite || displayStartLocationFloat.isNaN {
+                displayStartLocation = 0
+            }else{
+                displayStartLocation = Int(displayStartLocationFloat)
+            }
             displayLocation += displayStartLocation
             break
         }
