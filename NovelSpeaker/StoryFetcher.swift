@@ -12,7 +12,7 @@ import Kanna
 import Erik
 #endif
 
-struct StoryState {
+struct StoryState : CustomStringConvertible {
     let url:URL
     let cookieString:String?
     let content:String?
@@ -61,6 +61,40 @@ struct StoryState {
         #else
         return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless)
         #endif
+    }
+    
+    var description: String {
+        get {
+            let contentFirstSection:String
+            if let contentPrefix = content?.prefix(300) {
+                contentFirstSection = String(contentPrefix)
+            }else{
+                contentFirstSection = String((content ?? "").split(separator: "\n").first ?? "nil or no line")
+            }
+            var description = """
+url: \(url.absoluteString)
+cookieString: \(cookieString ?? "nil")
+content: \(contentFirstSection)
+nextUrl: \(nextUrl?.absoluteString ?? "nil")
+firstPageLink: \(firstPageLink?.absoluteString ?? "nil")
+title: \(title ?? "nil")
+author: \(author ?? "nil")
+subtitle: \(subtitle ?? "nil")
+tagArray: \(tagArray.joined(separator: ", "))
+siteInfoArray.count: \(siteInfoArray.count)
+isNeedHeadless: \(isNeedHeadless)
+waitSecondInHeadless: \(waitSecondInHeadless?.description ?? "nil")
+"""
+            #if !os(watchOS)
+            description += """
+
+document: \(document == nil ? "nil" : "not nil")
+nextButton: \(nextButton == nil ? "nil" : "not nil")
+firstPageButton: \(firstPageButton == nil ? "nil" : "not nil")
+"""
+            #endif
+            return description
+        }
     }
 }
 
@@ -683,9 +717,8 @@ class StoryFetcher {
 
         failedAction?(currentState.url, NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。"))
     }
-
-    static func CreateFirstStoryStateWithoutCheckLoadSiteInfo(url:URL, cookieString:String?) -> StoryState {
-        let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
+    
+    static func CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray:[StorySiteInfo], url:URL, cookieString:String?) -> StoryState {
         let isNeedHeadless:Bool = siteInfoArray.reduce(false) { (result, siteInfo) -> Bool in
             if result || siteInfo.isNeedHeadless { return true }
             return false
@@ -699,6 +732,11 @@ class StoryFetcher {
         #else
         return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: url, firstPageLink: nil, title: nil, author: nil, subtitle: nil, tagArray: [], siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: false, waitSecondInHeadless: waitSecondInHeadless)
         #endif
+    }
+
+    static func CreateFirstStoryStateWithoutCheckLoadSiteInfo(url:URL, cookieString:String?) -> StoryState {
+        let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
+        return CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString)
     }
     
     static func CreateFirstStoryState(url:URL, cookieString:String?, completion:((StoryState)->Void)?) {

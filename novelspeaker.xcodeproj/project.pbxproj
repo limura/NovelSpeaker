@@ -31,6 +31,7 @@
 		210EFEE123C8A92D007C3016 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE023C8A92D007C3016 /* Speaker.swift */; };
 		210EFEE323C8B623007C3016 /* SpeechBlockSpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */; };
 		2111C5D81D8AE84B004AF96A /* PickerViewDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */; };
+		21143D8025B2DC390078C2BA /* DownloadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21143D7F25B2DC390078C2BA /* DownloadTest.swift */; };
 		212137CE24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */; };
 		212137CF24F9BA0F00E5FB9E /* RobotsFileTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */; };
 		212323F522B7049E00543543 /* RealmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212323F422B7049E00543543 /* RealmTests.swift */; };
@@ -352,6 +353,7 @@
 		210EFEE023C8A92D007C3016 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBlockSpeaker.swift; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
+		21143D7F25B2DC390078C2BA /* DownloadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTest.swift; sourceTree = "<group>"; };
 		212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotsFileTool.swift; sourceTree = "<group>"; };
 		212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 5.xcdatamodel"; sourceTree = "<group>"; };
 		212323F422B7049E00543543 /* RealmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmTests.swift; sourceTree = "<group>"; };
@@ -1061,6 +1063,7 @@
 				212323F422B7049E00543543 /* RealmTests.swift */,
 				210EFEDE23C86ADB007C3016 /* SpeakerTest.swift */,
 				2104EDEE24B9E33F00E275D1 /* StoryFetcherTest.swift */,
+				21143D7F25B2DC390078C2BA /* DownloadTest.swift */,
 			);
 			path = NovelSpeakerTests;
 			sourceTree = "<group>";
@@ -1806,6 +1809,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				210EFEDF23C86ADB007C3016 /* SpeakerTest.swift in Sources */,
+				21143D8025B2DC390078C2BA /* DownloadTest.swift in Sources */,
 				212323F522B7049E00543543 /* RealmTests.swift in Sources */,
 				2104EDEF24B9E33F00E275D1 /* StoryFetcherTest.swift in Sources */,
 			);

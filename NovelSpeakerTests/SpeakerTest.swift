@@ -52,7 +52,7 @@ class SpeakerTest: XCTestCase {
         speaker.withMoreSplitTargets = ["。", ".", "\n"]
         speaker.moreSplitMinimumLetterCount = 30
         RealmUtil.Write { (realm) in
-            speaker.SetStory(story: story)
+            speaker.SetStory(story: story, withUpdateReadDate: true)
         }
         let blockArray = speaker.speechBlockArray
         print("currentBlockIndex: \(speaker.currentBlockIndex)")
