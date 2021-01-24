@@ -1,0 +1,29 @@
+How to use NovelSpeaker
+How to use NovelSpeaker
+<br><div>NovelSpeaker is an app for "listening" to novels by having the app read the novels posted on the web page.
+</div><br>
+<div>If you are reading this text by selecting it from the bookshelf in the NovelSpeaker app, press the "Speak" button near the top right to start reading.
+(Please note that you will hear a sound when the reading is performed. After the reading starts, the "Speak" button will change to the "Stop" button. Press the "Stop" button to stop the reading.)
+If you want to specify the position to start reading, press and hold the position you want to start reading while the reading is stopped to display the selected range, and then press the "Speak" button on the upper right. I will.
+</div><br>
+<div>The novel to be read aloud needs to be temporarily saved inside NovelSpeaker by importing the web novel into NovelSpeaker using the "Web Search" tab or "Web Import" tab at the bottom of the screen.
+</div><br>
+<div>Let's take in one novel as a trial. Find your favorite novel, such as by opening the Web Import tab and selecting a novel site from the sites listed on the first page. Then, make sure that the text of the novel that you find interesting is displayed. Then, click the "Import" button at the bottom right to start temporary loading.
+(Note that the "Import" button will try to import the currently displayed content, so be sure to press the "Import" button while the novel text is displayed, not the explanation page of the novel.)
+</div><br>
+<div>When the temporary loading is completed, the title and body of the novel will be displayed, and a dialog will appear in which you can select "Import as is" or "Do not import". After confirming that the desired content is displayed, click the "Import as is" button to import the novel. When you return to the bookshelf, the novel should be added to the bookshelf.
+</div><br>
+<div>More detailed information such as how to use this "Web Import" tab with a video is also written in "About Web Import Function" at the bottom of the support site or at the link on the first screen of the <a href="../WebImport.html">"Web Import" tab</a>. I would appreciate it if you could refer to it.
+</div><br>
+<div>When you start importing a novel, you should see the novel registered on the bookshelf screen. By selecting the novel on the bookshelf screen, you will be able to read the text of the novel, and you will be able to start speaking with the "Speak" button in the upper right corner.
+</div><br>
+<div>In addition, NovelSpeaker supports background playback, so even if you press the "Speak" button on the upper right to start playback and then press the power button to turn off the screen or switch to another application, playback will continue. You can. I hope you can use it while you are out on foot, or when you are doing household chores and you are using your hands and eyes but not your ears.
+</div><br>
+<div>Also, on some novel sites, one novel may be divided into several chapters (pages).
+In such cases, NovelSpeaker will incorporate each chapter as a single page. However, if you access many pages at a time, it will put a load on the Web server side, so load one page at a time slowly. So, for example, in the case of a novel that exceeds 1000 pages, it will take a long time to load until the last chapter. In that case, please wait for the download to be completed leisurely, such as reading the novel slowly from the first page loaded.
+(If you have read up to 900 pages of the 1000-page novel and want to read it from page 901 immediately, use the Web import function to display the page 901 and display ". If you press the "Import" button, you can start loading from that page. However, in that case, pages 1 to 900 will not be imported. Please take this into consideration and use it well. I'm happy)
+</div><br>
+<div>It takes time to download a novel that is divided into multiple pages, but background download cannot be supported due to restrictions on the iOS side, so close the screen or switch to another app while downloading the novel. If you do something like that, NovelSpeaker will end (I think it will work for a while, but it should finish in about 5 minutes), so if you want to complete the download of the novel, NovelSpeaker's You need to keep the screen open, or do some tricks such as transitioning to background operation during a speech that allows background operation.
+</div><br>
+<div>This is the basic usage of NovelSpeaker. If you just want to get started quickly, I think the contents of this chapter are all right. From the next time onward, I will explain the contents that can be used more conveniently, such as things that can be done by changing the settings, but I think that it is difficult to read everything, so even when you are ready I hope you will read it leisurely.
+</div>
