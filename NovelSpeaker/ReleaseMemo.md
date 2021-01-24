@@ -2620,6 +2620,41 @@ Bug fix
 - Addressed an issue where some URLs could fail to load
 - Fixed the problem that when you press and hold the image displayed on the Web import tab and select "Add to "Photo"", it drops.
 
+# Version 2.0.0
+
+- 小説のダウンロードの仕組みを変更
+- iCloudによる端末間同期機能を追加
+- 会話文等で話者自体を変更できるように
+- 本棚画面での順番に複数の要素を追加
+- 本棚画面でお気に入りの表示を追加
+- 小説本文画面に「詳細」ボタンを追加。小説毎の設定が追加されます
+- Web検索画面を追加 (なろう検索画面は削除されました)
+- 自作フォルダの概念を追加
+- その他色々と変更されました。見た目は変わっていないように見えて中身はほぼ全て書き換わっています。
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は以前からお知らせしておりました、次世代版へのアップデートとなります。この修正では見た目はあまり変わらないかもしれませんが、内部はほとんど全てが書き直されており、様々な新機能がご提供できるようになりました。
+なお、以前の ことせかい で出来ていた事のほとんどについて、以前同様に提供しているつもりです(なろう検索など、削除された機能も無い事は無いのですけれども)。
+次世代版の ことせかい での変更された点につきましては、サポートサイトにて告知する予定ですのでそちらをご参照頂けますと幸いです。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 2.0.0
+
+- Change internal database
+- Rewrite almost all source code from Objective-C to Swift
+- Function addition
+  - Added iCloud synchronization function between devices
+  - To be able to change the speaker itself in conversational sentences, etc.
+  - Add elements in order on the bookshelf screen
+  - Now you can register novels as \"favorites\"
+  - Added \"Details\" button to the novel text screen. Settings for each novel will be added
+  - Added Web search screen
+  - Added the concept of self-made folders
+
+# Version 2.0.0
 
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す
