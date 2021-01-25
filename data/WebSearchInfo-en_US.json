@@ -62,25 +62,81 @@
         }
     },
     {
-        "title": "Kakuyomu",
+        "title": "kakuyomu",
         "HTTPMethod": "GET",
-        "isNeedHeadless": true,
-        "url": "https://www.google.com/search?",
+        "isNeedHeadless": false,
+        "url": "https://kakuyomu.jp/search?",
         "values": [
-            {"queryType": "text", "displayText": "Search string", "queryName": "as_q"},
-            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
-            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
-            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
-            {"queryType": "hidden", "queryName": "num", "value": "20"},
-            {"queryType": "hidden", "queryName": "complete", "value": "0"},
-            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
-            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "https://kakuyomu.jp/works/"}
+            {"queryType": "text", "displayText": "Contains the following keywords", "queryName": "q"},
+            {"queryType": "text", "displayText": "Does not contain the following keywords", "queryName": "ex_q"},
+            {"queryType": "radio", "displayText": "Genre", "queryName": "genre_name", "radio":
+                {
+                    "Another world fantasy": "fantasy",
+                    "Contemporary fantasy": "action",
+                    "SF": "sf",
+                    "Love": "love_story",
+                    "Romantic comedy": "romance",
+                    "Contemporary drama": "drama",
+                    "Horror": "horror",
+                    "Mystery": "mystery",
+                    "Essay nonfiction": "nonfiction",
+                    "History, era, bizarre": "history",
+                    "Creative theory / criticism": "criticism",
+                    "Poetry, fairy tales, etc.": "others"
+                }
+            },
+            {"queryType": "radio", "displayText": "Writing status", "queryName": "serial_status", "radio":
+                {
+                    "Serialized": "running",
+                    "Completed": "completed"
+                }
+            },
+            {"queryType": "radio", "displayText": "Number of star", "queryName": "total_review_point_range", "radio":
+                {
+                    "  0〜9": "-9",
+                    " 10〜": "10-",
+                    "100〜": "100-",
+                    "500〜": "500-"
+                }
+            },
+            {"queryType": "radio", "displayText": "Novel length", "queryName": "total_character_count_range", "radio":
+                {
+                    "1: Short story (~ 20,000 characters)": "-20000",
+                    "2: Short novel (20,000 to 80,000 characters)": "20000-80000",
+                    "3: Long novel (80,000 characters ~)": "80000-"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "Self-rating (select items to exclude)", "queryName": "exclusion_flag_name", "separator": "&exclusion_flag_name=",
+                "multiSelect": {
+                    "There is a cruel depiction": "cruel",
+                    "There is a description of violence": "violent",
+                    "With sexual depiction": "sexual"
+                }
+            },
+            {"queryType": "radio", "displayText": "release date", "queryName": "published_date_range", "radio":
+                {
+                    "Within 1 day": "1days",
+                    "Within 1 week": "7days",
+                    "Within 1 month": "1months",
+                    "Within half a year": "6months",
+                    "Within 1 year": "1years"
+                }
+            },
+            {"queryType": "radio", "displayText": "Update date", "queryName": "last_episode_published_date_range", "radio":
+                {
+                    "Within 1 day": "1days",
+                    "Within 1 week": "7days",
+                    "Within 1 month": "1months",
+                    "Within half a year": "6months",
+                    "Within 1 year": "1years"
+                }
+            }
         ],
         "result": {
-            "block": "//div[@id='rso']//a[contains(@href,'https://kakuyomu.jp/works/')and not(contains(@href,'webcache.google'))]",
-            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
-            "title": "//div/text()",
-            "url": "//a[contains(@href,'https://kakuyomu.jp/works/') and not(contains(@href,'webcache.google'))]/@href"
+            "block": "//section[@id='searchResult-works']/div[contains(@class,'widget-work')]/div[@class='float-left']",
+            "nextLink": "//div[@class='widget-pager']/p[@class='widget-pagerNext']/a[contains(@href,'/search?')]/@href",
+            "title": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]",
+            "url": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]/@href"
         }
     },
     {
@@ -131,26 +187,649 @@
             "url": "//div[@class='subject']/a/@href"
         }
     },
+
     {
-        "title": "Blue sky library",
+        "title": "Akatsuki",
         "HTTPMethod": "GET",
-        "isNeedHeadless": true,
-        "url": "https://www.google.com/search?",
+        "isNeedHeadless": false,
+        "url": "https://www.akatsuki-novels.com/novels/index/",
+        "querySeparator": "/",
+        "queryJoinner": "~",
         "values": [
-            {"queryType": "text", "displayText": "Search string", "queryName": "as_q"},
-            {"queryType": "hidden", "queryName": "hl", "value": "ja"},
-            {"queryType": "hidden", "queryName": "lr", "value": "lang_ja"},
-            {"queryType": "hidden", "queryName": "ie", "value": "utf-8"},
-            {"queryType": "hidden", "queryName": "num", "value": "20"},
-            {"queryType": "hidden", "queryName": "complete", "value": "0"},
-            {"queryType": "hidden", "queryName": "as_dt", "value": "i"},
-            {"queryType": "hidden", "queryName": "as_sitesearch", "value": "www.aozora.gr.jp"}
+            {"queryType": "multiSelect", "displayText": "Exclusion conditions", "queryName": "", "separator": "/", "multiSelect":
+                {
+                    "R-15": "age_limit_a~1",
+                    "Original character hero": "orinusi_a~1",
+                    "God reincarnation": "kamiten_a~1",
+                    "BL": "boys_love_a~1",
+                    "yuri": "girls_love_a~1",
+                    "Cruel depiction": "representative_cruel_a~1",
+                    "Anti": "anti~1",
+                    "Hate": "hate~1",
+                    "Short story": "serial_story_a~1",
+                    "Feature film (serialized)": "finished_a~1",
+                    "Feature film (completed)": "finished_b~1",
+                    "A novel by the author who has posted a large number of posts in a short period of time": "nl_mkx~1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "Filtering conditions", "queryName": "", "separator": "/", "multiSelect":
+                {
+                    "R-15": "age_limit_xa~1",
+                    "Original character hero": "orinusi_xa~1",
+                    "God reincarnation": "kamiten_xa~1",
+                    "BL": "boys_love_xa~1",
+                    "yuri": "girls_love_xa~1",
+                    "Cruel depiction": "representative_cruel_xa~1",
+                    "Anti": "anti_xa~1",
+                    "Hate": "hate_xa~1",
+                    "Short story": "serial_story_xa~1",
+                    "Feature film (serialized)": "finished_xa~1",
+                    "Feature film (completed)": "finished_xb~1"
+                }
+            },
+            {"queryType": "radio", "displayText": "Express", "queryName": "so", "defaultValue": "0",
+                "radio": {
+                    "01: New arrival order": "0",
+                    "02: Comprehensive evaluation (excluding evaluation by story) Highest order": "17",
+                    "03: Comprehensive evaluation (excluding evaluation by story) in ascending order": "18",
+                    "04: Overall evaluation in descending order": "1",
+                    "05: Overall evaluation in ascending order": "2",
+                    "06: In descending order of the number of people evaluated": "3",
+                    "07: Evaluation number in ascending order": "4",
+                    "08: In descending order of PV number": "5",
+                    "09: In ascending order of PV": "6",
+                    "10: In descending order of UA": "7",
+                    "11: In ascending order of UA": "8",
+                    "12: In descending order of the number of characters": "9",
+                    "13: In ascending order of characters": "10",
+                    "14: In descending order of the number of characters per episode": "11",
+                    "15: In ascending order of the number of characters per episode": "12",
+                    "16: In descending order of the number of stories": "13",
+                    "17: In ascending order of stories": "14",
+                    "18: In descending order of favorite registrations": "15",
+                    "19: In ascending order of favorites": "16",
+                    "20: In descending order of impressions": "19",
+                    "21: In ascending order of impressions": "20"
+                }
+            }
         ],
         "result": {
-            "block": "//div[@id='rso']//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]",
-            "nextLink": "//span[@id='xjs']//a[@id='pnnext']/@href",
-            "title": "//div/text()",
-            "url": "//a[contains(@href,'https://www.aozora.gr.jp/cards/') and contains(@href,'/files/') and not(contains(@href,'webcache.google'))]/@href"
+            "block": "//div[@class='topicsBox']",
+            "nextLink": "//a[@rel='next']/@href",
+            "title": "//strong[@class='novelTitle']/a[contains(@href,'/stories/index/novel_id')]",
+            "url": "//strong[@class='novelTitle']/a[contains(@href,'/stories/index/novel_id')]/@href"
+        }
+    },
+    {
+        "title": "Hameln",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://syosetu.org/search/?",
+        "values": [
+            {"queryType": "text", "displayText": "Search string", "queryName": "word"},
+            {"queryType": "hidden", "queryName": "mode", "value": "search"}
+	],
+        "result": {
+            "block": "//div[contains(@class,'autopagerize_page_element')]/div[@class='section3']",
+            "nextLink": "//div[contains(@class,'autopagerize_page_element')]/div[@class='paging']//a[@rel='next']/@href",
+            "title": "//a[contains(@href,'/novel/')]",
+            "url": "//a[contains(@href,'/novel/')]/@href"
+        }
+    },
+    {
+        "title": "Starry sky library",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://slib.net/works/?",
+        "values": [
+            {"queryType": "radio", "displayText": "format", "queryName": "type",
+                "radio": {
+                    "novel": "1",
+                    "Essays and essays": "11",
+                    "Verse Poem": "21",
+                    "Free verse": "31"
+                }
+            },
+            {"queryType": "radio", "displayText": "Amount of text", "queryName": "length",
+                "radio": {
+                    "In charge": "1",
+                    "Short story": "2",
+                    "Short novel": "3",
+                    "Long novel": "4"
+                }
+            },
+            {"queryType": "radio", "displayText": "rights", "queryName": "copy",
+                "radio": {
+                    "CC BY-NC-ND": "11",
+                    "CC BY-NC-SA": "12",
+                    "CC BY-NC": "13",
+                    "CC BY-ND": "14",
+                    "CC BY-SA": "15",
+                    "CC BY": "16",
+                    "Derivative work": "21",
+                    "Public Domain": "99"
+                }
+            },
+            {"queryType": "radio", "displayText": "Rating", "queryName": "rating",
+                "radio": {
+                    "For all ages": "1",
+                    "For toddlers": "-11",
+                    "For toddlers only": "11",
+                    "For children": "-12",
+                    "For children only": "12",
+                    "For young people": "-13",
+                    "For young people only": "13",
+                    "For adults": "-14",
+                    "For adults only": "14"
+                }
+            },
+            {"queryType": "radio", "displayText": "Genre", "queryName": "tag[]",
+                "radio": {
+                    "All elements": "on",
+                    "Fantasy": "1",
+                    "Youth": "2",
+                    "Love": "3",
+                    "Adventure": "4",
+                    "Action": "5",
+                    "Suspense": "6",
+                    "Mystery": "7",
+                    "Age / history": "8",
+                    "Horror": "9",
+                    "SF": "10",
+                    "Comedy": "11"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='container_works']//section[contains(@class,'content_cardwork')]",
+            "nextLink": "//div[@class='works-navigation']//a[contains(@href,'/works/') and contains(@href,'index=') and child::i]",
+            "title": "//header/h2/a",
+            "url": "//header/h2/a/@href"
+        }
+    },
+    {
+	"isDisabled": true,
+        "title": "Estar (Currently, the 30th and subsequent searches cannot be performed)",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://estar.jp/novels?",
+        "values": [
+            {"queryType": "text", "displayText": "keyword", "queryName": "keyword"},
+            {"queryType": "text", "displayText": "Negative keywords", "queryName": "excludeKeyword"},
+            {"queryType": "radio", "displayText": "Sort order", "queryName": "sort",
+                "radio": {
+                    "In order of popularity": "score_desc",
+                    "Newest update date": "sort_modified_at_desc",
+                    "Oldest update date": "modified_at_asc",
+                    "Newest release date": "sort_published_at_desc",
+                    "Oldest release date": "published_at_asc",
+                    "In descending order of the number of stars": "sort_star_desc",
+                    "In descending order of the number of bookshelves added": "sort_bookshelf_desc"
+                }
+            },
+            {"queryType": "onOff", "displayText": "Serialized", "queryName": "writing", "value": "1"},
+            {"queryType": "onOff", "displayText": "Complete", "queryName": "finished", "value": "1"},
+            {"queryType": "onOff", "displayText": "Suspended", "queryName": "ex_paused", "value": "1"},
+            {"queryType": "onOff", "displayText": "Radical expression", "queryName": "ex_r18", "value": "1"},
+            {"queryType": "radio", "displayText": "Word count", "queryName": "characterLengthOption",
+                "radio": {
+                    "Less than 20,000 characters (short version)": "short",
+                    "Over 80,000 characters (feature)": "long"
+                }
+            },
+            {"queryType": "radio", "displayText": "Release date", "queryName": "published",
+                "radio": {
+                    "1: Last week": "7",
+                    "2: Last month": "30",
+                    "3: Within 1 year": "365"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "Genre", "queryName": "genres", "separator": ",",
+                "multiSelect": {
+                    "Love": "1020",
+                    "Fantasy": "1006",
+                    "Contemporary fantasy": "1023",
+                    "Non-Fiction": "1005",
+                    "BL": "1018",
+                    "Youth": "1002",
+                    "SF": "1007",
+                    "Mystery": "1009",
+                    "Horror": "1008",
+                    "Human drama": "1021",
+                    "Essay / HowTo": "1022",
+                    "History / era": "1010",
+                    "Comedy": "1015",
+                    "Poetry / fairy tales / picture books": "1003",
+                    "Settings / plot": "1016"
+                }
+            },
+            {"queryType": "onOff", "displayText": "Book and comicalize", "queryName": "is_book_p", "value": "1"},
+            {"queryType": "onOff", "displayText": "Contest winner", "queryName": "awarded", "value": "1"},
+            {"queryType": "onOff", "displayText": "Special feature", "queryName": "in_selection", "value": "1"}
+        ],
+        "result": {
+            "block": "//div[contains(@class,'novelListItem')]",
+            "memo: TODO:": "nextLinkButton は Erik か何かを使って次のページへのボタンをJavaScriptで .click() させるための物という事にしておきますそのうち実装したいなぁ。(´・ω・`)",
+            "nextLinkButton": ".pager .next .button",
+            "title": "//div[@class='info']/h3[@class='title']",
+            "url": "//a[contains(@href,'/novels/')]/@href"
+        }
+    },
+    {
+        "title": "NovelUp+",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://novelup.plus/search?",
+        "values": [
+            {"queryType": "text", "displayText": "Search string", "queryName": "q"},
+            {"queryType": "text", "displayText": "Excluded string", "queryName": "e"},
+            {"queryType": "multiSelect", "displayText": "Keyword search target", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "Title of work": "search[story]=1",
+                    "Synopsis": "search[introduction]=1",
+                    "Tags": "search[tag]=1",
+                    "Author name": "search[member]=1",
+                    "Original": "search[license]=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "Genre", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "Another world fantasy": "genre[1]=1",
+                    "Modern / Other Fantasy": "genre[2]=1",
+                    "SF": "genre[3]=1",
+                    "Love / romantic comedy": "genre[4]=1",
+                    "Horror": "genre[5]=1",
+                    "Mystery": "genre[6]=1",
+                    "Essay / Review / Column": "genre[7]=1",
+                    "History / era": "genre[8]=1",
+                    "Literature / pure literature": "genre[9]=1",
+                    "Blog / Activity Report": "genre[10]=1",
+                    "Contemporary / youth drama": "genre[11]=1",
+                    "Poetry / Tanka": "genre[12]=1",
+                    "Work introduction": "genre[13]=1",
+                    "Derivative work": "genre[52]=1",
+                    "Fairy tales / picture books / others": "genre[99]=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "Narrowing down by work type", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "Short stories / short stories": "short=1",
+                    "Feature film": "not-short=1",
+                    "Settings / plot": "plot=1",
+                    "Completed": "finish=1",
+                    "Serialized": "not-finish=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "Exclusion conditions", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "Works that have been suspended for a long time": "pause=1",
+                    "Works with cruel depictions": "rating[1]=1",
+                    "Works with violence depictions": "rating[2]=1",
+                    "Works with sexual expression": "rating[3]=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "Sorting search results", "queryName": "sort", "defaultValue": "1", "radio":
+                {
+                    "Update order (episode)": "1",
+                    "New arrival order (works)": "2",
+                    "In descending order of the number of bookmarks": "3",
+                    "Highest ranking (days)": "4",
+                    "Highest ranking (cumulative)": "8",
+                    "In descending order of support points": "9",
+                    "In descending order of Novella points": "10"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@id='section_search_result']//li//div[@class='info_set']",
+            "nextLink": "//div[@class='infinite-scroll-pagination']//a[contains(@class,'infinite-scroll-more')]/@href",
+            "title": "//div[@class='novel_title']",
+            "url": "//div[@class='novel_title']/a[contains(@href,'/story/')]/@href"
+        }
+    },
+    {
+        "title": "Alphapolis",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www.alphapolis.co.jp/novel/index?",
+        "values": [
+            {"queryType": "text", "displayText": "Free word", "queryName": "query"},
+            {"queryType": "radio", "displayText": "Length", "queryName": "volume", "radio":
+                {
+                    "Short short": "1",
+                    "Short story": "2",
+                    "Long novel": "3"
+                }
+            },
+            {"queryType": "radio", "displayText": "Progress", "queryName": "complete", "radio":
+                {
+                    "Serialized": "2",
+                    "Complete": "1"
+                }
+            },
+            {"queryType": "hidden", "displayText": "R-rated", "queryName": "rating", "value": "-1,-2",
+                "memo": {
+                    "queryType が radio であればこんな感じのデータを入れれば良い事になってます。": "けれど、ことせかい は一応9歳以上対象なので、Web検索で除外できるのならその時点で除外しておきます。",
+                    "R15･R18を除く": "-1,-2",
+                    "R18を除く": "-2",
+                    "R15": "1",
+                    "R18": "2",
+                    "R15･R18": "1,2"
+                }
+            },
+            {"queryType": "hidden", "queryName": "limit", "value": "40"},
+            {"queryType": "radio", "displayText": "Sorting search results", "queryName": "sort", "defaultValue": "24hpt", "radio":
+                {
+                    "24 hours / point order": "24hpt",
+                    "Weekly popularity": "weekly",
+                    "Monthly popularity order": "monthly",
+                    "By yearly popularity": "yearly",
+                    "Cumulative point order": "total",
+                    "Most favorites": "favorite",
+                    "New arrival order": "recent",
+                    "Recently updated order": "episode_recent"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@id='main']/div[contains(@class,'novels')]//div[@class='content-main']",
+            "nextLink": "//div[contains(@class,'paginator')]/span[preceding-sibling::span[@class='current']]/a[contains(@href,'/novel/index?')]/@href",
+            "title": "//div[contains(@class,'content-title')]/h2[@class='title']",
+            "url": "//div[contains(@class,'content-title')]/h2[@class='title']/a[contains(@href,'/novel/')]/@href"
+        }
+    },
+    {
+        "title": "Berry's Cafe",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www.berrys-cafe.jp/search/book?",
+        "values": [
+            {"queryType": "text", "displayText": "Search keyword", "queryName": "word"},
+            {"queryType": "radio", "displayText": "Genre", "queryName": "genre", "defaultValue": "0", "radio":
+                {
+                    " Unspecified": "0",
+                    "Love (all)": "100",
+                    "Love (pure love)": "101",
+                    "Love (romantic comedy)": "102",
+                    "Love (office love)": "103",
+                    "Love (school)": "104",
+                    "Love (true story)": "105",
+                    "Love (Other)": "199",
+                    "Fantasy / SF / Adventure": "700",
+                    "Practical / essay (all)": "1200",
+                    "Practical / essay (gourmet recipe)": "1201",
+                    "Practical / essay (beauty / health)": "1202",
+                    "Practical / essay (life / hobby)": "1203",
+                    "Practical / essay (children)": "1204",
+                    "Practical / essay (work)": "1205",
+                    "Practical / essay (other)": "1299",
+                    "Mystery / suspense": "400",
+                    "Youth / friendship": "200",
+                    "Non-fiction / true story": "300",
+                    "Horror / occult": "600",
+                    "History / era": "1400",
+                    "Picture books / fairy tales": "1000",
+                    "Comedy": "900",
+                    "Poetry / Tanka / Haiku / Senryu": "1300",
+                    "Other": "9900"
+                }
+            },
+            {"queryType": "radio", "displayText": "Feelings", "queryName": "feeling", "defaultValue": "0", "radio":
+                {
+                    " Unspecified": "0",
+                    "Can cry": "1",
+                    "Painful": "2",
+                    "Be moved": "3",
+                    "Throb": "4",
+                    "Heartthrob": "5",
+                    "Interesting": "6",
+                    "Excited": "7",
+                    "Scared": "8",
+                    "Heartwarming": "9",
+                    "Squishy": "10",
+                    "Get energized": "11",
+                    "Have a dream": "12",
+                    "Mysterious mood": "13",
+                    "Useful": "14",
+                    "I was surprised": "15"
+                }
+            },
+            {"queryType": "radio", "displayText": "Writing status", "queryName": "finished", "defaultValue": "0", "radio":
+                {
+                    "All": "0",
+                    "Complete": "2",
+                    "Updating": "1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "The length of the work", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "Long novel": "length[]=4",
+                    "Short novel": "length[]=2",
+                    "Short story": "length[]=1"
+                }
+            }
+        ],
+        "result": {
+            "block": "//section[@class='search_result']/ul/li",
+            "nextLink": "//div[@class='pageList']//li[@class='next']/a[contains(@href,'/search/')]/@href",
+            "title": "//div[@class='book_main']//a[contains(@href,'/book/')]//h4",
+            "url": "//div[@class='book_main']//a[contains(@href,'/book/') and descendant::h4]/@href"
+        }
+    },
+    {
+	"isDisabled": true,
+        "title": "Asahi Shimbun DIGITAL",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://sitesearch.asahi.com/.cgi/sitesearch/sitesearch.pl?",
+        "values": [
+            {"queryType": "text", "displayText": "Keywords (cannot be searched if not entered)", "queryName": "Keywords"},
+            {"queryType": "hidden", "queryName": "Searchsubmit", "value": "検索"},
+            {"queryType": "hidden", "queryName": "Searchsubmit2", "value": "検索"},
+            {"queryType": "hidden", "queryName": "iref", "value": "pc_gnavi"}
+        ],
+        "result": {
+            "block": "//*[@id='SiteSearchResult']/li[@class='webronza' or @class='digital' or @class='EduA']",
+            "nextLink": "//div[@class='Section']/div[@class='Pagination']/a[contains(@href,'/sitesearch/index.php?') and @class='Next']/@href",
+            "title": "//span[@class='SearchResult_Headline']/em",
+            "url": "//a/@href"
+        }
+    },
+    {
+        "title": "AUTOMATON",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://automaton-media.com/?",
+        "values": [
+            {"queryType": "text", "displayText": "Keyword", "queryName": "s"}
+        ],
+        "result": {
+            "block": "//div[contains(@class,'td-main-content')]//div[contains(@class,'td-animation-stack')]",
+            "nextLink": "//div[contains(@class,'page-nav')]/a[contains(@href,'/page/') and child::i[@class='td-icon-menu-right']]/@href",
+            "title": "//h3[contains(@class,'entry-title')]/a[contains(@href,'/articles/') and @title]",
+            "url": "//h3[contains(@class,'entry-title')]/a[contains(@href,'/articles/') and @title]/@href"
+        }
+    },
+    {
+	"isDisabled": true,
+        "title": "Yahoo! Japan News",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://news.yahoo.co.jp/search?",
+        "values": [
+            {"queryType": "text", "displayText": "Keywords (cannot be searched if not entered)", "queryName": "p"},
+            {"queryType": "hidden", "queryName": "ei", "value": "utf-8"}
+        ],
+        "result": {
+            "block": "//div[@class='newsFeed']/ol[@class='newsFeed_list']/li[contains(@class,'newsFeed_item')]",
+            "nextLink": "",
+            "title": "//a//div[@class='newsFeed_item_title']",
+            "url": "//a/@href"
+        }
+    },
+    {
+	"isDisabled": true,
+        "title": "All About",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://search.allabout.co.jp/?",
+        "values": [
+            {"queryType": "text", "displayText": "Keywords (cannot be searched if not entered)", "queryName": "q"}
+        ],
+        "result": {
+            "block": "//div[@class='newsFeed']/ol[@class='newsFeed_list']/li[contains(@class,'newsFeed_item')]",
+            "nextLink": "",
+            "title": "//a//div[@class='newsFeed_item_title']",
+            "url": "//a/@href"
+        }
+    },
+    {
+	"isDisabled": true,
+        "title": "Mainichi newspaper",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://mainichi.jp/search?",
+        "values": [
+            {"queryType": "text", "displayText": "Keywords (cannot be searched if not entered)", "queryName": "q"},
+            {"queryType": "radio", "displayText": "Order", "queryName": "", "defaultValue": "s=date", "radio":
+                {
+                    "New arrival order": "s=date",
+                    "Related order": ""
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='main-box']/ul/li",
+            "nextLink": "//div[@class='pager']/ul/li[@class='next']/a/@href",
+            "title": "//a/span[contains(@class,'midashi')]",
+            "url": "//a/@href"
+        }
+    },
+    {
+        "title": "novelba",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://novelba.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "Keyword", "queryName": "searchWord"},
+            {"queryType": "hidden", "queryName": "isMajorType", "value": "0"},
+            {"queryType": "hidden", "queryName": "isIndiesType", "value": "1"},
+            {"queryType": "onOff", "displayText": "Do not include the work name in the search target", "queryName": "isWorkName", "value": "0"},
+            {"queryType": "onOff", "displayText": "The author name is not included in the search target", "queryName": "isAuthorName", "value": "0"},
+            {"queryType": "onOff", "displayText": "Do not include keyword names in the search target", "queryName": "isKeywords", "value": "0"},
+            {"queryType": "onOff", "displayText": "Synopsis is not included in the search target", "queryName": "isOutline", "value": "0"},
+            {"queryType": "radio", "displayText": "Genre", "queryName": "genreId", "defaultValue": "", "radio":
+                {
+                    "01: All": "",
+                    "02: Fantasy": "5",
+                    "03: Love": "2",
+                    "04: Contemporary drama": "18",
+                    "05: Academy": "10",
+                    "06: SF": "6",
+                    "07: Essay": "14",
+                    "08: Comedy": "8",
+                    "09: Literature": "1",
+                    "10: Horror": "7",
+                    "11: Poetry": "13",
+                    "12: Modern action": "17",
+                    "13: Adventure": "9",
+                    "14: Detective": "4",
+                    "15: War chronicle": "11",
+                    "16: History": "3",
+                    "17: Fairy tale": "12",
+                    "18: Replay": "15",
+                    "19: Others": "16"
+                }
+            },
+            {"queryType": "radio", "displayText": "Number of stories", "queryName": "episodeCountCohort", "defaultValue": "", "radio":
+                {
+                    "1: All": "",
+                    "2: Single story": "0",
+                    "3: More than 2 chapters and less than 10 chapters": "1",
+                    "4: More than 11 chapters and less than 100 chapters": "2",
+                    "5: Over 101 chapters": "3"
+                }
+            },
+            {"queryType": "radio", "displayText": "Type", "queryName": "serializeStatus", "defaultValue": "", "radio":
+                {
+                    "1: All": "",
+                    "2: Serialized": "serializing",
+                    "3: Completed": "completed"
+                }
+            },
+            {"queryType": "radio", "displayText": "Sort order", "queryName": "showOrder", "defaultValue": "", "radio":
+                {
+                    "1: Recommended order": "",
+                    "2: Newest update date": "updates",
+                    "3: In descending order of the number of stories": "episodeCount"
+                }
+            }
+        ],
+        "result": {
+            "block": "//section[@class='search_section']/ul[@class='result_list']/li[child::a[contains(@href,'/works/')]]",
+            "nextLink": "//ul[@class='pager']/li[preceding-sibling::li[child::a[@class='picked']]]/a/@href",
+            "title": "//a/div[@class='info_list']/p[@class='title']",
+            "url": "//a/@href"
+        }
+    },
+    {
+	"isDisabled": true,
+        "title": "Novelism",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://novelism.jp/search/?",
+        "values": [
+            {"queryType": "text", "displayText": "Keywords", "queryName": "search"},
+            {"queryType": "text", "displayText": "Excluded words", "queryName": "exclude"},
+            {"queryType": "multiSelect", "displayText": "Stage", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "Different world": "worldview=6",
+                    "Modern world": "worldview=5",
+                    "History / era": "worldview=4",
+                    "SF": "worldview=3",
+                    "Game(VRMMO)": "worldview=2",
+                    "Others": "worldview=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "Genre", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "Adventure / Battle": "category=10",
+                    "Love": "category=9",
+                    "War": "category=8",
+                    "Everyday": "category=7",
+                    "Sports": "category=6",
+                    "Mystery": "category=5",
+                    "Horror": "category=4",
+                    "Comedy": "category=3",
+                    "Human drama": "category=2",
+                    "Derivative work": "category=11",
+                    "Others": "category=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "Length", "queryName": "is_long_piece", "defaultValue": "", "radio":
+                {
+                    "Short story": "false",
+                    "Long novel": "true"
+                }
+            },
+            {"queryType": "radio", "displayText": "Completed state", "queryName": "is_completed", "defaultValue": "", "radio":
+                {
+                    "Serialized": "false",
+                    "Completed": "true"
+                }
+            },
+            {"queryType": "radio", "displayText": "Work state", "queryName": "is_contracted", "defaultValue": "", "radio":
+                {
+                    "General works": "false",
+                    "Contract work": "true"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='flex-1' and descendant::div[@class='flex-1']//div[@class='novel-card-title']]",
+            "nextLink": "",
+            "title": "//div[@class='flex-1']//div[@class='novel-card-title']",
+            "url": "//div[@class='flex-1']//div[@class='novel-card-title']/a/@href"
         }
     }
 ]
