@@ -832,5 +832,111 @@
             "title": "//div[@class='flex-1']//div[@class='novel-card-title']",
             "url": "//div[@class='flex-1']//div[@class='novel-card-title']/a/@href"
         }
+    },
+    {
+	"isDisabled": true,
+        "title": "起点中文网",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://www.qidian.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "kw"},
+            {"queryType": "radio", "displayText": "順序", "queryName": "", "defaultValue": "", "radio":
+                {
+                    "レコメンド": "sort=",
+                    "更新時間": "sort=1",
+                    "トータルコレクション": "sort=11",
+                    "総単語数": "sort=4"
+                }
+            },
+            {"queryType": "radio", "displayText": "地点", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "男の子": "siteid=1",
+                    "女の子": "siteid=0"
+                }
+            },
+            {"queryType": "radio", "displayText": "分類", "queryName": "chanId", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "ファンタジー": "chanId=21",
+                    "市": "chanId=4",
+                    "現代ロマンス": "chanId=82",
+                    "ライトノベル(1)": "chanId=12",
+                    "SF(科幻)": "chanId=9",
+                    "仙侠": "chanId=22",
+                    "古代ロマンス": "chanId=80",
+                    "ショートストーリー(1)": "chanId=20076",
+                    "ファンタジー": "chanId=1",
+                    "ゲーム": "chanId=7",
+                    "歴史(1)": "chanId=5",
+                    "ショートストーリー(2)": "chanId=30083",
+                    "ファンタジーロマンス": "chanId=84",
+                    "若者ロマンス": "chanId=83",
+                    "武道": "chanId=2",
+                    "おとぎ話": "chanId=81",
+                    "現実": "chanId=15",
+                    "サスペンス": "chanId=10",
+                    "フィクション": "chanId=13100",
+                    "SF空間(科幻空間)": "chanId=86",
+                    "文献": "chanId=14100",
+                    "実生活": "chanId=30120",
+                    "歴史(2)": "chanId=14400",
+                    "体育": "chanId=8",
+                    "ライトノベル(2)": "chanId=87",
+                    "サスペンス推論": "chanId=85",
+                    "青年文学": "chanId=14300",
+                    "軍隊": "chanId=6",
+                    "ゲームの競争": "chanId=88",
+                    "バイオグラフィー": "chanId=14500"
+                }
+            },
+            {"queryType": "radio", "displayText": "連載状態", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "執筆中": "action=0",
+                    "完結": "action=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "属性", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "無料": "vip=0",
+                    "有料": "vip=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "単語数", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "30万語未満": "size=1",
+                    "30〜50万語": "size=2",
+                    "50〜100万語": "size=3",
+                    "100〜200万語": "size=4",
+                    "200万語以上": "size=5"
+                }
+            },
+            {"queryType": "radio", "displayText": "品質", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "署名作品": "sign=1",
+                    "ファインノベル": "sign=2"
+                }
+            },
+            {"queryType": "radio", "displayText": "更新時間", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "一ヶ月以内": "update=5",
+                    "半月以内": "update=4",
+                    "7日以内": "update=3",
+                    "3日以内": "update=2"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@id='result-list']//li[@class='res-book-item']",
+            "nextLink": "",
+            "title": "//h4/a[contains(@href,'/info/')]",
+            "url": "//h4/a[contains(@href,'/info/')]/@href"
+        }
     }
 ]
