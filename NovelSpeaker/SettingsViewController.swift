@@ -682,48 +682,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            <<< SwitchRow() { row in
-                row.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
-                row.cell.textLabel?.numberOfLines = 0
-                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                    row.value = globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
-                }
-            }.onChange({ (row) in
-                let judge = row.value
-                if judge! {
-                    NiftyUtility.EasyDialogBuilder(self)
-                        .title(title: NSLocalizedString("SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title", comment:"確認"))
-                        .textView(content: NSLocalizedString("SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12", comment:"この設定を有効にすると、読み上げ中の読み上げ位置表示がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ)に読み替えるように設定することで回避するようになります。\nこの機能を実装した時点では、\"α\"(アルファ)は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われます。\n以上の事を理解した上でこの設定を有効にしますか？"), heightMultiplier: 0.6)
-                        .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
-                            row.value = false
-                            row.updateCell()
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: true, completion: nil)
-                            }
-                        })
-                        .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: true)
-                            }
-                            RealmUtil.RealmBlock { (realm) -> Void in
-                                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                                RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                                    globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = true
-                                }
-                            }
-                        })
-                        .build().show()
-                }else{
-                    RealmUtil.RealmBlock { (realm) -> Void in
-                        guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-                        RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
-                            globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = false
-                        }
-                    }
-                }
-            })
             <<< SwitchRow("MixWithOthersSwitchRow") { row in
                 row.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)")
                 row.cell.textLabel?.numberOfLines = 0
@@ -1058,6 +1016,48 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     return self.m_RubySwitchToggleHitCount < 10 && (NovelSpeakerUtility.isDebugMenuAlwaysEnabled == false)
                 })
             }
+            <<< SwitchRow() { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled
+                }
+            }.onChange({ (row) in
+                let judge = row.value
+                if judge! {
+                    NiftyUtility.EasyDialogBuilder(self)
+                        .title(title: NSLocalizedString("SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title", comment:"確認"))
+                        .textView(content: NSLocalizedString("SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12", comment:"この設定を有効にすると、読み上げ中の読み上げ位置表示がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ)に読み替えるように設定することで回避するようになります。\nこの機能を実装した時点では、\"α\"(アルファ)は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われます。\n以上の事を理解した上でこの設定を有効にしますか？"), heightMultiplier: 0.6)
+                        .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
+                            row.value = false
+                            row.updateCell()
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: true, completion: nil)
+                            }
+                        })
+                        .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: true)
+                            }
+                            RealmUtil.RealmBlock { (realm) -> Void in
+                                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                                RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                                    globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = true
+                                }
+                            }
+                        })
+                        .build().show()
+                }else{
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                        RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                            globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = false
+                        }
+                    }
+                }
+            })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_ClearSiteInfoCache", comment: "SiteInfoキャッシュを削除する")
                 $0.cell.textLabel?.numberOfLines = 0
