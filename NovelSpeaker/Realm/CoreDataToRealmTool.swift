@@ -67,7 +67,7 @@ class CoreDataToRealmTool: NSObject {
         realmState.isLicenseReaded = globalDataSingleton.isLicenseReaded()
         realmState.isDuckOthersEnabled = globalDataSingleton.isDuckOthersEnabled()
         realmState.isMixWithOthersEnabled = globalDataSingleton.isMixWithOthersEnabled()
-        realmState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = globalDataSingleton.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled()
+        realmState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = false
         realmState.isPlaybackDurationEnabled = globalDataSingleton.isPlaybackDurationEnabled()
         realmState.isShortSkipEnabled = globalDataSingleton.isShortSkipEnabled()
         realmState.isReadingProgressDisplayEnabled = globalDataSingleton.isReadingProgressDisplayEnabled()
