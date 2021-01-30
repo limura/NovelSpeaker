@@ -35,7 +35,7 @@ with open(INDEX_TEMPLATE_PATH, "r") as f:
     indexTemplate = f.read()
 
 topics = [] # type: List[Topic]
-targetFiles = glob.glob("*.txt")
+targetFiles = glob.glob("[0-9]*.txt")
 targetFiles.sort()
 index = 1
 for file in targetFiles:
