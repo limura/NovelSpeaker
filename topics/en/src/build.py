@@ -20,10 +20,10 @@ class Topic:
 def RenderHTML(template:str, topic:Topic):
     currentTemplate = template
     if topic.index > 1:
-        currentTemplate = currentTemplate.replace("PREV_LINK", f'<a href="{format(topic.index - 1, "05d")}.html">前のページ</a>')
+        currentTemplate = currentTemplate.replace("PREV_LINK", f'<a href="{format(topic.index - 1, "05d")}.html">Previous page</a>')
     else:
         currentTemplate = currentTemplate.replace("PREV_LINK", '')
-    currentTemplate = currentTemplate.replace("NEXT_LINK", f'<a href="{format(topic.index + 1, "05d")}.html" rel="NEXT">次のページ</a>')
+    currentTemplate = currentTemplate.replace("NEXT_LINK", f'<a href="{format(topic.index + 1, "05d")}.html" rel="NEXT">Next page</a>')
     return currentTemplate.replace("HTML_TITLE", topic.htmlTitle).replace("PAGE_TITLE", topic.pageTitle).replace("BODY", topic.body)
 
 template = ""
