@@ -736,4 +736,12 @@ li {
         }
         .build().show()
     }
+    
+    func load(url:URL) {
+        if let webView = wkWebView {
+            webView.load(URLRequest(url: url))
+        }else{
+            self.openTargetUrl = url
+        }
+    }
 }
