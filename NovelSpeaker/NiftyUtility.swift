@@ -1477,8 +1477,8 @@ class NiftyUtility: NSObject {
     /// 怪しく <ruby>xxx<rp>(</rp><rt>yyy</rt><rp>)</rt></ruby> や、<ruby>xxx<rt>yyy</rt></ruby> という文字列を
     /// |xxx(yyy) という文字列に変換します。
     /// つまり、xxx(yyy) となるはずのものを、|xxx(yyy) となるように変換するわけです。
-    static let ConvertRubyTagToVerticalBarRubyText_ConvFromString = "<ruby>(<rb>)?([^<]+)\\s*(</rb>)?\\s*(<rp>[^<]*</rp>)?\\s*(<rt>[^<]+</rt>)\\s*(<rp>[^<]*</rp>)?</ruby>"
-    static let ConvertRubyTagToVerticalBarRubyText_RegexpConvFrom = try? NSRegularExpression(pattern: ConvertRubyTagToVerticalBarRubyText_ConvFromString, options: [.caseInsensitive])
+    static let ConvertRubyTagToVerticalBarRubyText_ConvFromString = "<ruby[^>]*?>(<rb[^>]*?>)?([^<]+)\\s*(</rb[^>]*?>)?\\s*(<rp[^>]*?>[^<]*</rp[^>]*?>)?\\s*(<rt[^>]*?>[^<]+</rt[^>]*?>)\\s*(<rp[^>]*?>[^<]*</rp[^>]*?>)?</ruby[^>]*?>"
+    static let ConvertRubyTagToVerticalBarRubyText_RegexpConvFrom = try? NSRegularExpression(pattern: ConvertRubyTagToVerticalBarRubyText_ConvFromString, options: [.caseInsensitive, .dotMatchesLineSeparators])
     static func ConvertRubyTagToVerticalBarRubyText(htmlString:String) -> String {
         let convTo = "|$1$2$3($5)"
         guard let regexp = ConvertRubyTagToVerticalBarRubyText_RegexpConvFrom else { return htmlString }
