@@ -732,21 +732,25 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.0.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.0.1
 
-- 小説のダウンロードの仕組みを変更
-- iCloudによる端末間同期機能を追加
-- 会話文等で話者自体を変更できるように
-- 本棚画面での順番に複数の要素を追加
-- 本棚画面でお気に入りの表示を追加
-- 小説本文画面に「詳細」ボタンを追加。小説毎の設定が追加されます
-- Web検索画面を追加 (なろう検索画面は削除されました)
-- 自作フォルダの概念を追加
-- その他色々と変更されました。見た目は変わっていないように見えて中身はほぼ全て書き換わっています。
+- Version 1.* から Version 2.0.0 へのアップデート時に「小説の章の順番がめちゃくちゃになる」という問題を修正
+- Safariからの取り込みの時に「Web取込タブで試す」を押してもWeb取込タブでそのURLが開かない場合があった問題を修正
+- Web取込時に一部のルビ表記をルビとして認識せずに取り込んでしまう事がある問題を修正
+- 「設定タブ」->「内部データ参照用URLの設定」で「Web検索タブ用ヒント情報」に値を書き入れると「標準の読み替え設定」側の値が書き換わってしまう問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.0.1
+
+- Version 1.* から Version 2.0.0 へのアップデート時に「小説の章の順番がめちゃくちゃになる」という問題を修正
+- Safariからの取り込みの時に「Web取込タブで試す」を押してもWeb取込タブでそのURLが開かない場合があった問題を修正
+- Web取込時に一部のルビ表記をルビとして認識せずに取り込んでしまう事がある問題を修正
+- 「設定タブ」->「内部データ参照用URLの設定」で「Web検索タブ用ヒント情報」に値を書き入れると「標準の読み替え設定」側の値が書き換わってしまう問題を修正
+
+
+
 # Version 2.0.0
 
 - 内部データベースを変更

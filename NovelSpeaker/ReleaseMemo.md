@@ -2654,7 +2654,31 @@ Bug fix
   - Added Web search screen
   - Added the concept of self-made folders
 
-# Version 2.0.0
+# Version 2.0.1
+
+
+問題の修正
+
+- Version 1.* から Version 2.0.0 へのアップデート時に「小説の章の順番がめちゃくちゃになる」という問題を修正
+- Safariからの取り込みの時に「Web取込タブで試す」を押してもWeb取込タブでそのURLが開かない場合があった問題を修正
+- Web取込時に一部のルビ表記をルビとして認識せずに取り込んでしまう事がある問題を修正
+- 「設定タブ」->「内部データ参照用URLの設定」で「Web検索タブ用ヒント情報」に値を書き入れると「標準の読み替え設定」側の値が書き換わってしまう問題を修正
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は Version 1.* から Version 2.0.0 へのアップデート時に、Version 1.* からデータ移行された小説のデータのうち、複数の章があるものの章の順番がバラバラになってしまうという問題へ対応する物となります。
+この度はこのような問題を出してしまって誠に申し訳ありませんでした。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 2.0.1
+
+
+- Fixed an issue where "the order of the novel chapters would be messed up" when updating from Version 1. * to Version 2.0.0
+- Fixed the problem that the URL sometimes did not open in the Web import tab even if you pressed "Try on the Web import tab" when importing from Safari.
+- Fixed the problem that some ruby notation may be imported without being recognized as ruby when importing to the Web.
+- Fixed the problem that the value on the "Standard replacement setting" side was rewritten when the value was entered in "Hint information for Web search tab" in "Settings tab" -> "URL setting for internal data reference"
 
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す

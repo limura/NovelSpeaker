@@ -742,15 +742,24 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.0.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.0.1
 
-- Change internal database
-- Rewrite almost all source code from Objective-C to Swift
-- Many other changes
+- Fixed an issue where \"the order of the novel chapters would be messed up\" when updating from Version 1. * to Version 2.0.0
+- Fixed the problem that the URL sometimes did not open in the Web import tab even if you pressed \"Try on the Web import tab\" when importing from Safari.
+- Fixed the problem that some ruby notation may be imported without being recognized as ruby when importing to the Web.
+- Fixed the problem that the value on the \"Standard replacement setting\" side was rewritten when the value was entered in \"Hint information for Web search tab\" in \"Settings tab\" -> \"URL setting for internal data reference\"
+
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.0.1
+
+- Fixed an issue where \"the order of the novel chapters would be messed up\" when updating from Version 1. * to Version 2.0.0
+- Fixed the problem that the URL sometimes did not open in the Web import tab even if you pressed \"Try on the Web import tab\" when importing from Safari.
+- Fixed the problem that some ruby notation may be imported without being recognized as ruby when importing to the Web.
+- Fixed the problem that the value on the \"Standard replacement setting\" side was rewritten when the value was entered in \"Hint information for Web search tab\" in \"Settings tab\" -> \"URL setting for internal data reference\"
+
 # Version 2.0.0
 
 - Change internal database
