@@ -152,7 +152,7 @@
 "SettingsViewController_CloudPushProcessingDialog" = "iCloud 側へデータを書き込み中です。";
 "SettingsViewController_IsUseiCloud_ConifirmRemoveLocalData" = "iCloud上のデータを利用する事にします。\n現在のデータは破棄されます。\nこの操作は元に戻せません。\nよろしいですか？";
 "SettingsViewController_iCloudAccountInvalid_restricted" = "iCloudアカウント が制限付きの状態のため利用できません。";
-"SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloudアカウント が設定されていません(設定アプリから iCloud にサインインする必要があります)。\n「設定アプリ」で「iCloud」を検索してAppleID内の「iCloud」の中で「ことせかい」がONになっている状態にしてください。";
+"SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloudアカウント が設定されていません(設定アプリから iCloud にサインインする必要があります)。\n「設定アプリ」で「iCloud」を検索してAppleID内の「iCloud」の中で「ことせかい」がON、同じ場所(上の方)で「iCloud Drive」もONになっている状態にしてください。";
 "SettingsViewController_iCloudAccountInvalid_cloudNotDetermine" = "iCloudアカウント の状態を取得できませんでした。";
 "SettingsViewController_InvalidiCloudStatus" = "iCloud の状態に問題があります";
 "SettingsViewController_ClearSiteInfoCache" = "SiteInfoキャッシュを削除する";
