@@ -281,7 +281,8 @@ static DummySoundLooper* dummySoundLooper = nil;
         return;
     }
     [self coreDataPerfomBlockAndWait:^{
-        [self->m_CoreDataObjectHolder SearchEntityWithBlock:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode] block:^(NSObject* obj) {
+        NSSortDescriptor* sortDescrpotor = [[NSSortDescriptor alloc] initWithKey:@"chapter_number" ascending:YES];
+        [self->m_CoreDataObjectHolder SearchEntityWithBlock:@"Story" predicate:[NSPredicate predicateWithFormat:@"ncode == %@", ncode] sortDescriptor:sortDescrpotor block:^(NSObject* obj) {
             @autoreleasepool {
                 Story* story = (Story*)obj;
                 block(story.content);

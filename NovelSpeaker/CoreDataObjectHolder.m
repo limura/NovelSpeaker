@@ -570,7 +570,7 @@
     return results;
 }
 
-- (void)SearchEntityWithBlock:(NSString*)entityName predicate:(NSPredicate*)predicate block:(void(^)(NSObject*))block {
+- (void)SearchEntityWithBlock:(NSString*)entityName predicate:(NSPredicate*)predicate sortDescriptor:(NSSortDescriptor*)sortDescriptor block:(void(^)(NSObject*))block {
     if (block == nil) {
         return;
     }
@@ -582,6 +582,9 @@
         NSEntityDescription* entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
         [fetchRequest setEntity:entity];
         [fetchRequest setPredicate:predicate];
+        if (sortDescriptor != NULL) {
+            fetchRequest.sortDescriptors = @[sortDescriptor];
+        }
         fetchRequest.fetchLimit = bulkSize;
         fetchRequest.fetchOffset = offset;
 
