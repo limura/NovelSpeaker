@@ -938,5 +938,62 @@
             "title": "//h4/a[contains(@href,'/info/')]",
             "url": "//h4/a[contains(@href,'/info/')]/@href"
         }
+    },
+    {
+	"isDisabled": true,
+        "title": "monogatary.com",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://monogatary.com/search/story?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(何も入力しないと失敗します)", "queryName": "kw"},
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 全てのジャンル": "",
+                    "恋愛": "genre=2",
+                    "異世界": "genre=3",
+                    "SF・ファンタジー": "genre=4",
+                    "歴史": "genre=5",
+                    "ミステリー": "genre=6",
+                    "青春・学園": "genre=7",
+                    "お仕事": "genre=8",
+                    "アクション・バトル": "genre=9",
+                    "ホラー・サスペンス": "genre=10",
+                    "グルメ・レシピ": "genre=11",
+                    "子供向け・児童文学": "genre=12",
+                    "コメディー・お笑い": "genre=13",
+                    "ヒューマンドラマ・日常系": "genre=14",
+                    "旅・海外": "genre=15",
+                    "エンタメ・カルチャー": "genre=16",
+                    "スポーツ": "genre=17",
+                    "エッセイ・ノンフィクション": "genre=18",
+                    "シナリオ・企画書": "genre=19",
+                    "詩・俳句・短歌など": "genre=20",
+                    "その他": "genre=21"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='list-thumbnail-card']/div[@class='list-thumbnail-card__item']",
+            "nextLink": "//div[@class='pagination']//a[contains(@class,'active') and contains(@class,'pagination__icon--next') and contains(@href,'/search/story?')]",
+            "title": "//a[@class='thumbnail-card__title-main-link' and contains(@href,'/story/')]/p",
+            "url": "//a[@class='thumbnail-card__title-main-link' and contains(@href,'/story/')]/@href"
+        }
+    },
+    {
+	"isDisabled": true,
+        "title": "電ファミニコゲーマー",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://news.denfaminicogamer.jp/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(何も入力しないと失敗します)", "queryName": "s"}
+        ],
+        "result": {
+            "block": "//div[@class='gsc-wrapper']//div[contains(@class,' gsc-result')]",
+            "nextLink": "",
+            "title": "//div[@class='gs-title']/a[@class='gs-title' and not(contains(@href,'//www.google.com/'))]",
+            "url": "//div[@class='gs-title']/a[@class='gs-title' and not(contains(@href,'//www.google.com/'))]/@href"
+        }
     }
 ]
