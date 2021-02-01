@@ -169,7 +169,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
-                    globalState.defaultSpeechModURL = value
+                    globalState.searchInfoURL = value
                 }
             }
         })
