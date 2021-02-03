@@ -1304,15 +1304,14 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         return (count, lastStoryChapterNumber)
     }
     
-    static func GetAllChapterNumberFor(realm: Realm, novelID:String) -> [Int] {
-        var result:[Int] = []
+    static func GetAllChapterNumberFor(realm: Realm, novelID:String) -> [[Int]] {
+        var result:[[Int]] = []
         let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         for storyBulk in storyBulkArray {
             autoreleasepool {
                 if let storyArray = storyBulk.LoadStoryArray() {
-                    for story in storyArray {
-                        result.append(story.chapterNumber)
-                    }
+                    let chapterNumberArray = storyArray.map({$0.chapterNumber})
+                    result.append(chapterNumberArray)
                 }else{
                     print("WARN: SearchAllStoryFor LoadStoryArray() failed in \(storyBulk.id)")
                 }
