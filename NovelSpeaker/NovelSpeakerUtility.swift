@@ -178,20 +178,23 @@ class NovelSpeakerUtility: NSObject {
     
     // 指定された realm に、必須データが入っているか否かを判定します。
     static func CheckDefaultSettingsAlive(realm:Realm) -> Bool {
+        // 中身が無い事にはできない物について判定して、それが一つでもあったら必須データは入っていないと判定します。
         guard let globalState = realm.object(ofType: RealmGlobalState.self, forPrimaryKey: RealmGlobalState.UniqueID) else { return false }
         if globalState.defaultSpeakerID.count <= 0
-            || globalState.defaultDisplaySettingID.count <= 0
-            || globalState.webImportBookmarkArray.count <= 0 { return false }
-        if realm.objects(RealmSpeakerSetting.self).count <= 0 { return false }
-        if realm.objects(RealmSpeechSectionConfig.self).count <= 0 { return false }
-        if realm.objects(RealmSpeechWaitConfig.self).count <= 0 { return false }
-        if realm.objects(RealmSpeechModSetting.self).count <= 0 { return false }
+            || globalState.defaultDisplaySettingID.count <= 0 { return false }
+        // 中身が入っていない状態にできる物については判定しないことにします。
+        //if globalState.webImportBookmarkArray.count <= 0 { return false }
+        //if realm.objects(RealmSpeakerSetting.self).count <= 0 { return false }
+        //if realm.objects(RealmSpeechSectionConfig.self).count <= 0 { return false }
+        //if realm.objects(RealmSpeechWaitConfig.self).count <= 0 { return false }
+        //if realm.objects(RealmSpeechModSetting.self).count <= 0 { return false }
         return true
     }
     // 標準設定を入れます。結構時間かかるのでバックグラウンドで行われます
     @objc static func InsertDefaultSettingsIfNeeded() {
         DispatchQueue.global(qos: .utility).async {
             RealmUtil.RealmBlock { (realm) -> Void in
+                if CheckDefaultSettingsAlive(realm: realm) { return }
                 let globalState:RealmGlobalState
                 if let tmpGlobalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                     globalState = tmpGlobalState
