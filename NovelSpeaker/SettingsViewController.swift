@@ -1015,6 +1015,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.title = NSLocalizedString("SettingsViewController_ClearSiteInfoCache", comment: "SiteInfoを読み直す")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
+                StoryHtmlDecoder.shared.WaitLoadSiteInfoReady {
+                    DispatchQueue.main.async {
+                        AppInformationLogger.AddLog(message: NSLocalizedString("SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd", comment: "手動による SiteInfo の読み込みが終了しました。\n他にエラーメッセージが出ていなければ SiteInfo の読み込みは成功したと思われます。"), isForDebug: false)
+                    }
+                }
                 StoryHtmlDecoder.shared.ClearSiteInfo()
                 DispatchQueue.main.async {
                     NiftyUtility.EasyDialogOneButton(

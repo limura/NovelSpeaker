@@ -178,6 +178,7 @@
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "今あるお知らせを全て消す";
 "SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "このお知らせをコピーする";
 "SettingsViewController_DontUsallyUseSection_Title" = "通常は使用する必要の無いもの";
+"SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd" = "手動による SiteInfo の読み込みが終了しました。\n他にエラーメッセージが出ていなければ SiteInfo の読み込みは成功したと思われます。";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";

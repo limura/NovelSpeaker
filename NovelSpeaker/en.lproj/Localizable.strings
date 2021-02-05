@@ -197,6 +197,7 @@
 "SettingsViewController_isUseWebSearchTabDisabledSite_Title" = "Show hidden sites on the Web Search tab";
 "SettingsViewController_isDebugMenuAlreadyEnabled_Title" = "Always turn on this debug menu";
 "SettingsViewController_DontUsallyUseSection_Title" = "Things you don't normally need to use";
+"SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd" = "Manual loading of SiteInfo is complete.\nIf there are no other error messages, it seems that the SiteInfo load was successful.";
 "SettingsTableViewController_AppInformation" = "In-app error notification";
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "In-app error notification (including for debugging)";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "Clear notification";
