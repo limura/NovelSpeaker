@@ -9,6 +9,5 @@ xcschemes
 Podfile.lock
 Podfile.tmp
 runinfer.sh
-linkSZTextViewHeader.sh
 Pods
 novelspeaker.xcworkspace
