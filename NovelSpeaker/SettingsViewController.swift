@@ -1025,6 +1025,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         buttonAction: nil)
                 }
             })
+            <<< ButtonRow(){
+                $0.title = NSLocalizedString("SettingsViewController_ClearWebSearchSiteInfoCache", comment: "Web検索タブの検索データを読み直す")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                NovelSearchViewController.SearchInfoCacheClear()
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogOneButton(
+                        viewController: self,
+                        title: nil,
+                        message: NSLocalizedString("SettingsViewController_ClearWebSearchSiteInfoCache_done", comment: "Web検索タブに戻ると読み込み直すように設定しました。"),
+                        buttonTitle: nil,
+                        buttonAction: nil)
+                }
+            })
 
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、
             // それらはこの下に記述されます
@@ -1083,20 +1097,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onChange({ row in
                 guard let value = row.value else { return }
                 RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: value)
-            })
-            <<< ButtonRow(){
-                $0.title = NSLocalizedString("SettingsViewController_ClearWebSearchSiteInfoCache", comment: "Web検索タブの検索データを読み直す")
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onCellSelection({ (cellOf, row) in
-                NovelSearchViewController.SearchInfoCacheClear()
-                DispatchQueue.main.async {
-                    NiftyUtility.EasyDialogOneButton(
-                        viewController: self,
-                        title: nil,
-                        message: NSLocalizedString("SettingsViewController_ClearWebSearchSiteInfoCache_done", comment: "Web検索タブに戻ると読み込み直すように設定しました。"),
-                        buttonTitle: nil,
-                        buttonAction: nil)
-                }
             })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
