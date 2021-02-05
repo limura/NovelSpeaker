@@ -547,6 +547,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     let row: RowOf<Bool>! = form.rowBy(tag: "OverrideRubySwitchRow")
                     return row.value ?? false == false
                 })
+                row.cell.textField.borderStyle = .roundedRect
                 RealmUtil.RealmBlock { (realm) -> Void in
                     row.value = ""
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
@@ -815,18 +816,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingsViewController_RemoteDataURLSetting", comment:"内部データ参照用URLの設定")
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onCellSelection({ (buttonCellOf, button) in
-                let nextViewController = RemoteDataURLSettingViewController()
-                self.navigationController?.pushViewController(nextViewController, animated: true)
-            }).cellUpdate({ (cell, button) in
-                cell.textLabel?.textAlignment = .left
-                cell.accessoryType = .disclosureIndicator
-                cell.editingAccessoryType = cell.accessoryType
-                cell.textLabel?.textColor = nil
-            })
-            <<< ButtonRow() {
                 $0.title = NSLocalizedString("SpeechViewButtonSettingsViewController_Title", comment: "小説本文画面の右上に表示されるボタン群の設定")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (buttonCellOf, button) in
@@ -1008,6 +997,34 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
             })
+            
+            +++ Section(NSLocalizedString("SettingsViewController_DontUsallyUseSection_Title", comment: "普段は使わない物"))
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingsViewController_RemoteDataURLSetting", comment:"内部データ参照用URLの設定")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (buttonCellOf, button) in
+                let nextViewController = RemoteDataURLSettingViewController()
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }).cellUpdate({ (cell, button) in
+                cell.textLabel?.textAlignment = .left
+                cell.accessoryType = .disclosureIndicator
+                cell.editingAccessoryType = cell.accessoryType
+                cell.textLabel?.textColor = nil
+            })
+            <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingsViewController_ClearSiteInfoCache", comment: "SiteInfoを読み直す")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                StoryHtmlDecoder.shared.ClearSiteInfo()
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogOneButton(
+                        viewController: self,
+                        title: nil,
+                        message: NSLocalizedString("SettingsViewController_ClearSiteInfoCache_done", comment: "保存されている SiteInfo 情報を削除しました。"),
+                        buttonTitle: nil,
+                        buttonAction: nil)
+                }
+            })
 
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、
             // それらはこの下に記述されます
@@ -1056,20 +1073,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled = false
                         }
                     }
-                }
-            })
-            <<< ButtonRow() {
-                $0.title = NSLocalizedString("SettingsViewController_ClearSiteInfoCache", comment: "SiteInfoキャッシュを削除する")
-                $0.cell.textLabel?.numberOfLines = 0
-            }.onCellSelection({ (cellOf, row) in
-                StoryHtmlDecoder.shared.ClearSiteInfo()
-                DispatchQueue.main.async {
-                    NiftyUtility.EasyDialogOneButton(
-                        viewController: self,
-                        title: nil,
-                        message: NSLocalizedString("SettingsViewController_ClearSiteInfoCache_done", comment: "保存されている SiteInfo 情報を削除しました。"),
-                        buttonTitle: nil,
-                        buttonAction: nil)
                 }
             })
             <<< SwitchRow("OverrideForceSiteInfoReload") { row in

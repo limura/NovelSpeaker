@@ -152,11 +152,11 @@
 "SettingsViewController_CloudPushProcessingDialog" = "iCloud 側へデータを書き込み中です。";
 "SettingsViewController_IsUseiCloud_ConifirmRemoveLocalData" = "iCloud上のデータを利用する事にします。\n現在のデータは破棄されます。\nこの操作は元に戻せません。\nよろしいですか？";
 "SettingsViewController_iCloudAccountInvalid_restricted" = "iCloudアカウント が制限付きの状態のため利用できません。";
-"SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloudアカウント が設定されていません(設定アプリから iCloud にサインインする必要があります)。\n「設定アプリ」で「iCloud」を検索してAppleID内の「iCloud」の中で「ことせかい」がON、同じ場所(上の方)で「iCloud Drive」もONになっている状態にしてください。";
+"SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloudアカウント が設定されていません(設定アプリから iCloud にサインインする必要があります)。\n「設定アプリ」で「iCloud」を検索してAppleID内の「iCloud」の中で「ことせかい」がONになっていて、同じ場所(ことせかい よりも上の方)の「iCloud Drive」もONになっている状態にしてください。";
 "SettingsViewController_iCloudAccountInvalid_cloudNotDetermine" = "iCloudアカウント の状態を取得できませんでした。";
 "SettingsViewController_InvalidiCloudStatus" = "iCloud の状態に問題があります";
-"SettingsViewController_ClearSiteInfoCache" = "SiteInfoキャッシュを削除する";
-"SettingsViewController_ClearSiteInfoCache_done" = "保存されている SiteInfo 情報を削除しました。";
+"SettingsViewController_ClearSiteInfoCache" = "SiteInfoを取得し直す";
+"SettingsViewController_ClearSiteInfoCache_done" = "保存されている SiteInfo 情報を削除し、再取得を開始しました。";
 "SettingsViewController_IsNeedRestartApp_Title" = "アプリの再起動が必要です";
 "SettingsViewController_IsNeedRestartApp_Message" = "この操作を行うためには一旦アプリを再起動させる必要があります。Appスイッチャーなどからアプリを終了させ、再度起動させた後にもう一度お試しください。(iCloud同期の ON/OFF は変更のたびに再起動が必要になります)";
 "SettingsViewController_FailedCheckIcloudDataIsValid" = "iCloud側のデータ確認に失敗しました。";
@@ -177,6 +177,7 @@
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "アプリ内エラーのお知らせ(デバッグ用も含む)";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "今あるお知らせを全て消す";
 "SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "このお知らせをコピーする";
+"SettingsViewController_DontUsallyUseSection_Title" = "通常は使用する必要の無いもの";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";
@@ -349,6 +350,18 @@
 "NovelDetailViewController_LikeLevelSwitchRowTitle" = "お気に入り";
 "NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle" = "この小説の更新確認を行わない";
 "NovelDetailViewController_ActionSection_ShareButton" = "この小説のURLをシェアする";
+"NovelDetailViewController_ActionSection_Title_PopupTitle" = "小説名をコピーしました";
+"NovelDetailViewController_ActionSection_Title_PopupMessage" = "小説名を変更する事もできます。";
+"NovelDetailViewController_ActionSection_Title_Popup_Cancel" = "変更しない";
+"NovelDetailViewController_ActionSection_Title_Popup_Edit" = "この名前に変更";
+"NovelDetailViewController_ActionSection_Title_Popup_Edit_Accepted" = "小説名を変更しました";
+"NovelDetailViewController_ActionSection_Title_Popup_Edit_Rejected" = "小説名の変更に失敗しました";
+"NovelDetailViewController_ActionSection_Writer_PopupTitle" = "著者名をコピーしました";
+"NovelDetailViewController_ActionSection_Writer_PopupMessage" = "著者名を変更する事もできます。";
+"NovelDetailViewController_ActionSection_Writer_Popup_Cancel" = "変更しない";
+"NovelDetailViewController_ActionSection_Writer_Popup_Edit" = "この名前に変更";
+"NovelDetailViewController_ActionSection_Writer_Popup_Edit_Accepted" = "著者名を変更しました";
+"NovelDetailViewController_ActionSection_Writer_Popup_Edit_Rejected" = "著者名の変更に失敗しました";
 
 "NovelKeywordTagSelectorViewController_Title" = "タグを選択";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "タグの追加";
@@ -673,6 +686,9 @@
 "StoryFetcher_FetchFirstContent_NoNextUrlAlive" = "本文を取り出せませんでした。(本文が掲載されている部分へのリンクが発見できませんでした)";
 "StoryFetcher_FetchFirstContent_ExceededCountToLive" = "本文を取り出せませんでした。(本文へのリンクが発見できないまま読み込み回数上限に達しました)";
 "StoryFetcher_FetchError_RobotsText" = "Webサイト様側で機械的なアクセスを制限されているサイトであったため、ことせかい による取得ができません。(robots.txt で拒否されています)";
+"StoryFetcher_FetchSiteInfoError_SiteInfo" = "次点のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。";
+"StoryFetcher_FetchSiteInfoError_CustomSiteInfo" = "ことせかい 用のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。";
+"StoryFetcher_FetchSiteInfoError_FetchError" = "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。";
 
 "AutoSplitStringSettingViewController_Title" = "テキスト分割文字列の設定";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_Error_NoText" = "空文字列は指定できません";

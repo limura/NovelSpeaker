@@ -437,6 +437,11 @@ class StoryHtmlDecoder {
                 self.lock.unlock()
             }else{
                 isFail = true
+                #if !os(watchOS)
+                AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_SiteInfo", comment: "次点のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
+                        "siteInfoURL": siteInfoURL.absoluteString
+                    ], isForDebug: false)
+                #endif
             }
             if let data = customSiteInfoData, let siteInfoArray = DecodeSiteInfoData(data: data) {
                 self.lock.lock()
@@ -444,6 +449,9 @@ class StoryHtmlDecoder {
                 self.lock.unlock()
             }else{
                 isFail = true
+                AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_CustomSiteInfo", comment: "ことせかい 用のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
+                        "customSiteInfoURL": customSiteInfoURL.absoluteString
+                    ], isForDebug: false)
             }
             announceLoadEnd()
             if isFail {
@@ -472,6 +480,10 @@ class StoryHtmlDecoder {
                 let result = updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData)
                 completion?(result)
             }) { (err) in
+                AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
+                        "siteInfoURL": siteInfoURL.absoluteString,
+                        "custonSiteInfoURL": customSiteInfoURL.absoluteString
+                    ], isForDebug: false)
                 announceLoadEnd()
                 completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
             }
@@ -481,6 +493,9 @@ class StoryHtmlDecoder {
             customSiteInfoData = data
             completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
         }) { (err) in
+            AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
+                    "customSiteInfoURL": customSiteInfoURL.absoluteString
+                ], isForDebug: false)
             announceLoadEnd()
             completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
         }
@@ -506,6 +521,7 @@ class StoryFetcher {
     }
     
     func DecodeDocument(currentState:StoryState, html:String?, encoding:String.Encoding, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
+        // TODO: この辺りに取得したHTMLをlogに吐くような奴を作っておくと良さげ？
         guard let html = html, let htmlDocument = try? HTML(html: html, encoding: encoding) else {
             failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_Parse", comment: "HTMLの解析に失敗しました。(有効なHTMLまたはXHTML文書ではないようです。いまのところ、ことせかい はPDF等のHTMLやXHTMLではない文書は読み込む事ができません)"))
             return

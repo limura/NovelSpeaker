@@ -155,8 +155,8 @@
 "SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloud account has not been set up.";
 "SettingsViewController_iCloudAccountInvalid_cloudNotDetermine" = "Could not get the status of your iCloud account.";
 "SettingsViewController_InvalidiCloudStatus" = "There was a problem with the state of iCloud.";
-"SettingsViewController_ClearSiteInfoCache" = "Delete SiteInfo cache";
-"SettingsViewController_ClearSiteInfoCache_done" = "The saved SiteInfo information has been deleted.";
+"SettingsViewController_ClearSiteInfoCache" = "Get SiteInfo again";
+"SettingsViewController_ClearSiteInfoCache_done" = "The saved SiteInfo information has been deleted and reacquisition has started.";
 "SettingsViewController_IsNeedRestartApp_Title" = "App restart required";
 "SettingsViewController_IsNeedRestartApp_Message" = "In order to do this operation, you need to restart the application once. Quit the application from the App switcher, restart it, and then try again.";
 "SettingsViewController_FailedCheckIcloudDataIsValid" = "Failed to check the data on iCloud side.";
@@ -196,6 +196,7 @@
 "SettingsViewController_iCloudPullWithRefreshiCloudStatus_Message" = "Started reloading iCloud data.";
 "SettingsViewController_isUseWebSearchTabDisabledSite_Title" = "Show hidden sites on the Web Search tab";
 "SettingsViewController_isDebugMenuAlreadyEnabled_Title" = "Always turn on this debug menu";
+"SettingsViewController_DontUsallyUseSection_Title" = "Things you don't normally need to use";
 "SettingsTableViewController_AppInformation" = "In-app error notification";
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "In-app error notification (including for debugging)";
 "SettingsTableViewController_AppInformation_ClearButtonTitle" = "Clear notification";
@@ -373,6 +374,18 @@
 "NovelDetailViewController_LikeLevelSwitchRowTitle" = "Favorite";
 "NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle" = "Do not check for updates to this novel";
 "NovelDetailViewController_ActionSection_ShareButton" = "Share the URL of this novel";
+"NovelDetailViewController_ActionSection_Title_PopupTitle" = "I copied the novel name";
+"NovelDetailViewController_ActionSection_Title_PopupMessage" = "You can also change the novel name.";
+"NovelDetailViewController_ActionSection_Title_Popup_Cancel" = "Do not change";
+"NovelDetailViewController_ActionSection_Title_Popup_Edit" = "Rename to this";
+"NovelDetailViewController_ActionSection_Title_Popup_Edit_Accepted" = "Changed the novel name";
+"NovelDetailViewController_ActionSection_Title_Popup_Edit_Rejected" = "Failed to change the novel name";
+"NovelDetailViewController_ActionSection_Writer_PopupTitle" = "I copied the author name";
+"NovelDetailViewController_ActionSection_Writer_PopupMessage" = "You can also change the author name.";
+"NovelDetailViewController_ActionSection_Writer_Popup_Cancel" = "Do not change";
+"NovelDetailViewController_ActionSection_Writer_Popup_Edit" = "Rename to this";
+"NovelDetailViewController_ActionSection_Writer_Popup_Edit_Accepted" = "Changed the author name";
+"NovelDetailViewController_ActionSection_Writer_Popup_Edit_Rejected" = "Failed to change author name";
 
 
 "NovelKeywordTagSelectorViewController_Title" = "Select Tag";
@@ -683,6 +696,9 @@
 "StoryFetcher_FetchFirstContent_NoNextUrlAlive" = "The text could not be retrieved. (I could not find the link to the part where the text is posted)";
 "StoryFetcher_FetchFirstContent_ExceededCountToLive" = "The text could not be retrieved. (I reached the maximum number of reads without being able to find the link to the text)";
 "StoryFetcher_FetchError_RobotsText" = "Since the website is a site with mechanical access restricted, we cannot obtain it due to the facts. (rejected by robots.txt)";
+"StoryFetcher_FetchSiteInfoError_SiteInfo" = "Failed to read the next SiteInfo data. Due to this failure, when downloading a novel, it is more likely that the body part of the novel cannot be extracted and characters other than the body will also be imported.\nAfter checking the network status, execute \"Settings tab\" -> \"Get SiteInfo again\" and try to get it again.\nIf you still get the same problem, please contact us with this error message from \"Settings tab\" -> \"Contact Developer\".";
+"StoryFetcher_FetchSiteInfoError_CustomSiteInfo" = "Failed to read SiteInfo data for novelspeakers. Due to this failure, when downloading a novel, it is more likely that the body part of the novel cannot be extracted and characters other than the body will also be imported.\nAfter checking the network status, execute \"Settings tab\" -> \"Get SiteInfo again\" and try to get it again.\nIf you still get the same problem, please contact us with this error message from \"Settings tab\" -> \"Contact Developer\".";
+"StoryFetcher_FetchSiteInfoError_FetchError" = "Failed to read all SiteInfo data. Due to this failure, when downloading a novel, it is more likely that the body part of the novel cannot be extracted and characters other than the body will also be imported.\nAfter checking the network status, execute \"Settings tab\" -> \"Get SiteInfo again\" and try to get it again.\nIf you still get the same problem, please contact us with this error message from \"Settings tab\" -> \"Contact Developer\".";
 
 "AutoSplitStringSettingViewController_Title" = "Text segmentation string settings";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_Error_NoText" = "Empty string cannot be specified";
