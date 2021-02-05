@@ -72,10 +72,17 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                     for property in properties {
                         if property.name == "defaultSpeakerID", let newValue = property.newValue as? String, let oldValue = property.oldValue as? String, newValue != oldValue {
                             DispatchQueue.main.async {
-                                print("defaultSpeakerID changed. observeNovel() reload all.")
                                 self.form.removeAll()
                                 self.createCells()
                             }
+                            return
+                        }
+                        if ["writer", "title"].contains(property.name) {
+                            DispatchQueue.main.async {
+                                self.form.removeAll()
+                                self.createCells()
+                            }
+                            return
                         }
                     }
                 case .deleted:
@@ -188,7 +195,34 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
             }.onCellSelection({ (cellOf, row) in
                 UIPasteboard.general.string = novel.title.trimmingCharacters(in: .whitespacesAndNewlines)
                 DispatchQueue.main.async {
-                    NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CopyNovelTitleDone_Message", comment: "小説名をコピーしました"), buttonTitle: nil, buttonAction: nil)
+                    var dialog = NiftyUtility.EasyDialogBuilder(self)
+                    dialog = dialog.title(title: NSLocalizedString("NovelDetailViewController_ActionSection_Title_PopupTitle", comment: "小説名をコピーしました"))
+                    dialog = dialog.label(text: NSLocalizedString("NovelDetailViewController_ActionSection_Title_PopupMessage", comment: "小説名を変更する事もできます。"))
+                    dialog = dialog.textField(tag: 100, placeholder: nil, content: novel.title, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always)
+                    dialog = dialog.addButton(title: NSLocalizedString("NovelDetailViewController_ActionSection_Title_Popup_Cancel", comment: "変更しない")) { (dialog) in
+                            dialog.dismiss(animated: false, completion: nil)
+                        }
+                    dialog = dialog.addButton(title: NSLocalizedString("NovelDetailViewController_ActionSection_Title_Popup_Edit", comment: "この名前に変更")) { (dialog) in
+                        dialog.dismiss(animated: false, completion: {
+                            if let filterTextField = dialog.view.viewWithTag(100) as? UITextField, let newString = filterTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), RealmUtil.RealmBlock(block: { (realm) -> Bool in
+                                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novel.novelID) else { return false }
+                                RealmUtil.WriteWith(realm: realm) { (realm) in
+                                    novel.title = newString
+                                    realm.add(novel)
+                                }
+                                return true
+                            }) {
+                                DispatchQueue.main.async {
+                                    NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("NovelDetailViewController_ActionSection_Title_Popup_Edit_Accepted", comment: "小説名を変更しました"), message: nil, buttonTitle: nil, buttonAction: nil)
+                                }
+                            }else{
+                                DispatchQueue.main.async {
+                                    NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("NovelDetailViewController_ActionSection_Title_Popup_Edit_Rejected", comment: "小説名の変更に失敗しました"), message: nil, buttonTitle: nil, buttonAction: nil)
+                                }
+                            }
+                        })
+                    }
+                    dialog.build().show()
                 }
             })
             if novel.type == .URL {
@@ -198,7 +232,34 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 }.onCellSelection({ (cellOf, row) in
                     UIPasteboard.general.string = novel.writer.trimmingCharacters(in: .whitespacesAndNewlines)
                     DispatchQueue.main.async {
-                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CopyNovelWriterNameDone_Message", comment: "著者名をコピーしました"), buttonTitle: nil, buttonAction: nil)
+                        var dialog = NiftyUtility.EasyDialogBuilder(self)
+                        dialog = dialog.title(title: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_PopupTitle", comment: "著者名をコピーしました"))
+                        dialog = dialog.label(text: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_PopupMessage", comment: "著者名を変更する事もできます。"))
+                        dialog = dialog.textField(tag: 100, placeholder: nil, content: novel.writer, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always)
+                        dialog = dialog.addButton(title: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_Popup_Cancel", comment: "変更しない")) { (dialog) in
+                                dialog.dismiss(animated: false, completion: nil)
+                            }
+                        dialog = dialog.addButton(title: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_Popup_Edit", comment: "この名前に変更")) { (dialog) in
+                            dialog.dismiss(animated: false, completion: {
+                                if let filterTextField = dialog.view.viewWithTag(100) as? UITextField, let newString = filterTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), RealmUtil.RealmBlock(block: { (realm) -> Bool in
+                                    guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novel.novelID) else { return false }
+                                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                                        novel.writer = newString
+                                        realm.add(novel)
+                                    }
+                                    return true
+                                }) {
+                                    DispatchQueue.main.async {
+                                        NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_Popup_Edit_Accepted", comment: "著者名を変更しました"), message: nil, buttonTitle: nil, buttonAction: nil)
+                                    }
+                                }else{
+                                    DispatchQueue.main.async {
+                                        NiftyUtility.EasyDialogOneButton(viewController: self, title: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_Popup_Edit_Rejected", comment: "著者名の変更に失敗しました"), message: nil, buttonTitle: nil, buttonAction: nil)
+                                    }
+                                }
+                            })
+                        }
+                        dialog.build().show()
                     }
                 })
 
