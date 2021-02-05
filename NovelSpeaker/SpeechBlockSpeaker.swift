@@ -24,6 +24,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     var currentSpeakingLocation = 0
     
     // StopSpeech() で実際に読み上げが止まった時のハンドラ
+    let stopSpeechHandlerLockObject = NSObject()
     var stopSpeechHandler:(()->Void)? = nil
     
     override init() {
@@ -206,6 +207,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func StopSpeech(stopSpeechHandler:(()->Void)? = nil) {
+        objc_sync_enter(self.stopSpeechHandlerLockObject)
+        defer { objc_sync_exit(self.stopSpeechHandlerLockObject) }
         m_IsSpeaking = false
         self.stopSpeechHandler = stopSpeechHandler
         speaker.Stop()
@@ -275,6 +278,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         // 読み上げを停止させられている場合は何もしません。
         // これは、Stop() した時でも finishSpeak() が呼び出されるためです。
         if m_IsSpeaking != true {
+            objc_sync_enter(self.stopSpeechHandlerLockObject)
+            defer { objc_sync_exit(self.stopSpeechHandlerLockObject) }
             self.stopSpeechHandler?()
             self.stopSpeechHandler = nil
             return
@@ -304,6 +309,12 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func reloadSynthesizer() {
+        objc_sync_enter(self.stopSpeechHandlerLockObject)
+        defer { objc_sync_exit(self.stopSpeechHandlerLockObject) }
+        if let stopHandler = self.stopSpeechHandler {
+            stopHandler()
+            self.stopSpeechHandler = nil
+        }
         speaker.reloadSynthesizer()
     }
 }

@@ -613,7 +613,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let readingPoint = self.speaker.currentLocation
         if readingPoint >= length {
             self.speaker.SetSpeechLocation(location: readingPoint - length)
-            NiftyUtility.DispatchSyncMainQueue {
+            DispatchQueue.main.async {
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
                     let newLocation = self.speaker.currentLocation
                     if story.readLocation(realm: realm) != newLocation {
@@ -622,8 +622,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         }
                     }
                 }
+                completion()
             }
-            completion()
             return
         }
         var targetLength = length - readingPoint
