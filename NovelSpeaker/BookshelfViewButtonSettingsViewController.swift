@@ -55,6 +55,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         if #available(iOS 13.0, *) {
                             $0.cell.imageView?.image = UIImage(systemName: "gauge")
                         }
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .reload:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -63,6 +64,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         if #available(iOS 13.0, *) {
                             $0.cell.imageView?.image = UIImage(systemName: "arrow.clockwise")
                         }
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .switchFolder:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -71,6 +73,7 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         if #available(iOS 13.0, *) {
                             $0.cell.imageView?.image = UIImage(systemName: "rectangle.expand.vertical")
                         }
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .search:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -80,16 +83,19 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                         if #available(iOS 13.0, *) {
                             $0.cell.imageView?.image = UIImage(systemName: "magnifyingglass")
                         }
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .edit:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("BookshelfViewButtonType_Edit", comment: "小説リストを編集(小説の削除)")
                         $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .order:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("BookshelfViewButtonType_Order", comment: "小説の並び替え(順番)")
                         $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .iCloudPull:
                     section <<< SwitchRow(setting.type.rawValue) {

@@ -57,6 +57,7 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                         $0.title = NSLocalizedString("SpeechViewButtonType_OpenWebPage", comment: "Web取込タブで開く")
                         $0.value = setting.isOn
                         $0.cell.imageView?.image = UIImage(named: "earth")?.withRenderingMode(.alwaysTemplate)
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .reload:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -65,6 +66,7 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                         if #available(iOS 13.0, *) {
                             $0.cell.imageView?.image = UIImage(systemName: "arrow.clockwise")
                         }
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .share:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -73,6 +75,7 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                         if #available(iOS 13.0, *) {
                             $0.cell.imageView?.image = UIImage(systemName: "square.and.arrow.up")
                         }
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .search:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -86,16 +89,19 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                 case .edit:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_Edit", comment: "小説を編集する")
+                        $0.cell.textLabel?.numberOfLines = 0
                         $0.value = setting.isOn
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .backup:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_Backup", comment: "小説をバックアップする")
+                        $0.cell.textLabel?.numberOfLines = 0
                         $0.value = setting.isOn
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .detail:
                     section <<< LabelRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_Detail", comment: "小説の詳細を表示する")
+                        $0.cell.textLabel?.numberOfLines = 0
                     }
                 case .skipBackward:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -104,6 +110,7 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                             $0.cell.imageView?.image = UIImage(systemName: "gobackward.30")
                         }
                         $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 case .skipForward:
                     section <<< SwitchRow(setting.type.rawValue) {
@@ -112,6 +119,7 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                             $0.cell.imageView?.image = UIImage(systemName: "goforward.30")
                         }
                         $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
                 default:
                     continue
