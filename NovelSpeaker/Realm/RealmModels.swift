@@ -2038,6 +2038,7 @@ enum BookshelfViewButtonTypes:String, Codable {
     case order = "order"
     case downloadStatus = "downloadStatus"
     case switchFolder = "switchFolder"
+    case stopDownload = "stopDownload"
 }
 
 struct BookshelfViewButtonSetting: Codable {
@@ -2051,6 +2052,7 @@ struct BookshelfViewButtonSetting: Codable {
         BookshelfViewButtonSetting(type: .switchFolder, isOn: true),
         //BookshelfViewButtonSetting(type: .downloadStatus, isOn: false),
         BookshelfViewButtonSetting(type: .order, isOn: true),
+        BookshelfViewButtonSetting(type: .stopDownload, isOn: false),
         BookshelfViewButtonSetting(type: .reload, isOn: true),
         BookshelfViewButtonSetting(type: .edit, isOn: true),
     ]

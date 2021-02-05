@@ -636,6 +636,8 @@
 "BookShelfRATreeViewController_iCloudPushButtonTitle" = "iCloudへ送信";
 "BookShelfRATreeViewController_iCloudPullButton_Clicked" = "iCloud上の更新データの取得を開始しました。";
 "BookShelfRATreeViewController_iCloudPushButton_Clicked" = "iCloudへのデータのアップロードを開始しました。";
+"BookShelfRATreeViewController_stopDownloadButton_VoiceOverText" = "ダウンロードを停止";
+"BookShelfRATreeViewController_stopDownloadButtonTitle" = "停止";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 
@@ -733,6 +735,7 @@
 "BookshelfViewButtonType_Order" = "小説の並び替え(順番)";
 "BookshelfViewButtonType_iCloudPull" = "iCloud上の更新データの強制取り込みを開始する(通常は必要ありません)";
 "BookshelfViewButtonType_iCloudPush" = "端末側のデータの「全て」をiCloudへ送信ししなおし始める(通常は必要ありませんし、本当に全てのデータをiCloud側に送信しますので通信量が増えますし、全てを送信し終えるには時間がかかるはずです)";
+"BookshelfViewButtonType_stopDownload" = "実行中の全てのダウンロードを止める";
 
 "HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: 何も読み込めませんでした。なお、ネットワーク接続に問題がある場合などでもこのエラーが発生する場合があります。";
 

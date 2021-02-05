@@ -36,6 +36,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     var switchFolderButton:UIBarButtonItem = UIBarButtonItem()
     var iCloudPullButton:UIBarButtonItem = UIBarButtonItem()
     var iCloudPushButton:UIBarButtonItem = UIBarButtonItem()
+    var stopDownloadButton:UIBarButtonItem = UIBarButtonItem()
     var resumeSpeechFloatingButton:FloatingButton? = nil
     var nextViewStoryID: String?
     var isNextViewNeedResumeSpeech:Bool = false
@@ -328,6 +329,17 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 }
                 button.isEnabled = RealmUtil.IsUseCloudRealm()
                 self.iCloudPushButton = button
+                barButtonItemArray.append(button)
+            case .stopDownload:
+                let button:UIBarButtonItem
+                if #available(iOS 13.0, *), let image = UIImage(systemName: "pause.circle") {
+                    button = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(stopDownloadButtonClicked))
+                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_stopDownloadButton_VoiceOverText", comment: "ダウンロードを停止")
+                }else{
+                    button = UIBarButtonItem(title: NSLocalizedString("BookShelfRATreeViewController_stopDownloadButtonTitle", comment: "停止"), style: .plain, target: self, action: #selector(stopDownloadButtonClicked))
+                    button.accessibilityLabel = NSLocalizedString("BookShelfRATreeViewController_stopDownloadButton_VoiceOverText", comment: "ダウンロードを停止")
+                }
+                self.stopDownloadButton = button
                 barButtonItemArray.append(button)
             }
         }
@@ -831,6 +843,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }
         }
     }
+    @objc func stopDownloadButtonClicked(sender: Any) {
+        NovelDownloadQueue.shared.downloadStop()
+    }
+    
     func assignCloudPullPushButtonStatus() {
         let isEnabled = RealmUtil.IsUseCloudRealm()
         self.iCloudPullButton.isEnabled = isEnabled

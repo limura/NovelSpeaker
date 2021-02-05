@@ -647,7 +647,8 @@
 "BookShelfRATreeViewController_iCloudPushButtonTitle" = "Send to iCloud";
 "BookShelfRATreeViewController_iCloudPullButton_Clicked" = "We have started re-downloading data on iCloud.";
 "BookShelfRATreeViewController_iCloudPushButton_Clicked" = "We have started uploading data to iCloud.";
-
+"BookShelfRATreeViewController_stopDownloadButton_VoiceOverText" = "Stop download";
+"BookShelfRATreeViewController_stopDownloadButtonTitle" = "Stop";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";
@@ -743,6 +744,7 @@
 "BookshelfViewButtonType_Order" = "Sorting of novels (order)";
 "BookshelfViewButtonType_iCloudPull" = "Initiate forced capture of data on iCloud (usually not needed)";
 "BookshelfViewButtonType_iCloudPush" = "Start sending \"all\" of the data on the terminal side to iCloud again (usually it is not necessary, and since all the data is really sent to iCloud side, the communication volume will increase and it will take time to finish sending all It should take)";
+"BookshelfViewButtonType_stopDownload" = "Stop all running downloads";
 
 "HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: I couldn't read anything. Note that this error may occur even if there is a problem with the network connection.";
 

@@ -117,6 +117,16 @@ class BookshelfViewButtonSettingsViewController: FormViewController {
                             $0.cell.imageView?.image = image
                         }
                     }.onChange({_ in self.saveCurrentSetting()})
+                case .stopDownload:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("BookshelfViewButtonType_stopDownload", comment: "実行中の全てのダウンロードを止める")
+                        $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
+                        $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                        if #available(iOS 13.0, *), let image = UIImage(systemName: "pause.circle") {
+                            $0.cell.imageView?.image = image
+                        }
+                    }.onChange({_ in self.saveCurrentSetting()})
                 }
             }
         }
