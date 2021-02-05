@@ -96,7 +96,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_BeforeTitle", comment: "読み替え前")
             $0.value = self.beforeText
             $0.add(rule: RuleRequired())
-            $0.validationOptions = .validatesOnChange
+            $0.validationOptions = .validatesOnDemand
             $0.cell.textField.clearButtonMode = .always
             $0.cell.textField.borderStyle = .roundedRect
         }.onChange({ (textRow) in
@@ -125,7 +125,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_AfterTitle", comment: "読み替え後")
             $0.value = self.afterText
             $0.add(rule: RuleRequired())
-            $0.validationOptions = .validatesOnChange
+            $0.validationOptions = .validatesOnDemand
             $0.cell.textField.clearButtonMode = .always
             $0.cell.textField.borderStyle = .roundedRect
         }.onChange({ (textRow) in
@@ -191,6 +191,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             $0.value = ""
             $0.cell.textField.isUserInteractionEnabled = false
             $0.cell.textField.textAlignment = .left
+            $0.cell.textField.borderStyle = .roundedRect
         }
         <<< ButtonRow() {
             $0.title = NSLocalizedString("CreateSpeechModSettingViewControllerSwift_TestButtonTitle", comment: "発音テスト")
@@ -263,6 +264,7 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
     */
     
     func validateDataAndAlert(before:String, after:String, isUseRegexp:Bool) -> Bool {
+        form.validate()
         if !validateBeforeString(text: before, isUseRegexp: isUseRegexp) {
             DispatchQueue.main.async {
                 NiftyUtility.EasyDialogOneButton(
