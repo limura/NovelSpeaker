@@ -683,6 +683,22 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            <<< SwitchRow("isAnnounceAtRepatSpeechTimeSwitchRow") { row in
+                row.title = NSLocalizedString("SettingTableViewController_isAnnounceAtRepatSpeechTimeTitle", comment: "読み上げ停止後に再開する場合にその旨をアナウンスする")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith( realm: realm) else { return }
+                    row.value = globalState.isAnnounceAtRepatSpeechTime
+                }
+            }.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.isAnnounceAtRepatSpeechTime = value
+                    }
+                }
+            })
             <<< SwitchRow("MixWithOthersSwitchRow") { row in
                 row.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)")
                 row.cell.textLabel?.numberOfLines = 0

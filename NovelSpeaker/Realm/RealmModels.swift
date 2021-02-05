@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 4
+    static let currentSchemaVersion : UInt64 = 5
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -60,7 +60,12 @@ import AVFoundation
     static func Migrate_3_To_4(migration:Migration, oldSchemaVersion:UInt64) {
         Migrate_Novel_LikeLevelTo_GlobalState_NovelLikeOrder(migration: migration, oldSchemaVersion: oldSchemaVersion)
     }
-    
+    static func Migrate_4_To_5(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmGlobalState.className()) { (oldObject, newObject) in
+            newObject?["isAnnounceAtRepatSpeechTime"] = true
+        }
+    }
+
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
         if oldSchemaVersion == 0 {
             Migrate_0_To_1(migration: migration, oldSchemaVersion: oldSchemaVersion)
@@ -70,6 +75,9 @@ import AVFoundation
         }
         if oldSchemaVersion == 3 {
             Migrate_3_To_4(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion == 4 {
+            Migrate_4_To_5(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     
@@ -2289,6 +2297,7 @@ extension HTTPCookie {
     @objc dynamic var m_DisplayType : Int = NovelDisplayType.textView.rawValue
     @objc dynamic var bookshelfViewButtonSettingArrayData = Data()
     @objc dynamic var m_repeatSpeechType : Int = Int(RepeatSpeechType.NoRepeat.rawValue)
+    @objc dynamic var isAnnounceAtRepatSpeechTime = true
     @objc dynamic var isOverrideRubyIsEnabled = false
     @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
     @objc dynamic var isIgnoreURIStringSpeechEnabled = false

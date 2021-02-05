@@ -1089,9 +1089,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     func finishSpeak() {
         let nextStorySpeechWaitSecond = 0.5
+        func AnnounceAndDoNext(realm:Realm, announceText: String, block: @escaping (()->Void)) {
+            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.isAnnounceAtRepatSpeechTime == true else {
+                block()
+                return
+            }
+            self.AnnounceSpeech(text: announceText, completion: block)
+        }
+        
         func speechNextNovelWith(realm:Realm, title:String, story:Story) {
             self.StopSpeech(realm: realm)
-            self.AnnounceSpeech(text: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), title)) {
+            AnnounceAndDoNext(realm: realm, announceText: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), title)) {
                 DispatchQueue.main.async {
                     self.ringPageTurningSound()
                     self.SetStory(story: story, withUpdateReadDate: true) { (story) in
@@ -1139,7 +1147,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 RealmUtil.WriteWith(realm: realm) { (realm) in
                                     firstStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                                 }
-                                self.AnnounceSpeech(text: NSLocalizedString("StorySpeaker_SpeechStopedAndRewindFirstStory", comment: "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。")) {
+                                AnnounceAndDoNext(realm: realm, announceText: NSLocalizedString("StorySpeaker_SpeechStopedAndRewindFirstStory", comment: "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。")) {
                                     DispatchQueue.main.async {
                                         self.ringPageTurningSound()
                                         self.SetStory(story: firstStory, withUpdateReadDate: true) { (story) in

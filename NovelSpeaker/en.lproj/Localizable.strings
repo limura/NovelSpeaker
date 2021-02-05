@@ -112,6 +112,7 @@
 "SettingTableViewController_PrivacyPolicy" = "NovelSpeaker's privacy policy";
 "SettingTableView_SendEmailWithLargeFileWarning" = "Please note that the file attached is very large with %@. There are possibilities of error codes due to internet flucuation. \r\n Try using Mail Drop from iCloud Drive (supports up to 5GB)";
 "SettingTableViewController_About" = "About NovelSpeaker";
+"SettingTableViewController_isAnnounceAtRepatSpeechTimeTitle" = "Announce to that effect when resuming after stopping reading";
 "SettingsViewController_CreatingBackupData" = "Generating backup\r\n";
 "SettingsViewController_GenerateBackupDataFailed" = "Backup Generation failed.";
 "SettingsViewController_IsCreateFullBackup?" = "Would you like to backup the entire bookshelf including the text?\r\nWhen there are a large number of registered novels, it may be time and storage consuming.";

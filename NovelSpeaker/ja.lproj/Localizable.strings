@@ -111,6 +111,7 @@
 "SettingTableViewController_PrivacyPolicy" = "ことせかい のプライバシーポリシーを確認する";
 "SettingTableView_SendEmailWithLargeFileWarning" = "なお、今回添付されているファイルは %@ ととても大きいため、メールの転送経路によってはエラーを引き起こす可能性があります。\r\niCloud DriveのMail Dropという機能を使うとかなり大きなファイル(最大5GBytesまで)のファイルを送信できるようになるので、そちらの利用を検討したほうが良いかもしれません。";
 "SettingTableViewController_About" = "ことせかい について";
+"SettingTableViewController_isAnnounceAtRepatSpeechTimeTitle" = "読み上げ停止後に再開する場合にその旨を告知する";
 "SettingsViewController_CreatingBackupData" = "バックアップデータ作成中です。\r\nしばらくお待ち下さい\r\n";
 "SettingsViewController_GenerateBackupDataFailed" = "バックアップデータの生成に失敗しました。";
 "SettingsViewController_IsCreateFullBackup?" = "小説の本文まで含めた完全なバックアップファイルを生成しますか？\r\n登録小説数が多い場合は生成に膨大な時間と本体容量が必要となります。";
