@@ -2680,6 +2680,62 @@ Bug fix
 - Fixed the problem that some ruby notation may be imported without being recognized as ruby when importing to the Web.
 - Fixed the problem that the value on the "Standard replacement setting" side was rewritten when the value was entered in "Hint information for Web search tab" in "Settings tab" -> "URL setting for internal data reference"
 
+# Version 2.1.0
+
+アイコンの変更
+
+ことせかい のアイコンを変更致しました
+
+インタフェースの変更
+
+- 「設定タブ」に「読み上げ停止後に再開する場合にその旨を告知する」のON/OFF設定を追加
+- 「設定タブ」->「本棚画面の右上に表示されるボタン群の編集」に「実行中の全てのダウンロードを止める」を追加
+- 「設定タブ」に「普段は使う必要の無いもの」というセクションを追加
+- 「設定タブ」->「普段は使う必要の無いもの」に「内部データ参照用URLの設定」「SiteInfoを読み直す」「Web検索タブの検索データを読み直す」を移動
+- 「小説の詳細」画面で小説名や作者名をタップした時に、それぞれをコピーした上で編集メニューが出るように
+- SiteInfoの読み込みに失敗した場合、「アプリ内エラーのお知らせ」にお知らせを出すように
+
+問題の修正
+
+- 発話中の「少し先へ進む」「少し前へ戻す」「早送り」「巻き戻し」のそれぞれが機能しなくなっていた問題を修正
+- 「設定タブ」の「発話設定」や「発話変更設定」「読みの修正」「読み上げ時の間の設定」のいづれかを全て消すと再起動時に初期値が入力される問題を修正
+- 「設定タブ」->「読みの修正」->「読みの修正詳細」で一番上の「読み替え前」とその一つ下の「読み替え後」に日本語モードで何らかの日本語文字の入力を行い、入力欄右側の「x」ボタンを押して全てを消した後にもう一度何らかの日本語文字を入力しようとすると、最初の1文字が変換候補から外れる、という問題を修正
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は、アイコンの修正とVersion 2.* になってから受けたお問い合わせのキャッチアップとなります。
+
+アイコンは Mattz-P様 に作って頂きました。Mattz-P様ありがとうございます！ヾ(*´∀｀*)ノ
+Version 2.* になってからは、なろう検索タブもなくなりましたし、より色々なWebサイト様からの文書を取り込めるようになりましたし、剣のマークの入っているいわゆる異世界物だけのようなイメージを払拭できそうでいいかなーと思っています。
+
+Version 2.* になってから受けたお問い合わせのキャッチアップに関しましては、色々とたくさんになってしまいました。できるだけ Version 1.* の頃と同じ操作感が保てるように努力したつもりでしたが、至らない点が少なくともこれだけあったのだと反省しております。また、まだ他にあるよという事に気づいておられたりされる方は優しく教えて頂けますとありがたいです。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+# Version 2.1.0
+
+Change icon
+
+The icon of the novel speaker has been changed.
+
+Interface changes
+
+- Added ON / OFF setting of "Notify when restarting after reading is stopped" to "Settings tab"
+- Added "Stop all running downloads" to "Settings tab"-> "Edit buttons displayed in the upper right corner of the bookshelf screen"
+- Added a section to "Settings tab" that says "What you don't normally need to use"
+- Move "Settings for internal data reference", "Reread SiteInfo", and "Reread search data on Web search tab" to "Settings tab"-> "Items that you do not normally need to use".
+- When you tap the novel name or author name on the "Details of novel" screen, the edit menu will appear after copying each.
+- If SiteInfo fails to load, a notification will be sent to "Notification of in-app error".
+
+Fixing the problem
+
+- Fixed an issue where each of "Forward a little", "Back a little", "Fast forward", and "Rewind" did not work during utterance
+- Fixed the problem that the initial value is input at restart when all of "Utterance setting", "Utterance change setting", "Reading correction", and "Setting during reading" are deleted from "Settings tab".
+- In "Settings tab"-> "Correction of reading"-> "Details of correction of reading", enter some Japanese characters in Japanese mode in "Before reading" and "After reading" below it. Fixed the problem that the first character is excluded from the conversion candidates when trying to input some Japanese characters again after erasing everything by pressing the "x" button on the right side of the input field.
+
+
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える

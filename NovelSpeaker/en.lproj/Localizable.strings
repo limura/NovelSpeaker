@@ -762,17 +762,44 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.0.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.1.0
 
-- Fixed an issue where \"the order of the novel chapters would be messed up\" when updating from Version 1. * to Version 2.0.0
-- Fixed the problem that the URL sometimes did not open in the Web import tab even if you pressed \"Try on the Web import tab\" when importing from Safari.
-- Fixed the problem that some ruby notation may be imported without being recognized as ruby when importing to the Web.
-- Fixed the problem that the value on the \"Standard replacement setting\" side was rewritten when the value was entered in \"Hint information for Web search tab\" in \"Settings tab\" -> \"URL setting for internal data reference\"
-
+- The icon of the NovelSpeaker has been changed.
+- Added ON / OFF setting of \"Notify when restarting after reading is stopped\" to \"Settings tab\"
+- Added \"Stop all running downloads\" to \"Settings tab\" -> \"Edit buttons displayed in the upper right corner of the bookshelf screen\"
+- Added a section to \"Settings tab\" that says \"What you don't normally need to use\"
+- Move \"Settings for internal data reference\", \"Reread SiteInfo\", and \"Reread search data on Web search tab\" to \"Settings tab\" -> \"Items that you do not normally need to use\".
+- When you tap the novel name or author name on the \"Details of novel\" screen, the edit menu will appear after copying each.
+- If SiteInfo fails to load, a notification will be sent to \"Notification of in-app error\".
+- Fixed an issue where each of \"Forward a little\", \"Back a little\", \"Fast forward\", and \"Rewind\" did not work during utterance
+- Fixed the problem that the initial value is input at restart when all of \"Utterance setting\", \"Utterance change setting\", \"Reading correction\", and \"Setting during reading\" are deleted from \"Settings tab\".
+- In \"Settings tab\" -> \"Correction of reading\" -> \"Details of correction of reading\", enter some Japanese characters in Japanese mode in \"Before reading\" and \"After reading\" below it. Fixed the problem that the first character is excluded from the conversion candidates when trying to input some Japanese characters again after erasing everything by pressing the \"x\" button on the right side of the input field.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+#Version 2.1.0
+
+Change icon
+
+- The icon of the NovelSpeaker has been changed.
+
+Interface changes
+
+- Added ON / OFF setting of \"Notify when restarting after reading is stopped\" to \"Settings tab\"
+- Added \"Stop all running downloads\" to \"Settings tab\" -> \"Edit buttons displayed in the upper right corner of the bookshelf screen\"
+- Added a section to \"Settings tab\" that says \"What you don't normally need to use\"
+- Move \"Settings for internal data reference\", \"Reread SiteInfo\", and \"Reread search data on Web search tab\" to \"Settings tab\" -> \"Items that you do not normally need to use\".
+- When you tap the novel name or author name on the \"Details of novel\" screen, the edit menu will appear after copying each.
+- If SiteInfo fails to load, a notification will be sent to \"Notification of in-app error\".
+
+Fixing the problem
+
+- Fixed an issue where each of \"Forward a little\", \"Back a little\", \"Fast forward\", and \"Rewind\" did not work during utterance
+- Fixed the problem that the initial value is input at restart when all of \"Utterance setting\", \"Utterance change setting\", \"Reading correction\", and \"Setting during reading\" are deleted from \"Settings tab\".
+- In \"Settings tab\" -> \"Correction of reading\" -> \"Details of correction of reading\", enter some Japanese characters in Japanese mode in \"Before reading\" and \"After reading\" below it. Fixed the problem that the first character is excluded from the conversion candidates when trying to input some Japanese characters again after erasing everything by pressing the \"x\" button on the right side of the input field.
+
+
 # Version 2.0.1
 
 - Fixed an issue where \"the order of the novel chapters would be messed up\" when updating from Version 1. * to Version 2.0.0
