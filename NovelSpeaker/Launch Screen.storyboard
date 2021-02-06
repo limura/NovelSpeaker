@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-    <device id="retina4_0" orientation="portrait" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15510"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -16,11 +16,14 @@
                         <viewControllerLayoutGuide type="bottom" id="xb3-aO-Qok"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="NovelSpeakerIcon-RoundedCorners.png" translatesAutoresizingMaskIntoConstraints="NO" id="NpF-v2-3pH">
-                                <rect key="frame" x="112" y="236" width="96" height="96"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="NovelSpeaker-backgroundGradation.png" translatesAutoresizingMaskIntoConstraints="NO" id="oIx-0G-IqQ">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="NovelSpeaker-WhiteIconOnly.png" translatesAutoresizingMaskIntoConstraints="NO" id="NpF-v2-3pH">
+                                <rect key="frame" x="145" y="386" width="124" height="124"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="NpF-v2-3pH" secondAttribute="height" multiplier="1:1" id="feO-Bx-S7v"/>
                                 </constraints>
@@ -28,19 +31,24 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="oIx-0G-IqQ" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="FcA-LT-74x"/>
                             <constraint firstItem="NpF-v2-3pH" firstAttribute="height" relation="lessThanOrEqual" secondItem="Ze5-6b-2t3" secondAttribute="height" multiplier="0.3" id="I17-Q1-tnF"/>
                             <constraint firstItem="NpF-v2-3pH" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Nmr-a6-egM"/>
+                            <constraint firstAttribute="trailing" secondItem="oIx-0G-IqQ" secondAttribute="trailing" id="Q5o-0f-PZM"/>
                             <constraint firstItem="NpF-v2-3pH" firstAttribute="width" relation="lessThanOrEqual" secondItem="Ze5-6b-2t3" secondAttribute="width" multiplier="0.3" id="VLy-Fx-Z45"/>
+                            <constraint firstItem="oIx-0G-IqQ" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="ez2-GJ-TDw"/>
+                            <constraint firstAttribute="bottom" secondItem="oIx-0G-IqQ" secondAttribute="bottom" id="h9k-36-mUp"/>
                             <constraint firstItem="NpF-v2-3pH" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="tVC-da-HLu"/>
                         </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="53" y="375"/>
+            <point key="canvasLocation" x="52.5" y="375"/>
         </scene>
     </scenes>
     <resources>
-        <image name="NovelSpeakerIcon-RoundedCorners.png" width="210.65142822265625" height="210.65142822265625"/>
+        <image name="NovelSpeaker-WhiteIconOnly.png" width="192" height="192"/>
+        <image name="NovelSpeaker-backgroundGradation.png" width="105.32571411132812" height="105.32571411132812"/>
     </resources>
 </document>

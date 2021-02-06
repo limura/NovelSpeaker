@@ -1,92 +1,92 @@
 {
   "images" : [
     {
-      "size" : "24x24",
+      "filename" : "NovelSpeakerIcon-color-48x48.png",
       "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-48x48.png",
-      "scale" : "2x",
       "role" : "notificationCenter",
+      "scale" : "2x",
+      "size" : "24x24",
       "subtype" : "38mm"
     },
     {
-      "size" : "27.5x27.5",
+      "filename" : "NovelSpeakerIcon-color-55x55.png",
       "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-55x55.png",
-      "scale" : "2x",
       "role" : "notificationCenter",
+      "scale" : "2x",
+      "size" : "27.5x27.5",
       "subtype" : "42mm"
     },
     {
-      "size" : "29x29",
+      "filename" : "NovelSpeakerIcon-color-58x58.png",
       "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-58x58.png",
       "role" : "companionSettings",
-      "scale" : "2x"
-    },
-    {
-      "size" : "29x29",
-      "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-87x87.png",
-      "role" : "companionSettings",
-      "scale" : "3x"
-    },
-    {
-      "size" : "40x40",
-      "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-80x80.png",
       "scale" : "2x",
+      "size" : "29x29"
+    },
+    {
+      "filename" : "NovelSpeakerIcon-color-87x87.png",
+      "idiom" : "watch",
+      "role" : "companionSettings",
+      "scale" : "3x",
+      "size" : "29x29"
+    },
+    {
+      "filename" : "NovelSpeakerIcon-color-80x80.png",
+      "idiom" : "watch",
       "role" : "appLauncher",
+      "scale" : "2x",
+      "size" : "40x40",
       "subtype" : "38mm"
     },
     {
-      "size" : "44x44",
+      "filename" : "NovelSpeakerIcon-color-88x88.png",
       "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-88x88.png",
-      "scale" : "2x",
       "role" : "appLauncher",
+      "scale" : "2x",
+      "size" : "44x44",
       "subtype" : "40mm"
     },
     {
-      "size" : "50x50",
+      "filename" : "NovelSpeakerIcon-color-100x100.png",
       "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-100x100.png",
-      "scale" : "2x",
       "role" : "appLauncher",
+      "scale" : "2x",
+      "size" : "50x50",
       "subtype" : "44mm"
     },
     {
-      "size" : "86x86",
+      "filename" : "NovelSpeakerIcon-color-172x172.png",
       "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-172x172.png",
-      "scale" : "2x",
       "role" : "quickLook",
+      "scale" : "2x",
+      "size" : "86x86",
       "subtype" : "38mm"
     },
     {
-      "size" : "98x98",
+      "filename" : "NovelSpeakerIcon-color-196x196.png",
       "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-196x196.png",
-      "scale" : "2x",
       "role" : "quickLook",
+      "scale" : "2x",
+      "size" : "98x98",
       "subtype" : "42mm"
     },
     {
-      "size" : "108x108",
+      "filename" : "NovelSpeakerIcon-color-216x216.png",
       "idiom" : "watch",
-      "filename" : "NovelSpeakerIcon-center-216x216.png",
-      "scale" : "2x",
       "role" : "quickLook",
+      "scale" : "2x",
+      "size" : "108x108",
       "subtype" : "44mm"
     },
     {
-      "size" : "1024x1024",
+      "filename" : "NovelSpeakerIcon-color-1024x1024.png",
       "idiom" : "watch-marketing",
-      "filename" : "NovelSpeakerIcon-center-1024x1024.png",
-      "scale" : "1x"
+      "scale" : "1x",
+      "size" : "1024x1024"
     }
   ],
   "info" : {
-    "version" : 1,
-    "author" : "xcode"
+    "author" : "xcode",
+    "version" : 1
   }
 }

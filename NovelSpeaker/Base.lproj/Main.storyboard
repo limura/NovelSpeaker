@@ -332,7 +332,20 @@
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="44" width="375" height="574"/>
-                                <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
+                                <string key="text">
+
+------ NovelSpeaker アイコン ------
+
+作成者: Mattz-P @ GitHub (https://github.com/Mattz-P)
+
+アイコン内素材:
+SHARED BY: MOHAMED IBRAHIM 04-05-2008 (http://www.clker.com/profile-9.html)
+
+
+
+
+------- SZTextView -------
+Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
 MIT License
 
@@ -353,7 +366,9 @@ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.   ----------- EasyDialogs ---------
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+--------- EasyDialogs ---------
 
 //  Created by Junior B. on 12.12.16.
 //  Copyright © 2016 Bonto.ch.
@@ -374,7 +389,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.   --------
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.    -------- eureka --------  The MIT License (MIT)
+//  THE SOFTWARE.
+
+
+-------- eureka --------
+
+The MIT License (MIT)
 
 Copyright (c) 2015 XMARTLABS
 
