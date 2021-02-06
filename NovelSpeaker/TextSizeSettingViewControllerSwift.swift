@@ -185,7 +185,6 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.displaySettingObserbeToken]) { (realm) in
                     displaySetting.lineSpacing = self.lineSpacingSlider.value
                     realm.add(displaySetting, update: .modified)
-                    print("lineSpacing: \(self.lineSpacingSlider.value) -> \(displaySetting.lineSpacingDisplayValue)")
                 }
                 self.setFont(displaySetting: displaySetting)
             }
