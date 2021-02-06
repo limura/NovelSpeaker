@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 5
+    static let currentSchemaVersion : UInt64 = 6
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -63,6 +63,11 @@ import AVFoundation
     static func Migrate_4_To_5(migration:Migration, oldSchemaVersion:UInt64) {
         migration.enumerateObjects(ofType: RealmGlobalState.className()) { (oldObject, newObject) in
             newObject?["isAnnounceAtRepatSpeechTime"] = true
+        }
+    }
+    static func Migrate_5_To_6(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmDisplaySetting.className()) { (oldObject, newObject) in
+            newObject?["lineSpacing"] = Float(26.0)
         }
     }
 
@@ -2486,6 +2491,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
     @objc dynamic var name : String = "" // primary key
     @objc dynamic var isDeleted: Bool = false
     @objc dynamic var textSizeValue: Float = 58.0
+    @objc dynamic var lineSpacing: Float = 3.0
     @objc dynamic var fontID = ""
     @objc dynamic var isVertical: Bool = false
     @objc dynamic var createdDate = Date()
@@ -2528,6 +2534,25 @@ extension RealmGlobalState: CanWriteIsDeleted {
                 return font
             }
             return UIFont.systemFont(ofSize: CGFloat(fontSize))
+        }
+    }
+
+    // value は 1 から 100 までを変化していて、実際に開く行間の値(pixel数？)を返す。
+    // 計算としては基本が 1.05^value の曲線(最初なだらかで最後急激に上がる奴)で、value が 100 の時には 500 になるような値とします。
+    // NSAttributeString の lineSpacing は、フォントサイズを含んだ値になるようなので、
+    // 「行間」という単語からするとよくわからん動きになるけれどまぁいいかとします。
+    static func convertLineSpacingValueFrom(lineSpacing:Float) -> CGFloat {
+        var value = Float(lineSpacing)
+        if value < 0.0 {
+            value = 0.0;
+        }else if value > 100.0 {
+            value = 100.0;
+        }
+        return CGFloat(pow(1.05, value) * 499 / pow(1.05, 99) + 1.0)
+    }
+    var lineSpacingDisplayValue: CGFloat {
+        get {
+            return RealmDisplaySetting.convertLineSpacingValueFrom(lineSpacing: self.lineSpacing)
         }
     }
 

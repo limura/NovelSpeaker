@@ -12,14 +12,39 @@ import RealmSwift
 class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDelegate {
     @IBOutlet weak var textSizeSlider: UISlider!
     @IBOutlet weak var sampleTextTextView: UITextView!
-
+    @IBOutlet weak var lineSpacingSlider: UISlider!
+    @IBOutlet weak var fontSizeLabel: UILabel!
+    @IBOutlet weak var lineSpacingLabel: UILabel!
+    
     var displaySettingObserbeToken:NotificationToken? = nil
+    var textAttribute:[NSAttributedString.Key: Any] = [:]
+    
+    let sampleText = """
+メロスは両手で老爺のからだをゆすぶって質問を重ねた。老爺は、あたりをはばかる低声で、わずか答えた。
+「王様は、人を殺します。」
+「なぜ殺すのだ。」
+「悪心を抱いている、というのですが、誰もそんな、悪心を持っては居りませぬ。」
+「たくさんの人を殺したのか。」
+「はい、はじめは王様の妹婿さまを。それから、御自身のお世嗣を。それから、妹さまを。それから、妹さまの御子さまを。それから、皇后さまを。それから、賢臣のアレキス様を。」
+「おどろいた。国王は乱心か。」
+「いいえ、乱心ではございませぬ。人を、信ずる事が出来ぬ、というのです。このごろは、臣下の心をも、お疑いになり、少しく派手な暮しをしている者には、人質ひとりずつ差し出すことを命じて居ります。御命令を拒めば十字架にかけられて、殺されます。きょうは、六人殺されました。」
+　聞いて、メロスは激怒した。「呆れた王だ。生かして置けぬ。」
+　メロスは、単純な男であった。買い物を、背負ったままで、のそのそ王城にはいって行った。たちまち彼は、巡邏の警吏に捕縛された。調べられて、メロスの懐中からは短剣が出て来たので、騒ぎが大きくなってしまった。メロスは、王の前に引き出された。
+「この短刀で何をするつもりであったか。言え！」暴君ディオニスは静かに、けれども威厳を以て問いつめた。その王の顔は蒼白で、眉間の皺しわは、刻み込まれたように深かった。
+
+太宰治 走れメロスより
+"""
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         addObservers()
-        
+
+        fontSizeLabel.text = NSLocalizedString("TextSizeSettingViewController_FontSizeLabel_Text", comment: "文字の大きさ")
+        fontSizeLabel.sizeToFit()
+        lineSpacingLabel.text = NSLocalizedString("TextSizeSettingViewController_LineSpacingLabel_Text", comment: "行間")
+        fontSizeLabel.sizeToFit()
+
         self.navigationItem.rightBarButtonItems = [
             UIBarButtonItem(title: NSLocalizedString("TextSizeSettingViewController_FontSettingTitle", comment: "字体設定"), style: .plain, target: self, action: #selector(fontSettingButtonClicked(_:))),
             UIBarButtonItem(title: NSLocalizedString("TextSizeSettinvViewController_ColorSettingTitle", comment: "色設定"), style: .plain, target: self, action: #selector(colorSettingButtonClicked(_:))),
@@ -89,7 +114,22 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
 
+    func updateTextAttribute(font:UIFont?, lineSpacing:CGFloat) {
+        let style = NSMutableParagraphStyle()
+        style.lineSpacing = lineSpacing // 行間
+        var attributes:[NSAttributedString.Key:Any] = [
+            .paragraphStyle: style
+        ]
+        if let font = font {
+            attributes[.font] = font
+        }
+        textAttribute = attributes
+    }
     
+    func applyText(text:String) {
+        self.sampleTextTextView.attributedText = NSAttributedString(string: text, attributes: self.textAttribute)
+    }
+
     func setFontFromRealm() {
         RealmUtil.RealmBlock { (realm) -> Void in
             if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
@@ -99,11 +139,11 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
     }
     
     func setFont(displaySetting:RealmDisplaySetting) {
-        let textSizeValue = displaySetting.textSizeValue
-        let font = displaySetting.font
+        updateTextAttribute(font: displaySetting.font, lineSpacing: displaySetting.lineSpacingDisplayValue)
         DispatchQueue.main.async {
-            self.textSizeSlider.value = textSizeValue
-            self.sampleTextTextView.font = font
+            self.applyText(text: self.sampleText)
+            self.textSizeSlider.value = displaySetting.textSizeValue
+            self.lineSpacingSlider.value = displaySetting.lineSpacing
         }
     }
     
@@ -132,10 +172,23 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
             if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.displaySettingObserbeToken]) { (realm) in
                     displaySetting.textSizeValue = self.textSizeSlider.value
+                    realm.add(displaySetting, update: .modified)
                 }
                 self.setFont(displaySetting: displaySetting)
             }
         }
     }
     
+    @IBAction func lineSpacingSliderChanged(_ sender: Any) {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
+                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.displaySettingObserbeToken]) { (realm) in
+                    displaySetting.lineSpacing = self.lineSpacingSlider.value
+                    realm.add(displaySetting, update: .modified)
+                    print("lineSpacing: \(self.lineSpacingSlider.value) -> \(displaySetting.lineSpacingDisplayValue)")
+                }
+                self.setFont(displaySetting: displaySetting)
+            }
+        }
+    }
 }

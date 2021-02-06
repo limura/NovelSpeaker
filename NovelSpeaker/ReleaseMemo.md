@@ -2694,6 +2694,7 @@ Bug fix
 - 「設定タブ」->「普段は使う必要の無いもの」に「内部データ参照用URLの設定」「SiteInfoを読み直す」「Web検索タブの検索データを読み直す」を移動
 - 「小説の詳細」画面で小説名や作者名をタップした時に、それぞれをコピーした上で編集メニューが出るように
 - SiteInfoの読み込みに失敗した場合、「アプリ内エラーのお知らせ」にお知らせを出すように
+- 「設定タブ」->「小説本文表示画面の設定」に「行間」のスライダを追加
 
 問題の修正
 
@@ -2728,6 +2729,7 @@ Interface changes
 - Move "Settings for internal data reference", "Reread SiteInfo", and "Reread search data on Web search tab" to "Settings tab"-> "Items that you do not normally need to use".
 - When you tap the novel name or author name on the "Details of novel" screen, the edit menu will appear after copying each.
 - If SiteInfo fails to load, a notification will be sent to "Notification of in-app error".
+-Added "Line spacing" slider to "Settings tab" -> "Novel text display screen settings"
 
 Fixing the problem
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -69,13 +69,20 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minValue="1" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="Fkj-1l-L3c">
-                                <rect key="frame" x="14" y="52" width="347" height="31"/>
+                                <rect key="frame" x="64" y="52" width="297" height="32"/>
                                 <connections>
                                     <action selector="textSizeSliderChanged:" destination="Pb4-1M-Lvn" eventType="valueChanged" id="dUE-qK-TOH"/>
                                 </connections>
                             </slider>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="26" minValue="0.0" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="9GS-ku-xOY">
+                                <rect key="frame" x="64" y="90.5" width="297" height="31"/>
+                                <connections>
+                                    <action selector="lineSpacingSliderChanged:" destination="Pb4-1M-Lvn" eventType="valueChanged" id="OmG-S4-ijv"/>
+                                    <action selector="textSizeSliderChanged:" destination="Pb4-1M-Lvn" eventType="valueChanged" id="WNM-Xu-eiu"/>
+                                </connections>
+                            </slider>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vgK-qt-EeE">
-                                <rect key="frame" x="16" y="90" width="343" height="520"/>
+                                <rect key="frame" x="16" y="128" width="343" height="482"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <string key="text">メロスは両手で老爺のからだをゆすぶって質問を重ねた。老爺は、あたりをはばかる低声で、わずか答えた。
 「王様は、人を殺します。」
@@ -92,28 +99,51 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kPq-1m-MJA">
+                                <rect key="frame" x="16" y="57" width="42" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="47T-9e-HPO">
+                                <rect key="frame" x="16" y="95" width="42" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="WC8-P8-5Yg"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="vgK-qt-EeE" firstAttribute="leading" secondItem="OW2-Cz-epG" secondAttribute="leadingMargin" id="4QT-7q-iiY"/>
+                            <constraint firstItem="kPq-1m-MJA" firstAttribute="leading" secondItem="WC8-P8-5Yg" secondAttribute="leading" constant="16" id="6q0-9K-kHW"/>
+                            <constraint firstItem="Fkj-1l-L3c" firstAttribute="leading" secondItem="kPq-1m-MJA" secondAttribute="trailing" constant="8" symbolic="YES" id="84K-FB-hcc"/>
+                            <constraint firstItem="vgK-qt-EeE" firstAttribute="top" secondItem="9GS-ku-xOY" secondAttribute="bottom" constant="7.5" id="85R-uO-fvh"/>
+                            <constraint firstItem="9GS-ku-xOY" firstAttribute="leading" secondItem="47T-9e-HPO" secondAttribute="trailing" constant="8" symbolic="YES" id="AAT-sh-aDx"/>
+                            <constraint firstItem="47T-9e-HPO" firstAttribute="leading" secondItem="WC8-P8-5Yg" secondAttribute="leading" constant="16" id="Hkn-bI-tOi"/>
                             <constraint firstItem="Fkj-1l-L3c" firstAttribute="top" secondItem="WC8-P8-5Yg" secondAttribute="top" constant="8" id="Jh6-lD-Fzh"/>
+                            <constraint firstItem="9GS-ku-xOY" firstAttribute="centerY" secondItem="47T-9e-HPO" secondAttribute="centerY" id="U9d-it-fi8"/>
+                            <constraint firstItem="Fkj-1l-L3c" firstAttribute="centerY" secondItem="kPq-1m-MJA" secondAttribute="centerY" id="We7-Ot-IaO"/>
+                            <constraint firstItem="kPq-1m-MJA" firstAttribute="top" secondItem="WC8-P8-5Yg" secondAttribute="top" constant="13" id="bfk-3l-LFW"/>
                             <constraint firstItem="Fkj-1l-L3c" firstAttribute="trailing" secondItem="OW2-Cz-epG" secondAttribute="trailingMargin" id="frR-j7-mlx"/>
-                            <constraint firstItem="Fkj-1l-L3c" firstAttribute="leading" secondItem="OW2-Cz-epG" secondAttribute="leadingMargin" id="glh-d4-Vty"/>
+                            <constraint firstItem="47T-9e-HPO" firstAttribute="top" secondItem="kPq-1m-MJA" secondAttribute="bottom" constant="17" id="lbo-Dl-mBZ"/>
                             <constraint firstItem="vgK-qt-EeE" firstAttribute="trailing" secondItem="OW2-Cz-epG" secondAttribute="trailingMargin" id="niZ-fU-RjM"/>
-                            <constraint firstItem="vgK-qt-EeE" firstAttribute="top" secondItem="Fkj-1l-L3c" secondAttribute="bottom" constant="8" id="t5l-0L-QId"/>
+                            <constraint firstItem="WC8-P8-5Yg" firstAttribute="trailing" secondItem="9GS-ku-xOY" secondAttribute="trailing" constant="16" id="r8b-mJ-FI0"/>
                             <constraint firstItem="WC8-P8-5Yg" firstAttribute="bottom" secondItem="vgK-qt-EeE" secondAttribute="bottom" constant="8" id="ui5-qs-9yA"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="文字の大きさ" id="PxM-wl-qYW"/>
                     <connections>
+                        <outlet property="fontSizeLabel" destination="kPq-1m-MJA" id="jQB-MV-xdf"/>
+                        <outlet property="lineSpacingLabel" destination="47T-9e-HPO" id="qLw-yN-Wi3"/>
+                        <outlet property="lineSpacingSlider" destination="9GS-ku-xOY" id="DRn-MO-nZ1"/>
                         <outlet property="sampleTextTextView" destination="vgK-qt-EeE" id="hVV-5j-25g"/>
                         <outlet property="textSizeSlider" destination="Fkj-1l-L3c" id="Giq-B6-e0p"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="u55-Il-lHZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="719" y="1592"/>
+            <point key="canvasLocation" x="717.60000000000002" y="1591.7541229385308"/>
         </scene>
         <!--Bug Report View Controller-->
         <scene sceneID="r9Q-T3-N95">
@@ -302,7 +332,7 @@
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="em1-qg-D62">
                                 <rect key="frame" x="0.0" y="44" width="375" height="574"/>
-                                <mutableString key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
+                                <string key="text"> ------- SZTextView -------  Copyright (c) 2013 glaszig &lt;glaszig@gmail.com&gt;
 
 MIT License
 
@@ -1228,7 +1258,7 @@ THE SOFTWARE.
    See the License for the specific language governing permissions and
    limitations under the License.
 
-</mutableString>
+</string>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>

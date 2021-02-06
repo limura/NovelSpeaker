@@ -35,7 +35,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var displaySettingObserverToken:NotificationToken? = nil
     var globalStateObserverToken:NotificationToken? = nil
     var readingChapterStoryUpdateDate:Date = Date()
-    
+    var storyTextAttribute:[NSAttributedString.Key: Any] = [:]
+    var displayTextCache:String = ""
+
     let storySpeaker = StorySpeaker.shared
     
     var lastChapterNumber:Int = -1
@@ -120,13 +122,14 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     func initWidgets() {
-        self.textView.text = NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……")
+        self.applyStoryText(text: NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……"))
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 return
             }
             if let displaySetting = globalState.defaultDisplaySettingWith(realm: realm) {
-                textView.font = displaySetting.font
+                //textView.font = displaySetting.font
+                updateStoryTextAttribute(font: displaySetting.font, lineSpacing: displaySetting.lineSpacingDisplayValue)
             }
         }
         
@@ -270,6 +273,28 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
     }
     
+    func updateStoryTextAttribute(font:UIFont?, lineSpacing:CGFloat) {
+        let style = NSMutableParagraphStyle()
+        style.lineSpacing = lineSpacing // 行間
+        //style.paragraphSpacing = 10 // 改行の時の間
+        var attributes:[NSAttributedString.Key:Any] = [
+            .paragraphStyle: style
+        ]
+        if let font = font {
+            attributes[.font] = font
+        }
+        storyTextAttribute = attributes
+        reloadStoryText()
+    }
+    
+    func applyStoryText(text:String) {
+        self.displayTextCache = text
+        self.reloadStoryText()
+    }
+    func reloadStoryText() {
+        self.textView.attributedText = NSAttributedString(string: self.displayTextCache, attributes: self.storyTextAttribute)
+    }
+    
     func setStoryWithoutSetToStorySpeaker(story:Story) {
         self.readingChapterStoryUpdateDate = Date()
         RealmUtil.RealmBlock { (realm) -> Void in
@@ -288,10 +313,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             DispatchQueue.main.async {
                 if let textViewText = self.textView.text, textViewText != content {
                     if story.content.count <= 0 {
-                        self.textView.text = NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。")
+                        self.applyStoryText(text: NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。"))
                         return
                     }
-                    self.textView.text = story.content
+                    self.applyStoryText(text: story.content)
                     // textView.select() すると、選択範囲の上にメニューが出るようになるのでこの時点では select() はしない。
                     // でも、textView.becomeFirstResponder() しておかないと選択範囲自体が表示されないようなので becomeFirstResponder() はどこかでしておかないと駄目っぽい。
                     //self.textView.select(self)
@@ -423,11 +448,12 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 switch change {
                 case .change(_, let properties):
                     for propaty in properties {
-                        if propaty.name == "textSizeValue" || propaty.name == "fontID" {
+                        if propaty.name == "textSizeValue" || propaty.name == "fontID" || propaty.name == "lineSpacing" {
                             DispatchQueue.main.async {
                                 RealmUtil.RealmBlock { (realm) -> Void in
                                     guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
-                                    self.textView.font = displaySetting.font
+                                    //self.textView.font = displaySetting.font
+                                    self.updateStoryTextAttribute(font: displaySetting.font, lineSpacing: displaySetting.lineSpacingDisplayValue)
                                 }
                             }
                         }
