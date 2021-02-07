@@ -583,6 +583,7 @@ class NovelDownloadQueue : NSObject {
     
     func downloadStop() {
         self.isDownloadStop = true
+        self.queueHolder.ClearAllQueue()
     }
     
     @objc static func DownloadFlush() {
