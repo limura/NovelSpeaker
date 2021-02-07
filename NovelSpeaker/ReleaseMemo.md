@@ -2701,6 +2701,7 @@ Bug fix
 - 発話中の「少し先へ進む」「少し前へ戻す」「早送り」「巻き戻し」のそれぞれが機能しなくなっていた問題を修正
 - 「設定タブ」の「発話設定」や「発話変更設定」「読みの修正」「読み上げ時の間の設定」のいづれかを全て消すと再起動時に初期値が入力される問題を修正
 - 「設定タブ」->「読みの修正」->「読みの修正詳細」で一番上の「読み替え前」とその一つ下の「読み替え後」に日本語モードで何らかの日本語文字の入力を行い、入力欄右側の「x」ボタンを押して全てを消した後にもう一度何らかの日本語文字を入力しようとすると、最初の1文字が変換候補から外れる、という問題を修正
+- 全ての小説の更新確認を行うなどで小説のダウンロードインジケータが表示されている時に、ダウンロードが停止されてもそのインジケータだけは消えない問題を修正
 
 評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
 
@@ -2736,6 +2737,7 @@ Fixing the problem
 - Fixed an issue where each of "Forward a little", "Back a little", "Fast forward", and "Rewind" did not work during utterance
 - Fixed the problem that the initial value is input at restart when all of "Utterance setting", "Utterance change setting", "Reading correction", and "Setting during reading" are deleted from "Settings tab".
 - In "Settings tab"-> "Correction of reading"-> "Details of correction of reading", enter some Japanese characters in Japanese mode in "Before reading" and "After reading" below it. Fixed the problem that the first character is excluded from the conversion candidates when trying to input some Japanese characters again after erasing everything by pressing the "x" button on the right side of the input field.
+- Fixed an issue where when the novel download indicator is displayed, such as when checking for updates of all novels, only that indicator does not disappear even if the download is stopped.
 
 
 TODO:
