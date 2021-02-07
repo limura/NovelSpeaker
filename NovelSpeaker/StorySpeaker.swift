@@ -785,7 +785,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             songInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = position
             songInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1.0
         }
-        if let image = UIImage.init(named: "NovelSpeakerIcon-167px.png") {
+        if let image = UIImage.init(named: "NovelSpeakerIcon-color-1024x1024.png") {
             let artWork = MPMediaItemArtwork.init(boundsSize: image.size) { (size) -> UIImage in
                 return image.resize(newSize: size)
             }
