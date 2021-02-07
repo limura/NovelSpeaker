@@ -128,6 +128,12 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
     
     func applyText(text:String) {
         self.sampleTextTextView.attributedText = NSAttributedString(string: text, attributes: self.textAttribute)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let state = RealmGlobalState.GetInstanceWith(realm: realm) {
+                self.sampleTextTextView.backgroundColor = state.backgroundColor
+                self.sampleTextTextView.textColor = state.foregroundColor
+            }
+        }
     }
 
     func setFontFromRealm() {

@@ -293,6 +293,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     func reloadStoryText() {
         self.textView.attributedText = NSAttributedString(string: self.displayTextCache, attributes: self.storyTextAttribute)
+        self.applyTheme()
     }
     
     func setStoryWithoutSetToStorySpeaker(story:Story) {
