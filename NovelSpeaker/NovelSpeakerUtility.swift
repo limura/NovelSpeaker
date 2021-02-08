@@ -1267,6 +1267,9 @@ class NovelSpeakerUtility: NSObject {
                         let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
                         setting.createdDate = createdDate
                     }
+                    if let lineSpacing = displaySettingDic.object(forKey: "lineSpacing") as? NSNumber {
+                        setting.lineSpacing = lineSpacing.floatValue
+                    }
                     setting.targetNovelIDArray.removeAll()
                     if let targetNovelIDArray = displaySettingDic.object(forKey: "targetNovelIDArray") as? NSArray  {
                         for novelID in targetNovelIDArray {
@@ -1427,6 +1430,9 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if let repeatSpeechType = dic.object(forKey: "repeatSpeechType") as? NSNumber {
                     globalState.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.intValue) ?? RepeatSpeechType.NoRepeat
+                }
+                if let isAnnounceAtRepatSpeechTime = dic.value(forKey: "isAnnounceAtRepatSpeechTime") as? NSNumber {
+                    globalState.isAnnounceAtRepatSpeechTime = isAnnounceAtRepatSpeechTime.boolValue
                 }
                 if let isOverrideRubyIsEnabled = dic.object(forKey: "isOverrideRubyIsEnabled") as?   NSNumber {
                     globalState.isOverrideRubyIsEnabled = isOverrideRubyIsEnabled.boolValue
@@ -1944,6 +1950,7 @@ class NovelSpeakerUtility: NSObject {
                 "defaultDisplaySettingID": globalState.defaultDisplaySettingID,
                 "defaultSpeakerID": globalState.defaultSpeakerID,
                 "repeatSpeechType": globalState.m_repeatSpeechType,
+                "isAnnounceAtRepatSpeechTime": globalState.isAnnounceAtRepatSpeechTime,
                 "isOverrideRubyIsEnabled": globalState.isOverrideRubyIsEnabled,
                 "notRubyCharactorStringArray": globalState.notRubyCharactorStringArray,
                 "isIgnoreURIStringSpeechEnabled": globalState.isIgnoreURIStringSpeechEnabled,
@@ -1958,6 +1965,7 @@ class NovelSpeakerUtility: NSObject {
             for setting in targetArray {
                 result.append([
                     "textSizeValue": setting.textSizeValue,
+                    "lineSpacing": setting.lineSpacing,
                     "fontID": setting.fontID,
                     "name": setting.name,
                     "isVertical": setting.isVertical,

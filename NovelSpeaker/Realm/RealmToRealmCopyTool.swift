@@ -185,6 +185,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.m_DisplayType = obj.m_DisplayType
             newObj.bookshelfViewButtonSettingArrayData = obj.bookshelfViewButtonSettingArrayData
             newObj.m_repeatSpeechType = obj.m_repeatSpeechType
+            newObj.isAnnounceAtRepatSpeechTime = obj.isAnnounceAtRepatSpeechTime
             newObj.isOverrideRubyIsEnabled = obj.isOverrideRubyIsEnabled
             newObj.notRubyCharactorStringArray = obj.notRubyCharactorStringArray
             newObj.isIgnoreURIStringSpeechEnabled = obj.isIgnoreURIStringSpeechEnabled
@@ -206,6 +207,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isDeleted = obj.isDeleted
             newObj.name = obj.name
             newObj.textSizeValue = obj.textSizeValue
+            newObj.lineSpacing = obj.lineSpacing
             newObj.fontID = obj.fontID
             newObj.isVertical = obj.isVertical
             newObj.createdDate = obj.createdDate
