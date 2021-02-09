@@ -220,17 +220,17 @@ import AVFoundation
         let container = GetContainer()
         let realmConfiguration = RealmUtil.GetCloudRealmConfiguration()
         return SyncEngine(objects: [
-            SyncObject<RealmCloudVersionChecker>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmStoryBulk>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmNovel>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmSpeechModSetting>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmSpeechWaitConfig>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmSpeakerSetting>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmSpeechSectionConfig>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmGlobalState>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmDisplaySetting>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmNovelTag>(realmConfiguration: realmConfiguration),
-            SyncObject<RealmBookmark>(realmConfiguration: realmConfiguration),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmCloudVersionChecker.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmStoryBulk.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmNovel.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmSpeechModSetting.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmSpeechWaitConfig.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmSpeakerSetting.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmSpeechSectionConfig.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmGlobalState.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmDisplaySetting.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmNovelTag.self),
+            SyncObject(realmConfiguration: realmConfiguration, type: RealmBookmark.self),
             ], databaseScope: .private, container: container)
     }
 
