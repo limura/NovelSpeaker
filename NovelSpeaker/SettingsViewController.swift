@@ -142,7 +142,11 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
         NiftyUtility.CheckNewImportantImformation { (text) in
             DispatchQueue.main.async {
-                self.tabBarController?.tabBar.items?[3].badgeValue = "!"
+                if text.count > 0 {
+                    self.tabBarController?.tabBar.items?[3].badgeValue = "!"
+                }else{
+                    self.tabBarController?.tabBar.items?[3].badgeValue = nil
+                }
             }
         } hasNoNewInformation: {
             DispatchQueue.main.async {
@@ -316,10 +320,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                             }else{
                                 row.value = ""
                             }
+                            row.updateCell()
                         }
                     }, hasNoNewInformation: {
                         DispatchQueue.main.async {
                             row.value = ""
+                            row.updateCell()
                         }
                     })
                 }
