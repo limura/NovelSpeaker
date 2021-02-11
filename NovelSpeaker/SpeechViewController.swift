@@ -37,6 +37,8 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var readingChapterStoryUpdateDate:Date = Date()
     var storyTextAttribute:[NSAttributedString.Key: Any] = [:]
     var displayTextCache:String = ""
+    var leftSwipeRecgnizer:UISwipeGestureRecognizer = UISwipeGestureRecognizer()
+    var rightSwipeRecgnizer:UISwipeGestureRecognizer = UISwipeGestureRecognizer()
 
     let storySpeaker = StorySpeaker.shared
     
@@ -76,6 +78,16 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.textView.becomeFirstResponder()
+        DispatchQueue.main.async {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                if globalState.isEnableSwipeOnStoryView {
+                    self.assignSwipeRecognizer()
+                }else{
+                    self.removeSwipeRecognizer()
+                }
+            }
+        }
     }
     
     deinit {
@@ -133,12 +145,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }
         }
         
-        let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(leftSwipe(_:)))
-        leftSwipe.direction = .left
-        self.textView.addGestureRecognizer(leftSwipe)
-        let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(rightSwipe(_:)))
-        rightSwipe.direction = .right
-        self.textView.addGestureRecognizer(rightSwipe)
+        self.leftSwipeRecgnizer = UISwipeGestureRecognizer(target: self, action: #selector(leftSwipe(_:)))
+        self.leftSwipeRecgnizer.direction = .left
+        self.rightSwipeRecgnizer = UISwipeGestureRecognizer(target: self, action: #selector(rightSwipe(_:)))
+        self.rightSwipeRecgnizer.direction = .right
         
         previousChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
         nextChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
@@ -148,6 +158,15 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         nextChapterButton.accessibilityLabel = NSLocalizedString("SpeechViewController_NextChapterButton_VoiceOverTitle", comment: "次のページ")
 
         setCustomUIMenu()
+    }
+    
+    func assignSwipeRecognizer() {
+        self.textView.addGestureRecognizer(self.leftSwipeRecgnizer)
+        self.textView.addGestureRecognizer(self.rightSwipeRecgnizer)
+    }
+    func removeSwipeRecognizer() {
+        self.textView.removeGestureRecognizer(self.leftSwipeRecgnizer)
+        self.textView.removeGestureRecognizer(self.rightSwipeRecgnizer)
     }
     
     func setCustomUIMenu() {
@@ -352,7 +371,17 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                                 guard let storyID = self.storyID, let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))?.RemoveRealmLink(), let buttonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() else { return }
                                 self.assignUpperButtons(novel: novel, aliveButtonSettings: buttonSettings)
                             }
-                            break
+                        }
+                        if property.name == "isEnableSwipeOnStoryView" {
+                            if let value = property.newValue as? Bool {
+                                DispatchQueue.main.async {
+                                    if value == true {
+                                        self.assignSwipeRecognizer()
+                                    }else{
+                                        self.removeSwipeRecognizer()
+                                    }
+                                }
+                            }
                         }
                     }
                 default:

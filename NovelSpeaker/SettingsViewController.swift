@@ -855,6 +855,21 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            <<< SwitchRow("isEnableSwipeOnStoryView") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsEnableSwipeOnStoryView", comment: "小説本文画面での左右スワイプでページめくりができるようにする")
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isEnableSwipeOnStoryView
+                }
+                row.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.globalDataNotificationToken]) { (realm) in
+                        globalState.isEnableSwipeOnStoryView = value
+                    }
+                }
+            })
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 $0.cell.textLabel?.numberOfLines = 0

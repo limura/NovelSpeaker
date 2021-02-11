@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 6
+    static let currentSchemaVersion : UInt64 = 7
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -70,6 +70,11 @@ import AVFoundation
             newObject?["lineSpacing"] = Float(26.0)
         }
     }
+    static func Migrate_6_To_7(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmGlobalState.className()) { (oldObject, newObject) in
+            newObject?["isEnableSwipeOnStoryView"] = true
+        }
+    }
 
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
         if oldSchemaVersion == 0 {
@@ -83,6 +88,12 @@ import AVFoundation
         }
         if oldSchemaVersion == 4 {
             Migrate_4_To_5(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion == 5 {
+            Migrate_5_To_6(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion == 6 {
+            Migrate_6_To_7(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     
@@ -2306,6 +2317,7 @@ extension HTTPCookie {
     @objc dynamic var isOverrideRubyIsEnabled = false
     @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
     @objc dynamic var isIgnoreURIStringSpeechEnabled = false
+    @objc dynamic var isEnableSwipeOnStoryView = true
     let novelLikeOrder = List<String>()
     
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"
