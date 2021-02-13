@@ -2739,6 +2739,40 @@ Fixing the problem
 - In "Settings tab"-> "Correction of reading"-> "Details of correction of reading", enter some Japanese characters in Japanese mode in "Before reading" and "After reading" below it. Fixed the problem that the first character is excluded from the conversion candidates when trying to input some Japanese characters again after erasing everything by pressing the "x" button on the right side of the input field.
 - Fixed an issue where when the novel download indicator is displayed, such as when checking for updates of all novels, only that indicator does not disappear even if the download is stopped.
 
+#Version 2.2.0
+
+インタフェースの変更
+
+- 「設定タブ」->「小説本文画面での左右スワイプでページめくりができるようにする」のON/OFF設定を追加
+
+問題の修正
+
+- 「設定タブ」のタブ側(?)に「！」がついている時に、「！」のついている「開発者からのお知らせ」や「アプリ内エラーのお知らせ」を開いてもタブ側の「！」が消えなかった場合があった問題を修正
+- 起動時に「設定タブ」->「開発者からのお知らせ」に新しいお知らせがあった時、「設定タブ」側には「！」がつくけれど、「設定タブ」->「開発者からのお知らせ」には「！」がつかない場合があった問題を修正
+- URLに日本語等の URL encode されそうな文字の含まれる小説が開けなくなる(または開いても本文が読めなくなる)問題を修正
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正は前回と引き続き Version 2.* で発生していた問題や、お問い合わせへの対応となります。
+恐らくまだまだ問題はあるのかとは思うのですが、今の所すぐに対応できる物についてはこのリリースで対応できたつもりになっている、という物になります。もし、「まだコレが直っていないのでは」というような事が思いついている方は、サポートサイト下部にあります「ご意見ご要望フォーム」か、アプリ内の「設定タブ」->「開発者に問い合わせる」からお問い合わせ下さい。
+(なお、不都合報告の場合は「はじめに(ことせかいの使い方)」の12ページ目の「開発者に問い合わせる」https://limura.github.io/NovelSpeaker/topics/jp/00012.html をよくお読みになった上で、問題を再現する事のできる手順やURLといった情報を忘れずに付記してお問い合わせ頂けますようお願いいたします)
+
+なお、ここ最近は余暇の時間の大半が ことせかい のお問い合わせ対応に使われており、正直な所を申しまして 馬鹿らしくてやってられない という気分になっています事をご理解いただいた上で、落ち着いて、礼儀正しく、上記の「開発者に問い合わせる」の項目を熟読した上で再現可能な情報を付記した上で、お問い合わせ頂けますとありがたいです。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+#Version 2.2.0
+
+Interface changes
+
+- Added ON / OFF setting of "Settings tab" -> "Allow page turning by swiping left and right on the novel text screen"
+
+Fixing the problem
+
+- When "!" Is attached to the tab side Of "Settings tab", even if you open "Notice from developer" or "Notification of in-app error" with "!", "!" On the tab side. Fixed an issue where "!" did not disappear
+- When there is a new notification in "Settings tab" -> "Notice from developer" at startup, "!" Is added on the "Settings tab" side, but "Settings tab" -> "Notice from developer" Fixed an issue where "!" Was not added to "!"
+- Fixed the problem that novels containing characters that are likely to be URL encoded, such as Japanese, cannot be opened (or the text cannot be read even if they are opened).
 
 TODO:
 - HTTP GET 周りをイベント駆動型に書き直す
