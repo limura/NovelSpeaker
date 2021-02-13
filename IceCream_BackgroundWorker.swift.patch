@@ -1,6 +1,22 @@
 --- BackgroundWorker.swift.orig	2021-02-10 22:50:58.000000000 +0900
-+++ BackgroundWorker.swift	2021-02-10 22:51:44.000000000 +0900
-@@ -28,9 +28,15 @@ class BackgroundWorker: NSObject {
++++ BackgroundWorker.swift	2021-02-13 20:27:44.000000000 +0900
+@@ -16,10 +16,13 @@ class BackgroundWorker: NSObject {
+     static let shared = BackgroundWorker()
+     
+     private var thread: Thread?
+-    private var block: (() -> Void)?
++    private var block:[(() -> Void)] = []
++    private let lockObject = NSLock()
+     
+     func start(_ block: @escaping () -> Void) {
+-        self.block = block
++        lockObject.lock()
++        self.block.append(block)
++        lockObject.unlock()
+         
+         if thread == nil {
+             thread = Thread { [weak self] in
+@@ -28,9 +31,15 @@ class BackgroundWorker: NSObject {
                      return
                  }
                  while (!th.isCancelled) {
@@ -16,10 +32,17 @@
                  }
                  Thread.exit()
              }
-@@ -53,5 +59,6 @@ class BackgroundWorker: NSObject {
+@@ -52,6 +61,12 @@ class BackgroundWorker: NSObject {
+     }
      
      @objc private func runBlock() {
-         block?()
-+	block = nil
+-        block?()
++        lockObject.lock()
++        let blockArray = block
++        block.removeAll()
++        lockObject.unlock()
++        for block in blockArray {
++            block()
++        }
      }
  }
