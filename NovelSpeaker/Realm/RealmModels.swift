@@ -897,7 +897,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     // とりあえず base64 decode できるかを試して失敗したら "%2F" を元に戻したものを返します。
     static func UniqueIDToURI(uniqueID:String) -> String {
         guard let zipedData = Data(base64Encoded: uniqueID), let data = NiftyUtility.decompress(data: zipedData), let uri = String(data: data, encoding: .utf8) else {
-            return uniqueID.removingPercentEncoding ?? uniqueID
+            return uniqueID.replacingOccurrences(of: "%2f", with: "/").replacingOccurrences(of: "%2F", with: "/")
         }
         return uri
     }
