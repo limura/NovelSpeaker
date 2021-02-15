@@ -644,6 +644,8 @@
 "BookShelfRATreeViewController_stopDownloadButtonTitle" = "停止";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
+"BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "お気に入り、現在は設定中";
+"BookShelfTreeViewCell_NotLikeStar_AccessibilityLabel" = "お気に入り、現在は未設定";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "読み替え辞書を移行中";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "読み上げ時の間の設定を移行中";

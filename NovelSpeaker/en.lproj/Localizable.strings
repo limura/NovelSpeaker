@@ -687,6 +687,9 @@
 "NovelSearchViewController_LoadingNextLink_Title" = "Searching for additional parts...";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
+"BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "Favorite state. now enabled.";
+"BookShelfTreeViewCell_NotLikeStar_AccessibilityLabel" = "Favorite state. now disabled.";
+
 
 "NovelDisplayColorSettingViewController_SampleText" = "If I speak in the tongues of men or of angels, but do not have love, I am only a resounding gong or a clanging cymbal. If I have the gift of prophecy and can fathom all mysteries and all knowledge, and if I have a faith that can move mountains, but do not have love, I am nothing. If I give all I possess to the poor and give over my body to hardship that I may boast,[b] but do not have love, I gain nothing.";
 "NovelDisplayColorSettingViewController_ColorSettingButton_Default" = "Standard (follows dark mode, etc.)";

@@ -200,8 +200,10 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         DispatchQueue.main.async {
             if likeLevel > 0 {
                 self.likeButton.setImage(BookShelfTreeViewCell.likeStarImage, for: .normal)
+                self.likeButton.accessibilityLabel = NSLocalizedString("BookShelfTreeViewCell_LikeStar_AccessibilityLabel", comment: "お気に入り、現在は設定中")
             }else{
                 self.likeButton.setImage(BookShelfTreeViewCell.notLikeStarImage, for: .normal)
+                self.likeButton.accessibilityLabel = NSLocalizedString("BookShelfTreeViewCell_NotLikeStar_AccessibilityLabel", comment: "お気に入り、現在は未設定")
             }
         }
     }
