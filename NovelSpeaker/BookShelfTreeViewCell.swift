@@ -46,6 +46,8 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         likeButton.imageView?.contentMode = .scaleAspectFit
         likeButton.contentHorizontalAlignment = .fill
         likeButton.contentVerticalAlignment = .fill
+        likeButton.isAccessibilityElement = false
+        readProgressView.isAccessibilityElement = false
         downloadingActivityIndicator.isHidden = true
         RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
