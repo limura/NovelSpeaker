@@ -646,6 +646,9 @@
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 "BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "お気に入り、現在は設定中";
 "BookShelfTreeViewCell_NotLikeStar_AccessibilityLabel" = "お気に入り、現在は未設定";
+"BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_Finished_Format" = "%@。読み終わっています";
+"BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_NotRead_Format" = "%@。まだ読んでいません";
+"BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_Format" = "%@ %d%%まで読んでいます";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "読み替え辞書を移行中";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "読み上げ時の間の設定を移行中";
