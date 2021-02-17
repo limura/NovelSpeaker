@@ -692,7 +692,7 @@
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_Finished_Format" = "%@. finished reading";
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_NotRead_Format" = "%@. haven't read it yet";
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_Format" = "%@ reading up to %d%%";
-
+"BookShelfTreeViewCell_AccessibilityLabel_Folder_Format" = "\"%@\" folder";
 
 "NovelDisplayColorSettingViewController_SampleText" = "If I speak in the tongues of men or of angels, but do not have love, I am only a resounding gong or a clanging cymbal. If I have the gift of prophecy and can fathom all mysteries and all knowledge, and if I have a faith that can move mountains, but do not have love, I am nothing. If I give all I possess to the poor and give over my body to hardship that I may boast,[b] but do not have love, I gain nothing.";
 "NovelDisplayColorSettingViewController_ColorSettingButton_Default" = "Standard (follows dark mode, etc.)";

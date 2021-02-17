@@ -649,6 +649,7 @@
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_Finished_Format" = "%@。読み終わっています";
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_NotRead_Format" = "%@。まだ読んでいません";
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_Format" = "%@ %d%%まで読んでいます";
+"BookShelfTreeViewCell_AccessibilityLabel_Folder_Format" = "%@ フォルダ";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "読み替え辞書を移行中";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "読み上げ時の間の設定を移行中";

@@ -442,6 +442,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }else{
             titleLabel.text = title
         }
+        self.titleLabel.accessibilityLabel = titleLabel.text
         if novel.isNewFlug {
             self.activateNewImageView()
         }else{
@@ -464,6 +465,9 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
             titleLabel.text = NSLocalizedString("BookShelfTreeViewCell_UnknownTitle", comment: "(小説名未設定)")
         }else{
             titleLabel.text = title
+        }
+        if let titleLabelText = titleLabel.text {
+            self.titleLabel.accessibilityLabel = String(format: NSLocalizedString("BookShelfTreeViewCell_AccessibilityLabel_Folder_Format", comment: "%@ フォルダ"), titleLabelText)
         }
         self.checkAndUpdateNewImage(novelIDArray: watchNovelIDArray)
         assignObservers()
