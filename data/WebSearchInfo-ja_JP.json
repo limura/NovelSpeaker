@@ -995,5 +995,21 @@
             "title": "//div[@class='gs-title']/a[@class='gs-title' and not(contains(@href,'//www.google.com/'))]",
             "url": "//div[@class='gs-title']/a[@class='gs-title' and not(contains(@href,'//www.google.com/'))]/@href"
         }
+    },
+    {
+	"isDisabled": true,
+        "title": "雛形",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "q"}
+        ],
+        "result": {
+            "block": "",
+            "nextLink": "",
+            "title": "",
+            "url": ""
+        }
     }
 ]
