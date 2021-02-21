@@ -771,16 +771,21 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.1
 
-- Added ON / OFF setting of \"Settings tab\" -> \"Allow page turning by swiping left and right on the novel text screen\"
-- When \"!\" Is attached to the tab side Of \"Settings tab\", even if you open \"Notice from developer\" or \"Notification of in-app error\" with \"!\", \"!\" On the tab side. Fixed an issue where \"!\" did not disappear
-- When there is a new notification in \"Settings tab\" -> \"Notice from developer\" at startup, \"!\" Is added on the \"Settings tab\" side, but \"Settings tab\" -> \"Notice from developer\" Fixed an issue where \"!\" Was not added to \"!\"
-- Fixed the problem that novels containing characters that are likely to be URL encoded, such as Japanese, cannot be opened (or the text cannot be read even if they are opened).
+- Slightly strengthened VoiceOver support on bookshelves
+- Changed the initial value of the novel to be corrected for reading created when pressing \"+\" in \"Settings tab\" -> \"Modify reading\" to \"All novels\".
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.2.1
+
+Bug fix
+
+- Slightly strengthened VoiceOver support on bookshelves
+- Changed the initial value of the novel to be corrected for reading created when pressing \"+\" in \"Settings tab\" -> \"Modify reading\" to \"All novels\".
+
 #Version 2.2.0
 
 Interface changes

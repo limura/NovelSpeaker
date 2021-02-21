@@ -2481,4 +2481,39 @@ class NovelSpeakerUtility: NSObject {
     static func GenerateNSError(msg: String, code: Int = 0) -> NSError {
         return NSError(domain: "com.limuraproducts.novelspeaker", code: code, userInfo: [NSLocalizedDescriptionKey: msg])
     }
+    
+    #if false // つくりかけ
+    /// 指定されたページ(章)を削除します。
+    /// そのページ(章)より後のページ(章)番号が全て書き変わります。
+    static func removeStory(storyID:String, completion: @escaping ((_ result:Bool)->Void)) {
+        DispatchQueue.main.async {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
+                let targetChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else {
+                    completion(false)
+                    return
+                }
+                guard let lastChapterNumber = novel.lastChapterNumber else {
+                    completion(true)
+                    return
+                }
+                if lastChapterNumber < targetChapterNumber {
+                    completion(true)
+                    return
+                }
+                var blockIndex = RealmStoryBulk.CalcBulkChapterNumber(chapterNumber: targetChapterNumber)
+                while blockIndex < lastChapterNumber {
+                    let currentBulkStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: blockIndex)
+                    guard let currentBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: currentBulkStoryID) else {
+                        completion(false)
+                        return
+                    }
+                    //TODO: hogehoge
+                    blockIndex += RealmStoryBulk.bulkCount
+                }
+            }
+        }
+    }
+    #endif
 }

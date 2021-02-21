@@ -762,16 +762,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.1
 
-- 「設定タブ」->「小説本文画面での左右スワイプでページめくりができるようにする」のON/OFF設定を追加
-- 「設定タブ」のタブ側(?)に「！」がついている時に、「！」のついている「開発者からのお知らせ」や「アプリ内エラーのお知らせ」を開いてもタブ側の「！」が消えなかった場合があった問題を修正
-- 起動時に「設定タブ」->「開発者からのお知らせ」に新しいお知らせがあった時、「設定タブ」側には「！」がつくけれど、「設定タブ」->「開発者からのお知らせ」には「！」がつかない場合があった問題を修正
-- URLに日本語等の URL encode されそうな文字の含まれる小説が開けなくなる(または開いても本文が読めなくなる)問題を修正
+- 本棚でのVoiceOver対応を少し強化
+- 「設定タブ」->「読みの修正」で「+」を押した時に作られる読みの修正の対象小説の初期値が空になっていたものを、「全ての小説」に変更
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.2.1
+
+問題の修正
+
+- 本棚でのVoiceOver対応を少し強化
+- 「設定タブ」->「読みの修正」で「+」を押した時に作られる読みの修正の対象小説の初期値が空になっていたものを、「全ての小説」に変更
+
+
 # Version 2.2.0
 
 インタフェースの変更
