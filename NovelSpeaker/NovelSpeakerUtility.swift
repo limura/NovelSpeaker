@@ -532,6 +532,7 @@ class NovelSpeakerUtility: NSObject {
                         }
                         if globalStatus.webImportBookmarkArray.contains(bookmark) { continue }
                         globalStatus.webImportBookmarkArray.append(bookmark)
+                        realm.add(globalStatus, update: .modified)
                     }
                 }
             }
@@ -724,6 +725,7 @@ class NovelSpeakerUtility: NSObject {
                         globalState.backgroundColor = UIColor(red: CGFloat(red.floatValue), green: CGFloat(green.floatValue), blue: CGFloat(blue.floatValue), alpha: CGFloat(alpha.floatValue))
                     }
                 }
+                realm.add(globalState, update: .modified)
                 if let current_reading_content = dic.value(forKey: "current_reading_content") as? String {
                     currentReadingContent = current_reading_content
                 }
@@ -1130,6 +1132,7 @@ class NovelSpeakerUtility: NSObject {
                         }
                     }
                 }
+                realm.add(mod, update: .modified)
             }
         }
     }
@@ -1234,6 +1237,7 @@ class NovelSpeakerUtility: NSObject {
                             sectionConfig.targetNovelIDArray.append(novel)
                         }
                     }
+                    realm.add(sectionConfig, update: .modified)
                 }
             }
         }
@@ -1454,6 +1458,7 @@ class NovelSpeakerUtility: NSObject {
                         }
                     }
                 }
+                realm.add(globalState, update: .modified)
             }
         }
     }
