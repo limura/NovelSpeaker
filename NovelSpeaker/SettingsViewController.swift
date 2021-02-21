@@ -330,6 +330,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
                 row.cell.accessoryType = .disclosureIndicator
+                row.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 NiftyUtility.FetchNewImportantImformation(fetched: { (text, holeText) in
                     var informationText = NSLocalizedString("SettingsTableViewController_Information_NoImportantInformationAlived", comment: "今現在、重要なお知らせはありません。")
@@ -373,6 +374,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< LabelRow() { (row) in
                 row.tag = "SettingsTableViewController_AppInformation_TAG"
                 row.title = NSLocalizedString("SettingsTableViewController_AppInformation", comment: "アプリ内エラーのお知らせ")
+                row.cell.textLabel?.numberOfLines = 0
                 if AppInformationLogger.isNewLogAlive() {
                     row.value = "❗"
                 }else{
@@ -1148,6 +1150,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< LabelRow() { (row) in
                 row.title = NSLocalizedString("SettingsTableViewController_AppInformation_IncludedForDebug", comment: "アプリ内エラーのお知らせ(デバッグ用も含む)")
                 row.cell.accessoryType = .disclosureIndicator
+                row.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 DispatchQueue.main.async {
                     let logText = AppInformationLogger.LoadLogString(isIncludeDebugLog: true)
