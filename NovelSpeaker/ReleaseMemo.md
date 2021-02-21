@@ -2781,6 +2781,7 @@ Fixing the problem
 
 - 本棚でのVoiceOver対応を少し強化
 - 「設定タブ」->「読みの修正」で「+」を押した時に作られる読みの修正の対象小説の初期値が空になっていたものを、「全ての小説」に変更
+- Version 2.* で作成したバックアップファイルからの復元時に「読みの修正」と「発話変更設定」が復元できない問題を修正
 
 評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
 
@@ -2788,7 +2789,7 @@ Fixing the problem
 恐らくまだまだ問題はあるのかとは思うのですが、今の所すぐに対応できる物についてはこのリリースで対応できたつもりになっている、という物になります。もし、「まだコレが直っていないのでは」というような事が思いついている方は、サポートサイト下部にあります「ご意見ご要望フォーム」か、アプリ内の「設定タブ」->「開発者に問い合わせる」からお問い合わせ下さい。
 (なお、不都合報告の場合は「はじめに(ことせかいの使い方)」の12ページ目の「開発者に問い合わせる」https://limura.github.io/NovelSpeaker/topics/jp/00012.html をよくお読みになった上で、問題を再現する事のできる手順やURLといった情報を忘れずに付記してお問い合わせ頂けますようお願いいたします)
 
-また、暫く後に ことせかい の対応 iOS(iPad OS)バージョンを 10.0 以上から 14.0 以上に引き上げる予定です。これにより、対応されなくなる iPhone(例えば iPhone 5s, iPhone 6等)で動作している ことせかい と最新版の ことせかい との間での iCloud同期 はサポートされず、動作できなくなる可能性がございます。その場合は iCloud同期 をOFFにする事で利用し続ける事は可能となりますため、そのように対応して頂けますようお願いいたします。
+また、暫く後(次のiPhoneが発売される頃より少し後位を目処)に ことせかい の対応 iOS(iPad OS)バージョンを 10.0 以上から 14.0 以上に引き上げる予定です。これにより、対応されなくなる iPhone(例えば iPhone 5s, iPhone 6等)で動作している ことせかい と最新版の ことせかい との間での iCloud同期 はサポートされず、動作できなくなる可能性がございます。その場合は iCloud同期 をOFFにする事で利用し続ける事は可能となりますため、そのように対応して頂けますようお願いいたします。
 
 以上となります。
 それでは、これからも ことせかい をよろしくお願いいたします。
@@ -2799,6 +2800,7 @@ Bug fix
 
 - Slightly strengthened VoiceOver support on bookshelves
 - Changed the initial value of the novel to be corrected for reading created when pressing "+" in "Settings tab"-> "Modify reading" to "All novels".
+- Fixed the problem that "correction of reading" and "speech change setting" could not be restored when restoring from a backup file created with Version 2. *
 
 In addition, we plan to increase the supported iOS (iPad OS) version of NovelSpeaker from 10.0 or higher to 14.0 or higher after a while. This will prevent iCloud syncing between the latest version of NovelSpeaker and the fact that it is running on an unsupported iPhone (eg iPhone 5s, iPhone 6, etc.) and may not work. In that case, you can continue to use it by turning off iCloud synchronization, so please take such measures.
 

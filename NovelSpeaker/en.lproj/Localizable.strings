@@ -775,6 +775,7 @@
 
 - Slightly strengthened VoiceOver support on bookshelves
 - Changed the initial value of the novel to be corrected for reading created when pressing \"+\" in \"Settings tab\" -> \"Modify reading\" to \"All novels\".
+- Fixed the problem that \"correction of reading\" and \"speech change setting\" could not be restored when restoring from a backup file created with Version 2. *
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -785,6 +786,7 @@ Bug fix
 
 - Slightly strengthened VoiceOver support on bookshelves
 - Changed the initial value of the novel to be corrected for reading created when pressing \"+\" in \"Settings tab\" -> \"Modify reading\" to \"All novels\".
+- Fixed the problem that \"correction of reading\" and \"speech change setting\" could not be restored when restoring from a backup file created with Version 2. *
 
 #Version 2.2.0
 
