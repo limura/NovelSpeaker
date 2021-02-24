@@ -178,6 +178,7 @@ class OnOffQuery: SearchQuery, Decodable {
         return SwitchRow() {
             $0.title = self.displayText
             $0.value = self.isOn
+            $0.cell.textLabel?.numberOfLines = 0
         }.onChange { (row) in
             self.isOn = row.value ?? false
         }
