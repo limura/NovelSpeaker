@@ -575,6 +575,8 @@
 "SpeechSectionConfigsViewController_AddNewSettingDialogTitle" = "話者設定の名前を指定してください";
 "SpeechSectionConfigsViewController_AddNewSettingDialogPlaceHolder" = "空文字列は指定できません";
 "SpeechSectionConfigsViewController_AddNewSettingDialogAlreadyDefined" = "既に存在する名前は指定できません";
+"SpeechSectionConfigsViewController_BeforeTextPlaceholder" = "空文字列は使用できません";
+"SpeechSectionConfigsViewController_AfterTextPlaceholder" = "空文字列は使用できません";
 
 "CreateSpeechModSettingViewControllerSwift_Title" = "読みの修正詳細";
 "CreateSpeechModSettingViewControllerSwift_BeforeTitle" = "読み替え前";

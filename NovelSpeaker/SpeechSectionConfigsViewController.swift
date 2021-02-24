@@ -139,13 +139,14 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         <<< TextRow("StartTextRow-\(name)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_BeforeTextTitle", comment: "開始文字")
             $0.add(rule: RuleRequired())
-            $0.validationOptions = .validatesOnChange
+            $0.validationOptions = .validatesOnDemand
             $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
                 return self.hideCache[name] ?? true
             })
             $0.value = speechSectionConfig.startText
             $0.add(rule: RuleRequired())
             $0.cell.textField.borderStyle = .roundedRect
+            $0.cell.textField.placeholder = NSLocalizedString("SpeechSectionConfigsViewController_BeforeTextPlaceholder", comment: "空文字列は使用できません")
         }.onChange({ (row) in
             guard let text = row.value else {
                 return
@@ -171,13 +172,14 @@ class SpeechSectionConfigsViewController: FormViewController, MultipleNovelIDSel
         <<< TextRow("EndTextRow-\(name)") {
             $0.title = NSLocalizedString("SpeechSectionConfigsViewController_AfterTextTitle", comment: "終了文字")
             $0.add(rule: RuleRequired())
-            $0.validationOptions = .validatesOnChange
+            $0.validationOptions = .validatesOnDemand
             $0.hidden = Condition.function(["TitleLabelRow-\(name)"], { (form) -> Bool in
                 return self.hideCache[name] ?? true
             })
             $0.value = speechSectionConfig.endText
             $0.add(rule: RuleRequired())
             $0.cell.textField.borderStyle = .roundedRect
+            $0.cell.textField.placeholder = NSLocalizedString("SpeechSectionConfigsViewController_AfterTextPlaceholder", comment: "空文字列は使用できません")
         }.onChange({ (row) in
             guard let text = row.value else {
                 return

@@ -585,6 +585,8 @@
 "SpeechSectionConfigsViewController_AddNewSettingDialogTitle" = "Please specify the name of the Speaker change setting";
 "SpeechSectionConfigsViewController_AddNewSettingDialogPlaceHolder" = "Empty string can not be specified";
 "SpeechSectionConfigsViewController_AddNewSettingDialogAlreadyDefined" = "You can not specify a name that already exists";
+"SpeechSectionConfigsViewController_BeforeTextPlaceholder" = "Empty string cannot be used";
+"SpeechSectionConfigsViewController_AfterTextPlaceholder" = "Empty string cannot be used";
 
 "CreateSpeechModSettingViewControllerSwift_Title" = "Correction of the reading";
 "CreateSpeechModSettingViewControllerSwift_BeforeTitle" = "Before";
