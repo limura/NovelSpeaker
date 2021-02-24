@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 import SZTextView
 
-class EditBookViewController: UIViewController, RealmObserverResetDelegate {
+class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITextFieldDelegate {
     public var targetNovelID:String = ""
     
     @IBOutlet weak var titleTextField: UITextField!
@@ -57,6 +57,8 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate {
         }
         self.movePreviousButton.accessibilityLabel = NSLocalizedString("SpeechViewController_PreviousChapterButton_VoiceOverTitle", comment: "前のページ")
         self.moveNextButton.accessibilityLabel = NSLocalizedString("SpeechViewController_NextChapterButton_VoiceOverTitle", comment: "次のページ")
+        self.titleTextField.clearButtonMode = .always
+        self.titleTextField.delegate = self
         registNotificationCenter()
         startObserve()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
@@ -484,6 +486,12 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate {
                     }
                 }
             }
+        }
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
         }
     }
 }

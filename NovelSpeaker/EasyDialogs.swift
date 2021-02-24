@@ -39,9 +39,14 @@ fileprivate class AutoLayoutButton:UIButton {
     }
 }
 
-fileprivate class EasyDialogCustomUITextField: UITextField {
+fileprivate class EasyDialogCustomUITextField: UITextField, UITextFieldDelegate {
     public var focusKeyboard: Bool = false
     public var shouldReturnEventHander: ((EasyDialog)->(Void))? = nil
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
+        }
+    }
 }
 
 fileprivate class EasyDialogCustomUITextView: UITextView, UITextViewDelegate {
@@ -315,7 +320,7 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             return self
         }
         
-        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextField.BorderStyle = .none, clearButtonMode: UITextField.ViewMode = .never, shouldReturnEventHandler:((EasyDialog)->(Void))? = nil) -> Self {
+        public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextField.BorderStyle = .none, clearButtonMode: UITextField.ViewMode = .never, isNeedAllSelectOnEditTime: Bool = false, shouldReturnEventHandler:((EasyDialog)->(Void))? = nil) -> Self {
             let textField = EasyDialogCustomUITextField()
             textField.placeholder = placeholder
             textField.text = content
@@ -326,6 +331,10 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             textField.clearButtonMode = clearButtonMode
             textField.shouldReturnEventHander = shouldReturnEventHandler
             textField.font = theme.textFont
+            textField.clearButtonMode = .always
+            if isNeedAllSelectOnEditTime {
+                textField.delegate = textField
+            }
             if let tag = tag {
                 textField.tag = tag
             }

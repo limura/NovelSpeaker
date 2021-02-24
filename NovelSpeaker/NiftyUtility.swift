@@ -186,7 +186,7 @@ class NiftyUtility: NSObject {
         }
         DispatchQueue.main.async {
             var builder = EasyDialogBuilder(viewController)
-            builder = builder.textField(tag: 100, placeholder: titleString, content: titleString, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect)
+            builder = builder.textField(tag: 100, placeholder: titleString, content: titleString, keyboardType: .default, secure: false, focusKeyboard: false, borderStyle: .roundedRect, isNeedAllSelectOnEditTime: true)
                 // TODO: 怪しくheightを画面の縦方向からの比率で指定している。
                 // ここに 1.0 とか書くと他のViewの分の高さが入って全体は画面の縦幅よりも高くなるので全部が表示されない。
                 // つまり、この謎の数字 0.45 というのは、できれば書きたくない値であり、この値でも大きすぎるかもしれず、
