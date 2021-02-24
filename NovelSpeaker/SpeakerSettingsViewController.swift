@@ -14,7 +14,7 @@ import RealmSwift
 class SpeakerSettingsViewController: FormViewController, RealmObserverResetDelegate {
     let speaker = SpeechBlockSpeaker()
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
-    var isRateSettingSync = true
+    static var isRateSettingSync = true
     var rateSyncValue:Float? = nil
     var hideCache:[String:Bool] = [:]
     var sliderMoveDate:Date = Date(timeIntervalSince1970: 0)
@@ -175,7 +175,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 return
             }
             let currentRowTag = row.tag
-            if self.isRateSettingSync {
+            if SpeakerSettingsViewController.isRateSettingSync {
                 if let syncValue = self.rateSyncValue, syncValue == rate { return }
                 self.rateSyncValue = rate
                 for row in self.form.rows.filter({ (row) -> Bool in
@@ -419,12 +419,12 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         })
         <<< SwitchRow() {
             $0.title = NSLocalizedString("SpeakSettingsViewController_SyncRateSetting", comment: "速度設定を同期する")
-            $0.value = self.isRateSettingSync
+            $0.value = SpeakerSettingsViewController.isRateSettingSync
         }.onChange({ (row) in
             guard let value = row.value else {
                 return
             }
-            self.isRateSettingSync = value
+            SpeakerSettingsViewController.isRateSettingSync = value
         })
         
         RealmUtil.RealmBlock { (realm) -> Void in
