@@ -282,7 +282,6 @@ class NiftyUtility: NSObject {
         var index = 0
         while let page = pdf.page(at: index) {
             if let pageText = page.string {
-                print("PDF page: ", pageText)
                 result.append(pageText)
             }
             index += 1
