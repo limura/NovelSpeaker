@@ -350,6 +350,8 @@ class NovelSpeakerUtility: NSObject {
     
     #if !os(watchOS)
     static func ProcessPDFFile(url:URL) -> Bool {
+        let isSecureURL = url.startAccessingSecurityScopedResource()
+        defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
         guard let text = NiftyUtility.FilePDFToString(url: url) else {
             DispatchQueue.main.async {
                 guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
@@ -361,10 +363,8 @@ class NovelSpeakerUtility: NSObject {
             }
             return false
         }
-        let isSecureURL = url.startAccessingSecurityScopedResource()
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
-            defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
@@ -373,6 +373,8 @@ class NovelSpeakerUtility: NSObject {
     #endif
     #if !os(watchOS)
     static func ProcessRTFFile(url:URL) -> Bool {
+        let isSecureURL = url.startAccessingSecurityScopedResource()
+        defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
         guard let text = NiftyUtility.FileRTFToAttributedString(url: url)?.string else {
             DispatchQueue.main.async {
                 guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
@@ -384,10 +386,8 @@ class NovelSpeakerUtility: NSObject {
             }
             return false
         }
-        let isSecureURL = url.startAccessingSecurityScopedResource()
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
-            defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
@@ -396,6 +396,8 @@ class NovelSpeakerUtility: NSObject {
     #endif
     #if !os(watchOS)
     static func ProcessRTFDFile(url:URL) -> Bool {
+        let isSecureURL = url.startAccessingSecurityScopedResource()
+        defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
         guard let text = NiftyUtility.FileRTFDToAttributedString(url: url)?.string else {
             DispatchQueue.main.async {
                 guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
@@ -407,10 +409,8 @@ class NovelSpeakerUtility: NSObject {
             }
             return false
         }
-        let isSecureURL = url.startAccessingSecurityScopedResource()
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
-            defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
@@ -419,11 +419,11 @@ class NovelSpeakerUtility: NSObject {
     #endif
     #if !os(watchOS)
     static func ProcessTextFile(url:URL) -> Bool {
-        guard let data = try? Data(contentsOf: url), let text = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data)) else { return false }
         let isSecureURL = url.startAccessingSecurityScopedResource()
+        defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: url), let text = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data)) else { return false }
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
-            defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
         }
