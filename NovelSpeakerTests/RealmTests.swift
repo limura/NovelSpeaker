@@ -31,20 +31,6 @@ class RealmTests: XCTestCase {
         }
     }
     
-    func testLeakTest() {
-        let downloadQueue = NovelDownloadQueue.shared
-        RealmUtil.RealmBlock { (realm) -> Void in
-            if let novels = RealmNovel.GetAllObjectsWith(realm: realm) {
-                for novel in novels {
-                    downloadQueue.addQueue(novelID: novel.novelID)
-                }
-            }
-        }
-        while true {
-            NiftyUtility.RunLoopSleep(deltaSecond: 1)
-        }
-    }
-    
     func testBase64Test() {
         let okText = "aG9nZQ==" // "hoge"
         let ngTextList = [
