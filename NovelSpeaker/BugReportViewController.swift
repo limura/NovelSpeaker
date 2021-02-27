@@ -84,6 +84,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let isUserSupportDisabled = false
         checkCanSendEmailWithMFMailComposeViewController()
         BehaviorLogger.AddLog(description: "BugReportViewController viewDidLoad", data: [:])
 
@@ -95,7 +96,16 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         }
 
         // Do any additional setup after loading the view.
-        form +++ Section(NSLocalizedString("BugReportViewController_HiddenImportantInformationSectionHeader", comment: "お知らせ")) {
+        form
+            +++ Section({ (section) in
+                section.tag = "Section_BugReportDisabled"
+                section.hidden = isUserSupportDisabled ? false : true
+            })
+            <<< LabelRow("BugReportDisabledLabelRow") {
+                $0.title = NSLocalizedString("BugReportViewController_BugReportIsDisabledNowLabel", comment: "ことせかい ユーザサポート停止中のお知らせ\n\nことせかい は現在ユーザサポートを停止しています。\nこれは、ユーザサポートへの対応業務にかかる時間を捻出するのが大変というのもさることながら、開発者側がお問い合わせ(ユーザ側で発生している何らかの問題)を認識してしまうと、そのお問い合わせに書かれている問題を解決しないと心が休まらないために、「お問い合わせを無視する」という対応が取れない事が問題で、お問い合わせを受ける事だけで心の負担が大きいためです。\nそのため、お問い合わせを受け付けること自体が問題となっており、これを排除するという対応を取ることにしました。\n酷い言い方をしますと、ユーザ様側で何らかの問題が発生していたとしましても、開発者の側で認識されなければ上記の問題を発生させませんため、そのユーザ様側で発生している問題を開発者側に伝える手段を止める、という対応になります。\nこの対応により、ことせかい で発生している不都合が直る頻度が激減する事が予想されるなど、ご不便をおかけすることになるかと思いますが、ご理解いただけますと幸いです。\nなお、ここで書いても読まれないかとは思いながら書きますが、AppStoreのレビュー欄にてお問い合わせを書かれましても、(少なくともユーザサポート停止中の間は、)開発者はAppStoreのレビュー欄を確認致しませんので対応はされない事をご理解下さい。(なお、ことせかい においてはAppStoreのレビュー欄にお問い合わせを書かれる事は、元々非推奨とさせていただいています)")
+                $0.cell.textLabel?.numberOfLines = 0
+            }
+            +++ Section(NSLocalizedString("BugReportViewController_HiddenImportantInformationSectionHeader", comment: "お知らせ")) {
                 $0.hidden = true
                 $0.tag = "HiddenImportantInformationSectionHeader"
             }
@@ -104,7 +114,10 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 $0.hidden = true
                 $0.cell.textLabel?.numberOfLines = 0
             }
-            +++ Section()
+            +++ Section({ (section) in
+                section.tag = "Section_Type"
+                section.hidden = isUserSupportDisabled ? true : false
+            })
             <<< AlertRow<String>() {
                 $0.title = NSLocalizedString("BugReportViewController_TypeSelectTitle", comment: "お問い合わせの種類")
                 $0.selectorTitle = NSLocalizedString("BugReportViewController_TypeSelectTitle", comment: "お問い合わせの種類")
@@ -197,6 +210,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             })
             +++ Section(NSLocalizedString("BugReportViewController_SectionHeader", comment: "不都合の報告")){
                 $0.tag = "Section_BugReport"
+                $0.hidden = isUserSupportDisabled ? true : false
             }
             <<< LabelRow() {
                 $0.title = NSLocalizedString("BugReportViewController_BugReportTitle", comment:"不都合がある場合にはこのフォームから入力して報告できます。")
@@ -385,7 +399,6 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     }
                 }
             })
-        
 
         if let url = URL(string: "https://limura.github.io/NovelSpeaker/ImportantInformation.txt") {
             NiftyUtility.cashedHTTPGet(url: url, delay: 60*60,
