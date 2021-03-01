@@ -323,7 +323,7 @@ class NovelDownloader : NSObject {
             state = currentState
         }else if let lastDownloadURL = lastDownloadURLTmp {
             print("lastDownloadURL:", lastDownloadURL.absoluteString)
-            state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: lastDownloadURL, cookieString: "")
+            state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: lastDownloadURL, cookieString: "", previousContent: nil)
         }else{
             failedSearchNovel(hint: "currentState and lastDownloadURL is nil.")
             return

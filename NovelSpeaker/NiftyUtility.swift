@@ -259,7 +259,7 @@ class NiftyUtility: NSObject {
             let dialog = builder.build()
             let fetcher = staticFetcher
             dialog.show {
-                fetcher.FetchFirstContent(url: url, cookieString: cookieString) { (url, state, errorString) in
+                fetcher.FetchFirstContent(url: url, cookieString: cookieString, previousContent: nil) { (url, state, errorString) in
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: {
                             if let state = state, (state.content?.count ?? 0) > 0 {
