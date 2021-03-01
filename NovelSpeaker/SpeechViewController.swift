@@ -759,20 +759,24 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     @objc func skipBackwardButtonClicked(_ sender: UIBarButtonItem) {
         if self.storySpeaker.isPlayng == false { return }
-        RealmUtil.RealmBlock { (realm) -> Void in
-            self.storySpeaker.StopSpeech(realm: realm) {
-                self.storySpeaker.SkipBackward(realm: realm, length: 30) {
-                    self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+        NiftyUtility.DispatchSyncMainQueue {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                self.storySpeaker.StopSpeech(realm: realm) {
+                    self.storySpeaker.SkipBackward(realm: realm, length: 30) {
+                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                    }
                 }
             }
         }
     }
     @objc func skipForwardButtonClicked(_ sender: UIBarButtonItem) {
         if self.storySpeaker.isPlayng == false { return }
-        RealmUtil.RealmBlock { (realm) -> Void in
-            self.storySpeaker.StopSpeech(realm: realm) {
-                self.storySpeaker.SkipForward(realm: realm, length: 30) {
-                    self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+        NiftyUtility.DispatchSyncMainQueue {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                self.storySpeaker.StopSpeech(realm: realm) {
+                    self.storySpeaker.SkipForward(realm: realm, length: 30) {
+                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                    }
                 }
             }
         }

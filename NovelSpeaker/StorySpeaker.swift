@@ -399,11 +399,13 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             if isJointHeadphone(outputs: previousDesc.outputs) {
                 // ヘッドフォンが抜けた
                 if self.isPlayng == false { return }
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    StopSpeech(realm: realm) {
-                        self.SkipBackward(realm: realm, length: 25) {
-                            self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
-                            self.willSpeakRange(range: NSMakeRange(self.speaker.currentLocation, 0))
+                NiftyUtility.DispatchSyncMainQueue {
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        self.StopSpeech(realm: realm) {
+                            self.SkipBackward(realm: realm, length: 25) {
+                                self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
+                                self.willSpeakRange(range: NSMakeRange(self.speaker.currentLocation, 0))
+                            }
                         }
                     }
                 }
@@ -939,14 +941,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         print("MPCommandCenter: skipForwardEvent")
         skipForwardCount += 100
         if isNowSkipping == true { return .success }
-        RealmUtil.RealmBlock { (realm) -> Void in
-            StopSpeech(realm: realm) {
-                let count = self.skipForwardCount
-                self.skipForwardCount = 0
-                self.isNowSkipping = true
-                self.SkipForward(realm: realm, length: count) {
-                    self.isNowSkipping = false
-                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+        NiftyUtility.DispatchSyncMainQueue {
+            RealmUtil.RealmBlock { (realm) -> Void in
+               self.StopSpeech(realm: realm) {
+                    let count = self.skipForwardCount
+                    self.skipForwardCount = 0
+                    self.isNowSkipping = true
+                    self.SkipForward(realm: realm, length: count) {
+                        self.isNowSkipping = false
+                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                    }
                 }
             }
         }
@@ -956,13 +960,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         print("MPCommandCenter: skipBackwardEvent")
         skipForwardCount += 100
         if isNowSkipping == true { return .success }
-        RealmUtil.RealmBlock { (realm) -> Void in
-            StopSpeech(realm: realm) {
-                let count = self.skipForwardCount
-                self.skipForwardCount = 0
-                self.SkipBackward(realm: realm, length: count) {
-                    self.isNowSkipping = false
-                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+        NiftyUtility.DispatchSyncMainQueue {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                self.StopSpeech(realm: realm) {
+                    let count = self.skipForwardCount
+                    self.skipForwardCount = 0
+                    self.SkipBackward(realm: realm, length: count) {
+                        self.isNowSkipping = false
+                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                    }
                 }
             }
         }
@@ -971,17 +977,19 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     var isSeeking = false
     func seekForwardInterval(){
-        RealmUtil.RealmBlock { (realm) -> Void in
-            self.StopSpeech(realm: realm) {
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    self.SkipForward(realm: realm, length: 50) {
-                        NiftyUtility.DispatchSyncMainQueue {
-                            self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                        }
-                        if self.isSeeking == false { return }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        NiftyUtility.DispatchSyncMainQueue {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                self.StopSpeech(realm: realm) {
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        self.SkipForward(realm: realm, length: 50) {
+                            NiftyUtility.DispatchSyncMainQueue {
+                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                            }
                             if self.isSeeking == false { return }
-                            self.seekForwardInterval()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                                if self.isSeeking == false { return }
+                                self.seekForwardInterval()
+                            }
                         }
                     }
                 }
@@ -1005,17 +1013,19 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     }
     
     func seekBackwardInterval(){
-        RealmUtil.RealmBlock { (realm) -> Void in
-            self.StopSpeech(realm: realm) {
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    self.SkipBackward(realm: realm, length: 60) {
-                        NiftyUtility.DispatchSyncMainQueue {
-                            self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                        }
-                        if self.isSeeking == false { return }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+        NiftyUtility.DispatchSyncMainQueue {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                self.StopSpeech(realm: realm) {
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        self.SkipBackward(realm: realm, length: 60) {
+                            NiftyUtility.DispatchSyncMainQueue {
+                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                            }
                             if self.isSeeking == false { return }
-                            self.seekBackwardInterval()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                                if self.isSeeking == false { return }
+                                self.seekBackwardInterval()
+                            }
                         }
                     }
                 }
