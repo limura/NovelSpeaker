@@ -775,15 +775,37 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.2
 
-- Slightly strengthened VoiceOver support on bookshelves
-- Changed the initial value of the novel to be corrected for reading created when pressing \"+\" in \"Settings tab\" -> \"Modify reading\" to \"All novels\".
-- Fixed the problem that \"correction of reading\" and \"speech change setting\" could not be restored when restoring from a backup file created with Version 2. *
+- Easy to delete all when trying to edit the title part that is being temporarily read by Web import etc.
+- Easy to delete all when trying to add a novel by selecting \"Settings tab\" -> \"Add new self-made novel\"
+- ON / OFF of \"Synchronize speed setting\" in \"Settings tab\" -> \"Speech settings\" will save the state until the application is closed.
+- Fixed the problem that the displayed item name was sometimes omitted in the search setting that can be set ON / OFF in the scene where the search condition of \"Web search tab\" is entered.
+- Fixed the problem that the first character of Japanese input immediately after emptying \"Start character\" and \"End character\" in \"Settings tab\" -> \"Utterance change setting\" does not work well.
+- Fixed the problem that the order set in \"Settings tab\" -> \"Edit self-made folder\" was not reflected in \"Bookshelf screen\"
+- Fixed the problem that the file may not be read normally (nothing may happen) when the file is passed to \"NovelSpeaker\" from the share menu.
+- If the content of the previous page is exactly the same as the content of the previous page during download, the download will be stopped as an error.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.2.2
+
+Interface changes
+
+- Easy to delete all when trying to edit the title part that is being temporarily read by Web import etc.
+- Easy to delete all when trying to add a novel by selecting \"Settings tab\" -> \"Add new self-made novel\"
+- ON / OFF of \"Synchronize speed setting\" in \"Settings tab\" -> \"Speech settings\" will save the state until the application is closed.
+
+Fixing the problem
+
+- Fixed the problem that the displayed item name was sometimes omitted in the search setting that can be set ON / OFF in the scene where the search condition of \"Web search tab\" is entered.
+- Fixed the problem that the first character of Japanese input immediately after emptying \"Start character\" and \"End character\" in \"Settings tab\" -> \"Utterance change setting\" does not work well.
+- Fixed the problem that the order set in \"Settings tab\" -> \"Edit self-made folder\" was not reflected in \"Bookshelf screen\"
+- Fixed the problem that the file may not be read normally (nothing may happen) when the file is passed to \"NovelSpeaker\" from the share menu.
+- If the content of the previous page is exactly the same as the content of the previous page during download, the download will be stopped as an error.
+
+
 # Version 2.2.1
 
 Bug fix

@@ -2805,6 +2805,51 @@ Bug fix
 In addition, we plan to increase the supported iOS (iPad OS) version of NovelSpeaker from 10.0 or higher to 14.0 or higher after a while. This will prevent iCloud syncing between the latest version of NovelSpeaker and the fact that it is running on an unsupported iPhone (eg iPhone 5s, iPhone 6, etc.) and may not work. In that case, you can continue to use it by turning off iCloud synchronization, so please take such measures.
 
 
+#Version 2.2.2 
+
+インタフェースの変更
+
+- Web取込等での仮読み込み中のタイトル部分を編集しようとした時に全削除をしやすく
+- 「設定タブ」->「新規自作小説の追加」で小説を追加しようとしている時等に全削除をしやすく
+- 「設定タブ」->「発話設定」の「速度設定を同期する」のON/OFFは、アプリが終了するまでは状態を保存するように
+
+問題の修正
+
+- 「Web検索タブ」の検索条件をいれているシーンで、ON/OFF設定ができる検索設定において、表示される項目名が省略されてしまう場合があった問題を修正
+- 「設定タブ」->「発話変更設定」の「開始文字」や「終了文字」を空にした直後の日本語入力の1文字目がうまく動かなくなる問題を修正
+- 「設定タブ」->「自作フォルダを編集する」で設定した順番が「本棚画面」に反映されていなかった問題を修正
+- シェアメニューからファイルを「ことせかい」に渡した時に、正常に読み込めない場合がある(何も起こらない場合がある)問題を修正
+- ダウンロード中に一つ前のページの内容とと全く同じページの内容であった場合にはエラーとしてダウンロードを停止するように
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正も前回と引き続き Version 2.* で発生していた問題や、お問い合わせへの対応となります。
+恐らくまだまだ問題はあるのかとは思うのですが、今の所すぐに対応できる物についてはこのリリースで対応できたつもりになっている、という物になります。
+
+まだまだ「前のバージョンではできていたのにできなくなりました」とか「新しくなったら使いにくくなりました」とか「新機能全然使い物にならないのでなんとかしてください」といったようなお問い合わせが止みませんので対応をしているわけなのですが、少々疲れました。正直な所、お問い合わせが届いた事を告げる音が端末から鳴るのを恐れてしまっていて、心が休まらない感じになっています。そのため、今後も同様な頻度でお問い合わせが届くようでしたら、暫くの間はお問い合わせの窓口を閉じて、AppStoreのレビュー欄からのお問い合わせも読まない、といった対応を取ることで「お問い合わせを受ける事からのストレス」を減らすようにしようかと思っています。
+
+また、暫く後(次のiPhoneが発売される頃より少し後位を目処)に ことせかい の対応 iOS(iPad OS)バージョンを 10.0 以上から 14.0 以上に引き上げる予定です。これにより、対応されなくなる iPhone(例えば iPhone 5s, iPhone 6等)で動作している ことせかい と最新版の ことせかい との間での iCloud同期 はサポートされず、動作できなくなる可能性がございます。その場合は iCloud同期 をOFFにする事で利用し続ける事は可能となりますため、そのように対応して頂けますようお願いいたします。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+# Version 2.2.2
+
+Interface changes
+
+- Easy to delete all when trying to edit the title part that is being temporarily read by Web import etc.
+- Easy to delete all when trying to add a novel by selecting "Settings tab"-> "Add new self-made novel"
+- ON / OFF of "Synchronize speed setting" in "Settings tab"-> "Speech settings" will save the state until the application is closed.
+
+Fixing the problem
+
+- Fixed the problem that the displayed item name was sometimes omitted in the search setting that can be set ON / OFF in the scene where the search condition of "Web search tab" is entered.
+- Fixed the problem that the first character of Japanese input immediately after emptying "Start character" and "End character" in "Settings tab"-> "Utterance change setting" does not work well.
+- Fixed the problem that the order set in "Settings tab"-> "Edit self-made folder" was not reflected in "Bookshelf screen"
+- Fixed the problem that the file may not be read normally (nothing may happen) when the file is passed to "NovelSpeaker" from the share menu.
+- If the content of the previous page is exactly the same as the content of the previous page during download, the download will be stopped as an error.
+
 TODO:
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
 
