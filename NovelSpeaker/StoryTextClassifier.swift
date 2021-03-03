@@ -177,7 +177,13 @@ class CombinedSpeechBlock: Identifiable {
             let blockSpeechTextCount = blockSpeechText.unicodeScalars.count
             let displayTextLength = Float(displayTextCount)
             let speechTextLength = Float(blockSpeechTextCount)
-            let speechStartLocation = Int(Float(location) * speechTextLength / displayTextLength)
+            let speechStartLocationFloat = Float(location) * speechTextLength / displayTextLength
+            let speechStartLocation:Int
+            if speechStartLocationFloat.isNaN || speechStartLocationFloat.isInfinite {
+                speechStartLocation = 0
+            }else{
+                speechStartLocation = Int(speechStartLocationFloat)
+            }
             let speechTextStartIndex = blockSpeechText.unicodeScalars.index(blockSpeechText.startIndex, offsetBy: speechStartLocation)
             speechText = String(blockSpeechText.unicodeScalars[speechTextStartIndex..<blockSpeechText.unicodeScalars.endIndex])
             location = 0
@@ -279,7 +285,13 @@ class CombinedSpeechBlock: Identifiable {
             }
             let displayTextLength = Float(blockDisplayTextCount)
             let speechTextLength = Float(blockSpeechTextCount)
-            let speechStartLocation = Int(Float(displayLocation) * speechTextLength / displayTextLength)
+            let speechStartLocationFloat = Float(displayLocation) * speechTextLength / displayTextLength
+            let speechStartLocation:Int
+            if speechStartLocationFloat.isNaN || speechStartLocationFloat.isInfinite {
+                speechStartLocation = 0
+            }else{
+                speechStartLocation = Int(Float(displayLocation) * speechTextLength / displayTextLength)
+            }
             speechLocation += speechStartLocation
             break
         }

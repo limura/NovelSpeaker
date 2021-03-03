@@ -1651,7 +1651,10 @@ class NovelSpeakerUtility: NSObject {
         }
         guard let temporaryDirectory = NiftyUtility.CreateTemporaryDirectory(directoryName: temporaryDirectoryName) else { return false }
         let unzipResult = SSZipArchive.unzipFile(atPath: url.path, toDestination: temporaryDirectory.path, overwrite: true, password: nil) { (fileName, fileInfo, progressCurrent, progressAllCount) in
-            let progressFloat = Float(progressCurrent) / Float(progressAllCount)
+            var progressFloat = Float(progressCurrent) / Float(progressAllCount)
+            if progressFloat.isInfinite || progressFloat.isNaN {
+                progressFloat = 1.0
+            }
             let warningMessage:String
             if progressAllCount >= 65535 {
                 warningMessage = NSLocalizedString("NovelSpeakerBackup_ProgressExtractingZip_WarningInvalidPercentage", comment: "\n展開中のバックアップファイル中のファイル数が多いため、進捗(%表示)が不正な値を指すことがあります")
@@ -2098,7 +2101,10 @@ class NovelSpeakerUtility: NSObject {
         progress?(NSLocalizedString("NovelSpeakerBackup_CompressingBackupData", comment: "圧縮準備中"))
         let zipFilePath = NiftyUtility.GetTemporaryFilePath(fileName: NiftyUtility.Date2ISO8601String(date: Date()) + ".zip")
         let zipResult = SSZipArchive.createZipFile(atPath: zipFilePath.path, withContentsOfDirectory: outputPath.path, keepParentDirectory: false, compressionLevel: 9, password: nil, aes: false) { (progressCount, progressAllCount) in
-            let progressFloat = Float(progressCount) / Float(progressAllCount)
+            var progressFloat = Float(progressCount) / Float(progressAllCount)
+            if progressFloat.isNaN || progressFloat.isInfinite {
+                progressFloat = 1.0
+            }
             let description = NSLocalizedString("NovelSpeakerBackup_CompressingBackupDataProgress", comment: "バックアップデータを圧縮中") + " (\(Int(progressFloat * 100))%)"
             progress?(description)
         }
