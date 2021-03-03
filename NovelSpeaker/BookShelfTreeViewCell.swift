@@ -119,7 +119,17 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
     }
     func applyCurrentReadingPointToIndicatorForVoiceOver_Normal(progress:Float, title:String){
         DispatchQueue.main.async {
-            let integerPercent = Int(100.0 * progress)
+            let percent:Double = Double(100.0) * Double(progress)
+            let integerPercent:Int
+            if percent.isInfinite {
+                integerPercent = 100
+            }else if percent.isZero {
+                integerPercent = 0
+            }else if percent.isNaN {
+                integerPercent = 0
+            }else{
+                integerPercent = Int(percent)
+            }
             self.titleLabel.accessibilityLabel = String(format: NSLocalizedString("BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_Format", comment: "%@ %d%% まで読んでいます"), title, integerPercent)
         }
     }
@@ -139,13 +149,16 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
         }
         let lastChapterNumber = novel.lastChapterNumber ?? 1
         let readLocation:Float = Float(novel.m_readingChapterReadingPoint)
-        let contentCount:Float = Float(novel.m_readingChapterContentCount)
+        let contentCount:Float = Float(novel.m_readingChapterContentCount > 0 ? novel.m_readingChapterContentCount : 1)
         let progress = ((Float(readingChapterNumber) - 1.0) + readLocation / contentCount) / Float(lastChapterNumber)
         if self.watchNovelIDArray != [novel.novelID] { return }
         DispatchQueue.main.async {
             if readingChapterNumber == lastChapterNumber && contentCount <= (readLocation + 10) {
                 self.readProgressView.tintColor = UIColor(displayP3Red: 0.6, green: 0.3, blue: 0.9, alpha: 1.0)
                 self.applyCurrentReadingPointToIndicatorForVoiceOver_Finished(title: novelTitle)
+            }else if progress.isNaN {
+                self.readProgressView.progress = 0.0
+                self.applyCurrentReadingPointToIndicatorForVoiceOver_NoRead(title: novelTitle)
             }else{
                 self.readProgressView.tintColor = UIColor(displayP3Red: 255/256.0, green: 188/256.0, blue: 2/256.0, alpha: 1.0)
                 self.applyCurrentReadingPointToIndicatorForVoiceOver_Normal(progress: progress, title: novelTitle)
