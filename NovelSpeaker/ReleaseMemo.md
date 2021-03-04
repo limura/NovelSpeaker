@@ -2820,6 +2820,7 @@ In addition, we plan to increase the supported iOS (iPad OS) version of NovelSpe
 - 「設定タブ」->「自作フォルダを編集する」で設定した順番が「本棚画面」に反映されていなかった問題を修正
 - シェアメニューからファイルを「ことせかい」に渡した時に、正常に読み込めない場合がある(何も起こらない場合がある)問題を修正
 - ダウンロード中に一つ前のページの内容とと全く同じページの内容であった場合にはエラーとしてダウンロードを停止するように
+- 読み上げ位置が不正な値になっている小説がある場合に、本棚画面で強制終了する可能性があった問題を修正
 
 評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
 
@@ -2849,6 +2850,7 @@ Fixing the problem
 - Fixed the problem that the order set in "Settings tab"-> "Edit self-made folder" was not reflected in "Bookshelf screen"
 - Fixed the problem that the file may not be read normally (nothing may happen) when the file is passed to "NovelSpeaker" from the share menu.
 - If the content of the previous page is exactly the same as the content of the previous page during download, the download will be stopped as an error.
+- Fixed an issue where the bookshelf screen could be forcibly terminated when there was a novel whose reading position was incorrect.
 
 TODO:
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える

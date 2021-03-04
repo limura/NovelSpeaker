@@ -785,6 +785,7 @@
 - Fixed the problem that the order set in \"Settings tab\" -> \"Edit self-made folder\" was not reflected in \"Bookshelf screen\"
 - Fixed the problem that the file may not be read normally (nothing may happen) when the file is passed to \"NovelSpeaker\" from the share menu.
 - If the content of the previous page is exactly the same as the content of the previous page during download, the download will be stopped as an error.
+- Fixed an issue where the bookshelf screen could be forcibly terminated when there was a novel whose reading position was incorrect.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -804,6 +805,7 @@ Fixing the problem
 - Fixed the problem that the order set in \"Settings tab\" -> \"Edit self-made folder\" was not reflected in \"Bookshelf screen\"
 - Fixed the problem that the file may not be read normally (nothing may happen) when the file is passed to \"NovelSpeaker\" from the share menu.
 - If the content of the previous page is exactly the same as the content of the previous page during download, the download will be stopped as an error.
+- Fixed an issue where the bookshelf screen could be forcibly terminated when there was a novel whose reading position was incorrect.
 
 
 # Version 2.2.1
