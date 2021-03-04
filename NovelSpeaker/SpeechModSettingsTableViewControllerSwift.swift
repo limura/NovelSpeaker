@@ -227,7 +227,9 @@ class SpeechModSettingsTableViewControllerSwift: UITableViewController, RealmObs
         let nextViewController = CreateSpeechModSettingViewControllerSwift()
         nextViewController.targetSpeechModSettingBeforeString = modSetting?.before
         nextViewController.isUseAnyNovelID = self.targetNovelID == RealmSpeechModSetting.anyTarget ? true : false
-        nextViewController.targetNovelID = self.targetNovelID
+        if (modSetting?.targetNovelIDArray.count ?? 0) == 0 {
+            nextViewController.targetNovelID = self.targetNovelID
+        }
         self.navigationController?.pushViewController(nextViewController, animated: true)
     }
     
