@@ -1683,6 +1683,9 @@ extension RealmStoryBulk: CanWriteIsDeleted {
                 tag.unref(realm:realm, novelID: self.novelID)
             }
         }
+        if let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let index = globalState.novelLikeOrder.index(of: self.novelID) {
+            globalState.novelLikeOrder.remove(at: index)
+        }
         RealmUtil.Delete(realm: realm, model: self)
     }
     
