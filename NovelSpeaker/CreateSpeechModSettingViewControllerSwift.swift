@@ -103,11 +103,8 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             guard let value = textRow.value else {
                 return
             }
-            if value.count < 0 || !textRow.isValid {
-                return
-            }
             self.beforeText = value
-            if !self.isUseRegexp, let row = self.form.rowBy(tag: "BeforeTestTextRow") as? TextRow {
+            if !self.isUseRegexp, value.count > 0, let row = self.form.rowBy(tag: "BeforeTestTextRow") as? TextRow {
                 row.value = value
                 self.beforeTestText = value
                 row.updateCell()
@@ -130,9 +127,6 @@ class CreateSpeechModSettingViewControllerSwift: FormViewController, MultipleNov
             $0.cell.textField.borderStyle = .roundedRect
         }.onChange({ (textRow) in
             guard let value = textRow.value else {
-                return
-            }
-            if value.count < 0 || !textRow.isValid {
                 return
             }
             self.afterText = value
