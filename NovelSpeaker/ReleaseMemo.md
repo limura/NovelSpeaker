@@ -2852,6 +2852,35 @@ Fixing the problem
 - If the content of the previous page is exactly the same as the content of the previous page during download, the download will be stopped as an error.
 - Fixed an issue where the bookshelf screen could be forcibly terminated when there was a novel whose reading position was incorrect.
 
+
+# Version 2.2.3
+
+問題の修正
+
+- 「設定タブ」->「読みの修正」から「読みの修正詳細」に移行する時に、「適用対象」に必ず「全ての小説」がセットされた状態で開いてしまう問題を修正
+- 「設定タブ」->「読みの修正」->「読みの修正詳細」にて「読み替え前」又は「読み替え後」のどちらか又は両方が空欄の状態で「保存する」等を選択しようとしてエラーが出た後に挙動がおかしくなる問題を修正
+
+
+評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
+
+今回の修正も前回と引き続き Version 2.* で発生していた問題や、お問い合わせへの対応となります。
+恐らくまだまだ問題はあるのかとは思うのですが、今の所すぐに対応できる物についてはこのリリースで対応できたつもりになっている、という物になります。
+
+まだまだ「前のバージョンではできていたのにできなくなりました」とか「新しくなったら使いにくくなりました」とか「新機能全然使い物にならないのでなんとかしてください」といったようなお問い合わせが止みませんので対応をしているわけなのですが、少々疲れました。正直な所、お問い合わせが届いた事を告げる音が端末から鳴るのを恐れてしまっていて、心が休まらない感じになっています。そのため、今後も同様な頻度でお問い合わせが届くようでしたら、暫くの間はお問い合わせの窓口を閉じて、AppStoreのレビュー欄からのお問い合わせも読まない、といった対応を取ることで「お問い合わせを受ける事からのストレス」を減らすようにしようかと思っています。
+
+また、暫く後(次のiPhoneが発売される頃より少し後位を目処)に ことせかい の対応 iOS(iPad OS)バージョンを 10.0 以上から 14.0 以上に引き上げる予定です。これにより、対応されなくなる iPhone(例えば iPhone 5s, iPhone 6等)で動作している ことせかい と最新版の ことせかい との間での iCloud同期 はサポートされず、動作できなくなる可能性がございます。その場合は iCloud同期 をOFFにする事で利用し続ける事は可能となりますため、そのように対応して頂けますようお願いいたします。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+# Version 2.2.3
+
+Fixing the problem
+
+- Fixed the problem that "All novels" was always set to "Applicable target" when moving from "Settings tab" -> "Correction of reading" to "Details of correction of reading".
+- In "Settings tab" -> "Correction of reading" -> "Details of correction of reading", try to select "Save" etc. with either "Before reading" or "After reading" blank. Fixed an issue that caused strange behavior after an error occurred
+
 TODO:
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
 

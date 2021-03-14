@@ -775,21 +775,21 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.3
 
-- Easy to delete all when trying to edit the title part that is being temporarily read by Web import etc.
-- Easy to delete all when trying to add a novel by selecting \"Settings tab\" -> \"Add new self-made novel\"
-- ON / OFF of \"Synchronize speed setting\" in \"Settings tab\" -> \"Speech settings\" will save the state until the application is closed.
-- Fixed the problem that the displayed item name was sometimes omitted in the search setting that can be set ON / OFF in the scene where the search condition of \"Web search tab\" is entered.
-- Fixed the problem that the first character of Japanese input immediately after emptying \"Start character\" and \"End character\" in \"Settings tab\" -> \"Utterance change setting\" does not work well.
-- Fixed the problem that the order set in \"Settings tab\" -> \"Edit self-made folder\" was not reflected in \"Bookshelf screen\"
-- Fixed the problem that the file may not be read normally (nothing may happen) when the file is passed to \"NovelSpeaker\" from the share menu.
-- If the content of the previous page is exactly the same as the content of the previous page during download, the download will be stopped as an error.
-- Fixed an issue where the bookshelf screen could be forcibly terminated when there was a novel whose reading position was incorrect.
+- Fixed the problem that \"All novels\" was always set to \"Applicable target\" when moving from \"Settings tab\" -> \"Correction of reading\" to \"Details of correction of reading\".
+- In \"Settings tab\" -> \"Correction of reading\" -> \"Details of correction of reading\", try to select \"Save\" etc. with either \"Before reading\" or \"After reading\" blank. Fixed an issue that caused strange behavior after an error occurred.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.2.3
+
+Fixing the problem
+
+- Fixed the problem that \"All novels\" was always set to \"Applicable target\" when moving from \"Settings tab\" -> \"Correction of reading\" to \"Details of correction of reading\".
+- In \"Settings tab\" -> \"Correction of reading\" -> \"Details of correction of reading\", try to select \"Save\" etc. with either \"Before reading\" or \"After reading\" blank. Fixed an issue that caused strange behavior after an error occurred.
+
 # Version 2.2.2
 
 Interface changes
