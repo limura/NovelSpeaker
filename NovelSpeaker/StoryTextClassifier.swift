@@ -473,6 +473,9 @@ class StoryTextClassifier {
             if let sc = speakerEndTextFirstCharacter, sc == c, speakerList.count > 1, let endText = speakerList.last?.endText, endText.count > 0 {
                 if targetString.starts(with: endText) {
                     index = content.index(index, offsetBy: endText.count)
+                    if content.endIndex < index {
+                        index = content.endIndex
+                    }
                     let displayText = String(content[currentTextStartIndex..<index])
                     let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: currentWaitconfig)
                     result.append(contentsOf: newBlockArray)
@@ -492,6 +495,9 @@ class StoryTextClassifier {
                 for sectionConfig in sectionConfigList {
                     if targetString.starts(with: sectionConfig.startText) {
                         if currentTextStartIndex < index {
+                            if content.endIndex < index {
+                                index = content.endIndex
+                            }
                             let displayText = String(content[currentTextStartIndex..<index])
                             let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: currentWaitconfig)
                             result.append(contentsOf: newBlockArray)
@@ -510,6 +516,9 @@ class StoryTextClassifier {
                 for char in withMoreSplitTargets {
                     if targetString.starts(with: char) {
                         index = content.index(index, offsetBy: char.count)
+                        if content.endIndex < index {
+                            index = content.endIndex
+                        }
                         let displayText = String(content[currentTextStartIndex..<index])
                         let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: currentWaitconfig)
                         result.append(contentsOf: newBlockArray)
@@ -520,6 +529,9 @@ class StoryTextClassifier {
             }
             if let waitConfig = currentWaitconfig {
                 index = content.index(index, offsetBy: waitConfig.targetText.count)
+                if content.endIndex < index {
+                    index = content.endIndex
+                }
                 let displayText = String(content[currentTextStartIndex..<index])
                 let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeakerSetting.speakerSetting, waitConfig: waitConfig)
                 result.append(contentsOf: newBlockArray)
