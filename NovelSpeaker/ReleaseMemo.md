@@ -2859,7 +2859,7 @@ Fixing the problem
 
 - 「設定タブ」->「読みの修正」から「読みの修正詳細」に移行する時に、「適用対象」に必ず「全ての小説」がセットされた状態で開いてしまう問題を修正
 - 「設定タブ」->「読みの修正」->「読みの修正詳細」にて「読み替え前」又は「読み替え後」のどちらか又は両方が空欄の状態で「保存する」等を選択しようとしてエラーが出た後に挙動がおかしくなる問題を修正
-
+- 「設定タブ」->「SiteInfoを取得し直す」を押した時に、SiteInfoの読み込みの終了を待たずに「アプリ内エラーのお知らせ」に「手動による SiteInfo の読み込みが終了しました」と追加されてしまっていた問題を修正
 
 評価やレビュー、ありがとうございます。特にサポートサイト側のご意見ご要望フォームやアプリ内の開発者に問い合わせる機能からの詳細なバグ報告には本当に助けられています。アプリのレビュー欄でのお褒めの言葉もとても嬉しいです。これからも宜しくお願い致します。
 
@@ -2880,6 +2880,7 @@ Fixing the problem
 
 - Fixed the problem that "All novels" was always set to "Applicable target" when moving from "Settings tab" -> "Correction of reading" to "Details of correction of reading".
 - In "Settings tab" -> "Correction of reading" -> "Details of correction of reading", try to select "Save" etc. with either "Before reading" or "After reading" blank. Fixed an issue that caused strange behavior after an error occurred
+- When I pressed "Settings tab" -> "Re-acquire SiteInfo", "Manual SiteInfo loading was completed" was added to "In-app error notification" without waiting for SiteInfo loading to finish. Fixed a problem that had been closed
 
 TODO:
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える

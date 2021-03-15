@@ -614,6 +614,7 @@
 "NovelDownloader_FailedByNoContent" = "Novel download failed. This nove has no content.";
 "NovelDownloader_FailedByNoRealmNovel" = "Novel download aborted. This novel was not registered on the bookshelf.";
 "NovelDownloader_InvalidNovelID" = "Novel  download failed. Could not start the download without getting the data (URL etc.) to download. It seems that there are problems with novel data not stored or deleted.";
+"NovelDownloader_SiteInfoNotReady" = "The text of the novel cannot be downloaded because the data (SiteInfo) required to retrieve the text of the novel cannot be read.\nPlease try downloading the novel again after re-acquiring SiteInfo by selecting \"Settings tab\" -> \"Get SiteInfo again\" after moving to a location with good network conditions.";
 
 "AssignNovelFolderViewController_Title" = "Classify to folder";
 "AssignNovelFolderViewController_CreateNewTagTitle" = "Create new folder";
@@ -779,6 +780,7 @@
 
 - Fixed the problem that \"All novels\" was always set to \"Applicable target\" when moving from \"Settings tab\" -> \"Correction of reading\" to \"Details of correction of reading\".
 - In \"Settings tab\" -> \"Correction of reading\" -> \"Details of correction of reading\", try to select \"Save\" etc. with either \"Before reading\" or \"After reading\" blank. Fixed an issue that caused strange behavior after an error occurred.
+- When I pressed \"Settings tab\" -> \"Re-acquire SiteInfo\", \"Manual SiteInfo loading was completed\" was added to \"In-app error notification\" without waiting for SiteInfo loading to finish. Fixed a problem that had been closed
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -789,6 +791,8 @@ Fixing the problem
 
 - Fixed the problem that \"All novels\" was always set to \"Applicable target\" when moving from \"Settings tab\" -> \"Correction of reading\" to \"Details of correction of reading\".
 - In \"Settings tab\" -> \"Correction of reading\" -> \"Details of correction of reading\", try to select \"Save\" etc. with either \"Before reading\" or \"After reading\" blank. Fixed an issue that caused strange behavior after an error occurred.
+- When I pressed \"Settings tab\" -> \"Re-acquire SiteInfo\", \"Manual SiteInfo loading was completed\" was added to \"In-app error notification\" without waiting for SiteInfo loading to finish. Fixed a problem that had been closed
+
 
 # Version 2.2.2
 
