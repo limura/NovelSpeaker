@@ -288,6 +288,7 @@
 "SpeechViewController_PreviousChapterButton_VoiceOverTitle" = "前のページ";
 "SpeechViewController_NextChapterButton_VoiceOverTitle" = "次のページ";
 "SpeechViewController_SkipBackwardButtonTitle" = "巻き戻し";
+"SpeechViewController_SkipForwardButtonTitle" = "少し先へ";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";

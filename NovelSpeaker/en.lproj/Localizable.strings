@@ -305,6 +305,7 @@
 "SpeechViewController_PreviousChapterButton_VoiceOverTitle" = "Previous page";
 "SpeechViewController_NextChapterButton_VoiceOverTitle" = "Next page";
 "SpeechViewController_SkipBackwardButtonTitle" = "Rewind";
+"SpeechViewController_SkipForwardButtonTitle" = "A little ahead";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";
