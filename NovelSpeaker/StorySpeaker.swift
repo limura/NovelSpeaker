@@ -748,7 +748,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.isMaxSpeechTimeExceeded = true
             if self.isPlayng == true && self.speaker.isPausedBySynthesizerState == true {
                 // 自分は発話してるつもりだけれど実際は Pause しているということは、
-                // 恐らくは外部からの影響で再生は停止していると思われるので、わざわざアナウンスはしない。
+                // 恐らくは外部からの影響で再生は停止していると思われるので、わざわざアナウンスはしないで単に発話を停止するだけにします。
+                self.StopSpeech(realm: realm)
                 return
             }
             self.StopSpeech(realm: realm)
@@ -1257,6 +1258,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     }
     
     @objc static func becomeActiveHandle() {
+        /* // becomeActive のタイミングでこの判定をすべきかどうかがいまいちよくわからないので一旦ここでは判定しないことにします。
         let speaker = StorySpeaker.shared
         // 自分は発話しているつもりだけれど、
         // AVSpeechSynthesizer 的には発話が中断(Pause)しているということは、
@@ -1266,5 +1268,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 StorySpeaker.shared.StopSpeech(realm: realm)
             }
         }
+         */
     }
 }
