@@ -54,10 +54,13 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     var isSpeaking:Bool {
         get { return m_IsSpeaking }
     }
+    var isSpeakingBySynthesizerState:Bool {
+        get { return speaker.isSpeaking }
+    }
     var isPausedBySynthesizerState:Bool {
         get { return speaker.isPaused }
     }
-    
+
     func GetSpeechTextWith(range:NSRange) -> String {
         let startOffset = DisplayLocationToSpeechLocation(location: range.location)
         let endOffset = DisplayLocationToSpeechLocation(location: range.location + range.length)
