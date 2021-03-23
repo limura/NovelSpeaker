@@ -146,4 +146,8 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
         synthesizer = AVSpeechSynthesizer()
         synthesizer.delegate = self
     }
+    
+    func isPaused() -> Bool {
+        return self.synthesizer.isPaused
+    }
 }

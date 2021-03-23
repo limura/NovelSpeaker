@@ -49,6 +49,11 @@ fileprivate class SpeechQueue {
         return speaker.isSpeaking()
     }
     
+    func isPaused() -> Bool {
+        guard let speaker = self.queuedSpeaker else { return false }
+        return speaker.isPaused()
+    }
+    
     func isSpeakEnd() -> Bool {
         guard let speaker = self.queuedSpeaker else { return false }
         if speaker.isSpeaking() { return false }
@@ -237,6 +242,28 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
     func reloadSynthesizer() {
         for (_, speaker) in self.speakerCache {
             speaker.reloadSynthesizer()
+        }
+    }
+    
+    var isSpeaking:Bool {
+        get {
+            self.speechQueueLock.lock()
+            defer { self.speechQueueLock.unlock() }
+            for speaker in speechQueue {
+                if speaker.isSpeaking() { return true }
+            }
+            return false
+        }
+    }
+    
+    var isPaused:Bool {
+        get {
+            self.speechQueueLock.lock()
+            defer { self.speechQueueLock.unlock() }
+            for speaker in speechQueue {
+                if speaker.isPaused() { return true }
+            }
+            return false
         }
     }
 }

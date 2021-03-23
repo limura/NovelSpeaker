@@ -138,6 +138,7 @@ void uncaughtExceptionHandler(NSException *exception)
     NSLog(@"application did become active.");
     // badge clear.
     [[NovelDownloadQueue shared] ClearDownloadCountBadge];
+    [StorySpeaker becomeActiveHandle];
     // BackgroundFetchが有効な設定であれば有効化します。
     [[NovelDownloadQueue shared] StartBackgroundFetchIfNeeded];
     if ([RealmUtil IsUseCloudRealm]) {

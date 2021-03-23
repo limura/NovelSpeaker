@@ -746,6 +746,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         self.isMaxSpeechTimeExceeded = false
         self.maxSpeechInSecTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(integerLiteral:     Int64(globalState.maxSpeechTimeInSec)), repeats: false) { (timer) in
             self.isMaxSpeechTimeExceeded = true
+            if self.isPlayng == true && self.speaker.isPausedBySynthesizerState == true {
+                // 自分は発話してるつもりだけれど実際は Pause しているということは、
+                // 恐らくは外部からの影響で再生は停止していると思われるので、わざわざアナウンスはしない。
+                return
+            }
             self.StopSpeech(realm: realm)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
                 self.AnnounceSpeech(text: NSLocalizedString("GlobalDataSingleton_AnnounceStopedByTimer", comment: "最大連続再生時間を超えたので、読み上げを停止します。"))
@@ -1249,5 +1254,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     func isDummySpeechAlive() -> Bool {
         return speaker.isDummySpeechAlive()
+    }
+    
+    @objc static func becomeActiveHandle() {
+        let speaker = StorySpeaker.shared
+        // 自分は発話しているつもりだけれど、
+        // AVSpeechSynthesizer 的には発話が中断(Pause)しているということは、
+        // 恐らく別アプリによって再生が停止するなどしていると判断する
+        if speaker.isPlayng == true && speaker.speaker.isPausedBySynthesizerState == true {
+            RealmUtil.RealmDispatchQueueAsyncBlock { (realm) in
+                StorySpeaker.shared.StopSpeech(realm: realm)
+            }
+        }
     }
 }
