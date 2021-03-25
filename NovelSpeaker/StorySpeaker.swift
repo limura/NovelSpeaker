@@ -747,9 +747,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         self.maxSpeechInSecTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(integerLiteral:     Int64(globalState.maxSpeechTimeInSec)), repeats: false) { (timer) in
             self.isMaxSpeechTimeExceeded = true
             if self.speaker.isPausedBySynthesizerState == true || self.speaker.isSpeakingBySynthesizerState == false {
-                // 自分は発話してるつもりだけれど実際は Stop や Pause しているということは、
-                // 外部からの影響等で再生は停止していると思われるので、
-                // アナウンスはしないで単に発話を停止するだけにします。
+                // 既に発話が停止している場合はわざわざアナウンスはしません。
+                // けれども、Pause しているだけの場合は Stop を明示的に呼ばないとおかしなことになるはずなので
+                // StopSpeech() は呼び出します
                 self.StopSpeech(realm: realm)
                 return
             }
