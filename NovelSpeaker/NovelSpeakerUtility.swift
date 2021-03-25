@@ -50,9 +50,8 @@ class NovelSpeakerUtility: NSObject {
         }
         completion(speechModSettings ?? [])
     }
-    /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
-    @objc static func ForceOverrideHungSpeakStringToSpeechModSettings() {
-        let targets = ["*": " "]
+    
+    static func ForceOverrideHungSpeakStringToSpeechModSettings_NotRegexp(targets:[String:String]) {
         RealmUtil.RealmBlock { (realm) in
             var writeQueue:[String:String] = [:]
             for (before, after) in targets {
@@ -77,6 +76,40 @@ class NovelSpeakerUtility: NSObject {
                 }
             }
         }
+    }
+    
+    static func ForceOverrideHungSpeakStringToSpeechModSettings_Regexp(targets:[String:String]) {
+        RealmUtil.RealmBlock { (realm) in
+            var writeQueue:[String:String] = [:]
+            for (before, after) in targets {
+                if let setting = RealmSpeechModSetting.SearchFromWith(realm: realm, beforeString: before){
+                    if setting.after != after {
+                        writeQueue[before] = after
+                    }
+                    continue
+                }
+                writeQueue[before] = after
+            }
+            if writeQueue.count > 0 {
+                RealmUtil.WriteWith(realm: realm) { (realm) in
+                    for (before, after) in writeQueue {
+                        let speechModSetting = RealmSpeechModSetting()
+                        speechModSetting.before = before
+                        speechModSetting.after = after
+                        speechModSetting.isUseRegularExpression = true
+                        speechModSetting.targetNovelIDArray.append(RealmSpeechModSetting.anyTarget)
+                        realm.add(speechModSetting, update: .modified)
+                    }
+                }
+            }
+        }
+    }
+    /// 読み上げ時にハングするような文字を読み上げ時にハングしない文字に変換するようにする読み替え辞書を強制的に登録します
+    @objc static func ForceOverrideHungSpeakStringToSpeechModSettings() {
+        let targets = ["*": " "]
+        ForceOverrideHungSpeakStringToSpeechModSettings_NotRegexp(targets: targets)
+        let regexpTargets = ["-{5,}": " "]
+        ForceOverrideHungSpeakStringToSpeechModSettings_Regexp(targets: regexpTargets)
     }
 
     fileprivate static func targetNovelURLArrayToNovelIDArrayWith(novelIDArray:[String], urlArray:[String]?) -> [String] {
