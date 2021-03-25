@@ -2882,6 +2882,41 @@ Fixing the problem
 - In "Settings tab" -> "Correction of reading" -> "Details of correction of reading", try to select "Save" etc. with either "Before reading" or "After reading" blank. Fixed an issue that caused strange behavior after an error occurred
 - When I pressed "Settings tab" -> "Re-acquire SiteInfo", "Manual SiteInfo loading was completed" was added to "In-app error notification" without waiting for SiteInfo loading to finish. Fixed a problem that had been closed
 
+
+# Version 2.2.4
+
+問題の修正
+
+- 小説本文画面の右上に設置できる「少し先へ」ボタンのVoiceOver用名称が未設定であった問題を修正
+- 発話中に別アプリ等の影響で発話が中断した時に動作がおかしくなる場合がある問題を修正
+- 短時間に複数回読み上げ開始の指示が飛んできた場合に、同じ箇所を複数回読み上げる可能性があった部分の一部を回避できるように
+- 「-」が5個以上連続している場合は空白に変換するような読み替え設定を起動時に強制的に追加するように
+
+今回の修正も前回と引き続き Version 2.* で発生していた問題や、お問い合わせへの対応となります。
+恐らくまだまだ問題はあるのかとは思うのですが、今の所すぐに対応できる物についてはこのリリースで対応できたつもりになっている、という物になります。
+
+まず最初の問題は、VoiceOver周りなのですが、VoiceOver周りについてはテスト自体をしておりませんのでまだまだ色々ありそうな気がしています。
+次の問題は、発話中に別アプリ等で発話が停止していて、「設定タブ」->「最大連続再生時間」の時間が経過した場合に、「最大連続再生時間を超えたので発話を終了します」といったアナウンスがされていた、という問題を解消するものです。
+次の問題は、Bluetoothイヤホン等から発話を開始しようとした時に、同じ部分を何回か読み上げてしまって読み上げ再生位置がズレるという問題にもしかすると対応できるかもしれない、という希望的な修正となります。
+次の問題は、「-------」という感じの長く連続した「-」があると読み上げがそこで停止するという問題を報告してくる方が多くなってきましたため、この問題を回避するような読み替え設定を強制的に導入するという物になります。ただ、この問題は私の手元の端末では再現しておりませんため、今回の読み替え設定の追加で解消するかどうかはよくわからない、というような形の物になります。
+
+また、まだまだ「前のバージョンではできていたのにできなくなりました」とか「新しくなったら使いにくくなりました」とか「新機能全然使い物にならないのでなんとかしてください」といったようなお問い合わせが止みませんので対応をしているわけなのですが、少々疲れました。正直な所、お問い合わせが届いた事を告げる音が端末から鳴るのを恐れてしまっていて、心が休まらない感じになっています。お問い合わせの数を減らす方法でユーザの皆様が納得できる形の方法は何か無いですかね。今の所は月額課金制への移行(ユーザ数を減らす)か、アプリの公開を止める(ユーザ数をゼロにする)以外の有効な手段を思いついていません。
+
+また、暫く後(次のiPhoneが発売される頃より少し後位を目処)に ことせかい の対応 iOS(iPad OS)バージョンを 10.0 以上から 14.0 以上に引き上げる予定です。これにより、対応されなくなる iPhone(例えば iPhone 5s, iPhone 6等)で動作している ことせかい と最新版の ことせかい との間での iCloud同期 はサポートされず、動作できなくなる可能性がございます。その場合は iCloud同期 をOFFにする事で利用し続ける事は可能となりますため、そのように対応して頂けますようお願いいたします。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 2.2.4
+
+Fixing the problem
+
+- Fixed an issue where the VoiceOver name for the "A little ahead" button that can be placed in the upper right corner of the novel text screen was not set.
+- Fixed the problem that the operation may become strange when the utterance is interrupted due to the influence of another application etc. during the utterance.
+- When the instruction to start reading aloud multiple times in a short time, you can avoid a part of the part that could read the same part multiple times.
+- Forcibly add a replacement setting that converts to blank when 5 or more "-" are consecutive at startup.
+
+
 TODO:
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
 

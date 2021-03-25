@@ -777,15 +777,25 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.3
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.4
 
-- Fixed the problem that \"All novels\" was always set to \"Applicable target\" when moving from \"Settings tab\" -> \"Correction of reading\" to \"Details of correction of reading\".
-- In \"Settings tab\" -> \"Correction of reading\" -> \"Details of correction of reading\", try to select \"Save\" etc. with either \"Before reading\" or \"After reading\" blank. Fixed an issue that caused strange behavior after an error occurred.
-- When I pressed \"Settings tab\" -> \"Re-acquire SiteInfo\", \"Manual SiteInfo loading was completed\" was added to \"In-app error notification\" without waiting for SiteInfo loading to finish. Fixed a problem that had been closed
+- Fixed an issue where the VoiceOver name for the \"A little ahead\" button that can be placed in the upper right corner of the novel text screen was not set.
+- Fixed the problem that the operation may become strange when the utterance is interrupted due to the influence of another application etc. during the utterance.
+- When the instruction to start reading aloud multiple times in a short time, you can avoid a part of the part that could read the same part multiple times.
+- Forcibly add a replacement setting that converts to blank when 5 or more \"-\" are consecutive at startup.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.2.4
+
+Fixing the problem
+
+- Fixed an issue where the VoiceOver name for the \"A little ahead\" button that can be placed in the upper right corner of the novel text screen was not set.
+- Fixed the problem that the operation may become strange when the utterance is interrupted due to the influence of another application etc. during the utterance.
+- When the instruction to start reading aloud multiple times in a short time, you can avoid a part of the part that could read the same part multiple times.
+- Forcibly add a replacement setting that converts to blank when 5 or more \"-\" are consecutive at startup.
+
 # Version 2.2.3
 
 Fixing the problem
