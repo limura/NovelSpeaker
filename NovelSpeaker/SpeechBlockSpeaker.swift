@@ -208,6 +208,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func StartSpeech() {
+        if m_IsSpeaking == true { return }
         m_IsSpeaking = true
         enqueueSpeechBlock()
     }
