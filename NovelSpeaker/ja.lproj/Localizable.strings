@@ -777,6 +777,7 @@
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.4
 
+- 短時間に何度も再起動した場合にセーフモードになるように
 - 小説本文画面の右上に設置できる「少し先へ」ボタンのVoiceOver用名称が未設定であった問題を修正
 - 発話中に別アプリ等の影響で発話が中断した時に動作がおかしくなる場合がある問題を修正
 - 短時間に複数回読み上げ開始の指示が飛んできた場合に、同じ箇所を複数回読み上げる可能性があった部分の一部を回避できるように
@@ -785,6 +786,10 @@
 
 "UpdateLogViewController_UpdateLog" = "
 # Version 2.2.4
+
+インタフェースの変更
+
+- 短時間に何度も再起動した場合にセーフモードになるように
 
 問題の修正
 

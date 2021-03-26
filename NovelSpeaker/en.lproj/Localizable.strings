@@ -787,6 +787,7 @@
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.4
 
+- Now to go into safe mode if you restart many times in a short time
 - Fixed an issue where the VoiceOver name for the \"A little ahead\" button that can be placed in the upper right corner of the novel text screen was not set.
 - Fixed the problem that the operation may become strange when the utterance is interrupted due to the influence of another application etc. during the utterance.
 - When the instruction to start reading aloud multiple times in a short time, you can avoid a part of the part that could read the same part multiple times.
@@ -796,6 +797,10 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 
 "UpdateLogViewController_UpdateLog" = "
 # Version 2.2.4
+
+Interface changes
+
+- Now to go into safe mode if you restart many times in a short time
 
 Fixing the problem
 
