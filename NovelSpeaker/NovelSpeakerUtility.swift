@@ -2596,7 +2596,7 @@ class NovelSpeakerUtility: NSObject {
 
     static func ClearCheckRestartFrequency() {
         let defaults = UserDefaults.standard
-        let cleardArray:[String] = []
+        let cleardArray:[String] = [NiftyUtility.Date2ISO8601String(date: Date())]
         defaults.set(cleardArray, forKey: CheckRestartFrequencyKey)
         defaults.synchronize()
     }
