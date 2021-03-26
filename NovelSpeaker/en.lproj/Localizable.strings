@@ -765,8 +765,10 @@
 "HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: I couldn't read anything. Note that this error may occur even if there is a problem with the network connection.";
 
 "SafeModeViewController_SectionTitle" = "Safe Mode";
-"SafeModeViewController_TitleLabelTitle" = "It started in safe mode because it detected that the app was restarted multiple times in a short period of time.\nIf you are forced to quit immediately after starting, you may be able to avoid it to some extent by changing the settings on the \"Settings tab\".\nAlso, if changing the settings on the \"Settings tab\" does not help, generate a backup file from \"Create backup\" in the \"Settings tab\" to save the data saved in the novelspeaker. You may be able to take it out. However, even if he restores his novels based on the retrieved data, that data can cause similar kills. In such a case, if the same problem is reproduced at the developer's hand after sending the backup data that the forced termination will occur from \"Settings tab\" -> \"Send inquiries to developers via E-mail\" May be able to solve the problem.";
-"SafeModeViewController_GoToSettingsTabButton_Title" = "Open the \"Settings tab\"";
+"SafeModeViewController_TitleLabelTitle" = "It started in safe mode because it detected that the app was restarted multiple times in a short period of time.\nYou may be able to retrieve the data stored in the novelspeaker by creating a backup file from the menu below. However, even if he restores his novels based on the retrieved data, that data can cause similar kills. In such a case, use \"Send inquiries to developers via E-mail\" to create an inconvenience report email, attach the backup data that will cause the forced termination, and send it, and the same problem will occur at the developer's hand. If you reproduce it, you may be able to solve the problem. However, the backup data includes data stored in his novelspeaker, so don't attach it if it contains data you don't want to give to the developer.";
+"SafeModeViewController_CreateShortBackupButton_Title" = "Generate a lightweight backup (The text of the novel is not saved and must be downloaded again)";
+"SafeModeViewController_CreateFullBackupButton_Title" = "Generate a full backup (The text of the novel is also saved, but it takes time and storage space)";
+"SafeModeViewController_SendProbremReport_Title" = "Send inquiries to developers via E-mail";
 "SafeModeViewController_ExitSafeModeButton_Title" = "Exit safe mode and boot normally";
 
 

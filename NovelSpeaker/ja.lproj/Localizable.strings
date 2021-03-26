@@ -756,8 +756,10 @@
 "HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: 何も読み込めませんでした。なお、ネットワーク接続に問題がある場合などでもこのエラーが発生する場合があります。";
 
 "SafeModeViewController_SectionTitle" = "セーフモード";
-"SafeModeViewController_TitleLabelTitle" = "短時間に複数回アプリが再起動したのを検知したため、セーフモードで起動しました。\n起動直後に強制終了してしまう場合には、「設定タブ」で設定を変更することである程度は回避できるかもしれません。\nまた、「設定タブ」で設定を変えてもどうにもならない場合、「設定タブ」内の「バックアップ用データの生成」からバックアップファイルを生成することで、ことせかい に保存されているデータを取り出す事ができるかもしれません。ただ、取り出されたデータを元に ことせかい を復元したとしても、そのデータが原因で同様の強制終了が発生する可能性はあります。そのような場合には、「設定タブ」→「開発者に問い合わせる」からその強制終了が発生してしまうバックアップデータを送って頂いた上で、開発者の手元で同様の問題が再現しました場合には、問題を解消することができるようになるかもしれません。";
-"SafeModeViewController_GoToSettingsTabButton_Title" = "「設定タブ」を開く";
+"SafeModeViewController_TitleLabelTitle" = "短時間に複数回アプリが再起動したのを検知したため、セーフモードで起動しました。\n以下のメニューからバックアップファイルを生成することで、ことせかい に保存されているデータを取り出す事ができるかもしれません。ただ、取り出されたデータを元に ことせかい を復元したとしても、そのデータが原因で同様の強制終了が発生する可能性はあります。そのような場合には、「開発者に問い合わせる」を使って不都合報告メールを作成し、その強制終了が発生してしまうバックアップデータを添付して送って頂き、開発者の手元で同様の問題が再現しました場合には、問題を解消することができるようになるかもしれません。ただし、バックアップデータには ことせかい に保存されているデータが含まれますので、開発者に渡したくないデータが含まれている場合には添付しないようにしてください。";
+"SafeModeViewController_CreateShortBackupButton_Title" = "軽量バックアップを生成する(小説本文は保存されませんので、再度ダウンロードする必要があります)";
+"SafeModeViewController_CreateFullBackupButton_Title" = "完全バックアップを生成する(小説本文も保存されますが、時間とストレージ容量を必要とします)";
+"SafeModeViewController_SendProbremReport_Title" = "開発者に問い合わせる";
 "SafeModeViewController_ExitSafeModeButton_Title" = "セーフモードを終了し、通常起動する";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
