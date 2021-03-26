@@ -471,9 +471,9 @@ class StoryTextClassifier {
                 }
             }
             if let sc = speakerEndTextFirstCharacter, sc == c, speakerList.count > 1, let endText = speakerList.last?.endText, endText.count > 0 {
-                if targetString.starts(with: endText) {
-                    index = content.index(index, offsetBy: endText.count)
-                    if content.endIndex < index {
+                if targetString.starts(with: endText), let newIndex = content.index(index, offsetBy: endText.count, limitedBy: content.endIndex) {
+                    index = newIndex
+                    if content.endIndex <= index {
                         index = content.endIndex
                     }
                     let displayText = String(content[currentTextStartIndex..<index])
@@ -493,9 +493,9 @@ class StoryTextClassifier {
             }
             if let sectionConfigList = indexedSectionConfigList[c] {
                 for sectionConfig in sectionConfigList {
-                    if targetString.starts(with: sectionConfig.startText) {
+                    if targetString.starts(with: sectionConfig.startText), let newIndex = content.index(index, offsetBy: sectionConfig.startText.count, limitedBy: content.endIndex) {
                         if currentTextStartIndex < index {
-                            if content.endIndex < index {
+                            if content.endIndex <= index {
                                 index = content.endIndex
                             }
                             let displayText = String(content[currentTextStartIndex..<index])
@@ -503,7 +503,7 @@ class StoryTextClassifier {
                             result.append(contentsOf: newBlockArray)
                         }
                         currentTextStartIndex = index
-                        index = content.index(index, offsetBy: sectionConfig.startText.count)
+                        index = newIndex
                         speakerList.append(sectionConfig)
                         if sectionConfig.endText.count > 0 {
                             speakerEndTextFirstCharacter = sectionConfig.endText[sectionConfig.endText.startIndex]
@@ -514,9 +514,9 @@ class StoryTextClassifier {
             }
             if content[currentTextStartIndex..<index].count > moreSplitMinimumLetterCount {
                 for char in withMoreSplitTargets {
-                    if targetString.starts(with: char) {
-                        index = content.index(index, offsetBy: char.count)
-                        if content.endIndex < index {
+                    if targetString.starts(with: char), let newIndex = content.index(index, offsetBy: char.count, limitedBy: content.endIndex) {
+                        index = newIndex
+                        if content.endIndex <= index {
                             index = content.endIndex
                         }
                         let displayText = String(content[currentTextStartIndex..<index])
@@ -527,9 +527,9 @@ class StoryTextClassifier {
                     }
                 }
             }
-            if let waitConfig = currentWaitconfig {
-                index = content.index(index, offsetBy: waitConfig.targetText.count)
-                if content.endIndex < index {
+            if let waitConfig = currentWaitconfig, let newIndex = content.index(index, offsetBy: waitConfig.targetText.count, limitedBy: content.endIndex) {
+                index = newIndex
+                if content.endIndex <= index {
                     index = content.endIndex
                 }
                 let displayText = String(content[currentTextStartIndex..<index])
