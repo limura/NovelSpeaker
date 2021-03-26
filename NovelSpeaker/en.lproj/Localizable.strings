@@ -764,6 +764,12 @@
 
 "HeadlessHttpClient_ErikError_noContent" = "ErikError.noContent: I couldn't read anything. Note that this error may occur even if there is a problem with the network connection.";
 
+"SafeModeViewController_SectionTitle" = "Safe Mode";
+"SafeModeViewController_TitleLabelTitle" = "It started in safe mode because it detected that the app was restarted multiple times in a short period of time.\nIf you are forced to quit immediately after starting, you may be able to avoid it to some extent by changing the settings on the \"Settings tab\".\nAlso, if changing the settings on the \"Settings tab\" does not help, generate a backup file from \"Create backup\" in the \"Settings tab\" to save the data saved in the novelspeaker. You may be able to take it out. However, even if he restores his novels based on the retrieved data, that data can cause similar kills. In such a case, if the same problem is reproduced at the developer's hand after sending the backup data that the forced termination will occur from \"Settings tab\" -> \"Send inquiries to developers via E-mail\" May be able to solve the problem.";
+"SafeModeViewController_GoToSettingsTabButton_Title" = "Open the \"Settings tab\"";
+"SafeModeViewController_ExitSafeModeButton_Title" = "Exit safe mode and boot normally";
+
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";

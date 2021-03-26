@@ -80,7 +80,12 @@ void uncaughtExceptionHandler(NSException *exception)
     //[CoreDataToRealmTool UnregisterConvertFromCoreDataFinished];
     //[RealmUtil RemoveLocalRealmFile];
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
-    if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool IsNeedMigration] || isiCloudValid == false) {
+    // 短時間に何度も再起動している場合、セーフモードで起動します。
+    if ([NovelSpeakerUtility CheckRestartFrequencyWithTickTime:30 count:3] == true) {
+        NSLog(@"start safe mode!!!!");
+        UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"safeMode" bundle:nil];
+        toplevelViewController = [storyboard instantiateInitialViewController];
+    }else if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool IsNeedMigration] || isiCloudValid == false) {
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"coreDataMigration" bundle:nil];
         toplevelViewController = [storyboard instantiateInitialViewController];
     }else{

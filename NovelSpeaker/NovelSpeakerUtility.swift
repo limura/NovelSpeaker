@@ -2560,4 +2560,44 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     #endif
+    
+    /// 短時間で何度も再起動を繰り返しているかどうかを確認するためのツールです。
+    /// 動作としては、CheckRestartFrequency() が呼び出されるたびにその時間を UserDefaults に保存します。
+    /// その時に、直近の count回前 の CheckRestartFrequency() 呼び出しを行った時間が
+    /// 現在時刻から tickTime を引いた時間よりも後であれば、true を返します。(それ以外は false を返します)
+    /// 従って、例えば tickTime が 10(秒) で count が 3 であれば、
+    /// 10秒以内に 3回以上 CheckRestartFrequency() が呼び出されているなら true が返ります。
+    static let CheckRestartFrequencyKey = "CheckRestartFrequencyKey"
+    @objc static func CheckRestartFrequency(tickTime:TimeInterval, count:Int) -> Bool {
+        let maxCount = 10
+
+        let now = Date()
+        let expireDate = now.addingTimeInterval(tickTime * -1)
+
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [CheckRestartFrequencyKey : []])
+        var prev = defaults.stringArray(forKey: CheckRestartFrequencyKey) ?? []
+        let currentDateTime = NiftyUtility.Date2ISO8601String(date: now)
+        prev.append(currentDateTime)
+        while prev.count > maxCount {
+            prev.removeFirst()
+        }
+        defaults.set(prev, forKey: CheckRestartFrequencyKey)
+        defaults.synchronize()
+        while prev.count > count {
+            prev.removeFirst()
+        }
+        if prev.count != count {
+            return false
+        }
+        guard let targetDateTimeString = prev.first, let targetDateTime = NiftyUtility.ISO8601String2Date(iso8601String: targetDateTimeString) else { return false }
+        return targetDateTime >= expireDate
+    }
+
+    static func ClearCheckRestartFrequency() {
+        let defaults = UserDefaults.standard
+        let cleardArray:[String] = []
+        defaults.set(cleardArray, forKey: CheckRestartFrequencyKey)
+        defaults.synchronize()
+    }
 }

@@ -200,6 +200,8 @@
 		21D8FC5219FCB07B00CCF1B6 /* coreDataMigration.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */; };
 		21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21DD0BF420B595F500DC3C39 /* LICENSE.txt */; };
 		21DFB3FC22ADA1390006A933 /* ActivityIndicatorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */; };
+		21E26FEB260E066F009018B6 /* SafeModeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E26FEA260E066F009018B6 /* SafeModeViewController.swift */; };
+		21E26FF3260E134C009018B6 /* safeMode.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21E26FF2260E134C009018B6 /* safeMode.storyboard */; };
 		21E6B41E246D55DC00605874 /* HeadlessHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */; };
 		21E76BF91FB487B1003C659F /* EasyDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BF81FB487B1003C659F /* EasyDialogs.swift */; };
 		21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E76BFA1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift */; };
@@ -524,6 +526,8 @@
 		21D8FC5819FCB09E00CCF1B6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/coreDataMigration.strings; sourceTree = "<group>"; };
 		21DD0BF420B595F500DC3C39 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorManager.swift; sourceTree = "<group>"; };
+		21E26FEA260E066F009018B6 /* SafeModeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeModeViewController.swift; sourceTree = "<group>"; };
+		21E26FF2260E134C009018B6 /* safeMode.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = safeMode.storyboard; sourceTree = "<group>"; };
 		21E294E61970E2180012A3AA /* SettingDataModel 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 2.xcdatamodel"; sourceTree = "<group>"; };
 		21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadlessHTTPClient.swift; sourceTree = "<group>"; };
 		21E76BF81FB487B1003C659F /* EasyDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EasyDialogs.swift; sourceTree = "<group>"; };
@@ -957,6 +961,7 @@
 				21F054DE1917E0F200CC6BA9 /* Main.storyboard */,
 				21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */,
 				219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */,
+				21E26FF2260E134C009018B6 /* safeMode.storyboard */,
 				211BA5F219973AAD00560842 /* TextSpeech */,
 				21D8FC4C19FC97DB00CCF1B6 /* Tools */,
 				21260E902261D02B002DD7AE /* Realm */,
@@ -1035,6 +1040,7 @@
 				21AA7FCE25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift */,
 				210DD99725840D1000F2B907 /* BookshelfViewButtonSettingsViewController.swift */,
 				212F6175258723C200822737 /* NovelLikeOrderSettingViewController.swift */,
+				21E26FEA260E066F009018B6 /* SafeModeViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1327,6 +1333,7 @@
 				21B53A2219619C50009658B7 /* gear.png in Resources */,
 				210958C41A0DF55600E9171F /* booksearch.png in Resources */,
 				21F563C71FD801970037F5D7 /* >.png in Resources */,
+				21E26FF3260E134C009018B6 /* safeMode.storyboard in Resources */,
 				21B53A2319619C50009658B7 /* gear@2x.png in Resources */,
 				21F563CF1FD802400037F5D7 /* <.png in Resources */,
 				21A38BC025CEF40A008DA66B /* NovelSpeaker-backgroundGradation.png in Resources */,
@@ -1693,6 +1700,7 @@
 				21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
 				21E76BFB1FB4D9A5003C659F /* SpeechModSettingsTableViewControllerSwift.swift in Sources */,
+				21E26FEB260E066F009018B6 /* SafeModeViewController.swift in Sources */,
 				214141D01FC0A1C30076DEC2 /* NiftyUtility.swift in Sources */,
 				212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */,
 				21DFB3FC22ADA1390006A933 /* ActivityIndicatorManager.swift in Sources */,
