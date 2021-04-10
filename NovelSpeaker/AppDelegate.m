@@ -82,7 +82,6 @@ void uncaughtExceptionHandler(NSException *exception)
     GlobalDataSingleton* globalData = [GlobalDataSingleton GetInstance];
     // 短時間に何度も再起動している場合、セーフモードで起動します。
     if ([NovelSpeakerUtility CheckRestartFrequencyWithTickTime:30 count:3] == true) {
-        NSLog(@"start safe mode!!!!");
         UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"safeMode" bundle:nil];
         toplevelViewController = [storyboard instantiateInitialViewController];
     }else if ([globalData isRequiredCoreDataMigration] || [CoreDataToRealmTool IsNeedMigration] || isiCloudValid == false) {
