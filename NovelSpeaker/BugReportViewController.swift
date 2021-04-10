@@ -22,6 +22,8 @@ struct BugReportViewInputData {
 }
 
 class BugReportViewController: FormViewController, MFMailComposeViewControllerDelegate {
+    var additionalHintString:String? = nil
+    
     static var value = BugReportViewInputData();
     
     /// 最新のプライバシーポリシーを読んだことがあるか否かを判定して、読んだことがなければ表示して同意を求めます
@@ -459,6 +461,12 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         let isBackgroundFetchEnabled = RealmUtil.RealmBlock { (realm) -> Bool in
             return RealmGlobalState.GetInstanceWith(realm: realm)?.isBackgroundNovelFetchEnabled ?? false
         }
+        let additionalHint:String
+        if let hint = self.additionalHintString {
+            additionalHint = "\n\(hint)"
+        }else{
+            additionalHint = ""
+        }
         let picker = MFMailComposeViewController()
         picker.mailComposeDelegate = self;
         picker.setSubject(NSLocalizedString("BugReportViewController_SendNewFeatureMailSubject", comment:"ことせかい 新機能等の提案"))
@@ -472,6 +480,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             + "\nApp version:" + appVersionString
             + "\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
             + "\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
+            + additionalHint
         , isHTML: false)
         present(picker, animated: true, completion: nil)
         return true;
@@ -493,6 +502,12 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         let isBackgroundFetchEnabled = RealmUtil.RealmBlock { (realm) -> Bool in
             return RealmGlobalState.GetInstanceWith(realm: realm)?.isBackgroundNovelFetchEnabled ?? false
         }
+        let additionalHint:String
+        if let hint = self.additionalHintString {
+            additionalHint = "\n\(hint)"
+        }else{
+            additionalHint = ""
+        }
         
         let picker = MFMailComposeViewController()
         picker.mailComposeDelegate = self;
@@ -507,6 +522,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             + "\nApp version:" + appVersionString
             + "\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
             + "\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
+            + additionalHint
             + "\n" + NSLocalizedString("BugReportViewController_TimeOfOccurrence", comment: "問題発生日時") + ": " + date.description(with: Locale.init(identifier: "ja_JP"))
             + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Description", comment: "不都合の概要") + ":\n" + description
             + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Procedure", comment: "不都合の再現方法") + ":\n" + procedure

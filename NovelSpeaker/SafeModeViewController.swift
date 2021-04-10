@@ -44,6 +44,7 @@ class SafeModeViewController: FormViewController {
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection({ (_, _) in
             let nextViewController = BugReportViewController()
+            nextViewController.additionalHintString = "safe mode: true"
             nextViewController.modalPresentationStyle = .fullScreen
             self.navigationController?.pushViewController(nextViewController, animated: true)
         })
