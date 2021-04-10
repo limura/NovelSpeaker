@@ -775,16 +775,20 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.4
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.5
 
-- 短時間に何度も再起動した場合にセーフモードになるように
-- 小説本文画面の右上に設置できる「少し先へ」ボタンのVoiceOver用名称が未設定であった問題を修正
-- 発話中に別アプリ等の影響で発話が中断した時に動作がおかしくなる場合がある問題を修正
-- 短時間に複数回読み上げ開始の指示が飛んできた場合に、同じ箇所を複数回読み上げる可能性があった部分の一部を回避できるように
-- 「-」が5個以上連続している場合は空白に変換するような読み替え設定を起動時に強制的に追加するように
+- 小説のページを開いた時に、「発話変更設定」「読みの修正」「読み上げ時の間の設定」の中に空文字列に対しての設定があった場合に強制終了してしまう問題を修正
+
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.2.5
+
+問題の修正
+
+- 小説のページを開いた時に、「発話変更設定」「読みの修正」「読み上げ時の間の設定」の中に空文字列に対しての設定があった場合に強制終了してしまう問題を修正
+
+
 # Version 2.2.4
 
 インタフェースの変更
