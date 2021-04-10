@@ -405,8 +405,7 @@ class StoryTextClassifier {
         
         var indexedSectionConfigList:[Character:[SpeechSectionConfig]] = [:]
         for sectionConfig in sectionConfigList {
-            guard sectionConfig.startText.count > 0 else { continue }
-            let c = sectionConfig.startText[sectionConfig.startText.startIndex]
+            guard let c = sectionConfig.startText.first else { continue }
             if var list = indexedSectionConfigList[c] {
                 list.append(sectionConfig)
                 indexedSectionConfigList[c] = list
@@ -416,8 +415,7 @@ class StoryTextClassifier {
         }
         var indexedWaitConfigList:[Character:[SpeechWaitConfig]] = [:]
         for waitConfig in waitConfigList {
-            guard waitConfig.targetText.count > 0 else { continue }
-            let c = waitConfig.targetText[waitConfig.targetText.startIndex]
+            guard let c = waitConfig.targetText.first else { continue }
             if var list = indexedWaitConfigList[c] {
                 list.append(waitConfig)
                 indexedWaitConfigList[c] = list
@@ -427,8 +425,7 @@ class StoryTextClassifier {
         }
         var indexedSpeechModArray:[Character:[SpeechModSetting]] = [:]
         for modSetting in sortedSpeechModArray {
-            guard modSetting.before.count > 0 else { continue }
-            let c = modSetting.before[modSetting.before.startIndex]
+            guard let c = modSetting.before.first else { continue }
             if var list = indexedSpeechModArray[c] {
                 list.append(modSetting)
                 indexedSpeechModArray[c] = list
