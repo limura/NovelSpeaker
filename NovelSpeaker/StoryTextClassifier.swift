@@ -396,6 +396,8 @@ class StoryTextClassifier {
     //
     // また、読み替え辞書の適用もこの文字列の分割時点で行います。
     static func CategorizeStoryText(content:String, withMoreSplitTargets:[String], moreSplitMinimumLetterCount:Int, defaultSpeaker:SpeakerSetting, sectionConfigList:[SpeechSectionConfig], waitConfigList:[SpeechWaitConfig], sortedSpeechModArray:[SpeechModSetting]) -> [CombinedSpeechBlock] {
+        guard content.count > 0 else { return [] }
+        
         //let startDate = Date()
         var result:[SpeechBlockInfo] = []
 
@@ -403,6 +405,7 @@ class StoryTextClassifier {
         
         var indexedSectionConfigList:[Character:[SpeechSectionConfig]] = [:]
         for sectionConfig in sectionConfigList {
+            guard sectionConfig.startText.count > 0 else { continue }
             let c = sectionConfig.startText[sectionConfig.startText.startIndex]
             if var list = indexedSectionConfigList[c] {
                 list.append(sectionConfig)
@@ -413,6 +416,7 @@ class StoryTextClassifier {
         }
         var indexedWaitConfigList:[Character:[SpeechWaitConfig]] = [:]
         for waitConfig in waitConfigList {
+            guard waitConfig.targetText.count > 0 else { continue }
             let c = waitConfig.targetText[waitConfig.targetText.startIndex]
             if var list = indexedWaitConfigList[c] {
                 list.append(waitConfig)
@@ -423,6 +427,7 @@ class StoryTextClassifier {
         }
         var indexedSpeechModArray:[Character:[SpeechModSetting]] = [:]
         for modSetting in sortedSpeechModArray {
+            guard modSetting.before.count > 0 else { continue }
             let c = modSetting.before[modSetting.before.startIndex]
             if var list = indexedSpeechModArray[c] {
                 list.append(modSetting)
