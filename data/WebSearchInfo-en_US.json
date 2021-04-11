@@ -481,10 +481,10 @@
             }
         ],
         "result": {
-            "block": "//div[@id='section_search_result']//li//div[@class='info_set']",
+            "block": "//div[@id='section_search_result']//li//div[@class='story_card']",
             "nextLink": "//div[@class='infinite-scroll-pagination']//a[contains(@class,'infinite-scroll-more')]/@href",
-            "title": "//div[@class='novel_title']",
-            "url": "//div[@class='novel_title']/a[contains(@href,'/story/')]/@href"
+            "title": "//p[@class='story_name']",
+            "url": "//p[@class='story_name']/a[contains(@href,'/story/')]/@href"
         }
     },
     {
