@@ -1608,6 +1608,8 @@ class NiftyUtility: NSObject {
             guard let elementXML = element.toHTML, let tagString = HTMLToString(htmlString: elementXML) else { continue }
             let trimedString = tagString.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "#＃♯"))
             if trimedString.count <= 0 { continue }
+            // 空白で分割する場合は components() で分割したのをセットすれば良いのだけれど、今までそうではなかったので今からそうするのは如何なものか
+            //tagSet.formUnion(Set<String>(trimedString.components(separatedBy: " 　\u{C2A0}"))) // C2A0 == &nbsp;
             tagSet.insert(trimedString)
         }
         return tagSet
