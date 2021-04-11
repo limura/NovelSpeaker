@@ -540,6 +540,12 @@ class StoryFetcher {
             failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_Parse", comment: "HTMLの解析に失敗しました。(有効なHTMLまたはXHTML文書ではないようです。いまのところ、ことせかい はPDF等のHTMLやXHTMLではない文書は読み込む事ができません)"))
             return
         }
+        func mergeTag(prevTagArray:[String], newTagArray:[String]) -> [String] {
+            var tagSet = Set<String>(prevTagArray)
+            tagSet.formUnion(Set<String>(newTagArray))
+            return Array(tagSet)
+        }
+        
         for siteInfo in currentState.siteInfoArray {
             let pageElement = siteInfo.decodePageElement(xmlDocument: htmlDocument).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             let nextUrl = siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url)
@@ -567,7 +573,7 @@ class StoryFetcher {
                     title: siteInfo.decodeTitle(xmlDocument: htmlDocument),
                     author: siteInfo.decodeAuthor(xmlDocument: htmlDocument),
                     subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument),
-                    tagArray: siteInfo.decodeTag(xmlDocument: htmlDocument),
+                    tagArray: mergeTag(prevTagArray: currentState.tagArray, newTagArray: siteInfo.decodeTag(xmlDocument: htmlDocument)),
                     siteInfoArray: currentState.siteInfoArray,
                     isNeedHeadless: currentState.isNeedHeadless,
                     waitSecondInHeadless: currentState.waitSecondInHeadless,
@@ -578,7 +584,7 @@ class StoryFetcher {
                 )
             )
             #else
-            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: pageElement, nextUrl: siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: siteInfo.decodeTitle(xmlDocument: htmlDocument), author: siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: siteInfo.decodeTag(xmlDocument: htmlDocument), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent))
+            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: pageElement, nextUrl: siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: siteInfo.decodeTitle(xmlDocument: htmlDocument), author: siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: mergeTag(prevTagArray: currentState.tagArray, newTagArray: siteInfo.decodeTag(xmlDocument: htmlDocument)), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent))
             #endif
             return
         }
@@ -691,7 +697,7 @@ class StoryFetcher {
         
         func fetchUrlWithRobotsCheck(url:URL, currentState:StoryState) {
             // TODO: 謎の固定値
-            let novelSpeakerUserAgent = "NovelSpeaker/1.1.147 CFNetwork/1128.0.1 Darwin/19.6.0"
+            let novelSpeakerUserAgent = "NovelSpeaker/2"
             RobotsFileTool.shared.CheckRobotsTxt(url: url, userAgentString: novelSpeakerUserAgent) { (result) in
                 if result {
                     fetchUrl(url: url, currentState: currentState)

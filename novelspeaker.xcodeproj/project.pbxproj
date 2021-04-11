@@ -173,6 +173,7 @@
 		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
 		21B56C69257F77F10065EDD4 /* UIImageExtensionSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */; };
+		21B959942622BEBF002A6714 /* HeadlessHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */; };
 		21BB5096253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21BB5095253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
@@ -658,6 +659,8 @@
 				210EFEDB23C80694007C3016 /* StoryTextClassifier.swift */,
 				210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */,
 				2164800B2290F3F900A183DF /* StorySpeaker.swift */,
+				21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */,
+				21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */,
 			);
 			name = TextSpeech;
 			sourceTree = "<group>";
@@ -824,6 +827,18 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
+		21B959932622BE90002A6714 /* NovelDownload */ = {
+			isa = PBXGroup;
+			children = (
+				21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */,
+				2104EDE824B985A100E275D1 /* StoryFetcher.swift */,
+				21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */,
+				214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */,
+				2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */,
+			);
+			name = NovelDownload;
+			sourceTree = "<group>";
+		};
 		21D8FC4C19FC97DB00CCF1B6 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
@@ -839,17 +854,10 @@
 				21F37B7C1EC2379100BE0452 /* CustomUITextView.swift */,
 				2167419F2043D592008A578D /* BehaviorLogger.swift */,
 				216741A62045B155008A578D /* UIDeviceModelNameExtension.swift */,
-				21AFDF3121664D5B002F34D9 /* DummySoundLooper.swift */,
-				21CA0FCA218DE6520059FACB /* DuplicateSoundPlayer.swift */,
-				2173A6B221C9260C002E9EA8 /* SyncHttpSession.swift */,
 				2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */,
 				21A2CDBA2292FD6E0080AEE6 /* NovelSpeakerNotificationTool.swift */,
-				21A2CDBF22947D140080AEE6 /* NovelDownloadQueue.swift */,
 				21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */,
-				21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */,
-				2104EDE824B985A100E275D1 /* StoryFetcher.swift */,
 				212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */,
-				214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */,
 				21D7B10E256D0FB700056E28 /* AppInformationLogger.swift */,
 			);
 			name = Tools;
@@ -963,6 +971,7 @@
 				219CAE2B1BFCD56000033939 /* Launch Screen.storyboard */,
 				21E26FF2260E134C009018B6 /* safeMode.storyboard */,
 				211BA5F219973AAD00560842 /* TextSpeech */,
+				21B959932622BE90002A6714 /* NovelDownload */,
 				21D8FC4C19FC97DB00CCF1B6 /* Tools */,
 				21260E902261D02B002DD7AE /* Realm */,
 				4E776B17196247BE00C36AD1 /* ViewControllers */,
@@ -1611,6 +1620,7 @@
 				2124B38D23BBF2E7002EBC31 /* NovelSpeakerUtility.swift in Sources */,
 				2193094B23BBE56A00035EF0 /* ExtensionDelegate.swift in Sources */,
 				21D7B110256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
+				21B959942622BEBF002A6714 /* HeadlessHTTPClient.swift in Sources */,
 				2124B39923BBFB7A002EBC31 /* CoreDataObjectHolder.m in Sources */,
 				21B56C69257F77F10065EDD4 /* UIImageExtensionSwift.swift in Sources */,
 				2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */,
