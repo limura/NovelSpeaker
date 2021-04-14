@@ -950,6 +950,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 section <<< LabelRow() {
                     $0.title = target
                     $0.cell.textLabel?.numberOfLines = 0
+                    $0.cell.accessibilityTraits = .button
                 }.onCellSelection({ (_, row) in
                     finish(result: target)
                     vc.close(animated: true, completion: nil)
@@ -957,6 +958,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             }
             section <<< ButtonRow() {
                 $0.title = "Cancel"
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.accessibilityTraits = .button
             }.onCellSelection({ (_, _) in
                 finish(result: nil)
                 vc.close(animated: true, completion: nil)
