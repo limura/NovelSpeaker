@@ -9,6 +9,7 @@
 import UIKit
 import RATreeView
 import RealmSwift
+import Eureka
 
 class BookShelfRATreeViewCellData {
     public var novelID:String?
@@ -923,15 +924,16 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
     }
     
     @objc func sortTypeSelectButtonClicked(sender:Any) {
-        let dialog = PickerViewDialog.createNewDialog(displayTextArray:
-            getDisplayStringToSortTypeDictionary().map({ (arg0) -> String in
-                let (key, _) = arg0
-                return key
-            }).sorted(by: { (a:String, b:String) -> Bool in
-                a < b
-            }),
-            firstSelectedString: getCurrentSortTypeDisplayString()) { (selectedText) in
-                let sortType = self.convertDisplayStringToSortType(key: selectedText)
+        let selectTargets = getDisplayStringToSortTypeDictionary().map({ (arg0) -> String in
+            let (key, _) = arg0
+            return key
+        }).sorted(by: { (a:String, b:String) -> Bool in
+            a < b
+        })
+        func finish(result:String?) {
+            guard let selectedText = result else { return }
+            let sortType = self.convertDisplayStringToSortType(key: selectedText)
+            DispatchQueue.main.async {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                         RealmUtil.WriteWith(realm: realm) { (realm) in
@@ -940,8 +942,27 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     }
                 }
                 self.reloadAllData()
+            }
         }
-        dialog?.popup(completion: nil)
+        EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { (vc) in
+            let section = Section()
+            for target in selectTargets {
+                section <<< LabelRow() {
+                    $0.title = target
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ (_, row) in
+                    finish(result: target)
+                    vc.close(animated: true, completion: nil)
+                })
+            }
+            section <<< ButtonRow() {
+                $0.title = "Cancel"
+            }.onCellSelection({ (_, _) in
+                finish(result: nil)
+                vc.close(animated: true, completion: nil)
+            })
+            vc.form +++ section
+        }, parentViewController: self, animated: true, completion: nil)
     }
     
     @objc func searchButtonClicked(sender:Any) {

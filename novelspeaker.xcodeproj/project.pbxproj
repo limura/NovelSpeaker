@@ -175,6 +175,7 @@
 		21B56C69257F77F10065EDD4 /* UIImageExtensionSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */; };
 		21B959942622BEBF002A6714 /* HeadlessHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */; };
 		21BB5096253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21BB5095253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift */; };
+		21C52BDE2626BDD800EE4768 /* EurekaPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C52BDD2626BDD800EE4768 /* EurekaPopupViewController.swift */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
 		21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 21C74F9D1965A5300039A706 /* NarouContentCacheData.m */; };
@@ -498,6 +499,7 @@
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
 		21B96ED32338124100112B5F /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ja-JP"; path = "ja-JP.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		21BB5095253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechViewButtonSettingsViewController.swift; sourceTree = "<group>"; };
+		21C52BDD2626BDD800EE4768 /* EurekaPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EurekaPopupViewController.swift; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
 		21C74F941964502A0039A706 /* arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@2x.png"; sourceTree = "<group>"; };
 		21C74F9C1965A5300039A706 /* NarouContentCacheData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NarouContentCacheData.h; sourceTree = "<group>"; };
@@ -724,6 +726,7 @@
 				2173A6C021CC530E002E9EA8 /* FloatingButton.xib */,
 				21648005229003E100A183DF /* BookShelfTreeViewCell.swift */,
 				21648006229003E100A183DF /* BookShelfTreeViewCell.xib */,
+				21C52BDD2626BDD800EE4768 /* EurekaPopupViewController.swift */,
 			);
 			name = CustomViews;
 			sourceTree = "<group>";
@@ -1671,6 +1674,7 @@
 				21AA7FCF25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
+				21C52BDE2626BDD800EE4768 /* EurekaPopupViewController.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
 				21E6B41E246D55DC00605874 /* HeadlessHTTPClient.swift in Sources */,
 				218E81FC251997E30041A1B5 /* RemoteDataURLSettingViewController.swift in Sources */,
