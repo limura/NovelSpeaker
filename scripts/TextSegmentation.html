@@ -1,0 +1,56 @@
+<html>
+<head>
+<meta http-equiv="content-type" charset="UTF-8">
+<title>テキトーにテキスト分割文字を埋め込むつーる</title>
+<style type="text/css">
+#text {
+  width: 100%;
+  height: 70vh;
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body>
+<label for="minCount">1ページの最小文字数</label>: <input value="5000" type="range" id="minCount" name="minCount" min="1" max="99999" step="1" onchange="ApplyMinCount(this.value)" oninput="ApplyMinCount(this.value)"></input><input type="text" size="10" id="minCountValue" onchange="ApplyMinCount(this.value)" oninput="ApplyMinCount(this.value)" value="5000"></input><br>
+<button id="convertButton">分割</button><br>
+<textarea id="text" name="text" placeholder="整形したい文字列をこの欄に書き込んだ上で「分割」ボタンを押してください。"></textarea>
+</body>
+<script>
+let segmentationText = "\n\n\n";
+let minCountElement = document.getElementById("minCount");
+let minCountValueElement = document.getElementById("minCountValue");
+let convertButtonElement = document.getElementById("convertButton");
+let textElement = document.getElementById("text");
+
+function ApplyMinCount(minCount){
+  if(minCountElement.value != minCount){
+    minCountElement.value = minCount;
+  }
+  if(minCountValueElement.value != minCount){
+    minCountValueElement.value = minCount;
+  }
+}
+
+convertButtonElement.onclick = () => {
+  var minCount = minCountElement.value + 0;
+  if(minCount <= 0){
+    minCount = 5000;
+    ApplyMinCount(minCount);
+  }
+  let text = textElement.value + "";
+  let splited = text.split(/[\r\n]/);
+  var currentText = "";
+  var resultText = "";
+  for(var i = 0; i < splited.length; i = i+1){
+    let line = splited[i];
+    currentText = currentText + line + "\n";
+    if(currentText.length > minCount){
+      resultText += segmentationText + currentText;
+      currentText = "";
+    }
+  }
+  resultText += segmentationText + currentText;
+  textElement.value = resultText.trim();
+};
+</script>
+</html>
