@@ -32,7 +32,7 @@ function ApplyMinCount(minCount){
 }
 
 convertButtonElement.onclick = () => {
-  var minCount = minCountElement.value + 0;
+  var minCount = Number(minCountElement.value);
   if(minCount <= 0){
     minCount = 5000;
     ApplyMinCount(minCount);
