@@ -274,7 +274,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     }
     
     func willSpeakRange(range: NSRange) {
-        guard let delegate = delegate else { return }
+        guard let delegate = delegate, speechBlockArray.count > currentSpeechBlockIndex else { return }
         let block = speechBlockArray[currentSpeechBlockIndex]
         let location = block.ComputeDisplayLocationFrom(speechLocation: range.location + currentBlockSpeechOffset) + currentDisplayStringOffset
         currentSpeakingLocation = location
