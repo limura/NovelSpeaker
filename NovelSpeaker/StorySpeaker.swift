@@ -1246,7 +1246,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
-    var currentBlock:CombinedSpeechBlock {
+    var currentBlock:CombinedSpeechBlock? {
         get { return speaker.currentBlock }
     }
     
