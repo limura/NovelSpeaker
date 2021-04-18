@@ -786,13 +786,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.5
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.3.0
 
-- Fixed the problem that when the page of the novel was opened, it was forcibly terminated when there was a setting for an empty string in \"Speech change setting\", \"Correction of reading\", and \"Setting during reading\".
+― In many cases, you can get some tags on websites where you can't get them.
+- PickerView (UI that selects one in a drum-like display) that appears in \"Order\" on the upper right of the \"Bookshelf screen\" is changed to another format
+- When \"Settings tab\" -> \"Ruby will read when available\" is ON, you can now select ON / OFF for \"Only the ruby notation derived from the NovelSpeaker is targeted\" is ON / OFF.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.3.0
+
+― In many cases, you can get some tags on websites where you can't get them.
+- PickerView (UI that selects one in a drum-like display) that appears in \"Order\" on the upper right of the \"Bookshelf screen\" is changed to another format
+- When \"Settings tab\" -> \"Ruby will read when available\" is ON, you can now select ON / OFF for \"Only the ruby notation derived from the NovelSpeaker is targeted\" is ON / OFF.
+
+
 # Version 2.2.5
 
 Fixing the problem

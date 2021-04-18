@@ -776,13 +776,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.2.5
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.3.0
 
-- 小説のページを開いた時に、「発話変更設定」「読みの修正」「読み上げ時の間の設定」の中に空文字列に対しての設定があった場合に強制終了してしまう問題を修正
+- 一部のタグを取得できていないWebサイトにおいて、取得できる場合を多くなるように
+- 「本棚画面」の右上の「順番」で出てくる PickerView (ドラムみたいな表示で何か一つを選択するUI)を別の形式の物に
+- 「設定タブ」→「ルビはルビだけ読む」がONの時に「ことせかい 由来のルビ表記のみを対象とする〜」のON/OFFを選択できるように
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.3.0
+
+- 一部のタグを取得できていないWebサイトにおいて、取得できる場合を多くなるように
+- 「本棚画面」の右上の「順番」で出てくる PickerView (ドラムみたいな表示で何か一つを選択するUI)を別の形式の物に
+- 「設定タブ」→「ルビはルビだけ読む」がONの時に「ことせかい 由来のルビ表記のみを対象とする〜」のON/OFFを選択できるように
+
+
 # Version 2.2.5
 
 問題の修正
