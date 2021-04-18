@@ -282,7 +282,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 }
                             }else if property.name == "isSpeechWaitSettingUseExperimentalWait" {
                                 self.isNeedApplySpeechConfigs = true
-                            }else if ["isOverrideRubyIsEnabled", "notRubyCharactorStringArray", "isIgnoreURIStringSpeechEnabled"].contains(property.name) {
+                            }else if ["isOverrideRubyIsEnabled", "notRubyCharactorStringArray", "isIgnoreURIStringSpeechEnabled", "isDisableNarouRuby"].contains(property.name) {
                                 self.isNeedApplySpeechConfigs = true
                                 return
                             }

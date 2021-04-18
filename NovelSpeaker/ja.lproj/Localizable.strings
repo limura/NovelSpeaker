@@ -181,6 +181,7 @@
 "SettingsViewController_DontUsallyUseSection_Title" = "通常は使用する必要の無いもの";
 "SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd" = "手動による SiteInfo の読み込みが終了しました。\n他にエラーメッセージが出ていなければ SiteInfo の読み込みは成功したと思われます。";
 "SettingTableViewController_IsEnableSwipeOnStoryView" = "小説本文画面での左右スワイプでページめくりができるようにする";
+"SettingTableViewController_DisableNarouRuby" = "ことせかい 由来のルビ表記のみを対象とする(『|ルビを振られる文字列(ルビ文字列)』という形式のみを対象とするようになるため、『漢字(ひらがなかカタカナ)』という表記をルビと判定される事を避けたい場合等に効果があります)";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";

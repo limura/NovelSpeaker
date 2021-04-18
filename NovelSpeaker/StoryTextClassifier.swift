@@ -663,18 +663,24 @@ class StoryTextClassifier {
         return result
     }
     
-    static func GenerateRubyModString(text:String, notRubyString:String) -> [SpeechModSetting] {
-        // 小説家になろうでのルビの扱い https://syosetu.com/man/ruby/
-        // 正規表現における文字集合の書き方
-        // 平仮名 \p{Hiragana}
-        // カタカナ \p{Katakana}
-        // 漢字 \p{Han}
-        let rubyPatternList = [
-            "\\|([^|《(（]+?)[《(（]([^》)）]+?)[》)）]", // | のある場合
-            "\\｜([^｜《(（]+?)[《(（]([^》)）]+?)[》)）]", // ｜ のある場合
-            "([\\p{Han}]+?)[《(（]([^》)）]+?)[》)）]", // 《 》 の前が漢字
-            "([\\p{Han}]+?)[《(（]([\\p{Hiragana}\\p{Katakana}]+?)[》)）]", // () の前が漢字かつ、() の中がカタカナまたは平仮名
-        ]
+    static func GenerateRubyModString(text:String, notRubyString:String, isDisableNarouRuby:Bool) -> [SpeechModSetting] {
+        let rubyPatternList:[String]
+        if isDisableNarouRuby == false {
+            // 小説家になろうでのルビの扱い https://syosetu.com/man/ruby/ に準拠します
+            // 正規表現における文字集合の書き方
+            // 平仮名 \p{Hiragana}
+            // カタカナ \p{Katakana}
+            // 漢字 \p{Han}
+            rubyPatternList = [
+                "\\|([^|《(（]+?)[《(（]([^》)）]+?)[》)）]", // | のある場合
+                "\\｜([^｜《(（]+?)[《(（]([^》)）]+?)[》)）]", // ｜ のある場合
+                "([\\p{Han}]+?)[《(（]([^》)）]+?)[》)）]", // 《 》 の前が漢字
+                "([\\p{Han}]+?)[《(（]([\\p{Hiragana}\\p{Katakana}]+?)[》)）]", // () の前が漢字かつ、() の中がカタカナまたは平仮名
+            ]
+        }else{
+            // ことせかい 由来のルビ表記を相手にします
+            rubyPatternList = ["\\|([^|(]+?)[(]([^)]+?)[)]"]
+        }
         var notRubyRegexp:NSRegularExpression? = nil
         if notRubyString.count > 0, let notRubyRe = try? NSRegularExpression(pattern: "^[\(notRubyString)]+$", options: []) {
             notRubyRegexp = notRubyRe
@@ -755,6 +761,7 @@ class StoryTextClassifier {
             var isOverrideRubyEnabled = false
             var notRubyCharactorStringArray = ""
             var isIgnoreURIStringSpeechEnabled = false
+            var isDisableNarouRuby = false
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                 if globalState.isEscapeAboutSpeechPositionDisplayBugOniOS12Enabled == true {
                     let modSetting = SpeechModSetting(
@@ -766,6 +773,7 @@ class StoryTextClassifier {
                 isOverrideRubyEnabled = globalState.isOverrideRubyIsEnabled
                 notRubyCharactorStringArray = globalState.notRubyCharactorStringArray
                 isIgnoreURIStringSpeechEnabled = globalState.isIgnoreURIStringSpeechEnabled
+                isDisableNarouRuby = globalState.isDisableNarouRuby
             }
             if isIgnoreURIStringSpeechEnabled {
                 let modSetting = SpeechModSetting(
@@ -775,7 +783,7 @@ class StoryTextClassifier {
                 speechModSettingList.append(modSetting)
             }
             if isOverrideRubyEnabled {
-                let rubySettingArray = GenerateRubyModString(text: story.content, notRubyString: notRubyCharactorStringArray)
+                let rubySettingArray = GenerateRubyModString(text: story.content, notRubyString: notRubyCharactorStringArray, isDisableNarouRuby: isDisableNarouRuby)
                 speechModSettingList.append(contentsOf: rubySettingArray)
             }
             

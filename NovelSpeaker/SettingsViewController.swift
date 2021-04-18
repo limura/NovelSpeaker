@@ -569,6 +569,27 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            <<< SwitchRow("DisableNarouRubyRow") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_DisableNarouRuby", comment:"ことせかい 由来のルビ表記のみを対象とする")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                row.hidden = .function(["OverrideRubySwitchRow"], { form -> Bool in
+                    let row: RowOf<Bool>! = form.rowBy(tag: "OverrideRubySwitchRow")
+                    return row.value ?? false == false
+                })
+                row.value = false
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isDisableNarouRuby
+                }
+            }.onChange({ row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.isDisableNarouRuby = value
+                    }
+                }
+            })
             <<< SwitchRow(){ row in
                 row.title = NSLocalizedString("SettingTableViewController_DisplayBookmarkPositionOnBookshelf", comment: "本棚に栞の現在位置ゲージを表示する")
                 row.cell.textLabel?.numberOfLines = 0

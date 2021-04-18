@@ -1483,6 +1483,9 @@ class NovelSpeakerUtility: NSObject {
                 if let isEnableSwipeOnStoryView = dic.object(forKey:   "isEnableSwipeOnStoryView") as? NSNumber {
                     globalState.isEnableSwipeOnStoryView = isEnableSwipeOnStoryView.boolValue
                 }
+                if let isDisableNarouRuby = dic.object(forKey: "isDisableNarouRuby") as? NSNumber {
+                    globalState.isDisableNarouRuby = isDisableNarouRuby.boolValue
+                }
                 if let novelLikeOrder = dic.object(forKey: "novelLikeOrder") as? NSArray {
                     globalState.novelLikeOrder.removeAll()
                     for novelID in novelLikeOrder {
@@ -1999,6 +2002,7 @@ class NovelSpeakerUtility: NSObject {
                 "notRubyCharactorStringArray": globalState.notRubyCharactorStringArray,
                 "isIgnoreURIStringSpeechEnabled": globalState.isIgnoreURIStringSpeechEnabled,
                 "isEnableSwipeOnStoryView": globalState.isEnableSwipeOnStoryView,
+                "isDisableNarouRuby": globalState.isDisableNarouRuby,
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
             ]
         }

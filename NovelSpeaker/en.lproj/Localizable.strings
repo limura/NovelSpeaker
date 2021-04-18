@@ -219,6 +219,7 @@
 "SettingTableViewController_MixWithOthersIsEnabled" = "Continue reading when other media plays (Does not works with headphones or control center)";
 "SettingTableViewController_DuckOthersIsEnabled" = "Decreases volume for other applications";
 "SettingTableViewController_IsOpenRecentBookInStartTime" = "Startup with the last read book";
+"SettingTableViewController_DisableNarouRuby" = "Only the ruby notation derived from the NovelSpeaker is targeted (effective when you want to avoid the notation \"Kanji (Hiragana or Katakana)\" being judged as ruby).";
 
 "RemoteDataURLSettingViewController_Title" = "Setting URL for internal data reference";
 "RemoteDataURLSettingViewController_Information" = "Note: If you rewrite the settings here poorly, NovelSpeaker may not work properly. Make sure you understand the contents before rewriting.\nThe standard settings are all \"empty (nothing is written)\", so if a problem occurs, you can return to the standard settings by deleting the contents of all items.";

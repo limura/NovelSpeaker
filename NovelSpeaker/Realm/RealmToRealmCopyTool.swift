@@ -190,6 +190,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.notRubyCharactorStringArray = obj.notRubyCharactorStringArray
             newObj.isIgnoreURIStringSpeechEnabled = obj.isIgnoreURIStringSpeechEnabled
             newObj.isEnableSwipeOnStoryView = obj.isEnableSwipeOnStoryView
+            newObj.isDisableNarouRuby = obj.isDisableNarouRuby
             newObj.novelLikeOrder.removeAll()
             newObj.novelLikeOrder.append(objectsIn: obj.novelLikeOrder)
 
