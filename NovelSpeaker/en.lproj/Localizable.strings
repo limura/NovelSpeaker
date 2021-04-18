@@ -791,6 +791,7 @@
 ― In many cases, you can get some tags on websites where you can't get them.
 - PickerView (UI that selects one in a drum-like display) that appears in \"Order\" on the upper right of the \"Bookshelf screen\" is changed to another format
 - When \"Settings tab\" -> \"Ruby will read when available\" is ON, you can now select ON / OFF for \"Only the ruby notation derived from the NovelSpeaker is targeted\" is ON / OFF.
+- Fixed the problem that \"Maximum reading time limit\" may become a yearly value when \"Settings tab\" -> \"Maximum reading time limit\" is changed in an environment different from UTC such as under Japanese environment.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -800,6 +801,7 @@ Please refer to \"the update history\" of the \"setting\" tab for the detailed i
 ― In many cases, you can get some tags on websites where you can't get them.
 - PickerView (UI that selects one in a drum-like display) that appears in \"Order\" on the upper right of the \"Bookshelf screen\" is changed to another format
 - When \"Settings tab\" -> \"Ruby will read when available\" is ON, you can now select ON / OFF for \"Only the ruby notation derived from the NovelSpeaker is targeted\" is ON / OFF.
+- Fixed the problem that \"Maximum reading time limit\" may become a yearly value when \"Settings tab\" -> \"Maximum reading time limit\" is changed in an environment different from UTC such as under Japanese environment.
 
 
 # Version 2.2.5
