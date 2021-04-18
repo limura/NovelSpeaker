@@ -457,20 +457,26 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< CountDownInlineRow() { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
                 row.minuteInterval = 1
-                let offset = Double(TimeZone.current.secondsFromGMT())
                 RealmUtil.RealmBlock { (realm) -> Void in
+                    var dateComponents = DateComponents()
                     if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                        row.value = Date(timeIntervalSinceReferenceDate: -offset + Double(globalState.maxSpeechTimeInSec))
+                        dateComponents.hour = (globalState.maxSpeechTimeInSec / 60 / 60) % 24
+                        dateComponents.minute = (globalState.maxSpeechTimeInSec / 60) % 60
+                        dateComponents.timeZone = NSTimeZone.system
                     }else{
-                        row.value = Date(timeIntervalSinceReferenceDate: -offset + 60*60*24-60)
+                        dateComponents.hour = 23
+                        dateComponents.minute = 59
+                        dateComponents.timeZone = NSTimeZone.system
                     }
+                    row.value = NSCalendar.current.date(from: dateComponents)
                 }
             }.onChange({ (row) in
                 guard let value = row.value else { return }
-                let offset = Double(TimeZone.current.secondsFromGMT())
-                let referenceDate = Date(timeIntervalSinceReferenceDate: -offset)
-                let timeInterval = Int(value.timeIntervalSince(referenceDate))
-                print("timeInterval: \(timeInterval)")
+                let calender = Calendar.current
+                let hour = calender.component(.hour, from: value)
+                let minute = calender.component(.minute, from: value)
+                let timeInterval = hour * 60 * 60 + minute * 60
+                //print("value: \(value.description), timeInterval: \(timeInterval)")
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.maxSpeechTimeInSec != timeInterval else { return }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
