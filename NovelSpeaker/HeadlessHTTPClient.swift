@@ -97,22 +97,35 @@ class HeadlessHttpClient {
             let requestID = "HTTPRequest" + url.absoluteString
             ActivityIndicatorManager.enable(id: requestID)
             let request = self.generateUrlRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL)
-            self.erik.load(urlRequest: request) { (document, err) in
-                ActivityIndicatorManager.disable(id: requestID)
-                if let err = err {
-                    if let err = err as? ErikError {
-                        errorResultHandler?(self.ErikErrorToNSError(error: err))
-                    }else{
-                        errorResultHandler?(err)
+            func LoadNext() {
+                self.erik.load(urlRequest: request) { (document, err) in
+                    ActivityIndicatorManager.disable(id: requestID)
+                    if let err = err {
+                        if let err = err as? ErikError {
+                            print("erik.load error ErikError: \(err.localizedDescription)")
+                            errorResultHandler?(self.ErikErrorToNSError(error: err))
+                        }else{
+                            print("erik.load error not ErikError: \(err.localizedDescription)")
+                            errorResultHandler?(err)
+                        }
+                        return
                     }
-                    return
+                    guard let doc = document else {
+                        let err = NSError(domain: "com.limuraproducts.headlesshttpclient", code: 0, userInfo: [NSLocalizedDescriptionKey: "doc = nil"])
+                        errorResultHandler?(err)
+                        return
+                    }
+                    successResultHandler?(doc)
                 }
-                guard let doc = document else {
-                    let err = NSError(domain: "com.limuraproducts.headlesshttpclient", code: 0, userInfo: [NSLocalizedDescriptionKey: "doc = nil"])
-                    errorResultHandler?(err)
-                    return
+            }
+            if url.absoluteString.contains("#"), let currentUrl = self.erik.url, url.absoluteString.replacingOccurrences(of: "#.*$", with: "", options: .regularExpression, range: nil) == currentUrl.absoluteString.replacingOccurrences(of: "#.*$", with: "", options: .regularExpression, range: nil) {
+                //print("about:blank を挟みます: \(url.absoluteString.replacingOccurrences(of: "#.*$", with: "", options: .regularExpression, range: nil))")
+                self.erik.visit(urlString: "about:blank") { (document, error) in
+                    LoadNext()
                 }
-                successResultHandler?(doc)
+            }else{
+                //print("about:blank は挟みません:\n\(url.absoluteString.replacingOccurrences(of: "#.*$", with: "", options: .regularExpression, range: nil))\n")
+                LoadNext()
             }
         }
     }
