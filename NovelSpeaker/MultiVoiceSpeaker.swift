@@ -22,15 +22,17 @@ fileprivate class SpeechQueue {
     let locale:String?
     let pitch:Float
     let rate:Float
+    let volume:Float
     let delay:TimeInterval
     let isDummy:Bool
     var queuedSpeaker:Speaker?
-    init(text:String, voiceIdentifier:String? = nil, locale:String? = nil, pitch:Float = 1, rate:Float = 1, delay:TimeInterval, isDummy:Bool = false) {
+    init(text:String, voiceIdentifier:String? = nil, locale:String? = nil, pitch:Float = 1, rate:Float = 1, volume:Float = 1, delay:TimeInterval, isDummy:Bool = false) {
         self.text = text
         self.voiceIdentifier = voiceIdentifier
         self.locale = locale
         self.pitch = pitch
         self.rate = rate
+        self.volume = volume
         self.delay = delay
         self.queuedSpeaker = nil
         self.isDummy = isDummy
@@ -40,6 +42,7 @@ fileprivate class SpeechQueue {
         self.queuedSpeaker = speaker
         speaker.pitch = pitch
         speaker.rate = rate
+        speaker.volume = volume
         speaker.delay = delay
         speaker.Speech(text: text)
     }
@@ -158,9 +161,9 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         queue.enqueue(speaker: speaker)
     }
     
-    func enqueue(text:String, voiceIdentifier:String?, locale:String?, pitch:Float = 1, rate:Float = 1, delay:TimeInterval = 0, isDummy:Bool = false) {
+    func enqueue(text:String, voiceIdentifier:String?, locale:String?, pitch:Float = 1, rate:Float = 1, volume:Float = 1, delay:TimeInterval = 0, isDummy:Bool = false) {
         //print("MultiVoiceSpeaker speech request got: \(text)")
-        let queue = SpeechQueue(text: text, voiceIdentifier: voiceIdentifier, locale: locale, pitch: pitch, rate: rate, delay: delay, isDummy: isDummy)
+        let queue = SpeechQueue(text: text, voiceIdentifier: voiceIdentifier, locale: locale, pitch: pitch, rate: rate, volume: volume, delay: delay, isDummy: isDummy)
 
         self.speechQueueLock.lock()
         defer { self.speechQueueLock.unlock() }
@@ -172,8 +175,8 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         startSpeech(queue: queue)
     }
     
-    func Speech(text:String, voiceIdentifier:String?, locale:String?, pitch:Float = 1, rate:Float = 1, delay:TimeInterval = 0) {
-        enqueue(text: text, voiceIdentifier: voiceIdentifier, locale: locale, pitch: pitch, rate: rate, delay: delay)
+    func Speech(text:String, voiceIdentifier:String?, locale:String?, pitch:Float = 1, rate:Float = 1, volume:Float = 1, delay:TimeInterval = 0) {
+        enqueue(text: text, voiceIdentifier: voiceIdentifier, locale: locale, pitch: pitch, rate: rate, volume: volume, delay: delay)
     }
     
     func Stop() {
@@ -225,7 +228,7 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         let speaker = getSpeaker(voiceIdentifier: voiceIdentifier, locale: locale)
         if speaker.isSpeechKicked { return }
         print("register: \(voiceIdentifier ?? "nil"), \(locale ?? "nil")")
-        enqueue(text: " ", voiceIdentifier: voiceIdentifier, locale: locale, pitch: 1, rate: 1, delay: 0, isDummy: true)
+        enqueue(text: " ", voiceIdentifier: voiceIdentifier, locale: locale, pitch: 1, rate: 1, volume: 0, delay: 0, isDummy: true)
     }
     
     func isDummySpeechAlive() -> Bool {

@@ -16,6 +16,8 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
     var testText = NSLocalizedString("SpeakSettingsTableViewController_ReadTheSentenceForTest", comment: "ここに書いた文をテストで読み上げます。")
     static var isRateSettingSync = true
     var rateSyncValue:Float? = nil
+    static var isVolumeSettingSync = true
+    var volumeSyncValue:Float? = nil
     var hideCache:[String:Bool] = [:]
     var sliderMoveDate:Date = Date(timeIntervalSince1970: 0)
     
@@ -77,10 +79,11 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))
     }
     
-    func testSpeech(pitch:Float, rate: Float, identifier: String, locale: String, text: String) {
+    func testSpeech(pitch:Float, rate: Float, volume: Float, identifier: String, locale: String, text: String) {
         let speakerSetting = RealmSpeakerSetting()
         speakerSetting.pitch = pitch
         speakerSetting.rate = rate
+        speakerSetting.volume = volume
         speakerSetting.voiceIdentifier = identifier
         speakerSetting.locale = locale
         let defaultSpeaker = SpeakerSetting(from: speakerSetting)
@@ -219,6 +222,71 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 }
             }
         })
+        section
+        <<< SliderRow("VolumeSliderRow-\(targetID)") {
+            $0.value = currentSetting.volume
+            $0.cell.slider.minimumValue = 0.0
+            $0.cell.slider.maximumValue = 1.0
+            $0.shouldHideValue = false
+            $0.displayValueFor = { (value:Float?) -> String? in
+                guard let value = value else { return "" }
+                return String(format: "%.2f", value)
+            }
+            $0.steps = 1000
+            $0.title = NSLocalizedString("SpeakSettingsViewController_VolumeTitle", comment: "大きさ")
+            $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
+                return self.hideCache[targetID] ?? false
+            })
+        }.onChange({ (row) in
+            self.sliderMoveDate = Date()
+            guard let volume = row.value else{
+                return
+            }
+            let currentRowTag = row.tag
+            if SpeakerSettingsViewController.isVolumeSettingSync {
+                if let volumeValue = self.volumeSyncValue, volumeValue == volume { return }
+                self.volumeSyncValue = volume
+                for row in self.form.rows.filter({ (row) -> Bool in
+                    guard let row = row as? SliderRow else {
+                        return false
+                    }
+                    guard let tag = row.tag else {
+                        return false
+                    }
+                    return tag.hasPrefix("VolumeSliderRow-")
+                }) {
+                    guard let targetRow = row as? SliderRow else {
+                        continue
+                    }
+                    guard let targetTag = targetRow.tag else {
+                        continue
+                    }
+                    let targetID = String(targetTag.suffix(targetTag.count - 16))
+                    DispatchQueue.main.async {
+                        RealmUtil.RealmBlock { (realm) -> Void in
+                            if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
+                                RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
+                                    setting.volume = volume
+                                }
+                            }
+                        }
+                    }
+                    if let thisRowTag = row.tag, let currentRowTag = currentRowTag, thisRowTag == currentRowTag { continue }
+                    targetRow.value = volume
+                    targetRow.updateCell()
+                }
+            }else{
+                DispatchQueue.main.async {
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        if let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) {
+                            RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.speakerSettingNotificationToken]) { (realm) in
+                                setting.volume = volume
+                            }
+                        }
+                    }
+                }
+            }
+        })
         <<< AlertRow<String>("LanguageAlertRow-\(targetID)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_LangageTitle", comment: "言語")
             $0.cancelTitle = NSLocalizedString("Cancel_button", comment: "Cancel")
@@ -295,6 +363,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         })
         <<< ButtonRow("TestSpeechButtonRow-\(targetID)") {
             $0.title = NSLocalizedString("SpeakSettingsViewController_TestSpeechButtonTitle", comment: "発音テスト")
+            $0.cell.textLabel?.numberOfLines = 0
             $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
                 return self.hideCache[targetID] ?? false
             })
@@ -303,12 +372,14 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
                 guard  let setting = RealmSpeakerSetting.SearchFromWith(realm: realm, name: targetID) else {
                     return
                 }
-                self.testSpeech(pitch: setting.pitch, rate: setting.rate, identifier: setting.voiceIdentifier, locale: setting.locale, text: self.testText)
+                print("testSpeech: volume: \(setting.volume), name: \(setting.name)")
+                self.testSpeech(pitch: setting.pitch, rate: setting.rate, volume: setting.volume, identifier: setting.voiceIdentifier, locale: setting.locale, text: self.testText)
             }
         })
         if !isDefaultSpeakerSetting {
             section <<< ButtonRow("RemoveButtonRow-\(targetID)") {
                 $0.title = NSLocalizedString("SpeakerSettingsViewController_RemoveButtonRow", comment: "この話者の設定を削除")
+                $0.cell.textLabel?.numberOfLines = 0
                 $0.hidden = Condition.function(["TitleLabelRow-\(targetID)"], { (form) -> Bool in
                     return self.hideCache[targetID] ?? false
                 })
@@ -420,13 +491,24 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
         <<< SwitchRow() {
             $0.title = NSLocalizedString("SpeakSettingsViewController_SyncRateSetting", comment: "速度設定を同期する")
             $0.value = SpeakerSettingsViewController.isRateSettingSync
+            $0.cell.textLabel?.numberOfLines = 0
         }.onChange({ (row) in
             guard let value = row.value else {
                 return
             }
             SpeakerSettingsViewController.isRateSettingSync = value
         })
-        
+        <<< SwitchRow() {
+            $0.title = NSLocalizedString("SpeakSettingsViewController_SyncVolumeSetting", comment: "大きさ設定を同期する")
+            $0.value = SpeakerSettingsViewController.isVolumeSettingSync
+            $0.cell.textLabel?.numberOfLines = 0
+        }.onChange({ (row) in
+            guard let value = row.value else {
+                return
+            }
+            SpeakerSettingsViewController.isVolumeSettingSync = value
+        })
+
         RealmUtil.RealmBlock { (realm) -> Void in
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else {
                 return

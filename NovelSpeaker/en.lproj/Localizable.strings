@@ -546,6 +546,7 @@
 "SpeakSettingsViewController_SpeakSettingNameTitle" = "Name";
 "SpeakSettingsViewController_PitchTitle" = "Pitch";
 "SpeakSettingsViewController_RateTitle" = "Rate";
+"SpeakSettingsViewController_VolumeTitle" = "Volume";
 "SpeakSettingsViewController_LangageTitle" = "Language";
 "SpeakSettingsViewController_LanguageDialogTitle" = "Select languate";
 "SpeakSettingsViewController_VoiceIdentifierTitle" = "Speaker";
@@ -556,6 +557,7 @@
 "SpeakSettingsViewController_AddNewSettingButtonTitle" = "Add new speaker settings";
 "SpeakSettingsViewController_SpeakerSettingAdded" = "Added speaker settings at the end.\n(Possibly need to scroll)";
 "SpeakSettingsViewController_SyncRateSetting" = "Synchronize rate settings";
+"SpeakSettingsViewController_SyncVolumeSetting" = "Synchronize volume settings";
 "SpeakerSettingsViewController_TitleText" = "Speaker settings";
 "SpeakerSettingViewController_NameValidateErrorNil" = "Name can not be empty string";
 "SpeakerSettingViewController_NameValidateErrorAlready" = "Already defined name";

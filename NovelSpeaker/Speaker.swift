@@ -19,6 +19,7 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     var m_Voice:AVSpeechSynthesisVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
     var m_Pitch:Float = 1.0
     var m_Rate:Float = AVSpeechUtteranceDefaultSpeechRate
+    var m_Volume:Float = 1.0
     var m_Delay:TimeInterval = 0.0
     var m_Delegate:SpeakRangeDelegate? = nil
     var isSpeechKicked:Bool = false
@@ -41,6 +42,7 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
         utt.pitchMultiplier = m_Pitch
         utt.rate = m_Rate
         utt.postUtteranceDelay = m_Delay
+        utt.volume = max(0.0, min(1.0, m_Volume))
         synthesizer.speak(utt)
     }
     
@@ -91,6 +93,12 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
                 return
             }
             m_Rate = value
+        }
+    }
+    var volume:Float {
+        get { return m_Volume }
+        set(value) {
+            m_Volume = max(0.0, min(1.0, value))
         }
     }
     var delay:TimeInterval {

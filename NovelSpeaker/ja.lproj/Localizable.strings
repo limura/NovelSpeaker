@@ -536,6 +536,7 @@
 "SpeakSettingsViewController_SpeakSettingNameTitle" = "名前";
 "SpeakSettingsViewController_PitchTitle" = "高さ";
 "SpeakSettingsViewController_RateTitle" = "速度";
+"SpeakSettingsViewController_VolumeTitle" = "音量";
 "SpeakSettingsViewController_LangageTitle" = "言語";
 "SpeakSettingsViewController_LanguageDialogTitle" = "言語を選択してください";
 "SpeakSettingsViewController_VoiceIdentifierTitle" = "話者";
@@ -546,6 +547,7 @@
 "SpeakSettingsViewController_AddNewSettingButtonTitle" = "新しく話者設定を追加する";
 "SpeakSettingsViewController_SpeakerSettingAdded" = "末尾に話者設定を追加しました。\n(恐らくはスクロールする必要があります)";
 "SpeakSettingsViewController_SyncRateSetting" = "速度設定を同期する";
+"SpeakSettingsViewController_SyncVolumeSetting" = "音量設定を同期する";
 "SpeakerSettingsViewController_TitleText" = "発話設定";
 "SpeakerSettingViewController_NameValidateErrorNil" = "名前に空文字列は設定できません";
 "SpeakerSettingViewController_NameValidateErrorAlready" = "既に定義済みの名前です";

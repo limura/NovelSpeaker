@@ -158,7 +158,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         let block = speechBlockArray[currentSpeechBlockIndex]
         self.delegate?.willSpeakRange(range: NSMakeRange(currentDisplayStringOffset, 1))
         let speechText = block.GenerateSpeechTextFrom(displayLocation: currentBlockDisplayOffset)
-        speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, delay: block.delay)
+        speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
         //print("Speech: \(speechText)")
     }
     
