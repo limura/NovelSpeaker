@@ -118,6 +118,7 @@ class SpeakerSettingsViewController: FormViewController, RealmObserverResetDeleg
             for tag in [
                 "PitchSliderRow-\(targetID)",
                 "RateSliderRow-\(targetID)",
+                "VolumeSliderRow-\(targetID)",
                 "LanguageAlertRow-\(targetID)",
                 "VoiceIdentifierAlertRow-\(targetID)",
                 "TestSpeechButtonRow-\(targetID)",
