@@ -507,6 +507,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }.onCellSelection({ (butonCellof, buttonRow) in
                 self.CreateNewUserText()
             })
+        #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow() { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_BackgroundFetch", comment:"小説の自動更新")
@@ -553,6 +554,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+        #endif
             section
             <<< SwitchRow("OverrideRubySwitchRow") { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
@@ -631,6 +633,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+        #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow(){ row in
                 row.title = NSLocalizedString("SettingTableViewController_OnlyDisplayAddSpeechModSettings", comment: "本文中の長押しメニューを読み替え辞書へ登録のみにする")
@@ -648,6 +651,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+        #endif
+        #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow(){ row in
                 row.title = NSLocalizedString("SettingTableViewController_ShortSkipIsEnabled", comment: "コントロールセンターの前後の章(トラック)への移動ボタンを、少し前/少し後の文への移動にする")
@@ -665,6 +670,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+        #endif
+        #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_PlaybackDurationIsEnabled", comment: "コントロールセンターの再生時間ゲージを有効にする(表示される時間は概算で、正確な値にはなりません)")
@@ -682,6 +689,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+        #endif
             section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_PageTurningSoundIsEnabled", comment: "ページめくり時に音を鳴らす")
@@ -761,6 +769,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+        #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow("MixWithOthersSwitchRow") { row in
                 row.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)")
@@ -798,6 +807,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+        #endif
             section
             <<< SwitchRow("IsOpenRecentBookInStartTime") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsOpenRecentBookInStartTime", comment: "起動時に前回開いていた小説を開く")
@@ -928,6 +938,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            #if !targetEnvironment(macCatalyst)
             section
             <<< SwitchRow("isEnableSwipeOnStoryView") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsEnableSwipeOnStoryView", comment: "小説本文画面での左右スワイプでページめくりができるようにする")
@@ -944,6 +955,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            #endif
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
