@@ -115,7 +115,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             // nothing to do.
         }
         
-        #if !os(OSX)
+        #if !targetEnvironment(macCatalyst)
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshControlValueChangedEvent), for: .valueChanged)
         treeView.scrollView.addSubview(refreshControl)
@@ -1295,7 +1295,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         return fontForFontSize.lineHeight + 10.5 + 12
     }
 
-    #if !os(OSX)
+    #if !targetEnvironment(macCatalyst)
     @objc func refreshControlValueChangedEvent(sendor:UIRefreshControl) {
         sendor.endRefreshing()
         DispatchQueue.global(qos: .background).async {
