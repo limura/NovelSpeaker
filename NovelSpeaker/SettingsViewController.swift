@@ -217,19 +217,22 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     #endif
     
     func createSettingsTable(){
-        form +++ Section()
+        var section = Section()
             /*
+            section
             <<< ButtonRow() {
                 $0.title = "ダミーログ追加"
             }.onCellSelection({ (cellOf, row) in
                 AppInformationLogger.AddLog(message: "テスト", isForDebug: true)
             })
+            section
             <<< ButtonRow() {
                 $0.title = "ターゲット追加"
             }.onCellSelection({ (cellOf, row) in
                 let novelID = self.addNewNovel(title: "ダミーデータ \(Date().description)")
                 self.testTargetNovelID = novelID
             })
+            section
             <<< ButtonRow() {
                 $0.title = "ダミーデータ追加(1..50)"
             }.onCellSelection({ (cellOf, row) in
@@ -237,6 +240,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ50", count: 50, startChapterNumber: 1)
                 self.checkBulkCounts(novelID: novelID)
             })
+            section
             <<< ButtonRow() {
                 $0.title = "ダミーデータ追加(1..150)"
             }.onCellSelection({ (cellOf, row) in
@@ -244,6 +248,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ150", count: 150, startChapterNumber: 1)
                 self.checkBulkCounts(novelID: novelID)
             })
+            section
             <<< ButtonRow() {
                 $0.title = "ダミーデータ追加(1..250)"
             }.onCellSelection({ (cellOf, row) in
@@ -251,6 +256,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ250", count: 250, startChapterNumber: 1)
                 self.checkBulkCounts(novelID: novelID)
             })
+            section
             <<< ButtonRow() {
                 $0.title = "ダミーデータ追加(50..150)"
             }.onCellSelection({ (cellOf, row) in
@@ -258,6 +264,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ50-150", count: 100, startChapterNumber: 50)
                 self.checkBulkCounts(novelID: novelID)
             })
+            section
             <<< ButtonRow() {
                 $0.title = "ダミーデータ追加(100..150)"
             }.onCellSelection({ (cellOf, row) in
@@ -265,6 +272,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ100-150", count: 50, startChapterNumber: 100)
                 self.checkBulkCounts(novelID: novelID)
             })
+            section
             <<< ButtonRow() {
                 $0.title = "ダミーデータ追加(150..350)"
             }.onCellSelection({ (cellOf, row) in
@@ -274,11 +282,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
              */
             /*
+            section
             <<< ButtonRow() {
                 $0.title = "テストボタン"
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (_, _) in
             })
+            section
             <<< ButtonRow() {
                 $0.title = "ファイルサイズを見る"
             }.onCellSelection({ (cellOf, row) in
@@ -292,6 +302,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
                 print(attribute)
             })
+            section
             <<< ButtonRow() {
                 $0.title = "小説追加"
             }.onCellSelection({ (cellOf, row) in
@@ -309,6 +320,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             */
+            section
             <<< LabelRow() { (row) in
                 row.tag = "SettingsTableViewController_Information_TAG"
                 row.title = NSLocalizedString("SettingsTableViewController_Information", comment: "お知らせ")
@@ -371,6 +383,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 })
             })
+            section
             <<< LabelRow() { (row) in
                 row.tag = "SettingsTableViewController_AppInformation_TAG"
                 row.title = NSLocalizedString("SettingsTableViewController_AppInformation", comment: "アプリ内エラーのお知らせ")
@@ -404,6 +417,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     self.updateTabBadge()
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SpeakerSettingsViewController_TitleText", comment:"話者・声色設定")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -416,6 +430,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_SpeechModSettingsButtonTitle", comment:"話者変更設定(会話文等で声質を変えたりする設定)")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -429,7 +444,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
-
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_SettingOfTheSpeechDelay", comment:"読み上げ時の間の設定")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -442,18 +457,19 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
-
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_CorrectionOfTheReading", comment:"読みの修正")
                 $0.presentationMode = .segueName(segueName: "speechModSettingSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0
             }
-            
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_SettingOfTheTextSize", comment:"文字サイズの設定")
                 $0.presentationMode = .segueName(segueName: "textSizeSettingSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0
             }
+            section
             <<< CountDownInlineRow() { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_MaxSpeechTime", comment:"最大連続再生時間")
                 row.minuteInterval = 1
@@ -484,13 +500,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_CreateNewUserText", comment:"新規自作本の追加")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 self.CreateNewUserText()
             })
-            
+            section
             <<< SwitchRow() { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_BackgroundFetch", comment:"小説の自動更新")
                 RealmUtil.RealmBlock { (realm) -> Void in
@@ -536,7 +553,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-            
+            section
             <<< SwitchRow("OverrideRubySwitchRow") { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_OverrideRuby", comment:"ルビはルビだけ読む")
                 row.cell.textLabel?.numberOfLines = 0
@@ -554,6 +571,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< TextRow("OverrideRubyTextRow") { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_EditNotRubyStringTitle", comment:"非ルビ文字")
                 row.cell.textLabel?.numberOfLines = 0
@@ -575,6 +593,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow("DisableNarouRubyRow") { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_DisableNarouRuby", comment:"ことせかい 由来のルビ表記のみを対象とする")
                 row.cell.textLabel?.numberOfLines = 0
@@ -596,6 +615,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow(){ row in
                 row.title = NSLocalizedString("SettingTableViewController_DisplayBookmarkPositionOnBookshelf", comment: "本棚に栞の現在位置ゲージを表示する")
                 row.cell.textLabel?.numberOfLines = 0
@@ -611,6 +631,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow(){ row in
                 row.title = NSLocalizedString("SettingTableViewController_OnlyDisplayAddSpeechModSettings", comment: "本文中の長押しメニューを読み替え辞書へ登録のみにする")
                 row.cell.textLabel?.numberOfLines = 0
@@ -627,6 +648,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow(){ row in
                 row.title = NSLocalizedString("SettingTableViewController_ShortSkipIsEnabled", comment: "コントロールセンターの前後の章(トラック)への移動ボタンを、少し前/少し後の文への移動にする")
                 row.cell.textLabel?.numberOfLines = 0
@@ -643,6 +665,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_PlaybackDurationIsEnabled", comment: "コントロールセンターの再生時間ゲージを有効にする(表示される時間は概算で、正確な値にはなりません)")
                 row.cell.textLabel?.numberOfLines = 0
@@ -659,6 +682,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_PageTurningSoundIsEnabled", comment: "ページめくり時に音を鳴らす")
                 row.cell.textLabel?.numberOfLines = 0
@@ -674,6 +698,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_IgnoreURISpeechIsEnabled", comment: "URIを読み上げないようにする")
                 row.cell.textLabel?.numberOfLines = 0
@@ -689,6 +714,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< AlertRow<String>("RepeatTypeSelectRow") { row in
                 row.title = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
                 row.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
@@ -718,6 +744,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow("isAnnounceAtRepatSpeechTimeSwitchRow") { row in
                 row.title = NSLocalizedString("SettingTableViewController_isAnnounceAtRepatSpeechTimeTitle", comment: "読み上げ停止後に再開する場合にその旨をアナウンスする")
                 row.cell.textLabel?.numberOfLines = 0
@@ -734,6 +761,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow("MixWithOthersSwitchRow") { row in
                 row.title = NSLocalizedString("SettingTableViewController_MixWithOthersIsEnabled", comment: "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)")
                 row.cell.textLabel?.numberOfLines = 0
@@ -750,6 +778,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_DuckOthersIsEnabled", comment: "他のアプリの音を小さくする")
                 row.cell.textLabel?.numberOfLines = 0
@@ -769,6 +798,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow("IsOpenRecentBookInStartTime") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsOpenRecentBookInStartTime", comment: "起動時に前回開いていた小説を開く")
                 row.cell.textLabel?.numberOfLines = 0
@@ -784,6 +814,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow("isDisallowsCellularAccess") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsDisallowsCellularAccess", comment: "携帯電話網ではダウンロードしないようにする")
                 RealmUtil.RealmBlock { (realm) -> Void in
@@ -799,6 +830,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow("isNeedConfirmDeleteBook") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsNeedConfirmDeleteBook", comment: "小説を削除する時に確認する")
                 RealmUtil.RealmBlock { (realm) -> Void in
@@ -814,6 +846,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_AutoSplitStringSetting", comment:"テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -826,6 +859,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            section
             <<< ButtonRow() { (row) in
                 row.title = NSLocalizedString("SettingsViewController_ManageFolderOrderButton", comment: "自作フォルダを編集する")
                 row.cell.textLabel?.numberOfLines = 0
@@ -838,6 +872,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            section
             <<< ButtonRow() { (row) in
                 row.title = NSLocalizedString("SettingsViewController_ManageNovelLikeOrderButton", comment: "お気に入り順を編集する")
                 row.cell.textLabel?.numberOfLines = 0
@@ -850,6 +885,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            section
             <<< SwitchRow("IsUseiCloud") {
                 $0.title = NSLocalizedString("SettingsViewController_IsUseiCloud_Title", comment: "iCloud 同期を使用する")
                 $0.value = RealmUtil.IsUseCloudRealm()
@@ -866,6 +902,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SpeechViewButtonSettingsViewController_Title", comment: "小説本文画面の右上に表示されるボタン群の設定")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -878,6 +915,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("BookshelfViewButtonSettingsViewController_Title", comment: "本棚画面の右上に表示されるボタン群の設定")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -890,6 +928,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            section
             <<< SwitchRow("isEnableSwipeOnStoryView") { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsEnableSwipeOnStoryView", comment: "小説本文画面での左右スワイプでページめくりができるようにする")
                 RealmUtil.RealmBlock { (realm) -> Void in
@@ -905,12 +944,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 self.ConfirmAddDefaultSpeechModSetting()
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_RemoveDefaultSpeechModSettings", comment:"標準の読みの修正と同じものを読み替え辞書登録から削除")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -936,14 +977,14 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
             })
-
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GetNcodeDownloadURLScheme", comment:"再ダウンロード用データの生成")
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 self.ShareNcodeListURLScheme()
             })
-            
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GoToSupportSite", comment: "サポートサイトを開く")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -952,12 +993,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_SendBugReport", comment: "不都合報告をmailで開発者に送る")
                 $0.cell.textLabel?.numberOfLines = 0
                 $0.presentationMode = .segueName(segueName: "BugReportViewSegue", onDismiss: nil)
             }
-            
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_GoToReleaseLog", comment:"更新履歴")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -970,13 +1012,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
-            
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_RightNotation", comment:"権利表記")
                 $0.presentationMode = .segueName(segueName: "CreditPageSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0
             }
-            
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_About", comment: "ことせかい について")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -989,7 +1031,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 .build().show()
             })
-            
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_LICENSE", comment: "LICENSE")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1024,6 +1066,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         .build().show()
                 }
             })
+            section
             <<< ButtonRow() {
             $0.title = NSLocalizedString("SettingTableViewController_PrivacyPolicy", comment: "ことせかい のプライバシーポリシーを確認する")
             $0.cell.textLabel?.numberOfLines = 0
@@ -1063,8 +1106,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
             })
-            
-            +++ Section(NSLocalizedString("SettingsViewController_DontUsallyUseSection_Title", comment: "普段は使わない物"))
+            form +++ section
+            section = Section(NSLocalizedString("SettingsViewController_DontUsallyUseSection_Title", comment: "普段は使わない物"))
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_RemoteDataURLSetting", comment:"内部データ参照用URLの設定")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1077,6 +1121,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 cell.editingAccessoryType = cell.accessoryType
                 cell.textLabel?.textColor = nil
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_ClearSiteInfoCache", comment: "SiteInfoを読み直す")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1096,6 +1141,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         buttonAction: nil)
                 }
             })
+            section
             <<< ButtonRow(){
                 $0.title = NSLocalizedString("SettingsViewController_ClearWebSearchSiteInfoCache", comment: "Web検索タブの検索データを読み直す")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1110,14 +1156,16 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         buttonAction: nil)
                 }
             })
+            form +++ section
 
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、
             // それらはこの下に記述されます
-            +++ Section("Debug") {
+            section = Section("Debug") {
                 $0.hidden = .function(["OverrideRubySwitchRow", "isDebugMenuAlreadyEnabledSwitchRow"], { form -> Bool in
                     return self.m_RubySwitchToggleHitCount < 10 && (NovelSpeakerUtility.isDebugMenuAlwaysEnabled == false)
                 })
             }
+            section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
                 row.cell.textLabel?.numberOfLines = 0
@@ -1160,6 +1208,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< SwitchRow("OverrideForceSiteInfoReload") { row in
                 row.title = NSLocalizedString("SettingTableViewController_ForceSiteInfoReload", comment:"SiteInfoを毎回読み直す")
                 row.value = false
@@ -1169,11 +1218,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 guard let value = row.value else { return }
                 RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: value)
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
                 $0.cell.textLabel?.numberOfLines = 0
             }
+            section
             <<< LabelRow() { (row) in
                 row.title = NSLocalizedString("SettingsTableViewController_AppInformation_IncludedForDebug", comment: "アプリ内エラーのお知らせ(デバッグ用も含む)")
                 row.cell.accessoryType = .disclosureIndicator
@@ -1197,6 +1248,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         }.build().show()
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingsViewController_iCloudPullWithRefreshiCloudStatus", comment: "iCloud上のデータを全て読み込み直す")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1218,6 +1270,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< ButtonRow(){
                 $0.title = NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_Title", comment: "現在のデータを全てiCloudにアップロードする")
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1243,7 +1296,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_UploadAllDataToiCloud_Message", comment: "全てのデータをiCloudにアップロードし始めました。データ量が多ければ多いほどアップロード完了まで時間がかかります。"), buttonTitle: nil, buttonAction: nil)
                 }
             })
-        
+            section
             <<< SwitchRow() {
                 $0.title = NSLocalizedString("SettingsViewController_isUseWebSearchTabDisabledSite_Title", comment: "Web検索タブ で実験中のサイトを表示する")
                 $0.value = NovelSpeakerUtility.isUseWebSearchTabDisabledSite
@@ -1253,6 +1306,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 NovelSpeakerUtility.isUseWebSearchTabDisabledSite = value
                 NovelSearchViewController.SearchInfoCacheClear()
             })
+            section
             <<< SwitchRow("isDebugMenuAlreadyEnabledSwitchRow") {
                 $0.title = NSLocalizedString("SettingsViewController_isDebugMenuAlreadyEnabled_Title", comment: "このデバッグ用メニューを常にONにする")
                 $0.value = NovelSpeakerUtility.isDebugMenuAlwaysEnabled
@@ -1263,6 +1317,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
 
             /*
+            section
             <<< ButtonRow() {
                 $0.title = "iCloud pull (with remove server change token)"
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1282,6 +1337,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = "iCloud pull (normal pull)"
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1296,6 +1352,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     })
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = "iCloud push"
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1312,6 +1369,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             */
             /*
+            section
             <<< ButtonRow() {
                 $0.title = "次回起動時に CoreData(旧データベース) の情報に書き戻す"
                 $0.cell.textLabel?.numberOfLines = 0
@@ -1324,10 +1382,12 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             */
         
             /*
+            section
             <<< LabelRow() {
                 $0.title = "以下は cookie 周りの処理を行う物です。一部は Xcode でログを確認しないと意味が無いボタンになります。"
                 $0.cell.textLabel?.numberOfLines = 0
             }
+            section
             <<< ButtonRow() {
                 $0.title = "dump(URLSession.shared)"
             }.onCellSelection({ (cellOf, row) in
@@ -1339,6 +1399,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtility.DumpHTTPCookieArray(cookieArray: cookieArray)
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = "dump(WkWebView)"
             }.onCellSelection({ (cellOf, row) in
@@ -1351,6 +1412,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtility.DumpHTTPCookieArray(cookieArray: cookieArray)
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = "dump(Realm)"
             }.onCellSelection({ (cellOf, row) in
@@ -1362,6 +1424,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtility.DumpHTTPCookieArray(cookieArray: cookieArray)
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = "save to Realm(URLSession.shared)"
             }.onCellSelection({ (cellOf, row) in
@@ -1381,6 +1444,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = "load to URLSession.shared"
             }.onCellSelection({ (cellOf, row) in
@@ -1396,6 +1460,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     NiftyUtility.AssignCookieArrayToCookieStorage(cookieArray: cookieArray, cookieStorage: cookieStorage)
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = "load to WkWebView"
             }.onCellSelection({ (cellOf, row) in
@@ -1410,6 +1475,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = "RemoveAll(URLSession.shared)"
             }.onCellSelection({ (cellOf, row) in
@@ -1420,6 +1486,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 NiftyUtility.RemoveAllCookieInCookieStorage(cookieStorage: cookieStorage)
                 print("RemoveAllCookieInCookieStorage executed.")
             })
+            section
             <<< ButtonRow() {
                 $0.title = "RemoveAll(headless)"
             }.onCellSelection({ (cellOf, row) in
@@ -1428,6 +1495,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     print("headlessClient.removeAllCookies done.")
                 }
             })
+            section
             <<< ButtonRow() {
                 $0.title = "RemoveAll(realm)"
             }.onCellSelection({ (cellOf, row) in
@@ -1440,6 +1508,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             */
+            form +++ section
     }
 
     func AssignMessageTo(tag:Int, text:String, dialog:EasyDialog) {
