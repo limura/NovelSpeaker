@@ -788,16 +788,32 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.3.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.3.1
 
-― In many cases, you can get some tags on websites where you can't get them.
-- PickerView (UI that selects one in a drum-like display) that appears in \"Order\" on the upper right of the \"Bookshelf screen\" is changed to another format
-- When \"Settings tab\" -> \"Ruby will read when available\" is ON, you can now select ON / OFF for \"Only the ruby notation derived from the NovelSpeaker is targeted\" is ON / OFF.
-- Fixed the problem that \"Maximum reading time limit\" may become a yearly value when \"Settings tab\" -> \"Maximum reading time limit\" is changed in an environment different from UTC such as under Japanese environment.
+- Added volume setting to \"Settings tab\" -> \"Utterance settings\"
+- When \"Play unread ones among favorites\" is selected in \"Settings tab\" -> \"Action when playback reaches the end\", the order of the novels to be read aloud next is displayed on the screen. Changed to give priority to the upper side
+- Slightly changed the behavior when an error occurs when loading from some websites
+- In \"Settings tab\" -> \"Action when playback reaches the end\", either \"Play unread ones in favorites\" or \"Play unread novels in the same folder\" is selected. Fixed an issue where you might not switch to another novel after reading one novel while you are
+- Fixed some issues that could cause double utterances when hitting the \"Speak\" button repeatedly in certain situations
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.3.1
+
+Interface changes
+
+- Added volume setting to \"Settings tab\" -> \"Utterance settings\"
+- When \"Play unread ones among favorites\" is selected in \"Settings tab\" -> \"Action when playback reaches the end\", the order of the novels to be read aloud next is displayed on the screen. Changed to give priority to the upper side
+
+Fixing the problem
+
+- Slightly changed the behavior when an error occurs when loading from some websites
+- In \"Settings tab\" -> \"Action when playback reaches the end\", either \"Play unread ones in favorites\" or \"Play unread novels in the same folder\" is selected. Fixed an issue where you might not switch to another novel after reading one novel while you are
+- Fixed some issues that could cause double utterances when hitting the \"Speak\" button repeatedly in certain situations
+
+
+
 # Version 2.3.0
 
 ― In many cases, you can get some tags on websites where you can't get them.
