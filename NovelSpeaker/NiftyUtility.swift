@@ -1378,7 +1378,7 @@ class NiftyUtility: NSObject {
             if let viewController = GetRegisterdToplevelViewController() {
                 return GetToplevelViewController(controller: viewController)
             }
-            if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+            if let viewController = UIApplication.shared.windows.first(where: {$0.isKeyWindow})?.rootViewController {
                 return GetToplevelViewController(controller: viewController)
             }
             return nil

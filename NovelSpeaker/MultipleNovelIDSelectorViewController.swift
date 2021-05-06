@@ -12,7 +12,7 @@ import UIKit
 import Eureka
 import RealmSwift
 
-protocol MultipleNovelIDSelectorDelegate : class {
+protocol MultipleNovelIDSelectorDelegate : AnyObject {
     func MultipleNovelIDSelectorSelected(selectedNovelIDSet:Set<String>, hint:String)
 }
 

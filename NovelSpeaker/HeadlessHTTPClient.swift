@@ -60,7 +60,7 @@ class HeadlessHttpClient {
             let frame = CGRect(x: 0, y: 0, width: 1024, height: 1366)
             self.webView = WKWebView(frame: frame, configuration: config)
             erik = Erik(webView: self.webView)
-            if let window = UIApplication.shared.keyWindow {
+            if let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) {
                 self.webView.alpha = 0.0001
                 window.insertSubview(self.webView, at: 0)
                 //print("Erik initialize done.")

@@ -30,8 +30,8 @@ class SyncHTTPSessionResult: NSObject {
 
 @objc(SyncHttpSession)
 class SyncHttpSession: NSObject {
-    var sessionConfig = URLSessionConfiguration()
-    var session:URLSession = URLSession()
+    var sessionConfig = URLSessionConfiguration.default
+    var session:URLSession = URLSession(configuration: URLSessionConfiguration.default)
 
     override init(){
         super.init()
