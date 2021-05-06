@@ -11,7 +11,7 @@ import AVFoundation
 
 protocol SpeakRangeDelegate {
     func willSpeakRange(range:NSRange)
-    func finishSpeak()
+    func finishSpeak(isCancel:Bool, speechString:String)
 }
 
 class Speaker: NSObject, AVSpeechSynthesizerDelegate {
@@ -132,10 +132,10 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     }
     
     @objc func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        delegate?.finishSpeak()
+        delegate?.finishSpeak(isCancel: false, speechString: utterance.speechString)
     }
     @objc func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        delegate?.finishSpeak()
+        delegate?.finishSpeak(isCancel: true, speechString: utterance.speechString)
     }
 
     #if !os(watchOS)

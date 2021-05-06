@@ -18,12 +18,48 @@ protocol StorySpeakerDeletgate {
     func storySpeakerStoryChanged(story:Story)
 }
 
-class AnnounceSpeakerFinishEventReceiver : SpeakRangeDelegate {
+class AnnounceSpeaker : SpeakRangeDelegate {
+    let speaker = Speaker()
     var handler:(()->Void)? = nil
+    var isWillSpeakRangeCalled:Bool = false
     
-    func willSpeakRange(range:NSRange) {}
-    func finishSpeak() {
-        self.handler?()
+    init() {
+        speaker.delegate = self
+    }
+    
+    func willSpeakRange(range:NSRange) { isWillSpeakRangeCalled = true }
+    func finishSpeak(isCancel: Bool, speechString: String) {
+        if isCancel == false {
+            self.handler?()
+        }
+    }
+    
+    func SetVoiceSettings(voiceIdentifier:String, language:String, pitch:Float, rate:Float, volume:Float) {
+        speaker.SetVoiceWith(identifier: voiceIdentifier, language: language)
+        speaker.pitch = pitch
+        speaker.rate = rate
+        speaker.volume = volume
+        speaker.Speech(text: " ")
+    }
+    
+    func StartAnnounce(text:String, completion: (()->Void)?) {
+        if text.count <= 0 {
+            handler?()
+            self.handler = nil
+            return
+        }
+        self.handler = completion
+        isWillSpeakRangeCalled = false
+        if speaker.isSpeaking() {
+            speaker.Stop()
+        }
+        speaker.Speech(text: text)
+    }
+    func StopAnnounce() {
+        self.handler = nil
+        if speaker.isSpeaking() {
+            speaker.Stop()
+        }
     }
 }
 
@@ -31,8 +67,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     static let shared = StorySpeaker()
     
     let speaker = SpeechBlockSpeaker()
-    let announceSpeaker = Speaker()
-    let announceSpeakerFinishEventReceiver = AnnounceSpeakerFinishEventReceiver()
+    let announceSpeaker = AnnounceSpeaker()
     let dummySoundLooper = DummySoundLooper()
     let pageTurningSoundPlayer = DuplicateSoundPlayer()
     var delegateArray = NSHashTable<AnyObject>.weakObjects()
@@ -75,7 +110,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
         ApplyDefaultSpeakerSettingToAnnounceSpeaker()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
-        announceSpeaker.delegate = announceSpeakerFinishEventReceiver
     }
     
     deinit {
@@ -121,10 +155,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }else{
                 defaultSpeaker = RealmSpeakerSetting()
             }
-            announceSpeaker.SetVoiceWith(identifier: defaultSpeaker.voiceIdentifier, language: defaultSpeaker.locale)
-            announceSpeaker.pitch = defaultSpeaker.pitch
-            announceSpeaker.rate = defaultSpeaker.rate
-            announceSpeaker.Speech(text: " ")
+            announceSpeaker.SetVoiceSettings(voiceIdentifier: defaultSpeaker.voiceIdentifier, language: defaultSpeaker.locale, pitch: defaultSpeaker.pitch, rate: defaultSpeaker.rate, volume: defaultSpeaker.volume)
         }
     }
 
@@ -502,13 +533,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     }
     
     func AnnounceSpeech(text:String, completion:(()->Void)? = nil) {
-        if isNeedApplySpeechConfigs {
-            ApplyDefaultSpeakerSettingToAnnounceSpeaker()
-        }
-        announceSpeakerFinishEventReceiver.handler = nil
-        announceSpeaker.Stop()
-        announceSpeakerFinishEventReceiver.handler = completion
-        announceSpeaker.Speech(text: text)
+        announceSpeaker.StartAnnounce(text: text, completion: completion)
     }
     
     func StartSpeech(realm: Realm, withMaxSpeechTimeReset:Bool) {
@@ -546,6 +571,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     // 読み上げを停止します。読み上げ位置が更新されます。
     func StopSpeech(realm: Realm, stopSpeechHandler:(()->Void)? = nil) {
         speaker.StopSpeech(stopSpeechHandler: stopSpeechHandler)
+        announceSpeaker.StopAnnounce()
         dummySoundLooper.stopPlay()
         stopMaxSpeechInSecTimer()
         let audioSession = AVAudioSession.sharedInstance()
@@ -1104,7 +1130,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
-    func finishSpeak() {
+    func finishSpeak(isCancel: Bool, speechString: String) {
         let nextStorySpeechWaitSecond = 0.5
         func AnnounceAndDoNext(realm:Realm, announceText: String, block: @escaping (()->Void)) {
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), globalState.isAnnounceAtRepatSpeechTime == true else {
@@ -1180,10 +1206,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                             }
                         }else if repeatSpeechType == .GoToNextLikeNovel,
                              let novelLikeOrder = RealmGlobalState.GetInstanceWith(realm: realm)?.novelLikeOrder,
-                             let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(by: {novelLikeOrder.index(of: $0.novelID) ?? 0 > novelLikeOrder.index(of: $1.novelID) ?? 0})
+                             let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(by: {novelLikeOrder.index(of: $0.novelID) ?? 0 < novelLikeOrder.index(of: $1.novelID) ?? 0})
                              .filter({novelLikeOrder.contains($0.novelID) && $0.novelID != novelID && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}),
                              let novel = filterdNovelArray.first,
-                             let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) {
+                             let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) {
                             speechNextNovelWith(realm: realm, title: novel.title, story: story)
                             return
                         }else if repeatSpeechType == .GoToNextSameFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: novelID, type: RealmNovelTag.TagType.Folder) {
@@ -1200,7 +1226,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                 }) {
                                     for novelID in folder.targetNovelIDArray {
                                         print(novelID)
-                                        guard let novel = novelDictionary[novelID], let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) else { continue }
+                                        guard let novel = novelDictionary[novelID], let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) else { continue }
                                         speechNextNovelWith(realm: realm, title: novel.title, story: story)
                                         return
                                     }

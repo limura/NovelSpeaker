@@ -200,12 +200,12 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
             willSpeakDelegate = delegate
         }
     }
-    func finishSpeak() {
+    func finishSpeak(isCancel: Bool, speechString: String) {
         var finishDelegate:SpeakRangeDelegate? = nil
         self.speechQueueLock.lock()
         defer {
             self.speechQueueLock.unlock()
-            finishDelegate?.finishSpeak()
+            finishDelegate?.finishSpeak(isCancel: isCancel, speechString: speechString)
         }
         if speechQueue.count > 0 {
             let queue = speechQueue.removeFirst()

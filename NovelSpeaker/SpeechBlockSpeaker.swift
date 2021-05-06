@@ -152,7 +152,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
     
     func enqueueSpeechBlock(){
         guard currentSpeechBlockIndex < speechBlockArray.count else {
-            self.finishSpeak()
+            self.finishSpeak(isCancel: true, speechString: "")
             return
         }
         let block = speechBlockArray[currentSpeechBlockIndex]
@@ -281,7 +281,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         delegate.willSpeakRange(range: NSMakeRange(location, range.length))
     }
     
-    func finishSpeak() {
+    func finishSpeak(isCancel: Bool, speechString: String) {
         // 読み上げを停止させられている場合は何もしません。
         // これは、Stop() した時でも finishSpeak() が呼び出されるためです。
         if m_IsSpeaking != true {
@@ -293,7 +293,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         }
         if setNextSpeechBlock() != true {
             m_IsSpeaking = false
-            self.delegate?.finishSpeak()
+            self.delegate?.finishSpeak(isCancel: isCancel, speechString: speechString)
             return
         }
         enqueueSpeechBlock()
