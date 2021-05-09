@@ -173,7 +173,6 @@
 		21B53A2919619D23009658B7 /* app_globe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21B53A2619619D23009658B7 /* app_globe@2x.png */; };
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
 		21B56C69257F77F10065EDD4 /* UIImageExtensionSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */; };
-		21B959942622BEBF002A6714 /* HeadlessHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E6B41D246D55DC00605874 /* HeadlessHTTPClient.swift */; };
 		21BB5096253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21BB5095253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift */; };
 		21C52BDE2626BDD800EE4768 /* EurekaPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C52BDD2626BDD800EE4768 /* EurekaPopupViewController.swift */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
@@ -1623,7 +1622,6 @@
 				2124B38D23BBF2E7002EBC31 /* NovelSpeakerUtility.swift in Sources */,
 				2193094B23BBE56A00035EF0 /* ExtensionDelegate.swift in Sources */,
 				21D7B110256D0FB700056E28 /* AppInformationLogger.swift in Sources */,
-				21B959942622BEBF002A6714 /* HeadlessHTTPClient.swift in Sources */,
 				2124B39923BBFB7A002EBC31 /* CoreDataObjectHolder.m in Sources */,
 				21B56C69257F77F10065EDD4 /* UIImageExtensionSwift.swift in Sources */,
 				2124B39A23BBFBB3002EBC31 /* LPPerformanceChecker.m in Sources */,

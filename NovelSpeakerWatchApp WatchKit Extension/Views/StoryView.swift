@@ -97,7 +97,7 @@ class StoryViewData:ObservableObject,StorySpeakerDeletgate {
     
     var combinedSpeechBlockUpdateFunc:CombinedSpeechBlockUpdateDelegate? = nil
     @Published var combinedBlockArray:[CombinedSpeechBlock] = [
-        CombinedSpeechBlock(block: SpeechBlockInfo(speechText: NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"), displayText: NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"), voiceIdentifier: nil, locale: nil, pitch: 1.0, rate: 1.0, delay: 0.0))
+        CombinedSpeechBlock(block: SpeechBlockInfo(speechText: NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"), displayText: NSLocalizedString("WatchOS_NowloadingText", comment: "読込中……"), voiceIdentifier: nil, locale: nil, pitch: 1.0, rate: 1.0, volume: 1.0, delay: 0.0))
     ] {
         // TODO: ScrollableVStack は data:[Content] を更新しても検知できない
         // ので、悲しいけど didSet を使って CombinedSpeechBlockUpdate() を呼んで
