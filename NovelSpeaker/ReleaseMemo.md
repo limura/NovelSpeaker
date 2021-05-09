@@ -3026,6 +3026,20 @@ macOS対応 なのですが、Mac Catalyst を使うとほとんど何もせず�
 以上となります。
 それでは、これからも ことせかい をよろしくお願いいたします。
 
+# Version 2.3.1
+
+Interface changes
+
+- Added volume setting to "Settings tab" -> "Utterance settings"
+- When "Play unread ones among favorites" is selected in "Settings tab" -> "Action when playback reaches the end", the order of the novels to be read aloud next is displayed on the screen. Changed to give priority to the upper side
+
+Fixing the problem
+
+- Slightly changed the behavior when an error occurs when loading from some websites
+- In "Settings tab" -> "Action when playback reaches the end", either "Play unread ones in favorites" or "Play unread novels in the same folder" is selected. Fixed an issue where you might not switch to another novel after reading one novel while you are
+- Fixed some issues that could cause double utterances when hitting the "Speak" button repeatedly in certain situations
+
+
 TODO:
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
 
