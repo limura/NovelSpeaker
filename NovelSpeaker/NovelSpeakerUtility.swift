@@ -1677,7 +1677,7 @@ class NovelSpeakerUtility: NSObject {
     }
     @discardableResult
     static func ProcessNovelSpeakerBackupFile_ZIPType(url:URL, progressUpdate:@escaping (String)->Void) -> Bool {
-        let temporaryDirectoryName = "NovelSpeakerBackup"
+        let temporaryDirectoryName = backupDirectoryName
         if let temporaryDirectory = NiftyUtility.CreateTemporaryDirectory(directoryName: temporaryDirectoryName) {
             do {
                 try FileManager.default.removeItem(at: temporaryDirectory)
@@ -2074,12 +2074,26 @@ class NovelSpeakerUtility: NSObject {
         return CreateBackupData(forNovelIDArray: [], progress: progress)
     }
     
-    static func CreateBackupData(forNovelIDArray:[String], isOnlyNovelData:Bool = false, fileNamePrefix:String = "", progress:((_ description:String)->Void)?) -> URL? {
-        let directoryName = "NovelSpeakerBackup"
-        // 一旦対象のディレクトリを作って、中身を全部消します。
-        if let outputPath = NiftyUtility.CreateTemporaryDirectory(directoryName: directoryName) {
-            NiftyUtility.RemoveDirectory(directoryPath: outputPath)
+    static let backupDirectoryName = "NovelSpeakerBackup"
+    @objc static func CleanBackupFolder() {
+        let tmpDir = NSTemporaryDirectory()
+        let temporaryDirectoryPath = URL(fileURLWithPath: tmpDir).appendingPathComponent(backupDirectoryName, isDirectory: true)
+        do {
+            let fileManager = FileManager.default
+            let files = try fileManager.contentsOfDirectory(atPath: tmpDir)
+            for file in files.filter({ $0.contains(".novelspeaker-backup") }) {
+                let backupFile = URL(fileURLWithPath: tmpDir).appendingPathComponent(file, isDirectory: false)
+                try fileManager.removeItem(at: backupFile)
+            }
+        } catch {
+            // nothing to do
         }
+        NiftyUtility.RemoveDirectory(directoryPath: temporaryDirectoryPath)
+    }
+
+    static func CreateBackupData(forNovelIDArray:[String], isOnlyNovelData:Bool = false, fileNamePrefix:String = "", progress:((_ description:String)->Void)?) -> URL? {
+        let directoryName = backupDirectoryName
+        CleanBackupFolder()
         // 改めてディレクトリを作り直します。
         guard let outputPath = NiftyUtility.CreateTemporaryDirectory(directoryName: directoryName) else {
             return nil
