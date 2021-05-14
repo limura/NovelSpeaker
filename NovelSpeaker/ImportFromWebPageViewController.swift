@@ -24,6 +24,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     @IBOutlet weak var backButton: UIBarButtonItem!
     @IBOutlet weak var forwardButton: UIBarButtonItem!
     @IBOutlet weak var refreshButton: UIBarButtonItem!
+    @IBOutlet weak var importButton: UIBarButtonItem!
     @IBOutlet weak var progressView: UIProgressView!
     @IBOutlet weak var addressBarUITextField: UITextField!
     @IBOutlet weak var safariButton: UIBarButtonItem!
@@ -673,6 +674,11 @@ li {
     // ページが表示された時に呼ばれるみたい
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         updateAddressBackgroundColor(color: addressBarBackgroundColor)
+        if let url = webView.url, url.absoluteString == "about:blank" {
+            self.importButton.isEnabled = false
+        }else{
+            self.importButton.isEnabled = true
+        }
     }
     
     // JavaScript で Alertされた時

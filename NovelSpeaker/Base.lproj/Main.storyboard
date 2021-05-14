@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Ktg-AW-K7m">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -171,7 +171,7 @@
                         <color key="sectionIndexBackgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="speechModSettingsTableViewDefaultCell" id="W85-N7-Sen">
-                                <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="24.5" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="W85-N7-Sen" id="ZbH-ye-pyG">
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -312,6 +312,7 @@
                         <outlet property="backButton" destination="dK5-Iz-MxA" id="V0h-di-n4j"/>
                         <outlet property="bookmarkUIBarButtonItem" destination="oQ1-yS-NlX" id="2W4-pf-LLi"/>
                         <outlet property="forwardButton" destination="kq8-ha-234" id="Vy6-FL-ZL5"/>
+                        <outlet property="importButton" destination="d9A-sU-gA4" id="cqk-Fg-Bxg"/>
                         <outlet property="progressView" destination="b2P-LC-lhM" id="mjw-Tw-BOx"/>
                         <outlet property="refreshButton" destination="q8x-rc-zlI" id="mCc-l7-Avz"/>
                         <outlet property="safariButton" destination="VF2-4e-3uI" id="lyN-Zm-Z5k"/>
@@ -1432,13 +1433,13 @@ THE SOFTWARE.
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="OiG-7z-gqj" customClass="CustomUITextView" customModule="NovelSpeaker" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="44" width="375" height="527"/>
+                                <rect key="frame" x="0.0" y="44" width="375" height="531"/>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RsE-pW-sT4">
-                                <rect key="frame" x="0.0" y="572" width="30" height="46"/>
+                                <rect key="frame" x="0.0" y="576" width="30" height="42"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                 <state key="normal" title="◀"/>
                                 <connections>
@@ -1446,7 +1447,7 @@ THE SOFTWARE.
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Atz-vc-WDz">
-                                <rect key="frame" x="345" y="571" width="30" height="48"/>
+                                <rect key="frame" x="345" y="575" width="30" height="44"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                 <state key="normal" title="▶"/>
                                 <connections>
@@ -1454,7 +1455,7 @@ THE SOFTWARE.
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="?/?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P4K-uK-bhG">
-                                <rect key="frame" x="310" y="584.5" width="27" height="21"/>
+                                <rect key="frame" x="310" y="588.5" width="27" height="17"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="27" id="InC-Ax-NTQ"/>
                                 </constraints>
@@ -1463,7 +1464,7 @@ THE SOFTWARE.
                                 <nil key="highlightedColor"/>
                             </label>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="xzg-Fa-5p1">
-                                <rect key="frame" x="36" y="580" width="268" height="31"/>
+                                <rect key="frame" x="36" y="582" width="268" height="31"/>
                                 <connections>
                                     <action selector="chapterSliderValueChanged:" destination="WIX-4N-ZvP" eventType="valueChanged" id="Gxw-oT-our"/>
                                 </connections>
@@ -1531,17 +1532,17 @@ THE SOFTWARE.
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" adjustsFontForContentSizeCategory="YES" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7U0-Lh-pyC">
-                                <rect key="frame" x="57" y="54.5" width="253" height="34"/>
+                                <rect key="frame" x="52.5" y="52.5" width="257.5" height="34"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hYi-6O-tpR">
-                                <rect key="frame" x="16" y="61" width="33" height="20.5"/>
+                                <rect key="frame" x="16" y="61" width="28.5" height="17"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wMt-h0-xpF">
-                                <rect key="frame" x="318" y="57" width="52" height="33"/>
+                                <rect key="frame" x="318" y="57" width="52" height="29"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="52" id="IPa-mV-vhY"/>
                                 </constraints>
@@ -1552,7 +1553,7 @@ THE SOFTWARE.
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cM0-Wf-FN8">
-                                <rect key="frame" x="0.0" y="139" width="55" height="46"/>
+                                <rect key="frame" x="0.0" y="131" width="55" height="42"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="55" id="a61-DH-2Zr"/>
                                 </constraints>
@@ -1563,13 +1564,13 @@ THE SOFTWARE.
                                 </connections>
                             </button>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="1" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="ZfF-jG-c09">
-                                <rect key="frame" x="56" y="147" width="210" height="31"/>
+                                <rect key="frame" x="56" y="137" width="210" height="31"/>
                                 <connections>
                                     <action selector="chapterSliderChanged:" destination="dCR-kh-Ivz" eventType="valueChanged" id="OvC-GN-7NX"/>
                                 </connections>
                             </slider>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1/1" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LN3-sB-fzm">
-                                <rect key="frame" x="269" y="152" width="52" height="20.5"/>
+                                <rect key="frame" x="269" y="143.5" width="52" height="17"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="52" id="asR-5m-zfM"/>
                                 </constraints>
@@ -1577,13 +1578,13 @@ THE SOFTWARE.
                                 <nil key="highlightedColor"/>
                             </label>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XX2-ka-OrJ" customClass="SZTextView">
-                                <rect key="frame" x="0.0" y="185" width="375" height="433"/>
+                                <rect key="frame" x="0.0" y="175" width="375" height="443"/>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="E2C-GJ-Of6">
-                                <rect key="frame" x="161" y="98" width="97" height="33"/>
+                                <rect key="frame" x="190" y="94" width="82" height="29"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <state key="normal" title="Add Chapter"/>
                                 <connections>
@@ -1591,7 +1592,7 @@ THE SOFTWARE.
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KLa-F4-FYq">
-                                <rect key="frame" x="268" y="98" width="91" height="33"/>
+                                <rect key="frame" x="282" y="94" width="77" height="29"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                 <state key="normal" title="Del Chapter"/>
                                 <connections>
@@ -1599,7 +1600,7 @@ THE SOFTWARE.
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Dd3-il-QVF">
-                                <rect key="frame" x="319" y="139" width="51" height="46"/>
+                                <rect key="frame" x="319" y="131" width="51" height="42"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="51" id="tck-oG-aNy"/>
                                 </constraints>
