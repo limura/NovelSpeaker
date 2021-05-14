@@ -25,6 +25,8 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     @IBOutlet weak var forwardButton: UIBarButtonItem!
     @IBOutlet weak var refreshButton: UIBarButtonItem!
     @IBOutlet weak var importButton: UIBarButtonItem!
+    @IBOutlet weak var homeButton: UIBarButtonItem!
+    @IBOutlet weak var bookmarkButton: UIBarButtonItem!
     @IBOutlet weak var progressView: UIProgressView!
     @IBOutlet weak var addressBarUITextField: UITextField!
     @IBOutlet weak var safariButton: UIBarButtonItem!
@@ -675,8 +677,14 @@ li {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         updateAddressBackgroundColor(color: addressBarBackgroundColor)
         if let url = webView.url, url.absoluteString == "about:blank" {
+            self.homeButton.isEnabled = false
+            self.bookmarkButton.isEnabled = false
+            self.refreshButton.isEnabled = false
             self.importButton.isEnabled = false
         }else{
+            self.homeButton.isEnabled = true
+            self.bookmarkButton.isEnabled = true
+            self.refreshButton.isEnabled = true
             self.importButton.isEnabled = true
         }
     }

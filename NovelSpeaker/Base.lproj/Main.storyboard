@@ -310,8 +310,10 @@
                     <connections>
                         <outlet property="addressBarUITextField" destination="LSE-Fd-akM" id="n5w-lt-aJL"/>
                         <outlet property="backButton" destination="dK5-Iz-MxA" id="V0h-di-n4j"/>
+                        <outlet property="bookmarkButton" destination="oQ1-yS-NlX" id="7c5-pA-1ZD"/>
                         <outlet property="bookmarkUIBarButtonItem" destination="oQ1-yS-NlX" id="2W4-pf-LLi"/>
                         <outlet property="forwardButton" destination="kq8-ha-234" id="Vy6-FL-ZL5"/>
+                        <outlet property="homeButton" destination="Lac-mr-xje" id="BQX-pE-IY4"/>
                         <outlet property="importButton" destination="d9A-sU-gA4" id="cqk-Fg-Bxg"/>
                         <outlet property="progressView" destination="b2P-LC-lhM" id="mjw-Tw-BOx"/>
                         <outlet property="refreshButton" destination="q8x-rc-zlI" id="mCc-l7-Avz"/>
