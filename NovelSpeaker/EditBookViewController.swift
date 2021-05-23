@@ -389,9 +389,11 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
                     self.deleteChapterButton.isEnabled = true
                     if chapterNumber <= 1 {
                         self.movePreviousButton.isEnabled = false
-                        // 最後の章であったとしても、最初の章は削除させない。章の無い本は存在できないので。
+                        // 最後の章であった場合で、その章が最後の章だった場合は削除させません。
                         // 本の削除は本棚で行います。
-                        self.deleteChapterButton.isEnabled = false
+                        if let lastChapterNumber = novel.lastChapterNumber, lastChapterNumber <= 1 {
+                            self.deleteChapterButton.isEnabled = false
+                        }
                     }else{
                         self.movePreviousButton.isEnabled = true
                     }
