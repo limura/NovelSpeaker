@@ -782,17 +782,24 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.3.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.3.2
 
-- 「設定タブ」->「発話設定」に音量(ボリューム)の設定を追加
-- 「設定タブ」->「再生が末尾に達した時の動作」で「お気に入りのうち未読の物を再生」を選択していた時に、次に読み上げられようとする小説の順番を、画面表示上の上側を優先するように変更
-- 一部のWebサイトからの読み込み時にエラーしてしまう場合の動作を少し変更
-- 「設定タブ」->「再生が末尾に達した時の動作」で「お気に入りのうち未読の物を再生」か「同じフォルダの小説のうち未読の物を再生」のどちらかが選択されている時に、一つの小説を読み終えた後に別の小説に切り替わらない場合がある問題を修正
-- 特定の状態で「Speak」ボタンを連打すると二重に発話される可能性があった問題の一部を修正
+- 起動時に「設定タブ」->「バックアップ用データの生成」で生成されたバックアップファイルを削除するように
+- 「Web取込」画面で about:blank が表示されている時(最初に表示されている物で、家のアイコンを押した時にも表示されるURL)は「取り込む」ボタン等を押せないように
+- 小説の編集画面で、任意の章を削除できるように
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.3.2
+
+インタフェースの変更
+
+- 起動時に「設定タブ」->「バックアップ用データの生成」で生成されたバックアップファイルを削除するように
+- 「Web取込」画面で about:blank が表示されている時(最初に表示されている物で、家のアイコンを押した時にも表示されるURL)は「取り込む」ボタン等を押せないように
+- 小説の編集画面で、任意の章を削除できるように
+
+
 # Version 2.3.1
 
 インタフェースの変更
