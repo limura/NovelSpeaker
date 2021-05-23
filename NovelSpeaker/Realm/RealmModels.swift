@@ -691,6 +691,14 @@ struct Story: Codable {
         case downloadDate
     }
     init() {}
+    init(url:String, subtitle:String, content:String, novelID:String, chapterNumber:Int, downloadDate:Date) {
+        self.url = url
+        self.subtitle = subtitle
+        self.content = content
+        self.novelID = novelID
+        self.chapterNumber = chapterNumber
+        self.downloadDate = downloadDate
+    }
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -700,6 +708,10 @@ struct Story: Codable {
         novelID = try values.decode(String.self, forKey: CodingKeys.novelID)
         chapterNumber = try values.decode(Int.self, forKey: CodingKeys.chapterNumber)
         downloadDate = try values.decode(Date.self, forKey: CodingKeys.downloadDate)
+    }
+    
+    func CreateDuplicateOne() -> Story {
+        return Story(url: url, subtitle: subtitle, content: content, novelID: novelID, chapterNumber: chapterNumber, downloadDate: downloadDate)
     }
     
     func readLocation(realm: Realm) -> Int {
@@ -1275,7 +1287,66 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         realm.delete(storyBulkArray)
     }
+    
+    // Write transaction の中で使います
+    static func RemoveStoryWith(realm:Realm, story:Story) -> Bool {
+        guard var storyBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: story.storyID) else { return false }
+        var targetStory:Story? = story
+        let targetNovelID = storyBulk.novelID
+        while targetStory != nil {
+            let nextBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: storyBulk.novelID, chapterNumber: storyBulk.chapterNumber + RealmStoryBulk.bulkCount + 1)
+            let nextBulkFirstStory:Story? = nextBulk?.LoadStoryArray()?.first
+            guard let currentStoryArray = storyBulk.LoadStoryArray() else { return false }
+            var updatedStoryArray:[Story] = []
+            var chapterNumber = storyBulk.chapterNumber + 1
+            for var story in currentStoryArray {
+                if story.storyID == targetStory?.storyID { continue }
+                story.chapterNumber = chapterNumber
+                chapterNumber += 1
+                updatedStoryArray.append(story)
+            }
+            if updatedStoryArray.count < RealmStoryBulk.bulkCount, let nextBulkFirstStory = nextBulkFirstStory {
+                var tmpStory = nextBulkFirstStory.CreateDuplicateOne()
+                tmpStory.chapterNumber = chapterNumber
+                updatedStoryArray.append(tmpStory)
+                targetStory = nextBulkFirstStory
+            }else{
+                targetStory = nil
+            }
+            
+            // Realm write transaction が必要な部分
+            if updatedStoryArray.count > 0 {
+                storyBulk.OverrideStoryListAsset(storyArray: updatedStoryArray)
+                realm.add(storyBulk, update: .modified)
+            }else{
+                realm.delete(storyBulk)
+            }
+            
+            guard let nextBulk = nextBulk else { break }
+            storyBulk = nextBulk
+        }
 
+        // RealmNovel で書き換わる部分をなんとかする
+        // ここまで来たなら目標の Story は消えているので RealmNovel 側で保持している StoryID をその分をずらす必要がある
+        if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID) {
+            if let lastChapterNumber = novel.lastChapterNumber {
+                novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: targetNovelID, chapterNumber: lastChapterNumber - 1)
+            }
+            let readingChapterStoryID = novel.m_readingChapterStoryID
+            if readingChapterStoryID == story.storyID {
+                novel.m_readingChapterStoryID = ""
+            }else{
+                let readingChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: readingChapterStoryID)
+                if readingChapterNumber >= story.chapterNumber {
+                    novel.m_readingChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID:  targetNovelID, chapterNumber: readingChapterNumber - 1)
+                }
+            }
+            realm.add(novel, update: .modified)
+        }
+
+        return true
+    }
+    
     static func SearchStoryBulkWith(realm:Realm, novelID:String, chapterNumber:Int) -> RealmStoryBulk? {
         //realm.refresh()
         let chapterNumberBulk = CalcBulkChapterNumber(chapterNumber: chapterNumber)

@@ -69,6 +69,10 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         endObserve()
         RealmObserverHandler.shared.RemoveDelegate(delegate: self)
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        NovelDownloadQueue.shared.downloadStop()
+    }
 
     override func viewDidDisappear(_ animated: Bool) {
         saveCurrentStory()
@@ -378,12 +382,11 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
                     if chapterNumber >= maxChapterNumber {
                         self.moveNextButton.isEnabled = false
                         self.addChapterButton.isEnabled = true
-                        self.deleteChapterButton.isEnabled = true
                     }else{
                         self.moveNextButton.isEnabled = true
                         self.addChapterButton.isEnabled = false
-                        self.deleteChapterButton.isEnabled = false
                     }
+                    self.deleteChapterButton.isEnabled = true
                     if chapterNumber <= 1 {
                         self.movePreviousButton.isEnabled = false
                         // 最後の章であったとしても、最初の章は削除させない。章の無い本は存在できないので。
@@ -474,17 +477,25 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         }
     }
     @IBAction func deleteChapterButtonClicked(_ sender: Any) {
-        // memo: 削除できるのは最後の章だけ(のはず)です。
-        RealmUtil.RealmBlock { (realm) -> Void in
-            if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: currentStoryID), story.storyID == currentStoryID {
-                RealmUtil.WriteWith(realm: realm) { (realm) in
-                    RealmStoryBulk.RemoveLastStoryWithCheckWith(realm: realm, storyID: currentStoryID)
-                    let (_, lastStoryChapterNumber) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: targetNovelID)
-                    if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), lastStoryChapterNumber > 0 {
-                        novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: targetNovelID, chapterNumber: lastStoryChapterNumber)
-                        setStory(storyID: novel.m_lastChapterStoryID)
+        NiftyUtility.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("EditBookViewController_ConifirmDeleteStory_Title", comment: "章を削除します"), message: NSLocalizedString("EditBookViewController_ConifirmDeleteStory_Message", comment: "この操作は元に戻せません。削除しますか？"), button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("EditBookViewController_ConifirmDeleteStory_OKButton", comment: "削除する")) {
+            NiftyUtility.EasyDialogNoButton(viewController: self, title: NSLocalizedString("EditBookViewController_NowDeleting_Title", comment: "削除中……"), message: nil) { dialog in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.currentStoryID), story.storyID == self.currentStoryID {
+                        RealmUtil.WriteWith(realm: realm) { (realm) in
+                            guard RealmStoryBulk.RemoveStoryWith(realm: realm, story: story) == true else { return }
+                            let (_, lastStoryChapterNumber) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: self.targetNovelID)
+                            if let newStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.currentStoryID) {
+                                self.setStory(storyID: newStory.storyID)
+                                return
+                            }
+                            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.targetNovelID), lastStoryChapterNumber > 0 {
+                                novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: self.targetNovelID, chapterNumber: lastStoryChapterNumber)
+                                self.setStory(storyID: novel.m_lastChapterStoryID)
+                            }
+                        }
                     }
                 }
+                dialog.dismiss(animated: false, completion: nil)
             }
         }
     }
