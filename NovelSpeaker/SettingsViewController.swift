@@ -185,7 +185,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         var result:[Story] = []
         for index in 0..<count {
             var story = Story()
-            story.content = content
+            story.content = "\(index + startChapterNumber): \(content)"
             story.novelID = novelID
             story.chapterNumber = index + startChapterNumber
             result.append(story)
@@ -209,6 +209,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     print("  storyArray.count: \(storyArray.count)")
                     print("  storyArray.first.chapterNumber: \(storyArray.first?.chapterNumber ?? -1)")
                     print("  storyArray.last.chapterNumber: \(storyArray.last?.chapterNumber ?? -1)")
+                    print("  storyArray[].chapterNumber: \(storyArray.map({$0.chapterNumber}))")
                 }
             }
         }
@@ -218,7 +219,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     
     func createSettingsTable(){
         var section = Section()
-            /*
+        #if false
             section
             <<< ButtonRow() {
                 $0.title = "ダミーログ追加"
@@ -280,7 +281,21 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 self.addDummDataToNovel(novelID: novelID, content: "ダミーデータ150-350", count: 200, startChapterNumber: 150)
                 self.checkBulkCounts(novelID: novelID)
             })
-             */
+            section
+            <<< ButtonRow() {
+                $0.title = "ダミーデータ Bulk内容確認"
+            }.onCellSelection({ cellOf, row in
+                let novelID = self.testTargetNovelID
+                self.checkBulkCounts(novelID: novelID)
+            })
+            section
+            <<< ButtonRow() {
+                $0.title = "ことせかい の使い方 Bulk内容確認"
+            }.onCellSelection({ cellOf, row in
+                let novelID = "https://limura.github.io/NovelSpeaker/topics/jp/00001.html"
+                self.checkBulkCounts(novelID: novelID)
+            })
+        #endif
             /*
             section
             <<< ButtonRow() {
