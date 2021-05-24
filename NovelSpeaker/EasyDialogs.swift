@@ -320,6 +320,42 @@ public class EasyDialog: UIViewController, UITextFieldDelegate {
             return self
         }
         
+        public func switchField(tag: Int? = nil, message: String, value:Bool = false, messageAlignment: NSTextAlignment = .left) -> Self {
+            let base = UIView()
+            let label = UILabel()
+            let sw = UISwitch()
+            label.translatesAutoresizingMaskIntoConstraints = false
+            label.text = message
+            label.textAlignment = messageAlignment
+            label.numberOfLines = 0
+            label.textColor = theme.textColor
+            label.font = theme.textFont
+            label.isAccessibilityElement = false
+            if let tag = tag {
+                sw.tag = tag
+            }
+            sw.translatesAutoresizingMaskIntoConstraints = false
+            sw.isEnabled = true
+            sw.isOn = value
+            sw.accessibilityLabel = message
+            base.translatesAutoresizingMaskIntoConstraints = false
+            base.addSubview(label)
+            base.addSubview(sw)
+            NSLayoutConstraint.activate([
+                label.topAnchor.constraint(equalTo: base.topAnchor),
+                label.bottomAnchor.constraint(equalTo: base.bottomAnchor),
+                label.leftAnchor.constraint(equalTo: base.leftAnchor),
+                label.rightAnchor.constraint(equalTo: sw.leftAnchor, constant: 8),
+                label.heightAnchor.constraint(greaterThanOrEqualToConstant: sw.bounds.height),
+                sw.widthAnchor.constraint(equalToConstant: sw.bounds.width),
+                sw.heightAnchor.constraint(equalToConstant: sw.bounds.height),
+                sw.rightAnchor.constraint(equalTo: base.rightAnchor),
+                sw.centerYAnchor.constraint(equalTo: label.centerYAnchor),
+            ])
+            views.append(base)
+            return self
+        }
+        
         public func textField(tag: Int? = nil, placeholder: String? = nil, content: String? = nil, keyboardType: UIKeyboardType = .default, secure: Bool = false, focusKeyboard: Bool = false, borderStyle: UITextField.BorderStyle = .none, clearButtonMode: UITextField.ViewMode = .never, isNeedAllSelectOnEditTime: Bool = false, shouldReturnEventHandler:((EasyDialog)->(Void))? = nil) -> Self {
             let textField = EasyDialogCustomUITextField()
             textField.placeholder = placeholder
