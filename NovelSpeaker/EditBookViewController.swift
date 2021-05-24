@@ -478,8 +478,18 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
             }
         }
     }
+
+    // 3回削除するまではON/OFFは出さないようにしようかと思ったけれど、最初から出していても良さそうなので最初から出すようにします。
+    var deleteChapterButtonClickCounter = 3
+    var isDisableDeleteChapterConifirm = false
     @IBAction func deleteChapterButtonClicked(_ sender: Any) {
-        NiftyUtility.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("EditBookViewController_ConifirmDeleteStory_Title", comment: "章を削除します"), message: NSLocalizedString("EditBookViewController_ConifirmDeleteStory_Message", comment: "この操作は元に戻せません。削除しますか？"), button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("EditBookViewController_ConifirmDeleteStory_OKButton", comment: "削除する")) {
+        let switchMessage:String?
+        if deleteChapterButtonClickCounter >= 3 && isDisableDeleteChapterConifirm == false {
+            switchMessage = NSLocalizedString("EditBookViewController_ConifirmDeleteStory_IsNeedConifirmSwitch_Message", comment: "暫くの間は確認を求めないようにする")
+        }else{
+            switchMessage = nil
+        }
+        func deleteStory() {
             NiftyUtility.EasyDialogNoButton(viewController: self, title: NSLocalizedString("EditBookViewController_NowDeleting_Title", comment: "削除中……"), message: nil) { dialog in
                 RealmUtil.RealmBlock { (realm) -> Void in
                     if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.currentStoryID), story.storyID == self.currentStoryID {
@@ -499,6 +509,17 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
                 }
                 dialog.dismiss(animated: false, completion: nil)
             }
+        }
+        
+        if isDisableDeleteChapterConifirm {
+            deleteStory()
+            return
+        }
+        
+        NiftyUtility.EasyDialogTwoButtonWithSwitch(viewController: self, title: NSLocalizedString("EditBookViewController_ConifirmDeleteStory_Title", comment: "章を削除します"), message: NSLocalizedString("EditBookViewController_ConifirmDeleteStory_Message", comment: "この操作は元に戻せません。削除しますか？"), switchMessage: switchMessage, switchValue: isDisableDeleteChapterConifirm, button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("EditBookViewController_ConifirmDeleteStory_OKButton", comment: "削除する")) { (switchResult) in
+            self.deleteChapterButtonClickCounter += 1
+            self.isDisableDeleteChapterConifirm = switchResult
+            deleteStory()
         }
     }
     
