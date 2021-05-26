@@ -147,7 +147,7 @@
             {"queryType": "text", "displayText": "検索文字列", "queryName": "s"}
         ],
         "result": {
-            "block": "//ul[contains(@class,'article-list__items')]/li/a[contains(@href,'/archives/')]",
+            "block": "//ul[contains(@class,'article-list__items')]/li[child::a[contains(@href,'/archives/')]]",
             "nextLink": "//div[@class='article-list__pagination']/a[contains(@href,'/page/')]",
             "title": "//a[contains(@href,'/archives/')]//p[@class='listed-article__title']",
             "url": "//a[contains(@href,'/archives/')]/@href"
