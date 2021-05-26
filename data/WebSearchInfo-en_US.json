@@ -147,9 +147,9 @@
             {"queryType": "text", "displayText": "Search string", "queryName": "s"}
         ],
         "result": {
-            "block": "//div[@id='main']/div[@class='container']/article[@class='post-article']",
-            "nextLink": "//div[@class='pageination']//li[@class='paging-last']/a/@href",
-            "title": "//a[contains(@href,'/archives/')]//h2",
+	    "block": "//ul[contains(@class,'article-list__items')]/li/a[contains(@href,'/archives/')]",
+	    "nextLink": "//div[@class='article-list__pagination']/a[contains(@href,'/page/')]",
+	    "title": "//a[contains(@href,'/archives/')]//p[@class='listed-article__title']",
             "url": "//a[contains(@href,'/archives/')]/@href"
         }
     },
