@@ -677,7 +677,7 @@ li {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         updateAddressBackgroundColor(color: addressBarBackgroundColor)
         if let url = webView.url, url.absoluteString == "about:blank" {
-            self.homeButton.isEnabled = false
+            self.homeButton.isEnabled = true
             self.bookmarkButton.isEnabled = false
             self.refreshButton.isEnabled = false
             self.importButton.isEnabled = false
