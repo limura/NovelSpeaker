@@ -1525,6 +1525,7 @@ class NiftyUtility: NSObject {
     static let RemoveNoNeedTagRegexpArray = [
         //try? NSRegularExpression(pattern: "<script.*?/script>", options: [.caseInsensitive, .dotMatchesLineSeparators]), // AttributedString に変換する場合、そちらで <script> は無視されるのでここで消しておく必要は多分ない
         try? NSRegularExpression(pattern: "<iframe.*?/iframe>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
+        try? NSRegularExpression(pattern: "<frame.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<link.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<meta.*?>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
         try? NSRegularExpression(pattern: "<noscript.*?/noscript>", options: [.caseInsensitive, .dotMatchesLineSeparators]),
