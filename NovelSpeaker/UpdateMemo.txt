@@ -17,9 +17,7 @@ TODO:
 - 長押しして範囲選択しても反映されない奴 ← 「問題発生日時: 2021年2月3日 水曜日 8時03分12秒 日本標準時」でmailを検索したら出てくる奴に詳しい情報あり ← 再現しない？
   iCloud同期がOFFでも発生しているという事は、iCloud同期側での更新確認中の話ではない
 - タイミング問題？で2回読み上げる事がある https://github.com/limura/NovelSpeaker/issues/124
-- 小説の章を個別に削除できるように
 - アイコンを変える事ができるようにする(例: https://moneyforward.com/engineers_blog/2017/03/29/ios10-3-alternateiconname/ setAlternateIconName 当たりで検索すれば出てくる)
-- 次回以降の早めのタイミングで、対応iOSのバージョンを12.0以降にしようかなぁ。(Xcodeに指摘されているので)→調べてみた所、14.0以降でも12.0以降でも切り捨てられるiPhoneは変わらないぽいので14.0以降にしてしまおうという気がしている。(iPadは調べてない)
 - pixiv小説でうまく取り込めないのがあるぽい https://www.pixiv.net/novel/show.php?id=14577122#1
   1ページ物で「次へ」というのが invisible になっているものだった。
   現時点では https://www.pixiv.net/novel/show.php?id=14666160 がそれに当たる。
@@ -27,10 +25,20 @@ TODO:
   これはURLが変わっていなかったらエラーするとか、前のページと全く同じ文字列であればエラーするような仕組みをいれておいたほうがいいかもしれない
 - 本棚画面を SwiftUI で作り直す
   メモ: SwiftUI でフォルダぽいリストを作る動画 https://www.youtube.com/watch?v=G0qor4QumfA
+- raw.githubusercontent.com は中国のGFWからアクセスできないぽい
+  参考: https://blog.kengo-toda.jp/entry/2021/05/25/111457
+  利用規約とかがそこに載ってるよなぁ。
 
 
 done
 - 起動時に「設定タブ」→「開発者からのお知らせ」に「！」がつかない(スクロールアウトしてスクロールインするとついてた。謎だ)
+- 小説の章を個別に削除できるように
+
+Version 2.3.3 (2.3.6)
+- HTMLを取り込む時に無視するタグに frame を追加しました
+  frame を使っているWebページを取り込もうとした時に、HTMLからStringに変更しようとして frame で指定された URL を取り出せないために強制終了している事があるぽい？ので無視するHTMLタグに frame タグを追加しました。
+  現状で無視することにしているタグは以下のタグになります。
+  iframe, frame, link, meta, noscript, img
 
 Version 2.3.2 (2.3.5)
 - 小説の編集画面において、章の削除時の確認ダイアログに「暫くの間は確認を求めないようにする」のON/OFFスイッチを表示するように
