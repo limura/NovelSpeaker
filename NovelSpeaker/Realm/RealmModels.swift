@@ -1288,6 +1288,68 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         realm.delete(storyBulkArray)
     }
     
+    // story.storyID で指定される位置に story を挿入します。
+    // story.storyID で表される story 以降(story.storyIDで指定された物を含む) の物は storyID が +1 されます。
+    static func InsertStoryWith(realm:Realm, story:Story) -> Bool {
+        // bulk に story をねじ込みます。
+        // bulk に元々入っていた story のうち、story 以降(story.storyIDで指定された物を含む) の物は storyID が +1 されます。
+        // bulk に収まりきらなかった story があった場合、返り値の二番目に添えられます(storyIDは新しい物に書き換えられています)
+        // bulk が対象の bulk でなかったり、story.storyID よりも前の storyID の story がない場合など
+        // 不正な追加がなされようとした場合には (nil, 未定義) を返します
+        func insertStoryTo(prevStoryArray:[Story]?, story:Story) -> ([Story]?, Story?) {
+            let bulkStoryID_Target = CreateUniqueBulkID(novelID: story.novelID, chapterNumber: story.chapterNumber)
+            var resultStoryArray:[Story] = []
+            var isHit:Bool = false
+            if (prevStoryArray?.count ?? 0) <= 0 && (story.chapterNumber % bulkCount) == 1 {
+                return ([story], nil)
+            }
+            guard let prevStoryArray = prevStoryArray else { return (nil, nil) }
+            for var currentStory in prevStoryArray {
+                let bulkStoryID_Current = CreateUniqueBulkID(novelID: currentStory.novelID, chapterNumber: currentStory.chapterNumber)
+                guard bulkStoryID_Target == bulkStoryID_Current else { return (nil, nil) }
+                if currentStory.storyID == story.storyID {
+                    resultStoryArray.append(story)
+                    isHit = true
+                }
+                if currentStory.chapterNumber >= story.chapterNumber {
+                    currentStory.chapterNumber += 1
+                }
+                resultStoryArray.append(currentStory)
+            }
+            guard isHit == true else { return (nil, nil) }
+            var kickOutStory:Story? = nil
+            if resultStoryArray.count > bulkCount {
+                kickOutStory = resultStoryArray.popLast()
+            }
+            return (resultStoryArray, kickOutStory)
+        }
+        var targetStory:Story? = story
+        while let targetStoryUnwrapped = targetStory {
+            let targetBulk = SearchStoryBulkWith(realm: realm, storyID: targetStoryUnwrapped.storyID)
+            if targetBulk == nil && targetStoryUnwrapped.chapterNumber > bulkCount && SearchStoryBulkWith(realm: realm, storyID: CreateUniqueBulkID(novelID: targetStoryUnwrapped.novelID, chapterNumber: targetStoryUnwrapped.chapterNumber - bulkCount)) == nil {
+                // 指定された story が入る bulk が無くて、
+                // その一つ前の bulk もない場合は insert しちゃ駄目
+                return false
+            }
+            let (storyArray, kickOutStory) = insertStoryTo(prevStoryArray: targetBulk?.LoadStoryArray() ?? nil, story: targetStoryUnwrapped)
+            guard let storyArray = storyArray, storyArray.count > 0 else { return false }
+            if let targetBulk = targetBulk {
+                targetBulk.OverrideStoryListAsset(storyArray: storyArray)
+                realm.add(targetBulk, update: .modified)
+            }else{
+                guard let story = storyArray.first else { return false }
+                let bulk = RealmStoryBulk()
+                bulk.id = CreateUniqueBulkID(novelID: story.novelID, chapterNumber: story.chapterNumber)
+                bulk.novelID = story.novelID
+                bulk.chapterNumber = StoryIDToChapterNumber(storyID: bulk.id)
+                bulk.OverrideStoryListAsset(storyArray: Array(storyArray))
+                realm.add(bulk, update: .modified)
+            }
+            targetStory = kickOutStory
+        }
+        return true
+    }
+    
     // Write transaction の中で使います
     static func RemoveStoryWith(realm:Realm, story:Story) -> Bool {
         guard var storyBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: story.storyID) else { return false }
