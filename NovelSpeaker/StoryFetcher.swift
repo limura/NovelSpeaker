@@ -192,6 +192,12 @@ struct StorySiteInfo {
         guard let xpath = tag else { return [] }
         return Array(NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath))
     }
+    
+    // とりあえず pageElement と URL だけある感じの物を返します。
+    func generatePageElementOnlySiteInfoString() -> String {
+        // {"data":{url:".*", pageElement:"//body", title:"//title", nextLink:"", author:"", firstPageLink:"", tag:""}}
+        return "{data:{url:'\(self.url?.pattern ?? ".*")', pageElement:'\(pageElement)'}}"
+    }
 }
 
 extension StorySiteInfo: CustomStringConvertible {
@@ -502,7 +508,8 @@ class StoryHtmlDecoder {
             }) { (err) in
                 AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
                         "siteInfoURL": siteInfoURL.absoluteString,
-                        "custonSiteInfoURL": customSiteInfoURL.absoluteString
+                        "customSiteInfoURL": customSiteInfoURL.absoluteString,
+                        "lastError": err?.localizedDescription ?? "nil"
                     ], isForDebug: false)
                 announceLoadEnd()
                 completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
@@ -514,7 +521,8 @@ class StoryHtmlDecoder {
             completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
         }) { (err) in
             AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
-                    "customSiteInfoURL": customSiteInfoURL.absoluteString
+                    "customSiteInfoURL": customSiteInfoURL.absoluteString,
+                    "lastError": err?.localizedDescription ?? "nil"
                 ], isForDebug: false)
             announceLoadEnd()
             completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
