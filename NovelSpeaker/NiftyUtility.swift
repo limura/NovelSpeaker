@@ -1807,4 +1807,9 @@ class NiftyUtility: NSObject {
     static func GetStackTrace() -> String {
         return Thread.callStackSymbols.map({$0.description}).joined(separator: "\n")
     }
+    
+    static func DoubleToInt(value:Double?) -> Int? {
+        guard let value = value, !value.isNaN, !value.isInfinite else { return nil }
+        return Int(value)
+    }
 }
