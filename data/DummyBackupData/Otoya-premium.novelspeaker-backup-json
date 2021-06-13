@@ -1,0 +1,6 @@
+{
+  "data_version" : "1.0.0",
+  "misc_settings" : {
+    "default_voice_identifier" : "com.apple.ttsbundle.Otoya-premium"
+  }
+}
