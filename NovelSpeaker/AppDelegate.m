@@ -112,6 +112,7 @@ void uncaughtExceptionHandler(NSException *exception)
     [[NovelDownloadQueue shared] ClearDownloadCountBadge];
     [NiftyUtility StartiCloudDataVersionChecker];
     [NovelSpeakerUtility CleanBackupFolder];
+    [ImportFromWebPageViewController ClearDownloadTemporaryDirectory];
 
     return YES;
 }

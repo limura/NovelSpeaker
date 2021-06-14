@@ -659,6 +659,13 @@ li {
                     decisionHandler(.cancel)
                     return
                 }
+            }else{
+                if #available(iOS 14.5, *) {
+                    if navigationAction.shouldPerformDownload {
+                        decisionHandler(.download)
+                        return
+                    }
+                }
             }
         }
         let app = UIApplication.shared
@@ -673,6 +680,20 @@ li {
         decisionHandler(.allow)
     }
     
+    // decisionHandler(.download) を指定した場合こいつが呼ばれるぽい
+    // で、呼ばれたらダウンロードするためのハンドラを自分にする
+    @available(iOS 14.5, *)
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        download.delegate = self
+    }
+    @available(iOS 14.5, *)
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        download.delegate = self
+    }
+    // WkWebView でダウンロードされるファイルがあった場合のダウンロードされたファイルへのpath(URL)を保存しておく場所。
+    // これ、ダウンロードが開始される時には保存されるべきファイル名が渡されるのに、
+    // ダウンロードが終了した時にはそのファイル名は渡されないためにこっちで覚えておかねばならんという問題があったので仕方なく覚えているという奴です。(´・ω・`)
+    var downloadFileUrl:URL? = nil
     // ページが表示された時に呼ばれるみたい
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         updateAddressBackgroundColor(color: addressBarBackgroundColor)
@@ -766,6 +787,62 @@ li {
             webView.load(URLRequest(url: url))
         }else{
             self.openTargetUrl = url
+        }
+    }
+}
+
+@available(iOS 14.5, *)
+extension ImportFromWebPageViewController: WKDownloadDelegate {
+    // WkWebViewでのダウンロード用に保存されるファイルへの path を生成する。
+    // 保存場所を テンポラリディレクトリ/download に固定するので、起動時にそれを消す事を想定している。
+    static func GetDownloadTemplaryDirectoryPath() -> URL {
+        return FileManager.default.temporaryDirectory.appendingPathComponent("WKWebViewDownload", isDirectory: true)
+    }
+    // WkWebView でのダウンロード用に保存されたファイルを全部消す
+    @objc static func ClearDownloadTemporaryDirectory() {
+        NiftyUtility.RemoveDirectory(directoryPath: GetDownloadTemplaryDirectoryPath())
+    }
+    static func GetDownloadTempolaryFilePath(fileName:String) -> URL {
+        let dir = GetDownloadTemplaryDirectoryPath()
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: nil)
+        let path = dir.appendingPathComponent(fileName)
+        try? FileManager.default.removeItem(at: path)
+        return path
+    }
+    
+    func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+        let downloadFilePath = ImportFromWebPageViewController.GetDownloadTempolaryFilePath(fileName: suggestedFilename)
+        self.downloadFileUrl = downloadFilePath
+        completionHandler(downloadFilePath)
+    }
+    func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+        print("download failed: \(error.localizedDescription)")
+    }
+    
+    func downloadDidFinish(_ download: WKDownload) {
+        guard let path = self.downloadFileUrl, FileManager.default.fileExists(atPath: path.path) else { return }
+        DispatchQueue.main.async {
+            func shareFile() {
+                let activityViewController = UIActivityViewController(activityItems: [path], applicationActivities: nil)
+                let frame = UIScreen.main.bounds
+                activityViewController.popoverPresentationController?.sourceView = self.view
+                activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
+                self.present(activityViewController, animated: true, completion: nil)
+            }
+            
+            if ["novelspeaker-backup-json", "novelspeaker-backup+json", "novelspeaker-backup+zip"].contains(path.pathExtension) {
+                NiftyUtility.EasyDialogTwoButton(viewController: self, title: NSLocalizedString("ImportFromWebPageViewController_DidDownloadNovelSpeakerBackupFileTitle", comment: "ことせかい バックアップファイルのダウンロード"), message: NSLocalizedString("ImportFromWebPageViewController_DidDownloadNovelSpeakerBackupFileMessage", comment: "ダウンロードされたファイルは ことせかい のバックアップファイルのようです。このまま適用しますか？"), button1Title: NSLocalizedString("ImportFromWebPageViewController_DidDownloadNovelSpeakerBackupFileCancel", comment: "適用しない(シェアメニューを開く)"), button1Action: {
+                    DispatchQueue.main.async {
+                        shareFile()
+                    }
+                }, button2Title: NSLocalizedString("ImportFromWebPageViewController_DidDownloadNovelSpeakerBackupFileOK", comment: "適用する")) {
+                    DispatchQueue.main.async {
+                        NovelSpeakerUtility.ProcessURL(url: path)
+                    }
+                }
+                return
+            }
+            shareFile()
         }
     }
 }

@@ -465,6 +465,7 @@ class NovelSpeakerUtility: NSObject {
     #endif
 
     #if !os(watchOS)
+    @discardableResult
     @objc public static func ProcessURL(url:URL?) -> Bool {
         guard let url = url else { return false }
         if let scheme = url.scheme, scheme == "novelspeaker" || scheme == "limuraproducts.novelspeaker" {
