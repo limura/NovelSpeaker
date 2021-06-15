@@ -1813,3 +1813,26 @@ class NiftyUtility: NSObject {
         return Int(value)
     }
 }
+
+extension String {
+    /// startIndex 以上 endIndex以下 部分の文字を取り出して返します。
+    /// 範囲外の部分は空文字列として扱われます。そのため、"hoge".NiftySubstring(from: 5, to: 10) は "" が返ります。
+    func NiftySubstring(from:Int, to:Int) -> String {
+        var s:String.Index = self.startIndex
+        var e:String.Index = self.startIndex
+        var from = from
+        var to = to
+        if from < 0 { from = 0 }
+        if from > self.count { from = self.count }
+        if to < from { to = from }
+        if to > self.count { to = self.count }
+        if let si = self.index(self.startIndex, offsetBy: from, limitedBy: self.endIndex) {
+            s = si
+            e = si
+        }
+        if let ei = self.index(self.startIndex, offsetBy: to, limitedBy: self.endIndex), ei > s {
+            e = ei
+        }
+        return String(self[s..<e])
+    }
+}
