@@ -156,7 +156,8 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             return
         }
         let block = speechBlockArray[currentSpeechBlockIndex]
-        self.delegate?.willSpeakRange(range: NSMakeRange(currentDisplayStringOffset, 1))
+        let location = block.ComputeDisplayLocationFrom(speechLocation: currentBlockSpeechOffset) + currentDisplayStringOffset
+        self.delegate?.willSpeakRange(range: NSMakeRange(location, 1))
         let speechText = block.GenerateSpeechTextFrom(displayLocation: currentBlockDisplayOffset)
         speaker.Speech(text: speechText, voiceIdentifier: block.voiceIdentifier, locale: block.locale, pitch: block.pitch, rate: block.rate, volume: block.volume, delay: block.delay)
         //print("Speech: \(speechText)")
@@ -241,7 +242,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             currentBlockDisplayOffset = currentLocation
             currentBlockSpeechOffset = speechBlock.ComputeSpeechLocationFrom(displayLocation: currentLocation)
             currentSpeakingLocation = location
-            //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex)")
+            //print("SetSpeechLocation(\(location)) -> currentSpeechBlockIndex: \(currentSpeechBlockIndex), currentBlockSpeechOffset: \(currentBlockSpeechOffset)")
             return true
         }
         // ここで currentSpeakingLocation を更新しておかないと、読み上げ開始位置が 0 に戻ってしまう。
