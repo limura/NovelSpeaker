@@ -1,0 +1,50 @@
+# 個人情報の利用目的
+
+ことせかい ではWebフォームによるお問い合わせや ことせかい のアプリ内からのお問い合わせなどの際に、ことせかい の利用者からのメールアドレスなどの個人情報を送信して頂く事がございます。
+
+これらの個人情報はお問い合わせに対する回答やお問い合わせ自体の内容を ことせかい の開発者側で検証するために利用させていただくものであり、個人情報をご提供頂く際の目的以外では利用致しません。
+
+# 個人情報の第三者への開示
+
+ことせかい に寄せられた個人情報は適切に管理し、以下に該当する場合を除いて第三者へ開示することはありません。
+
+- 法令等への協力のため、開示が必要となる場合
+
+# 個人情報の削除
+
+ことせかい に寄せられた個人情報は、以下に該当する場合において、それを削除致します。
+
+- 寄せられた個人情報について対応済みとなり、その情報を取得してから1年以上経った後、2年以内の間(年に一回の頻度で定期的に削除を実行する事になります)
+- ご本人からの削除の希望を受け取った時
+
+# プライバシーポリシーの変更について
+
+ことせかい では個人情報に関して適用される日本の法令を遵守するとともに、本プライバシーポリシーの内容を適宜見直しその改善に努めます。
+修正された最新のプライバシーポリシーは GitHub に登録されております ことせかい(NovelSpeaker) 内の PrivacyPolicy.txt(https://github.com/limura/NovelSpeaker/blob/master/PrivacyPolicy.txt) にて開示されます。
+
+
+English sentences by machine translation are shown below. For accurate information Japanese language takes precedence.
+
+# Purpose of using personal information
+
+NovelSpeaker may send personal information such as e-mail address from NovelSpeaker's user when making inquiries via Web form or inquiries from within the application of NovelSpeaker.
+
+These personal information will be used to verify the contents of the answer to the inquiry and the inquiry itself on the developer side of NovelSpeaker and will not be used except for the purpose of providing personal information.
+
+# Disclosure of personal information to third parties
+
+Personal information sent to NovelSpeaker will be properly managed and will not be disclosed to third parties unless it falls under the following.
+
+- When disclosure is required for cooperation with laws and regulations
+
+# Delete personal information
+
+Personal information sent to NovelSpeaker will be deleted if it falls under the following conditions.
+
+- We have dealt with about the personal information that we got, and after more than one year passed after acquiring that information, we will carry out the deletion within 2 years (periodically on a once-a-year basis)
+- When you receive a request for deletion from yourself
+
+# About change of privacy policy
+
+NovelSpeaker will comply with Japanese laws applicable to personal information, and review the content of this Privacy Policy as appropriate and make efforts to improve it.
+The latest revised privacy policy is disclosed in PrivacyPolicy.txt (https://github.com/limura/NovelSpeaker/blob/master/PrivacyPolicy.txt) in NovelSpeaker registered in GitHub.
