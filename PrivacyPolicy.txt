@@ -20,7 +20,7 @@
 # プライバシーポリシーの変更について
 
 ことせかい では個人情報に関して適用される日本の法令を遵守するとともに、本プライバシーポリシーの内容を適宜見直しその改善に努めます。
-修正された最新のプライバシーポリシーは GitHub に登録されております ことせかい(NovelSpeaker) 内の PrivacyPolicy.txt(https://github.com/limura/NovelSpeaker/blob/master/PrivacyPolicy.txt) にて開示されます。
+修正された最新のプライバシーポリシーは GitHub に登録されております ことせかい(NovelSpeaker) 内の PrivacyPolicy.txt(https://limura.github.io/NovelSpeaker/PrivacyPolicy.txt) にて開示されます。
 
 
 English sentences by machine translation are shown below. For accurate information Japanese language takes precedence.
@@ -47,4 +47,4 @@ Personal information sent to NovelSpeaker will be deleted if it falls under the 
 # About change of privacy policy
 
 NovelSpeaker will comply with Japanese laws applicable to personal information, and review the content of this Privacy Policy as appropriate and make efforts to improve it.
-The latest revised privacy policy is disclosed in PrivacyPolicy.txt (https://github.com/limura/NovelSpeaker/blob/master/PrivacyPolicy.txt) in NovelSpeaker registered in GitHub.
+The latest revised privacy policy is disclosed in PrivacyPolicy.txt (https://limura.github.io/NovelSpeaker/PrivacyPolicy.txt) in NovelSpeaker registered in GitHub.
