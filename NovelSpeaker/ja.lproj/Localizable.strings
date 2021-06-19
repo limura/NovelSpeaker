@@ -385,7 +385,7 @@
 
 "EditBookViewController_TitleText" = "小説名";
 "EditBookViewController_EntryButtonTitle" = "登録";
-"EditBookViewController_AddNewChapterButtonTitle" = "新しく章を追加";
+"EditBookViewController_AddNewChapterButtonTitle" = "章を追加";
 "EditBookViewController_DeleteChapterButtonTitle" = "この章を削除";
 "EditBookViewController_StoryPlaceholderText" = "ここに本文を入力します。";
 "EditBookViewController_ConifirmDeleteStory_Title" = "この章を削除します";
@@ -393,6 +393,10 @@
 "EditBookViewController_ConifirmDeleteStory_OKButton" = "削除する";
 "EditBookViewController_NowDeleting_Title" = "削除中……";
 "EditBookViewController_ConifirmDeleteStory_IsNeedConifirmSwitch_Message" = "暫くの間は確認を求めないようにする";
+"EditBookViewController_SpeakTestButton_AccesibilityLabel" = "発話テストを開始する";
+"EditBookViewController_SpeakTestButton_AccesibilityLabel_Stop" = "発話テストを停止する";
+"EditBookViewController_WaitingSpeakerSetting" = "本文を設定し直しています。";
+
 "NarouDownloadQueue_URLDownloadTitleFixed" = "ダウンロードしたものを「%@」の名前で本棚に登録します";
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "ダウンロードしたもののタイトルを取得できなかったので、以下のURLのまま本棚に登録します。\n%@";
 "NarouDownloadQueue_URLDownloadFailedWithException" = "URLの取得に失敗しました。\n%@";
