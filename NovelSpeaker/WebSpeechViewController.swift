@@ -12,11 +12,9 @@ import RealmSwift
 
 /*
  TODO:
- * 発話時にハイライトする場所がおかしい
  * 明るさの変更
  * 読む部分を全画面表示にする
    * 表示に関する設定項目をまとめた物がダイアログ的に表示できると良いかもしれん
- * 画面タップやスクロールが末端だったりで云々
  */
 
 extension UIColor {
@@ -41,19 +39,27 @@ extension UIColor {
 
 class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate {
     var targetStoryID:String? = nil
+    var isNeedResumeSpeech:Bool = false
+    var isNeedUpdateReadDate:Bool = true
     let textWebView = WKWebView()
     let webSpeechTool = WebSpeechViewTool()
+    
+    var isNeedCollectDisplayLocation = false
+    var webViewDisplayWholeText:String? = nil
+    var speakerDisplayWholeText:String? = nil
 
     var globalStateObserverToken:NotificationToken? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        textWebView.enableConsoleLog()
         createUIComponents()
         RestartObservers()
         RealmUtil.RealmBlock { realm in
             self.loadFirstContentWith(realm: realm, storyID: targetStoryID)
         }
+        setCustomUIMenu()
     }
     
     deinit {
@@ -99,7 +105,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         return text.replacingOccurrences(of: "\\|([^|(]+?)[(]([^)]+?)[)]", with: "<ruby> $1<rt> $2 </rt></ruby>", options: .regularExpression, range: text.range(of: text)).replacingOccurrences(of: "\r\n", with: "  <br>").replacingOccurrences(of: "\n", with: " <br>")
     }
     
-    func createContentHTML(realm:Realm, story:Story) -> String {
+    func createContentHTML(story:Story, displaySetting: RealmDisplaySetting?) -> String {
         var fontName:String = "-apple-system-title1"
         var fontPixelSize:Float = 18
         var letterSpacing:String = "0.03em"
@@ -119,7 +125,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             backgroundColorCSS = ""
         }
 
-        if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
+        if let displaySetting = displaySetting {
             fontName = displaySetting.font.fontName
             fontPixelSize = displaySetting.textSizeValue
             let lineSpacePix = displaySetting.lineSpacingDisplayValue
@@ -128,7 +134,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
                 lineSpaceEm += 1.0
             }
             lineHeight = "\(lineSpaceEm)em"
-            verticalModeCSS = displaySetting.isVertical ? "writing-mode: vertical-rl;" : ""
+            verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
         }
         
         let htmledText = convertNovelSepakerStringToHTML(text: story.content)
@@ -152,6 +158,9 @@ body.NovelSpeakerBody {
   \(foregroundColorCSS);
   \(backgroundColorCSS);
 }
+* {
+  scroll-behavior: smooth;
+}
 </style>
 </head>
 <html><body class="NovelSpeakerBody">
@@ -163,22 +172,42 @@ body.NovelSpeakerBody {
         return html
     }
     
-    func loadNovelWith(realm:Realm, story:Story) {
-        self.textWebView.loadHTMLString("<html><body class='NovelSpeakerBody'>\(NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……"))</body></html>", baseURL: nil)
-        StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true) { story in
+    func loadStoryWithoutStorySpeakerWith(story:Story) {
+        RealmUtil.RealmBlock { realm in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: story.novelID) else { return }
+            let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm)
+            let readLocation = story.readLocation(realm: realm)
             DispatchQueue.main.async {
                 self.title = novel.title
             }
             let aliveButtonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting
             self.assignUpperButtons(novel: novel, aliveButtonSettings: aliveButtonSettings)
-            if story.url.count > 0, let url = URL(string: story.url) {
+            self.webViewDisplayWholeText = nil
+            if story.url.count > 0, let url = URL(string: story.url), displaySetting?.viewType == .webViewOriginal {
+                self.isNeedCollectDisplayLocation = true
                 let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: story.url)
                 let request = URLRequest(url: url)
-//                self.webSpeechTool.loadUrl(webView: self.textWebView, request: request, siteInfoArray: siteInfoArray, completionHandler: nil)
-//                return
+                self.webSpeechTool.loadUrl(webView: self.textWebView, request: request, siteInfoArray: siteInfoArray, completionHandler: {
+                    self.webSpeechTool.getSpeechText { text in
+                        self.webViewDisplayWholeText = text
+                    }
+                    //self.webSpeechTool.hideNotPageElement {
+                    self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1, scrollRatio: 0.3)
+                    //}
+                })
+                return
             }
-            self.webSpeechTool.loadHtmlString(webView: self.textWebView, html: self.createContentHTML(realm: realm, story: story), baseURL: nil, completionHandler: nil)
+            self.isNeedCollectDisplayLocation = false
+            self.webSpeechTool.loadHtmlString(webView: self.textWebView, html: self.createContentHTML(story: story, displaySetting: displaySetting), baseURL: nil, completionHandler: {
+                self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1, scrollRatio: 0.3)
+            })
+        }
+    }
+    
+    func loadNovelWith(realm:Realm, story:Story) {
+        self.textWebView.loadHTMLString("<html><body class='NovelSpeakerBody'>\(NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……"))</body></html>", baseURL: nil)
+        StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true) { story in
+            self.loadStoryWithoutStorySpeakerWith(story: story)
         }
     }
     
@@ -312,12 +341,13 @@ body.NovelSpeakerBody {
                             }
                         }
                         if property.name == "isEnableSwipeOnStoryView" {
+                            // TODO: このオプションどういう扱いにする？横書きと縦書き表示で左右スワイプ上下スワイプの意味が変わるので、「設定タブ」の「小説本文画面での左右スワイプでページめくりが出来るようにする」って文言だと「左右」の意味が固定されちゃってて困る事になる。
                             if let value = property.newValue as? Bool {
                                 DispatchQueue.main.async {
                                     if value == true {
-                                        self.assignSwipeRecognizer()
+                                        //self.assignSwipeRecognizer()
                                     }else{
-                                        self.removeSwipeRecognizer()
+                                        //self.removeSwipeRecognizer()
                                     }
                                 }
                             }
@@ -335,6 +365,7 @@ body.NovelSpeakerBody {
     var shareButtonItem:UIBarButtonItem? = nil
     var skipBackwardButtonItem:UIBarButtonItem? = nil
     var skipForwardButtonItem:UIBarButtonItem? = nil
+    var showTableOfContentsButtonItem:UIBarButtonItem? = nil
     func assignUpperButtons(novel:RealmNovel, aliveButtonSettings:[SpeechViewButtonSetting]) {
         var barButtonArray:[UIBarButtonItem] = []
         
@@ -388,6 +419,16 @@ body.NovelSpeakerBody {
                 skipForwardButtonItem.isEnabled = false
                 self.skipForwardButtonItem = skipForwardButtonItem
                 barButtonArray.append(skipForwardButtonItem)
+            case .showTableOfContents:
+                let showTableOfContentsButtonItem:UIBarButtonItem
+                if #available(iOS 13.0, *) {
+                    showTableOfContentsButtonItem = UIBarButtonItem(image: UIImage(systemName: "list.bullet"), style: .plain, target: self, action: #selector(showTableOfContentsButtonClicked(_:)))
+                    showTableOfContentsButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
+                } else {
+                    showTableOfContentsButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次"), style: .plain, target: self, action: #selector(showTableOfContentsButtonClicked(_:)))
+                }
+                self.showTableOfContentsButtonItem = showTableOfContentsButtonItem
+                barButtonArray.append(showTableOfContentsButtonItem)
             default:
                 break
             }
@@ -469,7 +510,9 @@ body.NovelSpeakerBody {
                 rightButtonText: NSLocalizedString("OK_button", comment: "OK"),
                 leftButtonAction: nil,
                 rightButtonAction: { (filterText) in
-                    searchFunc(searchString: filterText)
+                    NovelSpeakerUtility.SearchStoryFor(selectedStoryID: StorySpeaker.shared.storyID, viewController: self, searchString: filterText) { (story) in
+                        StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
+                    }
                 },
                 shouldReturnIsRightButtonClicked: true,
                 completion: nil)
@@ -502,9 +545,11 @@ body.NovelSpeakerBody {
                 // TODO: not implememted yet.
                 // disableCurrentReadingStoryChangeFloatingButton()
                 self.webSpeechTool.getSelectedLocation { location in
-                    print("webSpeechTool.getSelectedLocation: \(location)")
+                    print("startStopButtonClicked selectedLocation: \(location ?? -1)")
                     RealmUtil.RealmBlock { realm in
-                        StorySpeaker.shared.setReadLocationWith(realm: realm, location: location)
+                        if let location = location {
+                            StorySpeaker.shared.setReadLocationWith(realm: realm, location: location)
+                        }
                         StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
                     }
                 }
@@ -536,6 +581,11 @@ body.NovelSpeakerBody {
             }
         }
     }
+    @objc func showTableOfContentsButtonClicked(_ sender: UIBarButtonItem) {
+        NovelSpeakerUtility.SearchStoryFor(selectedStoryID: StorySpeaker.shared.storyID, viewController: self, searchString: nil) { (story) in
+            StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
+        }
+    }
     @objc func leftSwipe(_ sender: UISwipeGestureRecognizer) {
         // TODO: not implemented yet
         // disableCurrentReadingStoryChangeFloatingButton()
@@ -554,12 +604,98 @@ body.NovelSpeakerBody {
     
     //MARK: StorySpeakerDeletgate handler
     func storySpeakerStartSpeechEvent(storyID:String) {
+        DispatchQueue.main.async {
+            self.startStopButtonItem?.title = NSLocalizedString("SpeechViewController_Stop", comment: "Stop")
+            self.skipBackwardButtonItem?.isEnabled = true
+            self.skipForwardButtonItem?.isEnabled = true
+            self.removeCustomUIMenu()
+        }
     }
     func storySpeakerStopSpeechEvent(storyID:String) {
+        DispatchQueue.main.async {
+            self.startStopButtonItem?.title = NSLocalizedString("SpeechViewController_Speak", comment: "Speak")
+            self.skipBackwardButtonItem?.isEnabled = false
+            self.skipForwardButtonItem?.isEnabled = false
+            self.setCustomUIMenu()
+        }
     }
     func storySpeakerUpdateReadingPoint(storyID:String, range:NSRange) {
-        self.webSpeechTool.highlightSpeechLocation(location: range.location, length: range.length)
+        //print("storySpeakerUpdateReadingPoint(range: \(range.location), \(range.length))")
+        let location:Int
+        if self.isNeedCollectDisplayLocation, let webViewWholeText = self.webViewDisplayWholeText, let speakerWholeText = self.speakerDisplayWholeText, webViewWholeText.count != speakerWholeText.count, speakerWholeText.count > 0 {
+            location = Int(Double(webViewWholeText.count) * Double(range.location) / Double(speakerWholeText.count))
+        }else{
+            location = range.location
+        }
+        self.webSpeechTool.highlightSpeechLocation(location: location, length: range.length, scrollRatio: 0.3)
     }
     func storySpeakerStoryChanged(story:Story) {
+        self.speakerDisplayWholeText = StorySpeaker.shared.GenerateWholeDisplayText()
+        self.loadStoryWithoutStorySpeakerWith(story: story)
+        if self.isNeedResumeSpeech {
+            self.isNeedResumeSpeech = false
+            DispatchQueue.main.async {
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                }
+                self.checkDummySpeechFinished()
+            }
+        }
+    }
+}
+
+// MARK: custom UI Menu 周り
+extension WebSpeechViewController {
+    func setCustomUIMenu() {
+        let menuController = UIMenuController.shared
+        let speechModMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), action: #selector(setSpeechModSetting(sender:)))
+        let speechModForThisNovelMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettingsForThisNovel", comment: "この小説用の読み替え辞書へ登録"), action: #selector(setSpeechModForThisNovelSetting(sender:)))
+        let checkSpeechTextMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), action: #selector(checkSpeechText(sender:)))
+        let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem]
+        menuController.menuItems = menuItems
+    }
+    func removeCustomUIMenu() {
+        let menuController = UIMenuController.shared
+        menuController.menuItems = []
+    }
+    
+    @objc func setSpeechModSetting(sender: UIMenuItem){
+        self.webSpeechTool.getSelectedString { string in
+            guard let text = string, text.count > 0 else { return }
+            DispatchQueue.main.async {
+                let nextViewController = CreateSpeechModSettingViewControllerSwift()
+                nextViewController.targetSpeechModSettingBeforeString = text
+                nextViewController.targetNovelID = RealmSpeechModSetting.anyTarget
+                nextViewController.isUseAnyNovelID = true
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }
+        }
+    }
+    @objc func setSpeechModForThisNovelSetting(sender: UIMenuItem){
+        self.webSpeechTool.getSelectedString { string in
+            guard let text = string, text.count > 0 else { return }
+            DispatchQueue.main.async {
+                let nextViewController = CreateSpeechModSettingViewControllerSwift()
+                nextViewController.targetSpeechModSettingBeforeString = text
+                nextViewController.isUseAnyNovelID = true
+                if let storyID = self.targetStoryID {
+                    nextViewController.targetNovelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
+                }else{
+                    // 不測の事態だ……('A`)
+                    return
+                }
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }
+        }
+    }
+
+    @objc func checkSpeechText(sender: UIMenuItem) {
+        self.webSpeechTool.getSelectedRange { startIndex, endIndex in
+            guard let startIndex = startIndex, let endIndex = endIndex, startIndex <= endIndex else { return }
+            DispatchQueue.main.async {
+                let speechText = StorySpeaker.shared.GenerateSpeechTextFrom(displayTextRange: NSMakeRange(startIndex, endIndex - startIndex))
+                NiftyUtility.EasyDialogLongMessageDialog(viewController: self, message: speechText)
+            }
+        }
     }
 }

@@ -121,6 +121,15 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                         $0.value = setting.isOn
                         $0.cell.textLabel?.numberOfLines = 0
                     }.onChange({_ in self.saveCurrentSetting()})
+                case .showTableOfContents:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("SpeechViewButtonType_ShowTableOfContents", comment: "章リスト(目次)")
+                        if #available(iOS 13.0, *) {
+                            $0.cell.imageView?.image = UIImage(systemName: "list.bullet")
+                        }
+                        $0.value = setting.isOn
+                        $0.cell.textLabel?.numberOfLines = 0
+                    }.onChange({_ in self.saveCurrentSetting()})
                 default:
                     continue
                 }

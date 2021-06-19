@@ -12,7 +12,7 @@ import RealmSwift
 import AVFoundation
 
 class NovelSpeakerUtility: NSObject {
-    static let privacyPolicyURL = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/master/PrivacyPolicy.txt")
+    static let privacyPolicyURL = URL(string: "https://limura.github.io/NovelSpeaker/PrivacyPolicy.txt")
     static let privacyPolicyKey = "NovelSpeaker_ReadedPrivacyPolicy"
     static let UserCreatedContentPrefix = "https://novelspeaker.example.com/UserCreatedContent/"
     static func GetReadedPrivacyPolicy() -> String {
@@ -1299,8 +1299,12 @@ class NovelSpeakerUtility: NSObject {
                         setting.fontID = fontID
                     }
                     if let isVertical = displaySettingDic.object(forKey: "isVertical") as? NSNumber {
-                        setting.isVertical = isVertical.boolValue
+                        setting.viewType = .normal
                     }
+                    if let viewTypeString = displaySettingDic.object(forKey: "viewType") as? String, let viewType = RealmDisplaySetting.ViewType(rawValue: viewTypeString) {
+                        setting.viewType = viewType
+                    }
+
                     if let createdDateString = displaySettingDic.object(forKey: "createdDate") as? String,
                         let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
                         setting.createdDate = createdDate
@@ -2018,7 +2022,7 @@ class NovelSpeakerUtility: NSObject {
                     "lineSpacing": setting.lineSpacing,
                     "fontID": setting.fontID,
                     "name": setting.name,
-                    "isVertical": setting.isVertical,
+                    "viewType": setting.viewType.rawValue,
                     "createdDate": NiftyUtility.Date2ISO8601String(date: setting.createdDate),
                     "targetNovelIDArray": Array(setting.targetNovelIDArray)
                 ])
@@ -2327,37 +2331,37 @@ class NovelSpeakerUtility: NSObject {
     #endif
     
     #if !os(watchOS)
-    static func SearchStoryFor(storyID:String, viewController:UIViewController, selectedResultHandler:((_ story:Story)->Void)? = nil) {
-        func searchFunc(searchString:String?){
-            NiftyUtility.EasyDialogNoButton(
-                viewController: viewController,
-                title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
-                message: nil) { (searchingDialog) in
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    var displayTextArray:[String] = []
-                    RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID)) { (story) -> Bool in
-                        guard let searchString = searchString else { return true }
-                        if searchString.count <= 0 { return true }
-                        return story.content.contains(searchString)
-                    } iterate: { (story) in
-                        displayTextArray.append("\(story.chapterNumber): \(story.GetSubtitle())")
-                    }
-                    var selectedText:String? = nil
-                    if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
-                        selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
-                    }
-                    let picker = PickerViewDialog.createNewDialog(displayTextArray: displayTextArray, firstSelectedString: selectedText) { (selectedText) in
-                        guard let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)) else { return }
-                        selectedResultHandler?(story)
-                        //SpeechBlockSpeaker.shared.SetStory(story: story)
-                    }
-                    searchingDialog.dismiss(animated: false) {
-                        picker?.popup(completion: nil)
-                    }
+    static func SearchStoryFor(selectedStoryID:String, viewController:UIViewController, searchString:String?, selectedResultHandler:((_ story:Story)->Void)? = nil) {
+        NiftyUtility.EasyDialogNoButton(
+            viewController: viewController,
+            title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
+            message: nil) { (searchingDialog) in
+            RealmUtil.RealmBlock { (realm) -> Void in
+                var displayTextArray:[String] = []
+                RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: selectedStoryID)) { (story) -> Bool in
+                    guard let searchString = searchString else { return true }
+                    if searchString.count <= 0 { return true }
+                    return story.content.contains(searchString)
+                } iterate: { (story) in
+                    displayTextArray.append("\(story.chapterNumber): \(story.GetSubtitle())")
+                }
+                var selectedText:String? = nil
+                if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: selectedStoryID) {
+                    selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
+                }
+                let picker = PickerViewDialog.createNewDialog(displayTextArray: displayTextArray, firstSelectedString: selectedText) { (selectedText) in
+                    guard let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: selectedStoryID), chapterNumber: chapterNumber)) else { return }
+                    selectedResultHandler?(story)
+                    //SpeechBlockSpeaker.shared.SetStory(story: story)
+                }
+                searchingDialog.dismiss(animated: false) {
+                    picker?.popup(completion: nil)
                 }
             }
         }
-        
+    }
+    
+    static func SearchStoryWithSearchDialog(storyID:String, viewController:UIViewController, selectedResultHandler:((_ story:Story)->Void)? = nil) {
         NiftyUtility.EasyDialogTextInput2Button(
             viewController: viewController,
             title: NSLocalizedString("SpeechViewController_SearchDialogTitle", comment: "検索"),
@@ -2368,7 +2372,9 @@ class NovelSpeakerUtility: NSObject {
             rightButtonText: NSLocalizedString("OK_button", comment: "OK"),
             leftButtonAction: nil,
             rightButtonAction: { (filterText) in
-                searchFunc(searchString: filterText)
+                SearchStoryFor(selectedStoryID: storyID, viewController: viewController, searchString: filterText) { story in
+                    selectedResultHandler?(story)
+                }
             },
             shouldReturnIsRightButtonClicked: true,
             completion: nil)

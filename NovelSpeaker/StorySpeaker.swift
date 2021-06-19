@@ -1297,4 +1297,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
          */
     }
+    
+    func GenerateWholeDisplayText() -> String {
+        return speaker.speechBlockArray.reduce("") { $0 + $1.displayText }
+    }
 }

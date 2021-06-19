@@ -1064,10 +1064,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                             button1Action: {
                                 RealmUtil.RealmBlock { (realm) -> Void in
                                     if let nextViewStoryID = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.firstChapterWith(realm: realm)?.storyID {
-                                        self.nextViewStoryID = nextViewStoryID
-                                        self.isNextViewNeedResumeSpeech = isNeedSpeech
-                                        self.isNextViewNeedUpdateReadDate = isNeedUpdateReadDate
-                                        self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
+                                        self.PushToNovelSpeechViewController(nextViewStoryID: nextViewStoryID, isNextViewNeedResumeSpeech: isNeedSpeech, isNextViewNeedUpdateReadDate: isNeedUpdateReadDate)
                                         return
                                     }
                                 }
@@ -1080,18 +1077,31 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                     return
                 }
                 if let story = novel.firstChapterWith(realm: realm) {
-                    nextViewStoryID = story.storyID
                     print("sendStoryID: \(nextViewStoryID ?? "unknown"), story.chapterNumber \(story.chapterNumber)")
-                    self.isNextViewNeedResumeSpeech = isNeedSpeech
-                    self.isNextViewNeedUpdateReadDate = isNeedUpdateReadDate
-                    self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
+                    self.PushToNovelSpeechViewController(nextViewStoryID: story.storyID, isNextViewNeedResumeSpeech: isNeedSpeech, isNextViewNeedUpdateReadDate: isNeedUpdateReadDate)
                 }
                 return
             }
-            nextViewStoryID = story.storyID
-            self.isNextViewNeedResumeSpeech = isNeedSpeech
-            self.isNextViewNeedUpdateReadDate = isNeedUpdateReadDate
-            self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
+            PushToNovelSpeechViewController(nextViewStoryID: story.storyID, isNextViewNeedResumeSpeech: isNeedSpeech, isNextViewNeedUpdateReadDate: isNeedUpdateReadDate)
+        }
+    }
+    
+    func PushToNovelSpeechViewController(nextViewStoryID: String, isNextViewNeedResumeSpeech:Bool, isNextViewNeedUpdateReadDate: Bool) {
+        self.nextViewStoryID = nextViewStoryID
+        self.isNextViewNeedResumeSpeech = isNextViewNeedResumeSpeech
+        self.isNextViewNeedUpdateReadDate = isNextViewNeedUpdateReadDate
+        RealmUtil.RealmBlock { realm in
+            let viewType = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm)?.viewType ?? RealmDisplaySetting.ViewType.normal
+            switch viewType {
+            case .normal:
+                self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
+            case .webViewVertical, .webViewHorizontal, .webViewOriginal:
+                let nextViewController = WebSpeechViewController()
+                nextViewController.targetStoryID = nextViewStoryID
+                nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
+                nextViewController.isNeedUpdateReadDate = isNextViewNeedUpdateReadDate
+                self.navigationController?.pushViewController(nextViewController, animated: true)
+            }
         }
     }
     

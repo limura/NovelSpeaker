@@ -24,254 +24,59 @@
 import UIKit
 import WebKit
 
+/// adding "console.log" support
+/// from https://banrai-works.net/2019/01/13/%E3%80%90swift%E3%80%91wkwebview%E3%81%A7javascript%E3%81%AEconsole-log%E3%82%92%E4%BD%BF%E3%81%88%E3%82%8B%E3%82%88%E3%81%86%E3%81%AB%E3%81%99%E3%82%8B/
+extension WKWebView: WKScriptMessageHandler {
+
+    /// enabling console.log
+    public func enableConsoleLog() {
+
+        //    set message handler
+        configuration.userContentController.add(self, name: "logging")
+
+        //    override console.log
+        let _override = WKUserScript(source: "var console = { log: function(msg){window.webkit.messageHandlers.logging.postMessage(msg) }};", injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        configuration.userContentController.addUserScript(_override)
+    }
+    
+    func JavaScriptAnyToString(body:Any) -> String {
+        if let number = body as? NSNumber {
+            return "\(number)"
+        }
+        if let string = body as? String {
+            return "\"\(string)\""
+        }
+        if let date = body as? NSDate {
+            return "\(date)"
+        }
+        if let array = body as? NSArray {
+            return array.reduce("[") { current, body in
+                return current + ", " + JavaScriptAnyToString(body: body)
+            } + "]"
+        }
+        if let dictionary = body as? NSDictionary {
+            return dictionary.reduce("{\n") { current, element in
+                return current + "\n" + "  \(JavaScriptAnyToString(body: element.key)): \(JavaScriptAnyToString(body: element.value))"
+            } + "\n}\n"
+        }
+        if body is NSNull {
+            return "null"
+        }
+        return "undefined"
+    }
+
+    /// message handler
+    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+
+        print("WebViewConsole:", JavaScriptAnyToString(body: message.body))
+    }
+}
+
 class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     var wkWebView:WKWebView? = nil
     var loadCompletionHandler:(() -> Void)? = nil
     var siteInfoArray:[StorySiteInfo] = []
     
-    let jsFunctions = """
-function GetPageElementArray(SiteInfo){
-  if("data" in SiteInfo && "pageElement" in SiteInfo.data){
-    return document.evaluate(SiteInfo.data.pageElement, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-  }
-  return undefined;
-}
-
-function GetNextLink(SiteInfo){
-  if("data" in SiteInfo && "nextLink" in SiteInfo.data){
-    return document.evaluate(SiteInfo.data.pageElement, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-  }
-  return undefined;
-}
-
-function ScrollToElement(element, index, margin) {
-  let range = new Range();
-  range.selectNode(element);
-  if(index > 0){
-    range.setStart(element, index);
-  }
-  rect = range.getBoundingClientRect();
-  //let x = window.pageXOffset + rect.x + rect.width;
-  let x = window.pageXOffset + rect.right + margin;
-  let y = window.pageYOffset + rect.bottom - window.innerHeight + margin;
-  window.scroll(x, y);
-}
-
-function ScrollToIndex(index, margin){
-  let elementData = SearchElementFromIndex(elementArray, index);
-  if(elementData){
-    ScrollToElement(elementData.element, elementData.index, 0);
-  }
-}
-
-function HighlightSpeechSentence(element, index, length){
-  //element.parentNode.scrollIntoView(true); // TEXT_NODE には scrollIntoView が無いっぽい(´・ω・`)
-  let range = new Range();
-  //range.selectNodeContents(element); // selectNodeContents() では子要素が無いと駄目
-  range.selectNode(element);
-  if(index > 0){
-    range.setStart(element, index);
-  }
-  if(length <= 0){
-    length = 1;
-  }
-  range.setEnd(element, index + length);
-
-  let selection = window.getSelection();
-  selection.removeAllRanges();
-  selection.addRange(range);
-}
-function isNotSpeechElement(element){
-  if(element instanceof HTMLElement){
-    switch(element.tagName){
-    case "SCRIPT":
-    case "STYLE":
-    case "NOSCRIPT":
-    case "IFRAME":
-    case "META":
-    case "IMG":
-      return true;
-      break;
-    default:
-      break;
-    }
-  }
-  return false;
-}
-
-function extractElement(element){
-  if(isNotSpeechElement(element)){
-    return [];
-  }
-  if(element.childNodes.length <= 0){
-    var text = "";
-    if(element.nodeType == Node.TEXT_NODE){
-      text = element.textContent;
-    }else{
-      text = element.innerText;
-    }
-    if(!text || text.trim().length <= 0){
-      return [];
-    }
-    return [{"element": element, "text": text}];
-  }
-  var elementArray = [];
-  for(var i = 0; i < element.childNodes.length; i++){
-    let childNode = element.childNodes[i];
-    elementArray = elementArray.concat(extractElement(childNode))
-  }
-  return elementArray;
-}
-
-function extractElementForPageElementArray(pageElementArray){
-  var elementArray = [];
-  for(var i = 0; i < pageElementArray.snapshotLength; i++){
-    let element = pageElementArray.snapshotItem(i);
-    elementArray = elementArray.concat(extractElement(element));
-  }
-  return elementArray;
-}
-
-// [{"element":, "text":}, ...] の配列の text の文字を index として、
-// index (0 起点) で示される element の何文字目であるかを返す({"element":, "text":, "index":})
-// 見つからなければ undefined が返ります
-function SearchElementFromIndex(elementArray, index){
-  var i = 0;
-  for(var i = 0; i < elementArray.length && index >= 0; i++){
-    let data = elementArray[i];
-    let element = data["element"];
-    let text = data["text"];
-    let textLength = text.length;
-    if(index < textLength){
-      return {"element": element, "text": text, "index": index}
-    }
-    index -= textLength;
-  }
-  return undefined
-}
-
-// elementArray から range で示された範囲を先頭とする elementArray と、その先頭の index を返す
-// 返されるのは {"elementArray": , "index": } の形式で、発見できなかった場合は undefined が返る
-function SplitElementFromSelection(elementArray, range){
-  var resultArray = [];
-  var prevArray = [];
-  var isHit = false;
-  var index = 0;
-  for(var i = 0; i < elementArray.length; i++){
-    let data = elementArray[i];
-    let element = data["element"];
-    let text = data["text"];
-    if(isHit){
-      resultArray.push(data);
-      continue;
-    }
-    let elementRange = new Range();
-    elementRange.selectNode(element);
-    if(!elementRange){
-      //console.log("elementRange", elementRange, element);
-      prevArray.push(data);
-      continue;
-    }
-    //console.log("compare", elementRange.compareBoundaryPoints(Range.START_TO_START, range), elementRange.compareBoundaryPoints(Range.START_TO_END, range));
-    if(elementRange.compareBoundaryPoints(Range.START_TO_START, range) <= 0 &&
-      elementRange.compareBoundaryPoints(Range.START_TO_END, range) >= 0){
-      isHit = true;
-      resultArray.push(data);
-
-      // TODO: ちゃんとやるなら range.startContainer が
-      // element と同じかどうかを確認して、startOffset を使う必要がある
-      index = range.startOffset;
-      if(text.length < index){
-        index = 0;
-      }
-    }else{
-      prevArray.push(data);
-    }
-  }
-  if(resultArray.length <= 0){
-    return undefined;
-  }
-  return {elementArray: resultArray, index: index, prevElementArray:prevArray};
-}
-
-// [{"element":, "text":}, ...] の配列の text の文字を、全部組み合わせた文字列を取得します
-// index は最初のelementでのオフセットになります
-function GenerateWholeText(elementArray, index){
-  var text = "";
-  elementArray.forEach(function(data){
-    console.log("text += ", data["text"], index);
-    if(data["text"].length >= index){
-      text += data["text"].slice(index);
-      index = 0;
-    }else{
-      index -= data["text"].length;
-    }
-  });
-  return text;
-}
-
-function GetSelectedIndex(){
-  let selection = window.getSelection();
-  var index = -1;
-  if(selection.rangeCount > 0){
-    let speechTarget = SplitElementFromSelection(elementArray, selection.getRangeAt(0));
-    //console.log("speechTarget", speechTarget);
-    if(speechTarget){
-      elementArray = speechTarget.elementArray;
-      prevElementArray = speechTarget.prevElementArray;
-      index = speechTarget.index;
-      for(var i = 0; i < prevElementArray.length; i++){
-        let element = prevElementArray[i];
-        index += element.text.length;
-      }
-    }
-  }else{
-    index = 0;
-  }
-  return index;
-}
-
-function HighlightFromIndex(index, length){
-    console.log("elementArray", elementArray);
-    let elementData = SearchElementFromIndex(elementArray, index);
-    if(elementData){
-      HighlightSpeechSentence(elementData.element, elementData.index, length);
-    }
-}
-
-function EnableSelection(){
-  let input = document.getElementById("focusInput");
-  input.selectionStart = 0;
-  input.selectionEnd = 1;
-  //document.getElementById("focusInput").focus();
-  if(elementArray.length >= 1) {
-    let element = elementArray[0].element;
-    let range = document.createRange();
-    range.selectNode(element);
-    let selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-    return "OK";
-  }
-  return "NG";
-}
-
-function CreateElementArray(SiteInfoArray){
-    if(SiteInfoArray === undefined) {
-        SiteInfoArray = [{"data":{url:".*", pageElement:"//body", title:"//title", nextLink:"", author:"", firstPageLink:"", tag:""}}];
-    }
-    for(let i = 0; i < SiteInfoArray.length; i++){
-        let siteInfo = SiteInfoArray[i];
-        let pageElementArray = GetPageElementArray(siteInfo);
-        if(pageElementArray){
-            return extractElementForPageElementArray(pageElementArray);
-        }
-    }
-    return undefined;
-}
-var elementArray = CreateElementArray();
-"OK";
-"""
     func removeDelegate(){
         if let webView = self.wkWebView {
             webView.navigationDelegate = nil;
@@ -296,6 +101,11 @@ var elementArray = CreateElementArray();
         webView.load(request)
     }
     
+    func loadInjectScript() -> String? {
+        guard let path = Bundle.main.path(forResource: "WebSpeechViewTool_Inject", ofType: "js") else { return nil }
+        return try? String.init(contentsOfFile: path)
+    }
+    
     // WKWebView の読み込み完了ハンドラ
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if webView.canBecomeFirstResponder {
@@ -311,6 +121,7 @@ var elementArray = CreateElementArray();
         }else{
             siteInfoJSONString = ""
         }
+        let jsFunctions = loadInjectScript() ?? "";
         let jsString = jsFunctions.replacingOccurrences(of: "var elementArray = CreateElementArray();", with: "var elementArray = CreateElementArray(\(siteInfoJSONString));")
         // JavaScript関数群を色々注入しておく
         evaluateJsToString(jsString: jsString) { (result) in
@@ -366,6 +177,27 @@ var elementArray = CreateElementArray();
             result = resultDouble
         }
     }
+    func evaluateJsToStringDoubleDictionary(jsString:String, completionHandler:(([String:Double]?) -> Void)?){
+        guard let wkWebView = self.wkWebView else {
+            return
+        }
+        wkWebView.evaluateJavaScript(jsString) { (node, err) in
+            var result:[String:Double]? = nil;
+            defer {
+                completionHandler?(result)
+            }
+            if let err = err {
+                print("js err:", err.localizedDescription)
+                print(jsString)
+                return
+            }
+            guard let resultDouble = node as? [String:Double] else {
+                print("js node == nil")
+                return
+            }
+            result = resultDouble
+        }
+    }
 
     
     func assignCSS(cssString:String){
@@ -381,20 +213,36 @@ var elementArray = CreateElementArray();
     func getSpeechText(completionHandler:((String?) -> Void)?) {
         evaluateJsToString(jsString: "GenerateWholeText(elementArray,0);", completionHandler: completionHandler)
     }
-    func highlightSpeechLocation(location:Int, length:Int) {
+    func highlightSpeechLocation(location:Int, length:Int, scrollRatio: Double) {
         //evaluateJsToString(jsString: "HighlightFromIndex(\(location), \(length));\"OK\";", completionHandler: nil)
-        evaluateJsToString(jsString: "HighlightFromIndex(\(location), \(length)); ScrollToIndex(\(location) + \(length), 200); \"OK\";", completionHandler: nil)
+        evaluateJsToString(jsString: "HighlightFromIndex(\(location), \(length)); ScrollToIndex(\(location) + \(length), \(scrollRatio)); \"OK\";", completionHandler: nil)
     }
-    func getSelectedLocation(completionHandler:((Int)->Void)?){
+    func getSelectedLocation(completionHandler:((Int?)->Void)?){
         evaluateJsToDouble(jsString: "GetSelectedIndex();") { (result) in
-            guard let completionHandler = completionHandler else {
-                return
-            }
-            if let result = result {
-                completionHandler(Int(result))
+            if let result = result, result.isNaN == false, result.isInfinite == false {
+                completionHandler?(Int(result))
             }else{
-                completionHandler(-1)
+                completionHandler?(nil)
             }
         }
+    }
+    func getSelectedString(completionHandler:((String?)->Void)?){
+        evaluateJsToString(jsString: "GetSelectedString();") { result in
+            completionHandler?(result)
+        }
+    }
+    func getSelectedRange(completionHandler:@escaping ((Int?,Int?)->Void)){
+        evaluateJsToStringDoubleDictionary(jsString: "GetSelectedRange();") { result in
+            guard let result = result, let startIndex = result["startIndex"], let endIndex = result["endIndex"] else {
+                completionHandler(nil, nil)
+                return
+            }
+            completionHandler(NiftyUtility.DoubleToInt(value: startIndex), NiftyUtility.DoubleToInt(value: endIndex))
+        }
+    }
+    func hideNotPageElement(completionHandler: (()->Void)?){
+        evaluateJsToString(jsString: "HideOtherElements(document.body, elementArray);\"OK\";", completionHandler: { _ in
+            completionHandler?()
+        })
     }
 }

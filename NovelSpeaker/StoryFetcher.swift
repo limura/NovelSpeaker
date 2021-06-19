@@ -196,7 +196,25 @@ struct StorySiteInfo {
     // とりあえず pageElement と URL だけある感じの物を返します。
     func generatePageElementOnlySiteInfoString() -> String {
         // {"data":{url:".*", pageElement:"//body", title:"//title", nextLink:"", author:"", firstPageLink:"", tag:""}}
-        return "{data:{url:'\(self.url?.pattern ?? ".*")', pageElement:'\(pageElement)'}}"
+        struct SiteInfoBase: Encodable {
+            let url:String
+            let pageElement:String
+        }
+        struct SiteInfoJson: Encodable {
+            let data:SiteInfoBase
+        }
+        let siteInfoTmp = SiteInfoJson(data: SiteInfoBase(url: self.url?.pattern ?? ".*", pageElement: pageElement))
+        if let jsonData = try? JSONEncoder().encode(siteInfoTmp), let jsonStirng = String(data: jsonData, encoding: .utf8) {
+            return jsonStirng
+        }
+        // JSON にするのに失敗したら自前でやってみます。(´・ω・`)
+        let pageElementString:String
+        if pageElement.contains("\"") {
+            pageElementString = "'\(pageElement)'"
+        }else{
+            pageElementString = "\"\(pageElement)\""
+        }
+        return "{data:{url:'\(self.url?.pattern ?? ".*")', pageElement:\(pageElementString)}}"
     }
 }
 

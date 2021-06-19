@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 8
+    static let currentSchemaVersion : UInt64 = 9
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -80,28 +80,36 @@ import AVFoundation
             newObject?["isDisableNarouRuby"] = false
         }
     }
+    static func Migrate_8_To_9(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmDisplaySetting.className()) { (oldObject, newObject) in
+            newObject?["m_ViewType"] = "Normal"
+        }
+    }
 
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
         if oldSchemaVersion == 0 {
             Migrate_0_To_1(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
-        if oldSchemaVersion == 1 {
+        if oldSchemaVersion <= 1 {
             Migrate_1_To_2(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
-        if oldSchemaVersion == 3 {
+        if oldSchemaVersion <= 3 {
             Migrate_3_To_4(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
-        if oldSchemaVersion == 4 {
+        if oldSchemaVersion <= 4 {
             Migrate_4_To_5(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
-        if oldSchemaVersion == 5 {
+        if oldSchemaVersion <= 5 {
             Migrate_5_To_6(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
-        if oldSchemaVersion == 6 {
+        if oldSchemaVersion <= 6 {
             Migrate_6_To_7(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
-        if oldSchemaVersion == 7 {
+        if oldSchemaVersion <= 7 {
             Migrate_7_To_8(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion <= 8 {
+            Migrate_8_To_9(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     
@@ -2147,6 +2155,7 @@ enum SpeechViewButtonTypes:String, Codable {
     case detail = "detail"
     case skipBackward = "skipBackward"
     case skipForward = "skipForward"
+    case showTableOfContents = "showTableOfContents"
 }
 
 struct SpeechViewButtonSetting: Codable {
@@ -2154,6 +2163,7 @@ struct SpeechViewButtonSetting: Codable {
     var isOn:Bool
     
     static let defaultSetting:[SpeechViewButtonSetting] = [
+        SpeechViewButtonSetting(type: .showTableOfContents, isOn: false),
         SpeechViewButtonSetting(type: .skipBackward, isOn: false),
         SpeechViewButtonSetting(type: .skipForward, isOn: false),
         SpeechViewButtonSetting(type: .openWebPage, isOn: true),
@@ -2650,11 +2660,18 @@ extension RealmGlobalState: CanWriteIsDeleted {
     @objc dynamic var textSizeValue: Float = 58.0
     @objc dynamic var lineSpacing: Float = 3.0
     @objc dynamic var fontID = ""
-    @objc dynamic var isVertical: Bool = false
+    @objc dynamic var m_ViewType: String = ViewType.normal.rawValue
     @objc dynamic var createdDate = Date()
     
     let targetNovelIDArray = List<String>()
     
+    enum ViewType: String {
+        case normal = "Normal"
+        case webViewVertical = "WebViewVertical"
+        case webViewHorizontal = "WebViewHorizontal"
+        case webViewOriginal = "WebViewOriginal"
+    }
+
     func targetNovelArrayWith(realm:Realm) -> [RealmNovel]? {
         return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
             return !novel.isDeleted && self.targetNovelIDArray.contains(novel.novelID)
@@ -2710,6 +2727,16 @@ extension RealmGlobalState: CanWriteIsDeleted {
     var lineSpacingDisplayValue: CGFloat {
         get {
             return RealmDisplaySetting.convertLineSpacingValueFrom(lineSpacing: self.lineSpacing)
+        }
+    }
+    
+    var viewType:ViewType {
+        get {
+            guard let viewType = ViewType(rawValue: m_ViewType) else { return ViewType.normal }
+            return viewType
+        }
+        set {
+            m_ViewType = newValue.rawValue
         }
     }
 

@@ -211,7 +211,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.textSizeValue = obj.textSizeValue
             newObj.lineSpacing = obj.lineSpacing
             newObj.fontID = obj.fontID
-            newObj.isVertical = obj.isVertical
+            newObj.viewType = obj.viewType
             newObj.createdDate = obj.createdDate
             newObj.targetNovelIDArray.removeAll()
             newObj.targetNovelIDArray.append(objectsIn: obj.targetNovelIDArray)

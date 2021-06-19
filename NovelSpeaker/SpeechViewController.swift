@@ -27,6 +27,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var shareButtonItem:UIBarButtonItem? = nil
     var skipBackwardButtonItem:UIBarButtonItem? = nil
     var skipForwardButtonItem:UIBarButtonItem? = nil
+    var showTableOfContentsButtonItem:UIBarButtonItem? = nil
 
     var novelObserverToken:NotificationToken? = nil
     var novelObserverNovelID:String = ""
@@ -235,6 +236,16 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 skipForwardButtonItem.isEnabled = false
                 self.skipForwardButtonItem = skipForwardButtonItem
                 barButtonArray.append(skipForwardButtonItem)
+            case .showTableOfContents:
+                let showTableOfContentsButtonItem:UIBarButtonItem
+                if #available(iOS 13.0, *) {
+                    showTableOfContentsButtonItem = UIBarButtonItem(image: UIImage(systemName: "list.bullet"), style: .plain, target: self, action: #selector(showTableOfContentsButtonClicked(_:)))
+                    showTableOfContentsButtonItem.accessibilityLabel = NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次")
+                } else {
+                    showTableOfContentsButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_ShowTableOfContentsButtonTitle", comment: "目次"), style: .plain, target: self, action: #selector(showTableOfContentsButtonClicked(_:)))
+                }
+                self.showTableOfContentsButtonItem = showTableOfContentsButtonItem
+                barButtonArray.append(showTableOfContentsButtonItem)
             default:
                 break
             }
@@ -674,42 +685,6 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             self.storySpeaker.StopSpeech(realm: realm)
-            func searchFunc(searchString:String?){
-                NiftyUtility.EasyDialogNoButton(
-                    viewController: self,
-                    title: NSLocalizedString("SpeechViewController_NowSearchingTitle", comment: "検索中"),
-                    message: nil) { (searchingDialog) in
-                    RealmUtil.RealmBlock { (realm) -> Void in
-                        var displayTextArray:[String] = []
-                        guard let storyID = self.storyID else {
-                            NiftyUtility.EasyDialogOneButton(
-                                viewController: self,
-                                title: nil,
-                                message: NSLocalizedString("SpeechViewController_CanNotGetStorys", comment: "小説情報を参照できませんでした。"),
-                                buttonTitle: nil, buttonAction: nil)
-                            return
-                        }
-                        RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID)) { (story) -> Bool in
-                            guard let searchString = searchString else { return true }
-                            if searchString.count <= 0 { return true }
-                            return story.content.contains(searchString)
-                        } iterate: { (story) in
-                            displayTextArray.append("\(story.chapterNumber): \(story.GetSubtitle())")
-                        }
-                        var selectedText:String? = nil
-                        if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) {
-                            selectedText = "\(story.chapterNumber): " + story.GetSubtitle()
-                        }
-                        let picker = PickerViewDialog.createNewDialog(displayTextArray: displayTextArray, firstSelectedString: selectedText) { (selectedText) in
-                            guard let number = selectedText.components(separatedBy: ":").first, let chapterNumber = Int(number), let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)) else { return }
-                            self.storySpeaker.SetStory(story: story, withUpdateReadDate: true)
-                        }
-                        searchingDialog.dismiss(animated: false) {
-                            picker?.popup(completion: nil)
-                        }
-                    }
-                }
-            }
             
             NiftyUtility.EasyDialogTextInput2Button(
                 viewController: self,
@@ -721,7 +696,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 rightButtonText: NSLocalizedString("OK_button", comment: "OK"),
                 leftButtonAction: nil,
                 rightButtonAction: { (filterText) in
-                    searchFunc(searchString: filterText)
+                    guard let storyID = self.storyID else { return }
+                    NovelSpeakerUtility.SearchStoryFor(selectedStoryID: storyID, viewController: self, searchString: filterText) { (story) in
+                        self.storySpeaker.SetStory(story: story, withUpdateReadDate: true)
+                    }
                 },
                 shouldReturnIsRightButtonClicked: true,
                 completion: nil)
@@ -779,6 +757,12 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     }
                 }
             }
+        }
+    }
+    @objc func showTableOfContentsButtonClicked(_ sender: UIBarButtonItem) {
+        guard let storyID = self.storyID else { return }
+        NovelSpeakerUtility.SearchStoryFor(selectedStoryID: storyID, viewController: self, searchString: nil) { (story) in
+            self.storySpeaker.SetStory(story: story, withUpdateReadDate: true)
         }
     }
     @objc func leftSwipe(_ sender: UISwipeGestureRecognizer) {

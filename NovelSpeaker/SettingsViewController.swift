@@ -1193,6 +1193,31 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 })
             }
             section
+            <<< AlertRow<String>("ViewTypeSelectRow") { row in
+                row.title = "小説本文画面の表示方式"
+                row.selectorTitle = "小説本文画面の表示方式"
+                row.options = [
+                    RealmDisplaySetting.ViewType.normal.rawValue
+                    , RealmDisplaySetting.ViewType.webViewHorizontal.rawValue
+                    , RealmDisplaySetting.ViewType.webViewVertical.rawValue
+                    , RealmDisplaySetting.ViewType.webViewOriginal.rawValue
+                ]
+                row.value = RealmDisplaySetting.ViewType.normal.rawValue
+                row.cell.textLabel?.numberOfLines = 0
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
+                    row.value = displaySetting.viewType.rawValue
+                }
+            }.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        guard let value = row.value, let viewType = RealmDisplaySetting.ViewType(rawValue: value) else { return }
+                        displaySetting.viewType = viewType
+                    }
+                }
+            })
+            section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
                 row.cell.textLabel?.numberOfLines = 0

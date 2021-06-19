@@ -92,7 +92,7 @@ class CoreDataToRealmTool: NSObject {
         if let fontID = globalDataSingleton.getDisplayFontName() {
             defaultDisplaySetting.fontID = fontID
         }
-        defaultDisplaySetting.isVertical = false
+        defaultDisplaySetting.viewType = .normal
         
         defaultSpeaker.name = NSLocalizedString("CoreDataToRealmTool_DefaultSpeaker", comment: "標準")
         if let pitch = globalState?.defaultPitch as? Float {
