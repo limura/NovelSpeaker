@@ -187,7 +187,7 @@ MIT\n\nCopyright © 2011-12 Yusuke Ito\n\nPermission is hereby granted, free of 
 "veu-sd-mPo.title" = "小説の編集";
 
 "E2C-GJ-Of6.normalTitle" = "章を追加";
-"KLa-F4-FYq.normalTitle" = "この章を削除";
+"KLa-F4-FYq.normalTitle" = "章を削除";
 "9su-Dc-tDK.title" = "字体設定";
 
 "Kyj-Nq-aQn.text" = "正規表現マッチ";

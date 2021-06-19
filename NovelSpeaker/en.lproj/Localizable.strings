@@ -251,8 +251,8 @@
 
 "EditBookViewController_TitleText" = "Name";
 "EditBookViewController_EntryButtonTitle" = "Register";
-"EditBookViewController_AddNewChapterButtonTitle" = "Add new chapter";
-"EditBookViewController_DeleteChapterButtonTitle" = "Delete this chapter";
+"EditBookViewController_AddNewChapterButtonTitle" = "Add chapter";
+"EditBookViewController_DeleteChapterButtonTitle" = "Delete chapter";
 "EditBookViewController_StoryPlaceholderText" = "Enter the text here.";
 "EditBookViewController_ConifirmDeleteStory_Title" = "Delete this chapter";
 "EditBookViewController_ConifirmDeleteStory_Message" = "This operation is irreversible. Do you want to delete it?";

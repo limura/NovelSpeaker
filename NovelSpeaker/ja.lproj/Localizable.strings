@@ -386,7 +386,7 @@
 "EditBookViewController_TitleText" = "小説名";
 "EditBookViewController_EntryButtonTitle" = "登録";
 "EditBookViewController_AddNewChapterButtonTitle" = "章を追加";
-"EditBookViewController_DeleteChapterButtonTitle" = "この章を削除";
+"EditBookViewController_DeleteChapterButtonTitle" = "章を削除";
 "EditBookViewController_StoryPlaceholderText" = "ここに本文を入力します。";
 "EditBookViewController_ConifirmDeleteStory_Title" = "この章を削除します";
 "EditBookViewController_ConifirmDeleteStory_Message" = "この操作は元に戻せません。削除しますか？";
