@@ -1612,28 +1612,69 @@ THE SOFTWARE.
                                     <action selector="moveNextButtonClicked:" destination="dCR-kh-Ivz" eventType="touchUpInside" id="0Fx-sR-3WK"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xDU-vX-wUV">
+                                <rect key="frame" x="16" y="97" width="22" height="22"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="22" id="Y2V-CV-gjo"/>
+                                    <constraint firstAttribute="height" constant="22" id="dVl-8f-fj9"/>
+                                </constraints>
+                                <state key="normal" image="arrow.left" catalog="system"/>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zXR-3Z-eDe">
+                                <rect key="frame" x="46" y="97" width="22" height="22"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="22" id="6qB-EJ-3rU"/>
+                                    <constraint firstAttribute="height" constant="22" id="9R3-gQ-PSi"/>
+                                </constraints>
+                                <state key="normal" image="arrow.down" catalog="system"/>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xL0-AJ-k2q">
+                                <rect key="frame" x="76" y="97" width="22" height="22"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="22" id="YxY-Q3-SL5"/>
+                                    <constraint firstAttribute="height" constant="22" id="hQm-cY-g9a"/>
+                                </constraints>
+                                <state key="normal" image="arrow.up" catalog="system"/>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PsX-PP-Y9K">
+                                <rect key="frame" x="106" y="97" width="22" height="22"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="22" id="Ixb-u9-BSV"/>
+                                    <constraint firstAttribute="height" constant="22" id="mPY-XW-wZD"/>
+                                </constraints>
+                                <state key="normal" image="arrow.right" catalog="system"/>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="G7J-8n-cqw"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="xL0-AJ-k2q" firstAttribute="leading" secondItem="zXR-3Z-eDe" secondAttribute="trailing" constant="8" symbolic="YES" id="3mu-Ip-si8"/>
                             <constraint firstItem="ZfF-jG-c09" firstAttribute="centerY" secondItem="LN3-sB-fzm" secondAttribute="centerY" id="5Qd-LU-hZu"/>
+                            <constraint firstItem="xDU-vX-wUV" firstAttribute="top" secondItem="hYi-6O-tpR" secondAttribute="bottom" constant="19" id="5WN-8Z-EpE"/>
                             <constraint firstAttribute="trailingMargin" secondItem="LN3-sB-fzm" secondAttribute="trailing" constant="38" id="7Pr-ac-AM7"/>
                             <constraint firstItem="hYi-6O-tpR" firstAttribute="top" secondItem="G7J-8n-cqw" secondAttribute="top" constant="17" id="8LW-Dc-hrf"/>
                             <constraint firstItem="wMt-h0-xpF" firstAttribute="top" secondItem="G7J-8n-cqw" secondAttribute="top" constant="13" id="B3k-1Z-A0p"/>
                             <constraint firstItem="cM0-Wf-FN8" firstAttribute="leading" secondItem="UOv-Sk-8f5" secondAttribute="leadingMargin" constant="-16" id="D91-3x-SVw"/>
                             <constraint firstItem="wMt-h0-xpF" firstAttribute="leading" secondItem="7U0-Lh-pyC" secondAttribute="trailing" constant="8" id="DKa-lg-HMm"/>
                             <constraint firstItem="KLa-F4-FYq" firstAttribute="leading" secondItem="E2C-GJ-Of6" secondAttribute="trailing" constant="10" id="DjF-IM-hK3"/>
+                            <constraint firstItem="zXR-3Z-eDe" firstAttribute="centerY" secondItem="xDU-vX-wUV" secondAttribute="centerY" id="H0a-9p-bbM"/>
                             <constraint firstItem="ZfF-jG-c09" firstAttribute="centerY" secondItem="Dd3-il-QVF" secondAttribute="centerY" id="H9Y-xn-LSX"/>
+                            <constraint firstItem="PsX-PP-Y9K" firstAttribute="centerY" secondItem="xDU-vX-wUV" secondAttribute="centerY" id="KXj-V9-Nze"/>
                             <constraint firstItem="7U0-Lh-pyC" firstAttribute="leading" secondItem="hYi-6O-tpR" secondAttribute="trailing" constant="8" id="KsZ-Qh-R0H"/>
                             <constraint firstItem="KLa-F4-FYq" firstAttribute="top" secondItem="wMt-h0-xpF" secondAttribute="bottom" constant="8" id="M7d-Ov-obG"/>
+                            <constraint firstItem="zXR-3Z-eDe" firstAttribute="leading" secondItem="xDU-vX-wUV" secondAttribute="trailing" constant="8" symbolic="YES" id="MYx-Ee-Pba"/>
+                            <constraint firstItem="xL0-AJ-k2q" firstAttribute="centerY" secondItem="xDU-vX-wUV" secondAttribute="centerY" id="Oea-1u-5uZ"/>
                             <constraint firstItem="E2C-GJ-Of6" firstAttribute="centerY" secondItem="KLa-F4-FYq" secondAttribute="centerY" id="PF8-TQ-Vth"/>
                             <constraint firstItem="XX2-ka-OrJ" firstAttribute="top" secondItem="ZfF-jG-c09" secondAttribute="bottom" constant="8" id="PRf-nF-Iku"/>
                             <constraint firstAttribute="trailingMargin" secondItem="wMt-h0-xpF" secondAttribute="trailing" constant="-11" id="UJb-r4-Wlc"/>
                             <constraint firstItem="ZfF-jG-c09" firstAttribute="leading" secondItem="cM0-Wf-FN8" secondAttribute="trailing" constant="3" id="V2Q-I5-zmZ"/>
                             <constraint firstItem="7U0-Lh-pyC" firstAttribute="centerY" secondItem="hYi-6O-tpR" secondAttribute="centerY" id="Vrp-Dr-eIV"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Dd3-il-QVF" secondAttribute="trailing" constant="-11" id="WEH-pZ-qMe"/>
+                            <constraint firstItem="PsX-PP-Y9K" firstAttribute="leading" secondItem="xL0-AJ-k2q" secondAttribute="trailing" constant="8" symbolic="YES" id="XCL-aR-dTt"/>
+                            <constraint firstItem="cM0-Wf-FN8" firstAttribute="top" secondItem="xDU-vX-wUV" secondAttribute="bottom" constant="12" id="YYg-3o-TMQ"/>
                             <constraint firstItem="XX2-ka-OrJ" firstAttribute="leading" secondItem="UOv-Sk-8f5" secondAttribute="leadingMargin" constant="-16" id="bPY-By-Woh"/>
                             <constraint firstAttribute="trailingMargin" secondItem="XX2-ka-OrJ" secondAttribute="trailing" constant="-16" id="cHc-ln-rLd"/>
+                            <constraint firstItem="xDU-vX-wUV" firstAttribute="leading" secondItem="G7J-8n-cqw" secondAttribute="leading" constant="16" id="dKL-uG-TIc"/>
                             <constraint firstItem="ZfF-jG-c09" firstAttribute="centerY" secondItem="cM0-Wf-FN8" secondAttribute="centerY" id="gmV-l7-KNf"/>
                             <constraint firstItem="hYi-6O-tpR" firstAttribute="leading" secondItem="UOv-Sk-8f5" secondAttribute="leadingMargin" id="iUO-8O-U1b"/>
                             <constraint firstItem="LN3-sB-fzm" firstAttribute="leading" secondItem="ZfF-jG-c09" secondAttribute="trailing" constant="5" id="jB1-HQ-nHl"/>
@@ -1648,6 +1689,10 @@ THE SOFTWARE.
                         <outlet property="chapterNumberIndicatorLabel" destination="LN3-sB-fzm" id="lox-zl-cOK"/>
                         <outlet property="chapterNumberIndicatorLabelWidthConstraint" destination="asR-5m-zfM" id="jpf-PN-Ehk"/>
                         <outlet property="chapterSlider" destination="ZfF-jG-c09" id="Gw2-h9-Zd2"/>
+                        <outlet property="cursorMoveDownButton" destination="zXR-3Z-eDe" id="MFK-RX-F3e"/>
+                        <outlet property="cursorMoveLeftButton" destination="xDU-vX-wUV" id="eJF-JP-eoH"/>
+                        <outlet property="cursorMoveRightButton" destination="PsX-PP-Y9K" id="4yE-kJ-pNb"/>
+                        <outlet property="cursorMoveUpButton" destination="xL0-AJ-k2q" id="IaU-SZ-C7m"/>
                         <outlet property="deleteChapterButton" destination="KLa-F4-FYq" id="wo7-O1-2l0"/>
                         <outlet property="entryButton" destination="wMt-h0-xpF" id="pSK-oX-hrW"/>
                         <outlet property="moveNextButton" destination="Dd3-il-QVF" id="wor-OF-Mli"/>
@@ -1669,6 +1714,10 @@ THE SOFTWARE.
     <resources>
         <image name="&lt;.png" width="36" height="36"/>
         <image name="&gt;.png" width="36" height="36"/>
+        <image name="arrow.down" catalog="system" width="120" height="128"/>
+        <image name="arrow.left" catalog="system" width="128" height="98"/>
+        <image name="arrow.right" catalog="system" width="128" height="98"/>
+        <image name="arrow.up" catalog="system" width="120" height="128"/>
         <image name="bookmark-false.png" width="36" height="36"/>
         <image name="booksearch.png" width="9.8742856979370117" height="9.8742856979370117"/>
         <image name="earth.png" width="36" height="36"/>

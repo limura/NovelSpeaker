@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 import SZTextView
 
-class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITextFieldDelegate {
+class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITextFieldDelegate, StorySpeakerDeletgate {
     public var targetNovelID:String = ""
     
     @IBOutlet weak var titleTextField: UITextField!
@@ -22,6 +22,11 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
     @IBOutlet weak var deleteChapterButton: UIButton!
     @IBOutlet weak var chapterNumberIndicatorLabel: UILabel!
     @IBOutlet weak var entryButton: UIButton!
+    @IBOutlet weak var cursorMoveRightButton: UIButton!
+    @IBOutlet weak var cursorMoveUpButton: UIButton!
+    @IBOutlet weak var cursorMoveDownButton: UIButton!
+    @IBOutlet weak var cursorMoveLeftButton: UIButton!
+
     /* TODO: 自前で配置すると色がおかしくなるので当面は封印します(´・ω・`)
     let titleTextField: UITextField = UITextField(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
     let movePreviousButton: UIButton = UIButton(type: .system)
@@ -41,12 +46,16 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
     //var chapterNumberIndicatorLabelWidthConstraint:NSLayoutConstraint? = nil
     var fontSizeObserverToken:NotificationToken? = nil
     var currentStoryID:String = ""
-    
+    let caretView = UIView()
+    var startStopButtonItem = UIBarButtonItem()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         initWidgets()
+        StorySpeaker.shared.AddDelegate(delegate: self)
         RealmUtil.RealmBlock { (realm) -> Void in
+            StorySpeaker.shared.StopSpeech(realm: realm)
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.targetNovelID) {
                 applyNovelWith(realm: realm, novelID: novel.novelID)
             }else{
@@ -101,6 +110,20 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
             button?.titleLabel?.numberOfLines = 0
             button?.titleLabel?.adjustsFontForContentSizeCategory = true
         }
+        
+        let startStopButtonItem = UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Speak", comment: "Speak"), style: .plain, target: self, action: #selector(SepakTestButtonClicked(_:)))
+        self.startStopButtonItem = startStopButtonItem
+        self.startStopButtonItem.accessibilityLabel = NSLocalizedString("EditBookViewController_SpeakTestButton_AccesibilityLabel", comment: "発話テストを開始する")
+        self.navigationItem.rightBarButtonItems = [startStopButtonItem]
+        
+        self.addChapterButton.accessibilityLabel = NSLocalizedString("EditBookViewController_AddNewChapterButtonTitle", comment: "章を追加")
+        self.deleteChapterButton.accessibilityLabel = NSLocalizedString("EditBookViewController_DeleteChapterButtonTitle", comment: "この章を削除")
+        assignCursorKeyButtons()
+        
+        self.caretView.alpha = 0.4
+        self.caretView.backgroundColor = UIColor.green
+        self.caretView.isHidden = true
+        self.storyTextView.addSubview(self.caretView)
     }
     
     func registNotificationCenter() {
@@ -304,6 +327,253 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         center.removeObserver(self)
         fontSizeObserverToken = nil
     }
+    
+    /* // UIBarButtonItem に long press の物を入れるにはこんな事をすると良いぽい。
+    func createLongPressImageView(image:UIImage, target: Any?, tapAction: Selector?, longPressAction: Selector?) -> UIView {
+        let view = UIImageView(image: image)
+        view.contentMode = .scaleAspectFit
+        if let tapAction = tapAction {
+            let tap = UITapGestureRecognizer(target: target, action: tapAction)
+            view.addGestureRecognizer(tap)
+        }
+        if let longPressAction = longPressAction {
+            let longPress = UILongPressGestureRecognizer(target: target, action: longPressAction)
+            view.addGestureRecognizer(longPress)
+        }
+        return view
+    }
+    func createLongPressImageUIBarButtonItem(image: UIImage, target: Any?, tapAction: Selector?, longPressAction: Selector?) -> UIBarButtonItem {
+        let view = createLongPressImageView(image: image, target: target, tapAction: tapAction, longPressAction: longPressAction)
+        let button = UIBarButtonItem()
+
+        button.customView = view
+        return button
+    } */
+
+    /* // キーボードの上の方にボタンを追加する奴
+    func addKeyboardBarButtonItems() {
+        var newItems:[UIBarButtonItem] = []
+
+        let leftButtonItem:UIBarButtonItem
+        if #available(iOS 13.0, *), let leftButtonImage = UIImage(systemName: "arrow.left") {
+            leftButtonItem = createLongPressImageUIBarButtonItem(image: leftButtonImage, target: self, tapAction: #selector(KeyboardBarButton_Left_EventHandler(_:)), longPressAction: #selector(KeyboardBarButton_LeftLongTap_EventHandler(_:)))
+        } else {
+            leftButtonItem = UIBarButtonItem(title: "<", style: .plain, target: self, action: #selector(KeyboardBarButton_Left_EventHandler(_:)))
+        }
+        leftButtonItem.accessibilityLabel = NSLocalizedString("EditBookViewController_KeyboardBarButtonItem_Left", comment: "左へカーソル移動")
+        newItems.append(leftButtonItem)
+        
+        let downButtonItem:UIBarButtonItem
+        if #available(iOS 13.0, *), let leftButtonImage = UIImage(systemName: "arrow.down") {
+            downButtonItem = UIBarButtonItem(image: leftButtonImage, style: .plain, target: self, action: #selector(KeyboardBarButton_Down_EventHandler(_:)))
+        } else {
+            downButtonItem = UIBarButtonItem(title: "v", style: .plain, target: self, action: #selector(KeyboardBarButton_Down_EventHandler(_:)))
+        }
+        downButtonItem.accessibilityLabel = NSLocalizedString("EditBookViewController_KeyboardBarButtonItem_Down", comment: "下へカーソル移動")
+        newItems.append(downButtonItem)
+        
+        let upButtonItem:UIBarButtonItem
+        if #available(iOS 13.0, *), let leftButtonImage = UIImage(systemName: "arrow.up") {
+            upButtonItem = UIBarButtonItem(image: leftButtonImage, style: .plain, target: self, action: #selector(KeyboardBarButton_Up_EventHandler(_:)))
+        } else {
+            upButtonItem = UIBarButtonItem(title: "^", style: .plain, target: self, action: #selector(KeyboardBarButton_Up_EventHandler(_:)))
+        }
+        upButtonItem.accessibilityLabel = NSLocalizedString("EditBookViewController_KeyboardBarButtonItem_Up", comment: "上へカーソル移動")
+        newItems.append(upButtonItem)
+        
+        let rightButtonItem:UIBarButtonItem
+        if #available(iOS 13.0, *), let leftButtonImage = UIImage(systemName: "arrow.right") {
+            rightButtonItem = UIBarButtonItem(image: leftButtonImage, style: .plain, target: self, action: #selector(KeyboardBarButton_Right_EventHandler(_:)))
+        } else {
+            rightButtonItem = UIBarButtonItem(title: ">", style: .plain, target: self, action: #selector(KeyboardBarButton_Right_EventHandler(_:)))
+        }
+        rightButtonItem.accessibilityLabel = NSLocalizedString("EditBookViewController_KeyboardBarButtonItem_Right", comment: "右へカーソル移動")
+        newItems.append(rightButtonItem)
+
+        let trailingBarButtonGroup = UIBarButtonItemGroup(barButtonItems: newItems, representativeItem: nil)
+        self.storyTextView.inputAssistantItem.trailingBarButtonGroups.append(trailingBarButtonGroup)
+    }*/
+    
+
+    func enableCursorKeys() {
+        self.cursorMoveUpButton.isEnabled = true
+        self.cursorMoveDownButton.isEnabled = true
+        self.cursorMoveLeftButton.isEnabled = true
+        self.cursorMoveRightButton.isEnabled = true
+    }
+    func disableCursorKeys() {
+        self.cursorMoveUpButton.isEnabled = false
+        self.cursorMoveDownButton.isEnabled = false
+        self.cursorMoveLeftButton.isEnabled = false
+        self.cursorMoveRightButton.isEnabled = false
+    }
+    
+    func assignLongPressRecognizer(view:UIView, target: Any?, longPressAction: Selector?){
+        if let longPressAction = longPressAction {
+            let longPress = UILongPressGestureRecognizer(target: target, action: longPressAction)
+            longPress.minimumPressDuration = 0
+            view.addGestureRecognizer(longPress)
+        }
+    }
+
+    func assignCursorKeyButtons() {
+        assignLongPressRecognizer(view: self.cursorMoveLeftButton, target: self, longPressAction: #selector(KeyboardBarButton_LeftLongTap_EventHandler(_:)))
+        assignLongPressRecognizer(view: self.cursorMoveUpButton, target: self, longPressAction: #selector(KeyboardBarButton_UpLongTap_EventHandler(_:)))
+        assignLongPressRecognizer(view: self.cursorMoveDownButton, target: self, longPressAction: #selector(KeyboardBarButton_DownLongTap_EventHandler(_:)))
+        assignLongPressRecognizer(view: self.cursorMoveRightButton, target: self, longPressAction: #selector(KeyboardBarButton_RightLongTap_EventHandler(_:)))
+
+        self.cursorMoveLeftButton.accessibilityLabel = NSLocalizedString("EditBookViewController_KeyboardBarButtonItem_Left", comment: "左へカーソル移動")
+        self.cursorMoveDownButton.accessibilityLabel = NSLocalizedString("EditBookViewController_KeyboardBarButtonItem_Down", comment: "下へカーソル移動")
+        self.cursorMoveUpButton.accessibilityLabel = NSLocalizedString("EditBookViewController_KeyboardBarButtonItem_Up", comment: "上へカーソル移動")
+        self.cursorMoveRightButton.accessibilityLabel = NSLocalizedString("EditBookViewController_KeyboardBarButtonItem_Right", comment: "右へカーソル移動")
+    }
+    
+    func cursorMoveLeft() {
+        NiftyUtility.DispatchSyncMainQueue {
+            guard let selectedRange = self.storyTextView.selectedTextRange, selectedRange.start.isEqual(self.storyTextView.beginningOfDocument) == false, let newPosition = self.storyTextView.position(from: selectedRange.start, offset: -1) else { return }
+            self.storyTextView.selectedTextRange = self.storyTextView.textRange(from: newPosition, to: newPosition)
+            self.storyTextView.scrollRangeToVisible(self.storyTextView.selectedRange)
+        }
+    }
+    var cursorLeftButtonTouchDownTime:Date? = nil
+    func LeftLongTapInterval() {
+        guard let startDate = cursorLeftButtonTouchDownTime else {
+            return
+        }
+        let currentDate = Date()
+        if startDate.addingTimeInterval(0.5) < currentDate {
+            self.cursorMoveLeft()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            self.LeftLongTapInterval()
+        }
+    }
+    @objc func KeyboardBarButton_LeftLongTap_EventHandler(_ sender: UITapGestureRecognizer) {
+        switch sender.state {
+        case .began:
+            cursorLeftButtonTouchDownTime = Date()
+            self.cursorMoveLeft()
+            LeftLongTapInterval()
+        case .changed: break
+        case .ended, .cancelled:
+            cursorLeftButtonTouchDownTime = nil
+        default:
+            cursorLeftButtonTouchDownTime = nil
+        }
+    }
+    
+    func cursorMoveUp() {
+        NiftyUtility.DispatchSyncMainQueue {
+            guard let selectedRange = self.storyTextView.selectedTextRange else { return }
+            let caretRect = self.storyTextView.caretRect(for: selectedRange.start)
+            let nextY = caretRect.origin.y - caretRect.size.height * 2 / 3
+            let nextCaretPoint = CGPoint(x: caretRect.origin.x, y: nextY)
+            guard let newPosition = self.storyTextView.closestPosition(to: nextCaretPoint) else { return }
+            self.storyTextView.selectedTextRange = self.storyTextView.textRange(from: newPosition, to: newPosition)
+            //self.storyTextView.scrollRangeToVisible(self.storyTextView.selectedRange)
+            self.storyTextView.scrollRectToVisible(CGRect(origin: nextCaretPoint, size: CGSize(width: 1, height: 1)), animated: false)
+        }
+    }
+    var cursorUpButtonTouchDownTime:Date? = nil
+    func UpLongTapInterval() {
+        guard let startDate = cursorUpButtonTouchDownTime else {
+            return
+        }
+        let currentDate = Date()
+        if startDate.addingTimeInterval(0.5) < currentDate {
+            self.cursorMoveUp()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            self.UpLongTapInterval()
+        }
+    }
+    @objc func KeyboardBarButton_UpLongTap_EventHandler(_ sender: UITapGestureRecognizer) {
+        switch sender.state {
+        case .began:
+            cursorUpButtonTouchDownTime = Date()
+            self.cursorMoveUp()
+            UpLongTapInterval()
+        case .changed: break
+        case .ended, .cancelled:
+            cursorUpButtonTouchDownTime = nil
+        default:
+            cursorUpButtonTouchDownTime = nil
+        }
+    }
+    
+    func cursorMoveDown() {
+        NiftyUtility.DispatchSyncMainQueue {
+            guard let selectedRange = self.storyTextView.selectedTextRange else { return }
+            let caretRect = self.storyTextView.caretRect(for: selectedRange.start)
+            let nextY = caretRect.origin.y + caretRect.size.height * 3 / 2
+            let nextCaretPoint = CGPoint(x: caretRect.origin.x, y: nextY)
+            guard let newPosition = self.storyTextView.closestPosition(to: nextCaretPoint) else { return }
+            self.storyTextView.selectedTextRange = self.storyTextView.textRange(from: newPosition, to: newPosition)
+            //self.storyTextView.scrollRangeToVisible(self.storyTextView.selectedRange)
+            self.storyTextView.scrollRectToVisible(CGRect(origin: nextCaretPoint, size: CGSize(width: 1, height: 1)), animated: false)
+        }
+    }
+    var cursorDownButtonTouchDownTime:Date? = nil
+    func DownLongTapInterval() {
+        guard let startDate = cursorDownButtonTouchDownTime else {
+            return
+        }
+        let currentDate = Date()
+        if startDate.addingTimeInterval(0.5) < currentDate {
+            self.cursorMoveDown()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            self.DownLongTapInterval()
+        }
+    }
+
+    @objc func KeyboardBarButton_DownLongTap_EventHandler(_ sender: UITapGestureRecognizer) {
+        switch sender.state {
+        case .began:
+            cursorDownButtonTouchDownTime = Date()
+            self.cursorMoveDown()
+            DownLongTapInterval()
+        case .changed: break
+        case .ended, .cancelled:
+            cursorDownButtonTouchDownTime = nil
+        default:
+            cursorDownButtonTouchDownTime = nil
+        }
+    }
+    
+    func cursorMoveRight() {
+        NiftyUtility.DispatchSyncMainQueue {
+            guard let selectedRange = self.storyTextView.selectedTextRange, selectedRange.start.isEqual(self.storyTextView.endOfDocument) == false, let newPosition = self.storyTextView.position(from: selectedRange.start, offset: 1) else { return }
+            self.storyTextView.selectedTextRange = self.storyTextView.textRange(from: newPosition, to: newPosition)
+            self.storyTextView.scrollRangeToVisible(self.storyTextView.selectedRange)
+        }
+    }
+    var cursorRightButtonTouchDownTime:Date? = nil
+    func RightLongTapInterval() {
+        guard let startDate = cursorRightButtonTouchDownTime else {
+            return
+        }
+        let currentDate = Date()
+        if startDate.addingTimeInterval(0.5) < currentDate {
+            self.cursorMoveRight()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            self.RightLongTapInterval()
+        }
+    }
+    @objc func KeyboardBarButton_RightLongTap_EventHandler(_ sender: UITapGestureRecognizer) {
+        switch sender.state {
+        case .began:
+            cursorRightButtonTouchDownTime = Date()
+            self.cursorMoveRight()
+            RightLongTapInterval()
+        case .changed: break
+        case .ended, .cancelled:
+            cursorRightButtonTouchDownTime = nil
+        default:
+            cursorRightButtonTouchDownTime = nil
+        }
+    }
 
     @objc func willShowKeyboardEventHandler(notification:Notification) {
         guard let userInfo = notification.userInfo, let rect = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect, let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber else {
@@ -328,6 +598,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         UIView.animate(withDuration: TimeInterval(duration.floatValue)) {
             self.view.layoutIfNeeded()
         }
+        enableCursorKeys()
     }
     @objc func willHideKeyboardEventHandler(notification:Notification) {
         guard let userInfo = notification.userInfo, let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber else {
@@ -350,6 +621,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         UIView.animate(withDuration: TimeInterval(duration.floatValue)) {
             self.view.layoutIfNeeded()
         }
+        disableCursorKeys()
     }
 
     func setStory(storyID:String) {
@@ -525,6 +797,63 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         }
     }
     
+    @objc func SepakTestButtonClicked(_ sender: Any) {
+        if StorySpeaker.shared.isPlayng {
+            RealmUtil.Write { realm in
+                StorySpeaker.shared.StopSpeech(realm: realm)
+            }
+            return
+        }
+        NiftyUtility.EasyDialogNoButton(viewController: self, title: nil, message: NSLocalizedString("EditBookViewController_WaitingSpeakerSetting", comment: "本文を設定し直しています。")) { dialog in
+            self.saveCurrentNovel()
+            self.saveCurrentStory()
+            RealmUtil.RealmBlock { realm in
+                guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.currentStoryID) else {
+                    dialog.dismiss(animated: false, completion: nil)
+                    return
+                }
+                RealmUtil.WriteWith(realm: realm) { realm in
+                    StorySpeaker.shared.setReadLocationWith(realm: realm, location: self.storyTextView.selectedRange.location)
+                }
+                StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: false) { story in
+                    DispatchQueue.main.async {
+                        RealmUtil.Write { realm in
+                            dialog.dismiss(animated: false, completion: nil)
+                            StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func storySpeakerStartSpeechEvent(storyID: String) {
+        DispatchQueue.main.async {
+            self.caretView.isHidden = false
+            self.startStopButtonItem.title = NSLocalizedString("SpeechViewController_Stop", comment: "Stop")
+        }
+    }
+    
+    func storySpeakerStopSpeechEvent(storyID: String) {
+        DispatchQueue.main.async {
+            self.caretView.isHidden = true
+            self.startStopButtonItem.title = NSLocalizedString("SpeechViewController_Speak", comment: "Speak")
+        }
+    }
+    
+    func storySpeakerUpdateReadingPoint(storyID: String, range: NSRange) {
+        DispatchQueue.main.async {
+            guard let position = self.storyTextView.position(from: self.storyTextView.beginningOfDocument, offset: range.location) else { return }
+            let rect = self.storyTextView.caretRect(for: position)
+            self.caretView.frame = CGRect(origin: rect.origin, size: CGSize(width: max(rect.width, rect.height), height: rect.height))
+            self.storyTextView.scrollRectToVisible(self.caretView.frame, animated: true)
+        }
+    }
+    
+    func storySpeakerStoryChanged(story: Story) {
+        setStory(storyID: story.storyID)
+    }
+
     func textFieldDidBeginEditing(_ textField: UITextField) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
