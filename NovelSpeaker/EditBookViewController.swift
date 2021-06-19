@@ -341,6 +341,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         }
         self.view.layoutIfNeeded()
         if let constraint = self.storyTextViewBottomConstraint {
+            constraint.isActive = false
             self.storyTextView.removeConstraint(constraint)
         }
         self.storyTextViewBottomConstraint = self.storyTextView.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -8)
