@@ -320,6 +320,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         // 一番下を決定している Window の constraint を書き換える
         self.view.layoutIfNeeded()
         if let constraint = self.storyTextViewBottomConstraint {
+            constraint.isActive = false
             self.storyTextView.removeConstraint(constraint)
         }
         self.storyTextViewBottomConstraint = self.storyTextView.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: 8 - rect.size.height + self.bottomLayoutGuide.length)
