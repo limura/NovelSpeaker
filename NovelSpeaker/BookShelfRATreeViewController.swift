@@ -1016,6 +1016,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
                 nextViewController.isNeedUpdateReadDate = isNextViewNeedUpdateReadDate
             }
+        }else if segue.identifier == "bookShelfToWebViewReaderSegue"{
+            if let nextViewController = segue.destination as? WebSpeechViewController {
+                nextViewController.targetStoryID = nextViewStoryID
+                nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
+                nextViewController.isNeedUpdateReadDate = isNextViewNeedUpdateReadDate
+            }
         }
     }
     func showNovelInformation(novelID:String) {
@@ -1096,11 +1102,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             case .normal:
                 self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
             case .webViewVertical, .webViewHorizontal, .webViewOriginal:
-                let nextViewController = WebSpeechViewController()
-                nextViewController.targetStoryID = nextViewStoryID
-                nextViewController.isNeedResumeSpeech = isNextViewNeedResumeSpeech
-                nextViewController.isNeedUpdateReadDate = isNextViewNeedUpdateReadDate
-                self.navigationController?.pushViewController(nextViewController, animated: true)
+                self.performSegue(withIdentifier: "bookShelfToWebViewReaderSegue", sender: self)
             }
         }
     }

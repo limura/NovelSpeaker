@@ -74,7 +74,18 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     override func viewWillDisappear(_ animated: Bool) {
         StorySpeaker.shared.RemoveDelegate(delegate: self)
     }
-    
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "WebViewToEditUserTextSegue" {
+            if let nextViewController = segue.destination as? EditBookViewController {
+                nextViewController.targetNovelID = RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID)
+            }
+        }else if segue.identifier == "WebViewReaderToNovelDetailViewPushSegue" {
+            guard let nextViewController = segue.destination as? NovelDetailViewController else { return }
+            nextViewController.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID)
+        }
+    }
+
     func StopObservers() {
         //novelObserverToken = nil
         //storyObserverToken = nil
@@ -129,12 +140,10 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             fontName = displaySetting.font.fontName
             fontPixelSize = displaySetting.textSizeValue
             let lineSpacePix = displaySetting.lineSpacingDisplayValue
-            var lineSpaceEm = lineSpacePix / displaySetting.font.xHeight
-            while lineSpaceEm < 1.0 {
-                lineSpaceEm += 1.0
-            }
+            let lineSpaceEm = lineSpacePix / displaySetting.font.xHeight + 1.0
             lineHeight = "\(lineSpaceEm)em"
             verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
+            print("fontName: \(fontName), font-size: \(fontPixelSize / 3)px, lineSpacePix: \(lineSpacePix), font.xHeight: \(displaySetting.font.xHeight), lineHeight: \(lineHeight)")
         }
         
         let htmledText = convertNovelSepakerStringToHTML(text: story.content)
@@ -142,9 +151,10 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
 <html>
 <head>
 <style type="text/css">
-@import url('https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&display=swap');
+//@import url('https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&display=swap');
 html {
-  font-family: 'Hachi Maru Pop', cursive;
+  //font-family: 'Hachi Maru Pop', cursive;
+  font: \(fontName);
   font-size: \(fontPixelSize / 3)px;
   letter-spacing: \(letterSpacing);
   line-height: \(lineHeight);
@@ -457,13 +467,10 @@ body.NovelSpeakerBody {
         }
     }
     @objc func editButtonClicked(_ sender: UIBarButtonItem) {
-        // TODO: not implemented yet
-        // pushToEditStory()
+        performSegue(withIdentifier: "WebViewToEditUserTextSegue", sender: self)
     }
     @objc func detailButtonClicked(_ sender: UIBarButtonItem) {
-        let nextViewController = NovelDetailViewController()
-        nextViewController.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID)
-        self.navigationController?.pushViewController(nextViewController, animated: true)
+        performSegue(withIdentifier: "WebViewReaderToNovelDetailViewPushSegue", sender: self)
     }
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
         //TODO: not implemented yet.

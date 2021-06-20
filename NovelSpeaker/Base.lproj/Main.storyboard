@@ -1420,11 +1420,32 @@ THE SOFTWARE.
                     <navigationItem key="navigationItem" id="BIV-fi-F7U"/>
                     <connections>
                         <segue destination="WIX-4N-ZvP" kind="push" identifier="bookShelfToReaderSegue" id="4ue-Q8-dhm"/>
+                        <segue destination="svA-Jn-EMv" kind="push" identifier="bookShelfToWebViewReaderSegue" id="mMg-NC-jGi"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="s1q-9t-Dmj" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-36" y="-645"/>
+        </scene>
+        <!--Web Speech View Controller-->
+        <scene sceneID="lUG-Y3-yqC">
+            <objects>
+                <viewController id="svA-Jn-EMv" customClass="WebSpeechViewController" customModule="NovelSpeaker" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="WkN-NK-AWW">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="NaY-nn-Sel"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="Ucb-Uj-MZA"/>
+                    <connections>
+                        <segue destination="QLu-9c-OBu" kind="push" identifier="WebViewReaderToNovelDetailViewPushSegue" id="zcY-Ej-AY3"/>
+                        <segue destination="dCR-kh-Ivz" kind="push" identifier="WebViewToEditUserTextSegue" id="IyG-FH-EcD"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="J8R-gn-e6f" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="721" y="-1335"/>
         </scene>
         <!--Speech View Controller-->
         <scene sceneID="fJw-k5-rSc">
@@ -1708,8 +1729,9 @@ THE SOFTWARE.
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="FvL-jm-emj"/>
-        <segue reference="whQ-HQ-5wp"/>
+        <segue reference="IyG-FH-EcD"/>
+        <segue reference="zcY-Ej-AY3"/>
+        <segue reference="DiM-k6-LVA"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="&lt;.png" width="36" height="36"/>
