@@ -118,7 +118,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
     
     func createContentHTML(story:Story, displaySetting: RealmDisplaySetting?) -> String {
-        var fontName:String = "-apple-system-title1"
+        var fontSetting:String = "font: -apple-system-title1;"
         var fontPixelSize:Float = 18
         var letterSpacing:String = "0.03em"
         var lineHeight:String = "1.5em"
@@ -138,13 +138,17 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         }
 
         if let displaySetting = displaySetting {
-            fontName = displaySetting.font.fontName
-            fontPixelSize = Float(displaySetting.font.pointSize)
-            let lineSpacePix = max(displaySetting.font.pointSize, displaySetting.lineSpacingDisplayValue)
+            let displayFont = displaySetting.font
+            let fontWeight = displayFont.fontDescriptor.symbolicTraits.contains(.traitBold) ? "bold" : "normal"
+            let fontStyle = displayFont.fontDescriptor.symbolicTraits.contains(.traitItalic) ? "italic" : "normal"
+            fontSetting = "font-family: '\(displaySetting.font.familyName)'; font-weight: \(fontWeight); font-style: \(fontStyle);"
+            
+            fontPixelSize = Float(displayFont.pointSize)
+            let lineSpacePix = max(displayFont.pointSize, displaySetting.lineSpacingDisplayValue)
             let lineSpaceEm = lineSpacePix / max(1, displaySetting.font.xHeight)
             lineHeight = "\(lineSpaceEm)"
             verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
-            print("fontName: \(fontName), font-size: \(fontPixelSize)px, lineSpacePix: \(lineSpacePix), font.xHeight: \(displaySetting.font.xHeight), line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
+            print("\(fontSetting), font-size: \(fontPixelSize)px, lineSpacePix: \(lineSpacePix), font.xHeight: \(displaySetting.font.xHeight), line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
         }
         
         let htmledText = convertNovelSepakerStringToHTML(text: story.content)
@@ -167,7 +171,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
 <head>
 <style type="text/css">
 html {
-  font: \(fontName);
+  \(fontSetting)
   font-size: \(fontPixelSize);
   letter-spacing: \(letterSpacing);
   line-height: \(lineHeight);
