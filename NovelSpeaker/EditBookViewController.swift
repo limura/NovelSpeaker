@@ -105,6 +105,10 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         
         storyTextView.placeholder = NSLocalizedString("EditBookViewController_StoryPlaceholderText", comment: "ここに本文を入力します。")
 
+        let insets = UIEdgeInsets(top: 8, left: 8, bottom: storyTextView.frame.height / 3.0, right: 0)
+        storyTextView.contentInset = insets
+        storyTextView.scrollIndicatorInsets = insets
+
         // ボタンは内部の titleLabel の Dynamic Type 対応を storyboard 側でできないぽいので自前で指定します。(´・ω・`)
         for button in [movePreviousButton, moveNextButton, addChapterButton, deleteChapterButton, entryButton] {
             button?.titleLabel?.numberOfLines = 0
