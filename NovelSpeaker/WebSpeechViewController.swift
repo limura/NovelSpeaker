@@ -49,6 +49,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var speakerDisplayWholeText:String? = nil
 
     var globalStateObserverToken:NotificationToken? = nil
+    var displaySettingObserverToken:NotificationToken? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -89,12 +90,12 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     func StopObservers() {
         //novelObserverToken = nil
         //storyObserverToken = nil
-        //displaySettingObserverToken = nil
+        displaySettingObserverToken = nil
         globalStateObserverToken = nil
     }
     func RestartObservers() {
         StopObservers()
-        //observeDispaySetting()
+        observeDispaySetting()
         //let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID)
         //observeStory(storyID: storyID)
         //observeNovel(novelID: novelID)
@@ -138,27 +139,39 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
 
         if let displaySetting = displaySetting {
             fontName = displaySetting.font.fontName
-            fontPixelSize = displaySetting.textSizeValue
-            let lineSpacePix = displaySetting.lineSpacingDisplayValue
-            let lineSpaceEm = lineSpacePix / displaySetting.font.xHeight + 1.0
-            lineHeight = "\(lineSpaceEm)em"
+            fontPixelSize = Float(displaySetting.font.pointSize)
+            let lineSpacePix = max(displaySetting.font.pointSize, displaySetting.lineSpacingDisplayValue)
+            let lineSpaceEm = lineSpacePix / max(1, displaySetting.font.xHeight)
+            lineHeight = "\(lineSpaceEm)"
             verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
-            print("fontName: \(fontName), font-size: \(fontPixelSize / 3)px, lineSpacePix: \(lineSpacePix), font.xHeight: \(displaySetting.font.xHeight), lineHeight: \(lineHeight)")
+            print("fontName: \(fontName), font-size: \(fontPixelSize)px, lineSpacePix: \(lineSpacePix), font.xHeight: \(displaySetting.font.xHeight), line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
         }
         
         let htmledText = convertNovelSepakerStringToHTML(text: story.content)
+        /* goole font を読み込む場合はこうするよのメモ
+         <html>
+         <head>
+         <style type="text/css">
+         @import url('https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&display=swap');
+         html {
+           font-family: 'Hachi Maru Pop', cursive;
+           font-size: \(fontPixelSize);
+           letter-spacing: \(letterSpacing);
+           line-height: \(lineHeight);
+           font-feature-settings: 'pkna';
+           \(verticalModeCSS)
+         }
+         */
         let html = """
 <html>
 <head>
 <style type="text/css">
-//@import url('https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&display=swap');
 html {
-  //font-family: 'Hachi Maru Pop', cursive;
   font: \(fontName);
-  font-size: \(fontPixelSize / 3)px;
+  font-size: \(fontPixelSize);
   letter-spacing: \(letterSpacing);
   line-height: \(lineHeight);
-  font-feature-settings: 'pkna';
+  font-feature-settings: 'pwid';
   \(verticalModeCSS)
 }
 ruby rt {
@@ -369,6 +382,41 @@ body.NovelSpeakerBody {
             })
         }
     }
+    
+    func observeDispaySetting() {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
+            displaySettingObserverToken = displaySetting.observe({ [weak self] (change) in
+                guard let self = self else { return }
+                switch change {
+                case .change(_, let properties):
+                    for property in properties {
+                        // ViewType が normal に変わっていたら元画面に戻します。
+                        // WARN: ViewType が normal 以外の物は全て WebSpeechViewController で処理できるという仮定を置いているので危険です。
+                        if property.name == "m_ViewType", let newValue = property.newValue as? String, newValue == RealmDisplaySetting.ViewType.normal.rawValue {
+                            DispatchQueue.main.async {
+                                self.navigationController?.popViewController(animated: true)
+                            }
+                            return
+                        }
+                        if property.name == "textSizeValue" || property.name == "fontID" || property.name == "lineSpacing" || property.name == "m_ViewType" {
+                            DispatchQueue.main.async {
+                                RealmUtil.RealmBlock { (realm) -> Void in
+                                    guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID) else { return }
+                                    self.loadStoryWithoutStorySpeakerWith(story: story)
+                                }
+                            }
+                        }
+                    }
+                case .error(_):
+                    break
+                case .deleted:
+                    break
+                }
+            })
+        }
+    }
+
 
     //MARK: 上のボタン群の設定
     var startStopButtonItem:UIBarButtonItem? = nil

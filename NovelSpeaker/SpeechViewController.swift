@@ -488,8 +488,15 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 guard let self = self else { return }
                 switch change {
                 case .change(_, let properties):
-                    for propaty in properties {
-                        if propaty.name == "textSizeValue" || propaty.name == "fontID" || propaty.name == "lineSpacing" {
+                    for property in properties {
+                        // ViewType が normal 以外に変わっていたら元画面に戻します
+                        if property.name == "m_ViewType", let newValue = property.newValue as? String, newValue != RealmDisplaySetting.ViewType.normal.rawValue {
+                            DispatchQueue.main.async {
+                                self.navigationController?.popViewController(animated: true)
+                            }
+                            return
+                        }
+                        if property.name == "textSizeValue" || property.name == "fontID" || property.name == "lineSpacing" {
                             DispatchQueue.main.async {
                                 RealmUtil.RealmBlock { (realm) -> Void in
                                     guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
