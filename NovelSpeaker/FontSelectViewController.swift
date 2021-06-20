@@ -39,19 +39,33 @@ class FontSelectViewController: FormViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        var currentFontName:String? = nil
+        RealmUtil.RealmBlock { realm in
+            guard let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) else { return }
+            currentFontName = displaySetting.fontID
+        }
 
         // Do any additional setup after loading the view.
         let section = Section()
-        section.append(CreateFontSelectRow(fontTitle: NSLocalizedString("FontSelectViewController_DefaultFontTitle", comment: "標準フォント"), fontName: "", sampleText: sampleText))
+        let selectColor = UIColor(white: 0.9, alpha: 1)
+        var currentRow:LabelRow = CreateFontSelectRow(fontTitle: NSLocalizedString("FontSelectViewController_DefaultFontTitle", comment: "標準フォント"), fontName: "", sampleText: sampleText)
+        section.append(currentRow)
         for familyName in UIFont.familyNames.sorted() {
             //print(String.init(format: "- %@", familyName))
             for fontName in UIFont.fontNames(forFamilyName: familyName).sorted() {
                 //print(String.init(format: "  - %@", fontName))
                 let row = CreateFontSelectRow(fontTitle: String(format: "%@/%@", familyName, fontName), fontName: fontName, sampleText: sampleText)
+                if fontName == currentFontName {
+                    currentRow = row
+                }
                 section.append(row)
             }
         }
+        currentRow.cellUpdate { cellOf,row in
+            cellOf.backgroundColor = selectColor
+        }
         form.append(section)
+        currentRow.select(animated: true, scrollPosition: .middle)
     }
 
     override func didReceiveMemoryWarning() {
