@@ -105,10 +105,11 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         
         storyTextView.placeholder = NSLocalizedString("EditBookViewController_StoryPlaceholderText", comment: "ここに本文を入力します。")
 
-        let insets = UIEdgeInsets(top: 8, left: 8, bottom: storyTextView.frame.height / 3.0, right: 0)
+        let insets = UIEdgeInsets(top: 8, left: 8, bottom: min(50, storyTextView.frame.height / 4.0), right: 0)
         storyTextView.contentInset = insets
-        storyTextView.scrollIndicatorInsets = insets
-
+        //storyTextView.textContainerInset = insets
+        //storyTextView.scrollIndicatorInsets = insets
+        
         // ボタンは内部の titleLabel の Dynamic Type 対応を storyboard 側でできないぽいので自前で指定します。(´・ω・`)
         for button in [movePreviousButton, moveNextButton, addChapterButton, deleteChapterButton, entryButton] {
             button?.titleLabel?.numberOfLines = 0
@@ -601,6 +602,14 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         self.storyTextViewBottomConstraint?.isActive = true
         UIView.animate(withDuration: TimeInterval(duration.floatValue)) {
             self.view.layoutIfNeeded()
+        } completion: { result in
+            DispatchQueue.main.async {
+                guard let selectedRange = self.storyTextView.selectedTextRange else { return }
+                let caretRect = self.storyTextView.caretRect(for: selectedRange.start)
+                let nextY = max(0, caretRect.origin.y - caretRect.size.height * 2 / 3)
+                let nextCaretPoint = CGPoint(x: caretRect.origin.x, y: nextY)
+                self.storyTextView.scrollRectToVisible(CGRect(origin: nextCaretPoint, size: CGSize(width: 1, height: 1)), animated: false)
+            }
         }
         enableCursorKeys()
     }
