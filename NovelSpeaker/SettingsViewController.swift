@@ -1194,7 +1194,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }
             section
             <<< AlertRow<String>("ViewTypeSelectRow") { row in
-                row.title = "小説本文画面の表示方式"
+                row.title = "小説本文画面の表示方式(実験的機能につき、この機能へのお問い合わせには返信致しません)"
                 row.selectorTitle = "小説本文画面の表示方式"
                 row.options = [
                     RealmDisplaySetting.ViewType.normal.rawValue
