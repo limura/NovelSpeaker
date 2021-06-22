@@ -119,7 +119,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     
     func createContentHTML(story:Story, displaySetting: RealmDisplaySetting?) -> String {
         var fontSetting:String = "font: -apple-system-title1;"
-        var fontPixelSize:Float = 18
+        var fontPixelSize:String = "18px"
         var letterSpacing:String = "0.03em"
         var lineHeight:String = "1.5em"
         var verticalModeCSS:String = ""
@@ -143,12 +143,12 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             let fontStyle = displayFont.fontDescriptor.symbolicTraits.contains(.traitItalic) ? "italic" : "normal"
             fontSetting = "font-family: '\(displaySetting.font.familyName)'; font-weight: \(fontWeight); font-style: \(fontStyle);"
             
-            fontPixelSize = Float(displayFont.pointSize)
+            fontPixelSize = "\(displayFont.lineHeight)px"
             let lineSpacePix = max(displayFont.pointSize, displaySetting.lineSpacingDisplayValue)
             let lineSpaceEm = lineSpacePix / max(1, displaySetting.font.xHeight)
             lineHeight = "\(lineSpaceEm)"
             verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
-            print("\(fontSetting), font-size: \(fontPixelSize)px, lineSpacePix: \(lineSpacePix), font.xHeight: \(displaySetting.font.xHeight), line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
+            print("\(fontSetting), font-size: \(fontPixelSize), lineSpacePix: \(lineSpacePix), font.xHeight: \(displaySetting.font.xHeight), line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
         }
         
         let htmledText = convertNovelSepakerStringToHTML(text: story.content)
@@ -175,7 +175,7 @@ html {
   font-size: \(fontPixelSize);
   letter-spacing: \(letterSpacing);
   line-height: \(lineHeight);
-  font-feature-settings: 'pwid';
+  font-feature-settings: 'pkna';
   \(verticalModeCSS)
 }
 ruby rt {
@@ -210,7 +210,7 @@ body.NovelSpeakerBody {
             let aliveButtonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting
             self.assignUpperButtons(novel: novel, aliveButtonSettings: aliveButtonSettings)
             self.webViewDisplayWholeText = nil
-            if story.url.count > 0, let url = URL(string: story.url), displaySetting?.viewType == .webViewOriginal {
+            if story.url.count > 0, novel.type == .URL, let url = URL(string: story.url), displaySetting?.viewType == .webViewOriginal {
                 self.isNeedCollectDisplayLocation = true
                 let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: story.url)
                 let request = URLRequest(url: url)
@@ -750,6 +750,7 @@ extension WebSpeechViewController {
 
     @objc func checkSpeechText(sender: UIMenuItem) {
         self.webSpeechTool.getSelectedRange { startIndex, endIndex in
+            print("startIndex: \(startIndex), endIndex: \(endIndex)")
             guard let startIndex = startIndex, let endIndex = endIndex, startIndex <= endIndex else { return }
             DispatchQueue.main.async {
                 let speechText = StorySpeaker.shared.GenerateSpeechTextFrom(displayTextRange: NSMakeRange(startIndex, endIndex - startIndex))
