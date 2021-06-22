@@ -872,4 +872,8 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
             textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
         }
     }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
 }
