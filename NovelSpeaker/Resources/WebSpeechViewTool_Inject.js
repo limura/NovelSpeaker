@@ -192,48 +192,76 @@ function SearchElementFromIndex(elementArray, index){
   return undefined
 }
 
-// elementArray から range で示された範囲を先頭とする elementArray と、その先頭の index を返す
-// 返されるのは {"elementArray": , "index": } の形式で、発見できなかった場合は undefined が返る
-function SplitElementFromSelection(elementArray, range){
-  var resultArray = [];
-  var prevArray = [];
-  var isHit = false;
-  var index = 0;
-  for(var i = 0; i < elementArray.length; i++){
-    let data = elementArray[i];
-    let element = data["element"];
-    let text = data["text"];
-    if(isHit){
-      resultArray.push(data);
-      continue;
-    }
+function isElementInRange(element, range) {
     let elementRange = new Range();
     elementRange.selectNode(element);
-    if(!elementRange){
-      //console.log("elementRange", elementRange, element);
-      prevArray.push(data);
-      continue;
-    }
-    //console.log("compare", elementRange.compareBoundaryPoints(Range.START_TO_START, range), elementRange.compareBoundaryPoints(Range.START_TO_END, range));
-    if(elementRange.compareBoundaryPoints(Range.START_TO_START, range) <= 0 &&
-      elementRange.compareBoundaryPoints(Range.START_TO_END, range) >= 0){
-      isHit = true;
-      resultArray.push(data);
+    // elementRange の開始点と終了点を es, ee
+    // range の開始点と終了点を rs, re
+    // とした場合、範囲外なのは ee < rs, re < es であるのでそう比較する
+    // 参考: https://lab.syncer.jp/Web/API_Interface/Reference/IDL/Range/compareBoundaryPoints/
+    if(elementRange.compareBoundaryPoints(Range.END_TO_START, range) > 0 ||
+       elementRange.compareBoundaryPoints(Range.START_TO_END, range) < 0) { return false; }
+    return true;
+}
 
-      // TODO: ちゃんとやるなら range.startContainer が
-      // element と同じかどうかを確認して、startOffset を使う必要がある
-      index = range.startOffset;
-      if(text.length < index){
-        index = 0;
-      }
-    }else{
-      prevArray.push(data);
+// elementArray から range で示された範囲を検索する。
+// 返り値としては、
+/*
+ {
+    elementArray: [element],
+    prevElementArray: [element],
+    afterElementArray: [element],
+    startIndex: int,
+    endIndex: int,
+ }
+ */
+// となる。
+// element は与えられた elementArray の一要素と同じで、
+// startIndex は、range の先頭位置が、与えられた elementArray の最初の文字からの何文字目に当たるかの数
+// endIndex は、range の末尾が、与えられた elementArray の最初の文字からの何文字目に当たるかの数
+// であり、発見できなかったり何らかの問題があった場合は undefined が返る。
+function SplitElementFromSelection(elementArray, range){
+    var resultArray = [];
+    var prevArray = [];
+    var afterArray = [];
+    var isHit = false;
+    var index = 0;
+    var startIndex = 0;
+    var endIndex = 0;
+    for(var i = 0; i < elementArray.length; i++){
+        let data = elementArray[i];
+        let element = data["element"];
+        let text = data["text"];
+      
+        let elementRange = new Range();
+        elementRange.selectNode(element);
+        
+        // element が範囲外である場合
+        if(elementRange.compareBoundaryPoints(Range.END_TO_START, range) > 0 ||
+            elementRange.compareBoundaryPoints(Range.START_TO_END, range) < 0){
+            if(isHit){
+                afterArray.push(data);
+            }else{
+                index += text.length;
+                prevArray.push(data);
+            }
+            continue;
+        }
+        // ここに来るのは範囲内の場合なのでもう少し詳しく確認する
+        if(elementRange.compareBoundaryPoints(Range.START_TO_START, range) < 0){
+            // 範囲内になった最初のelement
+            startIndex = index + range.startOffset;
+        }else if(elementRange.compareBoundaryPoints(Range.END_TO_END, range) <= 0){
+            // 範囲内になる最後のelment
+            endIndex = index + range.endOffset;
+        }
+        index += text.length;
+        resultArray.push(data);
     }
-  }
-  if(resultArray.length <= 0){
-    return undefined;
-  }
-  return {elementArray: resultArray, index: index, prevElementArray:prevArray};
+    if(resultArray.length <= 0){
+        return undefined;
+    }
+    return {elementArray: resultArray, startIndex: startIndex, endIndex: endIndex, prevElementArray: prevArray, afterElementArray: afterArray};
 }
 
 // [{"element":, "text":}, ...] の配列の text の文字を、全部組み合わせた文字列を取得します
@@ -241,7 +269,7 @@ function SplitElementFromSelection(elementArray, range){
 function GenerateWholeText(elementArray, index){
   var text = "";
   elementArray.forEach(function(data){
-    console.log("text += ", data["text"], index);
+    console.log(`text += ${data['text']}, ${index}`);
     if(data["text"].length >= index){
       text += data["text"].slice(index);
       index = 0;
@@ -251,22 +279,19 @@ function GenerateWholeText(elementArray, index){
   });
   return text;
 }
-
+function SelectionRangeToIndex(range){
+    let speechTarget = SplitElementFromSelection(elementArray, range);
+    if(speechTarget){
+        return { startIndex: speechTarget.startIndex, endIndex: speechTarget.endIndex };
+    }
+    return undefined;
+}
 function GetSelectedIndex(){
   let selection = window.getSelection();
   var index = -1;
   if(selection.rangeCount > 0){
-    let speechTarget = SplitElementFromSelection(elementArray, selection.getRangeAt(0));
-    if(speechTarget){
-      console.log("GetSelectedIndex() speechTarget alive:");
-      let elementArray = speechTarget.elementArray;
-      let prevElementArray = speechTarget.prevElementArray;
-      index = speechTarget.index;
-      for(var i = 0; i < prevElementArray.length; i++){
-        let element = prevElementArray[i];
-        index += element.text.length;
-      }
-    }
+    let result = SelectionRangeToIndex(selection.getRangeAt(0));
+    return result.startIndex;
   }else{
     index = 0;
   }
@@ -277,8 +302,7 @@ function GetSelectedRange(){
   var index = -1;
   var length = -1;
   if(selection.rangeCount > 0){
-    let range = selection.getRangeAt(0);
-    return([range.startOffset, range.endOffset]);
+    return SelectionRangeToIndex(selection.getRangeAt(0));
   }
   return null;
 }
