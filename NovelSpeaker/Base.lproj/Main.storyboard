@@ -1634,34 +1634,34 @@ THE SOFTWARE.
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xDU-vX-wUV">
-                                <rect key="frame" x="16" y="97" width="22" height="22"/>
+                                <rect key="frame" x="16" y="97" width="26" height="26"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="22" id="Y2V-CV-gjo"/>
-                                    <constraint firstAttribute="height" constant="22" id="dVl-8f-fj9"/>
+                                    <constraint firstAttribute="width" constant="26" id="Y2V-CV-gjo"/>
+                                    <constraint firstAttribute="height" constant="26" id="dVl-8f-fj9"/>
                                 </constraints>
                                 <state key="normal" image="arrow.left" catalog="system"/>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zXR-3Z-eDe">
-                                <rect key="frame" x="46" y="97" width="22" height="22"/>
+                                <rect key="frame" x="54" y="97" width="26" height="26"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="22" id="6qB-EJ-3rU"/>
-                                    <constraint firstAttribute="height" constant="22" id="9R3-gQ-PSi"/>
+                                    <constraint firstAttribute="width" constant="26" id="6qB-EJ-3rU"/>
+                                    <constraint firstAttribute="height" constant="26" id="9R3-gQ-PSi"/>
                                 </constraints>
                                 <state key="normal" image="arrow.down" catalog="system"/>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xL0-AJ-k2q">
-                                <rect key="frame" x="76" y="97" width="22" height="22"/>
+                                <rect key="frame" x="96" y="97" width="26" height="26"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="22" id="YxY-Q3-SL5"/>
-                                    <constraint firstAttribute="height" constant="22" id="hQm-cY-g9a"/>
+                                    <constraint firstAttribute="width" constant="26" id="YxY-Q3-SL5"/>
+                                    <constraint firstAttribute="height" constant="26" id="hQm-cY-g9a"/>
                                 </constraints>
                                 <state key="normal" image="arrow.up" catalog="system"/>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PsX-PP-Y9K">
-                                <rect key="frame" x="106" y="97" width="22" height="22"/>
+                                <rect key="frame" x="136.5" y="97" width="26" height="26"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="22" id="Ixb-u9-BSV"/>
-                                    <constraint firstAttribute="height" constant="22" id="mPY-XW-wZD"/>
+                                    <constraint firstAttribute="width" constant="26" id="Ixb-u9-BSV"/>
+                                    <constraint firstAttribute="height" constant="26" id="mPY-XW-wZD"/>
                                 </constraints>
                                 <state key="normal" image="arrow.right" catalog="system"/>
                             </button>
@@ -1669,7 +1669,7 @@ THE SOFTWARE.
                         <viewLayoutGuide key="safeArea" id="G7J-8n-cqw"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="xL0-AJ-k2q" firstAttribute="leading" secondItem="zXR-3Z-eDe" secondAttribute="trailing" constant="8" symbolic="YES" id="3mu-Ip-si8"/>
+                            <constraint firstItem="xL0-AJ-k2q" firstAttribute="leading" secondItem="zXR-3Z-eDe" secondAttribute="trailing" multiplier="1.1" constant="8" symbolic="YES" id="3mu-Ip-si8"/>
                             <constraint firstItem="ZfF-jG-c09" firstAttribute="centerY" secondItem="LN3-sB-fzm" secondAttribute="centerY" id="5Qd-LU-hZu"/>
                             <constraint firstItem="xDU-vX-wUV" firstAttribute="top" secondItem="hYi-6O-tpR" secondAttribute="bottom" constant="19" id="5WN-8Z-EpE"/>
                             <constraint firstAttribute="trailingMargin" secondItem="LN3-sB-fzm" secondAttribute="trailing" constant="38" id="7Pr-ac-AM7"/>
@@ -1683,7 +1683,7 @@ THE SOFTWARE.
                             <constraint firstItem="PsX-PP-Y9K" firstAttribute="centerY" secondItem="xDU-vX-wUV" secondAttribute="centerY" id="KXj-V9-Nze"/>
                             <constraint firstItem="7U0-Lh-pyC" firstAttribute="leading" secondItem="hYi-6O-tpR" secondAttribute="trailing" constant="8" id="KsZ-Qh-R0H"/>
                             <constraint firstItem="KLa-F4-FYq" firstAttribute="top" secondItem="wMt-h0-xpF" secondAttribute="bottom" constant="8" id="M7d-Ov-obG"/>
-                            <constraint firstItem="zXR-3Z-eDe" firstAttribute="leading" secondItem="xDU-vX-wUV" secondAttribute="trailing" constant="8" symbolic="YES" id="MYx-Ee-Pba"/>
+                            <constraint firstItem="zXR-3Z-eDe" firstAttribute="leading" secondItem="xDU-vX-wUV" secondAttribute="trailing" multiplier="1.1" constant="8" symbolic="YES" id="MYx-Ee-Pba"/>
                             <constraint firstItem="xL0-AJ-k2q" firstAttribute="centerY" secondItem="xDU-vX-wUV" secondAttribute="centerY" id="Oea-1u-5uZ"/>
                             <constraint firstItem="E2C-GJ-Of6" firstAttribute="centerY" secondItem="KLa-F4-FYq" secondAttribute="centerY" id="PF8-TQ-Vth"/>
                             <constraint firstItem="XX2-ka-OrJ" firstAttribute="top" secondItem="ZfF-jG-c09" secondAttribute="bottom" constant="8" id="PRf-nF-Iku"/>
@@ -1691,8 +1691,7 @@ THE SOFTWARE.
                             <constraint firstItem="ZfF-jG-c09" firstAttribute="leading" secondItem="cM0-Wf-FN8" secondAttribute="trailing" constant="3" id="V2Q-I5-zmZ"/>
                             <constraint firstItem="7U0-Lh-pyC" firstAttribute="centerY" secondItem="hYi-6O-tpR" secondAttribute="centerY" id="Vrp-Dr-eIV"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Dd3-il-QVF" secondAttribute="trailing" constant="-11" id="WEH-pZ-qMe"/>
-                            <constraint firstItem="PsX-PP-Y9K" firstAttribute="leading" secondItem="xL0-AJ-k2q" secondAttribute="trailing" constant="8" symbolic="YES" id="XCL-aR-dTt"/>
-                            <constraint firstItem="cM0-Wf-FN8" firstAttribute="top" secondItem="xDU-vX-wUV" secondAttribute="bottom" constant="12" id="YYg-3o-TMQ"/>
+                            <constraint firstItem="PsX-PP-Y9K" firstAttribute="leading" secondItem="xL0-AJ-k2q" secondAttribute="trailing" multiplier="1.05" constant="8" symbolic="YES" id="XCL-aR-dTt"/>
                             <constraint firstItem="XX2-ka-OrJ" firstAttribute="leading" secondItem="UOv-Sk-8f5" secondAttribute="leadingMargin" constant="-16" id="bPY-By-Woh"/>
                             <constraint firstAttribute="trailingMargin" secondItem="XX2-ka-OrJ" secondAttribute="trailing" constant="-16" id="cHc-ln-rLd"/>
                             <constraint firstItem="xDU-vX-wUV" firstAttribute="leading" secondItem="G7J-8n-cqw" secondAttribute="leading" constant="16" id="dKL-uG-TIc"/>
