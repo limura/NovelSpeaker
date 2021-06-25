@@ -24,54 +24,6 @@
 import UIKit
 import WebKit
 
-/// adding "console.log" support
-/// from https://banrai-works.net/2019/01/13/%E3%80%90swift%E3%80%91wkwebview%E3%81%A7javascript%E3%81%AEconsole-log%E3%82%92%E4%BD%BF%E3%81%88%E3%82%8B%E3%82%88%E3%81%86%E3%81%AB%E3%81%99%E3%82%8B/
-extension WKWebView: WKScriptMessageHandler {
-
-    /// enabling console.log
-    public func enableConsoleLog() {
-
-        //    set message handler
-        configuration.userContentController.add(self, name: "logging")
-
-        //    override console.log
-        let _override = WKUserScript(source: "var console = { log: function(msg){window.webkit.messageHandlers.logging.postMessage(msg) }};", injectionTime: .atDocumentStart, forMainFrameOnly: true)
-        configuration.userContentController.addUserScript(_override)
-    }
-    
-    func JavaScriptAnyToString(body:Any) -> String {
-        if let number = body as? NSNumber {
-            return "\(number)"
-        }
-        if let string = body as? String {
-            return "\"\(string)\""
-        }
-        if let date = body as? NSDate {
-            return "\(date)"
-        }
-        if let array = body as? NSArray {
-            return array.reduce("[") { current, body in
-                return current + ", " + JavaScriptAnyToString(body: body)
-            } + "]"
-        }
-        if let dictionary = body as? NSDictionary {
-            return dictionary.reduce("{\n") { current, element in
-                return current + "\n" + "  \(JavaScriptAnyToString(body: element.key)): \(JavaScriptAnyToString(body: element.value))"
-            } + "\n}\n"
-        }
-        if body is NSNull {
-            return "null"
-        }
-        return "undefined"
-    }
-
-    /// message handler
-    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-
-        print("WebViewConsole:", JavaScriptAnyToString(body: message.body))
-    }
-}
-
 class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     var wkWebView:WKWebView? = nil
     var loadCompletionHandler:(() -> Void)? = nil

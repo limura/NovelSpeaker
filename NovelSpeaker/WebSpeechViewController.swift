@@ -12,9 +12,11 @@ import RealmSwift
 
 /*
  TODO:
- * 明るさの変更
- * 読む部分を全画面表示にする
-   * 表示に関する設定項目をまとめた物がダイアログ的に表示できると良いかもしれん
+ - 別ページに移動するための手段が目次等しかない
+   - 末尾で引っ張って次のページに移動できたら良いね
+ - 読む部分を全画面表示にする
+   - 表示に関する設定項目をまとめた物がダイアログ的に表示できると良いかもしれん
+ - ダークモード・ライトモードの切り替えに追従できてないかも？(traitCollectionDidChange 辺りを確認しよう)
  */
 
 extension UIColor {
@@ -37,12 +39,13 @@ extension UIColor {
     }
 }
 
-class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate {
+class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate, WKScriptMessageHandler {
     var targetStoryID:String? = nil
     var isNeedResumeSpeech:Bool = false
     var isNeedUpdateReadDate:Bool = true
-    let textWebView = WKWebView()
+    var textWebView:WKWebView? = nil
     let webSpeechTool = WebSpeechViewTool()
+    var toggleInterfaceButton:UIButton? = nil
     
     var isNeedCollectDisplayLocation = false
     var webViewDisplayWholeText:String? = nil
@@ -51,14 +54,17 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var globalStateObserverToken:NotificationToken? = nil
     var displaySettingObserverToken:NotificationToken? = nil
 
+    let myScriptNamespace = "NovelSpeaker_\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        textWebView.enableConsoleLog()
-        createUIComponents()
+        let webView = WebSpeechViewController.createWkWebViewWithUserContentController(handler:self, myScriptNamespace:myScriptNamespace)
+        self.textWebView = webView
+        createUIComponents(webView: webView)
         RestartObservers()
         RealmUtil.RealmBlock { realm in
-            self.loadFirstContentWith(realm: realm, storyID: targetStoryID)
+            self.loadFirstContentWith(realm: realm, storyID: targetStoryID, webView: webView)
         }
         setCustomUIMenu()
     }
@@ -70,10 +76,19 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     override func viewWillAppear(_ animated: Bool) {
         StorySpeaker.shared.AddDelegate(delegate: self)
         applyTheme()
+        // TODO: 開いた時に毎回リロードするのはちょっと頭悪い気がする。
+        // 現状では、「しばらく動かしていなかった後に起動すると、WebViewが消えている事がある」
+        // という問題に対応するためにリロードしているのだが、view*Appear でリロードするのは何かおかしい。
+        RealmUtil.RealmBlock { realm in
+            if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID) {
+                self.loadStoryWithoutStorySpeakerWith(story: story)
+            }
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         StorySpeaker.shared.RemoveDelegate(delegate: self)
+        //displayTopAndDownComponents()
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -102,15 +117,131 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         observeGlobalState()
     }
 
-    func createUIComponents() {
-        self.textWebView.translatesAutoresizingMaskIntoConstraints = false
-        self.view.addSubview(textWebView)
+    func createUIComponents(webView:WKWebView) {
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(webView)
         NSLayoutConstraint.activate([
-            self.textWebView.topAnchor.constraint(equalTo: self.view.firstBaselineAnchor),
-            self.textWebView.bottomAnchor.constraint(equalTo: self.view.lastBaselineAnchor),
-            self.textWebView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
-            self.textWebView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
+            webView.topAnchor.constraint(equalTo: self.view.firstBaselineAnchor, constant: 8),
+            webView.bottomAnchor.constraint(equalTo: self.view.lastBaselineAnchor, constant: 8),
+            webView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
+            webView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
         ])
+        let toggleInterfaceButton = UIButton()
+        toggleInterfaceButton.translatesAutoresizingMaskIntoConstraints = false
+        toggleInterfaceButton.isAccessibilityElement = false
+        //toggleInterfaceButton.alpha = 0.4
+        //let (foregroundColor, backgroundColor) = getForegroundBackgroundColor()
+        //toggleInterfaceButton.backgroundColor = foregroundColor
+        //toggleInterfaceButton.setTitleColor(backgroundColor, for: .normal)
+        //toggleInterfaceButton.layer.cornerRadius = 3
+        //toggleInterfaceButton.layer.borderWidth = 2
+        //toggleInterfaceButton.layer.borderColor = foregroundColor.cgColor
+        toggleInterfaceButton.clipsToBounds = true
+        toggleInterfaceButton.addTarget(self, action: #selector(toggleInterfaceButtonClicked), for: .touchUpInside)
+        self.toggleInterfaceButton = toggleInterfaceButton
+        self.view.addSubview(toggleInterfaceButton)
+        self.view.bringSubviewToFront(toggleInterfaceButton)
+        self.view.sendSubviewToBack(webView)
+        NSLayoutConstraint.activate([
+            toggleInterfaceButton.bottomAnchor.constraint(equalTo: self.view.lastBaselineAnchor, constant: -75),
+            toggleInterfaceButton.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: -25),
+        ])
+        assignHideToToggleInterfaceButton()
+    }
+    
+    static func createInjectScriptAtDocumentStart(myScriptNamespace:String) -> String{
+        return """
+            \(myScriptNamespace) = {
+                webkit: window.webkit
+            };
+            """
+    }
+    static func createInjectScriptAtDocumentEnd(myScriptNamespace:String) -> String{
+        return """
+            var console = {
+                log: function(msg){
+                    \(myScriptNamespace).webkit.messageHandlers.logging.postMessage(msg);
+                }
+            };
+            function TapEvent(){
+                \(myScriptNamespace).webkit.messageHandlers.tapEvent.postMessage();
+            }
+            function \(myScriptNamespace)_TouchStartHandler(ev) {
+                console.log(["touchStart", ev]);
+            }
+            function \(myScriptNamespace)_TouchEndHandler(ev) {
+                console.log(["touchEnd", ev]);
+            }
+            function \(myScriptNamespace)_TouchCancelHandler(ev) {
+                console.log(["touchCancel", ev]);
+            }
+            function \(myScriptNamespace)_InjectTapEventChecker() {
+                const bodyElement = document.getElementById("body");
+                bodyElement.addEventListener("touchstart", \(myScriptNamespace)_TouchStartHandler, true);
+                bodyElement.addEventListener("touchstart", \(myScriptNamespace)_TouchEndHandler, true);
+                bodyElement.addEventListener("touchcancel", \(myScriptNamespace)_TouchCancelHandler, true);
+            }
+            """
+    }
+
+    static func createWkWebViewWithUserContentController(handler:WebSpeechViewController, myScriptNamespace:String) -> WKWebView {
+        let injectScriptAtDocumentStart = createInjectScriptAtDocumentStart(myScriptNamespace:myScriptNamespace)
+        let userScriptAtDocumentStart = WKUserScript(source: injectScriptAtDocumentStart, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        let injectScriptAtDocumentEnd = createInjectScriptAtDocumentEnd(myScriptNamespace:myScriptNamespace)
+        let userScriptAtDocumentEnd = WKUserScript(source: injectScriptAtDocumentEnd, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        let config = WKWebViewConfiguration()
+        config.userContentController.addUserScript(userScriptAtDocumentStart)
+        config.userContentController.addUserScript(userScriptAtDocumentEnd)
+        config.userContentController.add(handler, name: "logging")
+        return WKWebView(frame: CGRect(x: 0, y: 0, width: 1024, height: 1024), configuration: config)
+    }
+
+    // WkWebView の JavaScript からのイベントを受け取るメッセージハンドラ
+    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        switch message.name {
+        case "logging":
+            print("WebViewConsole:", JavaScriptAnyToString(body: message.body))
+        case "tapEvent":
+            print("tapEvent from JavaScript");
+        default:
+            break
+        }
+    }
+    func JavaScriptAnyToString(body:Any) -> String {
+        if let number = body as? NSNumber {
+            return "\(number)"
+        }
+        if let string = body as? String {
+            return "\"\(string)\""
+        }
+        if let date = body as? NSDate {
+            return "\(date)"
+        }
+        if let array = body as? NSArray {
+            return array.reduce("[") { current, body in
+                return current + (current.count <= 1 ? "" : ", ") + JavaScriptAnyToString(body: body)
+            } + "]"
+        }
+        if let dictionary = body as? NSDictionary {
+            return dictionary.reduce("{\n") { current, element in
+                return current + (current.count <= 2 ? "" : "\n") + "  \(JavaScriptAnyToString(body: element.key)): \(JavaScriptAnyToString(body: element.value))"
+            } + "\n}"
+        }
+        if body is NSNull {
+            return "null"
+        }
+        return "undefined(\(String(describing: body))"
+    }
+
+    func hideTopAndDownComponents(animated:Bool = true, animateCompletion: (()->Void)? = nil) {
+        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+        self.tabBarController?.setTabBarVisible(visible:false, animated: animated, animateCompletion: animateCompletion)
+        self.assignDisplayToToggleInterfaceButton()
+    }
+    func displayTopAndDownComponents(animated:Bool = true, animateCompletion: (()->Void)? = nil) {
+        self.navigationController?.setNavigationBarHidden(false, animated: animated)
+        self.tabBarController?.setTabBarVisible(visible:true, animated: animated, animateCompletion: animateCompletion)
+        self.assignHideToToggleInterfaceButton()
     }
     
     func convertNovelSepakerStringToHTML(text:String) -> String {
@@ -200,6 +331,7 @@ body.NovelSpeakerBody {
     }
     
     func loadStoryWithoutStorySpeakerWith(story:Story) {
+        guard let webView = self.textWebView else { return }
         RealmUtil.RealmBlock { realm in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: story.novelID) else { return }
             let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm)
@@ -214,7 +346,7 @@ body.NovelSpeakerBody {
                 self.isNeedCollectDisplayLocation = true
                 let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: story.url)
                 let request = URLRequest(url: url)
-                self.webSpeechTool.loadUrl(webView: self.textWebView, request: request, siteInfoArray: siteInfoArray, completionHandler: {
+                self.webSpeechTool.loadUrl(webView: webView, request: request, siteInfoArray: siteInfoArray, completionHandler: {
                     self.webSpeechTool.getSpeechText { text in
                         self.webViewDisplayWholeText = text
                     }
@@ -225,25 +357,25 @@ body.NovelSpeakerBody {
                 return
             }
             self.isNeedCollectDisplayLocation = false
-            self.webSpeechTool.loadHtmlString(webView: self.textWebView, html: self.createContentHTML(story: story, displaySetting: displaySetting), baseURL: nil, completionHandler: {
+            self.webSpeechTool.loadHtmlString(webView: webView, html: self.createContentHTML(story: story, displaySetting: displaySetting), baseURL: nil, completionHandler: {
                 self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1, scrollRatio: 0.3)
             })
         }
     }
     
-    func loadNovelWith(realm:Realm, story:Story) {
-        self.textWebView.loadHTMLString("<html><body class='NovelSpeakerBody'>\(NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……"))</body></html>", baseURL: nil)
+    func loadNovelWith(realm:Realm, story:Story, webView:WKWebView) {
+        webView.loadHTMLString("<html><body class='NovelSpeakerBody'>\(NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……"))</body></html>", baseURL: nil)
         StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true) { story in
             self.loadStoryWithoutStorySpeakerWith(story: story)
         }
     }
     
-    func loadFirstContentWith(realm:Realm, storyID:String?) {
+    func loadFirstContentWith(realm:Realm, storyID:String?, webView:WKWebView) {
         guard let storyID = storyID, let targetStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID) else {
-            self.textWebView.loadHTMLString("<html><body class='NovelSpeakerBody'>\( NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……"))</body></html>", baseURL: nil)
+            webView.loadHTMLString("<html><body class='NovelSpeakerBody'>\( NSLocalizedString("SpeechViewController_NowLoadingText", comment: "本文を読込中……"))</body></html>", baseURL: nil)
             return
         }
-        loadNovelWith(realm: realm, story: targetStory)
+        loadNovelWith(realm: realm, story: targetStory, webView: webView)
     }
     
     func checkDummySpeechFinished() {
@@ -645,6 +777,45 @@ body.NovelSpeakerBody {
             StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
         }
     }
+    
+    func assignHideToToggleInterfaceButton() {
+        guard let toggleInterfaceButton = self.toggleInterfaceButton else { return }
+        DispatchQueue.main.async {
+            if #available(iOS 13.0, *), let img = UIImage(systemName: "dock.arrow.down.rectangle", withConfiguration:  UIImage.SymbolConfiguration(pointSize: 24, weight: .bold, scale: .default)) {
+                toggleInterfaceButton.setImage(img, for: .normal)
+            } else {
+                toggleInterfaceButton.setTitle(NSLocalizedString("WebSpechViewController_ToggleInterfaceButton_Hide_Title", comment: "本文のみへ"), for: .normal)
+            }
+        }
+    }
+    func assignDisplayToToggleInterfaceButton() {
+        guard let toggleInterfaceButton = self.toggleInterfaceButton else { return }
+        DispatchQueue.main.async {
+            if #available(iOS 13.0, *), let img = UIImage(systemName: "dock.arrow.up.rectangle", withConfiguration:  UIImage.SymbolConfiguration(pointSize: 24, weight: .bold, scale: .default)) {
+                toggleInterfaceButton.setImage(img, for: .normal)
+            } else {
+                toggleInterfaceButton.setTitle(NSLocalizedString("WebSpechViewController_ToggleInterfaceButton_Display_Title", comment: "ボタン表示"), for: .normal)
+            }
+        }
+    }
+
+    @objc func toggleInterfaceButtonClicked(_ sender:UIButton){
+        func highlight(){
+            RealmUtil.RealmBlock { realm in
+                guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID) else { return }
+                let readLocation = story.readLocation(realm: realm)
+                DispatchQueue.main.async {
+                    self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1, scrollRatio: 0.3)
+                }
+            }
+        }
+        if(self.tabBarController?.isVisible ?? false) {
+            self.hideTopAndDownComponents(animated: true, animateCompletion: highlight)
+        }else{
+            self.displayTopAndDownComponents(animated: true, animateCompletion: highlight)
+        }
+    }
+    
     @objc func leftSwipe(_ sender: UISwipeGestureRecognizer) {
         // TODO: not implemented yet
         // disableCurrentReadingStoryChangeFloatingButton()

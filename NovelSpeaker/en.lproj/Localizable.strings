@@ -790,6 +790,8 @@
 "SafeModeViewController_SendProbremReport_Title" = "Send inquiries to developers via E-mail";
 "SafeModeViewController_ExitSafeModeButton_Title" = "Exit safe mode and boot normally";
 
+"WebSpechViewController_ToggleInterfaceButton_Hide_Title" = "To text only";
+"WebSpechViewController_ToggleInterfaceButton_Display_Title" = "Show buttons";
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

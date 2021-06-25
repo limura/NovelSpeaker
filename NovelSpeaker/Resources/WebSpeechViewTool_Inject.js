@@ -250,10 +250,25 @@ function SplitElementFromSelection(elementArray, range){
         // ここに来るのは範囲内の場合なのでもう少し詳しく確認する
         if(elementRange.compareBoundaryPoints(Range.START_TO_START, range) < 0){
             // 範囲内になった最初のelement
-            startIndex = index + range.startOffset;
-        }else if(elementRange.compareBoundaryPoints(Range.END_TO_END, range) <= 0){
+            isHit = true;
+            if(range.startContainer === element) {
+                /// range.startOffset が range で指定された element なら startOffset を信用して良い
+                startIndex = index + range.startOffset;
+                console.log(["firstElement", text, index, range.startOffset, range.endOffset]);
+            }else{
+                startIndex = index;
+                console.log(["firstElement(not plus startOffset)", text, index, range.startOffset, range.endOffset]);
+            }
+        }
+        if(endIndex == 0 && elementRange.compareBoundaryPoints(Range.END_TO_END, range) <= 0){
             // 範囲内になる最後のelment
-            endIndex = index + range.endOffset;
+            if(range.endContainer === element) {
+                endIndex = index + range.endOffset;
+                console.log(["endElement", text, index, range.startOffset, range.endOffset]);
+            }else{
+                endIndex = index;
+                console.log(["endElement(not plus endOffset)", text, index, range.startOffset, range.endOffset]);
+            }
         }
         index += text.length;
         resultArray.push(data);
@@ -261,6 +276,7 @@ function SplitElementFromSelection(elementArray, range){
     if(resultArray.length <= 0){
         return undefined;
     }
+    console.log({elementArray: resultArray.length, startIndex: startIndex, endIndex: endIndex, prevElementArray: prevArray.length, afterElementArray: afterArray.length});
     return {elementArray: resultArray, startIndex: startIndex, endIndex: endIndex, prevElementArray: prevArray, afterElementArray: afterArray};
 }
 

@@ -109,6 +109,7 @@
 		2164800C2290F3F900A183DF /* StorySpeaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800B2290F3F900A183DF /* StorySpeaker.swift */; };
 		2164800E22910E6300A183DF /* UIImageExtensionSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */; };
 		21652E6B23EDB8F300B64F9E /* SpeechContorlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */; };
+		216631E72682D26800F80C1D /* UITabBarControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216631E62682D26800F80C1D /* UITabBarControllerExtension.swift */; };
 		2166693C257548DB00B5B735 /* PickerViewDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2166693B257548DB00B5B735 /* PickerViewDialog.swift */; };
 		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
@@ -413,6 +414,7 @@
 		2164800B2290F3F900A183DF /* StorySpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorySpeaker.swift; sourceTree = "<group>"; };
 		2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensionSwift.swift; sourceTree = "<group>"; };
 		21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechContorlView.swift; sourceTree = "<group>"; };
+		216631E62682D26800F80C1D /* UITabBarControllerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITabBarControllerExtension.swift; sourceTree = "<group>"; };
 		2166693B257548DB00B5B735 /* PickerViewDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewDialog.swift; sourceTree = "<group>"; };
 		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
@@ -868,6 +870,7 @@
 				21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */,
 				212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */,
 				21D7B10E256D0FB700056E28 /* AppInformationLogger.swift */,
+				216631E62682D26800F80C1D /* UITabBarControllerExtension.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1720,6 +1723,7 @@
 				2177635119756781004F22FD /* GlobalStateCacheData.m in Sources */,
 				213A4DC91A63CFFB00E9EC13 /* SpeechWaitConfigCacheData.m in Sources */,
 				212F359E1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel in Sources */,
+				216631E72682D26800F80C1D /* UITabBarControllerExtension.swift in Sources */,
 				21647FFA228CA82A00A183DF /* CreateSpeechModSettingViewControllerSwift.swift in Sources */,
 				21E975B622983D2F0027A0A0 /* NovelSpeakerUtility.swift in Sources */,
 				21F054D91917E0F200CC6BA9 /* main.m in Sources */,
