@@ -88,7 +88,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     
     override func viewWillDisappear(_ animated: Bool) {
         StorySpeaker.shared.RemoveDelegate(delegate: self)
-        //displayTopAndDownComponents()
+        self.displayTopAndDownComponents(animated: false)
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -163,24 +163,6 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
                     \(myScriptNamespace).webkit.messageHandlers.logging.postMessage(msg);
                 }
             };
-            function TapEvent(){
-                \(myScriptNamespace).webkit.messageHandlers.tapEvent.postMessage();
-            }
-            function \(myScriptNamespace)_TouchStartHandler(ev) {
-                console.log(["touchStart", ev]);
-            }
-            function \(myScriptNamespace)_TouchEndHandler(ev) {
-                console.log(["touchEnd", ev]);
-            }
-            function \(myScriptNamespace)_TouchCancelHandler(ev) {
-                console.log(["touchCancel", ev]);
-            }
-            function \(myScriptNamespace)_InjectTapEventChecker() {
-                const bodyElement = document.getElementById("body");
-                bodyElement.addEventListener("touchstart", \(myScriptNamespace)_TouchStartHandler, true);
-                bodyElement.addEventListener("touchstart", \(myScriptNamespace)_TouchEndHandler, true);
-                bodyElement.addEventListener("touchcancel", \(myScriptNamespace)_TouchCancelHandler, true);
-            }
             """
     }
 
@@ -230,7 +212,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         if body is NSNull {
             return "null"
         }
-        return "undefined(\(String(describing: body))"
+        return "unknown(\(String(describing: body))"
     }
 
     func hideTopAndDownComponents(animated:Bool = true, animateCompletion: (()->Void)? = nil) {
@@ -781,7 +763,7 @@ body.NovelSpeakerBody {
     func assignHideToToggleInterfaceButton() {
         guard let toggleInterfaceButton = self.toggleInterfaceButton else { return }
         DispatchQueue.main.async {
-            if #available(iOS 13.0, *), let img = UIImage(systemName: "dock.arrow.down.rectangle", withConfiguration:  UIImage.SymbolConfiguration(pointSize: 24, weight: .bold, scale: .default)) {
+            if #available(iOS 13.0, *), let img = UIImage(systemName: "dock.arrow.down.rectangle", withConfiguration:  UIImage.SymbolConfiguration(pointSize: 24, weight: .light, scale: .default)) {
                 toggleInterfaceButton.setImage(img, for: .normal)
             } else {
                 toggleInterfaceButton.setTitle(NSLocalizedString("WebSpechViewController_ToggleInterfaceButton_Hide_Title", comment: "本文のみへ"), for: .normal)
@@ -791,7 +773,7 @@ body.NovelSpeakerBody {
     func assignDisplayToToggleInterfaceButton() {
         guard let toggleInterfaceButton = self.toggleInterfaceButton else { return }
         DispatchQueue.main.async {
-            if #available(iOS 13.0, *), let img = UIImage(systemName: "dock.arrow.up.rectangle", withConfiguration:  UIImage.SymbolConfiguration(pointSize: 24, weight: .bold, scale: .default)) {
+            if #available(iOS 13.0, *), let img = UIImage(systemName: "dock.arrow.up.rectangle", withConfiguration:  UIImage.SymbolConfiguration(pointSize: 24, weight: .light, scale: .default)) {
                 toggleInterfaceButton.setImage(img, for: .normal)
             } else {
                 toggleInterfaceButton.setTitle(NSLocalizedString("WebSpechViewController_ToggleInterfaceButton_Display_Title", comment: "ボタン表示"), for: .normal)
