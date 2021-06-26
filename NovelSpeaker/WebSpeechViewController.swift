@@ -120,11 +120,17 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     func createUIComponents(webView:WKWebView) {
         webView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(webView)
+        let safeAreaGuide:UILayoutGuide
+        if #available(iOS 11.0, *) {
+            safeAreaGuide = self.view.safeAreaLayoutGuide
+        } else {
+            safeAreaGuide = self.view.layoutMarginsGuide
+        }
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: self.view.firstBaselineAnchor, constant: 8),
-            webView.bottomAnchor.constraint(equalTo: self.view.lastBaselineAnchor, constant: 8),
-            webView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
-            webView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
+            webView.topAnchor.constraint(equalTo: safeAreaGuide.topAnchor, constant: 8),
+            webView.bottomAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor, constant: 8),
+            webView.leftAnchor.constraint(equalTo: safeAreaGuide.leftAnchor, constant: 8),
+            webView.rightAnchor.constraint(equalTo: safeAreaGuide.rightAnchor, constant: 8),
         ])
         let toggleInterfaceButton = UIButton()
         toggleInterfaceButton.translatesAutoresizingMaskIntoConstraints = false
@@ -143,8 +149,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.view.bringSubviewToFront(toggleInterfaceButton)
         self.view.sendSubviewToBack(webView)
         NSLayoutConstraint.activate([
-            toggleInterfaceButton.bottomAnchor.constraint(equalTo: self.view.lastBaselineAnchor, constant: -75),
-            toggleInterfaceButton.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: -25),
+            toggleInterfaceButton.bottomAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor, constant: -25),
+            toggleInterfaceButton.rightAnchor.constraint(equalTo: safeAreaGuide.rightAnchor, constant: -25),
         ])
         assignHideToToggleInterfaceButton()
     }
@@ -215,14 +221,25 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         return "unknown(\(String(describing: body))"
     }
 
-    func hideTopAndDownComponents(animated:Bool = true, animateCompletion: (()->Void)? = nil) {
-        self.navigationController?.setNavigationBarHidden(true, animated: animated)
-        self.tabBarController?.setTabBarVisible(visible:false, animated: animated, animateCompletion: animateCompletion)
+    func hideTopAndDownComponents(animated:Bool = false, animateCompletion: (()->Void)? = nil) {
+        UIView.transition(with: self.view, duration: animated ? TimeInterval(UINavigationController.hideShowBarDuration) : 0, options: .curveEaseOut) {
+            self.navigationController?.setNavigationBarHidden(true, animated: animated)
+            // setTabBarVisible を使うと SafeAreaGuide 周りが壊れるぽいので封印します。(´・ω・`)
+            //self.tabBarController?.setTabBarVisible(visible:false, animated: animated, animateCompletion: animateCompletion)
+            self.tabBarController?.tabBar.isHidden = true
+        } completion: { finished in
+            animateCompletion?()
+        }
         self.assignDisplayToToggleInterfaceButton()
     }
-    func displayTopAndDownComponents(animated:Bool = true, animateCompletion: (()->Void)? = nil) {
-        self.navigationController?.setNavigationBarHidden(false, animated: animated)
-        self.tabBarController?.setTabBarVisible(visible:true, animated: animated, animateCompletion: animateCompletion)
+    func displayTopAndDownComponents(animated:Bool = false, animateCompletion: (()->Void)? = nil) {
+        UIView.transition(with: self.view, duration: animated ? TimeInterval(UINavigationController.hideShowBarDuration) : 0, options: .curveEaseOut) {
+            self.navigationController?.setNavigationBarHidden(false, animated: animated)
+            //self.tabBarController?.setTabBarVisible(visible:true, animated: animated, animateCompletion: animateCompletion)
+            self.tabBarController?.tabBar.isHidden = false
+        } completion: { finished in
+            animateCompletion?()
+        }
         self.assignHideToToggleInterfaceButton()
     }
     
@@ -767,6 +784,9 @@ body.NovelSpeakerBody {
                 toggleInterfaceButton.setImage(img, for: .normal)
             } else {
                 toggleInterfaceButton.setTitle(NSLocalizedString("WebSpechViewController_ToggleInterfaceButton_Hide_Title", comment: "本文のみへ"), for: .normal)
+                let (foregroundColor, backgroundColor) = self.getForegroundBackgroundColor()
+                toggleInterfaceButton.backgroundColor = foregroundColor
+                toggleInterfaceButton.setTitleColor(backgroundColor, for: .normal)
             }
         }
     }
@@ -777,6 +797,9 @@ body.NovelSpeakerBody {
                 toggleInterfaceButton.setImage(img, for: .normal)
             } else {
                 toggleInterfaceButton.setTitle(NSLocalizedString("WebSpechViewController_ToggleInterfaceButton_Display_Title", comment: "ボタン表示"), for: .normal)
+                let (foregroundColor, backgroundColor) = self.getForegroundBackgroundColor()
+                toggleInterfaceButton.backgroundColor = foregroundColor
+                toggleInterfaceButton.setTitleColor(backgroundColor, for: .normal)
             }
         }
     }
@@ -791,10 +814,11 @@ body.NovelSpeakerBody {
                 }
             }
         }
-        if(self.tabBarController?.isVisible ?? false) {
-            self.hideTopAndDownComponents(animated: true, animateCompletion: highlight)
+        //if(self.tabBarController?.isVisible ?? false) {
+        if((self.navigationController?.isNavigationBarHidden ?? false) == false){
+            self.hideTopAndDownComponents(animated: false, animateCompletion: highlight)
         }else{
-            self.displayTopAndDownComponents(animated: true, animateCompletion: highlight)
+            self.displayTopAndDownComponents(animated: false, animateCompletion: highlight)
         }
     }
     
