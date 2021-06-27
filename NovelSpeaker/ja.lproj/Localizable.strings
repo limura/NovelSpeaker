@@ -785,6 +785,11 @@
 "WebSpechViewController_ToggleInterfaceButton_Hide_Title" = "本文のみへ";
 "WebSpechViewController_ToggleInterfaceButton_Display_Title" = "ボタン表示";
 
+"ScrollPullAndFireHandler_ForwardHintLabelText_Initial" = "強く引っ張って・・・";
+"ScrollPullAndFireHandler_BackwardHintLabelText_Initial" = "強く引っ張って・・・";
+"ScrollPullAndFireHandler_ForwardHintLabelText_Active" = "離して次のページへ";
+"ScrollPullAndFireHandler_BackwardHintLabelText_Active" = "離して前のページへ";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
 "BookShelfTableViewController_SortTypeNovelName" = "小説名順";

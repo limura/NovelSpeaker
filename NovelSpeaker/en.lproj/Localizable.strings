@@ -793,6 +793,11 @@
 "WebSpechViewController_ToggleInterfaceButton_Hide_Title" = "To text only";
 "WebSpechViewController_ToggleInterfaceButton_Display_Title" = "Show buttons";
 
+"ScrollPullAndFireHandler_ForwardHintLabelText_Initial" = "Pull strongly...";
+"ScrollPullAndFireHandler_BackwardHintLabelText_Initial" = "Pull strongly...";
+"ScrollPullAndFireHandler_ForwardHintLabelText_Active" = "Release to the next page";
+"ScrollPullAndFireHandler_BackwardHintLabelText_Active" = "Release to the previous page";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";

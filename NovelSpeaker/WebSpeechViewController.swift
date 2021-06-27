@@ -53,6 +53,10 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
 
     var globalStateObserverToken:NotificationToken? = nil
     var displaySettingObserverToken:NotificationToken? = nil
+    
+    var scrollPullAndFireHandler:ScrollPullAndFireHandler? = nil
+    
+    @objc static weak var instance:WebSpeechViewController? = nil
 
     let myScriptNamespace = "NovelSpeaker_\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
     
@@ -67,23 +71,17 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             self.loadFirstContentWith(realm: realm, storyID: targetStoryID, webView: webView)
         }
         setCustomUIMenu()
+        WebSpeechViewController.instance = self
     }
     
     deinit {
+        WebSpeechViewController.instance = nil
         RealmObserverHandler.shared.RemoveDelegate(delegate: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         StorySpeaker.shared.AddDelegate(delegate: self)
         applyTheme()
-        // TODO: 開いた時に毎回リロードするのはちょっと頭悪い気がする。
-        // 現状では、「しばらく動かしていなかった後に起動すると、WebViewが消えている事がある」
-        // という問題に対応するためにリロードしているのだが、view*Appear でリロードするのは何かおかしい。
-        RealmUtil.RealmBlock { realm in
-            if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID) {
-                self.loadStoryWithoutStorySpeakerWith(story: story)
-            }
-        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -99,6 +97,15 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         }else if segue.identifier == "WebViewReaderToNovelDetailViewPushSegue" {
             guard let nextViewController = segue.destination as? NovelDetailViewController else { return }
             nextViewController.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID)
+        }
+    }
+    
+    // background から redume した時に何故かWebViewの中身が空(真っ白)になる事があるぽいのでそれに対抗するために redume した時に呼ばれて再描画？する関数を用意しておきます。(´・ω・`)
+    @objc func RedisplayWebView() {
+        RealmUtil.RealmBlock { realm in
+            if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID) {
+                self.loadStoryWithoutStorySpeakerWith(story: story)
+            }
         }
     }
 
@@ -120,6 +127,21 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     func createUIComponents(webView:WKWebView) {
         webView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(webView)
+        let scrollPullAndFireHandler =  ScrollPullAndFireHandler(parent: self.view, scrollView: webView.scrollView, behavior: .horizontal)
+        scrollPullAndFireHandler.invokeMethod = { isForward in
+            print("invoke: \(isForward ? "forward" : "backward")")
+            switch isForward {
+            case true:
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    StorySpeaker.shared.LoadNextChapter(realm: realm)
+                }
+            case false:
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    StorySpeaker.shared.LoadPreviousChapter(realm: realm)
+                }
+            }
+        }
+        self.scrollPullAndFireHandler = scrollPullAndFireHandler
         let safeAreaGuide:UILayoutGuide
         if #available(iOS 11.0, *) {
             safeAreaGuide = self.view.safeAreaLayoutGuide
@@ -272,13 +294,12 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             let fontWeight = displayFont.fontDescriptor.symbolicTraits.contains(.traitBold) ? "bold" : "normal"
             let fontStyle = displayFont.fontDescriptor.symbolicTraits.contains(.traitItalic) ? "italic" : "normal"
             fontSetting = "font-family: '\(displaySetting.font.familyName)'; font-weight: \(fontWeight); font-style: \(fontStyle);"
-            
             fontPixelSize = "\(displayFont.lineHeight)px"
-            let lineSpacePix = max(displayFont.pointSize, displaySetting.lineSpacingDisplayValue)
-            let lineSpaceEm = lineSpacePix / max(1, displaySetting.font.xHeight)
+            let lineSpacePix = max(displayFont.lineHeight, displaySetting.lineSpacingDisplayValue)
+            let lineSpaceEm = lineSpacePix / max(1, displayFont.lineHeight)
             lineHeight = "\(lineSpaceEm)"
             verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
-            print("\(fontSetting), font-size: \(fontPixelSize), lineSpacePix: \(lineSpacePix), font.xHeight: \(displaySetting.font.xHeight), line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
+            print("\(fontSetting), font-size: \(fontPixelSize), lineSpacePix: \(lineSpacePix), pointSize: \(displayFont.pointSize), font.xHeight: \(displaySetting.font.xHeight), lineHeight: \(displayFont.lineHeight), ascender: \(displayFont.ascender), descender: \(displayFont.descender), capHeight: \(displayFont.capHeight), leading: \(displayFont.leading) line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
         }
         
         let htmledText = convertNovelSepakerStringToHTML(text: story.content)
@@ -355,6 +376,19 @@ body.NovelSpeakerBody {
                 })
                 return
             }
+            if let type = displaySetting?.viewType, type == .webViewHorizontal || type == .webViewVertical {
+                self.scrollPullAndFireHandler?.setupFor(scrollBehavior: type == .webViewVertical ? .vertical : .horizontal)
+                if story.chapterNumber <= 1 {
+                    self.scrollPullAndFireHandler?.isBackwardEnabled = false
+                }else{
+                    self.scrollPullAndFireHandler?.isBackwardEnabled = true
+                }
+                if let lastChapterNumber = novel.lastChapterNumber, lastChapterNumber == story.chapterNumber {
+                    self.scrollPullAndFireHandler?.isForwardEnabled = false
+                }else{
+                    self.scrollPullAndFireHandler?.isForwardEnabled = true
+                }
+            }
             self.isNeedCollectDisplayLocation = false
             self.webSpeechTool.loadHtmlString(webView: webView, html: self.createContentHTML(story: story, displaySetting: displaySetting), baseURL: nil, completionHandler: {
                 self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1, scrollRatio: 0.3)
@@ -419,6 +453,8 @@ body.NovelSpeakerBody {
         self.navigationController?.navigationBar.barStyle = barStyle
         // WebView にはCSSで注入する
         applyFgBgColorToWebView(foregroundColor: foregroundColor, backgroundColor: backgroundColor)
+        // 引っ張って次ページへ移動の奴にも色を設定する
+        self.scrollPullAndFireHandler?.setColor(foreground: foregroundColor, background: backgroundColor)
     }
     
     func getForegroundBackgroundColor() -> (UIColor, UIColor) {

@@ -110,6 +110,7 @@
 		2164800E22910E6300A183DF /* UIImageExtensionSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */; };
 		21652E6B23EDB8F300B64F9E /* SpeechContorlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */; };
 		216631E72682D26800F80C1D /* UITabBarControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216631E62682D26800F80C1D /* UITabBarControllerExtension.swift */; };
+		216631E92688772700F80C1D /* ScrollPullAndFireHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216631E82688772600F80C1D /* ScrollPullAndFireHandler.swift */; };
 		2166693C257548DB00B5B735 /* PickerViewDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2166693B257548DB00B5B735 /* PickerViewDialog.swift */; };
 		216741A02043D592008A578D /* BehaviorLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2167419F2043D592008A578D /* BehaviorLogger.swift */; };
 		216741A3204421F1008A578D /* BugReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216741A2204421F1008A578D /* BugReportViewController.swift */; };
@@ -415,6 +416,7 @@
 		2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensionSwift.swift; sourceTree = "<group>"; };
 		21652E6A23EDB8F300B64F9E /* SpeechContorlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechContorlView.swift; sourceTree = "<group>"; };
 		216631E62682D26800F80C1D /* UITabBarControllerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITabBarControllerExtension.swift; sourceTree = "<group>"; };
+		216631E82688772600F80C1D /* ScrollPullAndFireHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollPullAndFireHandler.swift; sourceTree = "<group>"; };
 		2166693B257548DB00B5B735 /* PickerViewDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewDialog.swift; sourceTree = "<group>"; };
 		2167419F2043D592008A578D /* BehaviorLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorLogger.swift; sourceTree = "<group>"; };
 		216741A2204421F1008A578D /* BugReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BugReportViewController.swift; sourceTree = "<group>"; };
@@ -871,6 +873,8 @@
 				212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */,
 				21D7B10E256D0FB700056E28 /* AppInformationLogger.swift */,
 				216631E62682D26800F80C1D /* UITabBarControllerExtension.swift */,
+				21D9C1662652602900CC5AE9 /* WebSpeechViewTool.swift */,
+				216631E82688772600F80C1D /* ScrollPullAndFireHandler.swift */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -1036,7 +1040,6 @@
 				21648001228F180E00A183DF /* BookShelfRATreeViewController.swift */,
 				21648009229092A200A183DF /* SpeechViewController.swift */,
 				21D9C16426524C2500CC5AE9 /* WebSpeechViewController.swift */,
-				21D9C1662652602900CC5AE9 /* WebSpeechViewTool.swift */,
 				212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */,
 				213A76EA1FB66FC400B98C11 /* SettingsViewController.swift */,
 				21647FF7228C947C00A183DF /* TextSizeSettingViewControllerSwift.swift */,
@@ -1686,6 +1689,7 @@
 				21D9C16526524C2500CC5AE9 /* WebSpeechViewController.swift in Sources */,
 				21AA7FCF25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
+				216631E92688772700F80C1D /* ScrollPullAndFireHandler.swift in Sources */,
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21C52BDE2626BDD800EE4768 /* EurekaPopupViewController.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,
