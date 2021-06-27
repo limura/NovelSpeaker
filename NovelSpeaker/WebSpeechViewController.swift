@@ -334,6 +334,10 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             }
             self.previousChapterTopConstraint = self.previousChapterButton.topAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor)
             self.previousChapterTopConstraint?.isActive = true
+            self.previousChapterButton.isHidden = true
+            self.nextChapterButton.isHidden = true
+            self.chapterSlider.isHidden = true
+            self.chapterPositionLabel.isHidden = true
             self.navigationController?.setNavigationBarHidden(true, animated: animated)
             // setTabBarVisible を使うと SafeAreaGuide 周りが壊れるぽいので封印します。(´・ω・`)
             //self.tabBarController?.setTabBarVisible(visible:false, animated: animated, animateCompletion: animateCompletion)
@@ -357,6 +361,10 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             }
             self.previousChapterBottomConstraint = self.previousChapterButton.bottomAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor)
             self.previousChapterBottomConstraint?.isActive = true
+            self.previousChapterButton.isHidden = false
+            self.nextChapterButton.isHidden = false
+            self.chapterSlider.isHidden = false
+            self.chapterPositionLabel.isHidden = false
 
             self.navigationController?.setNavigationBarHidden(false, animated: animated)
             //self.tabBarController?.setTabBarVisible(visible:true, animated: animated, animateCompletion: animateCompletion)
