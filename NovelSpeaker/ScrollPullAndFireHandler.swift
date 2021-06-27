@@ -67,44 +67,46 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
             self.forwardScrollHintLabel.alpha = 0
             return
         }
+        let backEnable:CGFloat = self.isBackwardEnabled ? 1 : 0
+        let forwardEnable:CGFloat = self.isForwardEnabled ? 1 : 0
         if invokeMergin > activeThreshold {
-            self.backwardScrollHintLabel.alpha = 1
-            self.forwardScrollHintLabel.alpha = 1
+            self.backwardScrollHintLabel.alpha = 1 * backEnable
+            self.forwardScrollHintLabel.alpha = 1 * forwardEnable
             return
         }
         switch m_scrollBehavior {
         case .horizontal:
             if bounceLevel < -activeThreshold {
-                self.backwardScrollHintLabel.alpha = 1
+                self.backwardScrollHintLabel.alpha = 1 * backEnable
                 self.forwardScrollHintLabel.alpha = 0
             }else if bounceLevel < -invokeMergin {
-                self.backwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin)
+                self.backwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin) * backEnable
                 self.forwardScrollHintLabel.alpha = 0
             }else if bounceLevel <= invokeMergin {
                 self.backwardScrollHintLabel.alpha = 0
                 self.forwardScrollHintLabel.alpha = 0
             }else if bounceLevel < activeThreshold {
                 self.backwardScrollHintLabel.alpha = 0
-                self.forwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin)
+                self.forwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin) * forwardEnable
             }else{
                 self.backwardScrollHintLabel.alpha = 0
-                self.forwardScrollHintLabel.alpha = 1
+                self.forwardScrollHintLabel.alpha = 1 * forwardEnable
             }
         case .vertical:
             if bounceLevel < -activeThreshold {
                 self.backwardScrollHintLabel.alpha = 0
-                self.forwardScrollHintLabel.alpha = 1
+                self.forwardScrollHintLabel.alpha = 1 * forwardEnable
             }else if bounceLevel < -invokeMergin {
                 self.backwardScrollHintLabel.alpha = 0
-                self.forwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin)
+                self.forwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin) * forwardEnable
             }else if bounceLevel <= invokeMergin {
                 self.backwardScrollHintLabel.alpha = 0
                 self.forwardScrollHintLabel.alpha = 0
             }else if bounceLevel < activeThreshold {
-                self.backwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin)
+                self.backwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin) * backEnable
                 self.forwardScrollHintLabel.alpha = 0
             }else{
-                self.backwardScrollHintLabel.alpha = 1
+                self.backwardScrollHintLabel.alpha = 1 * backEnable
                 self.forwardScrollHintLabel.alpha = 0
             }
         }
