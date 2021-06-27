@@ -26,8 +26,6 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
             setupFor(scrollBehavior: newValue)
         }
     }
-    var forwardEventDelegate:(()->Void)? = nil
-    var backwardEventDelegate:(()->Void)? = nil
     var invokeMethod:((_ isForward:Bool)->Void)? = nil
 
     let forwardScrollHintLabel = UILabel()
@@ -162,17 +160,13 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
         }
         backwardCenterXAnchor = self.backwardScrollHintLabel.centerXAnchor.constraint(equalTo: self.scrollView.centerXAnchor)
         backwardBottomAnchor = self.backwardScrollHintLabel.bottomAnchor.constraint(equalTo: self.scrollView.topAnchor, constant: backwardBottomConstant)
-        //backwardWidthAnchor = self.backwardScrollHintLabel.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor)
         forwardCenterXAnchor = self.forwardScrollHintLabel.centerXAnchor.constraint(equalTo: self.scrollView.centerXAnchor)
         forwardTopAnchor = self.forwardScrollHintLabel.topAnchor.constraint(equalTo: self.scrollView.bottomAnchor, constant: forwardTopConstant)
-        //forwardWidthAnchor = self.forwardScrollHintLabel.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor)
         NSLayoutConstraint.activate([
             backwardCenterXAnchor!,
             backwardBottomAnchor!,
-            //backwardWidthAnchor!,
             forwardCenterXAnchor!,
             forwardTopAnchor!,
-            //forwardWidthAnchor!,
         ])
         //print("bounceLevel: \(bounceLevel), backwardBottomConstant: \(backwardBottomConstant), forwardTopConstant: \(forwardTopConstant)")
     }
@@ -200,17 +194,13 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
         }
         backwardCenterYAnchor = self.backwardScrollHintLabel.centerYAnchor.constraint(equalTo: self.scrollView.centerYAnchor)
         backwardLeftAnchor = self.backwardScrollHintLabel.leftAnchor.constraint(equalTo: self.scrollView.rightAnchor, constant: backwardRightConstant)
-        //backwardHeightAnchor = self.backwardScrollHintLabel.heightAnchor.constraint(equalTo: self.scrollView.heightAnchor)
         forwardCenterYAnchor = self.forwardScrollHintLabel.centerYAnchor.constraint(equalTo: self.scrollView.centerYAnchor)
         forwardRightAnchor = self.forwardScrollHintLabel.rightAnchor.constraint(equalTo: self.scrollView.leftAnchor, constant: forwardLeftConstant)
-        //forwardHeightAnchor = self.forwardScrollHintLabel.heightAnchor.constraint(equalTo: self.scrollView.heightAnchor)
         NSLayoutConstraint.activate([
             backwardCenterYAnchor!,
             backwardLeftAnchor!,
-            //backwardHeightAnchor!,
             forwardCenterYAnchor!,
             forwardRightAnchor!,
-            //forwardHeightAnchor!,
         ])
         //print("bounceLevel: \(bounceLevel), backwardRightConstant: \(backwardRightConstant), forwardLeftConstant: \(forwardLeftConstant)")
     }
