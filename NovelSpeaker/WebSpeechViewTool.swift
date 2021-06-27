@@ -24,6 +24,27 @@
 import UIKit
 import WebKit
 
+extension UIColor {
+    var cssColor:String? {
+        get {
+            var red:CGFloat = 0
+            var green:CGFloat = 0
+            var blue:CGFloat = 0
+            var alpha:CGFloat = 0
+            if self.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+               , !red.isInfinite, !red.isNaN
+               , !green.isInfinite, !green.isNaN
+               , !blue.isInfinite, !blue.isNaN
+               , !alpha.isInfinite, !alpha.isNaN
+            {
+                return "rgba(\(String(format: "%d", Int(red*255))), \(String(format: "%d", Int(green*255))), \(String(format: "%d", Int(blue*255))), \(alpha))"
+            }
+            return nil
+        }
+    }
+}
+
+
 class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     var wkWebView:WKWebView? = nil
     var loadCompletionHandler:(() -> Void)? = nil
@@ -35,13 +56,18 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         }
     }
     
-    public func loadHtmlString(webView:WKWebView, html:String, baseURL: URL?, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
+    public func applyFromHtmlString(webView:WKWebView, html:String, baseURL: URL?, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
         removeDelegate()
         loadCompletionHandler = completionHandler
         self.wkWebView = webView
         self.siteInfoArray = siteInfoArray
         webView.navigationDelegate = self
         webView.loadHTMLString(html, baseURL: baseURL)
+    }
+    
+    public func applyFromNovelSpeakerString(webView:WKWebView, content: String, foregroundColor: UIColor, backgroundColor: UIColor, displaySetting: RealmDisplaySetting?, baseURL: URL?, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
+        let html = createContentHTML(content: content, foregroundColor: foregroundColor, backgroundColor: backgroundColor, displaySetting: displaySetting)
+        applyFromHtmlString(webView: webView, html: html, baseURL: baseURL, completionHandler: completionHandler)
     }
     
     public func loadUrl(webView:WKWebView, request:URLRequest, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
@@ -197,4 +223,90 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             completionHandler?()
         })
     }
+    
+    func convertNovelSepakerStringToHTML(text:String) -> String {
+        return text.replacingOccurrences(of: "\\|([^|(]+?)[(]([^)]+?)[)]", with: "<ruby> $1<rt> $2 </rt></ruby>", options: .regularExpression, range: text.range(of: text)).replacingOccurrences(of: "\r\n", with: "  <br>").replacingOccurrences(of: "\n", with: " <br>")
+    }
+    
+    func createContentHTML(content:String, foregroundColor:UIColor, backgroundColor:UIColor, displaySetting: RealmDisplaySetting?) -> String {
+        var fontSetting:String = "font: -apple-system-title1;"
+        var fontPixelSize:String = "18px"
+        var letterSpacing:String = "0.03em"
+        var lineHeight:String = "1.5em"
+        var verticalModeCSS:String = ""
+        let foregroundColorCSS:String
+        if let fgColor = foregroundColor.cssColor {
+            foregroundColorCSS = "color: \(fgColor)"
+        }else{
+            foregroundColorCSS = ""
+        }
+        let backgroundColorCSS:String
+        if let bgColor = backgroundColor.cssColor {
+            backgroundColorCSS = "background-color: \(bgColor)"
+        }else{
+            backgroundColorCSS = ""
+        }
+
+        if let displaySetting = displaySetting {
+            let displayFont = displaySetting.font
+            let fontWeight = displayFont.fontDescriptor.symbolicTraits.contains(.traitBold) ? "bold" : "normal"
+            let fontStyle = displayFont.fontDescriptor.symbolicTraits.contains(.traitItalic) ? "italic" : "normal"
+            fontSetting = "font-family: '\(displaySetting.font.familyName)'; font-weight: \(fontWeight); font-style: \(fontStyle);"
+            fontPixelSize = "\(displayFont.lineHeight)px"
+            let lineSpacePix = max(displayFont.lineHeight, displaySetting.lineSpacingDisplayValue)
+            let lineSpaceEm = lineSpacePix / max(1, displayFont.lineHeight)
+            lineHeight = "\(lineSpaceEm)"
+            verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
+            print("\(fontSetting), font-size: \(fontPixelSize), lineSpacePix: \(lineSpacePix), pointSize: \(displayFont.pointSize), font.xHeight: \(displaySetting.font.xHeight), lineHeight: \(displayFont.lineHeight), ascender: \(displayFont.ascender), descender: \(displayFont.descender), capHeight: \(displayFont.capHeight), leading: \(displayFont.leading) line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
+        }
+        
+        let htmledText = convertNovelSepakerStringToHTML(text: content)
+        /* goole font を読み込む場合はこうするよのメモ
+         <html>
+         <head>
+         <style type="text/css">
+         @import url('https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&display=swap');
+         html {
+           font-family: 'Hachi Maru Pop', cursive;
+           font-size: \(fontPixelSize);
+           letter-spacing: \(letterSpacing);
+           line-height: \(lineHeight);
+           font-feature-settings: 'pkna';
+           \(verticalModeCSS)
+         }
+         */
+        let html = """
+<html>
+<head>
+<style type="text/css">
+html {
+  \(fontSetting)
+  font-size: \(fontPixelSize);
+  letter-spacing: \(letterSpacing);
+  line-height: \(lineHeight);
+  font-feature-settings: 'pkna';
+  \(verticalModeCSS)
+}
+ruby rt {
+    font-size: 0.65em;
+}
+body.NovelSpeakerBody {
+  \(foregroundColorCSS);
+  \(backgroundColorCSS);
+}
+* {
+  scroll-behavior: smooth;
+}
+</style>
+</head>
+<html><body class="NovelSpeakerBody">
+"""
+        + htmledText
+        + """
+</body></html>
+"""
+        return html
+    }
+    
+
 }

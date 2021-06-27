@@ -19,26 +19,6 @@ import RealmSwift
  - ダークモード・ライトモードの切り替えに追従できてないかも？(traitCollectionDidChange 辺りを確認しよう)
  */
 
-extension UIColor {
-    var cssColor:String? {
-        get {
-            var red:CGFloat = 0
-            var green:CGFloat = 0
-            var blue:CGFloat = 0
-            var alpha:CGFloat = 0
-            if self.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-               , !red.isInfinite, !red.isNaN
-               , !green.isInfinite, !green.isNaN
-               , !blue.isInfinite, !blue.isNaN
-               , !alpha.isInfinite, !alpha.isNaN
-            {
-                return "rgba(\(String(format: "%d", Int(red*255))), \(String(format: "%d", Int(green*255))), \(String(format: "%d", Int(blue*255))), \(alpha))"
-            }
-            return nil
-        }
-    }
-}
-
 class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate, WKScriptMessageHandler {
     var targetStoryID:String? = nil
     var isNeedResumeSpeech:Bool = false
@@ -264,92 +244,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         }
         self.assignHideToToggleInterfaceButton()
     }
-    
-    func convertNovelSepakerStringToHTML(text:String) -> String {
-        return text.replacingOccurrences(of: "\\|([^|(]+?)[(]([^)]+?)[)]", with: "<ruby> $1<rt> $2 </rt></ruby>", options: .regularExpression, range: text.range(of: text)).replacingOccurrences(of: "\r\n", with: "  <br>").replacingOccurrences(of: "\n", with: " <br>")
-    }
-    
-    func createContentHTML(story:Story, displaySetting: RealmDisplaySetting?) -> String {
-        var fontSetting:String = "font: -apple-system-title1;"
-        var fontPixelSize:String = "18px"
-        var letterSpacing:String = "0.03em"
-        var lineHeight:String = "1.5em"
-        var verticalModeCSS:String = ""
-        let (foregroundColor, backgroundColor) = getForegroundBackgroundColor()
-        let foregroundColorCSS:String
-        if let fgColor = foregroundColor.cssColor {
-            foregroundColorCSS = "color: \(fgColor)"
-        }else{
-            foregroundColorCSS = ""
-        }
-        let backgroundColorCSS:String
-        if let bgColor = backgroundColor.cssColor {
-            backgroundColorCSS = "background-color: \(bgColor)"
-        }else{
-            backgroundColorCSS = ""
-        }
 
-        if let displaySetting = displaySetting {
-            let displayFont = displaySetting.font
-            let fontWeight = displayFont.fontDescriptor.symbolicTraits.contains(.traitBold) ? "bold" : "normal"
-            let fontStyle = displayFont.fontDescriptor.symbolicTraits.contains(.traitItalic) ? "italic" : "normal"
-            fontSetting = "font-family: '\(displaySetting.font.familyName)'; font-weight: \(fontWeight); font-style: \(fontStyle);"
-            fontPixelSize = "\(displayFont.lineHeight)px"
-            let lineSpacePix = max(displayFont.lineHeight, displaySetting.lineSpacingDisplayValue)
-            let lineSpaceEm = lineSpacePix / max(1, displayFont.lineHeight)
-            lineHeight = "\(lineSpaceEm)"
-            verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
-            print("\(fontSetting), font-size: \(fontPixelSize), lineSpacePix: \(lineSpacePix), pointSize: \(displayFont.pointSize), font.xHeight: \(displaySetting.font.xHeight), lineHeight: \(displayFont.lineHeight), ascender: \(displayFont.ascender), descender: \(displayFont.descender), capHeight: \(displayFont.capHeight), leading: \(displayFont.leading) line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
-        }
-        
-        let htmledText = convertNovelSepakerStringToHTML(text: story.content)
-        /* goole font を読み込む場合はこうするよのメモ
-         <html>
-         <head>
-         <style type="text/css">
-         @import url('https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&display=swap');
-         html {
-           font-family: 'Hachi Maru Pop', cursive;
-           font-size: \(fontPixelSize);
-           letter-spacing: \(letterSpacing);
-           line-height: \(lineHeight);
-           font-feature-settings: 'pkna';
-           \(verticalModeCSS)
-         }
-         */
-        let html = """
-<html>
-<head>
-<style type="text/css">
-html {
-  \(fontSetting)
-  font-size: \(fontPixelSize);
-  letter-spacing: \(letterSpacing);
-  line-height: \(lineHeight);
-  font-feature-settings: 'pkna';
-  \(verticalModeCSS)
-}
-ruby rt {
-    font-size: 0.65em;
-}
-body.NovelSpeakerBody {
-  \(foregroundColorCSS);
-  \(backgroundColorCSS);
-}
-* {
-  scroll-behavior: smooth;
-}
-</style>
-</head>
-<html><body class="NovelSpeakerBody">
-"""
-        + htmledText
-        + """
-</body></html>
-"""
-        return html
-    }
-    
     func loadStoryWithoutStorySpeakerWith(story:Story) {
         guard let webView = self.textWebView else { return }
         RealmUtil.RealmBlock { realm in
@@ -390,9 +285,10 @@ body.NovelSpeakerBody {
                 }
             }
             self.isNeedCollectDisplayLocation = false
-            self.webSpeechTool.loadHtmlString(webView: webView, html: self.createContentHTML(story: story, displaySetting: displaySetting), baseURL: nil, completionHandler: {
+            let (fg, bg) = getForegroundBackgroundColor()
+            self.webSpeechTool.applyFromNovelSpeakerString(webView: webView, content: story.content, foregroundColor: fg, backgroundColor: bg, displaySetting: displaySetting, baseURL: nil) {
                 self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1, scrollRatio: 0.3)
-            })
+            }
         }
     }
     
