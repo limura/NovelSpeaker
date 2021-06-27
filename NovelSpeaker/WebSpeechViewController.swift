@@ -36,6 +36,17 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     
     var scrollPullAndFireHandler:ScrollPullAndFireHandler? = nil
     
+    let previousChapterButton = UIButton()
+    let nextChapterButton = UIButton()
+    let chapterSlider = UISlider()
+    let chapterPositionLabel = UILabel()
+    var chapterPositionLabelWidthConstraint:NSLayoutConstraint? = nil
+    
+    var previousChapterBottomConstraint:NSLayoutConstraint? = nil
+    var previousChapterTopConstraint:NSLayoutConstraint? = nil
+    
+    var lastChapterNumber:Int = -1
+
     @objc static weak var instance:WebSpeechViewController? = nil
 
     let myScriptNamespace = "NovelSpeaker_\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
@@ -103,8 +114,99 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         //observeNovel(novelID: novelID)
         observeGlobalState()
     }
+    
+    func applyChapterListChange() {
+        let storyID = StorySpeaker.shared.storyID
+        let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
+        let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: storyID)
+        var lastChapterNumber:Int = self.lastChapterNumber
+        if lastChapterNumber <= 0 {
+            RealmUtil.RealmBlock { (realm) -> Void in
+                lastChapterNumber = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.lastChapterNumber ?? -1
+            }
+            if lastChapterNumber <= 0 {
+                return
+            }
+            self.lastChapterNumber = lastChapterNumber
+        }
+        DispatchQueue.main.async {
+            if chapterNumber <= 1 {
+                self.previousChapterButton.isEnabled = false
+            }else{
+                self.previousChapterButton.isEnabled = true
+            }
+            if chapterNumber < lastChapterNumber {
+                self.nextChapterButton.isEnabled = true
+            }else{
+                self.nextChapterButton.isEnabled = false
+            }
+            self.chapterSlider.minimumValue = 1.0
+            self.chapterSlider.maximumValue = Float(lastChapterNumber) + Float(0.01)
+            self.chapterSlider.value = Float(chapterNumber)
+            
+            self.chapterPositionLabel.text = "\(chapterNumber)/\(lastChapterNumber)"
+            self.chapterPositionLabel.sizeToFit()
+            if self.view.subviews.contains(self.chapterPositionLabel) {
+                if let constraint = self.chapterPositionLabelWidthConstraint {
+                    self.chapterPositionLabel.removeConstraint(constraint)
+                }
+                self.chapterPositionLabelWidthConstraint = self.chapterPositionLabel.widthAnchor.constraint(equalToConstant: self.chapterPositionLabel.frame.width)
+                self.chapterPositionLabelWidthConstraint?.isActive = true
+            }
+        }
+    }
 
     func createUIComponents(webView:WKWebView) {
+        let safeAreaGuide:UILayoutGuide
+        if #available(iOS 11.0, *) {
+            safeAreaGuide = self.view.safeAreaLayoutGuide
+        } else {
+            safeAreaGuide = self.view.layoutMarginsGuide
+        }
+
+        self.view.addSubview(previousChapterButton)
+        self.view.addSubview(nextChapterButton)
+        self.view.addSubview(chapterSlider)
+        self.view.addSubview(chapterPositionLabel)
+        previousChapterButton.setTitle(" ◀ ", for: .normal)
+        previousChapterButton.titleLabel?.sizeToFit()
+        previousChapterButton.sizeToFit()
+        previousChapterButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
+        previousChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
+        previousChapterButton.accessibilityLabel = NSLocalizedString("SpeechViewController_PreviousChapterButton_VoiceOverTitle", comment: "前のページ")
+        previousChapterButton.addTarget(self, action: #selector(previousChapterButtonClicked(_:)), for: .touchUpInside)
+        previousChapterButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        nextChapterButton.setTitle(" ▶ ", for: .normal)
+        nextChapterButton.titleLabel?.sizeToFit()
+        nextChapterButton.sizeToFit()
+        nextChapterButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
+        nextChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
+        nextChapterButton.accessibilityLabel = NSLocalizedString("SpeechViewController_NextChapterButton_VoiceOverTitle", comment: "次のページ")
+        nextChapterButton.addTarget(self, action: #selector(nextChapterButtonClicked(_:)), for: .touchUpInside)
+        nextChapterButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        chapterSlider.translatesAutoresizingMaskIntoConstraints = false
+        chapterSlider.addTarget(self, action: #selector(chapterSliderValueChanged(_:)), for: .valueChanged)
+
+        chapterPositionLabel.adjustsFontForContentSizeCategory = true
+        chapterPositionLabel.translatesAutoresizingMaskIntoConstraints = false
+        chapterPositionLabel.font = UIFont.preferredFont(forTextStyle: .body)
+        applyChapterListChange()
+        
+        self.previousChapterBottomConstraint = previousChapterButton.bottomAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor, constant: -8)
+        NSLayoutConstraint.activate([
+            self.previousChapterBottomConstraint!,
+            self.chapterSlider.centerYAnchor.constraint(equalTo: self.previousChapterButton.centerYAnchor),
+            self.previousChapterButton.leftAnchor.constraint(equalTo: safeAreaGuide.leftAnchor, constant: 16),
+            self.chapterSlider.leftAnchor.constraint(equalTo: self.previousChapterButton.rightAnchor, constant: 8),
+            self.nextChapterButton.centerYAnchor.constraint(equalTo: self.previousChapterButton.centerYAnchor),
+            self.nextChapterButton.leftAnchor.constraint(equalTo: self.chapterSlider.rightAnchor, constant: 8),
+            self.chapterPositionLabel.centerYAnchor.constraint(equalTo: self.previousChapterButton.centerYAnchor),
+            self.chapterPositionLabel.leftAnchor.constraint(equalTo: self.nextChapterButton.rightAnchor, constant: 8),
+            self.chapterPositionLabel.rightAnchor.constraint(equalTo: safeAreaGuide.rightAnchor, constant: -16),
+        ])
+        
         webView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(webView)
         let scrollPullAndFireHandler =  ScrollPullAndFireHandler(parent: self.view, scrollView: webView.scrollView, behavior: .horizontal)
@@ -121,18 +223,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             }
         }
         self.scrollPullAndFireHandler = scrollPullAndFireHandler
-        let safeAreaGuide:UILayoutGuide
-        if #available(iOS 11.0, *) {
-            safeAreaGuide = self.view.safeAreaLayoutGuide
-        } else {
-            safeAreaGuide = self.view.layoutMarginsGuide
-        }
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: safeAreaGuide.topAnchor, constant: 8),
-            webView.bottomAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor, constant: 8),
+            webView.bottomAnchor.constraint(equalTo: previousChapterButton.topAnchor, constant: 8),
             webView.leftAnchor.constraint(equalTo: safeAreaGuide.leftAnchor, constant: 8),
             webView.rightAnchor.constraint(equalTo: safeAreaGuide.rightAnchor, constant: 8),
         ])
+        
         let toggleInterfaceButton = UIButton()
         toggleInterfaceButton.translatesAutoresizingMaskIntoConstraints = false
         toggleInterfaceButton.isAccessibilityElement = false
@@ -150,7 +247,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.view.bringSubviewToFront(toggleInterfaceButton)
         self.view.sendSubviewToBack(webView)
         NSLayoutConstraint.activate([
-            toggleInterfaceButton.bottomAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor, constant: -25),
+            toggleInterfaceButton.bottomAnchor.constraint(equalTo: previousChapterButton.topAnchor, constant: -25),
             toggleInterfaceButton.rightAnchor.constraint(equalTo: safeAreaGuide.rightAnchor, constant: -25),
         ])
         assignHideToToggleInterfaceButton()
@@ -223,7 +320,20 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
 
     func hideTopAndDownComponents(animated:Bool = false, animateCompletion: (()->Void)? = nil) {
+        if let bottomConstraint = self.previousChapterBottomConstraint {
+            bottomConstraint.isActive = false
+        }
+        
         UIView.transition(with: self.view, duration: animated ? TimeInterval(UINavigationController.hideShowBarDuration) : 0, options: .curveEaseOut) {
+            if let topConstraint = self.previousChapterTopConstraint { topConstraint.isActive = false }
+            let safeAreaGuide:UILayoutGuide
+            if #available(iOS 11.0, *) {
+                safeAreaGuide = self.view.safeAreaLayoutGuide
+            } else {
+                safeAreaGuide = self.view.layoutMarginsGuide
+            }
+            self.previousChapterTopConstraint = self.previousChapterButton.topAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor)
+            self.previousChapterTopConstraint?.isActive = true
             self.navigationController?.setNavigationBarHidden(true, animated: animated)
             // setTabBarVisible を使うと SafeAreaGuide 周りが壊れるぽいので封印します。(´・ω・`)
             //self.tabBarController?.setTabBarVisible(visible:false, animated: animated, animateCompletion: animateCompletion)
@@ -234,7 +344,20 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.assignDisplayToToggleInterfaceButton()
     }
     func displayTopAndDownComponents(animated:Bool = false, animateCompletion: (()->Void)? = nil) {
+        if let topConstraint = self.previousChapterTopConstraint {
+            topConstraint.isActive = false
+        }
         UIView.transition(with: self.view, duration: animated ? TimeInterval(UINavigationController.hideShowBarDuration) : 0, options: .curveEaseOut) {
+            if let bottomConstraint = self.previousChapterBottomConstraint { bottomConstraint.isActive = false }
+            let safeAreaGuide:UILayoutGuide
+            if #available(iOS 11.0, *) {
+                safeAreaGuide = self.view.safeAreaLayoutGuide
+            } else {
+                safeAreaGuide = self.view.layoutMarginsGuide
+            }
+            self.previousChapterBottomConstraint = self.previousChapterButton.bottomAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor)
+            self.previousChapterBottomConstraint?.isActive = true
+
             self.navigationController?.setNavigationBarHidden(false, animated: animated)
             //self.tabBarController?.setTabBarVisible(visible:true, animated: animated, animateCompletion: animateCompletion)
             self.tabBarController?.tabBar.isHidden = false
@@ -331,16 +454,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     func applyThemeColor(backgroundColor:UIColor, foregroundColor:UIColor, indicatorStyle:UIScrollView.IndicatorStyle, barStyle:UIBarStyle) {
         
         self.view.backgroundColor = backgroundColor;
-        /*
-        self.textView.textColor = foregroundColor;
-        self.textView.backgroundColor = backgroundColor;
-        self.textView.indicatorStyle = indicatorStyle
         self.nextChapterButton.backgroundColor = backgroundColor
+        self.nextChapterButton.setTitleColor(self.view.tintColor, for: .normal)
         self.previousChapterButton.backgroundColor = backgroundColor
+        self.previousChapterButton.setTitleColor(self.view.tintColor, for: .normal)
         self.chapterSlider.backgroundColor = backgroundColor
         self.chapterPositionLabel.backgroundColor = backgroundColor
         self.chapterPositionLabel.textColor = foregroundColor
-         */
         self.tabBarController?.tabBar.barTintColor = backgroundColor
         self.navigationController?.navigationBar.barTintColor = backgroundColor
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: foregroundColor]
@@ -708,6 +828,33 @@ body.NovelSpeakerBody {
         }
     }
     
+    @objc func chapterSliderValueChanged(_ sender: Any) {
+        //disableCurrentReadingStoryChangeFloatingButton()
+        let storyID = StorySpeaker.shared.storyID
+        let chapterNumber = Int(self.chapterSlider.value + 0.5)
+        let targetStoryID = RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)
+        //self.chapterSlider.value = Float(chapterNumber)
+        RealmUtil.RealmBlock { (realm) -> Void in
+            if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: targetStoryID) {
+                StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
+            }
+        }
+    }
+    
+    @objc func previousChapterButtonClicked(_ sender: Any) {
+        //disableCurrentReadingStoryChangeFloatingButton()
+        RealmUtil.RealmBlock { (realm) -> Void in
+            StorySpeaker.shared.LoadPreviousChapter(realm: realm)
+        }
+    }
+    @objc func nextChapterButtonClicked(_ sender: Any) {
+        //disableCurrentReadingStoryChangeFloatingButton()
+        RealmUtil.RealmBlock { (realm) -> Void in
+            StorySpeaker.shared.LoadNextChapter(realm: realm)
+        }
+    }
+
+    
     func assignHideToToggleInterfaceButton() {
         guard let toggleInterfaceButton = self.toggleInterfaceButton else { return }
         DispatchQueue.main.async {
@@ -799,6 +946,7 @@ body.NovelSpeakerBody {
     func storySpeakerStoryChanged(story:Story) {
         self.speakerDisplayWholeText = StorySpeaker.shared.GenerateWholeDisplayText()
         self.loadStoryWithoutStorySpeakerWith(story: story)
+        self.applyChapterListChange()
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false
             DispatchQueue.main.async {
