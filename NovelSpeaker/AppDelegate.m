@@ -150,6 +150,8 @@ void uncaughtExceptionHandler(NSException *exception)
     if ([RealmUtil IsUseCloudRealm]) {
         [RealmUtil CloudPull];
     }
+    // background から redume した時に webview が真っ白になる場合があるぽいのでそれに対抗します。(´・ω・`)
+    [[WebSpeechViewController instance] RedisplayWebView];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
