@@ -225,9 +225,9 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.scrollPullAndFireHandler = scrollPullAndFireHandler
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: safeAreaGuide.topAnchor, constant: 8),
-            webView.bottomAnchor.constraint(equalTo: previousChapterButton.topAnchor, constant: 8),
+            webView.bottomAnchor.constraint(equalTo: previousChapterButton.topAnchor, constant: -8),
             webView.leftAnchor.constraint(equalTo: safeAreaGuide.leftAnchor, constant: 8),
-            webView.rightAnchor.constraint(equalTo: safeAreaGuide.rightAnchor, constant: 8),
+            webView.rightAnchor.constraint(equalTo: safeAreaGuide.rightAnchor, constant: -8),
         ])
         
         let toggleInterfaceButton = UIButton()
