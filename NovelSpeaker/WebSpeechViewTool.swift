@@ -230,7 +230,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     
     func createContentHTML(content:String, foregroundColor:UIColor, backgroundColor:UIColor, displaySetting: RealmDisplaySetting?) -> String {
         var fontSetting:String = "font: -apple-system-title1;"
-        var fontPixelSize:String = "18px"
+        var fontSize:String = "18px"
         var letterSpacing:String = "0.03em"
         var lineHeight:String = "1.5em"
         var verticalModeCSS:String = ""
@@ -252,12 +252,11 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             let fontWeight = displayFont.fontDescriptor.symbolicTraits.contains(.traitBold) ? "bold" : "normal"
             let fontStyle = displayFont.fontDescriptor.symbolicTraits.contains(.traitItalic) ? "italic" : "normal"
             fontSetting = "font-family: '\(displaySetting.font.familyName)'; font-weight: \(fontWeight); font-style: \(fontStyle);"
-            fontPixelSize = "\(displayFont.lineHeight)px"
-            let lineSpacePix = max(displayFont.lineHeight, displaySetting.lineSpacingDisplayValue)
-            let lineSpaceEm = lineSpacePix / max(1, displayFont.lineHeight)
-            lineHeight = "\(lineSpaceEm)"
+            fontSize = "\(displayFont.lineHeight)px"
+            let lineSpacePix = displayFont.lineHeight + displaySetting.lineSpacingDisplayValue
+            lineHeight = "\(lineSpacePix)px"
             verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
-            print("\(fontSetting), font-size: \(fontPixelSize), lineSpacePix: \(lineSpacePix), pointSize: \(displayFont.pointSize), font.xHeight: \(displaySetting.font.xHeight), lineHeight: \(displayFont.lineHeight), ascender: \(displayFont.ascender), descender: \(displayFont.descender), capHeight: \(displayFont.capHeight), leading: \(displayFont.leading) line-height: \(lineHeight), vertical: \"\(verticalModeCSS)\"")
+            print("\(fontSetting), font-size: \(fontSize), lineSpacePix: \(lineSpacePix), pointSize: \(displayFont.pointSize), font.xHeight: \(displaySetting.font.xHeight), CSS line-height: \(lineHeight), UIFont.lineHeight: \(displayFont.lineHeight), lineSpacingDisplayValue: \(displaySetting.lineSpacingDisplayValue), ascender: \(displayFont.ascender), descender: \(displayFont.descender), capHeight: \(displayFont.capHeight), leading: \(displayFont.leading) vertical: \"\(verticalModeCSS)\")")
         }
         
         let htmledText = convertNovelSepakerStringToHTML(text: content)
@@ -281,7 +280,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
 <style type="text/css">
 html {
   \(fontSetting)
-  font-size: \(fontPixelSize);
+  font-size: \(fontSize);
   letter-spacing: \(letterSpacing);
   line-height: \(lineHeight);
   font-feature-settings: 'pkna';
