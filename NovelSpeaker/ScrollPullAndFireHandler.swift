@@ -43,11 +43,11 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
         parent.addSubview(backwardScrollHintLabel)
         parent.bringSubviewToFront(forwardScrollHintLabel)
         parent.bringSubviewToFront(backwardScrollHintLabel)
-        //forwardScrollHintLabel.alpha = 0
+        forwardScrollHintLabel.alpha = 0
         forwardScrollHintLabel.numberOfLines = 0
         forwardScrollHintLabel.translatesAutoresizingMaskIntoConstraints = false
         forwardScrollHintLabel.textAlignment = .center
-        //backwardScrollHintLabel.alpha = 0
+        backwardScrollHintLabel.alpha = 0
         backwardScrollHintLabel.numberOfLines = 0
         backwardScrollHintLabel.translatesAutoresizingMaskIntoConstraints = false
         backwardScrollHintLabel.textAlignment = .center
@@ -64,26 +64,52 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
     }
     
     func setAlpha(bounceLevel:CGFloat) {
-        return
-        let level = abs(bounceLevel)
+        if isDragging == false {
+            self.backwardScrollHintLabel.alpha = 0
+            self.forwardScrollHintLabel.alpha = 0
+            return
+        }
         if invokeMergin > activeThreshold {
             self.backwardScrollHintLabel.alpha = 1
             self.forwardScrollHintLabel.alpha = 1
             return
         }
-        if level < invokeMergin {
-            self.backwardScrollHintLabel.alpha = 0
-            self.forwardScrollHintLabel.alpha = 0
-            return
+        switch m_scrollBehavior {
+        case .horizontal:
+            if bounceLevel < -activeThreshold {
+                self.backwardScrollHintLabel.alpha = 1
+                self.forwardScrollHintLabel.alpha = 0
+            }else if bounceLevel < -invokeMergin {
+                self.backwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin)
+                self.forwardScrollHintLabel.alpha = 0
+            }else if bounceLevel <= invokeMergin {
+                self.backwardScrollHintLabel.alpha = 0
+                self.forwardScrollHintLabel.alpha = 0
+            }else if bounceLevel < activeThreshold {
+                self.backwardScrollHintLabel.alpha = 0
+                self.forwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin)
+            }else{
+                self.backwardScrollHintLabel.alpha = 0
+                self.forwardScrollHintLabel.alpha = 1
+            }
+        case .vertical:
+            if bounceLevel < -activeThreshold {
+                self.backwardScrollHintLabel.alpha = 0
+                self.forwardScrollHintLabel.alpha = 1
+            }else if bounceLevel < -invokeMergin {
+                self.backwardScrollHintLabel.alpha = 0
+                self.forwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin)
+            }else if bounceLevel <= invokeMergin {
+                self.backwardScrollHintLabel.alpha = 0
+                self.forwardScrollHintLabel.alpha = 0
+            }else if bounceLevel < activeThreshold {
+                self.backwardScrollHintLabel.alpha = abs(bounceLevel) / (activeThreshold - invokeMergin)
+                self.forwardScrollHintLabel.alpha = 0
+            }else{
+                self.backwardScrollHintLabel.alpha = 1
+                self.forwardScrollHintLabel.alpha = 0
+            }
         }
-        if level > activeThreshold {
-            self.backwardScrollHintLabel.alpha = 1
-            self.forwardScrollHintLabel.alpha = 1
-            return
-        }
-        let alpha = level / (activeThreshold - invokeMergin)
-        self.backwardScrollHintLabel.alpha = alpha
-        self.forwardScrollHintLabel.alpha = alpha
     }
     
     var backwardCenterXAnchor:NSLayoutConstraint? = nil
@@ -317,6 +343,7 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
             bouncingLevel = calcBouncingLevelForVertical(scrollView: scrollView)
         }
         if abs(bouncingLevel) >= activeThreshold {
+            setAlpha(bounceLevel: 0)
             switch m_scrollBehavior {
             case .horizontal:
                 if bouncingLevel > 0 {
