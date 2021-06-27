@@ -109,7 +109,6 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.view.addSubview(webView)
         let scrollPullAndFireHandler =  ScrollPullAndFireHandler(parent: self.view, scrollView: webView.scrollView, behavior: .horizontal)
         scrollPullAndFireHandler.invokeMethod = { isForward in
-            print("invoke: \(isForward ? "forward" : "backward")")
             switch isForward {
             case true:
                 RealmUtil.RealmBlock { (realm) -> Void in
@@ -117,7 +116,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
                 }
             case false:
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    StorySpeaker.shared.LoadPreviousChapter(realm: realm)
+                    StorySpeaker.shared.LoadPreviousChapter(realm: realm, moveReadingPointToLast: true)
                 }
             }
         }

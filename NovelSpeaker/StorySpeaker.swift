@@ -738,12 +738,16 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
         return RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: previousChapterNumber))
     }
-    func LoadPreviousChapter(realm: Realm, completion: ((Bool)->Void)? = nil){
+    func LoadPreviousChapter(realm: Realm, moveReadingPointToLast:Bool = false, completion: ((Bool)->Void)? = nil){
         DispatchQueue.main.async {
             if let previousStory = self.SearchPreviousChapterWith(realm: realm, storyID: self.storyID) {
-                if previousStory.readLocation(realm: realm) != 0 {
+                if moveReadingPointToLast == false || previousStory.content.count <= 2, previousStory.readLocation(realm: realm) != 0 {
                     RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
                         previousStory.SetCurrentReadLocationWith(realm: realm, location: 0)
+                    }
+                }else if moveReadingPointToLast {
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
+                        previousStory.SetCurrentReadLocationWith(realm: realm, location: max(0, previousStory.content.count - 2))
                     }
                 }
                 self.ringPageTurningSound()
