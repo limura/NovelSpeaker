@@ -210,6 +210,7 @@
 "SettingTableViewController_RepeatType_RewindToThisStory" = "現在の章を再生し直す";
 "SettingTableViewController_RepeatType_GoToNextLikeNovel" = "お気に入りのうち未読の物を再生";
 "SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "同じフォルダの小説のうち未読の物を再生";
+"SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel" = "指定フォルダの小説のうち未読の物を再生";
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する";
 "SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "確認";
 "SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "この設定は、読み上げ中の読み上げ位置表示がおかしくなる問題への対応です。ただし、対応手法がかなりトリッキーなので適用する前に原理を理解しておいてください。\nこの設定を有効にすると、読み上げ中の読み上げ位置がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ) に読み替えるように設定することでこの問題を回避するようになります。\nこの機能を実装した時点では、iOS の音声合成エンジンでは \"α\"(アルファ) は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により \"α\" が「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われますので iOS 11 以前でご利用の方は必要なさそうです。\n以上の事を理解した上でこの設定を有効にしますか？";
@@ -291,6 +292,8 @@
 "SpeechViewController_SkipBackwardButtonTitle" = "巻き戻し";
 "SpeechViewController_SkipForwardButtonTitle" = "少し先へ";
 "SpeechViewController_ShowTableOfContentsButtonTitle" = "目次";
+"SpeechViewController_SelectFolder_Title" = "続けて再生するフォルダを選択";
+"SpeechViewController_NotUseNextSpeechNovel" = "続けて再生を使わずに開始";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";

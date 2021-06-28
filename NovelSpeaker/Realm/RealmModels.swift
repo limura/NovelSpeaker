@@ -2432,6 +2432,7 @@ extension HTTPCookie {
     case RewindToThisStory = 2 // 一つの章が対象(一つの章を読み終えたらその章の最初に戻る)
     case GoToNextLikeNovel = 3 // 「お気に入り」に登録されている小説のうち、未読の物に切り替えて再生する
     case GoToNextSameFolderdNovel = 4 // 同じ「フォルダ」に登録されている小説のうち、未読のものに切り替えて再生する
+    case GoToNextSelectedFolderdNovel = 5
 }
 
 @objc final class RealmGlobalState: Object {

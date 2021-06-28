@@ -212,6 +212,7 @@
 "SettingTableViewController_RepeatType_RewindToThisStory" = "Replay the current chapter";
 "SettingTableViewController_RepeatType_GoToNextLikeNovel" = "Play unread ones out of your favorites";
 "SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "Play unread novels in the same folder";
+"SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel" = "Play unread novels in the specified folder";
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "A hotfix to unsynced audio and reading progress to IOS 12";
 "SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "Confirm";
 "SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "When this setting is enabled, it is set to change to \"α\"(alpha) for possible characters (such as blanks and line feeds are not displayed) that are thought to be wrong with the reading position display being read aloud.\nAt the time of implementing this function, \"α\"(alpha) is a character that can not be read aloud, so it seems that it will be a problematic operation in general. However, there is a possibility that it will be read aloud as iOS due to change in iOS speech synthesis engine side in the future.\nAlso, iOS 12 (or later) is supposed to need this function.\nDo you enable this setting after understanding the above?";
@@ -315,6 +316,8 @@
 "SpeechViewController_SkipBackwardButtonTitle" = "Rewind";
 "SpeechViewController_SkipForwardButtonTitle" = "A little ahead";
 "SpeechViewController_ShowTableOfContentsButtonTitle" = "table of contents";
+"SpeechViewController_SelectFolder_Title" = "Select a folder to play continuously";
+"SpeechViewController_NotUseNextSpeechNovel" = "Continue without using playback";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";

@@ -2404,8 +2404,8 @@ class NovelSpeakerUtility: NSObject {
             return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextLikeNovel", comment: "お気に入りのうち未読の物")
         case .GoToNextSameFolderdNovel:
             return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameFolderdNovel", comment: "指定フォルダの小説のうち未読の物")
-        @unknown default:
-            return nil
+        case .GoToNextSelectedFolderdNovel:
+            return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel", comment: "指定されたフォルダの小説のうち未読の物を再生")
         }
     }
     static func RepeatSpeechStringToType(typeString:String) -> RepeatSpeechType? {
@@ -2420,12 +2420,14 @@ class NovelSpeakerUtility: NSObject {
             return .GoToNextLikeNovel
         case NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameFolderdNovel", comment: "指定フォルダの小説のうち未読の物"):
             return .GoToNextSameFolderdNovel
+        case NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel", comment: "指定フォルダの小説のうち未読の物を再生"):
+            return .GoToNextSelectedFolderdNovel
         default:
             return nil
         }
     }
     static func GetAllRepeatSpeechStringType() -> [RepeatSpeechType] {
-        return [.NoRepeat, .RewindToFirstStory, .RewindToThisStory, .GoToNextLikeNovel, .GoToNextSameFolderdNovel]
+        return [.NoRepeat, .RewindToFirstStory, .RewindToThisStory, .GoToNextLikeNovel, .GoToNextSameFolderdNovel, .GoToNextSelectedFolderdNovel]
     }
     
     /// 保存されているStoryを調べて、chapterNumber が 1 から順についている事を確認しつつ、

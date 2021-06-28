@@ -9,6 +9,7 @@
 import UIKit
 import RealmSwift
 import IceCream
+import Eureka
 
 class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate {
     
@@ -737,8 +738,54 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             }else{
                 disableCurrentReadingStoryChangeFloatingButton()
                 storySpeaker.setReadLocationWith(realm: realm, location: self.textView.selectedRange.location)
-                self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                self.checkDummySpeechFinished()
+
+                func runNextSpeech(nextFolder:RealmNovelTag?){
+                    self.storySpeaker.targetFolderNameForGoToNextSelectedFolderdNovel = nextFolder?.name
+                    RealmUtil.RealmBlock { realm in
+                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                        self.checkDummySpeechFinished()
+                    }
+                }
+                if let storyID = self.storyID, let repeatType = RealmGlobalState.GetInstanceWith(realm: realm)?.repeatSpeechType, repeatType == .GoToNextSelectedFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), type: RealmNovelTag.TagType.Folder) {
+                    let folderArray = Array(folderArray)
+                    if folderArray.count == 1, let folder = folderArray.first {
+                        runNextSpeech(nextFolder: folder)
+                        return
+                    }else if folderArray.count > 1 {
+                        EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { vc in
+                            let section = Section(NSLocalizedString("SpeechViewController_SelectFolder_Title", comment: "連続再生するフォルダを選択"))
+                            for folder in folderArray {
+                                section <<< LabelRow() {
+                                    $0.title = folder.name
+                                    $0.cell.textLabel?.numberOfLines = 0
+                                    $0.cell.accessibilityTraits = .button
+                                }.onCellSelection({ (_, row) in
+                                    runNextSpeech(nextFolder: folder)
+                                    vc.close(animated: true, completion: nil)
+                                })
+                            }
+                            vc.form +++ section
+                            vc.form +++ Section()
+                            <<< LabelRow() {
+                                $0.title = NSLocalizedString("SpeechViewController_NotUseNextSpeechNovel", comment: "続けて再生を使わずに開始")
+                                $0.cell.textLabel?.numberOfLines = 0
+                                $0.cell.accessibilityTraits = .button
+                            }.onCellSelection({ (_, row) in
+                                runNextSpeech(nextFolder: nil)
+                                vc.close(animated: true, completion: nil)
+                            })
+                            <<< LabelRow() {
+                                $0.title = NSLocalizedString("Cancel", comment: "Cancel")
+                                $0.cell.textLabel?.numberOfLines = 0
+                                $0.cell.accessibilityTraits = .button
+                            }.onCellSelection({ (_, row) in
+                                vc.close(animated: true, completion: nil)
+                            })
+                        }, parentViewController: self, animated: true, completion: nil)
+                        return
+                    }
+                }
+                runNextSpeech(nextFolder: nil)
             }
         }
     }

@@ -93,6 +93,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     // この制御値を保存しておく必要があります。
     var withMoreSplitTargets:[String] = []
     var moreSplitMinimumLetterCount:Int = Int.max
+    
+    var targetFolderNameForGoToNextSelectedFolderdNovel:String? = nil
 
     private override init() {
         super.init()
@@ -1234,6 +1236,24 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                         speechNextNovelWith(realm: realm, title: novel.title, story: story)
                                         return
                                     }
+                                }
+                            }
+                        }else if repeatSpeechType == .GoToNextSelectedFolderdNovel, let targetFolderName = self.targetFolderNameForGoToNextSelectedFolderdNovel, let folder = RealmNovelTag.SearchWith(realm: realm, name: targetFolderName, type: RealmNovelTag.TagType.Folder) {
+                            if let novelDictionary = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: Array(folder.targetNovelIDArray))?.filter({ (novel) in
+                                if novel.novelID == novelID { return false }
+                                if novel.m_readingChapterStoryID != novel.m_lastChapterStoryID { return true }
+                                if novel.m_readingChapterReadingPoint + 5 >= novel.m_readingChapterContentCount { return false }
+                                return true
+                            }).reduce([:] as [String:RealmNovel], { (result, novel) -> [String:RealmNovel] in
+                                var result = result
+                                result[novel.novelID] = novel
+                                return result
+                            }) {
+                                for novelID in folder.targetNovelIDArray {
+                                    print(novelID)
+                                    guard let novel = novelDictionary[novelID], let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) else { continue }
+                                    speechNextNovelWith(realm: realm, title: novel.title, story: story)
+                                    return
                                 }
                             }
                         }
