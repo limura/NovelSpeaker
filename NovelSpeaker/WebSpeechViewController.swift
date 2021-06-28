@@ -9,6 +9,7 @@
 import UIKit
 import WebKit
 import RealmSwift
+import Eureka
 
 /*
  TODO:
@@ -786,23 +787,75 @@ body.NovelSpeakerBody {
             BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
         }
     }
+    
+    func CheckFolderAndStartSpeech() {
+        RealmUtil.RealmBlock { realm in
+            //disableCurrentReadingStoryChangeFloatingButton()
+            self.webSpeechTool.getSelectedLocation { location in
+                print("startStopButtonClicked selectedLocation: \(location ?? -1)")
+                RealmUtil.RealmBlock { realm in
+                    if let location = location {
+                        StorySpeaker.shared.setReadLocationWith(realm: realm, location: location)
+                    }
+                    func runNextSpeech(nextFolder:RealmNovelTag?){
+                        StorySpeaker.shared.targetFolderNameForGoToNextSelectedFolderdNovel = nextFolder?.name
+                        RealmUtil.RealmBlock { realm in
+                            StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                            self.checkDummySpeechFinished()
+                        }
+                    }
+                    let storyID = StorySpeaker.shared.storyID
+                    if let repeatType = RealmGlobalState.GetInstanceWith(realm: realm)?.repeatSpeechType, repeatType == .GoToNextSelectedFolderdNovel, let folderArray = RealmNovelTag.SearchWith(realm: realm, novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), type: RealmNovelTag.TagType.Folder) {
+                        let folderArray = Array(folderArray)
+                        if folderArray.count == 1, let folder = folderArray.first {
+                            runNextSpeech(nextFolder: folder)
+                            return
+                        }else if folderArray.count > 1 {
+                            EurekaPopupViewController.RunSimplePopupViewController(formSetupMethod: { vc in
+                                let section = Section(NSLocalizedString("SpeechViewController_SelectFolder_Title", comment: "連続再生するフォルダを選択"))
+                                for folder in folderArray {
+                                    section <<< LabelRow() {
+                                        $0.title = folder.name
+                                        $0.cell.textLabel?.numberOfLines = 0
+                                        $0.cell.accessibilityTraits = .button
+                                    }.onCellSelection({ (_, row) in
+                                        runNextSpeech(nextFolder: folder)
+                                        vc.close(animated: true, completion: nil)
+                                    })
+                                }
+                                vc.form +++ section
+                                vc.form +++ Section()
+                                <<< LabelRow() {
+                                    $0.title = NSLocalizedString("SpeechViewController_NotUseNextSpeechNovel", comment: "続けて再生を使わずに開始")
+                                    $0.cell.textLabel?.numberOfLines = 0
+                                    $0.cell.accessibilityTraits = .button
+                                }.onCellSelection({ (_, row) in
+                                    runNextSpeech(nextFolder: nil)
+                                    vc.close(animated: true, completion: nil)
+                                })
+                                <<< LabelRow() {
+                                    $0.title = NSLocalizedString("Cancel", comment: "Cancel")
+                                    $0.cell.textLabel?.numberOfLines = 0
+                                    $0.cell.accessibilityTraits = .button
+                                }.onCellSelection({ (_, row) in
+                                    vc.close(animated: true, completion: nil)
+                                })
+                            }, parentViewController: self, animated: true, completion: nil)
+                            return
+                        }
+                    }
+                    runNextSpeech(nextFolder: nil)
+                }
+            }
+        }
+    }
+
     @objc func startStopButtonClicked(_ sender: UIBarButtonItem) {
         RealmUtil.RealmBlock { (realm) -> Void in
             if StorySpeaker.shared.isPlayng {
                 StorySpeaker.shared.StopSpeech(realm: realm)
             }else{
-                // TODO: not implememted yet.
-                // disableCurrentReadingStoryChangeFloatingButton()
-                self.webSpeechTool.getSelectedLocation { location in
-                    print("startStopButtonClicked selectedLocation: \(location ?? -1)")
-                    RealmUtil.RealmBlock { realm in
-                        if let location = location {
-                            StorySpeaker.shared.setReadLocationWith(realm: realm, location: location)
-                        }
-                        StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                    }
-                }
-                self.checkDummySpeechFinished()
+                self.CheckFolderAndStartSpeech()
             }
         }
     }
@@ -958,10 +1011,7 @@ body.NovelSpeakerBody {
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false
             DispatchQueue.main.async {
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
-                }
-                self.checkDummySpeechFinished()
+                self.CheckFolderAndStartSpeech()
             }
         }
     }
