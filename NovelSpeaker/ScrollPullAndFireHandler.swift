@@ -234,28 +234,28 @@ class ScrollPullAndFireHandler: NSObject, UIScrollViewDelegate {
     
     func setLabelTextForHorizontal(bounceLevel:CGFloat){
         if bounceLevel < -activeThreshold {
-            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Active", comment: "離して前のページへ"), image: createBoldAllowImage(systemName: "arrowtriangle.up.fill"), isVertical: false)
-            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "arrowtriangle.up.fill"), isVertical: false)
+            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Active", comment: "離して前のページへ"), image: createBoldAllowImage(systemName: "chevron.up.circle.fill"), isVertical: false)
+            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "chevron.up.circle"), isVertical: false)
         }else if bounceLevel > activeThreshold {
-            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "arrowtriangle.down.fill"), isVertical: false)
-            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Active", comment: "離して次のページへ"), image: createBoldAllowImage(systemName: "arrowtriangle.down.fill"), isVertical: false)
+            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "chevron.down.circle"), isVertical: false)
+            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Active", comment: "離して次のページへ"), image: createBoldAllowImage(systemName: "chevron.down.circle.fill"), isVertical: false)
         }else{
-            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "arrowtriangle.down.fill"), isVertical: false)
-            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "arrowtriangle.up.fill"), isVertical: false)
+            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "chevron.down.circle"), isVertical: false)
+            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "chevron.up.circle"), isVertical: false)
         }
         self.backwardScrollHintLabel.sizeToFit()
         self.forwardScrollHintLabel.sizeToFit()
     }
     func setLabelTextForVertical(bounceLevel:CGFloat){
         if bounceLevel < -activeThreshold {
-            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Initial", comment: "引っ張って前のページへ"), image: createBoldAllowImage(systemName: "arrowtriangle.right.fill"), isVertical: true)
-            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Active", comment: "離して次のページへ"), image: createBoldAllowImage(systemName: "arrowtriangle.backward.fill"), isVertical: true)
+            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "chevron.right.circle"), isVertical: true)
+            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Active", comment: "離して次のページへ"), image: createBoldAllowImage(systemName: "chevron.backward.circle.fill"), isVertical: true)
         }else if bounceLevel > activeThreshold {
-            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Active", comment: "離して前のページへ"), image: createBoldAllowImage(systemName: "arrowtriangle.right.fill"), isVertical: true)
-            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Initial", comment: "引っ張って次のページへ"), image: createBoldAllowImage(systemName: "arrowtriangle.backward.fill"), isVertical: true)
+            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Active", comment: "離して前のページへ"), image: createBoldAllowImage(systemName: "chevron.right.circle.fill"), isVertical: true)
+            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "chevron.backward.circle"), isVertical: true)
         }else{
-            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Initial", comment: "引っ張って前のページへ"), image: createBoldAllowImage(systemName: "arrowtriangle.backward.fill"), isVertical: true)
-            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Initial", comment: "引っ張って次のページへ"), image: createBoldAllowImage(systemName: "arrowtriangle.right.fill"), isVertical: true)
+            self.backwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_BackwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "chevron.backward.circle"), isVertical: true)
+            self.forwardScrollHintLabel.attributedText = createLabelAttributedString(text: NSLocalizedString("ScrollPullAndFireHandler_ForwardHintLabelText_Initial", comment: "強く引っ張って・・・"), image: createBoldAllowImage(systemName: "chevron.right.circle"), isVertical: true)
         }
         self.backwardScrollHintLabel.sizeToFit()
         self.forwardScrollHintLabel.sizeToFit()
