@@ -1473,6 +1473,9 @@ class NovelSpeakerUtility: NSObject {
                 if let repeatSpeechType = dic.object(forKey: "repeatSpeechType") as? NSNumber {
                     globalState.repeatSpeechType = RepeatSpeechType(rawValue: repeatSpeechType.intValue) ?? RepeatSpeechType.NoRepeat
                 }
+                if let repeatSpeechLoopType = dic.object(forKey: "repeatSpeechLoopType") as? String {
+                    globalState.repeatSpeechLoopType = RepeatSpeechLoopType(rawValue: repeatSpeechLoopType) ?? RepeatSpeechLoopType.normal
+                }
                 if let isAnnounceAtRepatSpeechTime = dic.value(forKey: "isAnnounceAtRepatSpeechTime") as? NSNumber {
                     globalState.isAnnounceAtRepatSpeechTime = isAnnounceAtRepatSpeechTime.boolValue
                 }
@@ -2002,6 +2005,7 @@ class NovelSpeakerUtility: NSObject {
                 "defaultDisplaySettingID": globalState.defaultDisplaySettingID,
                 "defaultSpeakerID": globalState.defaultSpeakerID,
                 "repeatSpeechType": globalState.m_repeatSpeechType,
+                "repeatSpeechLoopType": globalState.m_repeatSpeechLoopType,
                 "isAnnounceAtRepatSpeechTime": globalState.isAnnounceAtRepatSpeechTime,
                 "isOverrideRubyIsEnabled": globalState.isOverrideRubyIsEnabled,
                 "notRubyCharactorStringArray": globalState.notRubyCharactorStringArray,
@@ -2434,10 +2438,36 @@ class NovelSpeakerUtility: NSObject {
             return nil
         }
     }
-    static func GetAllRepeatSpeechStringType() -> [RepeatSpeechType] {
+    static func GetAllRepeatSpeechType() -> [RepeatSpeechType] {
         return [.NoRepeat, .RewindToFirstStory, .RewindToThisStory, .GoToNextLikeNovel, .GoToNextSameFolderdNovel, .GoToNextSelectedFolderdNovel, .GoToNextSameWriterNovel, .GoToNextSameWebsiteNovel]
     }
-    
+
+    static func RepeatSpeechLoopTypeToString(type:RepeatSpeechLoopType) -> String? {
+        switch type {
+        case .normal:
+            return NSLocalizedString("SettingTableViewController_RepeatSpeechLoopType_Normal", comment: "未読の物を続きから再生")
+        case .noCheckReadingPoint:
+            return NSLocalizedString("SettingTableViewController_RepeatSpeechLoopType_NoCheckReadingPoint", comment: "順に1ページ目から再生")
+        }
+    }
+    static func RepeatSpeechLoopStringToType(typeString:String) -> RepeatSpeechLoopType? {
+        switch typeString {
+        case NSLocalizedString("SettingTableViewController_RepeatSpeechLoopType_Normal", comment: "未読の物を続きから再生"):
+            return .normal
+        case NSLocalizedString("SettingTableViewController_RepeatSpeechLoopType_NoCheckReadingPoint", comment: "順に1ページ目から再生"):
+            return .noCheckReadingPoint
+        default:
+            return nil
+        }
+    }
+    static func GetAllRepeatSpeechLoopType() -> [RepeatSpeechLoopType] {
+        return [.normal, .noCheckReadingPoint]
+    }
+    // ReepatSpeechLoopType が .normal でない場合に対象となる RepeatSpeechType のリスト
+    static func GetAllRepeatSpeechLoopTargetRepeatSpeechType() -> [RepeatSpeechType] {
+        return [.GoToNextLikeNovel, .GoToNextSameWebsiteNovel, .GoToNextSameWriterNovel, .GoToNextSelectedFolderdNovel]
+    }
+
     /// 保存されているStoryを調べて、chapterNumber が 1 から順についている事を確認しつつ、
     /// それに沿っていない Story があったら、そこから後ろの Story は全部消すという事をして
     /// 「chapterNumber は必ず 1 から順に1ずつ増加する形になっている」という状態に保とうとします。

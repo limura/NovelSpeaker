@@ -1164,7 +1164,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                let repeatSpeechType = RealmGlobalState.GetInstanceWith(realm: realm)?.repeatSpeechType
+                let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
+                let repeatSpeechType = globalState?.repeatSpeechType
                 if let repeatSpeechType = repeatSpeechType, repeatSpeechType == .RewindToThisStory {
                     self.setReadLocationWith(realm: realm, location: 0)
                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
@@ -1187,6 +1188,38 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 }else{
                     let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
                     if let repeatSpeechType = repeatSpeechType {
+                        if globalState?.repeatSpeechLoopType == .noCheckReadingPoint && NovelSpeakerUtility.GetAllRepeatSpeechLoopTargetRepeatSpeechType().contains(repeatSpeechType) {
+                            func runNextSpeechLoop(novelIDArray:[String]) -> Bool {
+                                if let currentIndex = novelIDArray.firstIndex(of: novelID), let nextNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelIDArray[(currentIndex + 1) % novelIDArray.count]), nextNovel.novelID != novelID, let firstStory = nextNovel.firstChapterWith(realm: realm) {
+                                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                                        firstStory.SetCurrentReadLocationWith(realm: realm, location: 0)
+                                    }
+                                    speechNextNovelWith(realm: realm, title: nextNovel.title, story: firstStory)
+                                    return true
+                                }
+                                return false
+                            }
+                            if repeatSpeechType == .GoToNextLikeNovel
+                               , let novelLikeOrder = RealmGlobalState.GetInstanceWith(realm: realm)?.novelLikeOrder, runNextSpeechLoop(novelIDArray: Array(novelLikeOrder)) {
+                                return
+                            }else if repeatSpeechType == .GoToNextSelectedFolderdNovel, let nextFolderName = self.targetFolderNameForGoToNextSelectedFolderdNovel, let nextNovelIDArray = RealmNovelTag.SearchWith(realm: realm, name: nextFolderName, type: RealmNovelTag.TagType.Folder)?.targetNovelIDArray, runNextSpeechLoop(novelIDArray: Array(nextNovelIDArray)) {
+                                return
+                            }else if repeatSpeechType == .GoToNextSameWriterNovel, let currentNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID),
+                                     let nextNovelIDArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(by: { $0.title < $1.title })
+                                        .filter({$0.writer == currentNovel.writer}).map({$0.novelID}), runNextSpeechLoop(novelIDArray: Array(nextNovelIDArray)) {
+                                return
+                            }else if repeatSpeechType == .GoToNextSameWebsiteNovel, let currentNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let currentWebSite = currentNovel.type == .UserCreated ? "" : URL(string: novelID)?.host,
+                                     let nextNovelIDArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(by: { $0.title < $1.title })
+                                        .filter({
+                                            guard let webSite = $0.type == .UserCreated ? "" : URL(string: $0.novelID)?.host else { return false }
+                                            return webSite == currentWebSite
+                                        }).map({$0.novelID}), runNextSpeechLoop(novelIDArray: Array(nextNovelIDArray)) {
+                                return
+                            }
+                            self.StopSpeech(realm: realm)
+                            self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
+                            return
+                        }
                         if repeatSpeechType == .RewindToFirstStory {
                             if let firstStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)) {
                                 // 何故か self.SetStory() した後に

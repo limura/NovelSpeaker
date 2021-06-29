@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 9
+    static let currentSchemaVersion : UInt64 = 10
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -82,7 +82,12 @@ import AVFoundation
     }
     static func Migrate_8_To_9(migration:Migration, oldSchemaVersion:UInt64) {
         migration.enumerateObjects(ofType: RealmDisplaySetting.className()) { (oldObject, newObject) in
-            newObject?["m_ViewType"] = "Normal"
+            newObject?["m_ViewType"] = RealmDisplaySetting.ViewType.normal.rawValue
+        }
+    }
+    static func Migrate_9_To_10(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmGlobalState.className()) { (oldObject, newObject) in
+            newObject?["m_repeatSpeechLoopType"] = RepeatSpeechLoopType.normal.rawValue
         }
     }
 
@@ -110,6 +115,9 @@ import AVFoundation
         }
         if oldSchemaVersion <= 8 {
             Migrate_8_To_9(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion <= 9 {
+            Migrate_9_To_10(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     
@@ -2437,6 +2445,11 @@ extension HTTPCookie {
     case GoToNextSameWebsiteNovel = 7 // 同じWebサイトの小説のうち未読の物を再生
 }
 
+enum RepeatSpeechLoopType: String {
+    case normal = "Normal"
+    case noCheckReadingPoint = "NoCheckReadingPoint"
+}
+
 @objc final class RealmGlobalState: Object {
     static public let UniqueID = "only one object"
     @objc dynamic var id = UniqueID
@@ -2473,7 +2486,8 @@ extension HTTPCookie {
     @objc dynamic var cookieArrayData = Data()
     @objc dynamic var m_DisplayType : Int = NovelDisplayType.textView.rawValue
     @objc dynamic var bookshelfViewButtonSettingArrayData = Data()
-    @objc dynamic var m_repeatSpeechType : Int = Int(RepeatSpeechType.NoRepeat.rawValue)
+    @objc dynamic var m_repeatSpeechType : Int = RepeatSpeechType.NoRepeat.rawValue
+    @objc dynamic var m_repeatSpeechLoopType : String = RepeatSpeechLoopType.normal.rawValue
     @objc dynamic var isAnnounceAtRepatSpeechTime = true
     @objc dynamic var isOverrideRubyIsEnabled = false
     @objc dynamic var notRubyCharactorStringArray = "・、 　?？!！"
@@ -2516,6 +2530,14 @@ extension HTTPCookie {
         }
         set {
             m_repeatSpeechType = Int(newValue.rawValue)
+        }
+    }
+    var repeatSpeechLoopType : RepeatSpeechLoopType {
+        get {
+            return RepeatSpeechLoopType(rawValue: m_repeatSpeechLoopType) ?? RepeatSpeechLoopType.normal
+        }
+        set {
+            m_repeatSpeechLoopType = newValue.rawValue
         }
     }
     func defaultDisplaySettingWith(realm:Realm) -> RealmDisplaySetting? {

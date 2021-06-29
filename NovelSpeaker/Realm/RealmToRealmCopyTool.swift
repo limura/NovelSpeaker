@@ -185,6 +185,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.m_DisplayType = obj.m_DisplayType
             newObj.bookshelfViewButtonSettingArrayData = obj.bookshelfViewButtonSettingArrayData
             newObj.m_repeatSpeechType = obj.m_repeatSpeechType
+            newObj.m_repeatSpeechLoopType = obj.m_repeatSpeechLoopType
             newObj.isAnnounceAtRepatSpeechTime = obj.isAnnounceAtRepatSpeechTime
             newObj.isOverrideRubyIsEnabled = obj.isOverrideRubyIsEnabled
             newObj.notRubyCharactorStringArray = obj.notRubyCharactorStringArray

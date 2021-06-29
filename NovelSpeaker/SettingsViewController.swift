@@ -741,7 +741,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             <<< AlertRow<String>("RepeatTypeSelectRow") { row in
                 row.title = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
                 row.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatTypeTitle", comment:"繰り返し再生")
-                row.options = NovelSpeakerUtility.GetAllRepeatSpeechStringType().map({NovelSpeakerUtility.RepeatSpeechTypeToString(type: $0) ?? ""})
+                row.options = NovelSpeakerUtility.GetAllRepeatSpeechType().map({NovelSpeakerUtility.RepeatSpeechTypeToString(type: $0) ?? ""})
                 row.value = NovelSpeakerUtility.RepeatSpeechTypeToString(type: .NoRepeat)
                 row.cell.textLabel?.numberOfLines = 0
                 RealmUtil.RealmBlock { (realm) -> Void in
@@ -764,6 +764,34 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                     RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
                         globalState.repeatSpeechType = type
+                    }
+                }
+            })
+            section
+            <<< AlertRow<String>("RepeatLoopTypeSelectRow") { row in
+                row.title = NSLocalizedString("SettingTableViewController_RepeatLoopTypeTitle", comment:"次の小説の選択方式")
+                row.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatLoopTypeTitle", comment:"次の小説の選択方式")
+                row.options = NovelSpeakerUtility.GetAllRepeatSpeechLoopType().map({NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: $0) ?? ""})
+                row.value = NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: .normal)
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                row.hidden = .function(["RepeatTypeSelectRow"], { form -> Bool in
+                    let row: RowOf<String>! = form.rowBy(tag: "RepeatTypeSelectRow")
+                    let repeatSpeechType = NovelSpeakerUtility.RepeatSpeechStringToType(typeString: row.value ?? "") ?? RepeatSpeechType.NoRepeat
+                    return NovelSpeakerUtility.GetAllRepeatSpeechLoopTargetRepeatSpeechType().contains(repeatSpeechType) == false
+                })
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    let type = globalState.repeatSpeechLoopType
+                    if let typeString = NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: type) {
+                        row.value = typeString
+                    }
+                }
+            }.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.RepeatSpeechLoopStringToType(typeString: typeString) else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.repeatSpeechLoopType = type
                     }
                 }
             })

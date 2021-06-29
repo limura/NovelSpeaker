@@ -208,11 +208,14 @@
 "SettingTableViewController_RepeatType_NoRepeat" = "そのまま停止する";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "最初の章から再生し直す";
 "SettingTableViewController_RepeatType_RewindToThisStory" = "現在の章を再生し直す";
-"SettingTableViewController_RepeatType_GoToNextLikeNovel" = "お気に入りのうち未読の物を再生";
-"SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "同じフォルダの小説のうち未読の物を再生";
-"SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel" = "指定フォルダの小説のうち未読の物を再生";
-"SettingTableViewController_RepeatType_GoToNextSameWriterNovel" = "同じ作者の小説のうち未読の物を再生";
-"SettingTableViewController_RepeatType_GoToNextSameWebsiteNovel" = "同じWebサイトの小説のうち未読の物を再生";
+"SettingTableViewController_RepeatType_GoToNextLikeNovel" = "別のお気に入り小説を再生";
+"SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "同じフォルダの別の小説を再生";
+"SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel" = "指定フォルダの別の小説を再生";
+"SettingTableViewController_RepeatType_GoToNextSameWriterNovel" = "同じ作者の別の小説を再生";
+"SettingTableViewController_RepeatType_GoToNextSameWebsiteNovel" = "同じWebサイトの別の小説を再生";
+"SettingTableViewController_RepeatLoopTypeTitle" = "再生が末尾に達した時の次の小説の選択方式";
+"SettingTableViewController_RepeatSpeechLoopType_Normal" = "未読分の続きから再生";
+"SettingTableViewController_RepeatSpeechLoopType_NoCheckReadingPoint" = "順に1ページ目から再生";
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する";
 "SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "確認";
 "SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "この設定は、読み上げ中の読み上げ位置表示がおかしくなる問題への対応です。ただし、対応手法がかなりトリッキーなので適用する前に原理を理解しておいてください。\nこの設定を有効にすると、読み上げ中の読み上げ位置がおかしくなる原因と思われる文字(多くは空白や改行などの表示されない文字です)について、\"α\"(アルファ) に読み替えるように設定することでこの問題を回避するようになります。\nこの機能を実装した時点では、iOS の音声合成エンジンでは \"α\"(アルファ) は読み上げられない文字ですので概ね問題ない動作になると思われますが、将来的に iOS の音声合成エンジン側の変更により \"α\" が「アルファ」と読み上げられるようになる可能性があります。\nまた、この機能が必要となるのは iOS 12(以降) だと思われますので iOS 11 以前でご利用の方は必要なさそうです。\n以上の事を理解した上でこの設定を有効にしますか？";
@@ -808,20 +811,26 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.4.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.5.0
 
-- 「開発者に問い合わせる」内に『「アプリ内エラーのお知らせ」の内容を添付する』のON/OFF設定を追加
-- Web取込画面で download属性のついたリンク を選択した時にファイルとしてシェアされるように(iOS 14.5以上のみ)
-- 「設定タブ」->「小説本文画面の右上に表示されるボタン群の編集」に「章リスト(目次)」を追加
-- 小説の編集画面でキーボードを閉じた時に小説の本文部分の表示領域が元に戻らない問題を修正
-- 小説の編集画面に「Speak」ボタンを追加
-- 小説の編集画面にカーソル移動ボタンを追加
-- HTMLを取り込む時に無視するタグに frame を追加
-- 読み上げ開始時に読み上げ位置表示が前の方に一回飛んでしまう場合のある問題を修正
+-「設定タブ」->「再生が末尾に達した時の動作」に「指定フォルダの小説のうち未読の物を再生」と「同じ作者の別の小説を再生」、「同じWebサイトの別の小説を再生」を追加
+- 「本棚画面」で「最終ダウンロード日時順(フォルダ分類版)」のフォルダ内の順番を最終ダウンロード日時順にします
+- 「本棚画面」で「作者名順」のフォルダ内の順番を小説名順にします
+-「設定タブ」->「再生が末尾に達した時の動作」が特定の設定の場合に現れる「再生が末尾に達した時の次の小説の選択方式」を追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.5.0
+
+インタフェースの変更
+
+-「設定タブ」->「再生が末尾に達した時の動作」に「指定フォルダの小説のうち未読の物を再生」と「同じ作者の別の小説を再生」、「同じWebサイトの別の小説を再生」を追加
+- 「本棚画面」で「最終ダウンロード日時順(フォルダ分類版)」のフォルダ内の順番を最終ダウンロード日時順にします
+- 「本棚画面」で「作者名順」のフォルダ内の順番を小説名順にします
+-「設定タブ」->「再生が末尾に達した時の動作」が特定の設定の場合に現れる「再生が末尾に達した時の次の小説の選択方式」を追加
+
+
 # Version 2.4.0
 
 インタフェースの変更

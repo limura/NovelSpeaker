@@ -210,11 +210,14 @@
 "SettingTableViewController_RepeatType_NoRepeat" = "Stop";
 "SettingTableViewController_RepeatType_RewindToFirstStory" = "Play from the beginning";
 "SettingTableViewController_RepeatType_RewindToThisStory" = "Replay the current chapter";
-"SettingTableViewController_RepeatType_GoToNextLikeNovel" = "Play unread ones out of your favorites";
-"SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "Play unread novels in the same folder";
-"SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel" = "Play unread novels in the specified folder";
-"SettingTableViewController_RepeatType_GoToNextSameWriterNovel" = "Play unread novels of the same author";
-"SettingTableViewController_RepeatType_GoToNextSameWebsiteNovel" = "Play unread novels on the same website";
+"SettingTableViewController_RepeatType_GoToNextLikeNovel" = "Play another favorite novel";
+"SettingTableViewController_RepeatType_GoToNextSameFolderdNovel" = "Play another novel in the same folder";
+"SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel" = "Play another novel in the specified folder";
+"SettingTableViewController_RepeatType_GoToNextSameWriterNovel" = "Play another novel by the same author";
+"SettingTableViewController_RepeatType_GoToNextSameWebsiteNovel" = "Play another novel on the same website";
+"SettingTableViewController_RepeatLoopTypeTitle" = "Selection method for the next novel when playback reaches the end";
+"SettingTableViewController_RepeatSpeechLoopType_Normal" = "Play from the continuation of the unread part";
+"SettingTableViewController_RepeatSpeechLoopType_NoCheckReadingPoint" = "Play from the first page in order";
 "SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled" = "A hotfix to unsynced audio and reading progress to IOS 12";
 "SettingTableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12_title" = "Confirm";
 "SettingtableViewController_ConfirmEnableEscapeAboutSpeechPositionDisplayBugOniOS12" = "When this setting is enabled, it is set to change to \"α\"(alpha) for possible characters (such as blanks and line feeds are not displayed) that are thought to be wrong with the reading position display being read aloud.\nAt the time of implementing this function, \"α\"(alpha) is a character that can not be read aloud, so it seems that it will be a problematic operation in general. However, there is a possibility that it will be read aloud as iOS due to change in iOS speech synthesis engine side in the future.\nAlso, iOS 12 (or later) is supposed to need this function.\nDo you enable this setting after understanding the above?";
@@ -816,20 +819,26 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.4.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.5.0
 
-- Added ON / OFF setting of \"Attach the contents of \"Notification of in-app error\" in \"Contact the developer\"\"
-- When you select a link with the download attribute on the web import screen, it will be shared as a file (iOS 14.5 or higher only)
-- Added \"Chapter List (Table of Contents)\" to \"Settings tab\" -> \"Edit buttons displayed in the upper right corner of the novel text screen\"
-- Fixed the problem that the display area of the text part of the novel is not restored when the keyboard is closed on the novel edit screen.
-- Added \"Speak\" button to the novel editing screen
-- Added a cursor movement button to the novel editing screen
-- Added frame to the tag to ignore when importing HTML
-- Fixed the problem that the reading position display may jump to the front once at the beginning of reading.
+- Added \"Play unread novels in the specified folder\", \"Play another novel by the same author\", and \"Play another novel on the same website\" to \"Settings tab\" -> \"What happens when playback reaches the end\".
+- On the \"Bookshelf screen\", set the order in the \"Last download date and time (folder classification version)\" folder to the last download date and time.
+- On the \"Bookshelf screen\", change the order in the \"Author order\" folder to the novel name order.
+- Added \"Selection method for the next novel when playback reaches the end\" that appears when \"Settings tab\" -> \"Action when playback reaches the end\" is a specific setting.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.5.0
+
+Interface changes
+
+- Added \"Play unread novels in the specified folder\", \"Play another novel by the same author\", and \"Play another novel on the same website\" to \"Settings tab\" -> \"What happens when playback reaches the end\".
+- On the \"Bookshelf screen\", set the order in the \"Last download date and time (folder classification version)\" folder to the last download date and time.
+- On the \"Bookshelf screen\", change the order in the \"Author order\" folder to the novel name order.
+- Added \"Selection method for the next novel when playback reaches the end\" that appears when \"Settings tab\" -> \"Action when playback reaches the end\" is a specific setting.
+
+
 # Version 2.4.0
 
 Interface changes
