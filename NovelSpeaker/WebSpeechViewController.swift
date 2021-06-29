@@ -9,6 +9,7 @@
 import UIKit
 import WebKit
 import RealmSwift
+import IceCream
 import Eureka
 
 /*
@@ -34,7 +35,14 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
 
     var globalStateObserverToken:NotificationToken? = nil
     var displaySettingObserverToken:NotificationToken? = nil
-    
+    var novelObserverToken:NotificationToken? = nil
+    var novelObserverNovelID:String = ""
+    var readingChapterStoryUpdateDate:Date = Date()
+    var storyObserverToken:NotificationToken? = nil
+    var storyObserverBulkStoryID:String = ""
+
+    var currentReadStoryIDChangeAlertFloatingButton:FloatingButton? = nil
+
     var scrollPullAndFireHandler:ScrollPullAndFireHandler? = nil
     
     let previousChapterButton = UIButton()
@@ -102,17 +110,17 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
 
     func StopObservers() {
-        //novelObserverToken = nil
-        //storyObserverToken = nil
+        novelObserverToken = nil
+        storyObserverToken = nil
         displaySettingObserverToken = nil
         globalStateObserverToken = nil
     }
     func RestartObservers() {
         StopObservers()
         observeDispaySetting()
-        //let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID)
-        //observeStory(storyID: storyID)
-        //observeNovel(novelID: novelID)
+        let storyID = StorySpeaker.shared.storyID
+        observeStory(storyID: storyID)
+        observeNovel(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))
         observeGlobalState()
     }
     
@@ -385,6 +393,9 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             DispatchQueue.main.async {
                 self.title = novel.title
             }
+            if let lastChapterNumber = novel.lastChapterNumber {
+                self.lastChapterNumber = lastChapterNumber
+            }
             let aliveButtonSettings = RealmGlobalState.GetInstanceWith(realm: realm)?.GetSpeechViewButtonSetting() ?? SpeechViewButtonSetting.defaultSetting
             self.assignUpperButtons(novel: novel, aliveButtonSettings: aliveButtonSettings)
             self.webViewDisplayWholeText = nil
@@ -612,6 +623,113 @@ body.NovelSpeakerBody {
         }
     }
 
+    func observeStory(storyID:String) {
+        if storyObserverBulkStoryID == RealmStoryBulk.StoryIDToBulkID(storyID: storyID) { return }
+        self.storyObserverToken = nil
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let storyBulk = RealmStoryBulk.SearchStoryBulkWith(realm: realm, storyID: storyID) else { return }
+            storyObserverBulkStoryID = storyBulk.id
+            self.storyObserverToken = storyBulk.observe({ [weak self] (change) in
+                guard let self = self else { return }
+                let targetStoryID = StorySpeaker.shared.storyID
+                guard self.storyObserverBulkStoryID == RealmStoryBulk.StoryIDToBulkID(storyID: targetStoryID) else {
+                    return
+                }
+                switch change {
+                case .error(_):
+                    break
+                case .change(_, let properties):
+                    for property in properties {
+                        // content が書き換わった時のみを監視します。
+                        // でないと lastReadDate とかが書き換わった時にも表示の更新が走ってしまいます。
+                        let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: targetStoryID)
+                        if property.name == "storyListAsset", let newValue = property.newValue as? CreamAsset, let storyArray = RealmStoryBulk.StoryCreamAssetToStoryArray(asset: newValue) {
+                            // [Story] に変換できた
+                            if let story = RealmStoryBulk.StoryBulkArrayToStory(storyArray: storyArray, chapterNumber: chapterNumber) {
+                                // 今開いている Story が書き換えられているぽい
+                                if story.chapterNumber == chapterNumber, story.content != self.speakerDisplayWholeText {
+                                    self.speakerDisplayWholeText = story.content
+                                    DispatchQueue.main.async {
+                                        self.loadStoryWithoutStorySpeakerWith(story: story)
+                                    }
+                                }
+                            }else{
+                                // 今開いている Story が存在しなかった(恐らくは最後の章を開いていて、その章が削除された)
+                                if let lastStory = storyArray.last {
+                                    DispatchQueue.main.async {
+                                        StorySpeaker.shared.SetStory(story: lastStory, withUpdateReadDate: true)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                case .deleted:
+                    break
+                }
+            })
+        }
+    }
+
+    func observeNovel(novelID:String) {
+        if novelObserverNovelID == RealmStoryBulk.StoryIDToNovelID(storyID: StorySpeaker.shared.storyID) { return }
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
+            self.lastChapterNumber = novel.lastChapterNumber ?? -1
+            novelObserverNovelID = novelID
+            self.novelObserverToken = novel.observe({ [weak self] (change) in
+                guard let self = self else { return }
+                switch change {
+                case .error(_):
+                    break
+                case .change(_, let properties):
+                    for property in properties {
+                        if property.name == "title", let newValue = property.newValue as? String {
+                            DispatchQueue.main.async {
+                                self.title = newValue
+                            }
+                        }
+                        if property.name == "m_lastChapterStoryID", let newValue = property.newValue as? String {
+                            let chapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: newValue)
+                            if chapterNumber > 0 && self.lastChapterNumber != chapterNumber {
+                                self.lastChapterNumber = chapterNumber
+                                self.applyChapterListChange()
+                            }
+                        }
+                        if property.name == "m_readingChapterStoryID", let newReadingChapterStoryID = property.newValue as? String, newReadingChapterStoryID != StorySpeaker.shared.storyID, self.readingChapterStoryUpdateDate < Date(timeIntervalSinceNow: -1.5) {
+                            self.currentReadingStoryIDChangedEventHandler(newReadingStoryID: newReadingChapterStoryID)
+                        }
+                     }
+                case .deleted:
+                    break
+                }
+            })
+        }
+    }
+    
+    func disableCurrentReadingStoryChangeFloatingButton() {
+        guard let oldFloatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
+        self.currentReadStoryIDChangeAlertFloatingButton = nil
+        DispatchQueue.main.async {
+            oldFloatingButton.hide()
+        }
+    }
+    func currentReadingStoryIDChangedEventHandler(newReadingStoryID:String) {
+        let currentStoryID = StorySpeaker.shared.storyID
+        guard newReadingStoryID != currentStoryID else { return }
+        disableCurrentReadingStoryChangeFloatingButton()
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: newReadingStoryID) else { return }
+            let newChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: newReadingStoryID)
+            DispatchQueue.main.async {
+                self.currentReadStoryIDChangeAlertFloatingButton = FloatingButton.createNewFloatingButton()
+                guard let floatingButton = self.currentReadStoryIDChangeAlertFloatingButton else { return }
+                floatingButton.assignToView(view: self.view, text: String(format: NSLocalizedString("SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format", comment: "他端末で更新された %d章 へ移動"), newChapterNumber), animated: true, bottomConstraintAppend: -32.0) {
+                    StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: false)
+                    floatingButton.hideAnimate()
+                }
+            }
+        }
+    }
 
     //MARK: 上のボタン群の設定
     var startStopButtonItem:UIBarButtonItem? = nil
@@ -716,8 +834,7 @@ body.NovelSpeakerBody {
         performSegue(withIdentifier: "WebViewReaderToNovelDetailViewPushSegue", sender: self)
     }
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
-        //TODO: not implemented yet.
-        // disableCurrentReadingStoryChangeFloatingButton()
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             StorySpeaker.shared.StopSpeech(realm: realm)
             func searchFunc(searchString:String?){
@@ -790,7 +907,7 @@ body.NovelSpeakerBody {
     
     func CheckFolderAndStartSpeech() {
         RealmUtil.RealmBlock { realm in
-            //disableCurrentReadingStoryChangeFloatingButton()
+            self.disableCurrentReadingStoryChangeFloatingButton()
             self.webSpeechTool.getSelectedLocation { location in
                 print("startStopButtonClicked selectedLocation: \(location ?? -1)")
                 RealmUtil.RealmBlock { realm in
@@ -890,7 +1007,7 @@ body.NovelSpeakerBody {
     }
     
     @objc func chapterSliderValueChanged(_ sender: Any) {
-        //disableCurrentReadingStoryChangeFloatingButton()
+        disableCurrentReadingStoryChangeFloatingButton()
         let storyID = StorySpeaker.shared.storyID
         let chapterNumber = Int(self.chapterSlider.value + 0.5)
         let targetStoryID = RealmStoryBulk.CreateUniqueID(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID), chapterNumber: chapterNumber)
@@ -903,13 +1020,13 @@ body.NovelSpeakerBody {
     }
     
     @objc func previousChapterButtonClicked(_ sender: Any) {
-        //disableCurrentReadingStoryChangeFloatingButton()
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             StorySpeaker.shared.LoadPreviousChapter(realm: realm)
         }
     }
     @objc func nextChapterButtonClicked(_ sender: Any) {
-        //disableCurrentReadingStoryChangeFloatingButton()
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             StorySpeaker.shared.LoadNextChapter(realm: realm)
         }
@@ -962,15 +1079,13 @@ body.NovelSpeakerBody {
     }
     
     @objc func leftSwipe(_ sender: UISwipeGestureRecognizer) {
-        // TODO: not implemented yet
-        // disableCurrentReadingStoryChangeFloatingButton()
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             StorySpeaker.shared.LoadNextChapter(realm: realm)
         }
     }
     @objc func rightSwipe(_ sender: UISwipeGestureRecognizer) {
-        // TODO: not implemented yet
-        // disableCurrentReadingStoryChangeFloatingButton()
+        disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
             StorySpeaker.shared.LoadPreviousChapter(realm: realm)
         }
@@ -1005,6 +1120,7 @@ body.NovelSpeakerBody {
         self.webSpeechTool.highlightSpeechLocation(location: location, length: range.length, scrollRatio: 0.3)
     }
     func storySpeakerStoryChanged(story:Story) {
+        self.readingChapterStoryUpdateDate = Date()
         self.speakerDisplayWholeText = StorySpeaker.shared.GenerateWholeDisplayText()
         self.loadStoryWithoutStorySpeakerWith(story: story)
         self.applyChapterListChange()
