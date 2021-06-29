@@ -2406,6 +2406,10 @@ class NovelSpeakerUtility: NSObject {
             return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameFolderdNovel", comment: "指定フォルダの小説のうち未読の物")
         case .GoToNextSelectedFolderdNovel:
             return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel", comment: "指定されたフォルダの小説のうち未読の物を再生")
+        case .GoToNextSameWriterNovel:
+            return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameWriterNovel", comment: "同じ著者の小説のうち未読の物を再生")
+        case .GoToNextSameWebsiteNovel:
+            return NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameWebsiteNovel", comment: "同じWebサイトの小説のうち未読の物を再生")
         }
     }
     static func RepeatSpeechStringToType(typeString:String) -> RepeatSpeechType? {
@@ -2422,12 +2426,16 @@ class NovelSpeakerUtility: NSObject {
             return .GoToNextSameFolderdNovel
         case NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSelectedFolderdNovel", comment: "指定フォルダの小説のうち未読の物を再生"):
             return .GoToNextSelectedFolderdNovel
+        case NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameWriterNovel", comment: "同じ著者の小説のうち未読の物を再生"):
+            return .GoToNextSameWriterNovel
+        case NSLocalizedString("SettingTableViewController_RepeatType_GoToNextSameWebsiteNovel", comment: "同じWebサイトの小説のうち未読の物を再生"):
+            return .GoToNextSameWebsiteNovel
         default:
             return nil
         }
     }
     static func GetAllRepeatSpeechStringType() -> [RepeatSpeechType] {
-        return [.NoRepeat, .RewindToFirstStory, .RewindToThisStory, .GoToNextLikeNovel, .GoToNextSameFolderdNovel, .GoToNextSelectedFolderdNovel]
+        return [.NoRepeat, .RewindToFirstStory, .RewindToThisStory, .GoToNextLikeNovel, .GoToNextSameFolderdNovel, .GoToNextSelectedFolderdNovel, .GoToNextSameWriterNovel, .GoToNextSameWebsiteNovel]
     }
     
     /// 保存されているStoryを調べて、chapterNumber が 1 から順についている事を確認しつつ、

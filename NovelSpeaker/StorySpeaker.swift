@@ -1256,6 +1256,25 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                     return
                                 }
                             }
+                        }else if repeatSpeechType == .GoToNextSameWriterNovel, let currentNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID),
+                                 let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(by: { $0.title < $1.title })
+                                    .filter({$0.novelID != novelID && $0.writer == currentNovel.writer && ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)}),
+                             let novel = filterdNovelArray.first,
+                             let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) {
+                            speechNextNovelWith(realm: realm, title: novel.title, story: story)
+                            return
+                        }else if repeatSpeechType == .GoToNextSameWebsiteNovel, let currentNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let currentWebSite = currentNovel.type == .UserCreated ? "" : URL(string: novelID)?.host,
+                                 let filterdNovelArray = RealmNovel.GetAllObjectsWith(realm: realm)?.sorted(by: { $0.title < $1.title })
+                                    .filter({
+                                        guard let webSite = $0.type == .UserCreated ? "" : URL(string: $0.novelID)?.host else { return false }
+                                        return $0.novelID != novelID &&
+                                        webSite == currentWebSite &&
+                                        ((($0.m_readingChapterReadingPoint + 5) < $0.m_readingChapterContentCount) || $0.m_readingChapterStoryID != $0.m_lastChapterStoryID)
+                                    }),
+                             let novel = filterdNovelArray.first,
+                             let story = novel.m_readingChapterStoryID != "" ? RealmStoryBulk.SearchStoryWith(realm: realm, storyID: novel.m_readingChapterStoryID) : RealmStoryBulk.SearchStoryWith(realm: realm, novelID: novel.novelID, chapterNumber: 1) {
+                            speechNextNovelWith(realm: realm, title: novel.title, story: story)
+                            return
                         }
                     }
                     
