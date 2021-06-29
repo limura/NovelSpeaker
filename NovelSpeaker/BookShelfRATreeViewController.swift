@@ -437,7 +437,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 let folder = BookShelfRATreeViewCellData()
                 folder.title = filter.title
                 folder.childrens = []
-                for novel in novels {
+                for novel in novels.sorted(by: {$0.lastDownloadDate < $1.lastDownloadDate}) {
                     let lastDownloadDate = novel.lastDownloadDate
                     if lastDownloadDate <= prevDate && lastDownloadDate > filter.date {
                         let data = BookShelfRATreeViewCellData()
@@ -496,7 +496,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 folder.childrens = [BookShelfRATreeViewCellData]()
                 folder.title = target == "" ? NSLocalizedString("BookShelfRATreeViewController_UnknownWriter", comment: "(作者名不明)") : target
                 if let novels = dic[target] as? [RealmNovel] {
-                    for novel in novels {
+                    for novel in novels.sorted(by: {$0.title < $1.title}) {
                         let data = BookShelfRATreeViewCellData()
                         data.novelID = novel.novelID
                         data.title = novel.title
