@@ -177,8 +177,11 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.view.addSubview(nextChapterButton)
         self.view.addSubview(chapterSlider)
         self.view.addSubview(chapterPositionLabel)
-        previousChapterButton.setTitle(" ◀ ", for: .normal)
-        previousChapterButton.titleLabel?.sizeToFit()
+        if #available(iOS 13.0, *), let img = UIImage(systemName: "arrowtriangle.left.fill", withConfiguration: UIImage.SymbolConfiguration(scale: .large)) {
+            previousChapterButton.setImage(img, for: .normal)
+        } else {
+            previousChapterButton.setTitle("◀", for: .normal)
+        }
         previousChapterButton.sizeToFit()
         previousChapterButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
         previousChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
@@ -186,8 +189,11 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         previousChapterButton.addTarget(self, action: #selector(previousChapterButtonClicked(_:)), for: .touchUpInside)
         previousChapterButton.translatesAutoresizingMaskIntoConstraints = false
         
-        nextChapterButton.setTitle(" ▶ ", for: .normal)
-        nextChapterButton.titleLabel?.sizeToFit()
+        if #available(iOS 13.0, *), let img = UIImage(systemName: "arrowtriangle.right.fill", withConfiguration: UIImage.SymbolConfiguration(scale: .large)) {
+            nextChapterButton.setImage(img, for: .normal)
+        } else {
+            nextChapterButton.setTitle("▶", for: .normal)
+        }
         nextChapterButton.sizeToFit()
         nextChapterButton.titleLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
         nextChapterButton.titleLabel?.adjustsFontForContentSizeCategory = true
@@ -214,6 +220,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             self.chapterPositionLabel.centerYAnchor.constraint(equalTo: self.previousChapterButton.centerYAnchor),
             self.chapterPositionLabel.leftAnchor.constraint(equalTo: self.nextChapterButton.rightAnchor, constant: 8),
             self.chapterPositionLabel.rightAnchor.constraint(equalTo: safeAreaGuide.rightAnchor, constant: -16),
+            self.previousChapterButton.widthAnchor.constraint(equalToConstant: 40),
+            self.nextChapterButton.widthAnchor.constraint(equalToConstant: 40),
         ])
         
         webView.translatesAutoresizingMaskIntoConstraints = false
@@ -474,10 +482,11 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     func applyThemeColor(backgroundColor:UIColor, foregroundColor:UIColor, indicatorStyle:UIScrollView.IndicatorStyle, barStyle:UIBarStyle) {
         
         self.view.backgroundColor = backgroundColor;
-        self.nextChapterButton.backgroundColor = backgroundColor
-        self.nextChapterButton.setTitleColor(self.view.tintColor, for: .normal)
-        self.previousChapterButton.backgroundColor = backgroundColor
-        self.previousChapterButton.setTitleColor(self.view.tintColor, for: .normal)
+        //self.nextChapterButton.backgroundColor = backgroundColor
+        //self.nextChapterButton.setTitleColor(self.view.tintColor, for: .normal)
+        //self.nextChapterButton.setTitleColor(self.view.tintColor.withAlphaComponent(0.5), for: .disabled)
+        //self.previousChapterButton.backgroundColor = backgroundColor
+        //self.previousChapterButton.setTitleColor(self.view.tintColor, for: .normal)
         self.chapterSlider.backgroundColor = backgroundColor
         self.chapterPositionLabel.backgroundColor = backgroundColor
         self.chapterPositionLabel.textColor = foregroundColor
@@ -1123,6 +1132,7 @@ body.NovelSpeakerBody {
         self.readingChapterStoryUpdateDate = Date()
         self.speakerDisplayWholeText = StorySpeaker.shared.GenerateWholeDisplayText()
         self.loadStoryWithoutStorySpeakerWith(story: story)
+        self.observeStory(storyID: story.storyID)
         self.applyChapterListChange()
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false
