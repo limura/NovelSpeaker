@@ -593,8 +593,12 @@ class StoryFetcher {
             if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil {
                 continue
             }
+            // pageElement が抽出できなくて、URL全般にマッチしそうな奴は信用しません。
+            if pageElement.count <= 0 && ["^https?://...", "^https?://..+", "^https?://..", "^https?://.+", "^https?://."].contains(siteInfo.url?.pattern ?? "") {
+                continue
+            }
             #endif
-            
+            //print("match success: pageElement.count: \(pageElement.count), nextUrl: \(nextUrl?.absoluteString ?? "nil"), firstPageLink: \(firstPageLink?.absoluteString ?? "nil"), hitSiteInfo: \(siteInfo)")
             #if !os(watchOS)
             successAction?(
                 StoryState(
@@ -622,6 +626,7 @@ class StoryFetcher {
             #endif
             return
         }
+        //print("no match content. url: \(currentState.url), SiteInfoArray: \(currentState.siteInfoArray)")
         failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_ContentIsNil", comment: "HTMLの解析に失敗しました。(文書の中身を取り出せませんでした。ことせかい のサポートサイト側のご意見ご要望フォームや設定→開発者に問い合わせる等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません)"))
     }
     
