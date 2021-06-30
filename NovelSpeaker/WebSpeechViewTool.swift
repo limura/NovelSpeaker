@@ -234,6 +234,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         var letterSpacing:String = "0.03em"
         var lineHeight:String = "1.5em"
         var verticalModeCSS:String = ""
+        var columnExCSS = ""
         let foregroundColorCSS:String
         if let fgColor = foregroundColor.cssColor {
             foregroundColorCSS = "color: \(fgColor)"
@@ -252,11 +253,30 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             let fontWeight = displayFont.fontDescriptor.symbolicTraits.contains(.traitBold) ? "bold" : "normal"
             let fontStyle = displayFont.fontDescriptor.symbolicTraits.contains(.traitItalic) ? "italic" : "normal"
             fontSetting = "font-family: '\(displaySetting.font.familyName)'; font-weight: \(fontWeight); font-style: \(fontStyle);"
-            fontSize = "\(displayFont.lineHeight)px"
-            let lineSpacePix = displayFont.lineHeight + displaySetting.lineSpacingDisplayValue
+            // font-size を UIFont の size と合わせるには、
+            // 1. UIFont の .pointSize を使う
+            // 2. html 側に <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'> を設定して端末毎のリサイズをやめさせる
+            // と良いらしい
+            // from: https://developer.apple.com/forums/thread/128293
+            let localPixelMagnification:CGFloat = 1 //UIScreen.main.scale
+            fontSize = "\(displayFont.pointSize * localPixelMagnification)px"
+            let lineSpacePix = (displayFont.lineHeight + displaySetting.lineSpacingDisplayValue) * localPixelMagnification
             lineHeight = "\(lineSpacePix)px"
-            verticalModeCSS = displaySetting.viewType == .webViewVertical ? "writing-mode: vertical-rl;" : ""
-            print("\(fontSetting), font-size: \(fontSize), lineSpacePix: \(lineSpacePix), pointSize: \(displayFont.pointSize), font.xHeight: \(displaySetting.font.xHeight), CSS line-height: \(lineHeight), UIFont.lineHeight: \(displayFont.lineHeight), lineSpacingDisplayValue: \(displaySetting.lineSpacingDisplayValue), ascender: \(displayFont.ascender), descender: \(displayFont.descender), capHeight: \(displayFont.capHeight), leading: \(displayFont.leading) vertical: \"\(verticalModeCSS)\")")
+            if displaySetting.viewType == .webViewVertical {
+                // text-combine-upright の digit は WkWebView では未実装らしいけども。(´・ω・`)
+                verticalModeCSS = "writing-mode: vertical-rl; text-combine-upright: digit 2;"
+            }else if displaySetting.viewType == .webViewVertical2Column {
+                verticalModeCSS = "writing-mode: vertical-rl; text-combine-upright: digit 2;"
+                // 上下2段で表示します。
+                // んだけどこれ、読み上げ時の読み上げ位置表示でのスクロールと壊滅的に合わないです(´・ω・`)
+                columnExCSS = """
+                    column-count: 2; /* 2段にする。又は、columns: 14em; とかで14文字で段組みする、みたいなのもできるぽい。*/
+                    column-rule: solid 1px #888888; /* 間に線を引く */
+                    column-gap: 2.5rem; /* 線から文字を離す */
+                    width: 100vw; /* 横を横幅に合わせる */
+                    """
+            }
+            //print("\(fontSetting), font-size: \(fontSize), lineSpacePix: \(lineSpacePix), pointSize: \(displayFont.pointSize), font.xHeight: \(displaySetting.font.xHeight), CSS line-height: \(lineHeight), UIFont.lineHeight: \(displayFont.lineHeight), lineSpacingDisplayValue: \(displaySetting.lineSpacingDisplayValue), ascender: \(displayFont.ascender), descender: \(displayFont.descender), capHeight: \(displayFont.capHeight), leading: \(displayFont.leading) vertical: \"\(verticalModeCSS)\", UIScreen.main.scale: \(UIScreen.main.scale), UIScreen.main.nativeScale: \(UIScreen.main.nativeScale), nativeBounds.size.width: \(UIScreen.main.nativeBounds.size.width), bounds.size.width: \(UIScreen.main.bounds.size.width), ")
         }
         
         let htmledText = convertNovelSepakerStringToHTML(text: content)
@@ -277,12 +297,14 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         let html = """
 <html>
 <head>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'>
 <style type="text/css">
 html {
   \(fontSetting)
   font-size: \(fontSize);
   letter-spacing: \(letterSpacing);
   line-height: \(lineHeight);
+  overflow-wrap:break-word;
   font-feature-settings: 'pkna';
   \(verticalModeCSS)
 }
@@ -292,6 +314,7 @@ ruby rt {
 body.NovelSpeakerBody {
   \(foregroundColorCSS);
   \(backgroundColorCSS);
+  \(columnExCSS);
 }
 * {
   scroll-behavior: smooth;

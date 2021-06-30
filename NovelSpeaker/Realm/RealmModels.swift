@@ -2698,6 +2698,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
         case normal = "Normal"
         case webViewVertical = "WebViewVertical"
         case webViewHorizontal = "WebViewHorizontal"
+        case webViewVertical2Column = "WebViewVertical2Column"
         case webViewOriginal = "WebViewOriginal"
     }
 

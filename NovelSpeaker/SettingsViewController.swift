@@ -1228,6 +1228,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     RealmDisplaySetting.ViewType.normal.rawValue
                     , RealmDisplaySetting.ViewType.webViewHorizontal.rawValue
                     , RealmDisplaySetting.ViewType.webViewVertical.rawValue
+                    , RealmDisplaySetting.ViewType.webViewVertical2Column.rawValue
                     , RealmDisplaySetting.ViewType.webViewOriginal.rawValue
                 ]
                 row.value = RealmDisplaySetting.ViewType.normal.rawValue

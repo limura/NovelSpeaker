@@ -413,7 +413,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
                 })
                 return
             }
-            if let type = displaySetting?.viewType, type == .webViewHorizontal || type == .webViewVertical {
+            if let type = displaySetting?.viewType, type == .webViewHorizontal || type == .webViewVertical || type == .webViewVertical2Column {
                 self.scrollPullAndFireHandler?.setupFor(scrollBehavior: type == .webViewVertical ? .vertical : .horizontal)
                 if story.chapterNumber <= 1 {
                     self.scrollPullAndFireHandler?.isBackwardEnabled = false

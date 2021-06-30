@@ -1101,7 +1101,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             switch viewType {
             case .normal:
                 self.performSegue(withIdentifier: "bookShelfToReaderSegue", sender: self)
-            case .webViewVertical, .webViewHorizontal, .webViewOriginal:
+            case .webViewVertical, .webViewHorizontal, .webViewOriginal, .webViewVertical2Column:
                 self.performSegue(withIdentifier: "bookShelfToWebViewReaderSegue", sender: self)
             }
         }
