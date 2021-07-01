@@ -376,7 +376,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             } else {
                 safeAreaGuide = self.view.layoutMarginsGuide
             }
-            self.previousChapterBottomConstraint = self.previousChapterButton.bottomAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor)
+            self.previousChapterBottomConstraint = self.previousChapterButton.bottomAnchor.constraint(equalTo: safeAreaGuide.bottomAnchor, constant: -8)
             self.previousChapterBottomConstraint?.isActive = true
             self.previousChapterButton.isHidden = false
             self.nextChapterButton.isHidden = false
