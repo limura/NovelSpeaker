@@ -250,8 +250,6 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         let toggleInterfaceButton = UIButton()
         toggleInterfaceButton.translatesAutoresizingMaskIntoConstraints = false
         toggleInterfaceButton.isAccessibilityElement = false
-        //toggleInterfaceButton.alpha = 0.4
-        //let (foregroundColor, backgroundColor) = getForegroundBackgroundColor()
         //toggleInterfaceButton.backgroundColor = foregroundColor
         //toggleInterfaceButton.setTitleColor(backgroundColor, for: .normal)
         //toggleInterfaceButton.layer.cornerRadius = 3
@@ -482,11 +480,16 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     func applyThemeColor(backgroundColor:UIColor, foregroundColor:UIColor, indicatorStyle:UIScrollView.IndicatorStyle, barStyle:UIBarStyle) {
         
         self.view.backgroundColor = backgroundColor;
-        //self.nextChapterButton.backgroundColor = backgroundColor
-        //self.nextChapterButton.setTitleColor(self.view.tintColor, for: .normal)
-        //self.nextChapterButton.setTitleColor(self.view.tintColor.withAlphaComponent(0.5), for: .disabled)
-        //self.previousChapterButton.backgroundColor = backgroundColor
-        //self.previousChapterButton.setTitleColor(self.view.tintColor, for: .normal)
+        if #available(iOS 13.0, *) {
+            // nothing.
+        }else{
+            self.nextChapterButton.backgroundColor = backgroundColor
+            self.nextChapterButton.setTitleColor(self.view.tintColor, for: .normal)
+            self.nextChapterButton.setTitleColor(self.view.tintColor.withAlphaComponent(0.5), for: .disabled)
+            self.previousChapterButton.backgroundColor = backgroundColor
+            self.previousChapterButton.setTitleColor(self.view.tintColor, for: .normal)
+            self.previousChapterButton.setTitleColor(self.view.tintColor.withAlphaComponent(0.5), for: .disabled)
+        }
         self.chapterSlider.backgroundColor = backgroundColor
         self.chapterPositionLabel.backgroundColor = backgroundColor
         self.chapterPositionLabel.textColor = foregroundColor
