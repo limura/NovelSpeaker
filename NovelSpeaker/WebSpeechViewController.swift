@@ -1133,6 +1133,7 @@ body.NovelSpeakerBody {
         self.speakerDisplayWholeText = StorySpeaker.shared.GenerateWholeDisplayText()
         self.loadStoryWithoutStorySpeakerWith(story: story)
         self.observeStory(storyID: story.storyID)
+        self.observeNovel(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: story.storyID))
         self.applyChapterListChange()
         if self.isNeedResumeSpeech {
             self.isNeedResumeSpeech = false
