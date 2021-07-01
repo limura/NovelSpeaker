@@ -300,6 +300,8 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'>
 <style type="text/css">
 html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   \(fontSetting)
   font-size: \(fontSize);
   letter-spacing: \(letterSpacing);
