@@ -798,6 +798,13 @@
 "ScrollPullAndFireHandler_ForwardHintLabelText_Active" = "離して次のページへ";
 "ScrollPullAndFireHandler_BackwardHintLabelText_Active" = "離して前のページへ";
 
+"MenuButtonHandler_StartStopShortcutKey_Title" = "再生/停止";
+"MenuBarButtonHandler_NextShortcutKey_Title" = "次の章へ";
+"MenuBarButtonHandler_PreviousShortcutKey_Title" = "前の章へ";
+"MenuBarButtonHandler_SkipForwardShortcutKey_Title" = "少し前へ";
+"MenuBarButtonHandler_SkipBackwardShortcutKey_Title" = "少し後ろへ";
+"MenuBarButtonHandler_ControlMenu_Title" = "再生制御";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
 "BookShelfTableViewController_SortTypeNovelName" = "小説名順";

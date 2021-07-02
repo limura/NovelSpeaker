@@ -806,6 +806,14 @@
 "ScrollPullAndFireHandler_ForwardHintLabelText_Active" = "Release to the next page";
 "ScrollPullAndFireHandler_BackwardHintLabelText_Active" = "Release to the previous page";
 
+"MenuButtonHandler_StartStopShortcutKey_Title" = "Play/Pause";
+"MenuBarButtonHandler_NextShortcutKey_Title" = "Next page";
+"MenuBarButtonHandler_PreviousShortcutKey_Title" = "Previous page";
+"MenuBarButtonHandler_SkipForwardShortcutKey_Title" = "Forward";
+"MenuBarButtonHandler_SkipBackwardShortcutKey_Title" = "Backward";
+"MenuBarButtonHandler_ControlMenu_Title" = "Playback control";
+
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";
 "BookShelfTableViewController_SortTypeNovelName" = "Novel name";

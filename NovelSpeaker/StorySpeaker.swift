@@ -936,20 +936,24 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
         return .success
     }
-    @objc func togglePlayPauseEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
-        print("MPCommandCenter: togglePlayPauseEvent")
+    @discardableResult
+    func togglePlayPauseEvent() -> Bool {
         RealmUtil.RealmBlock { (realm) -> Void in
             if speaker.isSpeaking {
-                print("togglePlayPause stopSpeech")
                 StopSpeech(realm: realm)
             }else{
                 StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
             }
         }
+        return true
+    }
+    @objc func togglePlayPauseEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
+        print("MPCommandCenter: togglePlayPauseEvent")
+        self.togglePlayPauseEvent()
         return .success
     }
-    @objc func nextTrackEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
-        print("MPCommandCenter: nextTrackEvent")
+    @discardableResult
+    func nextTrackEvent() -> Bool {
         self.isSeeking = false
         RealmUtil.RealmBlock { (realm) -> Void in
             StopSpeech(realm: realm)
@@ -959,10 +963,15 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 }
             }
         }
+        return true
+    }
+    @objc func nextTrackEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
+        print("MPCommandCenter: nextTrackEvent")
+        self.nextTrackEvent()
         return .success
     }
-    @objc func previousTrackEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
-        print("MPCommandCenter: previousTrackEvent")
+    @discardableResult
+    func previousTrackEvent() -> Bool {
         self.isSeeking = false
         RealmUtil.RealmBlock { (realm) -> Void in
             StopSpeech(realm: realm)
@@ -972,14 +981,19 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 }
             })
         }
+        return true
+    }
+    @objc func previousTrackEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
+        print("MPCommandCenter: previousTrackEvent")
+        self.previousTrackEvent()
         return .success
     }
     var skipForwardCount = 0
     var isNowSkipping = false
-    @objc func skipForwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
-        print("MPCommandCenter: skipForwardEvent")
+    @discardableResult
+    func skipForwardEvent() -> Bool {
         skipForwardCount += 100
-        if isNowSkipping == true { return .success }
+        if isNowSkipping == true { return true }
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
                self.StopSpeech(realm: realm) {
@@ -993,12 +1007,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 }
             }
         }
-        return .success
+        return true
     }
-    @objc func skipBackwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
-        print("MPCommandCenter: skipBackwardEvent")
+    @objc func skipForwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
+        print("MPCommandCenter: skipForwardEvent")
+        
+        return self.skipForwardEvent() ? .success : .commandFailed
+    }
+    @discardableResult
+    func skipBackwardEvent() -> Bool {
         skipForwardCount += 100
-        if isNowSkipping == true { return .success }
+        if isNowSkipping == true { return true }
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.StopSpeech(realm: realm) {
@@ -1011,7 +1030,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 }
             }
         }
-        return .success
+        return true
+    }
+    @objc func skipBackwardEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
+        print("MPCommandCenter: skipBackwardEvent")
+        return self.skipBackwardEvent() ? .success : .commandFailed
     }
     
     var isSeeking = false

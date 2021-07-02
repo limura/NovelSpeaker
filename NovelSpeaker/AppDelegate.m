@@ -188,5 +188,11 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     [[NovelDownloadQueue shared] HandleBackgroundFetchWithApplication:application performFetchWithCompletionHandler:completionHandler];
 }
 
+- (void) buildMenuWithBuilder:(id<UIMenuBuilder>)builder {
+    [super buildMenuWithBuilder:builder];
+    if(@available(iOS 13.0, *)) {
+        [MenuButtonHandler buildMenuHandlerWithBuilder:builder];
+    }
+}
 
 @end
