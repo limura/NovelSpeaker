@@ -1213,7 +1213,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     if let repeatSpeechType = repeatSpeechType {
                         if globalState?.repeatSpeechLoopType == .noCheckReadingPoint && NovelSpeakerUtility.GetAllRepeatSpeechLoopTargetRepeatSpeechType().contains(repeatSpeechType) {
                             func runNextSpeechLoop(novelIDArray:[String]) -> Bool {
-                                if let currentIndex = novelIDArray.firstIndex(of: novelID), let nextNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelIDArray[(currentIndex + 1) % novelIDArray.count]), nextNovel.novelID != novelID, let firstStory = nextNovel.firstChapterWith(realm: realm) {
+                                if let currentIndex = novelIDArray.firstIndex(of: novelID), let nextNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelIDArray[(currentIndex + 1) % novelIDArray.count]), let firstStory = nextNovel.firstChapterWith(realm: realm) {
                                     RealmUtil.WriteWith(realm: realm) { (realm) in
                                         firstStory.SetCurrentReadLocationWith(realm: realm, location: 0)
                                     }
