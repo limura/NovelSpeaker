@@ -404,6 +404,10 @@
 "EditBookViewController_SpeakTestButton_AccesibilityLabel" = "発話テストを開始する";
 "EditBookViewController_SpeakTestButton_AccesibilityLabel_Stop" = "発話テストを停止する";
 "EditBookViewController_WaitingSpeakerSetting" = "本文を設定し直しています。";
+"EditBookViewController_KeyboardBarButtonItem_Left" = "左へカーソル移動";
+"EditBookViewController_KeyboardBarButtonItem_Down" = "下へカーソル移動";
+"EditBookViewController_KeyboardBarButtonItem_Up" = "上へカーソル移動";
+"EditBookViewController_KeyboardBarButtonItem_Right" = "右へカーソル移動";
 
 "NarouDownloadQueue_URLDownloadTitleFixed" = "ダウンロードしたものを「%@」の名前で本棚に登録します";
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "ダウンロードしたもののタイトルを取得できなかったので、以下のURLのまま本棚に登録します。\n%@";
