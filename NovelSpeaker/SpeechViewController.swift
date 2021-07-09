@@ -739,7 +739,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             func runNextSpeech(nextFolder:RealmNovelTag?){
                 self.storySpeaker.targetFolderNameForGoToNextSelectedFolderdNovel = nextFolder?.name
                 RealmUtil.RealmBlock { realm in
-                    self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                    self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)")
                     self.checkDummySpeechFinished()
                 }
             }
@@ -801,7 +801,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.storySpeaker.StopSpeech(realm: realm) {
                     self.storySpeaker.SkipBackward(realm: realm, length: 30) {
-                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し戻すボタン).\(#function)")
                     }
                 }
             }
@@ -813,7 +813,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.storySpeaker.StopSpeech(realm: realm) {
                     self.storySpeaker.SkipForward(realm: realm, length: 30) {
-                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し進めるボタン).\(#function)")
                     }
                 }
             }

@@ -832,7 +832,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
                     DispatchQueue.main.async {
                         RealmUtil.Write { realm in
                             dialog.dismiss(animated: false, completion: nil)
-                            StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                            StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説編集画面(Speakボタン).\(#function)")
                         }
                     }
                 }
