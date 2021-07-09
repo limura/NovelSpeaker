@@ -58,7 +58,7 @@
             "block": "//div[@class='searchkekka_box']",
             "nextLink": "//div[@class='pager']/a[@class='nextlink']/@href",
             "title": "//div[@class='novel_h']/a",
-            "url": "//div[@class='novel_h']/a/@href"
+            "url": "//a[contains(@href,'/novelview/infotop/ncode/')]/@href"
         }
     },
     {
