@@ -597,7 +597,6 @@ class StoryFetcher {
         
         var tryedResourceUrlArray:[String] = []
         for siteInfo in currentState.siteInfoArray {
-            print("siteInfo: \(siteInfo)")
             if let resourceUrl = siteInfo.resourceUrl {
                 tryedResourceUrlArray.append(resourceUrl)
             }
