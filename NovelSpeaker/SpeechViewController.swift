@@ -739,7 +739,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             func runNextSpeech(nextFolder:RealmNovelTag?){
                 self.storySpeaker.targetFolderNameForGoToNextSelectedFolderdNovel = nextFolder?.name
                 RealmUtil.RealmBlock { realm in
-                    self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)")
+                    self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(Speakボタンを押した 又は 本棚画面で「▶︎ 再生:〜」を選択した 又は 次のフォルダの小説に移行した).\(#function)", isNeedRepeatSpeech: true)
                     self.checkDummySpeechFinished()
                 }
             }
@@ -801,7 +801,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.storySpeaker.StopSpeech(realm: realm) {
                     self.storySpeaker.SkipBackward(realm: realm, length: 30) {
-                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し戻すボタン).\(#function)")
+                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し戻すボタン).\(#function)", isNeedRepeatSpeech: true)
                     }
                 }
             }
@@ -813,7 +813,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.storySpeaker.StopSpeech(realm: realm) {
                     self.storySpeaker.SkipForward(realm: realm, length: 30) {
-                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し進めるボタン).\(#function)")
+                        self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し進めるボタン).\(#function)", isNeedRepeatSpeech: true)
                     }
                 }
             }

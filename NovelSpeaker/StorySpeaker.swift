@@ -538,7 +538,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         announceSpeaker.StartAnnounce(text: text, completion: completion)
     }
     
-    func StartSpeech(realm: Realm, withMaxSpeechTimeReset:Bool, callerInfo:String?) {
+    var isNeedRepeatSpeech:Bool = false
+    func StartSpeech(realm: Realm, withMaxSpeechTimeReset:Bool, callerInfo:String?, isNeedRepeatSpeech:Bool) {
+        self.isNeedRepeatSpeech = isNeedRepeatSpeech
         if (self.isMaxSpeechTimeExceeded && (!withMaxSpeechTimeReset)) {
             return
         }
@@ -937,7 +939,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     @objc func playEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: playEvent")
         RealmUtil.RealmBlock { (realm) -> Void in
-            StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "コントロールセンターからの操作(再生).\(#function)")
+            StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "コントロールセンターからの操作(再生).\(#function)", isNeedRepeatSpeech: isNeedRepeatSpeech)
         }
         return .success
     }
@@ -954,7 +956,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             if speaker.isSpeaking {
                 StopSpeech(realm: realm)
             }else{
-                StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "再生・停止イベント.\(#function)")
+                StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "再生・停止イベント.\(#function)", isNeedRepeatSpeech: isNeedRepeatSpeech)
             }
         }
         return true
@@ -971,7 +973,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             StopSpeech(realm: realm)
             LoadNextChapter(realm: realm) { (result) in
                 if result == true {
-                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "次の章の読み上げ.\(#function)")
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "次の章の読み上げ.\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                 }
             }
         }
@@ -989,7 +991,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             StopSpeech(realm: realm)
             LoadPreviousChapter(realm: realm, completion: { (result) in
                 if result == true {
-                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "前の章の読み上げ.\(#function)")
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "前の章の読み上げ.\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                 }
             })
         }
@@ -1014,7 +1016,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     self.isNowSkipping = true
                     self.SkipForward(realm: realm, length: count) {
                         self.isNowSkipping = false
-                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "早送り(単発呼び出し).\(#function)")
+                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "早送り(単発呼び出し).\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                     }
                 }
             }
@@ -1037,7 +1039,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     self.skipForwardCount = 0
                     self.SkipBackward(realm: realm, length: count) {
                         self.isNowSkipping = false
-                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "巻き戻し(単発呼び出し).\(#function)")
+                        self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "巻き戻し(単発呼び出し).\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                     }
                 }
             }
@@ -1057,7 +1059,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         self.SkipForward(realm: realm, length: 50) {
                             NiftyUtility.DispatchSyncMainQueue {
-                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "早送り(連続呼び出し).\(#function)")
+                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "早送り(連続呼び出し).\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                             }
                             if self.isSeeking == false { return }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
@@ -1093,7 +1095,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         self.SkipBackward(realm: realm, length: 60) {
                             NiftyUtility.DispatchSyncMainQueue {
-                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "巻き戻し(連続呼び出し).\(#function)")
+                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "巻き戻し(連続呼び出し).\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                             }
                             if self.isSeeking == false { return }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
@@ -1145,7 +1147,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.02, execute: {
                 RealmUtil.RealmBlock { (realm) -> Void in
-                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "コントロールセンターからの操作(PlaybackPosition).\(#function)")
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "コントロールセンターからの操作(PlaybackPosition).\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                 }
             })
             return .success
@@ -1189,7 +1191,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     self.SetStory(story: story, withUpdateReadDate: true) { (story) in
                         DispatchQueue.main.asyncAfter(deadline: .now() + nextStorySpeechWaitSecond) {
                             RealmUtil.RealmBlock { (realm) -> Void in
-                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: "次の(別の)小説の読み上げを開始(「再生が末尾に達した時の動作」が 別の小説を再生 する設定になっている).\(#function)")
+                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: "次の(別の)小説の読み上げを開始(「再生が末尾に達した時の動作」が 別の小説を再生 する設定になっている).\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                             }
                         }
                     }
@@ -1201,14 +1203,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             RealmUtil.RealmBlock { (realm) -> Void in
                 let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
                 let repeatSpeechType = globalState?.repeatSpeechType
-                if let repeatSpeechType = repeatSpeechType, repeatSpeechType == .RewindToThisStory {
+                if self.isNeedRepeatSpeech, let repeatSpeechType = repeatSpeechType, repeatSpeechType == .RewindToThisStory {
                     self.setReadLocationWith(realm: realm, location: 0)
-                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: "同じ章を再生(「再生が末尾に達した時の動作」が「現在の章を再生し直す」になっている).\(#function)")
+                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: "同じ章を再生(「再生が末尾に達した時の動作」が「現在の章を再生し直す」になっている).\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                     return
                 }
                 self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
 
-                if let nextStory = self.SearchNextChapterWith(realm: realm, storyID: self.storyID) {
+                if self.isNeedRepeatSpeech, let nextStory = self.SearchNextChapterWith(realm: realm, storyID: self.storyID) {
                     self.ringPageTurningSound()
                     if nextStory.readLocation(realm: realm) != 0 {
                         RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.bookmarkObserverToken]) { (realm) in
@@ -1217,12 +1219,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                     }
                     self.SetStory(story: nextStory, withUpdateReadDate: true, completion: { (story) in
                         DispatchQueue.main.asyncAfter(deadline: .now() + nextStorySpeechWaitSecond) {
-                            self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: "次の章へ移行.\(#function)")
+                            self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: "次の章へ移行.\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                         }
                     })
                 }else{
                     let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID)
-                    if let repeatSpeechType = repeatSpeechType {
+                    if self.isNeedRepeatSpeech, let repeatSpeechType = repeatSpeechType {
                         if globalState?.repeatSpeechLoopType == .noCheckReadingPoint && NovelSpeakerUtility.GetAllRepeatSpeechLoopTargetRepeatSpeechType().contains(repeatSpeechType) {
                             func runNextSpeechLoop(novelIDArray:[String]) -> Bool {
                                 if let currentIndex = novelIDArray.firstIndex(of: novelID), let nextNovel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelIDArray[(currentIndex + 1) % novelIDArray.count]), let firstStory = nextNovel.firstChapterWith(realm: realm) {
@@ -1270,7 +1272,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                         self.SetStory(story: firstStory, withUpdateReadDate: true) { (story) in
                                             DispatchQueue.main.asyncAfter(deadline: .now() + nextStorySpeechWaitSecond) {
                                                 RealmUtil.RealmBlock { (realm) -> Void in
-                                                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: "最初の章から再生をやりなおす(「再生が末尾に達した時の動作」が「最初の章から再生し直す」になっている).\(#function)")
+                                                    self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: "最初の章から再生をやりなおす(「再生が末尾に達した時の動作」が「最初の章から再生し直す」になっている).\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
                                                 }
                                             }
                                         }
