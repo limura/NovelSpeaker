@@ -130,8 +130,9 @@ struct StorySiteInfo {
     let firstPageButton: String?
     let waitSecondInHeadless: Double?
     let forceClickButton:String?
+    let resourceUrl:String?
     
-    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?) {
+    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?) {
         self.pageElement = pageElement
         if let urlString = url, let urlRegex = try? NSRegularExpression(pattern: urlString, options: []) {
             self.url = urlRegex
@@ -155,6 +156,7 @@ struct StorySiteInfo {
         }
         self.waitSecondInHeadless = waitSecondInHeadless
         self.forceClickButton = forceClickButton
+        self.resourceUrl = resourceUrl
     }
     
     func isMatchUrl(urlString:String) -> Bool {
@@ -235,6 +237,7 @@ extension StorySiteInfo: CustomStringConvertible {
         result += "\"\nfirstPageButton: \"" + (firstPageButton ?? "nil")
         result += "\"\nwaitSecondInHeadless: \(waitSecondInHeadless ?? 0.0)"
         result += "\"\nforceClickButton: \"" + (forceClickButton ?? "nil")
+        result += "\"\nresourceUrl: \"" + (resourceUrl ?? "nil")
         result += "\""
         return result
     }
@@ -243,6 +246,7 @@ extension StorySiteInfo: CustomStringConvertible {
 extension StorySiteInfo : Decodable {
     enum CodingKeys: String, CodingKey {
         case data
+        case resource_url
     }
     private enum NestedKeys: String, CodingKey {
         case title
@@ -264,6 +268,7 @@ extension StorySiteInfo : Decodable {
     init(from decoder: Decoder) throws {
         let toplevelValue = try decoder.container(keyedBy: CodingKeys.self)
 
+        resourceUrl = try? toplevelValue.decode(String.self, forKey: .resource_url)
         let values = try toplevelValue.nestedContainer(keyedBy: NestedKeys.self, forKey: .data)
         title = try? values.decode(String.self, forKey: NestedKeys.title)
         pageElement = try values.decode(String.self, forKey: NestedKeys.pageElement)
@@ -313,7 +318,7 @@ class StoryHtmlDecoder {
     var customSiteInfoArray:[StorySiteInfo] = []
     let fallbackSiteInfoArray:[StorySiteInfo]
     let lock = NSLock()
-    var siteInfoLoadDoneHandlerArray:[()->Void] = []
+    var siteInfoLoadDoneHandlerArray:[(_ errorString:String?)->Void] = []
     var cacheFileExpireTimeinterval:Double = 60*60*24
     var nextExpireDate:Date = Date(timeIntervalSince1970: 0)
     let cacheFileName = "AutopagerizeSiteInfoCache"
@@ -327,8 +332,8 @@ class StoryHtmlDecoder {
     static let shared = StoryHtmlDecoder()
     private init(){
         fallbackSiteInfoArray = [
-            StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil),
-            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil)
+            //StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(@itemprop,'articleBody')"),
+            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)")
         ]
     }
     
@@ -410,7 +415,7 @@ class StoryHtmlDecoder {
             self.siteInfoLoadDoneHandlerArray.removeAll()
             lock.unlock()
             for handler in handlerQueued {
-                handler()
+                handler(nil)
             }
             return
         }
@@ -426,7 +431,7 @@ class StoryHtmlDecoder {
         }
     }
     
-    func WaitLoadSiteInfoReady(handler: @escaping ()->Void){
+    func WaitLoadSiteInfoReady(handler: @escaping (_ errorString:String?)->Void){
         lock.lock()
         siteInfoLoadDoneHandlerArray.append(handler)
         lock.unlock()
@@ -436,14 +441,14 @@ class StoryHtmlDecoder {
     // 標準のSiteInfoを非同期で読み込みます。
     func LoadSiteInfo(completion:((Error?)->Void)? = nil) {
         var cacheFileExpireTimeinterval:Double = self.cacheFileExpireTimeinterval
-        func announceLoadEnd() {
+        func announceLoadEnd(errorString:String?) {
             lock.lock()
             siteInfoNowLoading = false
             let targetArray = siteInfoLoadDoneHandlerArray
             siteInfoLoadDoneHandlerArray.removeAll()
             lock.unlock()
             for handler in targetArray {
-                handler()
+                handler(errorString)
             }
         }
         var userDefinedSiteInfoURL:URL? = nil
@@ -458,9 +463,10 @@ class StoryHtmlDecoder {
         }
         guard let siteInfoURL = userDefinedSiteInfoURL ?? URL(string: StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL),
               let customSiteInfoURL = userDefinedCustomSiteInfoURL ?? URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL) else {
-                completion?(NovelSpeakerUtility.GenerateNSError(msg: "unknown error. default url decode error."))
-                announceLoadEnd()
-                return
+            let errorMessage = "unknown error. default url decode error."
+            completion?(NovelSpeakerUtility.GenerateNSError(msg: errorMessage))
+            announceLoadEnd(errorString: errorMessage)
+            return
         }
         if RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled() {
             cacheFileExpireTimeinterval = 0
@@ -475,6 +481,7 @@ class StoryHtmlDecoder {
         // 既存のデータが残ります。
         func updateSiteInfo(siteInfoData:Data?, customSiteInfoData:Data?) -> Error? {
             var isFail:Bool = false
+            var errorMessage:String? = nil
             if let data = siteInfoData, let siteInfoArray = DecodeSiteInfoData(data: data) {
                 self.lock.lock()
                 self.siteInfoArray = siteInfoArray
@@ -482,7 +489,9 @@ class StoryHtmlDecoder {
             }else{
                 isFail = true
                 #if !os(watchOS)
-                AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_SiteInfo", comment: "次点のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
+                let msg = NSLocalizedString("StoryFetcher_FetchSiteInfoError_SiteInfo", comment: "次点のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。")
+                //errorMessage = msg
+                AppInformationLogger.AddLog(message: msg, appendix: [
                         "siteInfoURL": siteInfoURL.absoluteString
                     ], isForDebug: false)
                 #endif
@@ -493,13 +502,19 @@ class StoryHtmlDecoder {
                 self.lock.unlock()
             }else{
                 isFail = true
-                AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_CustomSiteInfo", comment: "ことせかい 用のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
+                let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_CustomSiteInfo", comment: "ことせかい 用のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。")
+                AppInformationLogger.AddLog(message: message, appendix: [
                         "customSiteInfoURL": customSiteInfoURL.absoluteString
                     ], isForDebug: false)
+                if let oldErrorMessage = errorMessage {
+                    errorMessage = oldErrorMessage.appending("\n\(message)")
+                }else{
+                    errorMessage = message
+                }
             }
-            announceLoadEnd()
+            announceLoadEnd(errorString: errorMessage)
             if isFail {
-                return NovelSpeakerUtility.GenerateNSError(msg: "siteInfo or customSiteInfo decode error.")
+                return NovelSpeakerUtility.GenerateNSError(msg: errorMessage ?? "siteInfo or customSiteInfo decode error.")
             }
             return nil
         }
@@ -524,12 +539,13 @@ class StoryHtmlDecoder {
                 let result = updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData)
                 completion?(result)
             }) { (err) in
-                AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
+                let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。")
+                AppInformationLogger.AddLog(message: message, appendix: [
                         "siteInfoURL": siteInfoURL.absoluteString,
                         "customSiteInfoURL": customSiteInfoURL.absoluteString,
                         "lastError": err?.localizedDescription ?? "nil"
                     ], isForDebug: false)
-                announceLoadEnd()
+                announceLoadEnd(errorString: message)
                 completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
             }
         }
@@ -538,11 +554,12 @@ class StoryHtmlDecoder {
             customSiteInfoData = data
             completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
         }) { (err) in
-            AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。"), appendix: [
+            let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。")
+            AppInformationLogger.AddLog(message: message, appendix: [
                     "customSiteInfoURL": customSiteInfoURL.absoluteString,
                     "lastError": err?.localizedDescription ?? "nil"
                 ], isForDebug: false)
-            announceLoadEnd()
+            announceLoadEnd(errorString: message)
             completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
         }
         #endif
@@ -578,7 +595,12 @@ class StoryFetcher {
             return Array(tagSet)
         }
         
+        var tryedResourceUrlArray:[String] = []
         for siteInfo in currentState.siteInfoArray {
+            print("siteInfo: \(siteInfo)")
+            if let resourceUrl = siteInfo.resourceUrl {
+                tryedResourceUrlArray.append(resourceUrl)
+            }
             let pageElement = siteInfo.decodePageElement(xmlDocument: htmlDocument).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             let nextUrl = siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url)
             let firstPageLink = siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url)
@@ -627,7 +649,13 @@ class StoryFetcher {
             return
         }
         //print("no match content. url: \(currentState.url), SiteInfoArray: \(currentState.siteInfoArray)")
-        failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_ContentIsNil", comment: "HTMLの解析に失敗しました。(文書の中身を取り出せませんでした。ことせかい のサポートサイト側のご意見ご要望フォームや設定→開発者に問い合わせる等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません)"))
+        failedAction?(currentState.url, NSLocalizedString("UriLoader_HTMLParseFailed_ContentIsNil", comment: "HTMLの解析に失敗しました。(文書の中身を取り出せませんでした。ことせかい のサポートサイト側のご意見ご要望フォームや設定→開発者に問い合わせる等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません)")
+            + """
+            \nurl: \(currentState.url.absoluteString)
+            SiteInfo resourceUrls(\(tryedResourceUrlArray.count)): [
+              \(tryedResourceUrlArray.joined(separator: "\n  "))
+            ]
+            """)
     }
     
     // 与えられた StoryState に示される「何をしたら次の本文が取得できるか」を実行して本文を取り出します。
@@ -831,15 +859,19 @@ class StoryFetcher {
         return CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString, previousContent: previousContent)
     }
     
-    static func CreateFirstStoryState(url:URL, cookieString:String?, previousContent:String?, completion:((StoryState)->Void)?) {
-        StoryHtmlDecoder.shared.WaitLoadSiteInfoReady {
-            completion?(CreateFirstStoryStateWithoutCheckLoadSiteInfo(url:url, cookieString: cookieString, previousContent: previousContent))
+    static func CreateFirstStoryState(url:URL, cookieString:String?, previousContent:String?, completion:((StoryState, _ errorString:String?)->Void)?) {
+        StoryHtmlDecoder.shared.WaitLoadSiteInfoReady { error in
+            completion?(CreateFirstStoryStateWithoutCheckLoadSiteInfo(url:url, cookieString: cookieString, previousContent: previousContent), error)
         }
     }
     
     func FetchFirst(url:URL, cookieString:String?, previousContent:String?, successAction:((StoryState)->Void)?, failedAction:((URL, String)->Void)?) {
-        StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, previousContent: previousContent, completion:{ (dummyState) in
-            self.FetchNext(currentState: dummyState, successAction: successAction, failedAction: failedAction)
+        StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, previousContent: previousContent, completion:{ (dummyState, errorString) in
+            if let errorString = errorString, errorString.count > 0 {
+                failedAction?(url, errorString)
+            }else{
+                self.FetchNext(currentState: dummyState, successAction: successAction, failedAction: failedAction)
+            }
         })
     }
     
@@ -874,7 +906,11 @@ class StoryFetcher {
     
     // 指定されたURLから最初の本文と思われるものまで読み込んでその値を返します。
     func FetchFirstContent(url:URL, cookieString:String?, previousContent:String?, completion:((_ requestURL:URL, _ state:StoryState?, _ errorDescriptionString:String?)->Void)?) {
-        StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, previousContent: previousContent, completion: { (state) in
+        StoryFetcher.CreateFirstStoryState(url: url, cookieString: cookieString, previousContent: previousContent, completion: { (state, errorString) in
+            if let errorString = errorString, errorString.count > 0 {
+                completion?(url, nil, errorString)
+                return
+            }
             self.FetchFirstContentRecurcive(currentState: state, successAction: { (state) in
                 completion?(url, state, nil)
             }, failedAction: { (url, errorString) in

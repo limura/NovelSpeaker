@@ -199,6 +199,7 @@
 "SettingsViewController_isDebugMenuAlreadyEnabled_Title" = "Always turn on this debug menu";
 "SettingsViewController_DontUsallyUseSection_Title" = "Things you don't normally need to use";
 "SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd" = "Manual loading of SiteInfo is complete.\nIf there are no other error messages, it seems that the SiteInfo load was successful.";
+"SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd_Failed" = "There is an error loading SiteInfo manually. (Probably there is a problem with the network connection. It seems that detailed information is written on the error side that is output at the same time, so check them and take appropriate action.)";
 "SettingTableViewController_IsEnableSwipeOnStoryView" = "Make it possible to turn pages by swiping left and right on the novel text screen";
 "SettingsTableViewController_AppInformation" = "Notification of in-app error";
 "SettingsTableViewController_AppInformation_IncludedForDebug" = "Notification of in-app error (including for debugging)";
@@ -640,6 +641,7 @@
 
 "MultipleNovelIDSelectorViewController_Title" = "Select novel";
 
+"NovelDownloadQueue_DownloadFailedByErrorSiteInfo" = "It seems that the loading of SiteInfo is failing, so I give up the download";
 
 "NovelDownloader_htmlStoryIsNil" = "Novel download failed.";
 "NovelDownloader_FailedByNoContent" = "Novel download failed. This nove has no content.";

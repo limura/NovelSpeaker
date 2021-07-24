@@ -498,7 +498,15 @@ class NovelDownloadQueue : NSObject {
     
     func dispatch() {
         while self.isDownloadStop == false && self.queueHolder.GetCurrentDownloadingNovelIDArray().count < self.maxSimultaneousDownloadCount, let nextTargetNovelID = self.queueHolder.getNextQueue() {
-            StoryHtmlDecoder.shared.WaitLoadSiteInfoReady {
+            StoryHtmlDecoder.shared.WaitLoadSiteInfoReady { errorString in
+                // TODO: SiteInfo の load に失敗した時用の処理が書かれていない
+                if let errorString = errorString {
+                    AppInformationLogger.AddLog(message: NSLocalizedString("NovelDownloadQueue_DownloadFailedByErrorSiteInfo", comment: "SiteInfo の読み込みが失敗しているようなのでダウンロードを諦めます"), appendix: ["novelID": nextTargetNovelID, "errorString": errorString], isForDebug: true)
+                    self.downloadStop()
+                    self.updateNetworkActivityIndicatorStatus()
+                    NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()
+                    return
+                }
                 let queuedDate = Date()
                 print("startDownload: \(nextTargetNovelID)")
                 NovelSpeakerNotificationTool.AnnounceDownloadStatusChanged()

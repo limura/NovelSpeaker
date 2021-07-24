@@ -180,6 +180,7 @@
 "SettingsTableViewController_AppInformation_CopyLogButtonTitle" = "このお知らせをコピーする";
 "SettingsViewController_DontUsallyUseSection_Title" = "通常は使用する必要の無いもの";
 "SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd" = "手動による SiteInfo の読み込みが終了しました。\n他にエラーメッセージが出ていなければ SiteInfo の読み込みは成功したと思われます。";
+"SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd_Failed" = "手動による SiteInfo の読込中にエラーが発生しています。(恐らくはネットワーク接続に問題があると考えられます。同時に出力されているエラー側に詳細な情報が書かれていると思われますので、それらを確認した上で、適切に対処してください)";
 "SettingTableViewController_IsEnableSwipeOnStoryView" = "小説本文画面での左右スワイプでページめくりができるようにする";
 "SettingTableViewController_DisableNarouRuby" = "ことせかい 由来のルビ表記のみを対象とする(『|ルビを振られる文字列(ルビ文字列)』という形式のみを対象とするようになるため、『漢字(ひらがなかカタカナ)』という表記をルビと判定される事を避けたい場合等に効果があります)";
 
@@ -631,6 +632,8 @@
 
 "MultipleNovelIDSelectorViewController_Title" = "小説を選択";
 
+"NovelDownloadQueue_DownloadFailedByErrorSiteInfo" = "SiteInfo の読み込みが失敗しているようなのでダウンロードを諦めます";
+
 "NovelDownloader_htmlStoryIsNil" = "小説のダウンロードに失敗しました。";
 "NovelDownloader_FailedByNoContent" = "取得された小説の本文がなかったため、読み込みを終了します。";
 "NovelDownloader_FailedByNoRealmNovel" = "小説が本棚に登録されていなかったため、ダウンロードを終了します。";
@@ -733,7 +736,7 @@
 
 "StoryFetcher_CanNotFindPageElementAndNextLink" = "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。";
 "StoryFetcher_FetchFirstContent_NoNextUrlAlive" = "本文を取り出せませんでした。(本文が掲載されている部分へのリンクが発見できませんでした)";
-"StoryFetcher_FetchFirstContent_ExceededCountToLive" = "本文を取り出せませんでした。(本文へのリンクが発見できないまま読み込み回数上限に達しました)";
+"StoryFetcher_FetchFirstContent_ExceededCountToLive" = "本文を取り出せませんでした。(本文へのリンクが発見できないまま読み込み回数上限に達しました。このエラーが発生する場合は各Webサイト用の小説の本文部分がどこなのかを示すデータ(SiteInfo)の更新に失敗している場合があります。「設定タブ」→「アプリ内エラーのお知らせ」でSiteInfoの取得に失敗した、などといったエラーが出ていない事を確認してください)";
 "StoryFetcher_FetchError_RobotsText" = "Webサイト様側で機械的なアクセスを制限されているサイトであったため、ことせかい による取得ができません。(robots.txt で拒否されています)";
 "StoryFetcher_FetchSiteInfoError_SiteInfo" = "次点のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。";
 "StoryFetcher_FetchSiteInfoError_CustomSiteInfo" = "ことせかい 用のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。";

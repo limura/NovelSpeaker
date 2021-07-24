@@ -1182,9 +1182,13 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (cellOf, row) in
                 StoryHtmlDecoder.shared.ClearSiteInfo()
-                StoryHtmlDecoder.shared.WaitLoadSiteInfoReady {
+                StoryHtmlDecoder.shared.WaitLoadSiteInfoReady { errorString in
                     DispatchQueue.main.async {
-                        AppInformationLogger.AddLog(message: NSLocalizedString("SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd", comment: "手動による SiteInfo の読み込みが終了しました。\n他にエラーメッセージが出ていなければ SiteInfo の読み込みは成功したと思われます。"), isForDebug: false)
+                        if errorString != nil {
+                            AppInformationLogger.AddLog(message: NSLocalizedString("SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd_Failed", comment: "手動による SiteInfo の読込中にエラーが発生しています。"), isForDebug: false)
+                        }else{
+                            AppInformationLogger.AddLog(message: NSLocalizedString("SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd", comment: "手動による SiteInfo の読み込みが終了しました。\n他にエラーメッセージが出ていなければ SiteInfo の読み込みは成功したと思われます。"), isForDebug: false)
+                        }
                     }
                 }
                 DispatchQueue.main.async {
