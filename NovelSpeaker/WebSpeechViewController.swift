@@ -25,7 +25,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var targetStoryID:String? = nil
     var isNeedResumeSpeech:Bool = false
     var isNeedUpdateReadDate:Bool = true
-    var textWebView:WKWebView? = nil
+    var textWebView:CustomWKWebView? = nil
     let webSpeechTool = WebSpeechViewTool()
     var toggleInterfaceButton:UIButton? = nil
     
@@ -307,7 +307,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             """
     }
 
-    static func createWkWebViewWithUserContentController(handler:WebSpeechViewController, myScriptNamespace:String) -> WKWebView {
+    static func createWkWebViewWithUserContentController(handler:WebSpeechViewController, myScriptNamespace:String) -> CustomWKWebView {
         let injectScriptAtDocumentStart = createInjectScriptAtDocumentStart(myScriptNamespace:myScriptNamespace)
         let userScriptAtDocumentStart = WKUserScript(source: injectScriptAtDocumentStart, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         let injectScriptAtDocumentEnd = createInjectScriptAtDocumentEnd(myScriptNamespace:myScriptNamespace)
@@ -316,7 +316,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         config.userContentController.addUserScript(userScriptAtDocumentStart)
         config.userContentController.addUserScript(userScriptAtDocumentEnd)
         config.userContentController.add(handler, name: "logging")
-        return WKWebView(frame: CGRect(x: 0, y: 0, width: 1024, height: 1024), configuration: config)
+        return CustomWKWebView(frame: CGRect(x: 0, y: 0, width: 1024, height: 1024), configuration: config)
     }
 
     // WkWebView の JavaScript からのイベントを受け取るメッセージハンドラ

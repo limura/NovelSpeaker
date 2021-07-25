@@ -44,9 +44,24 @@ extension UIColor {
     }
 }
 
+public class CustomWKWebView: WKWebView {
+    // WKWebView で長押しして出て来るメニューの項目を減らします
+    // from http://qiita.com/watt1006/items/2425bfa1720d522d05fd
+    override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if StorySpeaker.shared.isPlayng {
+            return false
+        }
+        return RealmUtil.RealmBlock { (realm) -> Bool in
+            if RealmGlobalState.GetInstanceWith(realm: realm)?.isMenuItemIsAddNovelSpeakerItemsOnly ?? false {
+                return false
+            }
+            return super.canPerformAction(action, withSender: sender);
+        }
+    }
+}
 
 class WebSpeechViewTool: NSObject, WKNavigationDelegate {
-    var wkWebView:WKWebView? = nil
+    var wkWebView:CustomWKWebView? = nil
     var loadCompletionHandler:(() -> Void)? = nil
     var siteInfoArray:[StorySiteInfo] = []
     
@@ -56,7 +71,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         }
     }
     
-    public func applyFromHtmlString(webView:WKWebView, html:String, baseURL: URL?, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
+    public func applyFromHtmlString(webView:CustomWKWebView, html:String, baseURL: URL?, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
         removeDelegate()
         loadCompletionHandler = completionHandler
         self.wkWebView = webView
@@ -65,12 +80,12 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         webView.loadHTMLString(html, baseURL: baseURL)
     }
     
-    public func applyFromNovelSpeakerString(webView:WKWebView, content: String, foregroundColor: UIColor, backgroundColor: UIColor, displaySetting: RealmDisplaySetting?, baseURL: URL?, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
+    public func applyFromNovelSpeakerString(webView:CustomWKWebView, content: String, foregroundColor: UIColor, backgroundColor: UIColor, displaySetting: RealmDisplaySetting?, baseURL: URL?, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
         let html = createContentHTML(content: content, foregroundColor: foregroundColor, backgroundColor: backgroundColor, displaySetting: displaySetting)
         applyFromHtmlString(webView: webView, html: html, baseURL: baseURL, completionHandler: completionHandler)
     }
     
-    public func loadUrl(webView:WKWebView, request:URLRequest, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
+    public func loadUrl(webView:CustomWKWebView, request:URLRequest, siteInfoArray:[StorySiteInfo] = [], completionHandler:(() -> Void)?){
         removeDelegate()
         loadCompletionHandler = completionHandler
         self.wkWebView = webView
