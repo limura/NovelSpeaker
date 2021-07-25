@@ -127,6 +127,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             }
             guard let nodeString = node as? String else {
                 print("js node == nil")
+                print(jsString)
                 return
             }
             result = nodeString
@@ -150,6 +151,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             }
             guard let resultDouble = node as? Double else {
                 print("js node == nil")
+                print(jsString)
                 return
             }
             result = resultDouble
@@ -171,6 +173,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             }
             guard let resultDouble = node as? [String:Double] else {
                 print("js node == nil")
+                print(jsString)
                 return
             }
             result = resultDouble
@@ -191,9 +194,12 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     func getSpeechText(completionHandler:((String?) -> Void)?) {
         evaluateJsToString(jsString: "GenerateWholeText(elementArray,0);", completionHandler: completionHandler)
     }
-    func highlightSpeechLocation(location:Int, length:Int, scrollRatio: Double) {
+    func highlightSpeechLocation(location:Int, length:Int, completionHandler:(()->Void)? = nil) {
         //evaluateJsToString(jsString: "HighlightFromIndex(\(location), \(length));\"OK\";", completionHandler: nil)
-        evaluateJsToString(jsString: "HighlightFromIndex(\(location), \(length)); ScrollToIndex(\(location) + \(length), \(scrollRatio)); \"OK\";", completionHandler: nil)
+        evaluateJsToString(jsString: "HighlightFromIndex(\(location), \(length)); \"OK\";", completionHandler: { _ in completionHandler?() })
+    }
+    func scrollToIndex(location:Int, length:Int, scrollRatio:Double, completionHandler:(()->Void)? = nil){
+        evaluateJsToString(jsString: "ScrollToIndex(\(location) + \(length), \(scrollRatio)); \"OK\";", completionHandler: { _ in completionHandler?() })
     }
     func getSelectedLocation(completionHandler:((Int?)->Void)?){
         evaluateJsToDouble(jsString: "GetSelectedIndex();") { (result) in
@@ -218,6 +224,13 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             completionHandler(NiftyUtility.DoubleToInt(value: startIndex), NiftyUtility.DoubleToInt(value: endIndex))
         }
     }
+    func getCurrentDisplayLocation(xRatio:Double, yRatio:Double, completionHandler:@escaping ((Int?)->Void)) {
+        evaluateJsToDouble(jsString: "GetCurrentDisplayLocation(\(xRatio), \(yRatio))") { location in
+            guard let location = location, !location.isInfinite, !location.isNaN else { completionHandler(nil); return }
+            completionHandler(Int(location))
+        }
+    }
+    
     func hideNotPageElement(completionHandler: (()->Void)?){
         evaluateJsToString(jsString: "HideOtherElements(document.body, elementArray);\"OK\";", completionHandler: { _ in
             completionHandler?()
@@ -235,6 +248,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         var lineHeight:String = "1.5em"
         var verticalModeCSS:String = ""
         var columnExCSS = ""
+        var minWidthHeightCSS = ""
         let foregroundColorCSS:String
         if let fgColor = foregroundColor.cssColor {
             foregroundColorCSS = "color: \(fgColor)"
@@ -275,6 +289,18 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
                     column-gap: 2.5rem; /* 線から文字を離す */
                     width: 100vw; /* 横を横幅に合わせる */
                     """
+            }
+            switch displaySetting.viewType {
+            case .normal, .webViewOriginal:
+                break
+            case .webViewHorizontal, .webViewVertical2Column:
+                // 縦については min-height が 100% を超えていなくてもスクロールできる(バウンスできる)ようなので特に指定はしません。
+                //minWidthHeightCSS = "min-height: 100.1%"
+                break
+            case .webViewVertical:
+                // 横については min-width を 100% より大きくしておかないと、コンテンツ量が少なすぎると左右のスクロールができなくなり、バウンスがされずに前後の章への移動ができなくなるため、これを指定する必要があります。
+                minWidthHeightCSS = "min-width: 100%"
+                break
             }
             //print("\(fontSetting), font-size: \(fontSize), lineSpacePix: \(lineSpacePix), pointSize: \(displayFont.pointSize), font.xHeight: \(displaySetting.font.xHeight), CSS line-height: \(lineHeight), UIFont.lineHeight: \(displayFont.lineHeight), lineSpacingDisplayValue: \(displaySetting.lineSpacingDisplayValue), ascender: \(displayFont.ascender), descender: \(displayFont.descender), capHeight: \(displayFont.capHeight), leading: \(displayFont.leading) vertical: \"\(verticalModeCSS)\", UIScreen.main.scale: \(UIScreen.main.scale), UIScreen.main.nativeScale: \(UIScreen.main.nativeScale), nativeBounds.size.width: \(UIScreen.main.nativeBounds.size.width), bounds.size.width: \(UIScreen.main.bounds.size.width), ")
         }
@@ -317,6 +343,7 @@ body.NovelSpeakerBody {
   \(foregroundColorCSS);
   \(backgroundColorCSS);
   \(columnExCSS);
+  \(minWidthHeightCSS);
 }
 * {
   scroll-behavior: smooth;

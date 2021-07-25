@@ -24,6 +24,10 @@ function isVerticalMode(element) {
 function ScrollToElement(element, index, margin) {
   let range = new Range();
   range.selectNode(element);
+  // 何故か //body が対象になっている時があって、その時は謎の挙動(次のTextNodeの全ての分だけスクロールするようになる)をするので index を一つずらすことで Text を選択されるようにすることで謎の挙動を回避します。
+  if(index == 0 && (range.endContainer instanceof HTMLBodyElement || range.startContainer instanceof HTMLBodyElement)){
+    index = 1;
+  }
   if(index > 0){
     range.setStart(element, index);
     range.setEnd(element, index+1);
@@ -36,7 +40,7 @@ function ScrollToElement(element, index, margin) {
   let x = window.pageXOffset + rect.left - xMargin;
   let y = window.pageYOffset + rect.top - window.innerHeight + yMargin;
   window.scrollTo({left: x, top: y, behavior: "smooth"});
-  //console.log("ScrollToElement: " + x + ", " + y + " rect: " + rect.x + ", " + rect.y);
+  //console.log(["ScrollToElement: " + x + ", " + y + " rect: " + rect.x + ", " + rect.y, "rect.left", rect.left, "pageXOffset", window.pageXOffset, "xMargin", xMargin, `${element.textContent}`]);
 }
 
 // margin はWebViewの幅や高さに対する比率(0.3とか)を指定する
@@ -360,6 +364,19 @@ function CreateElementArray(SiteInfoArray){
         let pageElementArray = GetPageElementArray(siteInfo);
         if(pageElementArray){
             return extractElementForPageElementArray(pageElementArray);
+        }
+    }
+    return undefined;
+}
+
+function GetCurrentDisplayLocation(xRatio, yRatio) {
+    const x = window.innerWidth * xRatio;
+    const y = window.innerHeight * yRatio;
+    const range = document.caretRangeFromPoint(x, y);
+    if(range) {
+        const indexDic = SelectionRangeToIndex(range);
+        if("startIndex" in indexDic) {
+            return indexDic.startIndex;
         }
     }
     return undefined;

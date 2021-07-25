@@ -55,6 +55,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     var previousChapterTopConstraint:NSLayoutConstraint? = nil
     
     var lastChapterNumber:Int = -1
+    
+    var currentViewTypeCache:RealmDisplaySetting.ViewType? = nil
 
     @objc static weak var instance:WebSpeechViewController? = nil
 
@@ -102,9 +104,29 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     
     // background から redume した時に何故かWebViewの中身が空(真っ白)になる事があるぽいのでそれに対抗するために redume した時に呼ばれて再描画？する関数を用意しておきます。(´・ω・`)
     @objc func RedisplayWebView() {
-        RealmUtil.RealmBlock { realm in
-            if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID) {
-                self.loadStoryWithoutStorySpeakerWith(story: story)
+        // MEMO: getCurrentDisplayLocation() でスクロールする起点を取得して、
+        // overrideLocation にそれを渡す事で再表示しながら「現在表示されている部分へスクロールする」ようになるんだけれど……
+        // WebViewOriginal みたいなのだと表示されている部分を検出できない可能性があるのよね。(´・ω・`)
+        // あと、縦書きの時は1文字分ズレてしまうので、検出する時の xRaito と
+        // スクロールする時の Raito を少し変える事で怪しく回避しようとしてるんだけど、
+        // まぁ文字の大きさによって失敗するんよなこの方法だと
+        let xRaito:Double
+        let yRaito:Double
+        let scrollRaito:Double
+        if self.currentViewTypeCache == .webViewVertical || self.currentViewTypeCache == .webViewVertical2Column {
+            xRaito = 0.99
+            yRaito = 0.5
+            scrollRaito = 0.95
+        }else{
+            xRaito = 0.5
+            yRaito = 0.01
+            scrollRaito = 0.95
+        }
+        self.webSpeechTool.getCurrentDisplayLocation(xRatio: xRaito, yRatio: yRaito) { currentDisplayLocation in
+            RealmUtil.RealmBlock { realm in
+                if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID) {
+                    self.loadStoryWithoutStorySpeakerWith(story: story, overrideLocation: currentDisplayLocation, scrollRatio: scrollRaito)
+                }
             }
         }
     }
@@ -278,8 +300,8 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     static func createInjectScriptAtDocumentEnd(myScriptNamespace:String) -> String{
         return """
             var console = {
-                log: function(msg){
-                    \(myScriptNamespace).webkit.messageHandlers.logging.postMessage(msg);
+                log: function(...args){
+                    \(myScriptNamespace).webkit.messageHandlers.logging.postMessage(args);
                 }
             };
             """
@@ -390,12 +412,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         self.assignHideToToggleInterfaceButton()
     }
 
-    func loadStoryWithoutStorySpeakerWith(story:Story) {
+    func loadStoryWithoutStorySpeakerWith(story:Story, overrideLocation:Int? = nil, scrollRatio: Double? = nil) {
         guard let webView = self.textWebView else { return }
         RealmUtil.RealmBlock { realm in
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: story.novelID) else { return }
             let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm)
             let readLocation = story.readLocation(realm: realm)
+            self.currentViewTypeCache = displaySetting?.viewType
             DispatchQueue.main.async {
                 self.title = novel.title
             }
@@ -414,7 +437,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
                         self.webViewDisplayWholeText = text
                     }
                     //self.webSpeechTool.hideNotPageElement {
-                    self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1, scrollRatio: 0.3)
+                    self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1) {
+                        if let overrideLocation = overrideLocation, overrideLocation >= 0 {
+                            self.webSpeechTool.scrollToIndex(location: overrideLocation, length: 1, scrollRatio: scrollRatio ?? 0.5)
+                        }else{
+                            self.webSpeechTool.scrollToIndex(location: readLocation, length: 1, scrollRatio: 0.3)
+                        }
+                    }
                     //}
                 })
                 return
@@ -435,7 +464,13 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
             self.isNeedCollectDisplayLocation = false
             let (fg, bg) = getForegroundBackgroundColor()
             self.webSpeechTool.applyFromNovelSpeakerString(webView: webView, content: story.content, foregroundColor: fg, backgroundColor: bg, displaySetting: displaySetting, baseURL: nil) {
-                self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1, scrollRatio: 0.3)
+                self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1) {
+                    if let overrideLocation = overrideLocation, overrideLocation > 0 {
+                        self.webSpeechTool.scrollToIndex(location: overrideLocation, length: 1, scrollRatio: scrollRatio ?? 0.5)
+                    }else{
+                        self.webSpeechTool.scrollToIndex(location: readLocation, length: 1, scrollRatio: 0.3)
+                    }
+                }
             }
         }
     }
@@ -929,7 +964,7 @@ body.NovelSpeakerBody {
                     func runNextSpeech(nextFolder:RealmNovelTag?){
                         StorySpeaker.shared.targetFolderNameForGoToNextSelectedFolderdNovel = nextFolder?.name
                         RealmUtil.RealmBlock { realm in
-                            StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                            StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(Speakボタンを押した 又は 本棚画面で「▶︎ 再生:〜」を選択した 又は 次のフォルダの小説に移行した).\(#function)", isNeedRepeatSpeech: true)
                             self.checkDummySpeechFinished()
                         }
                     }
@@ -994,7 +1029,7 @@ body.NovelSpeakerBody {
             RealmUtil.RealmBlock { (realm) -> Void in
                 StorySpeaker.shared.StopSpeech(realm: realm) {
                     StorySpeaker.shared.SkipBackward(realm: realm, length: 30) {
-                        StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                        StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)", isNeedRepeatSpeech: true)
                     }
                 }
             }
@@ -1006,7 +1041,7 @@ body.NovelSpeakerBody {
             RealmUtil.RealmBlock { (realm) -> Void in
                 StorySpeaker.shared.StopSpeech(realm: realm) {
                     StorySpeaker.shared.SkipForward(realm: realm, length: 30) {
-                        StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                        StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)", isNeedRepeatSpeech: true)
                     }
                 }
             }
@@ -1073,20 +1108,40 @@ body.NovelSpeakerBody {
     }
 
     @objc func toggleInterfaceButtonClicked(_ sender:UIButton){
-        func highlight(){
+        func highlight(overrideLocation:Int?, scrollRatio:Double?){
             RealmUtil.RealmBlock { realm in
                 guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: StorySpeaker.shared.storyID) else { return }
                 let readLocation = story.readLocation(realm: realm)
                 DispatchQueue.main.async {
-                    self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1, scrollRatio: 0.3)
+                    self.webSpeechTool.highlightSpeechLocation(location: readLocation, length: 1) {
+                        if let overrideLocation = overrideLocation, overrideLocation > 0 {
+                            self.webSpeechTool.scrollToIndex(location: overrideLocation, length: 1, scrollRatio: scrollRatio ?? 0.5)
+                        }else{
+                            self.webSpeechTool.scrollToIndex(location: readLocation, length: 1, scrollRatio: 0.3)
+                        }
+                    }
                 }
             }
         }
-        //if(self.tabBarController?.isVisible ?? false) {
-        if((self.navigationController?.isNavigationBarHidden ?? false) == false){
-            self.hideTopAndDownComponents(animated: false, animateCompletion: highlight)
+        print("width: \(self.textWebView?.frame.width ?? -1)")
+        let xRaito:Double
+        let yRaito:Double
+        let scrollRaito:Double
+        if self.currentViewTypeCache == .webViewVertical || self.currentViewTypeCache == .webViewVertical2Column {
+            xRaito = 0.99
+            yRaito = 0.5
+            scrollRaito = 0.95
         }else{
-            self.displayTopAndDownComponents(animated: false, animateCompletion: highlight)
+            xRaito = 0.5
+            yRaito = 0.03
+            scrollRaito = 0.95
+        }
+        self.webSpeechTool.getCurrentDisplayLocation(xRatio: xRaito, yRatio: yRaito) { currentDisplayLocation in
+            if((self.navigationController?.isNavigationBarHidden ?? false) == false){
+                self.hideTopAndDownComponents(animated: false, animateCompletion: { highlight(overrideLocation: currentDisplayLocation, scrollRatio: scrollRaito) })
+            }else{
+                self.displayTopAndDownComponents(animated: false, animateCompletion: { highlight(overrideLocation: currentDisplayLocation, scrollRatio: scrollRaito) })
+            }
         }
     }
     
@@ -1129,7 +1184,9 @@ body.NovelSpeakerBody {
         }else{
             location = range.location
         }
-        self.webSpeechTool.highlightSpeechLocation(location: location, length: range.length, scrollRatio: 0.3)
+        self.webSpeechTool.highlightSpeechLocation(location: location, length: range.length) {
+            self.webSpeechTool.scrollToIndex(location: location, length: 1, scrollRatio: 0.3)
+        }
     }
     func storySpeakerStoryChanged(story:Story) {
         self.readingChapterStoryUpdateDate = Date()
