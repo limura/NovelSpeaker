@@ -454,11 +454,19 @@ class StoryHtmlDecoder {
         var userDefinedSiteInfoURL:URL? = nil
         var userDefinedCustomSiteInfoURL:URL? = nil
         if let realm = try? RealmUtil.GetRealm(), let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-            if globalState.autopagerizeSiteInfoURL.count > 0, let autopagerizeURL = URL(string: globalState.autopagerizeSiteInfoURL) {
-                userDefinedSiteInfoURL = autopagerizeURL
+            if globalState.autopagerizeSiteInfoURL.count > 0 {
+                if let autopagerizeURL = URL(string: globalState.autopagerizeSiteInfoURL) {
+                    userDefinedSiteInfoURL = autopagerizeURL
+                }else{
+                    AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL", comment: "次点のSiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.autopagerizeSiteInfoURL], isForDebug: false)
+                }
             }
-            if globalState.novelSpeakerSiteInfoURL.count > 0, let novelSpeakerURL = URL(string: globalState.novelSpeakerSiteInfoURL) {
-                userDefinedCustomSiteInfoURL = novelSpeakerURL
+            if globalState.novelSpeakerSiteInfoURL.count > 0 {
+                if let novelSpeakerURL = URL(string: globalState.novelSpeakerSiteInfoURL) {
+                   userDefinedCustomSiteInfoURL = novelSpeakerURL
+                }else{
+                    AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL", comment: "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.novelSpeakerSiteInfoURL], isForDebug: false)
+                }
             }
         }
         guard let siteInfoURL = userDefinedSiteInfoURL ?? URL(string: StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL),
