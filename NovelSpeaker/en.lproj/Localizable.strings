@@ -835,16 +835,28 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.5.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.5.1
 
-- Added \"Play unread novels in the specified folder\", \"Play another novel by the same author\", and \"Play another novel on the same website\" to \"Settings tab\" -> \"What happens when playback reaches the end\".
-- On the \"Bookshelf screen\", set the order in the \"Last download date and time (folder classification version)\" folder to the last download date and time.
-- On the \"Bookshelf screen\", change the order in the \"Author order\" folder to the novel name order.
-- Added \"Selection method for the next novel when playback reaches the end\" that appears when \"Settings tab\" -> \"Action when playback reaches the end\" is a specific setting.
+- When reading aloud on the edit screen of the text of the novel, if it is read aloud to the end of the chapter, it will stop as it is
+- Changed the behavior when acquisition of SiteInfo (data used when extracting the text part of the novel, etc.) fails (to be exact, acquisition for regular update)
+- Set accessibility labels for VoiceOver environment on the cursor movement buttons up / down / left / right on the novel editing screen
+
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.5.1
+
+Interface changes
+
+- When reading aloud on the edit screen of the text of the novel, if it is read aloud to the end of the chapter, it will stop as it is
+- Changed the behavior when acquisition of SiteInfo (data used when extracting the text part of the novel, etc.) fails (to be exact, acquisition for regular update)
+
+Fixing the problem
+
+- Set accessibility labels for VoiceOver environment on the cursor movement buttons up / down / left / right on the novel editing screen
+
+
 # Version 2.5.0
 
 Interface changes

@@ -3166,6 +3166,8 @@ Fixing the problem
 
 以上となります。
 それでは、これからも ことせかい をよろしくお願いいたします。
+
+
 # Version 2.5.0
 
 Interface changes
@@ -3175,6 +3177,43 @@ Interface changes
 - On the "Bookshelf screen", change the order in the "Author order" folder to the novel name order.
 - Added "Selection method for the next novel when playback reaches the end" that appears when "Settings tab" -> "Action when playback reaches the end" is a specific setting.
 
+
+# Version 2.5.1
+
+インタフェースの変更
+
+- 小説本文の編集画面での読み上げ時にはその章の最後まで読み上げた場合にそのまま停止するようにします
+- SiteInfo(小説の本文部分を抽出する時等に使っているデータ)の取得(正確には定期更新用の取得)に失敗している場合の挙動を変更
+
+問題の修正
+
+- 小説の編集画面の上下左右へのカーソル移動ボタンにVoiceOver環境下用のアクセシビリティラベルを設定
+
+まず、小説本文の編集画面での「Speak」ボタンによる読み上げ時には、次の章への移動はせず、そのまま再生が終了するようにします。これは、場合によっては他の小説に読み上げが移行してしまったりしてわけがわからない状態になってしまうという問題があったためみ見直した、という形です。
+
+次に、ことせかい が小説を取り込む時に本文部分を抽出するためのデータとして利用している SiteInfo の取り込みに失敗した場合の挙動を変更しました。具体的には今までは SiteInfo の読み込みに失敗したとしても、ことせかい 内部に固定で定義されているSiteInfo(全てのWebページに対応する貧弱な物) を適用することで動作するようにしていましたが、この動作を諦めて、単純に取り込みが失敗するようにします。
+これは、「うまく取り込めない」というお問い合わせのうちのそれなりの割合で、SiteInfo が読み込めていない事が原因だと思われるお問い合わせがあるように見受けられますため、「SiteInfo が読み込めていないのでエラーしているので、ネットワーク状況の良い所に移動して SiteInfo の更新からやり直してください」という旨のエラーメッセージを直接表示してしまった方が良いであろう、という判断からくる物になります。
+
+また、小説の編集画面の上下左右へのカーソル移動ボタンにVoiceOver用のアクセシビリティラベルを設定はしていたものの、各国語用の文字列自体を設定していなかったため、内部定義用のIDがそのまま読み上げられていたという問題がありましたため、これを修正しました。
+
+さて、残念なことに、私はお問い合わせ対応に疲れてしまいました(色々と書きましたが無駄に長いので消しました。詳しい内容は Version 2.4.0 辺りのリリース告知文等に残っていると思います)。そんなわけなので、お問い合わせの数を減らす方法でユーザの皆様が納得できる形の方法を模索したいと考えています。ただ、今の所は月額課金制への移行(ユーザ数を減らす)か、アプリの公開を止める(ユーザ数をゼロにする)、お問い合わせへの対応の一切を止める(不都合が解消しなくなる)、の3つ以外に有効な手段を思いついていません。これらはそれぞれユーザの方々には辛い話にしかならなさそうで、あまり実行する気にはなっておりません。健全に稼ぐ形を模索していれば、或いは問題に思う事もなかったのかもしれませんが、今からそのような仕組みを導入するのも手間がかかる上に誰も喜ばないですし、困ったものですね。
+
+また、暫く後(iOS 15 がリリースされてから2,3ヶ月後位を目処)に ことせかい の対応 iOS(iPad OS)バージョンを 10.0 以上から 15.0 以上に引き上げる予定です(以前は iOS 14 以上にする予定でしたが、iOS 14 と iOS 15 ではサポートされるハードウェアに違いがなかったため、iOS 15 以上にさせていただく事にしました)。これにより、対応されなくなる iPhone(例えば iPhone 5s, iPhone 6等) では、アプリが動作しなくなるわけではありませんが、アプリのアップデートはできなくなります。同様に、サポートもご遠慮させていただくことになりますのでご了承ください。
+なお、アップデートがされなくなった ことせかい と最新版の ことせかい との間での iCloud同期 はサポートされず、動作できなくなる可能性がございます(具体的には、ことせかい のバージョン番号の1つ目か2つ目(2.4.0 であれば 2 と 4 の部分)が変わりますと iCloud 同期はできなくなると考えてください)。その場合は iCloud同期 をOFFにする事で利用し続ける事は可能となりますため、そのように対応して頂けますようお願いいたします。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 2.5.1
+
+Interface changes
+
+- When reading aloud on the edit screen of the text of the novel, if it is read aloud to the end of the chapter, it will stop as it is
+- Changed the behavior when acquisition of SiteInfo (data used when extracting the text part of the novel, etc.) fails (to be exact, acquisition for regular update)
+
+Fixing the problem
+
+- Set accessibility labels for VoiceOver environment on the cursor movement buttons up / down / left / right on the novel editing screen
 
 TODO:
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える

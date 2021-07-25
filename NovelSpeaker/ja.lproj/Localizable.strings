@@ -827,16 +827,27 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.5.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.5.1
 
--「設定タブ」->「再生が末尾に達した時の動作」に「指定フォルダの小説のうち未読の物を再生」と「同じ作者の別の小説を再生」、「同じWebサイトの別の小説を再生」を追加
-- 「本棚画面」で「最終ダウンロード日時順(フォルダ分類版)」のフォルダ内の順番を最終ダウンロード日時順にします
-- 「本棚画面」で「作者名順」のフォルダ内の順番を小説名順にします
--「設定タブ」->「再生が末尾に達した時の動作」が特定の設定の場合に現れる「再生が末尾に達した時の次の小説の選択方式」を追加
+- 小説本文の編集画面での読み上げ時にはその章の最後まで読み上げた場合にそのまま停止するようにします
+- SiteInfo(小説の本文部分を抽出する時等に使っているデータ)の取得(正確には定期更新用の取得)に失敗している場合の挙動を変更
+- 小説の編集画面の上下左右へのカーソル移動ボタンにVoiceOver環境下用のアクセシビリティラベルを設定
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.5.1
+
+インタフェースの変更
+
+- 小説本文の編集画面での読み上げ時にはその章の最後まで読み上げた場合にそのまま停止するようにします
+- SiteInfo(小説の本文部分を抽出する時等に使っているデータ)の取得(正確には定期更新用の取得)に失敗している場合の挙動を変更
+
+問題の修正
+
+- 小説の編集画面の上下左右へのカーソル移動ボタンにVoiceOver環境下用のアクセシビリティラベルを設定
+
+
 # Version 2.5.0
 
 インタフェースの変更
