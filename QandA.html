@@ -43,6 +43,7 @@
 	<li><a href="#AlphaAlphaAlpha">空白などを「アルファ」と読み上げる問題について</a></li>
 	<li><a href="#pixivNovel2">pixiv小説様で読み込めない場合についての暫定的な対応について</a></li>
 	<li><a href="#LongPressCursorMove">小説の編集画面でのカーソル移動ボタンを長押ししてもうまく動かない事がある場合について</a></li>
+	<li><a href="#SafariShareButtonToNovelSpeaker">Safari のシェアボタンから「ことせかい へ読み込む」が無くなってしまう事がある場合について</a></li>
 </ul>
 </div>
 <hr/>
@@ -506,6 +507,8 @@
 <p>このような場合には、少し面倒ですが、指を少しだけずらすとカーソルが動き出す事がありますので、その方法で回避して頂けますと幸いです。</p>
 <p>なお、分かる人にはわかるようなわからないような書き方をしますと <code>UILongPressGestureRecognizer</code> でイベントを受け取っているのですが、Tap Down時 に <code>.begin</code> が発生せず、Tap Up時 に <code>.begin</code> と <code>.ended</code> の両方が同時に発生する、という挙動になっていて、指をずらすと <code>.changed</code> は発生し続けるという謎の挙動になっています。回避方法がわかる方がおられましたら教えて頂けますと幸いです。
 </p>
+<h4 id="SafariShareButtonToNovelSpeaker">Safari のシェアボタンから「ことせかい へ読み込む」が無くなってしまう事がある場合について(2021/07)</h4>
+<p>こちらなのですが、iOS(又は iPad OS)を再起動すると直る事があるという話があるので、一度それを試してみて下さい。</p>
 </section>
         <footer>
 	  <a href="./">Top</a><br>
