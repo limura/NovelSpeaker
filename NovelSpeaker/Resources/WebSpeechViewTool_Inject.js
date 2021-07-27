@@ -337,6 +337,13 @@ function GetSelectedString(){
 }
 
 function HighlightFromIndex(index, length){
+    // index がコンテンツの最大文字数以上になってると undefined を返すのが通常の動作なのだけれど、
+    // 内部データ的に index が最大文字数と同じ値かそれ以上になる事があるぽい？ので
+    // 怪しく 最大文字数 - 1 にまるめてしまいます(´・ω・`)
+    let textLength = GenerateWholeText(elementArray, 0).length;
+    if(textLength && index >= textLength) {
+      index = textLength - 1;
+    }
     let elementData = SearchElementFromIndex(elementArray, index);
     if(elementData){
       HighlightSpeechSentence(elementData.element, elementData.text, elementData.index, length);
