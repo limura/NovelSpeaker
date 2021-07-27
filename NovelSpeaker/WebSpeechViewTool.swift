@@ -214,7 +214,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         evaluateJsToString(jsString: "HighlightFromIndex(\(location), \(length)); \"OK\";", completionHandler: { _ in completionHandler?() })
     }
     func scrollToIndex(location:Int, length:Int, scrollRatio:Double, completionHandler:(()->Void)? = nil){
-        evaluateJsToString(jsString: "ScrollToIndex(\(location) + \(length), \(scrollRatio)); \"OK\";", completionHandler: { _ in completionHandler?() })
+        evaluateJsToString(jsString: "ScrollToIndex(\(location), \(scrollRatio)); \"OK\";", completionHandler: { _ in completionHandler?() })
     }
     func getSelectedLocation(completionHandler:((Int?)->Void)?){
         evaluateJsToDouble(jsString: "GetSelectedIndex();") { (result) in

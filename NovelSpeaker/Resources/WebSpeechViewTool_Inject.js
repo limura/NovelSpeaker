@@ -45,6 +45,13 @@ function ScrollToElement(element, index, margin) {
 
 // margin はWebViewの幅や高さに対する比率(0.3とか)を指定する
 function ScrollToIndex(index, margin){
+  // index がコンテンツの最大文字数以上になってると undefined を返すのが通常の動作なのだけれど、
+  // 内部データ的に index が最大文字数と同じ値かそれ以上になる事があるぽい？ので
+  // 怪しく 最大文字数 - 1 にまるめてしまいます(´・ω・`)
+  let textLength = GenerateWholeText(elementArray, 0).length;
+  if(textLength && index >= textLength) {
+    index = textLength - 1;
+  }
   let elementData = SearchElementFromIndex(elementArray, index);
   if(elementData){
     ScrollToElement(elementData.element, elementData.index, margin);
@@ -285,7 +292,6 @@ function SplitElementFromSelection(elementArray, range){
 function GenerateWholeText(elementArray, index){
   var text = "";
   elementArray.forEach(function(data){
-    console.log(`text += ${data['text']}, ${index}`);
     if(data["text"].length >= index){
       text += data["text"].slice(index);
       index = 0;
