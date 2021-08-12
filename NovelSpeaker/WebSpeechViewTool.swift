@@ -136,8 +136,8 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
                 }
             }
             if let err = err {
-                print("js err:", err.localizedDescription)
-                print(jsString)
+                print("js err:", err.localizedDescription, "code:", jsString)
+                //print("js err stacktrace:\n\(Thread.callStackSymbols.joined(separator: "\n"))")
                 return
             }
             guard let nodeString = node as? String else {
@@ -210,7 +210,6 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         evaluateJsToString(jsString: "GenerateWholeText(elementArray,0);", completionHandler: completionHandler)
     }
     func highlightSpeechLocation(location:Int, length:Int, completionHandler:(()->Void)? = nil) {
-        //evaluateJsToString(jsString: "HighlightFromIndex(\(location), \(length));\"OK\";", completionHandler: nil)
         evaluateJsToString(jsString: "HighlightFromIndex(\(location), \(length)); \"OK\";", completionHandler: { _ in completionHandler?() })
     }
     func scrollToIndex(location:Int, length:Int, scrollRatio:Double, completionHandler:(()->Void)? = nil){
