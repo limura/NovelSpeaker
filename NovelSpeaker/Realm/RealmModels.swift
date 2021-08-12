@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 10
+    static let currentSchemaVersion : UInt64 = 11
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -90,6 +90,11 @@ import AVFoundation
             newObject?["m_repeatSpeechLoopType"] = RepeatSpeechLoopType.normal.rawValue
         }
     }
+    static func Migrate_10_To_11(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmGlobalState.className()) { (oldObject, newObject) in
+            newObject?["isNeedDisableIdleTimerWhenSpeechTime"] = false
+        }
+    }
 
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
         if oldSchemaVersion == 0 {
@@ -118,6 +123,9 @@ import AVFoundation
         }
         if oldSchemaVersion <= 9 {
             Migrate_9_To_10(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion <= 10 {
+            Migrate_10_To_11(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     
@@ -2494,6 +2502,7 @@ enum RepeatSpeechLoopType: String {
     @objc dynamic var isIgnoreURIStringSpeechEnabled = false
     @objc dynamic var isEnableSwipeOnStoryView = true
     @objc dynamic var isDisableNarouRuby = false
+    @objc dynamic var isNeedDisableIdleTimerWhenSpeechTime = false
     let novelLikeOrder = List<String>()
     
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"

@@ -224,6 +224,7 @@
 "SettingTableViewController_MixWithOthersIsEnabled" = "他のアプリで音楽が鳴っても止まらないように努力する(イヤホンやコントロールセンターからの操作を受け付けなくなります)";
 "SettingTableViewController_DuckOthersIsEnabled" = "他のアプリの音を小さくする";
 "SettingTableViewController_IsOpenRecentBookInStartTime" = "起動時に前回開いていた小説を開く";
+"SettingTableViewController_isNeedDisableIdleTimerWhenSpeechTime" = "読み上げ中はスリープモードに入らないようにする";
 
 "RemoteDataURLSettingViewController_Title" = "内部データ参照用URLの設定";
 "RemoteDataURLSettingViewController_Information" = "注意: ここにある設定は下手に書き換えると ことせかい が正常に動作しなくなる可能性があります。書き換えを行う場合は内容を理解した上で行ってください。\nなお、標準設定は全て「空(なにも書かれていない)」状態ですので問題が起こった場合には全ての項目の内容を消すことで標準設定に戻すことができます。";

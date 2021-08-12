@@ -192,6 +192,7 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isIgnoreURIStringSpeechEnabled = obj.isIgnoreURIStringSpeechEnabled
             newObj.isEnableSwipeOnStoryView = obj.isEnableSwipeOnStoryView
             newObj.isDisableNarouRuby = obj.isDisableNarouRuby
+            newObj.isNeedDisableIdleTimerWhenSpeechTime = obj.isNeedDisableIdleTimerWhenSpeechTime
             newObj.novelLikeOrder.removeAll()
             newObj.novelLikeOrder.append(objectsIn: obj.novelLikeOrder)
 

@@ -999,6 +999,26 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             #endif
+            #if !targetEnvironment(macCatalyst)
+            section
+            <<< SwitchRow("isNeedDisableIdleTimerWhenSpeechTimeRow") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_isNeedDisableIdleTimerWhenSpeechTime", comment:"読み上げ中はスリープモードに入らないようにする")
+                row.cell.textLabel?.numberOfLines = 0
+                //row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                row.value = false
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                    row.value = globalState.isNeedDisableIdleTimerWhenSpeechTime
+                }
+            }.onChange({ row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let value = row.value else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.isNeedDisableIdleTimerWhenSpeechTime = value
+                    }
+                }
+            })
+            #endif
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")
