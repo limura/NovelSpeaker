@@ -30,7 +30,11 @@ function ScrollToElement(element, index, margin) {
   }
   if(index > 0){
     range.setStart(element, index);
-    range.setEnd(element, index+1);
+    try {
+      range.setEnd(element, index+1);
+    }catch(e){
+        console.log(`ScrollToElement() range.setEnd(element, `index+1`) got error: ${e}`);
+    }
   }
   let xMargin = window.innerWidth * margin;
   let yMargin = window.innerHeight * margin;
