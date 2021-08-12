@@ -1070,6 +1070,15 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             section
             <<< ButtonRow() {
+                $0.title = NSLocalizedString("SettingTableViewController_GoToSupportSite_Q&A", comment: "サポートサイト内のQ&A(よくある質問とその答え)を開く")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (buttonCellof, buttonRow) in
+                if let url = URL(string: "https://limura.github.io/NovelSpeaker/QandA.html") {
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                }
+            })
+            section
+            <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_SendBugReport", comment: "不都合報告をmailで開発者に送る")
                 $0.cell.textLabel?.numberOfLines = 0
                 $0.presentationMode = .segueName(segueName: "BugReportViewSegue", onDismiss: nil)
