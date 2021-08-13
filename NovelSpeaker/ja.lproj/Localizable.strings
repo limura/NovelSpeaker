@@ -780,6 +780,7 @@
 "NovelFolderManageTableViewController_CreateNewFolder_Error_NoName" = "空文字列は指定できません";
 "NovelFolderManageTableViewController_CreateNewFolder_Error_SameNameAlive" = "同じ名前のフォルダが既に定義されています";
 "NovelFolderManageTableViewController_Title" = "自作フォルダの編集";
+"NovelFolderManageTableViewController_MultipleNovelIDSelectorViewControllerTitle_Formated" = "「%@」フォルダに登録される小説";
 
 "BookshelfViewButtonSettingsViewController_Title" = "本棚画面の右上に表示されるボタン群の編集";
 "BookshelfViewButtonType_DownloadStatus" = "ダウンロード状態の確認";

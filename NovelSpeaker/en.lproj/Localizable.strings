@@ -787,6 +787,7 @@
 "NovelFolderManageTableViewController_CreateNewFolder_Error_NoName" = "Empty string cannot be specified";
 "NovelFolderManageTableViewController_CreateNewFolder_Error_SameNameAlive" = "A folder with the same name has already been defined";
 "NovelFolderManageTableViewController_Title" = "Edit folders";
+"NovelFolderManageTableViewController_MultipleNovelIDSelectorViewControllerTitle_Formated" = "Novels registered in the \"%@\" folder";
 
 "BookshelfViewButtonSettingsViewController_Title" = "Settings for the buttons displayed in the upper right corner of the bookshelf screen";
 "BookshelfViewButtonType_DownloadStatus" = "Check download status";

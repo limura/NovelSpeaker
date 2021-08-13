@@ -20,6 +20,9 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
     public var SelectedNovelIDSet:Set<String> = Set<String>()
     public var IsUseAnyNovelID = true
     public var Hint = ""
+    public var IsNeedDisplayFolderName = false
+    public var UnDisplayFolderID:String? = nil
+    public var OverrideTitle:String? = nil
     public weak var delegate:MultipleNovelIDSelectorDelegate?
     
     static let AnyTypeTag = RealmSpeechModSetting.anyTarget
@@ -30,7 +33,7 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = NSLocalizedString("MultipleNovelIDSelectorViewController_Title", comment: "小説を選択")
+        self.title = self.OverrideTitle ?? NSLocalizedString("MultipleNovelIDSelectorViewController_Title", comment: "小説を選択")
         
         createSelectorCells()
         self.filterButton = UIBarButtonItem.init(title: NSLocalizedString("BookShelfTableViewController_SearchTitle", comment: "検索"), style: .done, target: self, action: #selector(filterButtonClicked(sender:)))
@@ -110,6 +113,22 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
             if self.filterString.count > 0 {
                 allNovels = allNovels.filter("title CONTAINS %@ OR writer CONTAINS %@", self.filterString, self.filterString)
             }
+            var novelIDToFolderNameTable:[String:[String]] = [:]
+            if self.IsNeedDisplayFolderName, let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) {
+                for folder in folderArray {
+                    if let unDisplayFolderID = self.UnDisplayFolderID, unDisplayFolderID == folder.id {
+                        continue
+                    }
+                    for novelID in folder.targetNovelIDArray {
+                        if var folderNameList = novelIDToFolderNameTable[novelID] {
+                            folderNameList.append(folder.name)
+                            novelIDToFolderNameTable[novelID] = folderNameList
+                        }else{
+                            novelIDToFolderNameTable[novelID] = [folder.name]
+                        }
+                    }
+                }
+            }
             for novel in allNovels {
                 let novelID = novel.novelID
                 section <<< CheckRow(novelID) {
@@ -122,6 +141,10 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
                     }else{
                         self.SelectedNovelIDSet.remove(novelID)
                     }
+                }).cellUpdate({ cell, row in
+                    guard let folderNameArray = novelIDToFolderNameTable[novelID] else { return }
+                    row.cellStyle = .subtitle
+                    cell.detailTextLabel?.text = folderNameArray.joined(separator: ", ")
                 })
             }
         }

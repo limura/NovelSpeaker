@@ -42,7 +42,7 @@ class FolderAddButtonRow: TableViewRow, MultipleNovelIDSelectorDelegate {
     }
     func assignCell(cell: UITableViewCell) {
         cell.textLabel?.text = NSLocalizedString("NovelFolderManageTableViewController_AddButtonTitle", comment: "このフォルダに入れる小説を選択する")
-        cell.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(FolderDeleteFolderButtonRow.tapGestureEvent)))
+        cell.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(FolderAddButtonRow.tapGestureEvent)))
     }
     func canEditable() -> Bool {
         return true
@@ -52,7 +52,8 @@ class FolderAddButtonRow: TableViewRow, MultipleNovelIDSelectorDelegate {
     }
     @objc func tapGestureEvent() {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard let novelIDArray = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Folder)?.targetNovelIDArray, let parent = self.parentViewController else { return }
+            guard let targetFolder = RealmNovelTag.SearchWith(realm: realm, name: self.folderName, type: RealmNovelTag.TagType.Folder), let parent = self.parentViewController else { return }
+            let novelIDArray = targetFolder.targetNovelIDArray
             DispatchQueue.main.async {
                 let nextViewController = MultipleNovelIDSelectorViewController()
                 var set = Set<String>()
@@ -62,6 +63,9 @@ class FolderAddButtonRow: TableViewRow, MultipleNovelIDSelectorDelegate {
                 nextViewController.SelectedNovelIDSet = set
                 nextViewController.IsUseAnyNovelID = false
                 nextViewController.delegate = self
+                nextViewController.IsNeedDisplayFolderName = true
+                nextViewController.UnDisplayFolderID = targetFolder.id
+                nextViewController.OverrideTitle = String(format: NSLocalizedString("NovelFolderManageTableViewController_MultipleNovelIDSelectorViewControllerTitle_Formated", comment: "「%@」フォルダに登録する小説を選択"), targetFolder.name)
                 parent.navigationController?.pushViewController(nextViewController, animated: true)
             }
         }
