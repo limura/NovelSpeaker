@@ -802,7 +802,7 @@
 "SafeModeViewController_SendProbremReport_Title" = "開発者に問い合わせる";
 "SafeModeViewController_ExitSafeModeButton_Title" = "セーフモードを終了し、通常起動する";
 
-"WebSpechViewController_ToggleInterfaceButton_Hide_Title" = "本文のみへ";
+"WebSpechViewController_ToggleInterfaceButton_Hide_Title" = "全画面表示";
 "WebSpechViewController_ToggleInterfaceButton_Display_Title" = "ボタン表示";
 
 "ScrollPullAndFireHandler_ForwardHintLabelText_Initial" = "強く引っ張って・・・";
