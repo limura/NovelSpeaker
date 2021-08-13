@@ -132,6 +132,7 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
             for novel in allNovels {
                 let novelID = novel.novelID
                 section <<< CheckRow(novelID) {
+                    $0.cellStyle = .subtitle
                     $0.title = novel.title
                     $0.value = self.SelectedNovelIDSet.contains(novelID)
                 }.onChange({ (row) in
@@ -143,7 +144,6 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
                     }
                 }).cellUpdate({ cell, row in
                     guard let folderNameArray = novelIDToFolderNameTable[novelID] else { return }
-                    row.cellStyle = .subtitle
                     cell.detailTextLabel?.text = folderNameArray.joined(separator: ", ")
                 })
             }

@@ -769,6 +769,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
             section
             <<< AlertRow<String>("RepeatLoopTypeSelectRow") { row in
+                // iPhone SE (1) だと表示領域が足りないので .subtitle にした方が良さそうだけど、値が左側に表示される事になるので一覧性が落ちるのよね
+                //row.cellStyle = .subtitle
                 row.title = NSLocalizedString("SettingTableViewController_RepeatLoopTypeTitle", comment:"次の小説の選択方式")
                 row.selectorTitle = NSLocalizedString("SettingTableViewController_RepeatLoopTypeTitle", comment:"次の小説の選択方式")
                 row.options = NovelSpeakerUtility.GetAllRepeatSpeechLoopType().map({NovelSpeakerUtility.RepeatSpeechLoopTypeToString(type: $0) ?? ""})
@@ -1255,6 +1257,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             }
             section
             <<< AlertRow<String>("ViewTypeSelectRow") { row in
+                row.cellStyle = .subtitle
                 row.title = "小説本文画面の表示方式(実験的機能につき、この機能へのお問い合わせには返信致しません)"
                 row.selectorTitle = "小説本文画面の表示方式"
                 row.options = [
