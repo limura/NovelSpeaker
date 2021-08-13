@@ -1318,6 +1318,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     
     // story.storyID で指定される位置に story を挿入します。
     // story.storyID で表される story 以降(story.storyIDで指定された物を含む) の物は storyID が +1 されます。
+    #if !os(watchOS) // 何故かここを watchOS でビルドしようとすると abort(6) とかで失敗する(´・ω・`)
     static func InsertStoryWith(realm:Realm, story:Story) -> Bool {
         // bulk に story をねじ込みます。
         // bulk に元々入っていた story のうち、story 以降(story.storyIDで指定された物を含む) の物は storyID が +1 されます。
@@ -1377,6 +1378,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         }
         return true
     }
+    #endif
     
     // Write transaction の中で使います
     static func RemoveStoryWith(realm:Realm, story:Story) -> Bool {

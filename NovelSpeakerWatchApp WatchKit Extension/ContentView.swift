@@ -115,7 +115,7 @@ struct CheckiCloudSyncView: View {
                     var story = Story()
                     story.content = self.speechText
                     StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: false)
-                    StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: false)
+                    StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: nil, isNeedRepeatSpeech: false)
                 }
             }) {
                 Text("speech(StorySpeaker)")

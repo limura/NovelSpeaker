@@ -29,7 +29,7 @@ struct SpeechContorlView: View {
                         RealmUtil.RealmBlock { (realm) -> Void in
                             speaker.LoadPreviousChapter(realm: realm, completion: { (result) in
                                 if result && isPlaying {
-                                    speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                                    speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: nil, isNeedRepeatSpeech: false)
                                 }
                             })
                         }
@@ -46,7 +46,7 @@ struct SpeechContorlView: View {
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 speaker.SkipBackward(realm: realm, length: 30) {
                                     if isPlaying {
-                                        speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                                        speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: nil, isNeedRepeatSpeech: false)
                                     }else{
                                         self.storyViewData.displayIndex = speaker.currentBlockIndex
                                     }
@@ -66,7 +66,7 @@ struct SpeechContorlView: View {
                         if speaker.isPlayng {
                             speaker.StopSpeech(realm: realm)
                         }else{
-                            speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                            speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: nil, isNeedRepeatSpeech: false)
                         }
                     }
                 }) {
@@ -92,7 +92,7 @@ struct SpeechContorlView: View {
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 speaker.SkipForward(realm: realm, length: 30) {
                                     if isPlaying {
-                                        speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                                        speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: nil, isNeedRepeatSpeech: false)
                                     }else{
                                         self.storyViewData.displayIndex = speaker.currentBlockIndex
                                     }
@@ -117,7 +117,7 @@ struct SpeechContorlView: View {
                         RealmUtil.RealmBlock { (realm) -> Void in
                             speaker.LoadNextChapter(realm: realm) { (result) in
                                 if result && isPlaying {
-                                    speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true)
+                                    speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: nil, isNeedRepeatSpeech: false)
                                 }
                             }
                         }

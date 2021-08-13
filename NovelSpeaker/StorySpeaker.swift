@@ -566,9 +566,11 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }catch{
             print("audioSession.setActive(true) failed")
         }
+        #if !os(watchOS)
         if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
             UIApplication.shared.isIdleTimerDisabled = globalState.isNeedDisableIdleTimerWhenSpeechTime
         }
+        #endif
         if withMaxSpeechTimeReset {
             startMaxSpeechInSecTimer(realm: realm)
         }
@@ -593,7 +595,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             "novelUrl" : RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID),
             "location" : self.speaker.currentLocation,
         ])
+        #if !os(watchOS)
         UIApplication.shared.isIdleTimerDisabled = false
+        #endif
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setActive(false, options: [AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation])
