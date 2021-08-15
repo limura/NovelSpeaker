@@ -120,12 +120,14 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         refreshControl.addTarget(self, action: #selector(refreshControlValueChangedEvent), for: .valueChanged)
         treeView.scrollView.addSubview(refreshControl)
         #endif
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
         registObserver()
         registNotificationCenter()
     }
     
     deinit {
         self.unregistNotificationCenter()
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {

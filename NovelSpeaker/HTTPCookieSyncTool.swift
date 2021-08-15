@@ -107,6 +107,10 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
         }
     }
     
+    deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
+    }
+    
     func WaitCanUseRealm(method: @escaping (()->Void)) {
         #if !os(watchOS)
         if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {

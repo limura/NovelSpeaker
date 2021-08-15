@@ -348,6 +348,10 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
         registerObserver()
     }
     
+    deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         RestartObservers()

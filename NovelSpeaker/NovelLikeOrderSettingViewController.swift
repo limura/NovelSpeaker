@@ -24,6 +24,10 @@ class NovelLikeOrderSettingViewController: FormViewController, MultipleNovelIDSe
         self.registerGlobalStateObserver()
     }
     
+    deinit {
+        RealmObserverHandler.shared.RemoveDelegate(delegate: self)
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         saveCurrentOrder()

@@ -74,6 +74,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
         }
         setCustomUIMenu()
         WebSpeechViewController.instance = self
+        RealmObserverHandler.shared.AddDelegate(delegate: self)
     }
     
     deinit {
