@@ -28,6 +28,7 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
     static let AnyTypeTag = RealmSpeechModSetting.anyTarget
     
     var novelArrayNotificationToken:NotificationToken? = nil
+    var novelTagNotificationToken:NotificationToken? = nil
     var filterString = ""
     var filterButton:UIBarButtonItem = UIBarButtonItem()
 
@@ -49,10 +50,12 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
     
     func StopObservers() {
         novelArrayNotificationToken = nil
+        novelTagNotificationToken = nil
     }
     func RestartObservers() {
         StopObservers()
         observeNovelArray()
+        observeNovelTag()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -85,6 +88,25 @@ class MultipleNovelIDSelectorViewController: FormViewController, RealmObserverRe
                             self.form.removeAll()
                             self.createSelectorCells()
                         }
+                    }
+                case .error(_):
+                    break
+                }
+            })
+        }
+    }
+    
+    func observeNovelTag() {
+        RealmUtil.RealmBlock { realm in
+            guard let allFolders = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
+            self.novelTagNotificationToken = allFolders.observe({ change in
+                switch change {
+                case .initial(_):
+                    break
+                case .update(_, deletions: _, insertions: _, modifications: _):
+                    DispatchQueue.main.async {
+                        self.form.removeAll()
+                        self.createSelectorCells()
                     }
                 case .error(_):
                     break
