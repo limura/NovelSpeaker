@@ -294,6 +294,7 @@
 "SpeechViewController_NowLoadingText" = "本文を読込中……";
 "SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "他端末で更新された %d章 へ移動";
 "SpeechViewController_WaitingSpeakerReady" = "発話の準備が整うのを待っています。";
+"SpeechViewController_CurrentWebPageButton_VoiceOverTitle" = "現在のページをWeb取込タブで開く";
 "SpeechViewController_WebPageButton_VoiceOverTitle" = "Web取込タブで開く";
 "SpeechViewController_PreviousChapterButton_VoiceOverTitle" = "前のページ";
 "SpeechViewController_NextChapterButton_VoiceOverTitle" = "次のページ";
@@ -754,6 +755,7 @@
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_PlaceHolder" = "改行を表現するには <改行> と入力します";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_EnterButton" = "追加";
 
+"SpeechViewButtonType_OpenCurrentWebPage" = "現在のページをWeb取込タブで開く";
 "SpeechViewButtonType_OpenWebPage" = "Web取込タブで開く";
 "SpeechViewButtonType_Reload" = "その小説の更新確認を行う";
 "SpeechViewButtonType_Share" = "小説のURLをシェアする";

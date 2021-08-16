@@ -52,6 +52,13 @@ class SpeechViewButtonSettingsViewController: FormViewController {
         self.form +++ MultivaluedSection(multivaluedOptions: .Reorder) { section in
             for setting in settingArray {
                 switch setting.type {
+                case .openCurrentWebPage:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("SpeechViewButtonType_OpenCurrentWebPage", comment: "現在のページをWeb取込タブで開く")
+                        $0.value = setting.isOn
+                        $0.cell.imageView?.image = UIImage(named: "earth")?.withRenderingMode(.alwaysTemplate)
+                        $0.cell.textLabel?.numberOfLines = 0
+                    }.onChange({_ in self.saveCurrentSetting()})
                 case .openWebPage:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_OpenWebPage", comment: "Web取込タブで開く")

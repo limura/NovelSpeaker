@@ -190,6 +190,12 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         for buttonSetting in aliveButtonSettings {
             if buttonSetting.isOn == false { continue }
             switch buttonSetting.type {
+            case .openCurrentWebPage:
+                let webPageButton = UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(openCurrentWebPageButtonClicked(_:)))
+                webPageButton.accessibilityLabel = NSLocalizedString("SpeechViewController_CurrentWebPageButton_VoiceOverTitle", comment: "現在のページをWeb取込タブで開く")
+                if novel.type == .URL {
+                    barButtonArray.append(webPageButton)
+                }
             case .openWebPage:
                 let webPageButton = UIBarButtonItem(image: UIImage(named: "earth"), style: .plain, target: self, action: #selector(safariButtonClicked(_:)))
                 webPageButton.accessibilityLabel = NSLocalizedString("SpeechViewController_WebPageButton_VoiceOverTitle", comment: "Web取込タブで開く")
@@ -722,6 +728,14 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     @objc func urlRefreshButtonClicked(_ sender: UIBarButtonItem) {
         guard let storyID = self.storyID else { return }
         NovelDownloadQueue.shared.addQueue(novelID: RealmStoryBulk.StoryIDToNovelID(storyID: storyID))
+    }
+    @objc func openCurrentWebPageButtonClicked(_ sender: UIBarButtonItem) {
+        RealmUtil.RealmBlock { (realm) -> Void in
+            guard let storyID = self.storyID, let urlString = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: storyID)?.url, let url = URL(string: urlString) else {
+                return
+            }
+            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: url)
+        }
     }
     @objc func safariButtonClicked(_ sender: UIBarButtonItem) {
         RealmUtil.RealmBlock { (realm) -> Void in

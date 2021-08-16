@@ -322,6 +322,7 @@
 "SpeechViewController_NowLoadingText" = "loading...";
 "SpeechViewController_CurrentReadingStoryChangedFloatingButton_Format" = "Go to the updated %d chapter on the other device";
 "SpeechViewController_WaitingSpeakerReady" = "Waiting for the speaker to be ready.";
+"SpeechViewController_CurrentWebPageButton_VoiceOverTitle" = "Open current page with Web import tab";
 "SpeechViewController_WebPageButton_VoiceOverTitle" = "Open in web import tab";
 "SpeechViewController_PreviousChapterButton_VoiceOverTitle" = "Previous page";
 "SpeechViewController_NextChapterButton_VoiceOverTitle" = "Next page";
@@ -761,6 +762,7 @@
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_PlaceHolder" = "Type <Enter> to represent a line break";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_EnterButton" = "Add";
 
+"SpeechViewButtonType_OpenCurrentWebPage" = "Open current page with Web import tab";
 "SpeechViewButtonType_OpenWebPage" = "Open in Web import tab";
 "SpeechViewButtonType_Reload" = "Check for updates to the novel";
 "SpeechViewButtonType_Share" = "Share the URL of this novel";
