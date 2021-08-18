@@ -415,7 +415,7 @@
 "NovelDetailViewController_ActionSection_Writer_Popup_Edit" = "Rename to this";
 "NovelDetailViewController_ActionSection_Writer_Popup_Edit_Accepted" = "Changed the author name";
 "NovelDetailViewController_ActionSection_Writer_Popup_Edit_Rejected" = "Failed to change author name";
-
+"NovelDetailViewController_ActionSection_CreateWholeTextButton" = "Output the text of this novel as a single text file";
 
 "NovelKeywordTagSelectorViewController_Title" = "Select Tag";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "Add Tag";
@@ -840,16 +840,28 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.5.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.0
 
-- When reading aloud on the edit screen of the text of the novel, if it is read aloud to the end of the chapter, it will stop as it is
-- Changed the behavior when acquisition of SiteInfo (data used when extracting the text part of the novel, etc.) fails (to be exact, acquisition for regular update)
-- Set accessibility labels for VoiceOver environment on the cursor movement buttons up / down / left / right on the novel editing screen
-
+- Added ON / OFF setting of \"Settings tab\" -> \"Do not enter sleep mode while reading\"
+- Added \"Settings tab\" -> \"Open Q & A (Frequently Asked Questions and Answers) in Support Site\"
+- In the list of novels displayed when you select \"Select a novel to put in this folder\" from \"Settings tab\" -> \"Edit your own folder\", if the novel is registered in another folder, that folder Add a list of names
+- Added \"Open current page in Web import tab\" to \"Settings tab\" -> \"Edit buttons displayed in the upper right corner of the novel text screen\"
+- For self-made novels Added \"Output the text of this novel as a single text file\" to the \"Detailed screen of the novel\"
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.6.0
+
+Interface changes
+
+- Added ON / OFF setting of \"Settings tab\" -> \"Do not enter sleep mode while reading\"
+- Added \"Settings tab\" -> \"Open Q & A (Frequently Asked Questions and Answers) in Support Site\"
+- In the list of novels displayed when you select \"Select a novel to put in this folder\" from \"Settings tab\" -> \"Edit your own folder\", if the novel is registered in another folder, that folder Add a list of names
+- Added \"Open current page in Web import tab\" to \"Settings tab\" -> \"Edit buttons displayed in the upper right corner of the novel text screen\"
+- For self-made novels Added \"Output the text of this novel as a single text file\" to the \"Detailed screen of the novel\"
+
+
 # Version 2.5.1
 
 Interface changes

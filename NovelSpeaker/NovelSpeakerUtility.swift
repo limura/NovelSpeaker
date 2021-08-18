@@ -2185,6 +2185,24 @@ class NovelSpeakerUtility: NSObject {
         }
         return backupFilePath
     }
+    
+    static func CreateShareFileFromData(fileName:String, data:Data) -> URL? {
+        let directoryName = backupDirectoryName
+        CleanBackupFolder()
+        // 改めてディレクトリを作り直します。
+        guard let outputPath = NiftyUtility.CreateTemporaryDirectory(directoryName: directoryName) else {
+            return nil
+        }
+        defer { NiftyUtility.RemoveDirectory(directoryPath: outputPath) }
+        let filePath = NiftyUtility.GetTemporaryFilePath(fileName: fileName)
+        do {
+            try data.write(to: filePath)
+        }catch{
+            print("CreateShareFileFromData data.write() failed.")
+            return nil
+        }
+        return filePath
+    }
     #endif
     
     static let LicenseReadKey = "NovelSpeaker_IsLicenseReaded"

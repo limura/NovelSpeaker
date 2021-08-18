@@ -380,6 +380,7 @@
 "NovelDetailViewController_ActionSection_Writer_Popup_Edit" = "この名前に変更";
 "NovelDetailViewController_ActionSection_Writer_Popup_Edit_Accepted" = "著者名を変更しました";
 "NovelDetailViewController_ActionSection_Writer_Popup_Edit_Rejected" = "著者名の変更に失敗しました";
+"NovelDetailViewController_ActionSection_CreateWholeTextButton" = "この小説の本文を一つのテキストファイルとして出力する";
 
 "NovelKeywordTagSelectorViewController_Title" = "タグを選択";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "タグの追加";
@@ -832,15 +833,27 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.5.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.0
 
-- 小説本文の編集画面での読み上げ時にはその章の最後まで読み上げた場合にそのまま停止するようにします
-- SiteInfo(小説の本文部分を抽出する時等に使っているデータ)の取得(正確には定期更新用の取得)に失敗している場合の挙動を変更
-- 小説の編集画面の上下左右へのカーソル移動ボタンにVoiceOver環境下用のアクセシビリティラベルを設定
+- 「設定タブ」->「読み上げ中はスリープモードに入らないようにする」のON/OFF設定を追加
+- 「設定タブ」->「サポートサイト内のQ&A(よくある質問とその答え)を開く」を追加
+- 「設定タブ」->「自作フォルダの編集」から「このフォルダに入れる小説を選択する」を選んだ時に表示される小説のリストに、他のフォルダに登録されている小説の場合はそのフォルダ名のリストを付記するように
+- 「設定タブ」->「小説本文画面の右上に表示されるボタン群の編集」に「現在のページをWeb取込タブで開く」を追加
+- 自作小説の場合「小説の詳細画面」に「この小説の本文を一つのテキストファイルとして出力する」を追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.6.0
+
+インタフェースの変更
+
+- 「設定タブ」->「読み上げ中はスリープモードに入らないようにする」のON/OFF設定を追加
+- 「設定タブ」->「サポートサイト内のQ&A(よくある質問とその答え)を開く」を追加
+- 「設定タブ」->「自作フォルダの編集」から「このフォルダに入れる小説を選択する」を選んだ時に表示される小説のリストに、他のフォルダに登録されている小説の場合はそのフォルダ名のリストを付記するように
+- 「設定タブ」->「小説本文画面の右上に表示されるボタン群の編集」に「現在のページをWeb取込タブで開く」を追加
+- 自作小説の場合「小説の詳細画面」に「この小説の本文を一つのテキストファイルとして出力する」を追加
+
 # Version 2.5.1
 
 インタフェースの変更

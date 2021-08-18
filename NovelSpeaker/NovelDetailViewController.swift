@@ -342,6 +342,31 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 }
             })
             
+            if novel.type == .UserCreated {
+                let title = novel.title
+                actionSection <<< ButtonRow() {
+                    $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_CreateWholeTextButton", comment: "この小説の本文を一つのテキストファイルとして出力する")
+                    $0.cell.textLabel?.numberOfLines = 0
+                }.onCellSelection({ cellOf, row in
+                    var wholeText = title
+                    RealmUtil.RealmBlock { realm in
+                        RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: self.novelID) { story in
+                            wholeText += "\n\n"
+                            wholeText += story.content
+                        }
+                    }
+                    let fileName = title.replacingOccurrences(of: "/", with: "_")
+                    guard let data = wholeText.data(using: .utf8), let outputFilePath = NovelSpeakerUtility.CreateShareFileFromData(fileName: fileName, data: data) else { return }
+                    DispatchQueue.main.async {
+                        let activityViewController = UIActivityViewController(activityItems: [outputFilePath], applicationActivities: nil)
+                        let frame = UIScreen.main.bounds
+                        activityViewController.popoverPresentationController?.sourceView = self.view
+                        activityViewController.popoverPresentationController?.sourceRect = CGRect(x: frame.width / 2 - 60, y: frame.size.height - 50, width: 120, height: 50)
+                        self.present(activityViewController, animated: true, completion: nil)
+                    }
+                })
+            }
+            
             if novel.type == .URL {
                 actionSection <<< ButtonRow() {
                     $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_ShareButton", comment: "この小説のURLをシェアする")
