@@ -698,7 +698,7 @@ class StoryFetcher {
             print("buttonClick:", currentState.url.absoluteString, "element.text:", buttonElement.text ?? "nil")
             buttonElement.click { (_, err) in
                 if let err = err {
-                    print("error occurd at after button click:", err.localizedDescription)
+                    print("error occurd at after button click:", err.localizedDescription, currentState.document?.innerHTML ?? "nil")
                     completionHandler?(nil, err)
                     return
                 }
