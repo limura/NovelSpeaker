@@ -355,7 +355,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                             wholeText += story.content
                         }
                     }
-                    let fileName = title.replacingOccurrences(of: "/", with: "_")
+                    let fileName = title.replacingOccurrences(of: "/", with: "_") + ".txt"
                     guard let data = wholeText.data(using: .utf8), let outputFilePath = NovelSpeakerUtility.CreateShareFileFromData(fileName: fileName, data: data) else { return }
                     DispatchQueue.main.async {
                         let activityViewController = UIActivityViewController(activityItems: [outputFilePath], applicationActivities: nil)
