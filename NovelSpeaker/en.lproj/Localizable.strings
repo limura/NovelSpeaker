@@ -154,6 +154,7 @@
 "SettingsViewController_IsUseiCloud_ConifirmRemoveLocalData" = "I will use the data on iCloud.\nThe current data is discarded.\nThis operation can not be undone.\nIs it OK?";
 "SettingsViewController_iCloudAccountInvalid_restricted" = "Your iCloud account is in a restricted state and can not be used.";
 "SettingsViewController_iCloudAccountInvalid_noAccount" = "iCloud account has not been set up.";
+"SettingsViewController_iCloudAccountInvalid_temporarilyUnavailable" = "It looks like your iCloud account isn't available. It seems to be a problem that may occur during processing on the OS side, so it may be better to wait for a while and try again. (temporarilyUnavailable)";
 "SettingsViewController_iCloudAccountInvalid_cloudNotDetermine" = "Could not get the status of your iCloud account.";
 "SettingsViewController_InvalidiCloudStatus" = "There was a problem with the state of iCloud.";
 "SettingsViewController_ClearSiteInfoCache" = "Get SiteInfo again";

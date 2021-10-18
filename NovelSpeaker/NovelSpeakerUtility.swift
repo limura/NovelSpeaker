@@ -1298,9 +1298,6 @@ class NovelSpeakerUtility: NSObject {
                     if let fontID = displaySettingDic.object(forKey: "fontID") as? String {
                         setting.fontID = fontID
                     }
-                    if let isVertical = displaySettingDic.object(forKey: "isVertical") as? NSNumber {
-                        setting.viewType = .normal
-                    }
                     if let viewTypeString = displaySettingDic.object(forKey: "viewType") as? String, let viewType = RealmDisplaySetting.ViewType(rawValue: viewTypeString) {
                         setting.viewType = viewType
                     }

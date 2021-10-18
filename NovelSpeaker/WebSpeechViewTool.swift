@@ -258,7 +258,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     func createContentHTML(content:String, foregroundColor:UIColor, backgroundColor:UIColor, displaySetting: RealmDisplaySetting?) -> String {
         var fontSetting:String = "font: -apple-system-title1;"
         var fontSize:String = "18px"
-        var letterSpacing:String = "0.03em"
+        let letterSpacing:String = "0.03em"
         var lineHeight:String = "1.5em"
         var verticalModeCSS:String = ""
         var columnExCSS = ""

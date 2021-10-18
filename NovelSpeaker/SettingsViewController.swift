@@ -2036,6 +2036,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 ngHandler?(NSLocalizedString("SettingsViewController_iCloudAccountInvalid_restricted", comment: "iCloud アカウントが制限付きの状態でしたので利用できません。"))
             case .noAccount:
                 ngHandler?(NSLocalizedString("SettingsViewController_iCloudAccountInvalid_noAccount", comment: "iCloud アカウントが設定されていません。"))
+            case .temporarilyUnavailable:
+                ngHandler?(NSLocalizedString("SettingsViewController_iCloudAccountInvalid_temporarilyUnavailable", comment: "iCloud アカウントが利用できない状態のようです。(temporarilyUnavailable)"))
             case .couldNotDetermine:
                 fallthrough
             @unknown default:

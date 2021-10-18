@@ -17,6 +17,7 @@ class ActivityIndicatorManager {
         DispatchQueue.main.async {
             lock.lock()
             defer { lock.unlock() }
+            // TODO: isNetworkActivityIndicatorVisible は deprecated なんだけども、FTLinearActivityIndicator を使うにはこいつを使わないと駄目な感じな気がするのでそのまま使っています。
             if enableIDSet.count > 0 {
                 UIApplication.shared.isNetworkActivityIndicatorVisible = true
             }else{

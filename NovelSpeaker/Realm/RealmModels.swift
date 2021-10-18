@@ -308,6 +308,8 @@ import AVFoundation
                 completionHandler(false, NSLocalizedString("SettingsViewController_iCloudAccountInvalid_restricted", comment: "iCloud アカウントが制限付きの状態でしたので利用できません。"))
             case .noAccount:
                 completionHandler(false, NSLocalizedString("SettingsViewController_iCloudAccountInvalid_noAccount", comment: "iCloud アカウントが設定されていません。"))
+            case .temporarilyUnavailable:
+                completionHandler(false, NSLocalizedString("SettingsViewController_iCloudAccountInvalid_temporarilyUnavailable", comment: "iCloud アカウントが利用できない状態のようです。(temporarilyUnavailable)"))
             case .couldNotDetermine:
                 fallthrough
             @unknown default:
@@ -2707,7 +2709,7 @@ extension RealmGlobalState: CanWriteIsDeleted {
     
     let targetNovelIDArray = List<String>()
     
-    enum ViewType: String {
+    enum ViewType: String, CaseIterable {
         case normal = "Normal"
         case webViewVertical = "WebViewVertical"
         case webViewHorizontal = "WebViewHorizontal"

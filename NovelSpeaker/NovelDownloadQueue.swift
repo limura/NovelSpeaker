@@ -666,6 +666,7 @@ class NovelDownloadQueue : NSObject {
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
             if !globalState.isBackgroundNovelFetchEnabled {
                 DispatchQueue.main.async {
+                    // TODO: setMinimumBackgroundFetchInterval は deprecated らしいので対応すべき
                     UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplication.backgroundFetchIntervalNever)
                 }
                 return

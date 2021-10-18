@@ -29,8 +29,8 @@ import UIKit
 // from https://stackoverflow.com/questions/34588598/ios-adjust-uibutton-height-depend-on-title-text-using-autolayout
 fileprivate class AutoLayoutButton:UIButton {
     override var intrinsicContentSize: CGSize {
-        var size = titleLabel!.sizeThatFits(CGSize(width: titleLabel!.preferredMaxLayoutWidth - contentEdgeInsets.left - contentEdgeInsets.right, height: .greatestFiniteMagnitude))
-        size.height += contentEdgeInsets.left + contentEdgeInsets.right
+        var size = titleLabel!.sizeThatFits(CGSize(width: titleLabel!.preferredMaxLayoutWidth - safeAreaInsets.left - safeAreaInsets.right, height: .greatestFiniteMagnitude))
+        size.height += safeAreaInsets.left + safeAreaInsets.right
         return size
     }
     override func layoutSubviews() {

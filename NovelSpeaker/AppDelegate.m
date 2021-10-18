@@ -183,10 +183,12 @@ void uncaughtExceptionHandler(NSException *exception)
  */
 
 // for background fetch
+/* deprecated method なのでコメントアウトしておきます。
 - (void)application:(UIApplication *)application
 performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler{
     [[NovelDownloadQueue shared] HandleBackgroundFetchWithApplication:application performFetchWithCompletionHandler:completionHandler];
 }
+ */
 
 - (void) buildMenuWithBuilder:(id<UIMenuBuilder>)builder {
     [super buildMenuWithBuilder:builder];

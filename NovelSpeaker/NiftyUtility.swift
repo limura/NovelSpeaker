@@ -1415,8 +1415,10 @@ class NiftyUtility: NSObject {
             if let viewController = GetRegisterdToplevelViewController() {
                 return GetToplevelViewController(controller: viewController)
             }
-            if let viewController = UIApplication.shared.windows.first(where: {$0.isKeyWindow})?.rootViewController {
-                return GetToplevelViewController(controller: viewController)
+            for scene in UIApplication.shared.connectedScenes {
+                if scene.activationState == .foregroundActive, let window = ((scene as? UIWindowScene)?.delegate as? UIWindowSceneDelegate)?.window, let rootViewController = window?.rootViewController {
+                    return GetToplevelViewController(controller: rootViewController)
+                }
             }
             return nil
         }

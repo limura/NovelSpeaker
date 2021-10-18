@@ -1266,7 +1266,7 @@ extension WebSpeechViewController {
 
     @objc func checkSpeechText(sender: UIMenuItem) {
         self.webSpeechTool.getSelectedRange { startIndex, endIndex in
-            print("startIndex: \(startIndex), endIndex: \(endIndex)")
+            print("startIndex: \(String(describing: startIndex)), endIndex: \(String(describing: endIndex))")
             guard let startIndex = startIndex, let endIndex = endIndex, startIndex <= endIndex else { return }
             DispatchQueue.main.async {
                 let speechText = StorySpeaker.shared.GenerateSpeechTextFrom(displayTextRange: NSMakeRange(startIndex, endIndex - startIndex))
