@@ -851,11 +851,74 @@ class NiftyUtility: NSObject {
         }
         return (tmpString, firstEncoding ?? .utf8)
     }
+
+    #if !os(watchOS)
+    static var headlessClientMap:[String:HeadlessHttpClient] = [:]
     
-    public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
+    public static func RemoveHeadlessHTTPClient(key:String) {
+        headlessClientMap.removeValue(forKey: key)
+    }
+    
+    public static func ClickOnHeadlessHTTPClient(key:String, element:Element, completion: @escaping ((String?)->Void)) {
+        guard let client = headlessClientMap[key] else {
+            completion(nil)
+            return
+        }
+        element.click(completionHandler: { _, err in
+            if err != nil {
+                completion(nil)
+                return
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                client.GetCurrentContent { document, err in
+                    guard let document = document else {
+                        completion(nil)
+                        return
+                    }
+                    completion(document.innerHTML)
+                }
+            }
+        })
+    }
+    
+    public static func QuerySelectorForHeadlessHTTPClient(key:String, selector:String, completion: @escaping ((Element?)->Void)){
+        guard let client = headlessClientMap[key] else {
+            completion(nil)
+            return
+        }
+        client.GetCurrentContent { document, err in
+            guard let document = document else {
+                completion(nil)
+                return
+            }
+            let result = document.querySelector(selector)
+            completion(result)
+        }
+    }
+    
+    public static func QuerySelectorForHeadlessHTTPClientAsync(key:String, selector:String) async -> Element? {
+        await withCheckedContinuation({ result in
+            QuerySelectorForHeadlessHTTPClient(key: key, selector: selector) { element in
+                result.resume(returning: element)
+            }
+        })
+    }
+    #endif
+
+    public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, headlessClientKey:String? = nil, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
         #if !os(watchOS)
         if isNeedHeadless {
-            httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, successAction: { (doc) in
+            var headlessClient:HeadlessHttpClient? = nil
+            if let headlessClientKey = headlessClientKey {
+                if let client = headlessClientMap[headlessClientKey] {
+                    headlessClient = client
+                }else{
+                    let newClient = HeadlessHttpClient()
+                    headlessClientMap[headlessClientKey] = newClient
+                    headlessClient = newClient
+                }
+            }
+            httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, httpClient: headlessClient, successAction: { (doc) in
                 if let data = doc.innerHTML?.data(using: .utf8) {
                     successAction?(data, .utf8)
                     return
