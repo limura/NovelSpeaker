@@ -230,6 +230,10 @@
 "SettingTableViewController_DisableNarouRuby" = "Only the ruby notation derived from the NovelSpeaker is targeted (effective when you want to avoid the notation \"Kanji (Hiragana or Katakana)\" being judged as ruby).";
 "SettingTableViewController_isNeedDisableIdleTimerWhenSpeechTime" = "Avoid entering sleep mode while speaking";
 "SettingTableViewController_GoToSupportSite_Q&A" = "Open Frequently Asked Questions and Answers on the support site";
+"SettingsViewController_ClearAllCookiesButton_Title" = "Delete all stored cookies";
+"SettingsViewController_ClearAllCookiesResult_Title" = "Deleted all stored cookies";
+"SettingsViewController_ClearAllCookiesDialog_Message" = "Do you want to delete all stored cookies?\nThe login status for each website is initialized. In some cases, you may not be able to download the novel. This operation is irreversible.";
+"SettingsViewController_ClearAllCookiesDialog_OKButton" = "Delete";
 
 "RemoteDataURLSettingViewController_Title" = "Setting URL for internal data reference";
 "RemoteDataURLSettingViewController_Information" = "Note: If you rewrite the settings here poorly, NovelSpeaker may not work properly. Make sure you understand the contents before rewriting.\nThe standard settings are all \"empty (nothing is written)\", so if a problem occurs, you can return to the standard settings by deleting the contents of all items.";

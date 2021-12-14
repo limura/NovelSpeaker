@@ -1246,6 +1246,27 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         buttonAction: nil)
                 }
             })
+            section
+            <<< ButtonRow(){
+                $0.title = NSLocalizedString("SettingsViewController_ClearAllCookiesButton_Title", comment: "保存されている全てのCookieを削除する")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ (cellOf, row) in
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogTwoButton(viewController: self, title: nil, message: NSLocalizedString("SettingsViewController_ClearAllCookiesDialog_Message", comment: "保存されている全てのCookieを削除しますか？\nWebサイト毎のログイン状態等が初期化されます。場合によっては小説のダウンロードができなくなる場合があります。"), button1Title: nil, button1Action: nil, button2Title: NSLocalizedString("SettingsViewController_ClearAllCookiesDialog_OKButton", comment: "削除する")) {
+                        RealmUtil.Write { realm in
+                            HTTPCookieSyncTool.ClearAllCookies(realm: realm)
+                        }
+                        DispatchQueue.main.async {
+                            NiftyUtility.EasyDialogOneButton(
+                                viewController: self,
+                                title: nil,
+                                message: NSLocalizedString("SettingsViewController_ClearAllCookiesResult_Title", comment: "保存されている全てのCookieを削除しました"),
+                                buttonTitle: nil,
+                                buttonAction: nil)
+                        }
+                    }
+                }
+            })
             form +++ section
 
             // デバッグ用の設定は、「ルビはルビだけ読む」のON/OFFを10回位繰り返すと出て来るようにしていて、

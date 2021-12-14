@@ -199,4 +199,18 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
         guard let sharedCookieArray = URLSession.shared.configuration.httpCookieStorage?.cookies else { return }
         SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: sharedCookieArray)
     }
+    
+    // 保存されている Cookie の全てを Realm, shared CookieStorage の両方から削除します
+    static func ClearAllCookies(realm:Realm) {
+        if let cookieStorage = URLSession.shared.configuration.httpCookieStorage, let cookies = cookieStorage.cookies {
+            for cookie in cookies {
+                cookieStorage.deleteCookie(cookie)
+            }
+        }
+        if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+            RealmUtil.WriteWith(realm: realm) { realm in
+                globalState.cookieArrayData = Data()
+            }
+        }
+    }
 }
