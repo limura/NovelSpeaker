@@ -46,32 +46,7 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
         }
         self.addressBarUITextField.backgroundColor = addressBarBackgroundColor
 
-        let wkWebViewConfiguration = makeWKWebViewConfiguration()
-        let wkWebView = WKWebView(frame: .zero, configuration: wkWebViewConfiguration)
-        self.wkWebView = wkWebView
-        wkWebView.navigationDelegate = self
-        wkWebView.uiDelegate = self
-        wkWebView.allowsBackForwardNavigationGestures = true
-        
-        // wkWebView の observer を登録します
-        addObservers()
-
-        wkWebView.translatesAutoresizingMaskIntoConstraints = false
-
-        self.view.addSubview(wkWebView)
-        let topConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .top, relatedBy: .equal, toItem: self.addressBarUITextField, attribute: .bottom, multiplier: 1.0, constant: 10.0)
-        let bottomConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .bottom, relatedBy: .equal, toItem: self.progressView, attribute: .top, multiplier: 1.0, constant: 0)
-        let trailingConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .trailing, relatedBy: .equal, toItem: self.view, attribute: .trailingMargin, multiplier: 1.0, constant: 0.0)
-        let leadingConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leadingMargin, multiplier: 1.0, constant: 0.0)
-        NSLayoutConstraint.activate([
-            topConstraint,
-            bottomConstraint,
-            trailingConstraint,
-            leadingConstraint,
-            ])
-
-        loadHomePage()
-        //wkWebView.load(URLRequest(url: URL(string: "https://www.google.co.jp/")!))
+        reloadWebView()
     }
     
     deinit {
@@ -103,6 +78,41 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
     */
     
     // MARK: - WKWebView observers
+    
+    func reloadWebView() {
+        // 既に WkWebView が登録されていたら消します
+        for subview in self.view.subviews{
+            if subview is WKWebView {
+                subview.removeFromSuperview()
+            }
+        }
+
+        let wkWebViewConfiguration = makeWKWebViewConfiguration()
+        let wkWebView = WKWebView(frame: .zero, configuration: wkWebViewConfiguration)
+        self.wkWebView = wkWebView
+        wkWebView.navigationDelegate = self
+        wkWebView.uiDelegate = self
+        wkWebView.allowsBackForwardNavigationGestures = true
+        
+        // wkWebView の observer を登録します
+        addObservers()
+
+        wkWebView.translatesAutoresizingMaskIntoConstraints = false
+
+        self.view.addSubview(wkWebView)
+        let topConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .top, relatedBy: .equal, toItem: self.addressBarUITextField, attribute: .bottom, multiplier: 1.0, constant: 10.0)
+        let bottomConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .bottom, relatedBy: .equal, toItem: self.progressView, attribute: .top, multiplier: 1.0, constant: 0)
+        let trailingConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .trailing, relatedBy: .equal, toItem: self.view, attribute: .trailingMargin, multiplier: 1.0, constant: 0.0)
+        let leadingConstraint = NSLayoutConstraint.init(item: wkWebView, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leadingMargin, multiplier: 1.0, constant: 0.0)
+        NSLayoutConstraint.activate([
+            topConstraint,
+            bottomConstraint,
+            trailingConstraint,
+            leadingConstraint,
+            ])
+
+        loadHomePage()
+    }
     
     func addObservers(){
         guard let wkWebView = self.wkWebView else {

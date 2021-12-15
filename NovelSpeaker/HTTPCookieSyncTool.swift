@@ -92,6 +92,7 @@
 
 import UIKit
 import RealmSwift
+import WebKit
 
 class HTTPCookieSyncTool: RealmObserverResetDelegate {
     static let shared = HTTPCookieSyncTool()
@@ -202,15 +203,21 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
     
     // 保存されている Cookie の全てを Realm, shared CookieStorage の両方から削除します
     static func ClearAllCookies(realm:Realm) {
-        if let cookieStorage = URLSession.shared.configuration.httpCookieStorage, let cookies = cookieStorage.cookies {
-            for cookie in cookies {
-                cookieStorage.deleteCookie(cookie)
-            }
+        NovelDownloadQueue.shared.downloadStop()
+        
+        // from https://qiita.com/sachiko-kame/items/6fd26bcdc1cd94cbddef
+        URLSession.shared.reset {}
+        UserDefaults.standard.synchronize()
+        let dataStore = WKWebsiteDataStore.default()
+        dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+            dataStore.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), for: records, completionHandler: {})
         }
+        
         if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
             RealmUtil.WriteWith(realm: realm) { realm in
                 globalState.cookieArrayData = Data()
             }
         }
+        BookShelfRATreeViewController.ReloadWebPageOnWebImportTab()
     }
 }

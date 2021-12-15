@@ -1447,4 +1447,13 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             instance.tabBarController?.selectedIndex = targetTabIndex
         }
     }
+    static func ReloadWebPageOnWebImportTab() {
+        guard let instance = instance else { return }
+        DispatchQueue.main.async {
+            /// XXX TODO: 謎の数字 2 が書いてある。WKWebView のタブの index なんだけども、なろう検索タブが消えたりすると変わるはず……
+            let targetTabIndex = 2
+            guard let viewController = instance.tabBarController?.viewControllers?[targetTabIndex] as? ImportFromWebPageViewController else { return }
+            viewController.reloadWebView()
+        }
+    }
 }
