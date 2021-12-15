@@ -838,17 +838,26 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.1
 
-- 「設定タブ」->「読み上げ中はスリープモードに入らないようにする」のON/OFF設定を追加
-- 「設定タブ」->「サポートサイト内のQ&A(よくある質問とその答え)を開く」を追加
-- 「設定タブ」->「自作フォルダの編集」から「このフォルダに入れる小説を選択する」を選んだ時に表示される小説のリストに、他のフォルダに登録されている小説の場合はそのフォルダ名のリストを付記するように
-- 「設定タブ」->「小説本文画面の右上に表示されるボタン群の編集」に「現在のページをWeb取込タブで開く」を追加
-- 自作小説の場合「小説の詳細画面」に「この小説の本文を一つのテキストファイルとして出力する」を追加
+対応OSバージョンを iOS 15, iPad OS 15 以降にしました。
+
+インタフェースの変更
+
+- 「設定タブ」に「保存されている全てのCookieを削除する」ボタンを追加
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.6.1
+
+対応OSバージョンを iOS 15, iPad OS 15 以降にしました。
+
+インタフェースの変更
+
+- 「設定タブ」に「保存されている全てのCookieを削除する」ボタンを追加
+
+
 # Version 2.6.0
 
 インタフェースの変更

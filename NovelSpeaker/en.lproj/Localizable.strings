@@ -845,17 +845,27 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.6.1
 
-- Added ON / OFF setting of \"Settings tab\" -> \"Do not enter sleep mode while reading\"
-- Added \"Settings tab\" -> \"Open Q & A (Frequently Asked Questions and Answers) in Support Site\"
-- In the list of novels displayed when you select \"Select a novel to put in this folder\" from \"Settings tab\" -> \"Edit your own folder\", if the novel is registered in another folder, that folder Add a list of names
-- Added \"Open current page in Web import tab\" to \"Settings tab\" -> \"Edit buttons displayed in the upper right corner of the novel text screen\"
-- For self-made novels Added \"Output the text of this novel as a single text file\" to the \"Detailed screen of the novel\"
+The supported OS version is iOS 15, iPad OS 15 or later.
+
+Interface changes
+
+- Added \"Delete all stored cookies\" button to \"Settings tab\"
+
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.6.1
+
+The supported OS version is iOS 15, iPad OS 15 or later.
+
+Interface changes
+
+- Added \"Delete all stored cookies\" button to \"Settings tab\"
+
+
 # Version 2.6.0
 
 Interface changes
