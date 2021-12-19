@@ -92,7 +92,10 @@
 
 import UIKit
 import RealmSwift
+
+#if !os(watchOS)
 import WebKit
+#endif
 
 class HTTPCookieSyncTool: RealmObserverResetDelegate {
     static let shared = HTTPCookieSyncTool()
@@ -113,7 +116,7 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
     }
     
     func WaitCanUseRealm(method: @escaping (()->Void)) {
-        #if !os(watchOS)
+#if !os(watchOS)
         if CoreDataToRealmTool.IsConvertFromCoreDataFinished() {
             print("WaitCanUseRealmThenDo CoreDataToRealmTool.IsConvertFromCoreDataFinished() return true.")
             method()
@@ -201,6 +204,7 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
         SaveCookiesFromCookieArrayWith(realm: realm, cookieArray: sharedCookieArray)
     }
     
+#if !os(watchOS)
     // 保存されている Cookie の全てを Realm, shared CookieStorage の両方から削除します
     static func ClearAllCookies(realm:Realm) {
         NovelDownloadQueue.shared.downloadStop()
@@ -220,4 +224,5 @@ class HTTPCookieSyncTool: RealmObserverResetDelegate {
         }
         BookShelfRATreeViewController.ReloadWebPageOnWebImportTab()
     }
+#endif
 }
