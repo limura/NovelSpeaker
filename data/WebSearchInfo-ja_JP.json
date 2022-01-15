@@ -448,6 +448,7 @@
                     "現代/青春ドラマ": "genre[11]=1",
                     "詩/短歌": "genre[12]=1",
                     "作品紹介": "genre[13]=1",
+                    "コメディ/ギャグ": "genre[14]=1",
                     "二次創作": "genre[52]=1",
                     "童話/絵本/その他": "genre[99]=1"
                 }
@@ -457,8 +458,9 @@
                     "短編 / 短編集": "short=1",
                     "長編": "not-short=1",
                     "設定・プロット": "plot=1",
-                    "完結済": "finish=1",
-                    "連載中": "not-finish=1"
+                    "自主企画": "user_event=1",
+                    "完結済・終了": "finish=1",
+                    "連載中・開催中": "not-finish=1"
                 }
             },
             {"queryType": "multiSelect", "displayText": "除外条件", "queryName": "", "separator": "&",
@@ -479,10 +481,20 @@
                     "応援ポイントが多い順": "9",
                     "ノベラポイントが多い順": "10"
                 }
-            }
+            },
+            {"queryType": "hidden", "queryName": "length[min]", "value": ""},
+            {"queryType": "hidden", "queryName": "length[max]", "value": ""},
+            {"queryType": "hidden", "queryName": "point[min]", "value": ""},
+            {"queryType": "hidden", "queryName": "point[max]", "value": ""},
+            {"queryType": "hidden", "queryName": "point_pay[min]", "value": ""},
+            {"queryType": "hidden", "queryName": "point_pay[max]", "value": ""},
+            {"queryType": "hidden", "queryName": "update[from]", "value": ""},
+            {"queryType": "hidden", "queryName": "update[to]", "value": ""},
+            {"queryType": "hidden", "queryName": "open[from]", "value": ""},
+            {"queryType": "hidden", "queryName": "open[to]", "value": ""}
         ],
         "result": {
-            "block": "//div[@id='section_search_result']//li//div[@class='story_card']",
+            "block": "//div[contains(@class,'sumally')]",
             "nextLink": "//div[@class='infinite-scroll-pagination']//a[contains(@class,'infinite-scroll-more')]/@href",
             "title": "//p[@class='story_name']",
             "url": "//p[@class='story_name']/a[contains(@href,'/story/')]/@href"
