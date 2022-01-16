@@ -140,6 +140,7 @@
         }
     },
     {
+	"isDisabled": true,
         "title": "ナゾロジー",
         "HTTPMethod": "GET",
         "url": "https://nazology.net/?",
