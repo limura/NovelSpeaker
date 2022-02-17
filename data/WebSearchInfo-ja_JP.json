@@ -1171,6 +1171,79 @@
     },
     {
 	"isDisabled": true,
+        "title": "野いちご",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www.no-ichigo.jp/search/book?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "word"},
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0",
+                "radio": {
+                    "01: 指定なし": "0",
+                    "02: 恋愛(すべて)": "100",
+                    "03: 恋愛(純愛)": "101",
+                    "04: 恋愛(ラブコメ)": "102",
+                    "05: 恋愛(オフィスラブ)": "103",
+                    "06: 恋愛(学園)": "104",
+                    "07: 恋愛(実話)": "105",
+                    "08: 恋愛(その他)": "199",
+                    "09: 青春・友情": "200",
+                    "10: ノンフィクション・実話": "300",
+                    "11: ミステリー・サスペンス": "400",
+                    "12: ホラー・オカルト": "600",
+                    "13: ファンタジー・ＳＦ・冒険": "700",
+                    "14: 歴史・時代": "1400",
+                    "15: コメディ": "900",
+                    "16: 絵本・童話": "1000",
+                    "17: 実用・エッセイ": "1200",
+                    "18: 詩・短歌・俳句・川柳": "1300",
+                    "19: その他": "9900"
+		}
+	    },
+            {"queryType": "radio", "displayText": "気持ち", "queryName": "feeling", "defaultValue": "0",
+                "radio": {
+                    "01: 指定なし": "0",
+                    "02: 泣ける": "1",
+                    "03: 切ない": "2",
+                    "04: 感動!": "3",
+                    "05: ドキドキ": "4",
+                    "06: 胸キュン": "5",
+                    "07: おもしろい": "6",
+                    "08: ワクワクする": "7",
+                    "09: 怖い": "8",
+                    "10: ほのぼの": "9",
+                    "11: スカッとする": "10",
+                    "12: 元気が出る": "11",
+                    "13: 夢いっぱい": "12",
+                    "14: 不思議な気分": "13",
+                    "15: ためになる": "14",
+                    "16: ビックリ": "15"
+		}
+	    },
+            {"queryType": "radio", "displayText": "完結", "queryName": "finished", "defaultValue": "0",
+                "radio": {
+                    "1: 全て": "0",
+                    "2: 完結": "2",
+                    "3: 更新中": "1"
+		}
+	    },
+            {"queryType": "multiSelect", "displayText": "作品の長さ", "queryName": "", "separator": "&",
+                "multiSelect": {
+		    "1: 長編": "length[]=4",
+		    "2: 中編": "length[]=2",
+		    "3: 短編": "length[]=1"
+		}
+	    }
+        ],
+        "result": {
+            "block": "//section[contains(@class,'search_result')]/ul/li[contains(@class,'topSection')]",
+            "nextLink": "//div[@class='pageList']/ul/li[@class='next']/a[contains(@href,'/search/book/')]",
+            "title": "//a[contains(@href,'/read/book/book_id/')]/dl/dd/h4",
+            "url": "//a[contains(@href,'/read/book/book_id/') and child::dl/dd/h4]/@href"
+        }
+    },
+    {
+	"isDisabled": true,
         "title": "雛形",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
