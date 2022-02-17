@@ -1170,7 +1170,7 @@
         }
     },
     {
-	"isDisabled": true,
+	"isDisabled": false,
         "title": "野いちご",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
