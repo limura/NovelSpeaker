@@ -1630,21 +1630,39 @@ class NiftyUtility: NSObject {
     }
     
     static func FilterXpathToHtml(xmlDocument:XMLDocument, xpath:String) -> String {
-        var resultHTML = ""
-        for element in xmlDocument.xpath(xpath) {
-            var elementXML = element.toHTML ?? ""
-            if let parent = element.parent, let parentTag = parent.tagName {
-                if element.nextSibling == nil && element.previousSibling == nil {
-                    elementXML = "<\(parentTag)>\(elementXML)</\(parentTag)>"
-                }else if element.nextSibling == nil {
-                    elementXML = "\(elementXML)</\(parentTag)>"
-                }else if element.previousSibling == nil {
-                    elementXML = "<\(parentTag)>\(elementXML)"
+        let xpathResult = xmlDocument.xpath(xpath)
+        switch xpathResult {
+        case .none:
+            return ""
+        case .NodeSet(let nodeset):
+            var resultHTML = ""
+            for element in nodeset {
+                var elementXML = ""
+                let toHtml = element.toHTML
+                if let toHtml = toHtml, let tagName = element.tagName, let content = element.content, toHtml == " \(tagName)=\"\(content)\"" {
+                    elementXML = content
+                }else{
+                    elementXML = toHtml ?? ""
                 }
+                if let parent = element.parent, let parentTag = parent.tagName {
+                    if element.nextSibling == nil && element.previousSibling == nil {
+                        elementXML = "<\(parentTag)>\(elementXML)</\(parentTag)>"
+                    }else if element.nextSibling == nil {
+                        elementXML = "\(elementXML)</\(parentTag)>"
+                    }else if element.previousSibling == nil {
+                        elementXML = "<\(parentTag)>\(elementXML)"
+                    }
+                }
+                resultHTML += elementXML
             }
-            resultHTML += elementXML
+            return resultHTML
+        case .Bool(let bool):
+            return "\(bool)"
+        case .Number(let num):
+            return "\(num)"
+        case .String(let text):
+            return text
         }
-        return resultHTML
     }
     static func FilterXpathToHtml(xmlElement:XMLElement, xpath:String) -> String {
         var resultHTML = ""
