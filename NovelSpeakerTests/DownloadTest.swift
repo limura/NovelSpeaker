@@ -18,7 +18,7 @@ class DownloadTest: XCTestCase {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         let semaphore = DispatchSemaphore(value: 0)
         //StoryHtmlDecoder.shared.ClearSiteInfo()
-        StoryHtmlDecoder.shared.WaitLoadSiteInfoReady {
+        StoryHtmlDecoder.shared.WaitLoadSiteInfoReady {errorString in
             semaphore.signal()
         }
         semaphore.wait()
@@ -135,7 +135,7 @@ class DownloadTest: XCTestCase {
         }
         let expectation = self.expectation(description: "FirstPageButton expectation")
         let fetcher = StoryFetcher()
-        let state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: targetUrl, cookieString: nil)
+        let state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: targetUrl, cookieString: nil, previousContent: nil)
         fetcher.FetchNext(currentState: state) { (state) in
             print(state.description)
             // firstPageButton が反応していれば、最初のページが表示され、その値が取れているはずです。
@@ -165,7 +165,7 @@ class DownloadTest: XCTestCase {
         }
         let expectation = self.expectation(description: "FirstPageButton expectation")
         let fetcher = StoryFetcher()
-        let state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: targetUrl, cookieString: nil)
+        let state = StoryFetcher.CreateFirstStoryStateWithoutCheckLoadSiteInfo(url: targetUrl, cookieString: nil, previousContent: nil)
         fetcher.FetchNext(currentState: state) { (state) in
             print(state.description)
             // firstPageButton が反応していれば、最初のページが表示され、その値が取れているはずです。
