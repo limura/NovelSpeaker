@@ -424,6 +424,10 @@
 "NovelDetailViewController_ActionSection_Writer_Popup_Edit_Accepted" = "Changed the author name";
 "NovelDetailViewController_ActionSection_Writer_Popup_Edit_Rejected" = "Failed to change author name";
 "NovelDetailViewController_ActionSection_CreateWholeTextButton" = "Output the text of this novel as a single text file";
+"NovelDetailViewController_ActionSection_Title_Copy" = "Copy the novel name";
+"NovelDetailViewController_ActionSection_Title_Copy_Done" = "Copied the novel name";
+"NovelDetailViewController_ActionSection_Writer_Copy" = "Copy the author name";
+"NovelDetailViewController_ActionSection_Writer_Copy_Done" = "Copied the author name";
 
 "NovelKeywordTagSelectorViewController_Title" = "Select Tag";
 "NovelKeywordTagSelectorViewController_AddTagTitle" = "Add Tag";

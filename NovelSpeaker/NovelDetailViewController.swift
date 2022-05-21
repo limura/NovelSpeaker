@@ -193,12 +193,20 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 $0.title = NSLocalizedString("NovelDetailViewController_Title", comment: "小説名")
                 $0.value = novel.title
             }.onCellSelection({ (cellOf, row) in
-                UIPasteboard.general.string = novel.title.trimmingCharacters(in: .whitespacesAndNewlines)
                 DispatchQueue.main.async {
                     var dialog = NiftyUtility.EasyDialogBuilder(self)
-                    dialog = dialog.title(title: NSLocalizedString("NovelDetailViewController_ActionSection_Title_PopupTitle", comment: "小説名をコピーしました"))
                     dialog = dialog.label(text: NSLocalizedString("NovelDetailViewController_ActionSection_Title_PopupMessage", comment: "小説名を変更する事もできます。"))
                     dialog = dialog.textField(tag: 100, placeholder: nil, content: novel.title, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always)
+                    dialog = dialog.addButton(title: NSLocalizedString("NovelDetailViewController_ActionSection_Title_Copy", comment: "小説名をコピーする"), callback: { dialog in
+                        if let filterTextField = dialog.view.viewWithTag(100) as? UITextField, let newString = filterTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) {
+                            dialog.dismiss(animated: false) {
+                                UIPasteboard.general.string = newString
+                                NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_ActionSection_Title_Copy_Done", comment: "小説名をコピーしました"))
+                            }
+                        }else{
+                            dialog.dismiss(animated: false)
+                        }
+                    })
                     dialog = dialog.addButton(title: NSLocalizedString("NovelDetailViewController_ActionSection_Title_Popup_Cancel", comment: "変更しない")) { (dialog) in
                             dialog.dismiss(animated: false, completion: nil)
                         }
@@ -230,11 +238,19 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                     $0.title = NSLocalizedString("NovelDetailViewController_Writer", comment: "著者")
                     $0.value = novel.writer
                 }.onCellSelection({ (cellOf, row) in
-                    UIPasteboard.general.string = novel.writer.trimmingCharacters(in: .whitespacesAndNewlines)
                     DispatchQueue.main.async {
                         var dialog = NiftyUtility.EasyDialogBuilder(self)
-                        dialog = dialog.title(title: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_PopupTitle", comment: "著者名をコピーしました"))
                         dialog = dialog.label(text: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_PopupMessage", comment: "著者名を変更する事もできます。"))
+                        dialog = dialog.addButton(title: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_Copy", comment: "著者名をコピーする"), callback: { dialog in
+                            if let filterTextField = dialog.view.viewWithTag(100) as? UITextField, let newString = filterTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) {
+                                dialog.dismiss(animated: false) {
+                                    UIPasteboard.general.string = newString
+                                    NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_Copy_Done", comment: "著者名をコピーしました"))
+                                }
+                            }else{
+                                dialog.dismiss(animated: false)
+                            }
+                        })
                         dialog = dialog.textField(tag: 100, placeholder: nil, content: novel.writer, keyboardType: .default, secure: false, focusKeyboard: true, borderStyle: .none, clearButtonMode: .always)
                         dialog = dialog.addButton(title: NSLocalizedString("NovelDetailViewController_ActionSection_Writer_Popup_Cancel", comment: "変更しない")) { (dialog) in
                                 dialog.dismiss(animated: false, completion: nil)
