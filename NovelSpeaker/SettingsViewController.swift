@@ -10,8 +10,9 @@ import UIKit
 import MessageUI
 import Eureka
 import RealmSwift
+import UniformTypeIdentifiers
 
-class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate, RealmObserverResetDelegate, AppInformationAliveDelegate {
+class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate, RealmObserverResetDelegate, AppInformationAliveDelegate, UIDocumentBrowserViewControllerDelegate {
     var m_NarouContentCacheData:NarouContentCacheData? = nil
     var m_RubySwitchToggleHitCount = 0
     var notificationTokens:[NSObjectProtocol] = []
@@ -1303,6 +1304,25 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+        #if false
+            section
+            <<< ButtonRow() { row in
+                row.title = "ファイル選択テスト"
+            }.onCellSelection({ cell, row in
+                let picker = UIDocumentBrowserViewController(forOpening: [
+                    UTType.plainText,
+                    UTType.folder,
+                ])
+                /*
+                let picker = UIDocumentPickerViewController(forOpeningContentTypes: [
+                    UTType.plainText
+                ], asCopy: true)
+                */
+                picker.allowsPickingMultipleItems = true
+                picker.delegate = self
+                self.navigationController?.present(picker, animated: true,  completion: nil)
+            })
+        #endif
             section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
@@ -2289,6 +2309,39 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 break
             default:
                 break
+            }
+        }
+    }
+    
+    /*
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt  urls: [URL]) {
+        print("documentPicker: \(urls)")
+    }
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        // nothing to do!
+    }
+     */
+    func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
+        print("documentBrowser: \(documentURLs)")
+        controller.dismiss(animated: true) {
+            // nothing to do
+            for url in documentURLs {
+                let scope = url.startAccessingSecurityScopedResource()
+                defer {
+                    if scope {
+                        url.stopAccessingSecurityScopedResource()
+                    }
+                }
+                if let bookmark = try? url.bookmarkData(options:
+                    .minimalBookmark
+                    //| .withSecurityScope
+                    , includingResourceValuesForKeys: nil, relativeTo: nil) {
+                    print("bookmark: \(url)\n\(bookmark)")
+                    var isStale = false
+                    if let bookmarkUrl = try? URL(resolvingBookmarkData: bookmark, bookmarkDataIsStale: &isStale), isStale == false {
+                        print("decode: \(bookmarkUrl)")
+                    }
+                }
             }
         }
     }
