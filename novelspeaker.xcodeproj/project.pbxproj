@@ -206,6 +206,7 @@
 		21D9C16526524C2500CC5AE9 /* WebSpeechViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D9C16426524C2500CC5AE9 /* WebSpeechViewController.swift */; };
 		21D9C1672652602900CC5AE9 /* WebSpeechViewTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D9C1662652602900CC5AE9 /* WebSpeechViewTool.swift */; };
 		21DD0BF520B595F500DC3C39 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 21DD0BF420B595F500DC3C39 /* LICENSE.txt */; };
+		21DF09A728375FFC009930EA /* SearchFloatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21DF09A628375FFC009930EA /* SearchFloatingView.swift */; };
 		21DFB3FC22ADA1390006A933 /* ActivityIndicatorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */; };
 		21E26FEB260E066F009018B6 /* SafeModeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21E26FEA260E066F009018B6 /* SafeModeViewController.swift */; };
 		21E26FF3260E134C009018B6 /* safeMode.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21E26FF2260E134C009018B6 /* safeMode.storyboard */; };
@@ -539,6 +540,7 @@
 		21D9C16426524C2500CC5AE9 /* WebSpeechViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSpeechViewController.swift; sourceTree = "<group>"; };
 		21D9C1662652602900CC5AE9 /* WebSpeechViewTool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSpeechViewTool.swift; sourceTree = "<group>"; };
 		21DD0BF420B595F500DC3C39 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		21DF09A628375FFC009930EA /* SearchFloatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchFloatingView.swift; sourceTree = "<group>"; };
 		21DFB3FB22ADA1390006A933 /* ActivityIndicatorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorManager.swift; sourceTree = "<group>"; };
 		21E26FEA260E066F009018B6 /* SafeModeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeModeViewController.swift; sourceTree = "<group>"; };
 		21E26FF2260E134C009018B6 /* safeMode.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = safeMode.storyboard; sourceTree = "<group>"; };
@@ -739,6 +741,7 @@
 				21648006229003E100A183DF /* BookShelfTreeViewCell.xib */,
 				21C52BDD2626BDD800EE4768 /* EurekaPopupViewController.swift */,
 				216631EA268E9C9200F80C1D /* MenuButtonHandler.swift */,
+				21DF09A628375FFC009930EA /* SearchFloatingView.swift */,
 			);
 			name = CustomViews;
 			sourceTree = "<group>";
@@ -1694,6 +1697,7 @@
 				21AA7FCF25620F4700ED9AC2 /* NovelFolderManageTableViewController.swift in Sources */,
 				213A4DC61A63CF8B00E9EC13 /* SpeechWaitConfig.m in Sources */,
 				216631E92688772700F80C1D /* ScrollPullAndFireHandler.swift in Sources */,
+				21DF09A728375FFC009930EA /* SearchFloatingView.swift in Sources */,
 				21AFDF3221664D5B002F34D9 /* DummySoundLooper.swift in Sources */,
 				21C52BDE2626BDD800EE4768 /* EurekaPopupViewController.swift in Sources */,
 				21D3979A1FC93DA40018F883 /* DebugLogViewControllerSwift.swift in Sources */,

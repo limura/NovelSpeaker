@@ -336,6 +336,9 @@
 "SpeechViewController_ShowTableOfContentsButtonTitle" = "table of contents";
 "SpeechViewController_SelectFolder_Title" = "Select a folder to play continuously";
 "SpeechViewController_NotUseNextSpeechNovel" = "Continue without using playback";
+"SpeechViewController_SearchByText_NotFound" = "The search string could not be found in the page.";
+"SpeechViewController_SearchByText_Found_Announce_to_VoiceOverUser_Formated" = "%@";
+"SpeechViewController_SearchByTextButton_AccessibilityLabel" = "Search within the page";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";
@@ -780,6 +783,14 @@
 "SpeechViewButtonType_SkipBackward" = "Rewind a little (during playback)";
 "SpeechViewButtonType_SkipForward" = "Advance a little (during playback)";
 "SpeechViewButtonType_ShowTableOfContents" = "Table of Contents";
+"SpeechViewButtonType_SearchByText" = "Search within the displayed page";
+
+"SearchFloatingView_SearchTextFieldPlaceHolder" = "Enter the character you want to search for";
+"SearchFloatingView_AccessibilityHint_SearchTextField" = "Enter the search character";
+"SearchFloatingView_AccessibilityHint_LeftButton" = "Search one before";
+"SearchFloatingView_AccessibilityHint_RightButton" = "Search one behind";
+"SearchFloatingView_AccessibilityHint_CloseButton" = "Exit the search window";
+
 
 "MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "The specified speaker was not available on this machine. I will use an alternative speaker.";
 

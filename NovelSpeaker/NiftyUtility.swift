@@ -1918,4 +1918,25 @@ extension String {
         }
         return String(self[s..<e])
     }
+    
+    var firstLine:String? {
+        get {
+            var resultLine:String? = nil
+            self.enumerateLines { line, stop in
+                resultLine = line
+                stop = true
+            }
+            return resultLine
+        }
+    }
+    var lastLine:String? {
+        get {
+            // TODO: 巨大な文字列だとクッソ遅いです。後ろから "\r\n" とかを探したほうが良いです。
+            var resultLine:String? = nil
+            self.enumerateLines { line, stop in
+                resultLine = line
+            }
+            return resultLine
+        }
+    }
 }

@@ -41,6 +41,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     var displayTextCache:String = ""
     var leftSwipeRecgnizer:UISwipeGestureRecognizer = UISwipeGestureRecognizer()
     var rightSwipeRecgnizer:UISwipeGestureRecognizer = UISwipeGestureRecognizer()
+    
+    var searchView:SearchFloatingView? = nil
+    var searchTextCache = ""
 
     let storySpeaker = StorySpeaker.shared
     
@@ -75,6 +78,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         observeGlobalState()
         registNotificationCenter()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
+        searchTextCache = ""
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -90,6 +94,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
             }
         }
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.clearSearchView()
     }
     
     deinit {
@@ -214,6 +223,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 }
             case .search:
                 barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchButtonClicked(_:))))
+            case .searchByText:
+                let button = UIBarButtonItem(image: UIImage(systemName: "doc.text.magnifyingglass"), style: .plain, target: self, action: #selector(searchByTextButtonClicked(_:)))
+                button.accessibilityLabel = NSLocalizedString("SpeechViewController_SearchByTextButton_AccessibilityLabel", comment: "ページ内を検索")
+                barButtonArray.append(button)
             case .edit:
                 barButtonArray.append(UIBarButtonItem(title: NSLocalizedString("SpeechViewController_Edit", comment: "編集"), style: .plain, target: self, action: #selector(editButtonClicked(_:))))
             case .detail:
@@ -711,6 +724,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 leftButtonAction: nil,
                 rightButtonAction: { (filterText) in
                     guard let storyID = self.storyID else { return }
+                    self.searchTextCache = filterText
                     NovelSpeakerUtility.SearchStoryFor(selectedStoryID: storyID, viewController: self, searchString: filterText) { (story) in
                         self.storySpeaker.SetStory(story: story, withUpdateReadDate: true)
                     }
@@ -718,6 +732,90 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 shouldReturnIsRightButtonClicked: true,
                 completion: nil)
         }
+    }
+    
+    func clearSearchView(){
+        if let searchView = self.searchView {
+            self.searchView = nil
+            searchView.removeFromSuperview()
+        }
+    }
+    
+    func searchResultAnnounceIfVoiceOverEnabled(foundString:String){
+        guard UIAccessibility.isVoiceOverRunning == true else { return }
+        let announceString = String(format: NSLocalizedString("SpeechViewController_SearchByText_Found_Announce_to_VoiceOverUser_Formated", comment: "%@"), foundString)
+        self.storySpeaker.AnnounceSpeech(text: announceString)
+    }
+    
+    func prevSearchByText(searchString:String){
+        let searchStringCount = searchString.unicodeScalars.count
+        let currentRange = self.textView.selectedRange
+        let targetText:String
+        if currentRange.location == NSNotFound {
+            targetText = ""
+        }else{
+            targetText = self.textView.text.NiftySubstring(from: 0, to: currentRange.location - 1)
+        }
+        guard let nextRange = targetText.range(of: searchString, options: .backwards) else {
+            DispatchQueue.main.async {
+                NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("SpeechViewController_SearchByText_NotFound", comment: "ページ内に検索文字列を発見できませんでした。"))
+            }
+            return
+        }
+        let targetLocation = max((targetText.distance(from: targetText.startIndex, to: nextRange.lowerBound) as Int), 0)
+        self.textView.becomeFirstResponder()
+        self.textView.selectedRange = NSRange(location: targetLocation, length: searchStringCount)
+        self.textViewScrollTo(readLocation: targetLocation)
+        
+        let foundString = self.textView.text.NiftySubstring(from: targetLocation, to: targetLocation + min(searchStringCount + 20, 30))
+        self.searchResultAnnounceIfVoiceOverEnabled(foundString: foundString)
+    }
+    func nextSearchByText(searchString:String){
+        let searchStringCount = searchString.unicodeScalars.count
+        let currentRange = self.textView.selectedRange
+        let targetText:String, currentLocation:Int
+        if currentRange.location == NSNotFound {
+            currentLocation = 0
+            targetText = self.textView.text
+        }else{
+            currentLocation = currentRange.location + 1
+            targetText = self.textView.text.NiftySubstring(from: currentLocation, to: self.textView.text.unicodeScalars.count)
+        }
+        guard let nextRange = targetText.range(of: searchString) else {
+            DispatchQueue.main.async {
+                NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("SpeechViewController_SearchByText_NotFound", comment: "ページ内に検索文字列を発見できませんでした。"))
+            }
+            return
+        }
+        let targetLocation = (targetText.distance(from: targetText.startIndex, to: nextRange.lowerBound) as Int) + currentLocation
+        self.textView.becomeFirstResponder()
+        self.textView.selectedRange = NSRange(location: targetLocation, length: searchStringCount)
+        self.textViewScrollTo(readLocation: targetLocation)
+
+        let foundString = self.textView.text.NiftySubstring(from: targetLocation, to: targetLocation + min(searchStringCount + 20, 30))
+        self.searchResultAnnounceIfVoiceOverEnabled(foundString: foundString)
+    }
+    
+    @objc func searchByTextButtonClicked(_ sender: UIBarButtonItem) {
+        if self.searchView != nil {
+            clearSearchView()
+            return
+        }
+        if self.storySpeaker.isPlayng {
+            RealmUtil.RealmBlock { realm in
+                self.storySpeaker.StopSpeech(realm: realm)
+            }
+        }
+        guard let topLevelViewController = self.parent?.parent else { return }
+        self.searchView = SearchFloatingView.generate(parentView: topLevelViewController.view, firstText: searchTextCache, leftButtonClickHandler: { searchString in
+            guard let searchString = searchString else { return }
+            self.prevSearchByText(searchString: searchString)
+        }, rightButtonClickHandler: { searchString in
+            guard let searchString = searchString else { return }
+            self.nextSearchByText(searchString: searchString)
+        }, isDeletedHandler: {
+            self.searchView = nil
+        })
     }
 
     @objc func shareButtonClicked(_ sender: UIBarButtonItem) {
@@ -752,6 +850,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
 
             func runNextSpeech(nextFolder:RealmNovelTag?){
                 self.storySpeaker.targetFolderNameForGoToNextSelectedFolderdNovel = nextFolder?.name
+                self.clearSearchView()
                 RealmUtil.RealmBlock { realm in
                     self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(Speakボタンを押した 又は 本棚画面で「▶︎ 再生:〜」を選択した 又は 次のフォルダの小説に移行した).\(#function)", isNeedRepeatSpeech: true)
                     self.checkDummySpeechFinished()
@@ -815,6 +914,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.storySpeaker.StopSpeech(realm: realm) {
                     self.storySpeaker.SkipBackward(realm: realm, length: 30) {
+                        self.clearSearchView()
                         self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し戻すボタン).\(#function)", isNeedRepeatSpeech: true)
                     }
                 }
@@ -827,6 +927,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.storySpeaker.StopSpeech(realm: realm) {
                     self.storySpeaker.SkipForward(realm: realm, length: 30) {
+                        self.clearSearchView()
                         self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し進めるボタン).\(#function)", isNeedRepeatSpeech: true)
                     }
                 }
@@ -877,6 +978,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     // MARK: StorySpeakerDelegate
     func storySpeakerStartSpeechEvent(storyID:String){
         DispatchQueue.main.async {
+            self.clearSearchView()
             self.startStopButtonItem?.title = NSLocalizedString("SpeechViewController_Stop", comment: "Stop")
             self.skipBackwardButtonItem?.isEnabled = true
             self.skipForwardButtonItem?.isEnabled = true

@@ -2181,6 +2181,7 @@ enum SpeechViewButtonTypes:String, Codable {
     case skipBackward = "skipBackward"
     case skipForward = "skipForward"
     case showTableOfContents = "showTableOfContents"
+    case searchByText = "searchByText"
 }
 
 struct SpeechViewButtonSetting: Codable {
@@ -2196,6 +2197,7 @@ struct SpeechViewButtonSetting: Codable {
         SpeechViewButtonSetting(type: .reload, isOn: true),
         SpeechViewButtonSetting(type: .share, isOn: true),
         SpeechViewButtonSetting(type: .search, isOn: true),
+        SpeechViewButtonSetting(type: .searchByText, isOn: false),
         SpeechViewButtonSetting(type: .backup, isOn: false),
         SpeechViewButtonSetting(type: .detail, isOn: true),
         SpeechViewButtonSetting(type: .edit, isOn: true),

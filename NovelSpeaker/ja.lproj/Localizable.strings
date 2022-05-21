@@ -308,6 +308,9 @@
 "SpeechViewController_ShowTableOfContentsButtonTitle" = "目次";
 "SpeechViewController_SelectFolder_Title" = "続けて再生するフォルダを選択";
 "SpeechViewController_NotUseNextSpeechNovel" = "続けて再生を使わずに開始";
+"SpeechViewController_SearchByText_NotFound" = "ページ内に検索文字列を発見できませんでした。";
+"SpeechViewController_SearchByText_Found_Announce_to_VoiceOverUser_Formated" = "%@";
+"SpeechViewController_SearchByTextButton_AccessibilityLabel" = "ページ内を検索";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
@@ -765,7 +768,7 @@
 "SpeechViewButtonType_OpenWebPage" = "Web取込タブで開く";
 "SpeechViewButtonType_Reload" = "その小説の更新確認を行う";
 "SpeechViewButtonType_Share" = "小説のURLをシェアする";
-"SpeechViewButtonType_Search" = "小説内を検索(何も入れずに検索すると章のリストを表示します)";
+"SpeechViewButtonType_Search" = "小説内で検索(何も入れずに検索すると章のリストを表示します)";
 "SpeechViewButtonType_Edit" = "小説を編集する";
 "SpeechViewButtonType_CopyTitle" = "小説名をコピーする";
 "SpeechViewButtonType_Backup" = "小説をバックアップする";
@@ -774,6 +777,13 @@
 "SpeechViewButtonType_SkipBackward" = "(再生中に)少し巻き戻す";
 "SpeechViewButtonType_SkipForward" = "(再生中に)少し進める";
 "SpeechViewButtonType_ShowTableOfContents" = "章リスト(目次)";
+"SpeechViewButtonType_SearchByText" = "表示されているページ内で検索";
+
+"SearchFloatingView_SearchTextFieldPlaceHolder" = "検索する文字を入力します";
+"SearchFloatingView_AccessibilityHint_SearchTextField" = "検索文字を入力";
+"SearchFloatingView_AccessibilityHint_LeftButton" = "一つ前を検索";
+"SearchFloatingView_AccessibilityHint_RightButton" = "一つ後ろを検索";
+"SearchFloatingView_AccessibilityHint_CloseButton" = "検索窓を終了";
 
 "MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします";
 

@@ -93,6 +93,15 @@ class SpeechViewButtonSettingsViewController: FormViewController {
                             $0.cell.imageView?.image = UIImage(systemName: "magnifyingglass")
                         }
                     }.onChange({_ in self.saveCurrentSetting()})
+                case .searchByText:
+                    section <<< SwitchRow(setting.type.rawValue) {
+                        $0.title = NSLocalizedString("SpeechViewButtonType_SearchByText", comment: "小説本文中を検索(表示されているページ内を検索)")
+                        $0.cell.textLabel?.numberOfLines = 0
+                        $0.value = setting.isOn
+                        if #available(iOS 13.0, *) {
+                            $0.cell.imageView?.image = UIImage(systemName: "doc.text.magnifyingglass")
+                        }
+                    }
                 case .edit:
                     section <<< SwitchRow(setting.type.rawValue) {
                         $0.title = NSLocalizedString("SpeechViewButtonType_Edit", comment: "小説を編集する")
