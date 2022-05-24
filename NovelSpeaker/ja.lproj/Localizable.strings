@@ -226,6 +226,7 @@
 "SettingTableViewController_DuckOthersIsEnabled" = "他のアプリの音を小さくする";
 "SettingTableViewController_IsOpenRecentBookInStartTime" = "起動時に前回開いていた小説を開く";
 "SettingTableViewController_isNeedDisableIdleTimerWhenSpeechTime" = "読み上げ中はスリープモードに入らないようにする";
+"SettingTableViewController_isSupportAutoRotate" = "画面の回転に追従する";
 "SettingTableViewController_GoToSupportSite_Q&A" = "サポートサイト内のQ&A(よくある質問とその答え)を開く";
 "SettingsViewController_ClearAllCookiesButton_Title" = "保存されている全てのCookieを削除する";
 "SettingsViewController_ClearAllCookiesResult_Title" = "保存されている全てのCookieを削除しました";

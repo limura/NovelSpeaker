@@ -1494,6 +1494,9 @@ class NovelSpeakerUtility: NSObject {
                 if let isNeedDisableIdleTimerWhenSpeechTime = dic.object(forKey: "isNeedDisableIdleTimerWhenSpeechTime") as? NSNumber {
                     globalState.isNeedDisableIdleTimerWhenSpeechTime = isNeedDisableIdleTimerWhenSpeechTime.boolValue
                 }
+                if let isSupportAutoRotateEnabled = dic.object(forKey: "isSupportAutoRotateEnabled") as? NSNumber {
+                    NovelSpeakerUtility.isSupportAutoRotateEnabled = isSupportAutoRotateEnabled.boolValue
+                }
                 if let novelLikeOrder = dic.object(forKey: "novelLikeOrder") as? NSArray {
                     globalState.novelLikeOrder.removeAll()
                     for novelID in novelLikeOrder {
@@ -2013,6 +2016,7 @@ class NovelSpeakerUtility: NSObject {
                 "isEnableSwipeOnStoryView": globalState.isEnableSwipeOnStoryView,
                 "isDisableNarouRuby": globalState.isDisableNarouRuby,
                 "isNeedDisableIdleTimerWhenSpeechTime": globalState.isNeedDisableIdleTimerWhenSpeechTime,
+                "isSupportAutoRotateEnabled": NovelSpeakerUtility.isSupportAutoRotateEnabled,
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
             ]
         }
@@ -2583,6 +2587,22 @@ class NovelSpeakerUtility: NSObject {
         }
         set {
             UserDefaults.standard.set(newValue, forKey: isDebugMenuAlwaysEnabled_Key)
+            UserDefaults.standard.synchronize()
+        }
+    }
+    
+    @objc static var currentRotation = UIDeviceOrientation.unknown
+    fileprivate static let isSupportAutoRotate_Key = "isSupportAutoRotate_Key"
+    @objc static var isSupportAutoRotateEnabled: Bool {
+        get {
+            if UIDevice.current.userInterfaceIdiom != .phone { return true }
+            let defaults = UserDefaults.standard
+            defaults.register(defaults: [isSupportAutoRotate_Key : false])
+            return defaults.bool(forKey: isSupportAutoRotate_Key)
+        }
+        set {
+            currentRotation = UIDevice.current.orientation
+            UserDefaults.standard.set(newValue, forKey: isSupportAutoRotate_Key)
             UserDefaults.standard.synchronize()
         }
     }

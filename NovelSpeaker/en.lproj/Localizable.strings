@@ -229,6 +229,7 @@
 "SettingTableViewController_IsOpenRecentBookInStartTime" = "Startup with the last read book";
 "SettingTableViewController_DisableNarouRuby" = "Only the ruby notation derived from the NovelSpeaker is targeted (effective when you want to avoid the notation \"Kanji (Hiragana or Katakana)\" being judged as ruby).";
 "SettingTableViewController_isNeedDisableIdleTimerWhenSpeechTime" = "Avoid entering sleep mode while speaking";
+"SettingTableViewController_isSupportAutoRotate" = "Follow the rotation of the screen";
 "SettingTableViewController_GoToSupportSite_Q&A" = "Open Frequently Asked Questions and Answers on the support site";
 "SettingsViewController_ClearAllCookiesButton_Title" = "Delete all stored cookies";
 "SettingsViewController_ClearAllCookiesResult_Title" = "Deleted all stored cookies";

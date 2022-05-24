@@ -197,4 +197,25 @@ performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))comp
     }
 }
 
+- (UIInterfaceOrientationMask)application:(UIApplication *)application
+  supportedInterfaceOrientationsForWindow:(UIWindow *)window {
+    if([NovelSpeakerUtility isSupportAutoRotateEnabled]){
+        return UIInterfaceOrientationMaskAll;
+    }
+    switch ([NovelSpeakerUtility currentRotation]) {
+        case UIDeviceOrientationUnknown:
+        case UIDeviceOrientationPortrait:
+            return UIInterfaceOrientationMaskPortrait;
+        case UIDeviceOrientationLandscapeLeft:
+            return UIInterfaceOrientationMaskLandscapeRight;
+        case UIDeviceOrientationLandscapeRight:
+            return UIInterfaceOrientationMaskLandscapeLeft;
+        case UIDeviceOrientationPortraitUpsideDown:
+            return UIInterfaceOrientationMaskPortraitUpsideDown;
+        default:
+            break;
+    }
+    return UIInterfaceOrientationMaskPortrait;
+}
+
 @end

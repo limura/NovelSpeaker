@@ -1323,6 +1323,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 self.navigationController?.present(picker, animated: true,  completion: nil)
             })
         #endif
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                section
+                <<< SwitchRow("isSupportAutoRotateRow") { (row) in
+                    row.title = NSLocalizedString("SettingTableViewController_isSupportAutoRotate", comment:"画面の回転に追従する")
+                    row.cell.textLabel?.numberOfLines = 0
+                    //row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                    row.value = NovelSpeakerUtility.isSupportAutoRotateEnabled
+                }.onChange({ row in
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let value = row.value else { return }
+                        NovelSpeakerUtility.isSupportAutoRotateEnabled = value
+                    }
+                })
+            }
             section
             <<< SwitchRow() { row in
                 row.title = NSLocalizedString("SettingTableViewController_IsEscapeAboutSpeechPositionDisplayBugOniOS12Enabled", comment: "iOS 12 で読み上げ中の読み上げ位置表示がおかしくなる場合への暫定的対応を適用する")
