@@ -15,6 +15,8 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
     @IBOutlet weak var lineSpacingSlider: UISlider!
     @IBOutlet weak var fontSizeLabel: UILabel!
     @IBOutlet weak var lineSpacingLabel: UILabel!
+    @IBOutlet weak var fontSizeValueLabel: UILabel!
+    @IBOutlet weak var lineSpacingValueLabel: UILabel!
     
     var displaySettingObserbeToken:NotificationToken? = nil
     var textAttribute:[NSAttributedString.Key: Any] = [:]
@@ -151,6 +153,22 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
             self.textSizeSlider.value = displaySetting.textSizeValue
             self.lineSpacingSlider.value = displaySetting.lineSpacing
         }
+        updateFontSizeValueLabel()
+        updateLineSpacingValueLabel()
+    }
+    
+    func updateFontSizeValueLabel(){
+        DispatchQueue.main.async {
+            self.fontSizeValueLabel.text = String(format: "%.2f", self.textSizeSlider.value)
+            self.fontSizeValueLabel.sizeToFit()
+        }
+    }
+    
+    func updateLineSpacingValueLabel(){
+        DispatchQueue.main.async {
+            self.lineSpacingValueLabel.text = String(format: "%.2f", self.lineSpacingSlider.value)
+            self.lineSpacingValueLabel.sizeToFit()
+        }
     }
     
     @objc func fontSettingButtonClicked(_ sender: UIBarButtonItem) {
@@ -174,6 +192,7 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
     */
 
     @IBAction func textSizeSliderChanged(_ sender: Any) {
+        updateFontSizeValueLabel()
         RealmUtil.RealmBlock { (realm) -> Void in
             if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.displaySettingObserbeToken]) { (realm) in
@@ -186,6 +205,7 @@ class TextSizeSettingViewControllerSwift: UIViewController, RealmObserverResetDe
     }
     
     @IBAction func lineSpacingSliderChanged(_ sender: Any) {
+        updateLineSpacingValueLabel()
         RealmUtil.RealmBlock { (realm) -> Void in
             if let displaySetting = RealmGlobalState.GetInstanceWith(realm: realm)?.defaultDisplaySettingWith(realm: realm) {
                 RealmUtil.WriteWith(realm: realm, withoutNotifying: [self.displaySettingObserbeToken]) { (realm) in
