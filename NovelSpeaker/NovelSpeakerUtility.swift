@@ -1494,8 +1494,13 @@ class NovelSpeakerUtility: NSObject {
                 if let isNeedDisableIdleTimerWhenSpeechTime = dic.object(forKey: "isNeedDisableIdleTimerWhenSpeechTime") as? NSNumber {
                     globalState.isNeedDisableIdleTimerWhenSpeechTime = isNeedDisableIdleTimerWhenSpeechTime.boolValue
                 }
-                if let isSupportAutoRotateEnabled = dic.object(forKey: "isSupportAutoRotateEnabled") as? NSNumber {
-                    NovelSpeakerUtility.isSupportAutoRotateEnabled = isSupportAutoRotateEnabled.boolValue
+                if let supportRotationMask = dic.object(forKey: "supportRotationMask") as? NSNumber {
+                    let mask:UIInterfaceOrientationMask
+                    if supportRotationMask.uintValue == UIInterfaceOrientationMask.all.rawValue {
+                        NovelSpeakerUtility.supportRotationMask = .all
+                    }else{
+                        NovelSpeakerUtility.supportRotationMask = .portrait
+                    }
                 }
                 if let novelLikeOrder = dic.object(forKey: "novelLikeOrder") as? NSArray {
                     globalState.novelLikeOrder.removeAll()
@@ -2016,7 +2021,7 @@ class NovelSpeakerUtility: NSObject {
                 "isEnableSwipeOnStoryView": globalState.isEnableSwipeOnStoryView,
                 "isDisableNarouRuby": globalState.isDisableNarouRuby,
                 "isNeedDisableIdleTimerWhenSpeechTime": globalState.isNeedDisableIdleTimerWhenSpeechTime,
-                "isSupportAutoRotateEnabled": NovelSpeakerUtility.isSupportAutoRotateEnabled,
+                "supportRotationMask": NovelSpeakerUtility.supportRotationMask.rawValue,
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
             ]
         }
@@ -2592,17 +2597,25 @@ class NovelSpeakerUtility: NSObject {
     }
     
     @objc static var currentRotation = UIDeviceOrientation.unknown
-    fileprivate static let isSupportAutoRotate_Key = "isSupportAutoRotate_Key"
-    @objc static var isSupportAutoRotateEnabled: Bool {
+    fileprivate static let supportRotationMask_Key = "supportRotationMask_Key"
+    @objc static var supportRotationMask: UIInterfaceOrientationMask {
         get {
-            if UIDevice.current.userInterfaceIdiom != .phone { return true }
+            if UIDevice.current.userInterfaceIdiom != .phone { return UIInterfaceOrientationMask.all }
             let defaults = UserDefaults.standard
-            defaults.register(defaults: [isSupportAutoRotate_Key : false])
-            return defaults.bool(forKey: isSupportAutoRotate_Key)
+            defaults.register(defaults: [supportRotationMask_Key : UIInterfaceOrientationMask.portrait.rawValue])
+            let maskUInt = UInt(defaults.integer(forKey: supportRotationMask_Key))
+            switch maskUInt {
+            case UIInterfaceOrientationMask.all.rawValue:
+                return UIInterfaceOrientationMask.all
+            case UIInterfaceOrientationMask.portrait.rawValue:
+                return UIInterfaceOrientationMask.portrait
+            default:
+                return UIInterfaceOrientationMask.portrait
+            }
         }
         set {
             currentRotation = UIDevice.current.orientation
-            UserDefaults.standard.set(newValue, forKey: isSupportAutoRotate_Key)
+            UserDefaults.standard.set(newValue.rawValue, forKey: supportRotationMask_Key)
             UserDefaults.standard.synchronize()
         }
     }

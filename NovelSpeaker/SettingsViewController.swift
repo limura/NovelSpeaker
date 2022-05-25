@@ -1329,11 +1329,16 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     row.title = NSLocalizedString("SettingTableViewController_isSupportAutoRotate", comment:"画面の回転に追従する")
                     row.cell.textLabel?.numberOfLines = 0
                     //row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
-                    row.value = NovelSpeakerUtility.isSupportAutoRotateEnabled
+                    row.value = NovelSpeakerUtility.supportRotationMask == UIInterfaceOrientationMask.all
                 }.onChange({ row in
                     RealmUtil.RealmBlock { (realm) -> Void in
                         guard let value = row.value else { return }
-                        NovelSpeakerUtility.isSupportAutoRotateEnabled = value
+                        switch value {
+                            case true:
+                                NovelSpeakerUtility.supportRotationMask = UIInterfaceOrientationMask.all
+                            case false:
+                                NovelSpeakerUtility.supportRotationMask = UIInterfaceOrientationMask.portrait
+                        }
                     }
                 })
             }
