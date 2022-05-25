@@ -426,6 +426,10 @@
 "EditBookViewController_KeyboardBarButtonItem_Down" = "下へカーソル移動";
 "EditBookViewController_KeyboardBarButtonItem_Up" = "上へカーソル移動";
 "EditBookViewController_KeyboardBarButtonItem_Right" = "右へカーソル移動";
+"EditBookViewController_InsertChapter_HowToInsertToFirstChapter" = "新しいページを1ページ目に追加するか、2ページ目に追加するかを選択してください";
+"EditBookViewController_InsertChapter_HowToInsertToFirstChapter_page1" = "1ページ目に追加する";
+"EditBookViewController_InsertChapter_HowToInsertToFirstChapter_page2" = "2ページ目に追加する";
+"EditBookViewController_InsertPageError" = "ページの追加に失敗しました";
 
 "NarouDownloadQueue_URLDownloadTitleFixed" = "ダウンロードしたものを「%@」の名前で本棚に登録します";
 "NarouDownloadQueue_URLDownloadTitleNotFound" = "ダウンロードしたもののタイトルを取得できなかったので、以下のURLのまま本棚に登録します。\n%@";

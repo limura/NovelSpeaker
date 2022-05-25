@@ -666,12 +666,11 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
                     self.chapterSlider.maximumValue = Float(maxChapterNumber) + 0.01
                     self.chapterSlider.value = Float(chapterNumber)
                     
+                    self.addChapterButton.isEnabled = true
                     if chapterNumber >= maxChapterNumber {
                         self.moveNextButton.isEnabled = false
-                        self.addChapterButton.isEnabled = true
                     }else{
                         self.moveNextButton.isEnabled = true
-                        self.addChapterButton.isEnabled = false
                     }
                     self.deleteChapterButton.isEnabled = true
                     if chapterNumber <= 1 {
@@ -751,19 +750,60 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         let chapterNumber = Int(chapterSlider.value)
         setStory(storyID: RealmStoryBulk.CreateUniqueID(novelID: targetNovelID, chapterNumber: chapterNumber))
     }
-    @IBAction func addChapterButtonClicked(_ sender: Any) {
-        saveCurrentStory()
+    
+    func insertNewChapter(chapterNumber:Int) {
         RealmUtil.RealmBlock { (realm) in
-            if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: targetNovelID), let lastStory = novel.lastChapterWith(realm: realm) {
-                let newStoryID = RealmStoryBulk.CreateUniqueID(novelID: targetNovelID, chapterNumber: lastStory.chapterNumber + 1)
-                RealmUtil.WriteWith(realm: realm) { (realm) in
-                    novel.m_lastChapterStoryID = newStoryID
-                    novel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
-                    novel.lastReadDate = Date(timeIntervalSinceNow: 0)
+            var story = Story()
+            story.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.currentStoryID)
+            story.chapterNumber = chapterNumber
+            RealmUtil.WriteWith(realm: realm) { (realm) in
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.targetNovelID) else {
+                    DispatchQueue.main.async {
+                        NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("EditBookViewController_InsertPageError", comment: "ページの追加に失敗しました") + ":1")
+                    }
+                    return
                 }
-                setStory(storyID: newStoryID)
+                if novel.type == .URL, let url = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: story.storyID)?.url ?? novel.lastDownloadURLWith(realm: realm) {
+                    // 小説の type が URL の場合は続きがダウンロードできるように近いページのURLをコピーしておきます。
+                    story.url = url
+                }
+                let result = RealmStoryBulk.InsertStoryWith(realm: realm, story: story)
+                if result == false {
+                    DispatchQueue.main.async {
+                        NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("EditBookViewController_InsertPageError", comment: "ページの追加に失敗しました") + ":2")
+                    }
+                }else{
+                    setStory(storyID: story.storyID)
+                }
             }
         }
+    }
+    
+    @IBAction func addChapterButtonClicked(_ sender: Any) {
+        saveCurrentStory()
+        let currentChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: self.currentStoryID)
+        if currentChapterNumber == 1 {
+            DispatchQueue.main.async {
+                var builder = NiftyUtility.EasyDialogBuilder(self)
+                builder = builder.title(title: NSLocalizedString("EditBookViewController_InsertChapter_HowToInsertToFirstChapter", comment: "新しいページを1ページ目に追加するか、2ページ目に追加するかを選択してください"))
+                builder = builder.addButton(title: NSLocalizedString("EditBookViewController_InsertChapter_HowToInsertToFirstChapter_page1", comment: "1ページ目に追加する"), callback: { dialog in
+                    dialog.dismiss(animated: false) {
+                        self.insertNewChapter(chapterNumber: 1)
+                    }
+                })
+                builder = builder.addButton(title: NSLocalizedString("EditBookViewController_InsertChapter_HowToInsertToFirstChapter_page2", comment: "2ページ目に追加する"), callback: { dialog in
+                    dialog.dismiss(animated: false) {
+                        self.insertNewChapter(chapterNumber: 2)
+                    }
+                })
+                builder = builder.addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { dialog in
+                    dialog.dismiss(animated: false)
+                })
+                builder.build().show()
+            }
+            return
+        }
+        self.insertNewChapter(chapterNumber: currentChapterNumber + 1)
     }
 
     // 3回削除するまではON/OFFは出さないようにしようかと思ったけれど、最初から出していても良さそうなので最初から出すようにします。

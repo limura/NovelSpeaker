@@ -1347,6 +1347,10 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
                 }
                 resultStoryArray.append(currentStory)
             }
+            if isHit == false, let lastChapterNumber = resultStoryArray.last?.chapterNumber, lastChapterNumber + 1 == story.chapterNumber {
+                resultStoryArray.append(story)
+                isHit = true
+            }
             guard isHit == true else { return (nil, nil) }
             var kickOutStory:Story? = nil
             if resultStoryArray.count > bulkCount {
@@ -1377,6 +1381,12 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
                 realm.add(bulk, update: .modified)
             }
             targetStory = kickOutStory
+        }
+        if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: story.novelID) {
+            novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_lastChapterStoryID) + 1)
+            novel.lastDownloadDate = Date(timeIntervalSinceNow: -1)
+            novel.lastReadDate = Date(timeIntervalSinceNow: 0)
+            realm.add(novel, update: .modified)
         }
         return true
     }
