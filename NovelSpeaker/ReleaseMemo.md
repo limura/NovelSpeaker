@@ -3284,6 +3284,43 @@ Interface changes
 
 - Added "Delete all stored cookies" button to "Settings tab"
 
+# Version 2.6.2
+
+インタフェースの変更
+
+- 「設定タブ」->「小説本文表示画面の設定」の文字の大きさと行間のそれぞれの数値を表示するように
+- 「設定タブ」->「小説本文画面の右上に表示されるボタン群の編集」に「表示されているページ内で検索」ボタンを追加
+- 小説の詳細画面の「小説名」と「著者名」をタップした時に出てくるダイアログに「〜をコピーする」ボタンを追加
+- 小説の編集画面の「章を追加」ボタンを、最後のページ以外でも押せるように
+
+以下にざっくりと修正点について解説しておきます。
+
+* 「設定タブ」->「小説本文表示画面の設定」の文字の大きさと行間のそれぞれの数値を表示するように
+こちらは単に数値を表示するようにしただけです。値を覚えておいて変更する前に戻したいといった時にご利用ください。
+
+* 「設定タブ」->「小説本文画面の右上に表示されるボタン群の編集」に「表示されているページ内で検索」ボタンを追加
+小説全体からの検索ではページまでしか絞れなかったので、ページ内でも検索できるようにしました。
+
+* 小説の詳細画面の「小説名」と「著者名」をタップした時に出てくるダイアログに「〜をコピーする」ボタンを追加
+今までは小説名や著者名をタップすると問答無用でコピーしていたのですが、これからは「〜をコピーする」ボタンを押さないとコピーされないようになります。
+
+* 小説の編集画面の「章を追加」ボタンを、最後のページ以外でも押せるように
+今までは小説の末尾にしか章を追加できませんでしたが、これからは途中にも追加できるようになります。
+
+さて、残念なことに私はお問い合わせ対応に疲れ果ててしまいましたため、致命的な問題(アプリが強制終了するようなもの)以外への対応は極力しない形にさせていただいています。お問い合わせ窓口の閉鎖等については今の所はしておりませんが、上記のような対応になりますため、新機能のご提案や強制終了を伴わない不都合の報告をされましたとしても、対応はされないものとお考え下さい。なお、今回のように気が向いたら修正する事もあります。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+# Version 2.6.2
+
+Interface changes
+
+- "Settings tab" -> "Text display settings" now displays the character size and the respective numerical values between lines.
+- Added "Search within the displayed page" button to "Settings tab"-> "Settings for the buttons displayed in the upper right corner of the novel text screen".
+- Added "Copy xxx name" button to the dialog that appears when you tap "Novel name" and "Author name" on the novel details screen.
+- The "Add chapter" button on the novel edit screen can now be pressed on pages other than the last page.
+
 TODO:
 - Google スプレッドシートで読み替え辞書を扱えるような何かを考える
 

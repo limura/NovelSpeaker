@@ -857,17 +857,26 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.2
 
-対応OSバージョンを iOS 15, iPad OS 15 以降にしました。
-
-インタフェースの変更
-
-- 「設定タブ」に「保存されている全てのCookieを削除する」ボタンを追加
+- 「設定タブ」->「小説本文表示画面の設定」の文字の大きさと行間のそれぞれの数値を表示するように
+- 「設定タブ」->「小説本文画面の右上に表示されるボタン群の編集」に「表示されているページ内で検索」ボタンを追加
+- 小説の詳細画面の「小説名」と「著者名」をタップした時に出てくるダイアログに「〜をコピーする」ボタンを追加
+- 小説の編集画面の「章を追加」ボタンを、最後のページ以外でも押せるように
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.6.2
+
+インタフェースの変更
+
+- 「設定タブ」->「小説本文表示画面の設定」の文字の大きさと行間のそれぞれの数値を表示するように
+- 「設定タブ」->「小説本文画面の右上に表示されるボタン群の編集」に「表示されているページ内で検索」ボタンを追加
+- 小説の詳細画面の「小説名」と「著者名」をタップした時に出てくるダイアログに「〜をコピーする」ボタンを追加
+- 小説の編集画面の「章を追加」ボタンを、最後のページ以外でも押せるように
+
+
 # Version 2.6.1
 
 対応OSバージョンを iOS 15, iPad OS 15 以降にしました。

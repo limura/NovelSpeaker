@@ -865,18 +865,26 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "# Version 2.6.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.2
 
-The supported OS version is iOS 15, iPad OS 15 or later.
-
-Interface changes
-
-- Added \"Delete all stored cookies\" button to \"Settings tab\"
-
+- \"Settings tab\" -> \"Text display settings\" now displays the character size and the respective numerical values between lines.
+- Added \"Search within the displayed page\" button to \"Settings tab\" -> \"Settings for the buttons displayed in the upper right corner of the novel text screen\".
+- Added \"Copy xxx name\" button to the dialog that appears when you tap \"Novel name\" and \"Author name\" on the novel details screen.
+- The \"Add chapter\" button on the novel edit screen can now be pressed on pages other than the last page.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.6.2
+
+Interface changes
+
+- \"Settings tab\" -> \"Text display settings\" now displays the character size and the respective numerical values between lines.
+- Added \"Search within the displayed page\" button to \"Settings tab\" -> \"Settings for the buttons displayed in the upper right corner of the novel text screen\".
+- Added \"Copy xxx name\" button to the dialog that appears when you tap \"Novel name\" and \"Author name\" on the novel details screen.
+- The \"Add chapter\" button on the novel edit screen can now be pressed on pages other than the last page.
+
+
 # Version 2.6.1
 
 The supported OS version is iOS 15, iPad OS 15 or later.
