@@ -591,6 +591,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     
     static func SearchInfoCacheClear() {
         lastSearchInfoLoadDate = Date(timeIntervalSince1970: 0)
+        URLCache.shared.removeAllCachedResponses()
         NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: SearchInfoCacheFileName)
     }
     

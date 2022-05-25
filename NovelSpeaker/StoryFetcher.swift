@@ -382,6 +382,7 @@ class StoryHtmlDecoder {
         self.lock.unlock()
         NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: cacheFileName)
         NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: customCacheFileName)
+        URLCache.shared.removeAllCachedResponses()
         LoadSiteInfoIfNeeded()
     }
     
