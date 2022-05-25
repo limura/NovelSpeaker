@@ -1243,6 +1243,62 @@
         }
     },
     {
+	"isDisabled": false,
+        "title": "ノベマ！",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://novema.jp/search/book?",
+        "values": [
+            {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude_word"},
+            {"queryType": "multiSelect", "displayText": "検索対象", "queryName": "", "separator": "&",
+                "multiSelect": {
+		    "タイトル": "search_targets[]=1",
+		    "キーワード": "search_targets[]=2",
+		    "作家名": "search_targets[]=4",
+		    "表紙コメント": "search_targets[]=8",
+		    "あらすじ": "search_targets[]=16"
+		},
+		"enableTargets": ["search_targets[]=1", "search_targets[]=2", "search_targets[]=4"]
+	    },
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0",
+                "radio": {
+                    "01: 指定なし": "0",
+                    "02: 恋愛・青春": "100",
+                    "03: ファンタジー(すべて)": "200",
+                    "04: ファンタジー(恋愛)": "201",
+                    "05: ファンタジー(異世界)": "202",
+                    "06: ミステリー": "300",
+                    "07: ヒューマンドラマ": "400",
+                    "08: ホラー・パニック": "500",
+                    "09: 歴史・時代": "600",
+                    "10: SF・冒険": "700",
+                    "11: その他": "9900"
+		}
+	    },
+            {"queryType": "radio", "displayText": "ステータス", "queryName": "finished", "defaultValue": "0",
+                "radio": {
+                    "1: 全て": "0",
+                    "2: 完結": "2",
+                    "3: 更新中": "1"
+		}
+	    },
+            {"queryType": "multiSelect", "displayText": "作品の長さ", "queryName": "", "separator": "&",
+                "multiSelect": {
+		    "1: 長編": "length[]=4",
+		    "2: 中編": "length[]=2",
+		    "3: 短編": "length[]=1"
+		}
+	    }
+        ],
+        "result": {
+            "block": "//main/section/div[@class='bookList']/div[@class='clm']",
+            "nextLink": "//div[@class='pageList']/ul/li[@class='next']/a[contains(@href,'/search/')]",
+            "title": "//div[@class='title']/a[contains(@href,'/book/')]",
+            "url": "//div[@class='title']/a[contains(@href,'/book/')]/@href"
+        }
+    },
+    {
 	"isDisabled": true,
         "title": "雛形",
         "HTTPMethod": "GET",
