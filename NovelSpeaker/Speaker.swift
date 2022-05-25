@@ -36,6 +36,9 @@ class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     }
     
     func Speech(text:String) {
+        if NiftyUtility.isTesting() {
+            return
+        }
         isSpeechKicked = true
         let utt = AVSpeechUtterance(string: text)
         utt.voice = m_Voice

@@ -1895,6 +1895,11 @@ class NiftyUtility: NSObject {
         guard let value = value, !value.isNaN, !value.isInfinite else { return nil }
         return Int(value)
     }
+    
+    static func isTesting() -> Bool {
+        // https://qiita.com/takecian/items/b106675e0b2ded41db57
+        return NSClassFromString("XCTest") != nil // nil じゃなかったらテスト実行中
+    }
 }
 
 extension String {
