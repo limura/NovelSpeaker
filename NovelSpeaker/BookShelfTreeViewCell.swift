@@ -271,7 +271,7 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
                     break
                 case .change(_, let properties):
                     for property in properties {
-                        if property.name == "m_readingChapterStoryID" /*|| property.name == "m_readingChapterReadingPoint" || property.name == "m_readingChapterContentCount"*/ {
+                        if property.name == "m_readingChapterStoryID" || property.name == "m_readingChapterReadingPoint" || property.name == "m_readingChapterContentCount" {
                             self.applyCurrentReadingPointToIndicator(novelID: novelID)
                         }
                         if property.name == "lastDownloadDate" || property.name == "lastReadDate" {
