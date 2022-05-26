@@ -871,6 +871,7 @@
 - Added \"Search within the displayed page\" button to \"Settings tab\" -> \"Settings for the buttons displayed in the upper right corner of the novel text screen\".
 - Added \"Copy xxx name\" button to the dialog that appears when you tap \"Novel name\" and \"Author name\" on the novel details screen.
 - The \"Add chapter\" button on the novel edit screen can now be pressed on pages other than the last page.
+- When \"Settings tab\" -> \"Display bookmarks on the Bookshelf\" is ON, the color of the bookmark position display bar does not turn purple even though there is an announcement that \"The Book ends here.\". Fix the problem
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -883,6 +884,10 @@ Interface changes
 - Added \"Search within the displayed page\" button to \"Settings tab\" -> \"Settings for the buttons displayed in the upper right corner of the novel text screen\".
 - Added \"Copy xxx name\" button to the dialog that appears when you tap \"Novel name\" and \"Author name\" on the novel details screen.
 - The \"Add chapter\" button on the novel edit screen can now be pressed on pages other than the last page.
+
+Fixing the problem
+
+- When \"Settings tab\" -> \"Display bookmarks on the Bookshelf\" is ON, the color of the bookmark position display bar does not turn purple even though there is an announcement that \"The Book ends here.\". Fix the problem
 
 
 # Version 2.6.1
