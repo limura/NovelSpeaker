@@ -558,7 +558,13 @@
         "isNeedHeadless": false,
         "url": "https://www.berrys-cafe.jp/search/book?",
         "values": [
-            {"queryType": "text", "displayText": "検索キーワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude_word"},
+	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "1"},
+	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "2"},
+	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "4"},
+	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "8"},
+	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "16"},
             {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0", "radio":
                 {
                     " 指定なし": "0",
@@ -624,10 +630,10 @@
             }
         ],
         "result": {
-            "block": "//section[@class='search_result']/ul/li",
-            "nextLink": "//div[@class='pageList']//li[@class='next']/a[contains(@href,'/search/')]/@href",
-            "title": "//div[@class='book_main']//a[contains(@href,'/book/')]//h4",
-            "url": "//div[@class='book_main']//a[contains(@href,'/book/') and descendant::h4]/@href"
+            "block": "//div[@class='bookList']/div[@class='clm']",
+            "nextLink": "//div[@class='pageList']/ul/li[@class='next']/a/@href",
+            "title": "//div[@class='item']/div[@class='title']/a",
+            "url": "//div[@class='item']/div[@class='title']/a/@href"
         }
     },
     {
