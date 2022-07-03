@@ -65,11 +65,16 @@ class MultiSelectQuery: SearchQuery, Decodable {
     let multiSelect:[String:String]
     let separator:String
     var enableTargets:Set<String> = Set()
-    init(displayText:String, queryName:String, multiSelect:[String:String], separator:String){
+    init(displayText:String, queryName:String, multiSelect:[String:String], separator:String, defaultTargets:[String]?){
         self.displayText = displayText
         self.queryName = queryName
         self.multiSelect = multiSelect
         self.separator = separator
+        if let defaultTargets = defaultTargets {
+            for target in defaultTargets {
+                enableTargets.insert(target)
+            }
+        }
     }
 
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
@@ -444,6 +449,7 @@ class WebSiteSection : Decodable {
             let radio:[String:String]?
             let value:String?
             let defaultValue:String?
+            let multiSelectDefaultTargets:[String]?
         }
         var generatedValues:[SearchQuery] = []
         if let queryArray = try? values.decode([DummySearchQuery].self, forKey: .values) {
@@ -455,7 +461,7 @@ class WebSiteSection : Decodable {
                     }
                 case "multiSelect":
                     if let displayText = query.displayText, let multiSelect = query.multiSelect, let separator = query.separator {
-                        generatedValues.append(MultiSelectQuery(displayText: displayText, queryName: query.queryName, multiSelect: multiSelect, separator: separator))
+                        generatedValues.append(MultiSelectQuery(displayText: displayText, queryName: query.queryName, multiSelect: multiSelect, separator: separator, defaultTargets:query.multiSelectDefaultTargets))
                     }
                 case "radio":
                     if let displayText = query.displayText, let radio = query.radio {
