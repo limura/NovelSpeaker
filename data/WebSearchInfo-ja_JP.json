@@ -561,11 +561,15 @@
         "values": [
             {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
             {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude_word"},
-	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "1"},
-	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "2"},
-	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "4"},
-	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "8"},
-	    {"queryType": "hidden", "queryName": "search_targets[]", "value": "16"},
+            {"queryType": "multiSelect", "displayText": "検索対象", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "タイトル": "search_targets[]=1",
+                    "キーワード": "search_targets[]=2",
+                    "作家名": "search_targets[]=4",
+                    "表紙コメント": "search_targets[]=8",
+                    "あらすじ": "search_targets[]=16"
+                }, "multiSelectDefaultTargets": ["タイトル", "キーワード", "作家名"]
+            },
             {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0", "radio":
                 {
                     " 指定なし": "0",
@@ -1185,11 +1189,15 @@
         "values": [
             {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
             {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude_word"},
-            {"queryType": "hidden", "queryName": "search_targets[]", "value": "1"},
-            {"queryType": "hidden", "queryName": "search_targets[]", "value": "2"},
-            {"queryType": "hidden", "queryName": "search_targets[]", "value": "4"},
-            {"queryType": "hidden", "queryName": "search_targets[]", "value": "8"},
-            {"queryType": "hidden", "queryName": "search_targets[]", "value": "16"},
+            {"queryType": "multiSelect", "displayText": "検索対象", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "タイトル": "search_targets[]=1",
+                    "キーワード": "search_targets[]=2",
+                    "作家名": "search_targets[]=4",
+                    "表紙コメント": "search_targets[]=8",
+                    "あらすじ": "search_targets[]=16"
+                }, "multiSelectDefaultTargets": ["タイトル", "キーワード", "作家名"]
+            },
             {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0",
                 "radio": {
                     "01: 指定なし": "0",
