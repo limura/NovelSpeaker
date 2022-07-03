@@ -1183,7 +1183,13 @@
         "isNeedHeadless": false,
         "url": "https://www.no-ichigo.jp/search/book?",
         "values": [
-            {"queryType": "text", "displayText": "キーワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude_word"},
+            {"queryType": "hidden", "queryName": "search_targets[]", "value": "1"},
+            {"queryType": "hidden", "queryName": "search_targets[]", "value": "2"},
+            {"queryType": "hidden", "queryName": "search_targets[]", "value": "4"},
+            {"queryType": "hidden", "queryName": "search_targets[]", "value": "8"},
+            {"queryType": "hidden", "queryName": "search_targets[]", "value": "16"},
             {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0",
                 "radio": {
                     "01: 指定なし": "0",
@@ -1243,10 +1249,10 @@
 	    }
         ],
         "result": {
-            "block": "//section[contains(@class,'search_result')]/ul/li[contains(@class,'topSection')]",
+            "block": "//main/section/div[@class='bookList']/div[@class='clm']",
             "nextLink": "//div[@class='pageList']/ul/li[@class='next']/a[contains(@href,'/search/book/')]",
-            "title": "//a[contains(@href,'/read/book/book_id/')]/dl/dd/h4",
-            "url": "//a[contains(@href,'/read/book/book_id/') and child::dl/dd/h4]/@href"
+            "title": "//div[@class='title']/a",
+            "url": "//div[@class='title']/a/@href"
         }
     },
     {
