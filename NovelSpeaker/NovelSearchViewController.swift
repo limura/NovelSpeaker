@@ -70,7 +70,9 @@ class MultiSelectQuery: SearchQuery, Decodable {
         self.queryName = queryName
         self.multiSelect = multiSelect
         self.separator = separator
-        if let defaultTargets = defaultTargets {
+        if let defaultTargets = defaultTargets?.filter({ str in
+            return multiSelect.keys.contains(str)
+        }) {
             for target in defaultTargets {
                 enableTargets.insert(target)
             }
