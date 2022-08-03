@@ -2111,6 +2111,7 @@ class NovelSpeakerUtility: NSObject {
     }
 
     static func CreateBackupData(forNovelIDArray:[String], isOnlyNovelData:Bool = false, fileNamePrefix:String = "", progress:((_ description:String)->Void)?) -> URL? {
+        NovelDownloadQueue.shared.downloadStop()
         let directoryName = backupDirectoryName
         CleanBackupFolder()
         // 改めてディレクトリを作り直します。
