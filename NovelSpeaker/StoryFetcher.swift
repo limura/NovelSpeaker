@@ -131,8 +131,9 @@ struct StorySiteInfo {
     let waitSecondInHeadless: Double?
     let forceClickButton:String?
     let resourceUrl:String?
+    let overrideUserAgent:String?
     
-    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?) {
+    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?) {
         self.pageElement = pageElement
         if let urlString = url, let urlRegex = try? NSRegularExpression(pattern: urlString, options: []) {
             self.url = urlRegex
@@ -157,6 +158,7 @@ struct StorySiteInfo {
         self.waitSecondInHeadless = waitSecondInHeadless
         self.forceClickButton = forceClickButton
         self.resourceUrl = resourceUrl
+        self.overrideUserAgent = overrideUserAgent
     }
     
     func isMatchUrl(urlString:String) -> Bool {
@@ -238,6 +240,7 @@ extension StorySiteInfo: CustomStringConvertible {
         result += "\"\nwaitSecondInHeadless: \(waitSecondInHeadless ?? 0.0)"
         result += "\"\nforceClickButton: \"" + (forceClickButton ?? "nil")
         result += "\"\nresourceUrl: \"" + (resourceUrl ?? "nil")
+        result += "\"\noverrideUserAgent: \"" + (overrideUserAgent ?? "nil")
         result += "\""
         return result
     }
@@ -263,6 +266,7 @@ extension StorySiteInfo : Decodable {
         case firstPageButton
         case waitSecondInHeadless
         case forceClickButton
+        case overrideUserAgent
     }
     
     init(from decoder: Decoder) throws {
@@ -306,6 +310,7 @@ extension StorySiteInfo : Decodable {
         }else{
             waitSecondInHeadless = 0
         }
+        overrideUserAgent = try? values.decode(String.self, forKey: NestedKeys.overrideUserAgent)
         #else
         waitSecondInHeadless = 0
         #endif
@@ -333,7 +338,7 @@ class StoryHtmlDecoder {
     private init(){
         fallbackSiteInfoArray = [
             //StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(@itemprop,'articleBody')"),
-            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)")
+            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil)
         ]
     }
     
@@ -800,6 +805,14 @@ class StoryFetcher {
             BehaviorLogger.AddLog(description: "Fetch URL", data: ["url": url.absoluteString, "isNeedHeadless": currentState.isNeedHeadless])
             #if !os(watchOS)
             if currentState.isNeedHeadless {
+                // あまりよろしくない感じですが、siteInfoArray の中に overrideUserAgent が指定されているものがあれば、その最初の物を使うという事をしています。
+                if let userAgentString = currentState.siteInfoArray.filter({ $0.overrideUserAgent?.count ?? 0 > 0 }).first?.overrideUserAgent {
+                    //print("httpClient.overrideUserAgent: \"\(userAgentString)\"")
+                    self.httpClient.overrideUserAgent(userAgentString: userAgentString)
+                }else{
+                    //print("httpClient.overrideUserAgent: nil")
+                    self.httpClient.overrideUserAgent(userAgentString: nil)
+                }
                 NiftyUtility.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, successAction: { (doc) in
                     let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton)

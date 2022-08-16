@@ -271,4 +271,12 @@ class HeadlessHttpClient {
     func takeSnapshot(snapshotConfiguration:WKSnapshotConfiguration? = nil, completionHandler: @escaping ((UIImage?, Error?)->Void)) {
         self.webView.takeSnapshot(with: snapshotConfiguration, completionHandler: completionHandler)
     }
+    
+    // UserAgent を指定されたものに変更します。
+    // userAgentString に nil を与えると標準の値を使うようになります。
+    func overrideUserAgent(userAgentString:String?) {
+        NiftyUtility.DispatchSyncMainQueue {
+            self.webView.customUserAgent = userAgentString
+        }
+    }
 }
