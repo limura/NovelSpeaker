@@ -760,6 +760,7 @@ class StoryFetcher {
                 }
                 failedAction?(currentState.url, err?.localizedDescription ?? "unknown error: ForceClickButton")
             }
+            return
         }
         
         // 次ページへのボタンがあればそれを辿る
