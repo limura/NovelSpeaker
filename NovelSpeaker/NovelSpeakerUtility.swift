@@ -466,11 +466,28 @@ class NovelSpeakerUtility: NSObject {
         return true
     }
     #endif
+    #if !os(watchOS)
+    static func ProcessHtmlFile(url:URL) -> Bool {
+        let isSecureURL = url.startAccessingSecurityScopedResource()
+        defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: url), let html = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data)), let text = NiftyUtility.HTMLToString(htmlString: html) else { return false }
+        let fileName = url.deletingPathExtension().lastPathComponent
+        DispatchQueue.main.async {
+            guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
+            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil) { (registerdNovelID, importOptionSeparated) in
+                guard let registerdNovelID = registerdNovelID else { return }
+                UpdateOuterNovelFileAttributes(novelID: registerdNovelID, fileUrl: url, importOptionSeparated:importOptionSeparated)
+            }
+        }
+        return true
+    }
+    #endif
 
     #if !os(watchOS)
     @discardableResult
     @objc public static func ProcessURL(url:URL?) -> Bool {
         guard let url = url else { return false }
+        print("ProcessURL: \(url.absoluteString)")
         if let scheme = url.scheme, scheme == "novelspeaker" || scheme == "limuraproducts.novelspeaker" {
             return ProcessNovelSpeakerURLScheme(url: url)
         }
@@ -485,6 +502,18 @@ class NovelSpeakerUtility: NSObject {
         }
         if url.pathExtension == "rtfd" {
             return ProcessRTFDFile(url:url)
+        }
+        if url.scheme == "http" || url.scheme == "https" {
+            // fetch しようとしてみる。
+            if let toplevelViewController = NiftyUtility.GetRegisterdToplevelViewController() {
+                DispatchQueue.main.async {
+                    NiftyUtility.checkUrlAndConifirmToUser(viewController: toplevelViewController, url: url, cookieString: "", isNeedFallbackImportFromWebPageTab: true)
+                }
+                return true
+            }
+        }
+        if url.pathExtension == "html" {
+            return ProcessHtmlFile(url:url)
         }
         return ProcessTextFile(url:url)
     }

@@ -545,6 +545,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     UTType.pdf,
                     UTType.rtf,
                     UTType.rtfd,
+                    UTType.url,
+                    UTType.html,
                 ], asCopy: false)
                 picker.allowsMultipleSelection = false
                 picker.shouldShowFileExtensions = true
