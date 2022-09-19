@@ -853,6 +853,10 @@
 "MenuBarButtonHandler_SkipBackwardShortcutKey_Title" = "Backward";
 "MenuBarButtonHandler_ControlMenu_Title" = "Playback control";
 
+"RealmNovel_AddNewNovelWithFirstStoryState_ERROR_InvalidNovelID" = "Invalid NovelID specified";
+"RealmNovel_AddNewNovelWithFirstStoryState_ERROR_InvalidContent" = "There was no text content";
+"RealmNovel_AddNewNovelWithFirstStoryState_ERROR_NovelAlreadyAlive" = "The same novel is registered on the bookshelf (if the URL is the same, it will be judged as the same novel even if the title changes)";
+
 
 "BookShelfTableViewController_SortTypeNcode" = "Ncode";
 "BookShelfTableViewController_SortTypeWriter" = "Writer name";

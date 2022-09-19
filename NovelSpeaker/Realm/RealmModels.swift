@@ -1862,13 +1862,13 @@ extension RealmStoryBulk: CanWriteIsDeleted {
     }
     
 
-    static func AddNewNovelWithFirstStoryState(state:StoryState) -> String? {
-        return RealmUtil.RealmBlock { (realm) -> String? in
+    static func AddNewNovelWithFirstStoryState(state:StoryState) -> (String?, String?)  {
+        return RealmUtil.RealmBlock { (realm) -> (String?, String?) in
             let novelID = state.url.absoluteString
-            guard novelID.count > 0 else { return nil }
-            guard let content = state.content, content.count > 0 else { return nil }
-            if SearchNovelWith(realm: realm, novelID: novelID) != nil { return nil }
-            
+            guard novelID.count > 0 else { return (nil, NSLocalizedString("RealmNovel_AddNewNovelWithFirstStoryState_ERROR_InvalidNovelID", comment: "不正なNovelIDが指定されています")) }
+            guard let content = state.content, content.count > 0 else { return (nil, NSLocalizedString("RealmNovel_AddNewNovelWithFirstStoryState_ERROR_InvalidContent", comment: "本文の中身がありませんでした")) }
+            let prevNovel = SearchNovelWith(realm: realm, novelID: novelID)
+            if prevNovel != nil { return (nil, NSLocalizedString("RealmNovel_AddNewNovelWithFirstStoryState_ERROR_NovelAlreadyAlive", comment: "本棚に同じ小説が登録されています(URLが同じ場合はタイトルが変わっても同じ小説と判定されます)") + ": " + (prevNovel?.title ?? "nil")) }
             let novel = RealmNovel()
             novel.novelID = novelID
             novel.url = novelID
@@ -1890,7 +1890,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
                     RealmNovelTag.AddTag(realm: realm, name: tagName, novelID: novelID, type: "keyword")
                 }
             }
-            return novelID
+            return (novelID, nil)
         }
     }
     

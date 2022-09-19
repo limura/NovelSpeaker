@@ -209,9 +209,11 @@ class NiftyUtility: NSObject {
                     DispatchQueue.main.async {
                         
                         dialog.dismiss(animated: false, completion: {
-                            guard let novelID = RealmNovel.AddNewNovelWithFirstStoryState(state:state.TitleChanged(title:titleString)) else {
+                            let (novelIDTmp, errorString) = RealmNovel.AddNewNovelWithFirstStoryState(state:state.TitleChanged(title:titleString))
+                            guard let novelID = novelIDTmp else {
                                 DispatchQueue.main.async {
-                                    NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"), message: NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryMessage", comment: "既に登録されている小説などの原因が考えられます。"), buttonTitle: nil, buttonAction: nil)
+                                    let errorMessage = errorString ?? NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryMessage", comment: "既に登録されている小説などの原因が考えられます。")
+                                    NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"), message: errorMessage, buttonTitle: nil, buttonAction: nil)
                                 }
                                 return
                             }

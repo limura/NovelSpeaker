@@ -846,6 +846,10 @@
 "MenuBarButtonHandler_SkipBackwardShortcutKey_Title" = "少し後ろへ";
 "MenuBarButtonHandler_ControlMenu_Title" = "再生制御";
 
+"RealmNovel_AddNewNovelWithFirstStoryState_ERROR_InvalidNovelID" = "不正なNovelIDが指定されています";
+"RealmNovel_AddNewNovelWithFirstStoryState_ERROR_InvalidContent" = "本文の中身がありませんでした";
+"RealmNovel_AddNewNovelWithFirstStoryState_ERROR_NovelAlreadyAlive" = "本棚に同じ小説が登録されています(URLが同じ場合はタイトルが変わっても同じ小説と判定されます)";
+
 "BookShelfTableViewController_SortTypeNcode" = "Ncode順";
 "BookShelfTableViewController_SortTypeWriter" = "作者名順";
 "BookShelfTableViewController_SortTypeNovelName" = "小説名順";
