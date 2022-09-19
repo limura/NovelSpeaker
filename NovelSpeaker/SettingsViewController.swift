@@ -12,7 +12,7 @@ import Eureka
 import RealmSwift
 import UniformTypeIdentifiers
 
-class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate, RealmObserverResetDelegate, AppInformationAliveDelegate, UIDocumentBrowserViewControllerDelegate {
+class SettingsViewController: FormViewController, MFMailComposeViewControllerDelegate, RealmObserverResetDelegate, AppInformationAliveDelegate, UIDocumentBrowserViewControllerDelegate, UIDocumentPickerDelegate {
     var m_NarouContentCacheData:NarouContentCacheData? = nil
     var m_RubySwitchToggleHitCount = 0
     var notificationTokens:[NSObjectProtocol] = []
@@ -522,6 +522,36 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 $0.cell.textLabel?.numberOfLines = 0
             }.onCellSelection({ (butonCellof, buttonRow) in
                 self.CreateNewUserText()
+            })
+            section
+            <<< ButtonRow() { row in
+                row.title = NSLocalizedString("SettingsViewController_ImportOuterFile", comment: "ファイルの取り込み")
+            }.onCellSelection({ cell, row in
+                /*
+                let picker = UIDocumentBrowserViewController(forOpening: [
+                    UTType.plainText,
+                    UTType.pdf,
+                    UTType.rtf,
+                    UTType.rtfd,
+                    //UTType.html,
+                    //UTType.folder,
+                    //UTType.epub,
+                ])
+                picker.allowsPickingMultipleItems = false
+                picker.allowsDocumentCreation = false
+                */
+                let picker = UIDocumentPickerViewController(forOpeningContentTypes: [
+                    UTType.plainText,
+                    UTType.pdf,
+                    UTType.rtf,
+                    UTType.rtfd,
+                ], asCopy: false)
+                picker.allowsMultipleSelection = false
+                picker.shouldShowFileExtensions = true
+                picker.title = NSLocalizedString("SettingsViewController_UIDocumentPickerViewTitle", comment: "ことせかい へ取り込むファイルを指定してください")
+                
+                picker.delegate = self
+                self.navigationController?.present(picker, animated: true,  completion: nil)
             })
         #if !targetEnvironment(macCatalyst)
             section
@@ -1304,25 +1334,6 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
-        #if false
-            section
-            <<< ButtonRow() { row in
-                row.title = "ファイル選択テスト"
-            }.onCellSelection({ cell, row in
-                let picker = UIDocumentBrowserViewController(forOpening: [
-                    UTType.plainText,
-                    UTType.folder,
-                ])
-                /*
-                let picker = UIDocumentPickerViewController(forOpeningContentTypes: [
-                    UTType.plainText
-                ], asCopy: true)
-                */
-                picker.allowsPickingMultipleItems = true
-                picker.delegate = self
-                self.navigationController?.present(picker, animated: true,  completion: nil)
-            })
-        #endif
             if UIDevice.current.userInterfaceIdiom == .phone {
                 section
                 <<< SwitchRow("isSupportAutoRotateRow") { (row) in
@@ -2332,36 +2343,34 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         }
     }
     
-    /*
-    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt  urls: [URL]) {
-        print("documentPicker: \(urls)")
-    }
-    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        // nothing to do!
-    }
-     */
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
-        print("documentBrowser: \(documentURLs)")
         controller.dismiss(animated: true) {
-            // nothing to do
-            for url in documentURLs {
-                let scope = url.startAccessingSecurityScopedResource()
-                defer {
-                    if scope {
-                        url.stopAccessingSecurityScopedResource()
-                    }
-                }
-                if let bookmark = try? url.bookmarkData(options:
-                    .minimalBookmark
-                    //| .withSecurityScope
-                    , includingResourceValuesForKeys: nil, relativeTo: nil) {
-                    print("bookmark: \(url)\n\(bookmark)")
-                    var isStale = false
-                    if let bookmarkUrl = try? URL(resolvingBookmarkData: bookmark, bookmarkDataIsStale: &isStale), isStale == false {
-                        print("decode: \(bookmarkUrl)")
-                    }
+            // 一つしか pick できないと仮定しています(delegate の allowsPickingMultipleItems を false にしているのでそうなるはずです)
+            guard let url = documentURLs.first else { return }
+            let scope = url.startAccessingSecurityScopedResource()
+            defer {
+                if scope {
+                    url.stopAccessingSecurityScopedResource()
                 }
             }
+            NovelSpeakerUtility.ProcessURL(url: url)
         }
+    }
+    
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        controller.dismiss(animated: true) {
+            // 一つしか pick できないと仮定しています(delegate の allowsPickingMultipleItems を false にしているのでそうなるはずです)
+            guard let url = urls.first else { return }
+            let scope = url.startAccessingSecurityScopedResource()
+            defer {
+                if scope {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+            NovelSpeakerUtility.ProcessURL(url: url)
+        }
+    }
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        controller.dismiss(animated: false)
     }
 }

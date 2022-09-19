@@ -212,7 +212,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     barButtonArray.append(webPageButton)
                 }
             case .reload:
-                if novel.type == .URL {
+                if novel.type == .URL || (novel.type == .UserCreated && NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novel.novelID)) {
                     barButtonArray.append(UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(urlRefreshButtonClicked(_:))))
                 }
             case .share:
@@ -496,6 +496,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         }
                     }
                 case .deleted:
+                    DispatchQueue.main.async {
+                        self.navigationController?.popViewController(animated: true)
+                    }
                     break
                 }
             })

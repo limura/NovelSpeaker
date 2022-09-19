@@ -554,6 +554,10 @@ class NovelDownloadQueue : NSObject {
     
     func addQueue(novelID:String) {
         NovelSpeakerUtility.CheckAndRecoverStoryCount(novelID: novelID)
+        if NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novelID) {
+            NovelSpeakerUtility.CheckAndUpdateRgisterdOuterNovel(novelID: novelID)
+            return
+        }
         self.queueHolder.addQueue(novelID: novelID)
         self.downloadStart()
     }
@@ -561,6 +565,12 @@ class NovelDownloadQueue : NSObject {
     func addQueueArray(novelArray:Results<RealmNovel>) {
         self.downloadStop()
         for novel in novelArray {
+            if novel.type == .UserCreated {
+                if NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novel.novelID) {
+                    NovelSpeakerUtility.CheckAndUpdateRgisterdOuterNovel(novelID: novel.novelID)
+                }
+                continue
+            }
             if novel.type != .URL { continue }
             self.queueHolder.addQueue(novelID: novel.novelID)
         }

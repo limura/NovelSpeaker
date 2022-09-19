@@ -458,7 +458,10 @@ class NovelSpeakerUtility: NSObject {
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
-            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil) { (registerdNovelID, importOptionSeparated) in
+                guard let registerdNovelID = registerdNovelID else { return }
+                UpdateOuterNovelFileAttributes(novelID: registerdNovelID, fileUrl: url, importOptionSeparated:importOptionSeparated)
+            }
         }
         return true
     }
@@ -2717,5 +2720,297 @@ class NovelSpeakerUtility: NSObject {
         let cleardArray:[String] = [NiftyUtility.Date2ISO8601String(date: Date())]
         defaults.set(cleardArray, forKey: CheckRestartFrequencyKey)
         defaults.synchronize()
+    }
+    
+    static let NovelBookmarkUserDefaultsKey = "NovelBookmarkUserDefaultsKey"
+    static func GetNovelBookmark(novelID:String) -> Data?{
+        let defaults = UserDefaults.standard
+        if let currentDictionary = defaults.dictionary(forKey: NovelBookmarkUserDefaultsKey) as? [String:Data] {
+            return currentDictionary[novelID]
+        }
+        return nil
+    }
+    static func SetNovelBookmark(novelID:String, bookmarkData:Data) {
+        let defaults = UserDefaults.standard
+        var currentDictionary:[String:Data] = defaults.dictionary(forKey: NovelBookmarkUserDefaultsKey) as? [String:Data] ?? [:]
+        currentDictionary[novelID] = bookmarkData
+        UserDefaults.standard.set(currentDictionary, forKey: NovelBookmarkUserDefaultsKey)
+    }
+    
+    static let OuterNovelFileAttributesKey = "OuterNovelFileAttributesKey"
+    fileprivate struct OuterNovelFileAttributes: Codable {
+        let modificationDate:Date
+        let size:Int
+        let bookmark:Data
+        let importOptionSeparated:Bool
+        let originalUrlAbsoluteString:String
+    }
+    fileprivate static func UpdateOuterNovelData(novelID:String, modificationDate:Date, size:Int, bookmark:Data, importOptionSeparated: Bool, originalUrl:URL) -> Bool {
+        let outerNovelDataAttribute = OuterNovelFileAttributes(modificationDate: modificationDate, size: size, bookmark: bookmark, importOptionSeparated: importOptionSeparated, originalUrlAbsoluteString: originalUrl.absoluteString)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.dataEncodingStrategy = .base64
+        guard let encodedData = try? encoder.encode(outerNovelDataAttribute) else {
+            print("OuterNovelDataAttribute encode error")
+            return false
+        }
+        let defaults = UserDefaults.standard
+        var currentDictionary:[String:Data] = defaults.dictionary(forKey: OuterNovelFileAttributesKey) as? [String:Data] ?? [:]
+        currentDictionary[novelID] = encodedData
+        defaults.set(currentDictionary, forKey: OuterNovelFileAttributesKey)
+        defaults.synchronize()
+        return true
+    }
+    static func RemoveOuterNovelAttributes(novelID:String){
+        let defaults = UserDefaults.standard
+        guard var currentDictionary:[String:Data] = defaults.dictionary(forKey: OuterNovelFileAttributesKey) as? [String:Data] else {
+            return
+        }
+        currentDictionary.removeValue(forKey: novelID)
+        defaults.set(currentDictionary, forKey: OuterNovelFileAttributesKey)
+        defaults.synchronize()
+    }
+    fileprivate static func GetOuterNovelAttributes(novelID:String) -> OuterNovelFileAttributes? {
+        let defaults = UserDefaults.standard
+        guard let currentDictionary:[String:Data] = defaults.dictionary(forKey: OuterNovelFileAttributesKey) as? [String:Data] else {
+            return nil
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.dataDecodingStrategy = .base64
+        guard let targetData = currentDictionary[novelID], let targetAttributes = try? decoder.decode(OuterNovelFileAttributes.self, from: targetData) else {
+            print("OuterNovelFileAttribute decode error")
+            return nil
+        }
+        return targetAttributes
+    }
+    static func UpdateOuterNovelFileAttributesOnlySizeAndDate(novelID:String, fileUrl:URL) -> Bool {
+        let scope = fileUrl.startAccessingSecurityScopedResource()
+        defer {
+            if scope {
+                fileUrl.stopAccessingSecurityScopedResource()
+            }
+        }
+        guard let originalAttributes = GetOuterNovelAttributes(novelID: novelID) else {
+            print("novel: \(novelID) not registerd in OuterNovelFile")
+            return false
+        }
+        guard let attributes = try? FileManager.default.attributesOfItem(atPath: fileUrl.path) else {
+            print("attributes get failed.")
+            return false
+        }
+        guard let size = attributes[FileAttributeKey.size] as? Int else {
+            print("attributes has no size")
+            return false
+        }
+        guard let modificationDate = attributes[FileAttributeKey.modificationDate] as? Date else {
+            print("attributes has no modificationDate")
+            return false
+        }
+        guard let originalUrl = URL(string: originalAttributes.originalUrlAbsoluteString) else {
+            print("originalUrl is not url string?")
+            return false
+        }
+        return UpdateOuterNovelData(novelID: novelID, modificationDate: modificationDate, size: size, bookmark: originalAttributes.bookmark, importOptionSeparated: originalAttributes.importOptionSeparated, originalUrl: originalUrl)
+    }
+    static func UpdateOuterNovelFileAttributes(novelID:String, fileUrl:URL, importOptionSeparated:Bool, completion: ((_ result:Bool)->Void)? = nil) {
+        let scope = fileUrl.startAccessingSecurityScopedResource()
+        defer {
+            if scope {
+                fileUrl.stopAccessingSecurityScopedResource()
+            }
+        }
+        let options:NSURL.BookmarkCreationOptions
+        #if os(macOS)
+            options = [.withSecurityScope, .securityScopeAllowOnlyReadAccess]
+        #else
+            options = .minimalBookmark
+        #endif
+        ReadFileUrlWithCompletionHandler(url: fileUrl) { data in
+            guard let bookmark = try? fileUrl.bookmarkData(options: options
+                , includingResourceValuesForKeys: nil, relativeTo: nil) else {
+                print("bookmark create failed.")
+                completion?(false)
+                return
+            }
+
+            guard let attributes = try? FileManager.default.attributesOfItem(atPath: fileUrl.path) else {
+                print("attributes get failed.")
+                completion?(false)
+                return
+            }
+            
+            guard let size = attributes[FileAttributeKey.size] as? Int else {
+                print("attributes has no size")
+                completion?(false)
+                return
+            }
+            guard let modificationDate = attributes[FileAttributeKey.modificationDate] as? Date else {
+                print("attributes has no modificationDate")
+                completion?(false)
+                return
+            }
+            _ = UpdateOuterNovelData(novelID: novelID, modificationDate: modificationDate, size: size, bookmark: bookmark, importOptionSeparated:importOptionSeparated, originalUrl: fileUrl)
+            completion?(true)
+        }
+    }
+    static func CheckOuterNovelIsModified(novelID: String) -> Bool {
+        guard let attributes = GetOuterNovelAttributes(novelID: novelID) else {
+            // 保存されたデータが存在しない場合は変更があったとみなす(読み直しを推奨する)
+            print("CheckOuterNovelIsModified return true: can not get novel attributes")
+            return true
+        }
+        var isStale = false
+        guard let bookmarkUrl = try? URL(resolvingBookmarkData: attributes.bookmark, bookmarkDataIsStale: &isStale), isStale == false else {
+            // ブックマークが取得できない場合やブックマークが古くなっている場合は変更があったとみなす(読み直しを推奨する)
+            print("can not decode bookmarkUrl or isStale != false")
+            return true
+        }
+        let scope = bookmarkUrl.startAccessingSecurityScopedResource()
+        defer {
+            if scope {
+                bookmarkUrl.stopAccessingSecurityScopedResource()
+            }
+        }
+        guard let fileAttributes = try? FileManager.default.attributesOfItem(atPath: bookmarkUrl.path) else {
+            // ファイル情報が取得できない場合は変更があったとみなす(読み直しを推奨する)
+            print("CheckOuterNovelIsModified return true: error in FileManager.default.attributesOfItem()")
+            return true
+        }
+        if let size = fileAttributes[FileAttributeKey.size] as? Int, attributes.size != size {
+            print("CheckOuterNovelIsModified return true: size. \(size) != \(attributes.size)")
+            return true
+        }
+        if let modificationDate = fileAttributes[FileAttributeKey.modificationDate] as? Date {
+            // fileAttributes[] の方のは ミリ秒 まで入っているけれど、
+            // attributes.modificationDate は一旦 JSON化 するためにミリ秒部分は落とされているので
+            // ミリ秒部分は落として比較します。
+            // で、ミリ秒部分を消す方法を探すのが面倒くさかったので DateFormatter で文字列にして比較してしまっています。
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy/MM/dd HH:mm:ss"
+            let fileDate = formatter.string(from: modificationDate)
+            let attributeDate = formatter.string(from: attributes.modificationDate)
+            if fileDate != attributeDate {
+                print("CheckOuterNovelIsModified return true: modificationDate. \(fileDate) != \(attributeDate)")
+                return true
+            }
+        }
+        print("CheckOuterNovelIsModified return false.")
+        return false
+    }
+    // url からデータを読み込みます。
+    // 最初に Data(contentsOf:) で読み込もうとして失敗したら、
+    // UIDocument を使って読み直そうとします。
+    static func ReadFileUrl(url:URL) async -> Data? {
+        if let data = try? Data(contentsOf: url) {
+            return data
+        }
+        class dataDocument : UIDocument {
+            var data:Data? = nil
+            override func load(fromContents contents: Any, ofType typeName: String?) throws {
+                guard let contents = contents as? Data else { return }
+                data = contents
+            }
+        }
+        let document = await dataDocument(fileURL: url)
+        let openStatus = await document.open()
+        if openStatus, let data = await document.data {
+            return data
+        }
+        print("can not read document.data")
+        return nil
+    }
+    static func ReadFileUrlWithCompletionHandler(url:URL, completion: @escaping ((_ data:Data?)->Void)) {
+        if let data = try? Data(contentsOf: url) {
+            completion(data)
+            return
+        }
+        class dataDocument : UIDocument {
+            var data:Data? = nil
+            override func load(fromContents contents: Any, ofType typeName: String?) throws {
+                guard let contents = contents as? Data else { return }
+                data = contents
+            }
+        }
+        let document = dataDocument(fileURL: url)
+        document.open { result in
+            guard result, let data = document.data else {
+                completion(nil)
+                return
+            }
+            completion(data)
+        }
+    }
+    static func ReadOuterNovel(novelID:String, completion: @escaping ((_ content:String?, _ fileURL:URL?)->Void)) {
+        guard let attributes = GetOuterNovelAttributes(novelID: novelID) else {
+            completion(nil, nil)
+            return
+        }
+        var isStale = false
+        guard let bookmarkUrl = try? URL(resolvingBookmarkData: attributes.bookmark, bookmarkDataIsStale: &isStale), isStale == false else {
+            print("can not read bookmark. error decode bookmarkUrl or isStale != false")
+            completion(nil, nil)
+            return
+        }
+        let scope = bookmarkUrl.startAccessingSecurityScopedResource()
+        defer {
+            if scope {
+                bookmarkUrl.stopAccessingSecurityScopedResource()
+            }
+        }
+        func convertDataToString(data:Data?) -> String? {
+            guard let data = data else { return nil }
+            if let string = String(data: data, encoding: .utf8) {
+                return string
+            }
+            var nsString:NSString?
+            let encodingValue = NSString.stringEncoding(for: data, encodingOptions: nil, convertedString: &nsString, usedLossyConversion: nil)
+            if encodingValue != 0 {
+                let encoding = String.Encoding(rawValue: encodingValue)
+                return String(data: data, encoding: encoding)
+            }
+            print("can not convert Data to String")
+            return nil
+        }
+        
+        ReadFileUrlWithCompletionHandler(url: bookmarkUrl, completion: { data in
+            completion(convertDataToString(data: data), bookmarkUrl)
+        })
+    }
+    static func IsRegisteredOuterNovel(novelID:String) -> Bool {
+        return GetOuterNovelAttributes(novelID: novelID) != nil
+    }
+    static func CheckAndUpdateRgisterdOuterNovel(novelID:String) {
+        guard let attribute = GetOuterNovelAttributes(novelID: novelID) else{ return }
+        guard CheckOuterNovelIsModified(novelID: novelID) else { return }
+        ReadOuterNovel(novelID: novelID) { (content, fileURL) in
+            guard let content = content?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
+            let separatedText = NiftyUtility.CheckShouldSeparate(text: content)
+            RealmUtil.RealmBlock { realm in
+                if attribute.importOptionSeparated, let separatedText = separatedText, separatedText.count > 1 {
+                    RealmUtil.WriteWith(realm: realm) { realm in
+                        // StoryBulk を上書きする事で SpeechViewController で表示を更新させようと思ったのだけれど、
+                        // うまいことイベントが飛ばないぽいのでいっそのことStoryBulkは全部消してしまって
+                        // その削除イベントで本棚に戻す、みたいな残念制御をしています(´・ω・`)
+                        //RealmStoryBulk.RemoveStoryChapterAndAfterWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: separatedText.count))
+                        RealmStoryBulk.RemoveAllStoryWith(realm: realm, novelID: novelID)
+                        _ = RealmNovel.OverrideStoryContentArrayWith(realm: realm, novelID: novelID, contentArray: separatedText)
+                    }
+                }else{
+                    RealmUtil.WriteWith(realm: realm) { realm in
+                        //RealmStoryBulk.RemoveStoryChapterAndAfterWith(realm: realm, storyID: RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 2))
+                        RealmStoryBulk.RemoveAllStoryWith(realm: realm, novelID: novelID)
+                        var story = Story()
+                        story.novelID = novelID
+                        story.chapterNumber = 1
+                        story.content = content
+                        RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    }
+                }
+            }
+            if let fileURL = fileURL {
+                _ = UpdateOuterNovelFileAttributesOnlySizeAndDate(novelID: novelID, fileUrl: fileURL)
+            }
+        }
     }
 }

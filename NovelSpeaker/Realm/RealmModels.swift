@@ -1317,6 +1317,50 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         realm.delete(storyBulkArray)
     }
+    // 指定された storyID を含み、それ以降のStoryを全て削除します。
+    static func RemoveStoryChapterAndAfterWith(realm: Realm, storyID:String) {
+        let novelID = StoryIDToNovelID(storyID: storyID)
+        if let cachedStory = storyCache, cachedStory.novelID == novelID {
+            storyCache = nil
+        }
+        if let cachedBulk = bulkCache, cachedBulk.novelID == novelID {
+            bulkCache = nil
+        }
+        let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID= %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
+        let chapterNumber = StoryIDToChapterNumber(storyID: storyID)
+        let bulkChapterNumber = CalcBulkChapterNumber(chapterNumber: chapterNumber)
+        var isNeedDelete = false
+        for storyBulk in storyBulkArray {
+            if storyBulk.chapterNumber == bulkChapterNumber {
+                isNeedDelete = true
+                if bulkChapterNumber == chapterNumber {
+                    // bulkChapterNumber が chapterNumber と同じという事は、その bulk は削除して良い。
+                    realm.delete(storyBulk)
+                    continue
+                }
+                if var storyArray = storyBulk.LoadStoryArray() {
+                    while storyArray.last?.chapterNumber != chapterNumber {
+                        storyArray.removeLast()
+                    }
+                    if storyArray.last?.chapterNumber == chapterNumber {
+                        storyArray.removeLast()
+                    }
+                    storyBulk.OverrideStoryListAsset(storyArray: storyArray)
+                    realm.add(storyBulk, update: .modified)
+                }
+            }
+            if isNeedDelete {
+                realm.delete(storyBulk)
+                continue
+            }
+        }
+        if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
+            if chapterNumber > 1 {
+                novel.m_lastChapterStoryID = CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber - 1)
+            }
+            realm.add(novel, update: .modified)
+        }
+    }
     
     // story.storyID で指定される位置に story を挿入します。
     // story.storyID で表される story 以降(story.storyIDで指定された物を含む) の物は storyID が +1 されます。
@@ -1775,27 +1819,49 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             return novel.novelID
         }
     }
-    static func AddNewNovelWithMultiplText(contents:[String], title:String) {
-        RealmUtil.Write { (realm) in
+    static func AddNewNovelWithMultiplText(contents:[String], title:String) -> String {
+        return RealmUtil.RealmBlock { (realm) -> String in
             let novel = RealmNovel()
             novel.type = .UserCreated
             novel.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
             novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: contents.count)
             var chapterNumber = 1
-            for content in contents {
-                if content.count <= 0 { continue }
-                var story = Story()
-                story.novelID = novel.novelID
-                story.chapterNumber = chapterNumber
-                story.content = content
-                RealmStoryBulk.SetStoryWith(realm: realm, story: story)
-                chapterNumber += 1
-                novel.AppendDownloadDate(realm: realm, date: Date())
+            RealmUtil.WriteWith(realm: realm) { realm in
+                for content in contents {
+                    if content.count <= 0 { continue }
+                    var story = Story()
+                    story.novelID = novel.novelID
+                    story.chapterNumber = chapterNumber
+                    story.content = content
+                    RealmStoryBulk.SetStoryWith(realm: realm, story: story)
+                    chapterNumber += 1
+                    novel.AppendDownloadDate(realm: realm, date: Date())
+                }
+                realm.add(novel, update: .modified)
             }
-            realm.add(novel, update: .modified)
+            return novel.novelID
         }
     }
+    // contentArray を1章目からのものとして上書きします。realm は Write で渡してください
+    static func OverrideStoryContentArrayWith(realm:Realm, novelID:String, contentArray:[String]) -> Bool {
+        guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return false }
+        var chapterNumber = 1
+        var storyArray:[Story] = []
+        for content in contentArray {
+            if content.count <= 0 { continue }
+            var story = Story()
+            story.novelID = novel.novelID
+            story.chapterNumber = chapterNumber
+            story.content = content
+            storyArray.append(story)
+            chapterNumber += 1
+            novel.AppendDownloadDate(realm: realm, date: Date())
+        }
+        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+        return true
+    }
     
+
     static func AddNewNovelWithFirstStoryState(state:StoryState) -> String? {
         return RealmUtil.RealmBlock { (realm) -> String? in
             let novelID = state.url.absoluteString
@@ -1872,6 +1938,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
         if let bookmark = RealmBookmark.GetSpeechBookmark(realm: realm, novelID: self.novelID) {
             bookmark.delete(realm: realm)
         }
+        NovelSpeakerUtility.RemoveOuterNovelAttributes(novelID: self.novelID)
         RealmUtil.Delete(realm: realm, model: self)
     }
     

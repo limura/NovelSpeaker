@@ -53,7 +53,7 @@ class NiftyUtility: NSObject {
     #endif
     
     #if !os(watchOS)
-    @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?){
+    @objc public static func checkTextImportConifirmToUser(viewController: UIViewController, title: String, content: String, hintString: String?, completion:((_ registerdNovelID:String?, _ importOptionSeparated:Bool)->Void)? = nil){
         let content = NovelSpeakerUtility.NormalizeNewlineString(string: content)
         DispatchQueue.main.async {
             var easyDialog = EasyDialogBuilder(viewController)
@@ -70,7 +70,9 @@ class NiftyUtility: NSObject {
             }
             easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtility_CancelImport", comment: "取り込まない"), callback: { (dialog) in
                 DispatchQueue.main.async {
-                    dialog.dismiss(animated: false, completion: nil)
+                    dialog.dismiss(animated: false) {
+                        completion?(nil, false)
+                    }
                 }
             })
             easyDialog = easyDialog.addButton(title: NSLocalizedString("NiftyUtility_Import", comment: "このまま取り込む"), callback: { (dialog) in
@@ -79,7 +81,8 @@ class NiftyUtility: NSObject {
                 DispatchQueue.main.async {
                     dialog.dismiss(animated: false, completion: nil)
                 }
-                RealmNovel.AddNewNovelOnlyText(content: content, title: title)
+                let novelID = RealmNovel.AddNewNovelOnlyText(content: content, title: title)
+                completion?(novelID, false)
             })
             if let separatedText = CheckShouldSeparate(text: content), separatedText.reduce(0, { (result, body) -> Int in
                 return result + (body.count > 0 ? 1 : 0)
@@ -88,7 +91,8 @@ class NiftyUtility: NSObject {
                     DispatchQueue.main.async {
                         dialog.dismiss(animated: false, completion: nil)
                     }
-                    RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: title)
+                    let novelID = RealmNovel.AddNewNovelWithMultiplText(contents: separatedText, title: title)
+                    completion?(novelID, true)
                 })
             }
             easyDialog.build(isForMessageDialog: true).show()

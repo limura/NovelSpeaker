@@ -232,6 +232,8 @@
 "SettingsViewController_ClearAllCookiesResult_Title" = "保存されている全てのCookieを削除しました";
 "SettingsViewController_ClearAllCookiesDialog_Message" = "保存されている全てのCookieを削除しますか？\nWebサイト毎のログイン状態等が初期化されます。場合によっては小説のダウンロードができなくなる場合があります。この操作は元に戻せません。";
 "SettingsViewController_ClearAllCookiesDialog_OKButton" = "削除する";
+"SettingsViewController_ImportOuterFile" = "ファイルの取り込み";
+"SettingsViewController_UIDocumentPickerViewTitle" = "ことせかい へ取り込むファイルを指定してください";
 
 "RemoteDataURLSettingViewController_Title" = "内部データ参照用URLの設定";
 "RemoteDataURLSettingViewController_Information" = "注意: ここにある設定は下手に書き換えると ことせかい が正常に動作しなくなる可能性があります。書き換えを行う場合は内容を理解した上で行ってください。\nなお、標準設定は全て「空(なにも書かれていない)」状態ですので問題が起こった場合には全ての項目の内容を消すことで標準設定に戻すことができます。";
