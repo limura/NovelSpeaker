@@ -1635,7 +1635,7 @@ class NiftyUtility: NSObject {
         return HTMLUtf8DataToString(htmlUtf8Data: data)
     }
     
-    static func FilterXpathToHtml(xmlDocument:XMLDocument, xpath:String) -> String {
+    static func FilterXpathToHtml(xmlDocument:Kanna.XMLDocument, xpath:String) -> String {
         let xpathResult = xmlDocument.xpath(xpath)
         switch xpathResult {
         case .none:
@@ -1670,7 +1670,7 @@ class NiftyUtility: NSObject {
             return text
         }
     }
-    static func FilterXpathToHtml(xmlElement:XMLElement, xpath:String) -> String {
+    static func FilterXpathToHtml(xmlElement:Kanna.XMLElement, xpath:String) -> String {
         var resultHTML = ""
         //print("FilterXpathToHtml(xmlElement:, xpath:\(xpath)): \(xmlElement.innerHTML ?? "nil")")
         for element in xmlElement.xpath(xpath) {
@@ -1690,7 +1690,7 @@ class NiftyUtility: NSObject {
         return resultHTML
     }
     
-    static func FilterXpathWithConvertString(xmlDocument:XMLDocument, xpath:String, injectStyle:String? = nil) -> String {
+    static func FilterXpathWithConvertString(xmlDocument:Kanna.XMLDocument, xpath:String, injectStyle:String? = nil) -> String {
         let filterdHTML = FilterXpathToHtml(xmlDocument: xmlDocument, xpath: xpath)
         let resultHTML:String
         if let injectStyle = injectStyle, injectStyle.count > 0 {
@@ -1703,7 +1703,7 @@ class NiftyUtility: NSObject {
         }
         return xmlDocument.xpath(xpath).reduce(""){ $0 + ($1.content ?? "") }
     }
-    static func FilterXpathWithConvertString(xmlElement:XMLElement, xpath:String, injectStyle:String? = nil) -> String {
+    static func FilterXpathWithConvertString(xmlElement:Kanna.XMLElement, xpath:String, injectStyle:String? = nil) -> String {
         let filterdHTML = FilterXpathToHtml(xmlElement: xmlElement, xpath: xpath)
         let resultHTML:String
         if let injectStyle = injectStyle, injectStyle.count > 0 {
@@ -1717,19 +1717,19 @@ class NiftyUtility: NSObject {
         return xmlElement.xpath(xpath).reduce(""){ $0 + ($1.content ?? "") }
     }
     
-    static func FilterXpathWithExtructFirstHrefLink(xmlDocument:XMLDocument, xpath:String, baseURL:URL) -> URL? {
+    static func FilterXpathWithExtructFirstHrefLink(xmlDocument:Kanna.XMLDocument, xpath:String, baseURL:URL) -> URL? {
         guard let urlNode = xmlDocument.xpath(xpath).first else { return nil }
         let urlString = urlNode["href"] ?? urlNode.content ?? ""
         return URL(string: urlString, relativeTo: baseURL)
     }
     
-    static func FilterXpathWithExtructFirstHrefLink(xmlElement:XMLElement, xpath:String, baseURL:URL) -> URL? {
+    static func FilterXpathWithExtructFirstHrefLink(xmlElement:Kanna.XMLElement, xpath:String, baseURL:URL) -> URL? {
         guard let urlNode = xmlElement.xpath(xpath).first else { return nil }
         let urlString = urlNode["href"] ?? urlNode.content ?? ""
         return URL(string: urlString, relativeTo: baseURL)
     }
     
-    static func FilterXpathWithExtructTagString(xmlDocument:XMLDocument, xpath:String) -> Set<String> {
+    static func FilterXpathWithExtructTagString(xmlDocument:Kanna.XMLDocument, xpath:String) -> Set<String> {
         var tagSet = Set<String>()
         for element in xmlDocument.xpath(xpath) {
             guard let elementXML = element.toHTML, let tagString = HTMLToString(htmlString: elementXML) else { continue }
@@ -1742,7 +1742,7 @@ class NiftyUtility: NSObject {
         return tagSet
     }
 
-    static func FilterXpathWithExtructTagString(xmlElement:XMLElement, xpath:String) -> Set<String> {
+    static func FilterXpathWithExtructTagString(xmlElement:Kanna.XMLElement, xpath:String) -> Set<String> {
         var tagSet = Set<String>()
         for element in xmlElement.xpath(xpath) {
             guard let elementXML = element.toHTML, let tagString = HTMLToString(htmlString: elementXML) else { continue }

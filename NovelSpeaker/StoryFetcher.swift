@@ -169,30 +169,30 @@ struct StorySiteInfo {
         return false
     }
     
-    func decodePageElement(xmlDocument:XMLDocument) -> String {
+    func decodePageElement(xmlDocument:Kanna.XMLDocument) -> String {
         return NovelSpeakerUtility.NormalizeNewlineString(string: NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: pageElement, injectStyle: injectStyle).trimmingCharacters(in: .whitespacesAndNewlines) )
     }
-    func decodeTitle(xmlDocument:XMLDocument) -> String? {
+    func decodeTitle(xmlDocument:Kanna.XMLDocument) -> String? {
         guard let xpath = title else { return nil }
         return NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    func decodeSubtitle(xmlDocument:XMLDocument) -> String? {
+    func decodeSubtitle(xmlDocument:Kanna.XMLDocument) -> String? {
         guard let xpath = subtitle else { return nil }
         return NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    func decodeFirstPageLink(xmlDocument:XMLDocument, baseURL: URL) -> URL? {
+    func decodeFirstPageLink(xmlDocument:Kanna.XMLDocument, baseURL: URL) -> URL? {
         guard let xpath = firstPageLink else { return nil }
         return NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlDocument: xmlDocument, xpath: xpath, baseURL: baseURL)
     }
-    func decodeNextLink(xmlDocument:XMLDocument, baseURL: URL) -> URL? {
+    func decodeNextLink(xmlDocument:Kanna.XMLDocument, baseURL: URL) -> URL? {
         guard let xpath = nextLink else { return nil }
         return NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlDocument: xmlDocument, xpath: xpath, baseURL: baseURL)
     }
-    func decodeAuthor(xmlDocument:XMLDocument) -> String? {
+    func decodeAuthor(xmlDocument:Kanna.XMLDocument) -> String? {
         guard let xpath = author else { return nil }
         return NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    func decodeTag(xmlDocument:XMLDocument) -> [String] {
+    func decodeTag(xmlDocument:Kanna.XMLDocument) -> [String] {
         guard let xpath = tag else { return [] }
         return Array(NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath))
     }
