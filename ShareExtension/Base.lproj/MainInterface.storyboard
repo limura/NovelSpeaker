@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="j1y-V4-xli">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Share View Controller-->
+        <scene sceneID="ceB-am-kn3">
+            <objects>
+                <viewController id="j1y-V4-xli" customClass="ShareViewController" customModule="ShareExtension" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" opaque="NO" contentMode="scaleToFill" id="wbc-yd-nQP">
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="37C-07-hdw">
+                                <rect key="frame" x="75" y="358" width="240" height="128"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GeH-Cd-lkY">
+                                        <rect key="frame" x="64.666666666666657" y="78" width="111" height="35"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="キャンセル"/>
+                                        <connections>
+                                            <action selector="cancelButtonClicked:" destination="j1y-V4-xli" eventType="touchUpInside" id="eCH-rW-td6"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8rF-w2-mRN">
+                                        <rect key="frame" x="19" y="25" width="202" height="35"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="ことせかい で取り込む"/>
+                                        <connections>
+                                            <action selector="openButtonClicked:" destination="j1y-V4-xli" eventType="touchUpInside" id="cXC-8O-MLO"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="8rF-w2-mRN" firstAttribute="top" secondItem="37C-07-hdw" secondAttribute="top" constant="25" id="IbW-6u-xnN"/>
+                                    <constraint firstAttribute="width" constant="240" id="IjO-3W-ypd"/>
+                                    <constraint firstItem="8rF-w2-mRN" firstAttribute="centerX" secondItem="37C-07-hdw" secondAttribute="centerX" id="Iob-io-jhT"/>
+                                    <constraint firstItem="GeH-Cd-lkY" firstAttribute="centerX" secondItem="37C-07-hdw" secondAttribute="centerX" id="RBy-4n-1oj"/>
+                                    <constraint firstItem="GeH-Cd-lkY" firstAttribute="height" secondItem="8rF-w2-mRN" secondAttribute="height" id="cWK-xu-EeQ"/>
+                                    <constraint firstItem="GeH-Cd-lkY" firstAttribute="top" secondItem="8rF-w2-mRN" secondAttribute="bottom" constant="18" id="m79-u4-Gz7"/>
+                                    <constraint firstAttribute="height" constant="128" id="xih-GK-9Te"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="1Xd-am-t49"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="37C-07-hdw" firstAttribute="centerY" secondItem="wbc-yd-nQP" secondAttribute="centerY" id="65r-qF-Ma8"/>
+                            <constraint firstItem="37C-07-hdw" firstAttribute="centerX" secondItem="wbc-yd-nQP" secondAttribute="centerX" id="SJd-yD-hqp"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="baseWindowView" destination="wbc-yd-nQP" id="UrX-JN-LjP"/>
+                        <outlet property="floatingWindowView" destination="37C-07-hdw" id="tOT-bg-q14"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="CEy-Cv-SGf" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="131" y="-49"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

@@ -178,6 +178,9 @@
 		21B53A2D19619E01009658B7 /* GlobalDataSingleton.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */; };
 		21B56C69257F77F10065EDD4 /* UIImageExtensionSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2164800D22910E6300A183DF /* UIImageExtensionSwift.swift */; };
 		21BB5096253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21BB5095253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift */; };
+		21BBC11128DC994A00DB4C3B /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21BBC11028DC994A00DB4C3B /* ShareViewController.swift */; };
+		21BBC11428DC994A00DB4C3B /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 21BBC11228DC994A00DB4C3B /* MainInterface.storyboard */; };
+		21BBC11828DC994A00DB4C3B /* ShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 21BBC10E28DC994900DB4C3B /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		21C52BDE2626BDD800EE4768 /* EurekaPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C52BDD2626BDD800EE4768 /* EurekaPopupViewController.swift */; };
 		21C74F961964502A0039A706 /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F931964502A0039A706 /* arrow_down.png */; };
 		21C74F971964502A0039A706 /* arrow_down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 21C74F941964502A0039A706 /* arrow_down@2x.png */; };
@@ -266,6 +269,13 @@
 			remoteGlobalIDString = 2193094023BBE56A00035EF0;
 			remoteInfo = "NovelSpeakerWatchApp WatchKit Extension";
 		};
+		21BBC11628DC994A00DB4C3B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 21BBC10D28DC994900DB4C3B;
+			remoteInfo = ShareExtension;
+		};
 		21F054EF1917E0F200CC6BA9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
@@ -282,6 +292,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				21BBC11828DC994A00DB4C3B /* ShareExtension.appex in Embed App Extensions */,
 				2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
@@ -509,6 +520,13 @@
 		21B53A2C19619E01009658B7 /* GlobalDataSingleton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GlobalDataSingleton.m; sourceTree = "<group>"; };
 		21B96ED32338124100112B5F /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ja-JP"; path = "ja-JP.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		21BB5095253F5B7500A33A00 /* SpeechViewButtonSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechViewButtonSettingsViewController.swift; sourceTree = "<group>"; };
+		21BBC10E28DC994900DB4C3B /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		21BBC11028DC994A00DB4C3B /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		21BBC11328DC994A00DB4C3B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		21BBC11928DC994B00DB4C3B /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		21BBC11D28DCCC1E00DB4C3B /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Base; path = Base.lproj/Info.plist; sourceTree = "<group>"; };
+		21BBC11F28DCCC2900DB4C3B /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "ja-JP"; path = "ja-JP.lproj/Info.plist"; sourceTree = "<group>"; };
+		21BBC12028DCCC2F00DB4C3B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = en; path = en.lproj/Info.plist; sourceTree = "<group>"; };
 		21C52BDD2626BDD800EE4768 /* EurekaPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EurekaPopupViewController.swift; sourceTree = "<group>"; };
 		21C74F931964502A0039A706 /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
 		21C74F941964502A0039A706 /* arrow_down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_down@2x.png"; sourceTree = "<group>"; };
@@ -619,6 +637,13 @@
 				2124B3A223BC37F7002EBC31 /* AVFoundation.framework in Frameworks */,
 				2124B3A023BC37EE002EBC31 /* CloudKit.framework in Frameworks */,
 				C2296499CD866B828ADB93C5 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21BBC10B28DC994900DB4C3B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -858,6 +883,17 @@
 			name = NovelDownload;
 			sourceTree = "<group>";
 		};
+		21BBC10F28DC994A00DB4C3B /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				21BBC11928DC994B00DB4C3B /* ShareExtension.entitlements */,
+				21BBC11028DC994A00DB4C3B /* ShareViewController.swift */,
+				21BBC11228DC994A00DB4C3B /* MainInterface.storyboard */,
+				21BBC11E28DCCC1E00DB4C3B /* Info.plist */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
 		21D8FC4C19FC97DB00CCF1B6 /* Tools */ = {
 			isa = PBXGroup;
 			children = (
@@ -926,6 +962,7 @@
 				2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
 				2193093623BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */,
 				2193094523BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */,
+				21BBC10F28DC994A00DB4C3B /* ShareExtension */,
 				21F054CB1917E0F200CC6BA9 /* Frameworks */,
 				21F054CA1917E0F200CC6BA9 /* Products */,
 				A889DD6179ED1DDD1D382860 /* Pods */,
@@ -941,6 +978,7 @@
 				2193092F23BBE56800035EF0 /* ことせかい.app */,
 				2193093223BBE56800035EF0 /* NovelSpeakerWatchApp.app */,
 				2193094123BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex */,
+				21BBC10E28DC994900DB4C3B /* ShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1174,6 +1212,23 @@
 			productReference = 2193094123BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex */;
 			productType = "com.apple.product-type.watchkit2-extension";
 		};
+		21BBC10D28DC994900DB4C3B /* ShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21BBC11A28DC994D00DB4C3B /* Build configuration list for PBXNativeTarget "ShareExtension" */;
+			buildPhases = (
+				21BBC10A28DC994900DB4C3B /* Sources */,
+				21BBC10B28DC994900DB4C3B /* Frameworks */,
+				21BBC10C28DC994900DB4C3B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShareExtension;
+			productName = ShareExtension;
+			productReference = 21BBC10E28DC994900DB4C3B /* ShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		21F054C81917E0F200CC6BA9 /* NovelSpeaker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21F054FB1917E0F200CC6BA9 /* Build configuration list for PBXNativeTarget "NovelSpeaker" */;
@@ -1189,6 +1244,7 @@
 			);
 			dependencies = (
 				2126A2641D9A1B90008E534A /* PBXTargetDependency */,
+				21BBC11728DC994A00DB4C3B /* PBXTargetDependency */,
 			);
 			name = NovelSpeaker;
 			productName = NovelSpeaker;
@@ -1220,7 +1276,7 @@
 		21F054C11917E0F100CC6BA9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1130;
+				LastSwiftUpdateCheck = 1400;
 				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = "IIMURA Takuji";
 				TargetAttributes = {
@@ -1247,6 +1303,11 @@
 					};
 					2193094023BBE56A00035EF0 = {
 						CreatedOnToolsVersion = 11.3;
+						DevelopmentTeam = 4KZE8276ZF;
+						ProvisioningStyle = Automatic;
+					};
+					21BBC10D28DC994900DB4C3B = {
+						CreatedOnToolsVersion = 14.0;
 						DevelopmentTeam = 4KZE8276ZF;
 						ProvisioningStyle = Automatic;
 					};
@@ -1296,6 +1357,7 @@
 				2193092E23BBE56800035EF0 /* NovelSpeakerWatchApp */,
 				2193093123BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */,
 				2193094023BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */,
+				21BBC10D28DC994900DB4C3B /* ShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -1338,6 +1400,14 @@
 				2138B15523C0804D00D8642C /* Silent3sec.mp3 in Resources */,
 				2138B14E23BFD81500D8642C /* InfoPlist.strings in Resources */,
 				2193095323BBE56B00035EF0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		21BBC10C28DC994900DB4C3B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21BBC11428DC994A00DB4C3B /* MainInterface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1661,6 +1731,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		21BBC10A28DC994900DB4C3B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21BBC11128DC994A00DB4C3B /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		21F054C51917E0F200CC6BA9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1785,6 +1863,11 @@
 			target = 2193094023BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */;
 			targetProxy = 2193094323BBE56A00035EF0 /* PBXContainerItemProxy */;
 		};
+		21BBC11728DC994A00DB4C3B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 21BBC10D28DC994900DB4C3B /* ShareExtension */;
+			targetProxy = 21BBC11628DC994A00DB4C3B /* PBXContainerItemProxy */;
+		};
 		21F054F01917E0F200CC6BA9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 21F054C81917E0F200CC6BA9 /* NovelSpeaker */;
@@ -1864,6 +1947,24 @@
 				2193093823BBE56800035EF0 /* Base */,
 			);
 			name = Interface.storyboard;
+			sourceTree = "<group>";
+		};
+		21BBC11228DC994A00DB4C3B /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21BBC11328DC994A00DB4C3B /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+		21BBC11E28DCCC1E00DB4C3B /* Info.plist */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21BBC11D28DCCC1E00DB4C3B /* Base */,
+				21BBC11F28DCCC2900DB4C3B /* ja-JP */,
+				21BBC12028DCCC2F00DB4C3B /* en */,
+			);
+			name = Info.plist;
 			sourceTree = "<group>";
 		};
 		21D8FC5419FCB07B00CCF1B6 /* coreDataMigration.storyboard */ = {
@@ -2175,6 +2276,81 @@
 			};
 			name = Release;
 		};
+		21BBC11B28DC994D00DB4C3B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareExtension/Base.lproj/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "ことせかい で読み込む";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 IIMURA Takuji. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		21BBC11C28DC994D00DB4C3B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4KZE8276ZF;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareExtension/Base.lproj/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "ことせかい で読み込む";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 IIMURA Takuji. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		21F054F91917E0F200CC6BA9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2281,6 +2457,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D50E31589CDB3D103CA851A6 /* Pods-NovelSpeaker.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CLANG_ENABLE_MODULES = YES;
@@ -2319,6 +2496,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 355FB89D08BB6B2E7B278294 /* Pods-NovelSpeaker.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CLANG_ENABLE_MODULES = YES;
@@ -2482,6 +2660,15 @@
 			buildConfigurations = (
 				2193095923BBE56B00035EF0 /* Debug */,
 				2193095A23BBE56B00035EF0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21BBC11A28DC994D00DB4C3B /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21BBC11B28DC994D00DB4C3B /* Debug */,
+				21BBC11C28DC994D00DB4C3B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
