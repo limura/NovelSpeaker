@@ -50,13 +50,9 @@
 		2124B3A023BC37EE002EBC31 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B39F23BC37EE002EBC31 /* CloudKit.framework */; };
 		2124B3A223BC37F7002EBC31 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B3A123BC37F7002EBC31 /* AVFoundation.framework */; };
 		2124B3A423BC37FD002EBC31 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124B3A323BC37FD002EBC31 /* libz.tbd */; };
-		2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */; };
-		2126A2611D9A1B90008E534A /* Action.js in Resources */ = {isa = PBXBuildFile; fileRef = 2126A2601D9A1B90008E534A /* Action.js */; };
-		2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		212852D619B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */; };
 		212852D819B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */; };
 		212852DC19B1D101001A75DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 212852DE19B1D101001A75DC /* Localizable.strings */; };
-		212972171DA66FDB001ED63D /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 212972141DA66F2C001ED63D /* Info.plist */; };
 		212EBDE52287F6EA0063FEC0 /* SpeakerSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */; };
 		212EBDED2289CD730063FEC0 /* SpeechWaitSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */; };
 		212EBDEF228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */; };
@@ -68,8 +64,6 @@
 		213374402013816D0043D995 /* bookmark-false@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743D2013816C0043D995 /* bookmark-false@3x.png */; };
 		213374412013816D0043D995 /* bookmark-false.png in Resources */ = {isa = PBXBuildFile; fileRef = 2133743E2013816C0043D995 /* bookmark-false.png */; };
 		2133F21C1E7D5674001A0BC5 /* CustomAutopagerizeItems.json in Resources */ = {isa = PBXBuildFile; fileRef = 2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */; };
-		2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2133F2211E7FFF0B001A0BC5 /* Localizable.strings */; };
-		2133F2261E800F4A001A0BC5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 21F054E41917E0F200CC6BA9 /* Images.xcassets */; };
 		213515FC1F8CC06400F7AAD0 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 213515FB1F8CC06400F7AAD0 /* MessageUI.framework */; };
 		2138B14E23BFD81500D8642C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2138B15023BFD81500D8642C /* InfoPlist.strings */; };
 		2138B15423C0804A00D8642C /* nc48625.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 21429D82209F4516001426F5 /* nc48625.m4a */; };
@@ -241,20 +235,12 @@
 		21F7DE45197EB33900BD2899 /* Story.m in Sources */ = {isa = PBXBuildFile; fileRef = 21F7DE44197EB33900BD2899 /* Story.m */; };
 		2DBE741BE2225C73ADE563E6 /* Pods_NovelSpeakerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF0DDF48D7FF3E1F2B5F6ECA /* Pods_NovelSpeakerTests.framework */; };
 		8261A40E09A2B1556BFC551B /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B449E9CF2D2F189FB86B53B2 /* Pods_NovelSpeakerWatchApp_WatchKit_App.framework */; };
-		9051B983E846E56867906F94 /* Pods_NovelSpeakerURLDownloadExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CB419FE58F3E590F82D37EC /* Pods_NovelSpeakerURLDownloadExtension.framework */; };
 		9CACC3CB8604EA2A797F6377 /* Pods_NovelSpeakerWatchApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F66E50ED8EA5D0894EBA9950 /* Pods_NovelSpeakerWatchApp.framework */; };
 		A40AB2DC9A100078357C04EC /* Pods_NovelSpeaker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A68F43A571834576C97C21CE /* Pods_NovelSpeaker.framework */; };
 		C2296499CD866B828ADB93C5 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 470C503436242F4F44D3E6F7 /* Pods_NovelSpeakerWatchApp_WatchKit_Extension.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		2126A2631D9A1B90008E534A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 2126A25A1D9A1B90008E534A;
-			remoteInfo = NovelSpeakerURLDownloadExtension;
-		};
 		2193093423BBE56800035EF0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 21F054C11917E0F100CC6BA9 /* Project object */;
@@ -293,7 +279,6 @@
 			dstSubfolderSpec = 13;
 			files = (
 				21BBC11828DC994A00DB4C3B /* ShareExtension.appex in Embed App Extensions */,
-				2126A2651D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -364,17 +349,10 @@
 		2124B3A123BC37F7002EBC31 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS6.1.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		2124B3A323BC37FD002EBC31 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS6.1.sdk/usr/lib/libz.tbd; sourceTree = DEVELOPER_DIR; };
 		2124B3A523BC3AF0002EBC31 /* NovelSpeakerWatchApp WatchKit Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "NovelSpeakerWatchApp WatchKit Extension.entitlements"; sourceTree = "<group>"; };
-		2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NovelSpeakerURLDownloadExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		2126A25D1D9A1B90008E534A /* ActionRequestHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActionRequestHandler.h; sourceTree = "<group>"; };
-		2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ActionRequestHandler.m; sourceTree = "<group>"; };
-		2126A2601D9A1B90008E534A /* Action.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Action.js; sourceTree = "<group>"; };
 		212852D519B1C61D001A75DC /* SettingDataModelMapping_2to3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_2to3.xcmappingmodel; sourceTree = "<group>"; };
 		212852D719B1C637001A75DC /* SettingDataModelMapping_3to4.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_3to4.xcmappingmodel; sourceTree = "<group>"; };
 		212852DD19B1D101001A75DC /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		212852E019B1ECAD001A75DC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		212972131DA66F2C001ED63D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = ja; path = ja.lproj/Info.plist; sourceTree = "<group>"; };
-		212972151DA66F2E001ED63D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = en; path = en.lproj/Info.plist; sourceTree = "<group>"; };
-		212972161DA66F97001ED63D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Base; path = Base.lproj/Info.plist; sourceTree = "<group>"; };
 		212EBDE42287F6EA0063FEC0 /* SpeakerSettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerSettingsViewController.swift; sourceTree = "<group>"; };
 		212EBDEC2289CD730063FEC0 /* SpeechWaitSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechWaitSettingViewController.swift; sourceTree = "<group>"; };
 		212EBDEE228AB1C00063FEC0 /* SpeechSectionConfigsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSectionConfigsViewController.swift; sourceTree = "<group>"; };
@@ -383,13 +361,10 @@
 		212F359D1A8F8F17009D0E60 /* SettingDataModelMapping_5to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_5to7.xcmappingmodel; sourceTree = "<group>"; };
 		212F359F1A8F8F3A009D0E60 /* SettingDataModelMapping_6to7.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = SettingDataModelMapping_6to7.xcmappingmodel; sourceTree = "<group>"; };
 		212F6175258723C200822737 /* NovelLikeOrderSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelLikeOrderSettingViewController.swift; sourceTree = "<group>"; };
-		212F951D1EB0EB8B005EF253 /* NovelSpeakerURLDownloadExtension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NovelSpeakerURLDownloadExtension-Bridging-Header.h"; sourceTree = "<group>"; };
 		2133743C2013816C0043D995 /* bookmark-false@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@2x.png"; sourceTree = "<group>"; };
 		2133743D2013816C0043D995 /* bookmark-false@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false@3x.png"; sourceTree = "<group>"; };
 		2133743E2013816C0043D995 /* bookmark-false.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bookmark-false.png"; sourceTree = "<group>"; };
 		2133F21B1E7D5674001A0BC5 /* CustomAutopagerizeItems.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = CustomAutopagerizeItems.json; sourceTree = "<group>"; };
-		2133F2201E7FFF0B001A0BC5 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
-		2133F2221E7FFF0D001A0BC5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		213515FB1F8CC06400F7AAD0 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		213700F72DBD6BF3B9237996 /* Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NovelSpeakerWatchApp WatchKit Extension/Pods-NovelSpeakerWatchApp WatchKit Extension.debug.xcconfig"; sourceTree = "<group>"; };
 		2138B15123BFD81B00D8642C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -449,7 +424,6 @@
 		217DCC5125119B9A00952A17 /* RealmObserverHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmObserverHandler.swift; sourceTree = "<group>"; };
 		217E683A1998F6A000C656AA /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		21814C581E8CE8970096CB42 /* NovelSpeaker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeaker.entitlements; sourceTree = "<group>"; };
-		21814C591E8CE8A00096CB42 /* NovelSpeakerURLDownloadExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NovelSpeakerURLDownloadExtension.entitlements; sourceTree = "<group>"; };
 		21843D55235DEDFA00834C7E /* NovelDisplayColorSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NovelDisplayColorSettingViewController.swift; sourceTree = "<group>"; };
 		21890CF41D9309F000869046 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		218E81E82518F0BE0041A1B5 /* AutoSplitStringSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoSplitStringSettingViewController.swift; sourceTree = "<group>"; };
@@ -621,14 +595,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2126A2581D9A1B90008E534A /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9051B983E846E56867906F94 /* Pods_NovelSpeakerURLDownloadExtension.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		2193093E23BBE56A00035EF0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -714,20 +680,6 @@
 				217DCC5125119B9A00952A17 /* RealmObserverHandler.swift */,
 			);
 			path = Realm;
-			sourceTree = "<group>";
-		};
-		2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */ = {
-			isa = PBXGroup;
-			children = (
-				2126A2601D9A1B90008E534A /* Action.js */,
-				21814C591E8CE8A00096CB42 /* NovelSpeakerURLDownloadExtension.entitlements */,
-				2126A25D1D9A1B90008E534A /* ActionRequestHandler.h */,
-				2126A25E1D9A1B90008E534A /* ActionRequestHandler.m */,
-				212972141DA66F2C001ED63D /* Info.plist */,
-				2133F2211E7FFF0B001A0BC5 /* Localizable.strings */,
-				212F951D1EB0EB8B005EF253 /* NovelSpeakerURLDownloadExtension-Bridging-Header.h */,
-			);
-			path = NovelSpeakerURLDownloadExtension;
 			sourceTree = "<group>";
 		};
 		215BFB4023EDB1490078E158 /* Views */ = {
@@ -959,7 +911,6 @@
 			children = (
 				21F054D21917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054F11917E0F200CC6BA9 /* NovelSpeakerTests */,
-				2126A25C1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
 				2193093623BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */,
 				2193094523BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */,
 				21BBC10F28DC994A00DB4C3B /* ShareExtension */,
@@ -974,7 +925,6 @@
 			children = (
 				21F054C91917E0F200CC6BA9 /* NovelSpeaker.app */,
 				21F054EA1917E0F200CC6BA9 /* NovelSpeakerTests.xctest */,
-				2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */,
 				2193092F23BBE56800035EF0 /* ことせかい.app */,
 				2193093223BBE56800035EF0 /* NovelSpeakerWatchApp.app */,
 				2193094123BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension.appex */,
@@ -1137,24 +1087,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 2126A2681D9A1B90008E534A /* Build configuration list for PBXNativeTarget "NovelSpeakerURLDownloadExtension" */;
-			buildPhases = (
-				83E287011980B0B51F2387CD /* [CP] Check Pods Manifest.lock */,
-				2126A2571D9A1B90008E534A /* Sources */,
-				2126A2581D9A1B90008E534A /* Frameworks */,
-				2126A2591D9A1B90008E534A /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = NovelSpeakerURLDownloadExtension;
-			productName = NovelSpeakerURLDownloadExtension;
-			productReference = 2126A25B1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		2193092E23BBE56800035EF0 /* NovelSpeakerWatchApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2193096323BBE56B00035EF0 /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchApp" */;
@@ -1243,7 +1175,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				2126A2641D9A1B90008E534A /* PBXTargetDependency */,
 				21BBC11728DC994A00DB4C3B /* PBXTargetDependency */,
 			);
 			name = NovelSpeaker;
@@ -1280,17 +1211,6 @@
 				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = "IIMURA Takuji";
 				TargetAttributes = {
-					2126A25A1D9A1B90008E534A = {
-						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = 4KZE8276ZF;
-						LastSwiftMigration = 0900;
-						ProvisioningStyle = Automatic;
-						SystemCapabilities = {
-							com.apple.ApplicationGroups.iOS = {
-								enabled = 0;
-							};
-						};
-					};
 					2193092E23BBE56800035EF0 = {
 						CreatedOnToolsVersion = 11.3;
 						DevelopmentTeam = 4KZE8276ZF;
@@ -1353,7 +1273,6 @@
 			targets = (
 				21F054C81917E0F200CC6BA9 /* NovelSpeaker */,
 				21F054E91917E0F200CC6BA9 /* NovelSpeakerTests */,
-				2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */,
 				2193092E23BBE56800035EF0 /* NovelSpeakerWatchApp */,
 				2193093123BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */,
 				2193094023BBE56A00035EF0 /* NovelSpeakerWatchApp WatchKit Extension */,
@@ -1363,17 +1282,6 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		2126A2591D9A1B90008E534A /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2133F2261E800F4A001A0BC5 /* Images.xcassets in Resources */,
-				2133F21F1E7FFF0B001A0BC5 /* Localizable.strings in Resources */,
-				2126A2611D9A1B90008E534A /* Action.js in Resources */,
-				212972171DA66FDB001ED63D /* Info.plist in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		2193092D23BBE56800035EF0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1600,24 +1508,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		83E287011980B0B51F2387CD /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-NovelSpeakerURLDownloadExtension-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		9C146D81A0459185D0992D07 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1683,14 +1573,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		2126A2571D9A1B90008E534A /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2126A25F1D9A1B90008E534A /* ActionRequestHandler.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		2193093D23BBE56A00035EF0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1848,11 +1730,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		2126A2641D9A1B90008E534A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 2126A25A1D9A1B90008E534A /* NovelSpeakerURLDownloadExtension */;
-			targetProxy = 2126A2631D9A1B90008E534A /* PBXContainerItemProxy */;
-		};
 		2193093523BBE56800035EF0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 2193093123BBE56800035EF0 /* NovelSpeakerWatchApp WatchKit App */;
@@ -1908,25 +1785,6 @@
 			children = (
 				212852DD19B1D101001A75DC /* ja */,
 				212852E019B1ECAD001A75DC /* en */,
-			);
-			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-		212972141DA66F2C001ED63D /* Info.plist */ = {
-			isa = PBXVariantGroup;
-			children = (
-				212972131DA66F2C001ED63D /* ja */,
-				212972151DA66F2E001ED63D /* en */,
-				212972161DA66F97001ED63D /* Base */,
-			);
-			name = Info.plist;
-			sourceTree = "<group>";
-		};
-		2133F2211E7FFF0B001A0BC5 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				2133F2201E7FFF0B001A0BC5 /* ja */,
-				2133F2221E7FFF0D001A0BC5 /* en */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -2010,79 +1868,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		2126A2661D9A1B90008E534A /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = BBCF0BFF2E4AF97813EA2893 /* Pods-NovelSpeakerURLDownloadExtension.debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Monocrome";
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_SUSPICIOUS_MOVES = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CODE_SIGN_ENTITLEMENTS = NovelSpeakerURLDownloadExtension/NovelSpeakerURLDownloadExtension.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2.6.5;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 4KZE8276ZF;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 2.6.2;
-				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerURLDownloadExtension/NovelSpeakerURLDownloadExtension-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		2126A2671D9A1B90008E534A /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0A81087663D9D92BE5570A69 /* Pods-NovelSpeakerURLDownloadExtension.release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-Monocrome";
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_SUSPICIOUS_MOVES = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CODE_SIGN_ENTITLEMENTS = NovelSpeakerURLDownloadExtension/NovelSpeakerURLDownloadExtension.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2.6.5;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 4KZE8276ZF;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = NovelSpeakerURLDownloadExtension/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MARKETING_VERSION = 2.6.2;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = com.limuraproducts.novelspeaker.NovelSpeakerURLDownloadExtension;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "NovelSpeakerURLDownloadExtension/NovelSpeakerURLDownloadExtension-Bridging-Header.h";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		2193095923BBE56B00035EF0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AF64DABA0B88B85E7F1DE40E /* Pods-NovelSpeakerWatchApp.debug.xcconfig */;
@@ -2628,15 +2413,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2126A2681D9A1B90008E534A /* Build configuration list for PBXNativeTarget "NovelSpeakerURLDownloadExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2126A2661D9A1B90008E534A /* Debug */,
-				2126A2671D9A1B90008E534A /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		2193096123BBE56B00035EF0 /* Build configuration list for PBXNativeTarget "NovelSpeakerWatchApp WatchKit Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
