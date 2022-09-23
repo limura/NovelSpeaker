@@ -3332,6 +3332,85 @@ Fixing the problem
 
 - When "Settings tab"-> "Display bookmarks on the Bookshelf" is ON, the color of the bookmark position display bar does not turn purple even though there is an announcement that "The Book ends here.". Fix the problem
 
+
+
+# Version 2.6.3
+
+インタフェースの変更・機能追加等
+
+- 小説の本棚への追加に失敗した時のエラーメッセージを少しわかりやすく変更
+- 「設定タブ」->「ファイルの取り込み」を追加
+- ファイル取り込み時に、このiPhone(またはiPad等)の上のテキストファイルであった場合はそのファイルの更新確認を行うように
+- ファイル読み込み(シェアメニューからの読み込み)での対応ファイルタイプに HTML を追加
+- Share Extension で WebURL を受け取ることができるように
+- Action Extension(「ことせかい へ読み込む」) を廃止(直上の Share Extension 側(シェアメニュー上のカラーのアイコンのもの)が同様の動作になります)
+- iOSにて、「設定タブ」->「画面の回転に追従する」を追加(iPadではON/OFFできず常にONなので表示されません)
+
+問題の修正
+
+- 一部のWebサイトでページを飛ばして読み込んでしまう場合のあった問題を修正
+
+以下にざっくりと修正点について解説しておきます。
+
+* 小説の本棚への追加に失敗した時のエラーメッセージを少しわかりやすく変更
+
+こちらは、『小説をダウンロードしようとしたけれど「すでに本棚に登録されています」的なエラーメッセージが出て登録を失敗するのだけれど、同じ名前の小説は存在しない』という問題が発生しているのだけれど、実は小説の名前が変わっていたのでわからなかったという場合でも、その本棚に登録されている側の小説の名前が確認できるようなエラーメッセージを生成するようにした、という形のものです。
+
+* 「設定タブ」->「ファイルの取り込み」を追加
+
+こちらは、シェアメニューからのファイルの取り込みと同じ機能を「設定タブ」から行えるようにした物になります。
+機能的には以前から提供していたけれど、発見しづらい機能になっていたので「設定タブ」側にボタンを用意したという感じです。
+
+* ファイル取り込み時に、このiPhone(またはiPad等)の上のテキストファイルであった場合はそのファイルの更新確認を行うように
+
+こちらは、一つ前の「ファイルの取り込み」や「ファイル アプリ」からの取り込みを使って取り込まれたファイルのうち、テキストファイルについてはその元ファイルが更新されるかどうかを監視して、更新があれば読み込み直すようになるという物になります。
+これは、「Web取込」機能で取り込まれた小説と同様に更新確認を行う事ができるようになる形で実装されています。
+ただ、実際にファイルの更新が確認できるようになるには「ファイル アプリ」側で更新されている状態にしておかないといけない(例えば Dropbox での共有されているファイルを Dropbox側 で更新したけれど、「ファイル アプリ」側でそのファイルの更新を取得していない場合は更新された事は検知できない)という事に注意してください。
+
+* ファイル読み込み(シェアメニューからの読み込み)での対応ファイルタイプに HTML を追加
+
+今までは .txt と .pdf, .rtf, .rtfd が対象でしたが、これに .html が加わる形になります。
+
+* Share Extension で WebURL を受け取ることができるように
+
+Safari や他のアプリからの WebURL を Share Extension側 で受け取れるようになります。
+Sheare Extension はシェアメニュー上のカラーのアイコンの物になります。
+これで Twitterアプリ 等からの WebURL のシェア先として ことせかい を選択できるようになるはずです。
+
+* Action Extension(「ことせかい へ読み込む」) を廃止
+
+こちらは Safari でしか動いていない機能でしたので、削除しました。
+直上の Share Extension 側(シェアメニュー上のカラーのアイコンのもの)が同様の動作になりますので今後はそちらをご利用ください。
+
+* iOSにて、「設定タブ」->「画面の回転に追従する」を追加(iPadではON/OFFできず常にONなので表示されません)
+
+iPadOS側では画面の回転に追従していたのでその機能を iOS側にも開放します。
+なお、今までと同様の動作(回転に追従しない)が標準となりますので回転に追従させたい場合はON/OFFスイッチを変更してください。
+
+変更点は概ね以上のような物となっています。
+
+さて、残念なことに私はお問い合わせ対応に疲れ果ててしまいましたため、致命的な問題(アプリが強制終了するようなもの)以外への対応は極力しない形にさせていただいています。お問い合わせ窓口の閉鎖等については今の所はしておりませんが、上記のような対応になりますため、新機能のご提案や強制終了を伴わない不都合の報告をされましたとしても、対応はされないものとお考え下さい。なお、今回のように気が向いたら修正する事もあります。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+# Version 2.6.3
+
+Interface change, function addition, etc.
+
+- Added \"Settings tab\" -> \"File import\"
+- Changed the error message to make it easier to understand when adding a novel to the bookshelf fails
+- When importing a file from the share menu, etc., if it is a text file on this iPhone (or iPad, etc.), check the update of that file.
+- Added HTML to supported file types for file import (import from share menu)
+- Enable to receive WebURL in Share Extension
+- Deprecated Action Extension
+- Add \"Settings tab\" -> \"Follow the rotation of the screen\" on iOS
+
+Fixing the problem
+
+- Fixed an issue that caused some websites to skip pages and load
+
 「設定タブ」→「本棚に栞の位置を表示する」がONの時に「読み上げが最後に達しました」とのアナウンスがあるにもかかわらず、栞の位置表示のバーの色が紫色にならない問題を修正
 
 TODO:

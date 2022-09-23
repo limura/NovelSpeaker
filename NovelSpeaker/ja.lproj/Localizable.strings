@@ -863,17 +863,37 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.3
 
-- 「設定タブ」→「小説本文表示画面の設定」の文字の大きさと行間のそれぞれの数値を表示するように
-- 「設定タブ」→「小説本文画面の右上に表示されるボタン群の編集」に「表示されているページ内で検索」ボタンを追加
-- 小説の詳細画面の「小説名」と「著者名」をタップした時に出てくるダイアログに「〜をコピーする」ボタンを追加
-- 小説の編集画面の「章を追加」ボタンを、最後のページ以外でも押せるように
-- 「設定タブ」→「本棚に栞の位置を表示する」がONの時に「読み上げが最後に達しました」とのアナウンスがあるにもかかわらず、栞の位置表示のバーの色が紫色にならない問題を修正
+- 小説の本棚への追加に失敗した時のエラーメッセージを少しわかりやすく変更
+- 「設定タブ」->「ファイルの取り込み」を追加
+- ファイル取り込み時に、このiPhone(またはiPad等)の上のテキストファイルであった場合はそのファイルの更新確認を行うように
+- ファイル読み込み(シェアメニューからの読み込み)での対応ファイルタイプに HTML を追加
+- Share Extension で WebURL を受け取ることができるように
+- Action Extension(「ことせかい へ読み込む」) を廃止(直上の Share Extension 側(シェアメニュー上のカラーのアイコンのもの)が同様の動作になります)
+- iOSにて、「設定タブ」->「画面の回転に追従する」を追加(iPadではON/OFFできず常にONなので表示されません)
+- 一部のWebサイトでページを飛ばして読み込んでしまう場合のあった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.6.3
+
+インタフェースの変更・機能追加等
+
+- 小説の本棚への追加に失敗した時のエラーメッセージを少しわかりやすく変更
+- 「設定タブ」->「ファイルの取り込み」を追加
+- ファイル取り込み時に、このiPhone(またはiPad等)の上のテキストファイルであった場合はそのファイルの更新確認を行うように
+- ファイル読み込み(シェアメニューからの読み込み)での対応ファイルタイプに HTML を追加
+- Share Extension で WebURL を受け取ることができるように
+- Action Extension(「ことせかい へ読み込む」) を廃止(直上の Share Extension 側(シェアメニュー上のカラーのアイコンのもの)が同様の動作になります)
+- iOSにて、「設定タブ」->「画面の回転に追従する」を追加(iPadではON/OFFできず常にONなので表示されません)
+
+問題の修正
+
+- 一部のWebサイトでページを飛ばして読み込んでしまう場合のあった問題を修正
+
+
 # Version 2.6.2
 
 インタフェースの変更

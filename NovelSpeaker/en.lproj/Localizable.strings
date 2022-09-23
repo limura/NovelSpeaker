@@ -871,17 +871,37 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.3
 
-- \"Settings tab\" -> \"Text display settings\" now displays the character size and the respective numerical values between lines.
-- Added \"Search within the displayed page\" button to \"Settings tab\" -> \"Settings for the buttons displayed in the upper right corner of the novel text screen\".
-- Added \"Copy xxx name\" button to the dialog that appears when you tap \"Novel name\" and \"Author name\" on the novel details screen.
-- The \"Add chapter\" button on the novel edit screen can now be pressed on pages other than the last page.
-- When \"Settings tab\" -> \"Display bookmarks on the Bookshelf\" is ON, the color of the bookmark position display bar does not turn purple even though there is an announcement that \"The Book ends here.\". Fix the problem
+- Added \"Settings tab\" -> \"File import\"
+- Changed the error message to make it easier to understand when adding a novel to the bookshelf fails
+- When importing a file from the share menu, etc., if it is a text file on this iPhone (or iPad, etc.), check the update of that file.
+- Added HTML to supported file types for file import (import from share menu)
+- Enable to receive WebURL in Share Extension
+- Deprecated Action Extension
+- Add \"Settings tab\" -> \"Follow the rotation of the screen\" on iOS
+- Fixed an issue that caused some websites to skip pages and load
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+# Version 2.6.3
+
+Interface change, function addition, etc.
+
+- Added \"Settings tab\" -> \"File import\"
+- Changed the error message to make it easier to understand when adding a novel to the bookshelf fails
+- When importing a file from the share menu, etc., if it is a text file on this iPhone (or iPad, etc.), check the update of that file.
+- Added HTML to supported file types for file import (import from share menu)
+- Enable to receive WebURL in Share Extension
+- Deprecated Action Extension
+- Add \"Settings tab\" -> \"Follow the rotation of the screen\" on iOS
+
+Fixing the problem
+
+- Fixed an issue that caused some websites to skip pages and load
+
+
 # Version 2.6.2
 
 Interface changes
