@@ -48,6 +48,8 @@ class ShareViewController: UIViewController {
     var targetURL:URL? = nil
     let customSchemeAndHost = "novelspeaker://shareurl/"
     
+    @IBOutlet weak var cancelButton: UIButton!
+    @IBOutlet weak var importButton: UIButton!
     @IBOutlet var baseWindowView: UIView!
     @IBOutlet weak var floatingWindowView: UIView!
     
@@ -64,7 +66,13 @@ class ShareViewController: UIViewController {
         floatingWindowView.layer.shadowOffset = CGSize(width: 4, height: 4)
         setupButtons()
     }
-    
+
+    override func viewDidAppear(_ animated: Bool) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9, execute: {
+            UIAccessibility.post(notification: .screenChanged, argument: self)
+        })
+    }
+
     @IBAction func openButtonClicked(_ sender: Any) {
         guard let url = self.targetURL else {
             print("can not load url. url is nil.")

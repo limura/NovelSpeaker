@@ -58,7 +58,9 @@
                     </view>
                     <connections>
                         <outlet property="baseWindowView" destination="wbc-yd-nQP" id="UrX-JN-LjP"/>
+                        <outlet property="cancelButton" destination="GeH-Cd-lkY" id="pD8-9t-jwJ"/>
                         <outlet property="floatingWindowView" destination="37C-07-hdw" id="tOT-bg-q14"/>
+                        <outlet property="importButton" destination="8rF-w2-mRN" id="gwY-Ph-LxB"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="CEy-Cv-SGf" userLabel="First Responder" sceneMemberID="firstResponder"/>
