@@ -338,6 +338,8 @@
 		210EFEE223C8B623007C3016 /* SpeechBlockSpeaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechBlockSpeaker.swift; sourceTree = "<group>"; };
 		2111C5D71D8AE84B004AF96A /* PickerViewDialog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerViewDialog.xib; sourceTree = "<group>"; };
 		21143D7F25B2DC390078C2BA /* DownloadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTest.swift; sourceTree = "<group>"; };
+		2117707C28DD9A4A00305D97 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/MainInterface.strings; sourceTree = "<group>"; };
+		2117707E28DD9A5500305D97 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MainInterface.strings; sourceTree = "<group>"; };
 		212137CD24F9BA0F00E5FB9E /* RobotsFileTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotsFileTool.swift; sourceTree = "<group>"; };
 		2122028F266B6FAD008EF6AF /* WebSpeechViewTool_Inject.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = WebSpeechViewTool_Inject.js; path = Resources/WebSpeechViewTool_Inject.js; sourceTree = "<group>"; };
 		212214AC19FBD6FB00FC775B /* SettingDataModel 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "SettingDataModel 5.xcdatamodel"; sourceTree = "<group>"; };
@@ -1811,6 +1813,8 @@
 			isa = PBXVariantGroup;
 			children = (
 				21BBC11328DC994A00DB4C3B /* Base */,
+				2117707C28DD9A4A00305D97 /* ja */,
+				2117707E28DD9A5500305D97 /* en */,
 			);
 			name = MainInterface.storyboard;
 			sourceTree = "<group>";

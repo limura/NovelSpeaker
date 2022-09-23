@@ -1,0 +1,12 @@
+
+/* Class = "UIButton"; configuration.title = "ことせかい で取り込む"; ObjectID = "8rF-w2-mRN"; */
+"8rF-w2-mRN.configuration.title" = "ことせかい で取り込む";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "8rF-w2-mRN"; */
+"8rF-w2-mRN.normalTitle" = "ことせかい で取り込む";
+
+/* Class = "UIButton"; configuration.title = "キャンセル"; ObjectID = "GeH-Cd-lkY"; */
+"GeH-Cd-lkY.configuration.title" = "キャンセル";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "GeH-Cd-lkY"; */
+"GeH-Cd-lkY.normalTitle" = "キャンセル";

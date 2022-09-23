@@ -1,0 +1,12 @@
+
+/* Class = "UIButton"; configuration.title = "ことせかい で取り込む"; ObjectID = "8rF-w2-mRN"; */
+"8rF-w2-mRN.configuration.title" = "Import to NovelSpeaker";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "8rF-w2-mRN"; */
+"8rF-w2-mRN.normalTitle" = "Import to NovelSpeaker";
+
+/* Class = "UIButton"; configuration.title = "キャンセル"; ObjectID = "GeH-Cd-lkY"; */
+"GeH-Cd-lkY.configuration.title" = "Cancel";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "GeH-Cd-lkY"; */
+"GeH-Cd-lkY.normalTitle" = "Cancel";
