@@ -376,6 +376,11 @@ class NovelSpeakerUtility: NSObject {
                 NiftyUtility.checkUrlAndConifirmToUser(viewController: rootViewController, url: targetURL, cookieString: cookieString, isNeedFallbackImportFromWebPageTab: true)
             }
             return true
+        }else if host == "shareurl" {
+            let targetURLString = url.absoluteString.replacingOccurrences(of: "^novelspeaker://shareurl/", with: "", options: .regularExpression)
+            if targetURLString == url.absoluteString { return false }
+            guard let targetURL = URL(string: targetURLString) else { return false }
+            return ProcessURL(url: targetURL)
         }
         return false
     }
