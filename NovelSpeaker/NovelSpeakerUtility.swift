@@ -2787,7 +2787,7 @@ class NovelSpeakerUtility: NSObject {
     }
     
     static let OuterNovelFileAttributesKey = "OuterNovelFileAttributesKey"
-    fileprivate struct OuterNovelFileAttributes: Codable {
+    struct OuterNovelFileAttributes: Codable {
         let modificationDate:Date
         let size:Int
         let bookmark:Data
@@ -2843,7 +2843,7 @@ class NovelSpeakerUtility: NSObject {
         defaults.set(currentDictionary, forKey: OuterNovelFileAttributesKey)
         defaults.synchronize()
     }
-    fileprivate static func GetOuterNovelAttributes(novelID:String) -> OuterNovelFileAttributes? {
+    static func GetOuterNovelAttributes(novelID:String) -> OuterNovelFileAttributes? {
         let defaults = UserDefaults.standard
         guard let currentDictionary:[String:Data] = defaults.dictionary(forKey: OuterNovelFileAttributesKey) as? [String:Data] else {
             return nil
@@ -2856,6 +2856,17 @@ class NovelSpeakerUtility: NSObject {
             return nil
         }
         return targetAttributes
+    }
+    static func UpdateOuterNovelFileAttirbuteOnlyNeedCheckUpdate(novelID:String, isNeedCheckUpdate:Bool) -> Bool {
+        guard let originalAttributes = GetOuterNovelAttributes(novelID: novelID) else {
+            print("novel: \(novelID) not registerd in OuterNovelFile")
+            return false
+        }
+        guard let originalUrl = URL(string: originalAttributes.originalUrlAbsoluteString) else {
+            print("originalUrl is not url string?")
+            return false
+        }
+        return UpdateOuterNovelData(novelID: novelID, modificationDate: originalAttributes.modificationDate, size: originalAttributes.size, bookmark: originalAttributes.bookmark, importOptionSeparated: originalAttributes.importOptionSeparated, originalUrl: originalUrl, isNeedCheckUpdate: isNeedCheckUpdate, fileFormat: originalAttributes.rawFileFormat)
     }
     static func UpdateOuterNovelFileAttributesOnlySizeAndDate(novelID:String, fileUrl:URL) -> Bool {
         let scope = fileUrl.startAccessingSecurityScopedResource()
@@ -3086,7 +3097,7 @@ class NovelSpeakerUtility: NSObject {
         return GetOuterNovelAttributes(novelID: novelID) != nil
     }
     static func CheckAndUpdateRgisterdOuterNovel(novelID:String) {
-        guard let attribute = GetOuterNovelAttributes(novelID: novelID) else{ return }
+        guard let attribute = GetOuterNovelAttributes(novelID: novelID), attribute.isNeedCheckUpdate != false else { return }
         guard CheckOuterNovelIsModified(novelID: novelID) else { return }
         ReadOuterNovel(novelID: novelID, fileFormat: attribute.rawFileFormat) { (content, fileURL) in
             guard let content = content?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }

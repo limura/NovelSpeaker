@@ -340,6 +340,17 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                         NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CheckUpdateDone_Message", comment: "更新チェックを開始しました"), buttonTitle: nil, buttonAction: nil)
                     }
                 })
+            }else if novel.type == .UserCreated, NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novel.novelID) {
+                actionSection <<< ButtonRow() {
+                    $0.title = NSLocalizedString("NovelDetailViewController_ActionSection_CheckUpdate", comment: "この小説の更新確認を行う")
+                    $0.cell.textLabel?.numberOfLines = 0
+                    $0.cell.accessoryType = .disclosureIndicator
+                }.onCellSelection({ (cellOf, row) in
+                    NovelDownloadQueue.shared.addQueue(novelID: self.novelID)
+                    DispatchQueue.main.async {
+                        NiftyUtility.EasyDialogOneButton(viewController: self, title: nil, message: NSLocalizedString("NovelDetailViewController_ActionSection_CheckUpdateDone_Message", comment: "更新チェックを開始しました"), buttonTitle: nil, buttonAction: nil)
+                    }
+                })
             }
 
             actionSection <<< ButtonRow() {
@@ -440,23 +451,36 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 $0.title = NSLocalizedString("SettingTableViewController_CorrectionOfTheReading", comment:"読みの修正")
                 $0.presentationMode = .segueName(segueName: "speechModSettingSegue", onDismiss: nil)
             }
-            settingSection <<< SwitchRow() {
-                $0.title = NSLocalizedString("NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle", comment: "この小説の更新確認を行わない")
-                $0.cell.textLabel?.numberOfLines = 0
-                $0.value = RealmUtil.RealmBlock { (realm) -> Bool in
-                    guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else { return false }
-                    return novel.isNotNeedUpdateCheck
-                }
-            }.onChange({ (row) in
-                guard let value = row.value else { return }
-                RealmUtil.RealmBlock { (realm) -> Void in
-                    guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID), novel.isNotNeedUpdateCheck != value else { return }
-                    RealmUtil.WriteWith(realm: realm) { (realm) in
-                        novel.isNotNeedUpdateCheck = value
-                        realm.add(novel, update: .modified)
+            if novel.type == .URL {
+                settingSection <<< SwitchRow() {
+                    $0.title = NSLocalizedString("NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle", comment: "この小説の更新確認を行わない")
+                    $0.cell.textLabel?.numberOfLines = 0
+                    $0.value = RealmUtil.RealmBlock { (realm) -> Bool in
+                        guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID) else { return false }
+                        return novel.isNotNeedUpdateCheck
                     }
-                }
-            })
+                }.onChange({ (row) in
+                    guard let value = row.value else { return }
+                    RealmUtil.RealmBlock { (realm) -> Void in
+                        guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID), novel.isNotNeedUpdateCheck != value else { return }
+                        RealmUtil.WriteWith(realm: realm) { (realm) in
+                            novel.isNotNeedUpdateCheck = value
+                            realm.add(novel, update: .modified)
+                        }
+                    }
+                })
+            }
+            if novel.type == .UserCreated, let outerNovelAttribute = NovelSpeakerUtility.GetOuterNovelAttributes(novelID: novel.novelID) {
+                let novelID = novel.novelID
+                settingSection <<< SwitchRow() {
+                    $0.title = NSLocalizedString("NovelDetailViewController_NovelUpdateCheck_SwitchRowTitle", comment: "この小説の更新確認を行わない")
+                    $0.cell.textLabel?.numberOfLines = 0
+                    $0.value = !(outerNovelAttribute.isNeedCheckUpdate ?? false)
+                }.onChange({ (row) in
+                    guard let value = row.value else { return }
+                    _ = NovelSpeakerUtility.UpdateOuterNovelFileAttirbuteOnlyNeedCheckUpdate(novelID: novelID, isNeedCheckUpdate: value ? false : true)
+                })
+            }
             /*
             settingSection <<< ButtonRow() {
                 $0.title = NSLocalizedString("NovelDetailViewController_AddRubyToSpeechModButtonTitle", comment: "小説中に出てくるルビ表記をこの小説用の読みの修正に上書き追加する")
