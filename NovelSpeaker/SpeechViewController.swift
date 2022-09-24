@@ -367,6 +367,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                         self.applyStoryText(text: NSLocalizedString("SpeechViewController_ContentReadFailed", comment: "文書の読み込みに失敗しました。"))
                         return
                     }
+                    // スクロールした状態で .attributedText を更新すると怪しい動きをするようなので、
+                    // .attributedText を書き換える前にスクロール位置を先頭に移動しておきます
+                    self.textView.setContentOffset(CGPoint(x: 0, y: 0), animated: false)
                     self.applyStoryText(text: story.content)
                     // textView.select() すると、選択範囲の上にメニューが出るようになるのでこの時点では select() はしない。
                     // でも、textView.becomeFirstResponder() しておかないと選択範囲自体が表示されないようなので becomeFirstResponder() はどこかでしておかないと駄目っぽい。
