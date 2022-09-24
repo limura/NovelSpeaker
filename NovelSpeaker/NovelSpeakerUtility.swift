@@ -404,7 +404,10 @@ class NovelSpeakerUtility: NSObject {
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
-            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil) { (registerdNovelID, importOptionSeparated) in
+                guard let registerdNovelID = registerdNovelID else { return }
+                RegisterOuterNovelFileAttributes(novelID: registerdNovelID, fileUrl: url, importOptionSeparated:importOptionSeparated, fileFormat: OuterNovelFileAttributes.FileFormat.pdf)
+            }
         }
         return true
     }
@@ -427,7 +430,10 @@ class NovelSpeakerUtility: NSObject {
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
-            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil)
+            NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil) { (registerdNovelID, importOptionSeparated) in
+                guard let registerdNovelID = registerdNovelID else { return }
+                RegisterOuterNovelFileAttributes(novelID: registerdNovelID, fileUrl: url, importOptionSeparated:importOptionSeparated, fileFormat: OuterNovelFileAttributes.FileFormat.rtf)
+            }
         }
         return true
     }
@@ -465,7 +471,7 @@ class NovelSpeakerUtility: NSObject {
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil) { (registerdNovelID, importOptionSeparated) in
                 guard let registerdNovelID = registerdNovelID else { return }
-                UpdateOuterNovelFileAttributes(novelID: registerdNovelID, fileUrl: url, importOptionSeparated:importOptionSeparated)
+                RegisterOuterNovelFileAttributes(novelID: registerdNovelID, fileUrl: url, importOptionSeparated:importOptionSeparated, fileFormat: OuterNovelFileAttributes.FileFormat.plainText)
             }
         }
         return true
@@ -475,13 +481,22 @@ class NovelSpeakerUtility: NSObject {
     static func ProcessHtmlFile(url:URL) -> Bool {
         let isSecureURL = url.startAccessingSecurityScopedResource()
         defer { if isSecureURL { url.stopAccessingSecurityScopedResource() } }
-        guard let data = try? Data(contentsOf: url), let html = String(data: data, encoding: NiftyUtility.DetectEncoding(data: data)), let text = NiftyUtility.HTMLToString(htmlString: html) else { return false }
+        guard let data = try? Data(contentsOf: url) else { return false }
+        
+        let (html, guessedEncoding) = NiftyUtility.decodeHTMLStringFrom(data: data, headerEncoding: NiftyUtility.DetectEncoding(data: data))
+        let text:String?
+        if let html = html {
+            text = NiftyUtility.HTMLToString(htmlString: html)
+        }else{
+            text = NiftyUtility.HTMLDataToString(htmlData: data, encoding: guessedEncoding ?? .utf8)
+        }
+        guard let text = text else { return false }
         let fileName = url.deletingPathExtension().lastPathComponent
         DispatchQueue.main.async {
             guard let viewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return }
             NiftyUtility.checkTextImportConifirmToUser(viewController: viewController, title: fileName.count > 0 ? fileName : "unknown title", content: text, hintString: nil) { (registerdNovelID, importOptionSeparated) in
                 guard let registerdNovelID = registerdNovelID else { return }
-                UpdateOuterNovelFileAttributes(novelID: registerdNovelID, fileUrl: url, importOptionSeparated:importOptionSeparated)
+                RegisterOuterNovelFileAttributes(novelID: registerdNovelID, fileUrl: url, importOptionSeparated:importOptionSeparated, fileFormat: OuterNovelFileAttributes.FileFormat.html)
             }
         }
         return true
@@ -2778,9 +2793,33 @@ class NovelSpeakerUtility: NSObject {
         let bookmark:Data
         let importOptionSeparated:Bool
         let originalUrlAbsoluteString:String
+        let isNeedCheckUpdate:Bool?
+        enum FileFormat: Int, CodingKey {
+            case invalidType = 0
+            case plainText = 1
+            case html = 2
+            case pdf = 3
+            case rtf = 4
+        }
+        func normalizeFileFormat(num:Int) -> FileFormat {
+            switch num {
+            case FileFormat.plainText.rawValue:
+                return FileFormat.plainText
+            case FileFormat.html.rawValue:
+                return FileFormat.html
+            case FileFormat.pdf.rawValue:
+                return FileFormat.pdf
+            case FileFormat.rtf.rawValue:
+                return FileFormat.rtf
+            default:
+                return FileFormat.invalidType
+            }
+        }
+        let fileFormat:Int?
+        var rawFileFormat:FileFormat { get { return normalizeFileFormat(num: fileFormat ?? FileFormat.invalidType.rawValue) } }
     }
-    fileprivate static func UpdateOuterNovelData(novelID:String, modificationDate:Date, size:Int, bookmark:Data, importOptionSeparated: Bool, originalUrl:URL) -> Bool {
-        let outerNovelDataAttribute = OuterNovelFileAttributes(modificationDate: modificationDate, size: size, bookmark: bookmark, importOptionSeparated: importOptionSeparated, originalUrlAbsoluteString: originalUrl.absoluteString)
+    fileprivate static func UpdateOuterNovelData(novelID:String, modificationDate:Date, size:Int, bookmark:Data, importOptionSeparated: Bool, originalUrl:URL, isNeedCheckUpdate:Bool, fileFormat:OuterNovelFileAttributes.FileFormat) -> Bool {
+        let outerNovelDataAttribute = OuterNovelFileAttributes(modificationDate: modificationDate, size: size, bookmark: bookmark, importOptionSeparated: importOptionSeparated, originalUrlAbsoluteString: originalUrl.absoluteString, isNeedCheckUpdate: isNeedCheckUpdate, fileFormat: fileFormat.rawValue)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.dataEncodingStrategy = .base64
@@ -2845,9 +2884,10 @@ class NovelSpeakerUtility: NSObject {
             print("originalUrl is not url string?")
             return false
         }
-        return UpdateOuterNovelData(novelID: novelID, modificationDate: modificationDate, size: size, bookmark: originalAttributes.bookmark, importOptionSeparated: originalAttributes.importOptionSeparated, originalUrl: originalUrl)
+
+        return UpdateOuterNovelData(novelID: novelID, modificationDate: modificationDate, size: size, bookmark: originalAttributes.bookmark, importOptionSeparated: originalAttributes.importOptionSeparated, originalUrl: originalUrl, isNeedCheckUpdate: originalAttributes.isNeedCheckUpdate ?? false, fileFormat: originalAttributes.rawFileFormat)
     }
-    static func UpdateOuterNovelFileAttributes(novelID:String, fileUrl:URL, importOptionSeparated:Bool, completion: ((_ result:Bool)->Void)? = nil) {
+    fileprivate static func RegisterOuterNovelFileAttributes(novelID:String, fileUrl:URL, importOptionSeparated:Bool, fileFormat: OuterNovelFileAttributes.FileFormat, completion: ((_ result:Bool)->Void)? = nil) {
         let scope = fileUrl.startAccessingSecurityScopedResource()
         defer {
             if scope {
@@ -2884,7 +2924,7 @@ class NovelSpeakerUtility: NSObject {
                 completion?(false)
                 return
             }
-            _ = UpdateOuterNovelData(novelID: novelID, modificationDate: modificationDate, size: size, bookmark: bookmark, importOptionSeparated:importOptionSeparated, originalUrl: fileUrl)
+            _ = UpdateOuterNovelData(novelID: novelID, modificationDate: modificationDate, size: size, bookmark: bookmark, importOptionSeparated:importOptionSeparated, originalUrl: fileUrl, isNeedCheckUpdate: true, fileFormat: fileFormat)
             completion?(true)
         }
     }
@@ -2975,11 +3015,12 @@ class NovelSpeakerUtility: NSObject {
             completion(data)
         }
     }
-    static func ReadOuterNovel(novelID:String, completion: @escaping ((_ content:String?, _ fileURL:URL?)->Void)) {
+    fileprivate static func ReadOuterNovel(novelID:String, fileFormat:OuterNovelFileAttributes.FileFormat, completion: @escaping ((_ content:String?, _ fileURL:URL?)->Void)) {
         guard let attributes = GetOuterNovelAttributes(novelID: novelID) else {
             completion(nil, nil)
             return
         }
+        print("format: \(attributes.fileFormat ?? -1) novel: \(novelID)")
         var isStale = false
         guard let bookmarkUrl = try? URL(resolvingBookmarkData: attributes.bookmark, bookmarkDataIsStale: &isStale), isStale == false else {
             print("can not read bookmark. error decode bookmarkUrl or isStale != false")
@@ -2992,8 +3033,7 @@ class NovelSpeakerUtility: NSObject {
                 bookmarkUrl.stopAccessingSecurityScopedResource()
             }
         }
-        func convertDataToString(data:Data?) -> String? {
-            guard let data = data else { return nil }
+        func convertDataToString(data:Data) -> String? {
             if let string = String(data: data, encoding: .utf8) {
                 return string
             }
@@ -3003,12 +3043,43 @@ class NovelSpeakerUtility: NSObject {
                 let encoding = String.Encoding(rawValue: encodingValue)
                 return String(data: data, encoding: encoding)
             }
-            print("can not convert Data to String")
             return nil
+        }
+        func convertPDFDataToString(data:Data) -> String? {
+            return NiftyUtility.BinaryPDFToString(data: data)
+        }
+        func convertRTFDataToString(data:Data) -> String? {
+            return NiftyUtility.RTFDataToAttributedString(data: data)?.string
+        }
+        func convertHTMLDataToString(data:Data) -> String? {
+            let (html, guessedEncoding) = NiftyUtility.decodeHTMLStringFrom(data: data, headerEncoding: NiftyUtility.DetectEncoding(data: data))
+            if let html = html {
+                return NiftyUtility.HTMLToString(htmlString: html)
+            }
+            return NiftyUtility.HTMLDataToString(htmlData: data, encoding: guessedEncoding ?? .utf8)
         }
         
         ReadFileUrlWithCompletionHandler(url: bookmarkUrl, completion: { data in
-            completion(convertDataToString(data: data), bookmarkUrl)
+            guard let data = data else {
+                completion(nil, bookmarkUrl)
+                return
+            }
+            print("format: \(fileFormat.stringValue)")
+            let content:String?
+            switch fileFormat {
+            case .plainText:
+                content = convertDataToString(data: data)
+            case .html:
+                content = convertHTMLDataToString(data: data)
+            case .pdf:
+                content = convertPDFDataToString(data: data)
+            case .rtf:
+                content = convertRTFDataToString(data: data)
+            default:
+                print("unknown format")
+                content = nil
+            }
+            completion(content, bookmarkUrl)
         })
     }
     static func IsRegisteredOuterNovel(novelID:String) -> Bool {
@@ -3017,7 +3088,7 @@ class NovelSpeakerUtility: NSObject {
     static func CheckAndUpdateRgisterdOuterNovel(novelID:String) {
         guard let attribute = GetOuterNovelAttributes(novelID: novelID) else{ return }
         guard CheckOuterNovelIsModified(novelID: novelID) else { return }
-        ReadOuterNovel(novelID: novelID) { (content, fileURL) in
+        ReadOuterNovel(novelID: novelID, fileFormat: attribute.rawFileFormat) { (content, fileURL) in
             guard let content = content?.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
             let separatedText = NiftyUtility.CheckShouldSeparate(text: content)
             RealmUtil.RealmBlock { realm in

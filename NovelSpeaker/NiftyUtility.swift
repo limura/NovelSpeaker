@@ -322,6 +322,16 @@ class NiftyUtility: NSObject {
     }
     #endif
     
+    static func RTFDataToAttributedString(data:Data) -> NSAttributedString? {
+        do {
+            let attributedString = try NSAttributedString(data: data, options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
+            return attributedString
+        }catch let error {
+            print("AttributedString from RTF data failed. error: ", error)
+        }
+        return nil
+    }
+    
     @objc public static func FileRTFToAttributedString(url: URL) -> NSAttributedString? {
         do {
             let attributedString = try NSAttributedString(url: url, options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil)
