@@ -1,0 +1,32 @@
+[
+  [
+    "com.apple.ttsbundle.siri_O-ren_ja-JP_premium",
+    "com.apple.ttsbundle.siri_female_ja-JP_premium"
+  ],
+  [
+    "com.apple.voice.enhanced.ja-JP.Kyoko",
+    "com.apple.ttsbundle.Kyoko-premium",
+    "com.apple.speech.synthesis.voice.kyoko.premium"
+  ],
+  [
+    "com.apple.voice.enhanced.ja-JP.Otoya",
+    "com.apple.ttsbundle.Otoya-premium",
+    "com.apple.speech.synthesis.voice.otoya.premium"
+  ],
+  [
+    "com.apple.ttsbundle.siri_O-ren_ja-JP_compact",
+    "com.apple.ttsbundle.siri_female_ja-JP_compact"
+  ],
+  [
+    "com.apple.voice.compact.ja-JP.Kyoko",
+    "com.apple.ttsbundle.Kyoko-compact"
+  ],
+  [
+    "com.apple.ttsbundle.siri_Hattori_ja-JP_compact",
+    "com.apple.ttsbundle.siri_male_ja-JP_compact"
+  ],
+  [
+    "com.apple.voice.compact.ja-JP.Otoya",
+    "com.apple.ttsbundle.Otoya-compact"
+  ]
+]
