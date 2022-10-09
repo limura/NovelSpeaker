@@ -3129,4 +3129,39 @@ class NovelSpeakerUtility: NSObject {
             }
         }
     }
+    
+    // 個々のOS間(場合によってはOSバージョン間)で、同じ名前(?)の話者に別のIdentity文字列が定義されている場合があり、
+    // iCloud同期をしている場合や別のOS間でのバックアップファイルの適用をすることで、
+    // 同じ話者名なのにIdentity文字列が違う事で話者を選択できない場合がある。
+    // これを回避するために、同じ名前で登録されているIdentity文字列についてリストを作って登録しておくことで
+    // このリスト内であれば同じ話者であると仮定して設定できるようにする。
+    // なお、この呼出は同期的に終了させるために default値 を持ち、初回のアクセス時やデータが取得できなかった時にはその値を返すようにしている。
+    // これは、この関数が呼び出されるのは発話周りに関係する事になり、その呼出でネットワーク遅延(最大10秒とか)の「待ち」が入るのを良しとしない事からくる。
+    static func GetVoiceIdentifierChangeTable() -> [[String]] {
+        let targetURLString = "https://limura.github.io/NovelSpeaker/data/SpeakerConvertTable-Version1.json"
+        let cacheFileName = "SpeakerConvertTable-Version1.json"
+        let cacheFileExpireTimeinterval:Double = 60*60*24
+        let defaultResult:[[String]] = [
+            ["com.apple.ttsbundle.siri_O-ren_ja-JP_premium", "com.apple.ttsbundle.siri_female_ja-JP_premium"],
+            ["com.apple.voice.enhanced.ja-JP.Kyoko", "com.apple.ttsbundle.Kyoko-premium", "com.apple.speech.synthesis.voice.kyoko.premium"],
+            ["com.apple.voice.enhanced.ja-JP.Otoya", "com.apple.ttsbundle.Otoya-premium", "com.apple.speech.synthesis.voice.otoya.premium"],
+            ["com.apple.ttsbundle.siri_O-ren_ja-JP_compact", "com.apple.ttsbundle.siri_female_ja-JP_compact"],
+            ["com.apple.voice.compact.ja-JP.Kyoko", "com.apple.ttsbundle.Kyoko-compact"],
+            ["com.apple.ttsbundle.siri_Hattori_ja-JP_compact", "com.apple.ttsbundle.siri_male_ja-JP_compact"],
+            ["com.apple.voice.compact.ja-JP.Otoya", "com.apple.ttsbundle.Otoya-compact"]
+        ]
+        guard let changeTableURL = URL(string: targetURLString) else {
+            return defaultResult
+        }
+        // 怪しくキャッシュファイルから読み込んで、HTTPリクエストはその後に勝手に出すようにします。
+        let result:[[String]]
+        if let cachedData = NiftyUtility.GetCachedHttpGetCachedData(url: changeTableURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeinterval), let table = try? JSONDecoder().decode([[String]].self, from: cachedData) {
+            result = table
+        }else{
+            result = defaultResult
+        }
+        // 単にキャッシュファイルを更新するためだけの呼び出しです。
+        NiftyUtility.FileCachedHttpGet(url: changeTableURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: nil, failedAction: nil)
+        return result
+    }
 }

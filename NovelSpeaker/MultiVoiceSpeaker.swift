@@ -126,6 +126,23 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
             voiceCache[voiceIdentifierNotNil] = voice
             return voice
         }
+
+        let changeTable = NovelSpeakerUtility.GetVoiceIdentifierChangeTable()
+        if let voiceIdentifierNotNil = voiceIdentifier , let changeToArray = changeTable.filter({ $0.contains(voiceIdentifierNotNil) }).first {
+            for changeTo in changeToArray {
+                if changeTo == voiceIdentifierNotNil { continue }
+                if let voice = AVSpeechSynthesisVoice(identifier: changeTo) {
+                    for voiceId in changeToArray {
+                        self.voiceCache[voiceId] = voice
+                    }
+                    AppInformationLogger.AddLog(message: NSLocalizedString("MultiVoiceSpeaker_getVoice_useVoiceIdentityChangeTable_Warning", comment: "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします。(他のOS/OSバージョン向けのIdentity文字列を確認したので近い話者を選択しました)"), appendix: [
+                        "from": voiceIdentifierNotNil,
+                        "to": voice.identifier
+                    ], isForDebug: true)
+                    return voice
+                }
+            }
+        }
         if let voiceIdentifierNotNil = voiceIdentifier, let voice = getNearVoice(voiceIdentifier: voiceIdentifierNotNil, targetLocale: fallbackLocale) {
             AppInformationLogger.AddLog(message: NSLocalizedString("MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning", comment: "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします"), appendix: ["from": voiceIdentifierNotNil, "to": "\(voice.identifier): \(voice.name)"], isForDebug: false)
             voiceCache[voice.identifier] = voice

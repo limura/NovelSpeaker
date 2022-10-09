@@ -921,7 +921,8 @@ class NiftyUtility: NSObject {
     }
     #endif
 
-    public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, headlessClientKey:String? = nil, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
+    static let httpRequestDefaultTimeoutInterval:TimeInterval = 10
+    public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval? = httpRequestDefaultTimeoutInterval, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, headlessClientKey:String? = nil, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
         #if !os(watchOS)
         if isNeedHeadless {
             var headlessClient:HeadlessHttpClient? = nil
@@ -934,7 +935,7 @@ class NiftyUtility: NSObject {
                     headlessClient = newClient
                 }
             }
-            httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, httpClient: headlessClient, successAction: { (doc) in
+            httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval ?? httpRequestDefaultTimeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, httpClient: headlessClient, successAction: { (doc) in
                 if let data = doc.innerHTML?.data(using: .utf8) {
                     successAction?(data, .utf8)
                     return
@@ -944,7 +945,7 @@ class NiftyUtility: NSObject {
         }
         #endif
         let session: URLSession = URLSession.shared
-        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: timeoutInterval)
+        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: timeoutInterval ?? httpRequestDefaultTimeoutInterval)
         if let postData = postData {
             request.httpMethod = "POST"
             request.httpBody = postData
@@ -1008,8 +1009,8 @@ class NiftyUtility: NSObject {
         }
     }
     
-    public static func httpGet(url: URL, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
-        httpRequest(url: url, postData: nil, successAction: successAction, failedAction: failedAction)
+    public static func httpGet(url: URL, timeoutInterval:TimeInterval? = nil, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
+        httpRequest(url: url, postData: nil, timeoutInterval: timeoutInterval, successAction: successAction, failedAction: failedAction)
     }
     
     public static func httpPost(url: URL, data:Data, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)?, failedAction:((Error?)->Void)?){
@@ -1433,18 +1434,31 @@ class NiftyUtility: NSObject {
         }
     }
     
-    static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, canRecoverOldFile:Bool = false, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?) {
-        if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName),
-            FileManager.default.fileExists(atPath: cacheFilePath.path),
-            let attribute = try? FileManager.default.attributesOfItem(atPath: cacheFilePath.path),
-            let modificationDate = attribute[FileAttributeKey.modificationDate] as? Date,
-            (Date().timeIntervalSince1970 - modificationDate.timeIntervalSince1970) < expireTimeinterval,
-            let dataZiped = try? Data(contentsOf: cacheFilePath),
-            let data = decompress(data: dataZiped) {
+    static func GetCachedHttpGetCachedData(url: URL, cacheFileName: String, expireTimeinterval:TimeInterval?) -> Data? {
+        guard let cacheFilePath = GetCacheFilePath(fileName: cacheFileName),
+              FileManager.default.fileExists(atPath: cacheFilePath.path) else {
+            return nil
+        }
+        if let expireTimeinterval = expireTimeinterval {
+            if let attribute = try? FileManager.default.attributesOfItem(atPath: cacheFilePath.path),
+               let modificationDate = attribute[FileAttributeKey.modificationDate] as? Date,
+               (Date().timeIntervalSince1970 - modificationDate.timeIntervalSince1970) >= expireTimeinterval {
+                return nil
+            }
+        }
+        guard let dataZiped = try? Data(contentsOf: cacheFilePath),
+              let data = decompress(data: dataZiped) else {
+            return nil
+        }
+        return data
+    }
+    
+    static public func FileCachedHttpGet(url: URL, cacheFileName:String, expireTimeinterval:TimeInterval, canRecoverOldFile:Bool = false, requestTimeout:TimeInterval? = nil, successAction:((Data)->Void)?, failedAction:((Error?)->Void)?) {
+        if let data = GetCachedHttpGetCachedData(url: url, cacheFileName: cacheFileName, expireTimeinterval: expireTimeinterval) {
             successAction?(data)
             return
         }
-        httpGet(url: url, successAction: { (data, encoding) in
+        httpGet(url: url, timeoutInterval: requestTimeout, successAction: { (data, encoding) in
             if let cacheFilePath = GetCacheFilePath(fileName: cacheFileName), let dataZiped = compress(data: data) {
                 do {
                     try dataZiped.write(to: cacheFilePath, options: Data.WritingOptions.atomic)

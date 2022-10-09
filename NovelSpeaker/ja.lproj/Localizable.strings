@@ -796,7 +796,8 @@
 "SearchFloatingView_AccessibilityHint_RightButton" = "一つ後ろを検索";
 "SearchFloatingView_AccessibilityHint_CloseButton" = "検索窓を終了";
 
-"MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします";
+"MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします。(文字列的に近い話者を使用します)";
+"MultiVoiceSpeaker_getVoice_useVoiceIdentityChangeTable_Warning" = "指定された話者がこの端末では利用できない物であったので、代わりの話者を利用する事にします。(他のOS/OSバージョン向けのIdentity文字列を確認したので近い話者を選択します)";
 
 "NovelFolderManageTableViewController_AddButtonTitle" = "このフォルダに入れる小説を選択する";
 "NovelFolderManageTableViewController_DeleteButtonTitle" = "このフォルダを削除する";

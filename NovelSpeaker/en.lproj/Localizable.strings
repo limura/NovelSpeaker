@@ -803,7 +803,8 @@
 "SearchFloatingView_AccessibilityHint_CloseButton" = "Exit the search window";
 
 
-"MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "The specified speaker was not available on this machine. I will use an alternative speaker.";
+"MultiVoiceSpeaker_getVoice_useGetNearVoice_Warning" = "The specified speaker was not available on this machine. I will use an alternative speaker. (Use stringally close speakers)";
+"MultiVoiceSpeaker_getVoice_useVoiceIdentityChangeTable_Warning" = "The specified speaker was not available on this machine. I will use an alternative speaker. (I checked Identity strings for other OS and other OS versions, so I choose a close speaker)";
 
 "NovelFolderManageTableViewController_AddButtonTitle" = "Select a novel to put in this folder";
 "NovelFolderManageTableViewController_DeleteButtonTitle" = "Delete this folder";
