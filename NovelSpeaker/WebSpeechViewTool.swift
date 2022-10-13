@@ -77,6 +77,8 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         loadCompletionHandler = completionHandler
         self.wkWebView = webView
         self.siteInfoArray = siteInfoArray
+        webView.allowsLinkPreview = false
+        webView.allowsBackForwardNavigationGestures = false
         webView.navigationDelegate = self
         webView.loadHTMLString(html, baseURL: baseURL)
     }
