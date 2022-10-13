@@ -64,6 +64,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     var wkWebView:CustomWKWebView? = nil
     var loadCompletionHandler:(() -> Void)? = nil
     var siteInfoArray:[StorySiteInfo] = []
+    var allowUrl:URL? = nil
     
     func removeDelegate(){
         if let webView = self.wkWebView {
@@ -90,6 +91,7 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         loadCompletionHandler = completionHandler
         self.wkWebView = webView
         self.siteInfoArray = siteInfoArray
+        self.allowUrl = request.url
         webView.navigationDelegate = self
         webView.load(request)
     }
@@ -97,6 +99,17 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
     func loadInjectScript() -> String? {
         guard let path = Bundle.main.path(forResource: "WebSpeechViewTool_Inject", ofType: "js") else { return nil }
         return try? String.init(contentsOfFile: path)
+    }
+    
+    // WKWebView の読み込み開始ハンドラ
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        if let allowUrl = self.allowUrl, let targetUrl = navigationAction.request.url, allowUrl == targetUrl {
+            return .allow
+        }
+        if let targetUrl = navigationAction.request.url, targetUrl.absoluteString == "about:blank" {
+            return .allow
+        }
+        return .cancel
     }
     
     // WKWebView の読み込み完了ハンドラ
