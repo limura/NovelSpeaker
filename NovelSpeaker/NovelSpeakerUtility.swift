@@ -365,11 +365,11 @@ class NovelSpeakerUtility: NSObject {
             let match = matches[0]
             guard let urlRange = Range(match.range(at: 1), in: absoluteString) else { return false }
             targetUrlString = String(absoluteString[urlRange])
-            let cookieString:String
+            let cookieString:String?
             if let cookieRange = Range(match.range(at: 2), in: absoluteString), let cookieStringCandidate =    String(absoluteString[cookieRange]).removingPercentEncoding {
                 cookieString = cookieStringCandidate
             }else{
-                cookieString = ""
+                cookieString = nil
             }
             guard let targetURL = URL(string: targetUrlString), let rootViewController = NiftyUtility.GetToplevelViewController(controller: nil) else { return false }
             DispatchQueue.main.async {
@@ -527,7 +527,7 @@ class NovelSpeakerUtility: NSObject {
             // fetch しようとしてみる。
             if let toplevelViewController = NiftyUtility.GetRegisterdToplevelViewController() {
                 DispatchQueue.main.async {
-                    NiftyUtility.checkUrlAndConifirmToUser(viewController: toplevelViewController, url: url, cookieString: "", isNeedFallbackImportFromWebPageTab: true)
+                    NiftyUtility.checkUrlAndConifirmToUser(viewController: toplevelViewController, url: url, cookieString: nil, isNeedFallbackImportFromWebPageTab: true)
                 }
                 return true
             }
@@ -2299,7 +2299,7 @@ class NovelSpeakerUtility: NSObject {
     #endif
     
     static func CheckAndRecoverStoryCountWith(realm:Realm, novel:RealmNovel) {
-        let (storyCount, lastStoryChapterNumber) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
+        let (storyCount, lastStoryChapterNumber, _) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
         let lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: storyCount)
         if novel.m_lastChapterStoryID != lastChapterStoryID && RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: lastStoryChapterNumber) == lastChapterStoryID {
             RealmUtil.WriteWith(realm: realm) { (realm) in

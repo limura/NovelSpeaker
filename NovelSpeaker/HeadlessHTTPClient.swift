@@ -80,7 +80,7 @@ class HeadlessHttpClient {
     
     func generateUrlRequest(url:URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString:String? = nil, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true) -> URLRequest {
         var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: timeoutInterval)
-        if let cookieString = cookieString {
+        if let cookieString = cookieString, cookieString.count > 0 {
             request.setValue(cookieString, forHTTPHeaderField: "Cookie")
         }
         request.allowsCellularAccess = allowsCellularAccess
