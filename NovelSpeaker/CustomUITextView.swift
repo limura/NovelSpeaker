@@ -17,9 +17,51 @@ public class CustomUITextView: UITextView {
         if StorySpeaker.shared.isPlayng {
             return false
         }
+        #if false
+        print("\"\(action.description)\",")
+        let passTarget = [
+            "cut:",
+            "copy:",
+            "paste:",
+            "delete:",
+            "select:",
+            "selectAll:",
+            "_promptForReplace:",
+            "_transliterateChinese:",
+            "_insertDrawing:",
+            "captureTextFromCamera:",
+            "toggleBoldface:",
+            "toggleItalics:",
+            "toggleUnderline:",
+            "makeTextWritingDirectionRightToLeft:",
+            "makeTextWritingDirectionLeftToRight:",
+            "_findSelected:",
+            "_define:",
+            "_translate:",
+            "_addShortcut:", // Webを検索
+            "_accessibilitySpeak:", // 読み上げ
+            "_accessibilitySpeakSpellOut:", // スペル
+            "_share:",
+            "setSpeechModSettingWithSender:",
+            "setSpeechModForThisNovelSettingWithSender:",
+            "checkSpeechTextWithSender:",
+        ]
+        if passTarget.contains(action.description) {
+            return super.canPerformAction(action, withSender: sender)
+        }
+        return false
+        #endif
+        
         return RealmUtil.RealmBlock { (realm) -> Bool in
-            if RealmGlobalState.GetInstanceWith(realm: realm)?.isMenuItemIsAddNovelSpeakerItemsOnly ?? false {
-                return false
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                if globalState.isMenuItemIsAddNovelSpeakerItemsOnly {
+                    for typeName in globalState.menuItemsNotRemoved {
+                        if let type = MenuItemsNotRemovedType(rawValue: typeName), type.isTargetSelector(selector: action) {
+                            return super.canPerformAction(action, withSender: sender)
+                        }
+                    }
+                    return false
+                }
             }
             return super.canPerformAction(action, withSender: sender);
         }

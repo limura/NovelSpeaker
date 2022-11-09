@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 11
+    static let currentSchemaVersion : UInt64 = 12
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -1538,21 +1538,25 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     }
     
     // 対象の小説について保存されている Story の個数と最後のStoryの chapterNumber のタプルを返します
-    static func CountStoryFor(realm:Realm, novelID:String) -> (Int, Int) {
+    static func CountStoryFor(realm:Realm, novelID:String) -> (Int, Int, Story?) {
         var count:Int = 0
         var lastStoryChapterNumber:Int = -1
+        var lastStory:Story? = nil
         let storyBulkArray = realm.objects(RealmStoryBulk.self).filter("isDeleted = false AND novelID = %@", novelID).sorted(byKeyPath: "chapterNumber", ascending: true)
         for storyBulk in storyBulkArray {
             autoreleasepool {
                 if let storyArray = storyBulk.LoadStoryArray() {
                     count += storyArray.count
+                    if let currentLastStory = storyArray.last {
+                        lastStory = currentLastStory
+                    }
                     lastStoryChapterNumber = storyArray.last?.chapterNumber ?? lastStoryChapterNumber
                 }else{
                     print("WARN: SearchAllStoryFor LoadStoryArray() failed in \(storyBulk.id)")
                 }
             }
         }
-        return (count, lastStoryChapterNumber)
+        return (count, lastStoryChapterNumber, lastStory)
     }
     
     static func GetAllChapterNumberFor(realm: Realm, novelID:String) -> [[Int]] {
@@ -2541,6 +2545,121 @@ extension HTTPCookie {
     case GoToNextSameWebsiteNovel = 7 // 同じWebサイトの小説のうち未読の物を再生
 }
 
+/// 残されるメニュー項目の対象タイプ
+enum MenuItemsNotRemovedType: String {
+    /*
+     発見した全てのもの
+     canPerformAction: _accessibilityPauseSpeaking:
+     canPerformAction: _accessibilitySpeak:
+     canPerformAction: _accessibilitySpeakLanguageSelection:
+     canPerformAction: _accessibilitySpeakSentence:
+     canPerformAction: _accessibilitySpeakSpellOut:
+     canPerformAction: _addShortcut:
+     canPerformAction: _define:
+     canPerformAction: _findSelected:
+     canPerformAction: _insertDrawing:
+     canPerformAction: _lookup:
+     canPerformAction: _promptForReplace:
+     canPerformAction: _share:
+     canPerformAction: _showTextStyleOptions:
+     canPerformAction: _translate:
+     canPerformAction: _transliterateChinese:
+     canPerformAction: captureTextFromCamera:
+     canPerformAction: checkSpeechTextWithSender:
+     canPerformAction: copy:
+     canPerformAction: cut:
+     canPerformAction: delete:
+     canPerformAction: makeTextWritingDirectionLeftToRight:
+     canPerformAction: makeTextWritingDirectionRightToLeft:
+     canPerformAction: paste:
+     canPerformAction: select:
+     canPerformAction: selectAll:
+     canPerformAction: setSpeechModForThisNovelSettingWithSender:
+     canPerformAction: setSpeechModSettingWithSender:
+     canPerformAction: toggleBoldface:
+     canPerformAction: toggleItalics:
+     canPerformAction: toggleUnderline:
+     
+     呼び出された順のもの(おそらく表示順)
+     "cut:",
+     "copy:", // コピー
+     "paste:",
+     "delete:",
+     "select:",
+     "selectAll:",
+     "_promptForReplace:",
+     "_transliterateChinese:",
+     "_insertDrawing:",
+     "captureTextFromCamera:",
+     "toggleBoldface:",
+     "toggleItalics:",
+     "toggleUnderline:",
+     "makeTextWritingDirectionRightToLeft:",
+     "makeTextWritingDirectionLeftToRight:",
+     "_findSelected:",
+     "_define:", // 調べる
+     "_translate:", // 翻訳
+     "_addShortcut:", // ユーザ辞書...
+     "_accessibilitySpeak:", // 読み上げ
+     "_accessibilitySpeakSpellOut:", // スペル
+     "_share:",
+     "setSpeechModSettingWithSender:",
+     "setSpeechModForThisNovelSettingWithSender:",
+     "checkSpeechTextWithSender:",
+     */
+    case copy // コピー
+    case define // 調べる
+    case translate // 翻訳
+    case addShortcut // ユーザ辞書...
+    case share // 共有
+
+    func localizedString() -> String {
+        switch self {
+        case .copy:
+            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_copy", comment: "コピー")
+        case .define:
+            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_define", comment: "調べる")
+        case .translate:
+            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_translate", comment: "翻訳")
+        case .addShortcut:
+            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_addShortcut", comment: "ユーザ辞書...")
+        case .share:
+            return NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_share", comment: "共有")
+        }
+    }
+    static func convertFromLocalizedString(localizedString: String) -> MenuItemsNotRemovedType? {
+        switch localizedString {
+        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_copy", comment: "コピー"):
+            return .copy
+        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_define", comment: "調べる"):
+            return .define
+        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_addShortcut", comment: "ユーザ辞書..."):
+            return .addShortcut
+        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_translate", comment: "翻訳"):
+            return .translate
+        case NSLocalizedString("RealmModels_MenuItemsNotRemoved_Name_share", comment: "共有"):
+            return .share
+        default:
+            return nil
+        }
+    }
+    
+    func isTargetSelector(selector: Selector) -> Bool {
+        switch self {
+        case .copy:
+            return selector == #selector(UIResponderStandardEditActions.copy(_:))
+        case .define:
+            return selector.description == "_define:"
+        case .addShortcut:
+            return selector.description == "_addShortcut:"
+        case .translate:
+            return selector.description == "_translate:"
+        case .share:
+            return selector.description == "_share:"
+        }
+    }
+}
+
 enum RepeatSpeechLoopType: String {
     case normal = "Normal"
     case noCheckReadingPoint = "NoCheckReadingPoint"
@@ -2592,6 +2711,7 @@ enum RepeatSpeechLoopType: String {
     @objc dynamic var isDisableNarouRuby = false
     @objc dynamic var isNeedDisableIdleTimerWhenSpeechTime = false
     let novelLikeOrder = List<String>()
+    let menuItemsNotRemoved = List<String>()
     
     static let isForceSiteInfoReloadIsEnabledKey = "NovelSpeaker_IsForceSiteInfoReloadIsEnabled"
     static func GetIsForceSiteInfoReloadIsEnabled() -> Bool {

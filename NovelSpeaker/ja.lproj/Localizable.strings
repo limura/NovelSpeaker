@@ -99,7 +99,7 @@
 "SettingTableViewController_GoToSupportSite" = "ことせかい のサポートサイトを開く";
 "SettingTableViewController_SendBugReport" = "開発者に問い合わせる";
 "SettingTableViewController_DisplayBookmarkPositionOnBookshelf" = "本棚に栞の位置を表示する";
-"SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "本文中の長押しメニューを ことせかい 由来の物のみにする";
+"SettingTableViewController_OnlyDisplayAddSpeechModSettings" = "本文中の長押しメニュー項目を減らす";
 "SettingTableViewController_ShortSkipIsEnabled" = "コントロールセンターでの前の章や次の章へのボタンを少し巻き戻し・少し進めるボタンへ変更する";
 "SettingTableViewController_PlaybackDurationIsEnabled" = "コントロールセンターに再生時間を表示する(表示される時間は概算で、正確な値にはなりません)";
 "SettingTableViewController_DarkThemeIsEnabled" = "小説を読む時に背景を暗くする";
@@ -184,6 +184,12 @@
 "SettingsViewController_ClearSiteInfoCache_SiteInfoLoadEnd_Failed" = "手動による SiteInfo の読込中にエラーが発生しています。(恐らくはネットワーク接続に問題があると考えられます。同時に出力されているエラー側に詳細な情報が書かれていると思われますので、それらを確認した上で、適切に対処してください)";
 "SettingTableViewController_IsEnableSwipeOnStoryView" = "小説本文画面での左右スワイプでページめくりができるようにする";
 "SettingTableViewController_DisableNarouRuby" = "ことせかい 由来のルビ表記のみを対象とする(『|ルビを振られる文字列(ルビ文字列)』という形式のみを対象とするようになるため、『漢字(ひらがなかカタカナ)』という表記をルビと判定される事を避けたい場合等に効果があります)";
+"SettingTableViewController_menuItemsNotRemoved" = "残される長押しメニュー項目";
+"RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
+"RealmModels_MenuItemsNotRemoved_Name_define" = "調べる";
+"RealmModels_MenuItemsNotRemoved_Name_translate" = "翻訳";
+"RealmModels_MenuItemsNotRemoved_Name_addShortcut" = "ユーザ辞書...";
+"RealmModels_MenuItemsNotRemoved_Name_share" = "共有";
 
 "NovelSpeakerUtility_ExportingNovelData" = "工程 1/4\n小説を抽出中";
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";

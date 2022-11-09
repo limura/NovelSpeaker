@@ -195,6 +195,8 @@ class RealmToRealmCopyTool: NSObject {
             newObj.isNeedDisableIdleTimerWhenSpeechTime = obj.isNeedDisableIdleTimerWhenSpeechTime
             newObj.novelLikeOrder.removeAll()
             newObj.novelLikeOrder.append(objectsIn: obj.novelLikeOrder)
+            newObj.menuItemsNotRemoved.removeAll()
+            newObj.menuItemsNotRemoved.append(objectsIn: obj.menuItemsNotRemoved)
 
             to.add(newObj, update: .modified)
             try to.commitWrite()

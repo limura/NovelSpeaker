@@ -52,8 +52,15 @@ public class CustomWKWebView: WKWebView {
             return false
         }
         return RealmUtil.RealmBlock { (realm) -> Bool in
-            if RealmGlobalState.GetInstanceWith(realm: realm)?.isMenuItemIsAddNovelSpeakerItemsOnly ?? false {
-                return false
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                if globalState.isMenuItemIsAddNovelSpeakerItemsOnly {
+                    for typeName in globalState.menuItemsNotRemoved {
+                        if let type = MenuItemsNotRemovedType(rawValue: typeName), type.isTargetSelector(selector: action) {
+                            return super.canPerformAction(action, withSender: sender)
+                        }
+                    }
+                    return false
+                }
             }
             return super.canPerformAction(action, withSender: sender);
         }

@@ -1039,7 +1039,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
             guard let story = novel.readingChapterWith(realm: realm) ?? novel.firstChapterWith(realm: realm) else {
                 let targetChapterNumber = RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_readingChapterStoryID)
-                let (novelCount, _) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
+                let (novelCount, _, _) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
                 guard novelCount > 0 else {
                     if novel.type == .URL {
                         DispatchQueue.main.async {

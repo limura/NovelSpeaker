@@ -683,7 +683,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             })
         #if !targetEnvironment(macCatalyst)
             section
-            <<< SwitchRow(){ row in
+            <<< SwitchRow("OnlyDisplayAddSpeechModSettingsRow"){ row in
                 row.title = NSLocalizedString("SettingTableViewController_OnlyDisplayAddSpeechModSettings", comment: "本文中の長押しメニューを読み替え辞書へ登録のみにする")
                 row.cell.textLabel?.numberOfLines = 0
                 row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
@@ -699,6 +699,49 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 }
             })
+            section
+        <<< MultipleSelectorRow<String>("menuItemsNotRemovedRow") { row in
+            row.title = NSLocalizedString("SettingTableViewController_menuItemsNotRemoved", comment: "残される長押しメニュー項目")
+            row.selectorTitle = NSLocalizedString("SettingTableViewController_menuItemsNotRemoved", comment: "残される長押しメニュー項目")
+            row.hidden = .function(["OnlyDisplayAddSpeechModSettingsRow"], { form -> Bool in
+                guard let row = form.rowBy(tag: "OnlyDisplayAddSpeechModSettingsRow") as? RowOf<Bool> else { return true }
+                return row.value ?? false == false
+            })
+            row.options = [
+                MenuItemsNotRemovedType.copy,
+                MenuItemsNotRemovedType.define,
+                MenuItemsNotRemovedType.translate,
+                MenuItemsNotRemovedType.addShortcut,
+                MenuItemsNotRemovedType.share,
+            ].map({
+                $0.localizedString()
+            })
+            row.cell.textLabel?.numberOfLines = 0
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                let newValue = globalState.menuItemsNotRemoved.map({
+                    guard let type = MenuItemsNotRemovedType(rawValue: $0) else { return "-" }
+                    return type.localizedString()
+                })
+                row.value = Set(newValue)
+            }
+        }.onChange({ (row) in
+            RealmUtil.RealmBlock { (realm) -> Void in
+                guard let value = row.value, let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                    globalState.menuItemsNotRemoved.removeAll()
+                    for typeName in value {
+                        if let type = MenuItemsNotRemovedType.convertFromLocalizedString(localizedString: typeName) {
+                            globalState.menuItemsNotRemoved.append(type.rawValue)
+                        }
+                    }
+                    realm.add(globalState, update: .modified)
+                }
+            }
+        }).onPresent { from, to in
+            to.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: from, action: #selector(self.multipleSelectorDone(_:)))
+        }
+
         #endif
         #if !targetEnvironment(macCatalyst)
             section
@@ -2374,5 +2417,9 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
     }
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
         controller.dismiss(animated: false)
+    }
+    
+    @objc func multipleSelectorDone(_ item:UIBarButtonItem) {
+        _ = navigationController?.popViewController(animated: true)
     }
 }

@@ -237,6 +237,12 @@
 "SettingsViewController_ClearAllCookiesDialog_OKButton" = "Delete";
 "SettingsViewController_ImportOuterFile" = "File import";
 "SettingsViewController_UIDocumentPickerViewTitle" = "Please specify the file to import into NovelSpeaker";
+"SettingTableViewController_menuItemsNotRemoved" = "Long press menu items left behind";
+"RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
+"RealmModels_MenuItemsNotRemoved_Name_define" = "Define";
+"RealmModels_MenuItemsNotRemoved_Name_translate" = "Translate";
+"RealmModels_MenuItemsNotRemoved_Name_addShortcut" = "Add shortcut";
+"RealmModels_MenuItemsNotRemoved_Name_share" = "Share";
 
 "RemoteDataURLSettingViewController_Title" = "Setting URL for internal data reference";
 "RemoteDataURLSettingViewController_Information" = "Note: If you rewrite the settings here poorly, NovelSpeaker may not work properly. Make sure you understand the contents before rewriting.\nThe standard settings are all \"empty (nothing is written)\", so if a problem occurs, you can return to the standard settings by deleting the contents of all items.";

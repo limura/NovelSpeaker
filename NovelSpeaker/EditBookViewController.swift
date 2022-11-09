@@ -822,7 +822,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
                     if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.currentStoryID), story.storyID == self.currentStoryID {
                         RealmUtil.WriteWith(realm: realm) { (realm) in
                             guard RealmStoryBulk.RemoveStoryWith(realm: realm, story: story) == true else { return }
-                            let (_, lastStoryChapterNumber) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: self.targetNovelID)
+                            let (_, lastStoryChapterNumber, _) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: self.targetNovelID)
                             if let newStory = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.currentStoryID) {
                                 self.setStory(storyID: newStory.storyID)
                                 return

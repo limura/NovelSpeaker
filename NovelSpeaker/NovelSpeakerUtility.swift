@@ -1562,6 +1562,14 @@ class NovelSpeakerUtility: NSObject {
                         }
                     }
                 }
+                if let menuItemsNotRemoved = dic.object(forKey: "menuItemsNotRemoved") as? NSArray {
+                    globalState.menuItemsNotRemoved.removeAll()
+                    for target in menuItemsNotRemoved {
+                        if let target = target as? String {
+                            globalState.menuItemsNotRemoved.append(target)
+                        }
+                    }
+                }
                 realm.add(globalState, update: .modified)
             }
         }
@@ -2075,6 +2083,7 @@ class NovelSpeakerUtility: NSObject {
                 "isNeedDisableIdleTimerWhenSpeechTime": globalState.isNeedDisableIdleTimerWhenSpeechTime,
                 "supportRotationMask": NovelSpeakerUtility.supportRotationMask.rawValue,
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
+                "menuItemsNotRemoved": Array(globalState.menuItemsNotRemoved),
             ]
         }
     }

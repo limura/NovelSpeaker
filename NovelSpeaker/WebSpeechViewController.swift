@@ -1228,6 +1228,12 @@ extension WebSpeechViewController {
         let checkSpeechTextMenuItem = UIMenuItem.init(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), action: #selector(checkSpeechText(sender:)))
         let menuItems:[UIMenuItem] = [speechModMenuItem, speechModForThisNovelMenuItem, checkSpeechTextMenuItem]
         menuController.menuItems = menuItems
+        #if targetEnvironment(macCatalyst)
+        #if false
+        let intraction = UIContextMenuInteraction(delegate: self)
+        self.textWebView?.addInteraction(intraction)
+        #endif
+        #endif
     }
     func removeCustomUIMenu() {
         let menuController = UIMenuController.shared
@@ -1275,3 +1281,16 @@ extension WebSpeechViewController {
         }
     }
 }
+
+#if targetEnvironment(macCatalyst)
+#if false
+extension WebSpeechViewController: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil, actionProvider: { suggestActions in
+            
+        })
+    }
+    
+}
+#endif
+#endif // targetEnvironment(macCatalyst)

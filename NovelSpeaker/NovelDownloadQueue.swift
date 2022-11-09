@@ -181,7 +181,7 @@ class StoryBulkWritePool {
         // 本来ならこの操作は必要無いはずです。
         if storyArray.count <= 0 {
             if RealmUtil.RealmBlock(block: { (realm) -> Bool in
-                let (_, lastChapterNumber) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: story.novelID)
+                let (_, lastChapterNumber, _) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: story.novelID)
                 if story.chapterNumber != (lastChapterNumber + 1) {
                     AppInformationLogger.AddLog(message: "StoryBulkWritePool.AddStory() で不正なchapterNumberのStoryが登録されようとしている", appendix: [
                         "StoryID": story.storyID,
@@ -291,7 +291,18 @@ class NovelDownloader : NSObject {
         var lastChapter:Story? = nil
         RealmUtil.RealmBlock { (realm) -> Void in
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                lastChapter = novel.lastChapterWith(realm: realm)
+                // novel.m_lastChapterStoryID は無視して StoryBulk 側のデータを使う事にします
+                let (_, _, lastStory) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: novel.novelID)
+                lastChapter = lastStory
+                // 一応 m_lastChapterStoryID が違うようであれば書き換えておきます。
+                if let lastStory = lastStory {
+                    if novel.m_lastChapterStoryID != RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStory.chapterNumber) {
+                        RealmUtil.WriteWith(realm: realm) { realm in
+                            novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStory.chapterNumber)
+                            realm.add(novel, update: .modified)
+                        }
+                    }
+                }
             }else{
                 isNovelAlive = false
             }
