@@ -922,7 +922,7 @@ class NiftyUtility: NSObject {
     #endif
 
     static let httpRequestDefaultTimeoutInterval:TimeInterval = 10
-    public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval? = httpRequestDefaultTimeoutInterval, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, headlessClientKey:String? = nil, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
+    public static func httpRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval? = httpRequestDefaultTimeoutInterval, cookieString:String? = nil, isNeedHeadless:Bool = false, mainDocumentURL:URL? = nil, allowsCellularAccess:Bool = true, headlessClientKey:String? = nil, withWaitSecond:Double? = nil, successAction:((_ content:Data, _ headerCharset:String.Encoding?)->Void)? = nil, failedAction:((Error?)->Void)? = nil){
         #if !os(watchOS)
         if isNeedHeadless {
             var headlessClient:HeadlessHttpClient? = nil
@@ -935,7 +935,7 @@ class NiftyUtility: NSObject {
                     headlessClient = newClient
                 }
             }
-            httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval ?? httpRequestDefaultTimeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, httpClient: headlessClient, successAction: { (doc) in
+            httpHeadlessRequest(url: url, postData: postData, timeoutInterval: timeoutInterval ?? httpRequestDefaultTimeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, httpClient: headlessClient, withWaitSecond: withWaitSecond, successAction: { (doc) in
                 if let data = doc.innerHTML?.data(using: .utf8) {
                     successAction?(data, .utf8)
                     return

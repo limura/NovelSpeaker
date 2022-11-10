@@ -9,6 +9,7 @@
 import Foundation
 import Eureka
 import Kanna
+import Erik
 
 @objc protocol MultipleSelectorDoneEnabled {
     @objc func multipleSelectorDone(_ item:UIBarButtonItem);
@@ -18,6 +19,7 @@ import Kanna
 protocol SearchQuery {
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow?
     func CreateQuery(joinner:String) -> String
+    func ReplaceURL(urlString:String) -> String
 }
 
 extension SearchQuery {
@@ -27,16 +29,19 @@ extension SearchQuery {
         }
     }
     func CreateQuery(joinner:String) -> String { return "" }
+    func ReplaceURL(urlString:String) -> String { return urlString }
 }
 
 class TextQuery: SearchQuery, Decodable {
     let displayText:String
     let queryName:String
+    let urlReplaceTarget:String?
     var inputText:String = ""
     
-    init(displayText:String, queryName:String) {
+    init(displayText:String, queryName:String, urlReplaceTarget:String?) {
         self.displayText = displayText
         self.queryName = queryName
+        self.urlReplaceTarget = urlReplaceTarget
     }
 
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
@@ -55,7 +60,14 @@ class TextQuery: SearchQuery, Decodable {
         }
     }
     func CreateQuery(joinner:String) -> String {
+        if let urlReplaceTarget = self.urlReplaceTarget, urlReplaceTarget.count > 0 { return "" }
+        if queryName.count == 0 && inputText.count == 0 { return "" }
+        if queryName.count == 0 { return inputText }
         return queryName + joinner + inputText
+    }
+    func ReplaceURL(urlString:String) -> String {
+        guard let urlReplaceTarget = self.urlReplaceTarget, urlReplaceTarget.count > 0, inputText.count > 0, let text = inputText.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) else { return urlString }
+        return urlString.replacingOccurrences(of: urlReplaceTarget, with: text)
     }
 }
 
@@ -111,6 +123,7 @@ class MultiSelectQuery: SearchQuery, Decodable {
         }
         return queryName + joinner + queryArray.joined(separator: separator)
     }
+    func ReplaceURL(urlString:String) -> String { return urlString }
 }
 
 class RadioQuery: SearchQuery, Decodable {
@@ -119,11 +132,13 @@ class RadioQuery: SearchQuery, Decodable {
     let defaultValue:String
     let radioList:[String:String]
     var enableTarget:String? = nil
-    init(displayText:String, queryName:String, defaultValue:String?, radioList:[String:String]){
+    let urlReplaceTarget:String?
+    init(displayText:String, queryName:String, defaultValue:String?, radioList:[String:String], urlReplaceTarget:String?){
         self.displayText = displayText
         self.queryName = queryName
         self.radioList = radioList
         self.defaultValue = defaultValue ?? ""
+        self.urlReplaceTarget = urlReplaceTarget
     }
 
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
@@ -144,29 +159,47 @@ class RadioQuery: SearchQuery, Decodable {
         }
     }
     func CreateQuery(joinner:String) -> String {
+        if let urlReplaceTarget = self.urlReplaceTarget, urlReplaceTarget.count > 0 { return "" }
         let value:String
         if let target = enableTarget, let ganreValue = self.radioList[target] {
             value = ganreValue
         }else{
             value = ""
         }
+        if queryName.count == 0 && value.count == 0 { return "" }
+        if queryName.count == 0 { return value }
         return queryName + joinner + value
+    }
+    func ReplaceURL(urlString:String) -> String {
+        guard let urlReplaceTarget = self.urlReplaceTarget, urlReplaceTarget.count > 0 else { return urlString }
+        guard let target = enableTarget, let ganreValue = self.radioList[target], ganreValue.count > 0, let text = ganreValue.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) else {
+            return urlString
+        }
+        return urlString.replacingOccurrences(of: urlReplaceTarget, with: text)
     }
 }
 
 class HiddenQuery: SearchQuery, Decodable {
     let queryName:String
     let value:String
-    init(queryName:String, value:String){
+    let urlReplaceTarget:String?
+    init(queryName:String, value:String, urlReplaceTarget: String?){
         self.queryName = queryName
         self.value = value
+        self.urlReplaceTarget = urlReplaceTarget
     }
     
     func CreateForm(parent:MultipleSelectorDoneEnabled) -> BaseRow? {
         return nil
     }
     func CreateQuery(joinner:String) -> String {
+        if self.urlReplaceTarget?.count ?? 0 > 0 { return "" }
+        if queryName.count == 0 { return value }
         return queryName + joinner + value
+    }
+    func ReplaceURL(urlString:String) -> String {
+        guard let urlReplaceTarget = self.urlReplaceTarget, urlReplaceTarget.count > 0, let text = self.value.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)  else { return urlString }
+        return urlString.replacingOccurrences(of: urlReplaceTarget, with: text)
     }
 }
 
@@ -192,10 +225,12 @@ class OnOffQuery: SearchQuery, Decodable {
     }
     func CreateQuery(joinner:String) -> String {
         if isOn {
+            if queryName.count == 0 { return value }
             return queryName + joinner + value
         }
         return ""
     }
+    func ReplaceURL(urlString:String) -> String { return urlString }
 }
 
 class SearchResultBlock {
@@ -252,12 +287,18 @@ struct SearchResult : Decodable {
     let titleXpath:String?
     let urlXpath:String?
     var nextLink:URL? = nil
+    let nextLinkButton:String?
+    var urlConvRegexpFrom:String?
+    var urlConvRegexpTo:String?
     
     enum CodingKeys: String, CodingKey {
         case blockXpath = "block"
         case nextLinkXpath = "nextLink"
         case titleXpath = "title"
         case urlXpath = "url"
+        case nextLinkButton = "nextLinkButton"
+        case convRegexpFrom = "urlConvRegexpFrom"
+        case convRegexpTo = "urlConvRegexpTo"
     }
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -265,19 +306,26 @@ struct SearchResult : Decodable {
         nextLinkXpath = try? values.decode(String.self, forKey: .nextLinkXpath)
         titleXpath = try? values.decode(String.self, forKey: .titleXpath)
         urlXpath = try? values.decode(String.self, forKey: .urlXpath)
+        nextLinkButton = try? values.decode(String.self, forKey: .nextLinkButton)
+        urlConvRegexpFrom = try? values.decode(String.self, forKey: .convRegexpFrom)
+        urlConvRegexpTo = try? values.decode(String.self, forKey: .convRegexpTo)
     }
     
-    func ConvertHTMLToSearchResultDataArray(data:Data, headerEncoding: String.Encoding?, baseURL: URL) -> ([SearchResultBlock], URL?) {
+    func ConvertHTMLToSearchResultDataArray(data:Data, headerEncoding: String.Encoding?, baseURL: URL, completion: @escaping (([SearchResultBlock], URL?, Element?)->Void)) {
         var result:[SearchResultBlock] = []
         let doc:HTMLDocument
         let (htmlOptional, encoding) = NiftyUtility.decodeHTMLStringFrom(data: data, headerEncoding: headerEncoding)
         if let html = htmlOptional, let htmlDocument = try? HTML(html: html, url: baseURL.absoluteString, encoding: headerEncoding ?? .utf8) {
             doc = htmlDocument
         }else{
-            guard let dataHtmlDocument = try? HTML(html: data, url: baseURL.absoluteString, encoding: encoding ?? headerEncoding ?? .utf8) else { return ([], nil) }
+            guard let dataHtmlDocument = try? HTML(html: data, url: baseURL.absoluteString, encoding: encoding ?? headerEncoding ?? .utf8) else {
+                completion([], nil, nil)
+                return
+            }
             doc = dataHtmlDocument
         }
         //print("ConvertHTMLToSearchResultDataArray: phase 1: baseURL: \(baseURL.absoluteString), data.count: \(data.count), \(String(bytes: data, encoding: .utf8) ?? "nil")")
+        //print("blockXpath: \(self.blockXpath), nextLinkXpath: \(nextLinkXpath ?? "nil"), titleXpath: \(titleXpath ?? "nil"), urlXpath: \(urlXpath ?? "nil"), nextLinkButton: \(nextLinkButton ?? "nil"), urlConvRegexpFrom: \(urlConvRegexpFrom ?? "nil"), urlConvRegexpTo: \(urlConvRegexpTo ?? "nil")")
         for blockHTML in doc.xpath(self.blockXpath) {
             //print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.toHTML ?? "nil")")
             let title:String
@@ -289,8 +337,24 @@ struct SearchResult : Decodable {
             if title.count <= 0 {
                 continue
             }
-            guard let urlXpath = self.urlXpath, let url = NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlElement: blockHTML, xpath: urlXpath, baseURL: baseURL) else {
+            guard let urlXpath = self.urlXpath else {
                 continue
+            }
+            // convRegexpFrom が定義されているのなら、urlXpath で指定されている物からさらに convRegexpFrom のものを convRegexpTo に置き換える形で変形したものを URL の元ネタとして利用します。
+            let url:URL
+            if let convRegexpFrom = self.urlConvRegexpFrom {
+                let urlTarget = NiftyUtility.FilterXpathToHtml(xmlElement: blockHTML, xpath: urlXpath)
+                //print("conv: \(urlTarget.replacingOccurrences(of: convRegexpFrom, with: self.urlConvRegexpTo ?? "", options: .regularExpression)) + \(baseURL.absoluteString)")
+                if urlTarget.count > 0, let target = URL(string: urlTarget.replacingOccurrences(of: convRegexpFrom, with: self.urlConvRegexpTo ?? "", options: .regularExpression), relativeTo: baseURL) {
+                    url = target
+                }else{
+                    continue
+                }
+            }else{
+                guard let urlTarget = NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlElement: blockHTML, xpath: urlXpath, baseURL: baseURL) else {
+                    continue
+                }
+                url = urlTarget
             }
             let description = NiftyUtility.FilterXpathWithConvertString(xmlElement: blockHTML, xpath: "/*")
             let resultBlock = SearchResultBlock(title: title, url: url, description: description)
@@ -302,7 +366,17 @@ struct SearchResult : Decodable {
         }else{
             nextURL = nil
         }
-        return (result, nextURL)
+        if let nextLinkButton = self.nextLinkButton {
+            NiftyUtility.QuerySelectorForHeadlessHTTPClient(key: NovelSearchViewController.HeadlessHTTPClientKey, selector: nextLinkButton) { element in
+                guard let element = element else {
+                    completion(result, nextURL, nil)
+                    return
+                }
+                completion(result, nil, element)
+            }
+            return
+        }
+        completion(result, nextURL, nil)
     }
 }
 
@@ -311,6 +385,8 @@ class SearchResultViewController: FormViewController {
     public var searchResult:SearchResult? = nil
     public var nextURL:URL? = nil
     public var siteName:String? = nil
+    public var isNeedHeadless:Bool = false
+    public var waitSecondInHeadless:Double? = nil
     let loadingCellTag = "loadingCell"
     
     override func viewDidLoad() {
@@ -323,7 +399,7 @@ class SearchResultViewController: FormViewController {
         createCells()
     }
     
-    func generateLoadNextButton(nextURL:URL, section:Section) -> ButtonRow {
+    func generateLoadNextLinkRow(nextURL:URL, section:Section) -> ButtonRow {
         return ButtonRow(self.loadingCellTag) {
             $0.title = NSLocalizedString("NovelSearchViewController_LoadNextPage", comment: "続きを検索しています……")
             $0.cell.textLabel?.numberOfLines = 0
@@ -338,10 +414,64 @@ class SearchResultViewController: FormViewController {
             self.loadNextLink(nextURL: nextURL, section: section, row: row)
         }
     }
+    func generateLoadNextButtonRow(nextButtonElement:Element, section:Section, baseURL: URL) -> ButtonRow {
+        return ButtonRow(self.loadingCellTag) {
+            $0.title = NSLocalizedString("NovelSearchViewController_LoadNextPage", comment: "続きを検索しています……")
+            $0.cell.textLabel?.numberOfLines = 0
+        }.onCellSelection { (buttonCellOf, row) in
+            //self.loadNextLink(nextURL: nextURL, section: section, row: row)
+        }.cellUpdate({ (cell, button) in
+            cell.textLabel?.textAlignment = .left
+            cell.accessoryType = .disclosureIndicator
+            cell.editingAccessoryType = cell.accessoryType
+            cell.textLabel?.textColor = nil
+        }).cellUpdate { (buttonCellOf, row) in
+            NiftyUtility.EasyDialogNoButton(viewController: self, title: NSLocalizedString("NovelSearchViewController_LoadingNextLink_Title", comment: "読込中……"), message: nil) { (dialog) in
+                self.removeLoadingRow()
+                NiftyUtility.ClickOnHeadlessHTTPClient(key: NovelSearchViewController.HeadlessHTTPClientKey, element: nextButtonElement) { html in
+                    guard let html = html, let data = html.data(using: .utf8, allowLossyConversion: true) else {
+                        DispatchQueue.main.async {
+                            dialog.dismiss(animated: false)
+                        }
+                        return
+                    }
+                    DispatchQueue.main.async {
+                        self.loadNextLinkCore(dialog: dialog, section: section, data: data, encoding: .utf8, baseURL: baseURL)
+                    }
+                }
+            }
+        }
+    }
     
     func removeLoadingRow(){
         guard var section = self.form.allSections.first else { return }
         section.removeLast()
+    }
+    
+    func loadNextLinkCore(dialog:EasyDialog, section:Eureka.Section, data:Data, encoding:String.Encoding?, baseURL: URL) {
+        //DispatchQueue.main.async {
+            guard let searchResult = self.searchResult else {
+                self.removeLoadingRow()
+                dialog.dismiss(animated: false, completion: nil)
+                return
+            }
+        searchResult.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: baseURL) { (resultBlockArray, nextURL, nextButton) in
+            self.removeLoadingRow()
+            self.resultBlockArray.append(contentsOf: resultBlockArray)
+            if resultBlockArray.count > 0 {
+                self.nextURL = nextURL
+                for novel in resultBlockArray {
+                    section <<< novel.CreateForm(parent: self)
+                }
+                if let nextButton = nextButton {
+                    section <<< self.generateLoadNextButtonRow(nextButtonElement: nextButton, section: section, baseURL: baseURL)
+                } else if let nextURL = nextURL {
+                    section <<< self.generateLoadNextLinkRow(nextURL: nextURL, section: section)
+                }
+            }
+            dialog.dismiss(animated: false, completion: nil)
+        }
+        //}
     }
     
     func loadNextLink(nextURL:URL, section:Section, row:ButtonRow) {
@@ -353,24 +483,9 @@ class SearchResultViewController: FormViewController {
                 return true
             }
             NiftyUtility.EasyDialogNoButton(viewController: self, title: NSLocalizedString("NovelSearchViewController_LoadingNextLink_Title", comment: "読込中……"), message: nil) { (dialog) in
-                NiftyUtility.httpRequest(url: nextURL, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
+                NiftyUtility.httpRequest(url: nextURL, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: nextURL, allowsCellularAccess: allowsCellularAccess, headlessClientKey: NovelSearchViewController.HeadlessHTTPClientKey, withWaitSecond: self.waitSecondInHeadless, successAction: { (data, encoding) in
                     DispatchQueue.main.async {
-                        guard let searchResult = self.searchResult else {
-                            self.removeLoadingRow()
-                            dialog.dismiss(animated: false, completion: nil)
-                            return
-                        }
-                        let (resultBlockArray, nextURL) = searchResult.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: nextURL)
-                        self.removeLoadingRow()
-                        self.resultBlockArray.append(contentsOf: resultBlockArray)
-                        self.nextURL = nextURL
-                        for novel in resultBlockArray {
-                            section <<< novel.CreateForm(parent: self)
-                        }
-                        if let nextURL = nextURL {
-                            section <<< self.generateLoadNextButton(nextURL: nextURL, section: section)
-                        }
-                        dialog.dismiss(animated: false, completion: nil)
+                        self.loadNextLinkCore(dialog: dialog, section: section, data: data, encoding: encoding, baseURL: nextURL)
                     }
                 }) { (err) in
                     DispatchQueue.main.async {
@@ -396,7 +511,7 @@ class SearchResultViewController: FormViewController {
             section <<< novel.CreateForm(parent: self)
         }
         if let nextURL = self.nextURL {
-            section <<< self.generateLoadNextButton(nextURL: nextURL, section: section)
+            section <<< self.generateLoadNextLinkRow(nextURL: nextURL, section: section)
         }
     }
 }
@@ -415,6 +530,9 @@ class WebSiteSection : Decodable {
     var values:[SearchQuery] = []
     var result:SearchResult? = nil
     var isDisabled:Bool? = false
+    var waitSecondInHeadless:Double? = nil
+    var announce:String? = nil
+    var webSiteURL:URL? = nil
     //var parentViewController:ParentViewController
     
     enum CodingKeys: String, CodingKey {
@@ -428,6 +546,9 @@ class WebSiteSection : Decodable {
         case values
         case result
         case isDisabled
+        case waitSecondInHeadless
+        case announce
+        case webSiteURL
     }
     required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -440,6 +561,11 @@ class WebSiteSection : Decodable {
         queryJoinner = (try? values.decode(String.self, forKey: .queryJoinner)) ?? "="
         mainDocumentURL = (try? values.decode(String.self, forKey: .mainDocumentURL)) ?? ""
         isDisabled = (try? values.decodeIfPresent(Bool.self, forKey: .isDisabled)) ?? false
+        waitSecondInHeadless = try? values.decode(Double.self, forKey: .waitSecondInHeadless)
+        announce = try? values.decode(String.self, forKey: .announce)
+        if let webSiteURLString = try? values.decode(String.self, forKey: .webSiteURL) {
+            webSiteURL = URL(string: webSiteURLString)
+        }
 
         // 怪しく全てを読み込める struct を作って一旦読み込みます(´・ω・`)
         struct DummySearchQuery: Decodable {
@@ -452,6 +578,7 @@ class WebSiteSection : Decodable {
             let value:String?
             let defaultValue:String?
             let multiSelectDefaultTargets:[String]?
+            let urlReplaceTarget:String?
         }
         var generatedValues:[SearchQuery] = []
         if let queryArray = try? values.decode([DummySearchQuery].self, forKey: .values) {
@@ -459,7 +586,7 @@ class WebSiteSection : Decodable {
                 switch query.queryType {
                 case "text":
                     if let displayText = query.displayText {
-                        generatedValues.append(TextQuery(displayText: displayText, queryName: query.queryName))
+                        generatedValues.append(TextQuery(displayText: displayText, queryName: query.queryName, urlReplaceTarget: query.urlReplaceTarget))
                     }
                 case "multiSelect":
                     if let displayText = query.displayText, let multiSelect = query.multiSelect, let separator = query.separator {
@@ -467,11 +594,11 @@ class WebSiteSection : Decodable {
                     }
                 case "radio":
                     if let displayText = query.displayText, let radio = query.radio {
-                        generatedValues.append(RadioQuery(displayText: displayText, queryName: query.queryName, defaultValue: query.defaultValue, radioList: radio))
+                        generatedValues.append(RadioQuery(displayText: displayText, queryName: query.queryName, defaultValue: query.defaultValue, radioList: radio, urlReplaceTarget: query.urlReplaceTarget))
                     }
                 case "hidden":
                     if let value = query.value {
-                        generatedValues.append(HiddenQuery(queryName: query.queryName, value: value))
+                        generatedValues.append(HiddenQuery(queryName: query.queryName, value: value, urlReplaceTarget: query.urlReplaceTarget))
                     }
                 case "onOff":
                     if let displayText = query.displayText, let value = query.value {
@@ -490,8 +617,10 @@ class WebSiteSection : Decodable {
         if HTTPMethod == "POST" {
             return URL(string: self.url)
         }
+        var url = self.url
         var query = ""
         for value in values {
+            url = value.ReplaceURL(urlString: url)
             let v = value.CreateQuery(joinner: queryJoinner)
             if v.count <= 0 {
                 continue
@@ -502,15 +631,22 @@ class WebSiteSection : Decodable {
             query += v
         }
         guard let queryEscaped = query.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) else { return nil }
-        guard let url = URL(string: self.url + queryEscaped) else { return nil }
-        return url
+        // この URL 生成は失敗して nil が返る可能性があります。(呼び出し元はそれを考慮しているはずです)
+        return URL(string: url + queryEscaped)
     }
     
     func GenerateQueryData() -> Data? {
         if HTTPMethod != "POST" {
             return nil
         }
-        let query = values.map({$0.CreateQuery(joinner: queryJoinner)}).joined(separator: querySeparator)
+        var queryArray:[String] = []
+        for value in values {
+            let q = value.CreateQuery(joinner: queryJoinner)
+            if q.count > 0 {
+                queryArray.append(q)
+            }
+        }
+        let query = queryArray.joined(separator: querySeparator)
         return query.data(using: .utf8)
     }
     
@@ -519,6 +655,20 @@ class WebSiteSection : Decodable {
         /*section <<< LabelRow() {
             $0.title = title
         }*/
+        if let announce = self.announce, announce.count > 0 {
+            section <<< LabelRow(){
+                $0.title = announce
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+            }
+        }
+        if let webSiteURL = self.webSiteURL {
+            section <<< ButtonRow() {
+                $0.title = NSLocalizedString("NovelSearchViewController_OpenWebSiteButtonText", comment: "Web取込タブで開く")
+            }.onCellSelection({ (buttonCellOf, buttonRow) in
+                BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: webSiteURL)
+            })
+        }
         for value in values {
             if let form = value.CreateForm(parent: parentViewController) {
                 section <<< form
@@ -537,25 +687,28 @@ class WebSiteSection : Decodable {
                 }
                 NiftyUtility.EasyDialogNoButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchingMessage", comment: "検索中"), message: nil) { (dialog) in
                     print("query: \(url.absoluteString)")
-                    NiftyUtility.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, successAction: { (data, encoding) in
-                        DispatchQueue.main.async {
-                            guard let result = self.result else {
+                    NiftyUtility.httpRequest(url: url, postData: self.GenerateQueryData(), timeoutInterval: 10, isNeedHeadless: self.isNeedHeadless, mainDocumentURL: URL(string: self.mainDocumentURL), allowsCellularAccess: allowsCellularAccess, headlessClientKey: NovelSearchViewController.HeadlessHTTPClientKey, withWaitSecond: self.waitSecondInHeadless, successAction: { (data, encoding) in
+                        guard let result = self.result else {
+                            DispatchQueue.main.async {
                                 dialog.dismiss(animated: false) {
-                                    DispatchQueue.main.async {
-                                        NiftyUtility.EasyDialogOneButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailed_Title", comment: "検索失敗"), message: NSLocalizedString("NovelSearchViewController_SearchField_Message", comment: "検索に失敗しました。\n恐らくは検索に利用されたWebサイト様側の仕様変更(HTML内容の変更)が影響していると思われます。「Web取込」側で取込を行うか、「Web検索」タブ用のデータが更新されるのをお待ち下さい。"), buttonTitle: nil, buttonAction: nil)
-                                    }
+                                    NiftyUtility.EasyDialogOneButton(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_SearchFailed_Title", comment: "検索失敗"), message: NSLocalizedString("NovelSearchViewController_SearchField_Message", comment: "検索に失敗しました。\n恐らくは検索に利用されたWebサイト様側の仕様変更(HTML内容の変更)が影響していると思われます。「Web取込」側で取込を行うか、「Web検索」タブ用のデータが更新されるのをお待ち下さい。"), buttonTitle: nil, buttonAction: nil)
                                 }
-                                return
                             }
-                            let (searchResultBlockArray, nextURL) = result.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: url)
-                            dialog.dismiss(animated: false) {
+                            return
+                        }
+                        DispatchQueue.global(qos: .utility).async {
+                            result.ConvertHTMLToSearchResultDataArray(data: data, headerEncoding: encoding, baseURL: url) { (searchResultBlockArray, nextURL, element) in
                                 DispatchQueue.main.async {
-                                    let nextViewController = SearchResultViewController()
-                                    nextViewController.resultBlockArray = searchResultBlockArray
-                                    nextViewController.nextURL = nextURL
-                                    nextViewController.searchResult = result
-                                    nextViewController.siteName = self.title
-                                    parentViewController.navigationController?.pushViewController(nextViewController, animated: true)
+                                    dialog.dismiss(animated: false) {
+                                        let nextViewController = SearchResultViewController()
+                                        nextViewController.resultBlockArray = searchResultBlockArray
+                                        nextViewController.nextURL = nextURL
+                                        nextViewController.searchResult = result
+                                        nextViewController.siteName = self.title
+                                        nextViewController.isNeedHeadless = self.isNeedHeadless
+                                        nextViewController.waitSecondInHeadless = self.waitSecondInHeadless
+                                        parentViewController.navigationController?.pushViewController(nextViewController, animated: true)
+                                    }
                                 }
                             }
                         }
@@ -580,6 +733,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     var currentSelectedSite:WebSiteSection? = nil
     static var lastSearchInfoLoadDate:Date = Date(timeIntervalSince1970: 0)
     static let SearchInfoCacheFileName = "SearchInfoData.json"
+    static let HeadlessHTTPClientKey = "NovelSearchViewControllerHeadlessHTTPClientKey"
     let searchInfoExpireTimeInterval:TimeInterval = 60*60*6 // 6時間
     
     override func viewDidLoad() {

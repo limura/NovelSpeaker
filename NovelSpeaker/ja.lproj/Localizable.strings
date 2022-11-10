@@ -750,6 +750,7 @@
 "NovelSearchViewController_NoticeLabelText" = "注: 本画面の「Web検索」機能については、リストされているWebサイト様側の仕様が少しでも変わると途端に動作しなくなるような仕組みを用いておりますため、うまく利用できなくなる可能性がとても高い物となっております。\nこちらの「Web検索」側でうまく利用できなくなっている場合でも、隣のタブの「Web取込」機能側では取り込む事ができる場合もございますのでうまく動いていない場合はそちらをご利用頂くような形で回避していただけますと幸いです。";
 "NovelSearchViewController_ForceReloadSearchInfoButton_Title" = "検索設定の読み込みを試みる";
 "NovelSearchViewController_LoadingNextLink_Title" = "追加分を検索中……";
+"NovelSearchViewController_OpenWebSiteButtonText" = "Web取込タブで開く";
 
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 

@@ -750,6 +750,8 @@
 "NovelSearchViewController_NoticeLabelText" = "Note: The \"Web search\" function on this page uses a mechanism that stops working as soon as the listed website specifications change, so it may not be able to be used successfully.\n Even if you are not able to use it successfully, there are cases where you can avoid it by importing it on the \"Web import\" function side, so we hope you can avoid it in the form that you use it.";
 "NovelSearchViewController_ForceReloadSearchInfoButton_Title" = "Try to load search settings";
 "NovelSearchViewController_LoadingNextLink_Title" = "Searching for additional parts...";
+"NovelSearchViewController_OpenWebSiteButtonText" = "Open in WebImport tab";
+
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";
 "BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "Favorite state. now enabled.";
