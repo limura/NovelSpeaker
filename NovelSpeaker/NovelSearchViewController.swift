@@ -262,6 +262,11 @@ class SearchResultBlock {
                         .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
                             dialog.dismiss(animated: false, completion: nil)
                         })
+                        .addButton(title: NSLocalizedString("NovelSearchViewController_OpenWebImportButtonTitle", comment: "Web取込 タブで開く"), callback: { dialog in
+                            dialog.dismiss(animated: false) {
+                                BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: self.url)
+                            }
+                        })
                         .addButton(title: NSLocalizedString("NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle", comment: "仮読み込み"), callback: { (dialog) in
                             dialog.dismiss(animated: false) {
                                 download()
