@@ -331,8 +331,14 @@ struct SearchResult : Decodable {
         }
         //print("ConvertHTMLToSearchResultDataArray: phase 1: baseURL: \(baseURL.absoluteString), data.count: \(data.count), \(String(bytes: data, encoding: .utf8) ?? "nil")")
         //print("blockXpath: \(self.blockXpath), nextLinkXpath: \(nextLinkXpath ?? "nil"), titleXpath: \(titleXpath ?? "nil"), urlXpath: \(urlXpath ?? "nil"), nextLinkButton: \(nextLinkButton ?? "nil"), urlConvRegexpFrom: \(urlConvRegexpFrom ?? "nil"), urlConvRegexpTo: \(urlConvRegexpTo ?? "nil")")
-        for blockHTML in doc.xpath(self.blockXpath) {
-            //print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.toHTML ?? "nil")")
+        for blockHTMLElement in doc.xpath(self.blockXpath) {
+            let blockHTML:XMLElement
+            if let blockHTMLString = blockHTMLElement.toHTML, let blockHTMLData = blockHTMLString.data(using: .utf8, allowLossyConversion: true), let blockDocument = try? HTML(html: blockHTMLData, encoding: .utf8), let blockElement = blockDocument.body {
+                blockHTML = blockElement
+            }else{
+                blockHTML = blockHTMLElement
+            }
+            print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.toHTML ?? "nil")")
             let title:String
             if let titleXpath = self.titleXpath {
                 title = NiftyUtility.FilterXpathWithConvertString(xmlElement: blockHTML, xpath: titleXpath).trimmingCharacters(in: .whitespacesAndNewlines)
