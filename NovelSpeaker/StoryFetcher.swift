@@ -620,10 +620,15 @@ class StoryFetcher {
             #if !os(watchOS)
             let nextButton:Element? = siteInfo.nextButton != nil ? currentState.document?.querySelectorAll(siteInfo.nextButton!).first : nil
             let firstPageButton:Element? = siteInfo.firstPageButton != nil ? currentState.document?.querySelectorAll(siteInfo.firstPageButton!).first : nil
-            if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil {
+            let forceClickButton:Element?
+            if let forceClickButtonSelector = siteInfo.forceClickButton {
+                forceClickButton = currentState.document?.querySelectorAll(forceClickButtonSelector).first
+            }else{
+                forceClickButton = nil
+            }
+            if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil && (forceClickButton == nil && siteInfo.isNeedHeadless) {
                 continue
             }
-            let forceClickButton:Element? = siteInfo.forceClickButton != nil ? currentState.document?.querySelectorAll(siteInfo.forceClickButton!).first : nil
             #else
             if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil {
                 continue
@@ -752,6 +757,7 @@ class StoryFetcher {
         
         // 押さねばならないボタンがあるのなら押す
         if let element = currentState.forceClickButton {
+            print("force click: \(element)")
             buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
                 if let state = state {
                     // TTL を減らして再取得したつもりになって評価しなおします。
