@@ -244,11 +244,12 @@ class SearchResultBlock {
         self.description = description
     }
     
-    func CreateForm(parent:UIViewController) -> ButtonRow {
+    func CreateForm(parent:SearchResultViewController) -> ButtonRow {
         return ButtonRow() {
             $0.title = title
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection { (buttonCellOf, row) in
+            parent.SearchResultSelect(cell: buttonCellOf)
             func download() {
                 DispatchQueue.main.async {
                     NiftyUtility.checkUrlAndConifirmToUser(viewController: parent, url: self.url, cookieString: nil, isNeedFallbackImportFromWebPageTab: false)
@@ -523,6 +524,18 @@ class SearchResultViewController: FormViewController {
         }
         if let nextURL = self.nextURL {
             section <<< self.generateLoadNextLinkRow(nextURL: nextURL, section: section)
+        }
+    }
+    
+    public func SearchResultSelect(cell:ButtonCellOf<String>) {
+        guard let section = self.form.allSections.first else { return }
+        for currentRow in section.allRows {
+            guard let currentButtonCell = currentRow.baseCell as? ButtonCellOf<String> else { continue }
+            if cell == currentButtonCell {
+                currentButtonCell.isSelected = true
+            }else{
+                currentButtonCell.isSelected = false
+            }
         }
     }
 }
