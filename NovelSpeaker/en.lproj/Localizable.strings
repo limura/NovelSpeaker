@@ -751,7 +751,7 @@
 "NovelSearchViewController_ForceReloadSearchInfoButton_Title" = "Try to load search settings";
 "NovelSearchViewController_LoadingNextLink_Title" = "Searching for additional parts...";
 "NovelSearchViewController_OpenWebSiteButtonText" = "Open in WebImport tab";
-"NovelSearchViewController_OpenWebImportButtonTitle" = "Open in WebImport tab";
+"NovelSearchViewController_OpenWebImportButtonTitle" = "Open in WebImport tab and check";
 
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";

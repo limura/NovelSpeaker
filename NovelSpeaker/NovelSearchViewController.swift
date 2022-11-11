@@ -129,7 +129,7 @@ class MultiSelectQuery: SearchQuery, Decodable {
 class RadioQuery: SearchQuery, Decodable {
     let displayText:String
     let queryName:String
-    let defaultValue:String
+    let defaultValue:String?
     let radioList:[String:String]
     var enableTarget:String? = nil
     let urlReplaceTarget:String?
@@ -137,7 +137,7 @@ class RadioQuery: SearchQuery, Decodable {
         self.displayText = displayText
         self.queryName = queryName
         self.radioList = radioList
-        self.defaultValue = defaultValue ?? ""
+        self.defaultValue = defaultValue
         self.urlReplaceTarget = urlReplaceTarget
     }
 
@@ -147,7 +147,7 @@ class RadioQuery: SearchQuery, Decodable {
             $0.selectorTitle = displayText
             $0.options = ([String](self.radioList.keys)).sorted()
             $0.value = nil
-            if defaultValue.count > 0, let key = self.radioList.filter({$0.value == defaultValue}).first?.key {
+            if let defaultValue = defaultValue, let key = self.radioList.filter({$0.value == defaultValue}).first?.key {
                 $0.value = key
                 self.enableTarget = key
             }else{
@@ -257,21 +257,21 @@ class SearchResultBlock {
             if let description = self.description, description.count > 0 {
                 DispatchQueue.main.async {
                     NiftyUtility.EasyDialogBuilder(parent)
-                        .title(title: self.title, numberOfLines: 1)
-                        .textView(content: description, heightMultiplier: 0.6)
-                        .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
-                            dialog.dismiss(animated: false, completion: nil)
-                        })
-                        .addButton(title: NSLocalizedString("NovelSearchViewController_OpenWebImportButtonTitle", comment: "Web取込 タブで開く"), callback: { dialog in
-                            dialog.dismiss(animated: false) {
-                                BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: self.url)
-                            }
-                        })
-                        .addButton(title: NSLocalizedString("NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle", comment: "仮読み込み"), callback: { (dialog) in
-                            dialog.dismiss(animated: false) {
-                                download()
-                            }
-                        })
+                    .title(title: self.title, numberOfLines: 1)
+                    .textView(content: description, heightMultiplier: 0.6)
+                    .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
+                        dialog.dismiss(animated: false, completion: nil)
+                    })
+                    .addButton(title: NSLocalizedString("NovelSearchViewController_OpenWebImportButtonTitle", comment: "Web取込 タブで開いて確認する"), callback: { dialog in
+                        dialog.dismiss(animated: false) {
+                            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: self.url)
+                        }
+                    })
+                    .addButton(title: NSLocalizedString("NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle", comment: "仮読み込み"), callback: { (dialog) in
+                        dialog.dismiss(animated: false) {
+                            download()
+                        }
+                    })
                     .build(isForMessageDialog: true).show()
                 }
             }else{
@@ -338,7 +338,7 @@ struct SearchResult : Decodable {
             }else{
                 blockHTML = blockHTMLElement
             }
-            print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.toHTML ?? "nil")")
+            //print("ConvertHTMLToSearchResultDataArray: phase 2 blockHTML.rowXML: \(blockHTML.toHTML ?? "nil")")
             let title:String
             if let titleXpath = self.titleXpath {
                 title = NiftyUtility.FilterXpathWithConvertString(xmlElement: blockHTML, xpath: titleXpath).trimmingCharacters(in: .whitespacesAndNewlines)
@@ -544,6 +544,7 @@ class WebSiteSection : Decodable {
     var waitSecondInHeadless:Double? = nil
     var announce:String? = nil
     var webSiteURL:URL? = nil
+    var allowDataVersion:Int = 0
     //var parentViewController:ParentViewController
     
     enum CodingKeys: String, CodingKey {
@@ -560,6 +561,7 @@ class WebSiteSection : Decodable {
         case waitSecondInHeadless
         case announce
         case webSiteURL
+        case allowDataVersion
     }
     required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -577,6 +579,7 @@ class WebSiteSection : Decodable {
         if let webSiteURLString = try? values.decode(String.self, forKey: .webSiteURL) {
             webSiteURL = URL(string: webSiteURLString)
         }
+        allowDataVersion = (try? values.decode(Int.self, forKey: .allowDataVersion)) ?? 0
 
         // 怪しく全てを読み込める struct を作って一旦読み込みます(´・ω・`)
         struct DummySearchQuery: Decodable {
@@ -673,13 +676,6 @@ class WebSiteSection : Decodable {
                 $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
             }
         }
-        if let webSiteURL = self.webSiteURL {
-            section <<< ButtonRow() {
-                $0.title = NSLocalizedString("NovelSearchViewController_OpenWebSiteButtonText", comment: "Web取込タブで開く")
-            }.onCellSelection({ (buttonCellOf, buttonRow) in
-                BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: webSiteURL)
-            })
-        }
         for value in values {
             if let form = value.CreateForm(parent: parentViewController) {
                 section <<< form
@@ -735,6 +731,20 @@ class WebSiteSection : Decodable {
                 }
             }
         })
+        if let webSiteURL = self.webSiteURL {
+            section <<< LabelRow() {
+                $0.title = " "
+                $0.cell.textLabel?.numberOfLines = 0
+                $0.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+            }.cellUpdate({ cell, row in
+                cell.backgroundColor = .systemGroupedBackground
+            })
+            section <<< ButtonRow() {
+                $0.title = NSLocalizedString("NovelSearchViewController_OpenWebSiteButtonText", comment: "Web取込タブで開く")
+            }.onCellSelection({ (buttonCellOf, buttonRow) in
+                BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: webSiteURL)
+            })
+        }
         return section
     }
 }
@@ -746,6 +756,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
     static let SearchInfoCacheFileName = "SearchInfoData.json"
     static let HeadlessHTTPClientKey = "NovelSearchViewControllerHeadlessHTTPClientKey"
     let searchInfoExpireTimeInterval:TimeInterval = 60*60*6 // 6時間
+    static let CURRENT_ALLOW_DATA_VERSION = 1
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -817,6 +828,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
         guard let result = try? decorder.decode([WebSiteSection].self, from: jsonData) else { return [] }
         if NovelSpeakerUtility.isUseWebSearchTabDisabledSite { return result }
         return result.filter {
+            guard $0.allowDataVersion >= NovelSearchViewController.CURRENT_ALLOW_DATA_VERSION else {return false}
             guard let isDisabled = $0.isDisabled else {return true}
             return isDisabled == false
         }
