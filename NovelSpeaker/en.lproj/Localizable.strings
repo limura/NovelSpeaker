@@ -238,6 +238,7 @@
 "SettingsViewController_ImportOuterFile" = "File import";
 "SettingsViewController_UIDocumentPickerViewTitle" = "Please specify the file to import into NovelSpeaker";
 "SettingTableViewController_menuItemsNotRemoved" = "Long press menu items left behind";
+"SettingsViewController_isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog" = "Add \"Open in WebImport tab and check\" button to each search result dialog in Web Search tab";
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "Define";
 "RealmModels_MenuItemsNotRemoved_Name_translate" = "Translate";

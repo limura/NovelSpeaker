@@ -185,6 +185,8 @@
 "SettingTableViewController_IsEnableSwipeOnStoryView" = "小説本文画面での左右スワイプでページめくりができるようにする";
 "SettingTableViewController_DisableNarouRuby" = "ことせかい 由来のルビ表記のみを対象とする(『|ルビを振られる文字列(ルビ文字列)』という形式のみを対象とするようになるため、『漢字(ひらがなかカタカナ)』という表記をルビと判定される事を避けたい場合等に効果があります)";
 "SettingTableViewController_menuItemsNotRemoved" = "残される長押しメニュー項目";
+"SettingsViewController_isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog" = "Web検索タブでの個々の検索結果ダイアログに「Web取込 タブで開いて確認する」ボタンを追加する";
+
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "調べる";
 "RealmModels_MenuItemsNotRemoved_Name_translate" = "翻訳";

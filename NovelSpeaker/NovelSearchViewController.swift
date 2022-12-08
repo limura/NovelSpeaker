@@ -257,23 +257,27 @@ class SearchResultBlock {
             }
             if let description = self.description, description.count > 0 {
                 DispatchQueue.main.async {
-                    NiftyUtility.EasyDialogBuilder(parent)
+                    var builder = NiftyUtility.EasyDialogBuilder(parent)
                     .title(title: self.title, numberOfLines: 1)
                     .textView(content: description, heightMultiplier: 0.6)
                     .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
                         dialog.dismiss(animated: false, completion: nil)
                     })
-                    .addButton(title: NSLocalizedString("NovelSearchViewController_OpenWebImportButtonTitle", comment: "Web取込 タブで開いて確認する"), callback: { dialog in
-                        dialog.dismiss(animated: false) {
-                            BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: self.url)
-                        }
-                    })
+                    if NovelSpeakerUtility.isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog {
+                        builder = builder
+                            .addButton(title: NSLocalizedString("NovelSearchViewController_OpenWebImportButtonTitle", comment: "Web取込 タブで開いて確認する"), callback: { dialog in
+                                dialog.dismiss(animated: false) {
+                                    BookShelfRATreeViewController.LoadWebPageOnWebImportTab(url: self.url)
+                                }
+                            })
+                    }
+                    builder = builder
                     .addButton(title: NSLocalizedString("NovelSearchViewController_DescriptionDisplayedAndTryDownloadButtonTitle", comment: "仮読み込み"), callback: { (dialog) in
                         dialog.dismiss(animated: false) {
                             download()
                         }
                     })
-                    .build(isForMessageDialog: true).show()
+                    builder.build(isForMessageDialog: true).show()
                 }
             }else{
                 download()

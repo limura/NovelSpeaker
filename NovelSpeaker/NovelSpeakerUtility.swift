@@ -2779,6 +2779,19 @@ class NovelSpeakerUtility: NSObject {
         defaults.set(cleardArray, forKey: CheckRestartFrequencyKey)
         defaults.synchronize()
     }
+
+    static let IsNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialogKey = "IsNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog"
+    static var isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog: Bool {
+        get {
+            let defaults = UserDefaults.standard
+            defaults.register(defaults: [IsNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialogKey : false])
+            return defaults.bool(forKey: IsNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialogKey)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: IsNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialogKey)
+            UserDefaults.standard.synchronize()
+        }
+    }
     
     static let NovelBookmarkUserDefaultsKey = "NovelBookmarkUserDefaultsKey"
     static func GetNovelBookmark(novelID:String) -> Data?{

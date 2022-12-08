@@ -1452,6 +1452,16 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 RealmGlobalState.SetIsForceSiteInfoReloadIsEnabled(newValue: value)
             })
             section
+            <<< SwitchRow() { row in
+                row.title = NSLocalizedString("SettingsViewController_isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog", comment: "Web検索タブでの個々の検索結果ダイアログに「Web取込タブで開いて確認する」ボタンを追加する")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                row.value = NovelSpeakerUtility.isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog
+            }.onChange({ row in
+                guard let value = row.value else { return }
+                NovelSpeakerUtility.isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog = value
+            })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
