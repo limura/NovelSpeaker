@@ -3412,6 +3412,58 @@ Fixing the problem
 
 - Fixed an issue that caused some websites to skip pages and load
 
+
+# Version 2.7.0
+
+インタフェースの変更・機能追加等
+
+- 異なるOS間やOSバージョン間の話者のIdentity文字列の差異による問題を、その差異を吸収するテーブルを使って回避できるように
+- 「設定タブ」->「本文中の長押しメニューを ことせかい 由来の物のみにする」がONの時に表示される「残される長押しメニュー項目」を追加
+- 「設定タブ」->「本文中の長押しメニューを ことせかい 由来の物のみにする」の表記を「本文中の長押しメニュー項目を減らす」に変更
+- 「Web検索」タブで使っているWebサイト毎の検索周りの定義を色々拡張しました
+
+問題の修正
+
+- ログインが必要なWebサイト等のCookieを利用しているWebサイトでダウンロードが失敗していた可能性のある問題を修正
+
+以下にざっくりと修正点について解説しておきます。
+
+* 異なるOS間やOSバージョン間の話者のIdentity文字列の差異による問題を、その差異を吸収するテーブルを使って回避できるように
+  こちらは iOS 16 の時と iOS 15 以前の時で、話者を識別するための情報が変化してしまったことに対応するための物です。この修正で「設定タブ」->「アプリ内エラーのお知らせ」に話者に関するエラーが出にくくなるはずです。
+  なお、こちらの問題は「設定タブ」->「発話設定」にある全ての「話者」について、「一旦別の話者を選択した後に元に戻す」という操作をすることで解消することができていた問題になります。
+* 「設定タブ」->「本文中の長押しメニューを ことせかい 由来の物のみにする」がONの時に表示される「残される長押しメニュー項目」を追加
+  こちらの機能を使うと、「本文中の長押しメニューを ことせかい 由来の物のみにする」をONにした時でも「コピー」等を残せるようになります。
+  なお、この修正により内部データベースに新しい要素が追加されたため、iCloud同期でもデータバージョンが上がる事になり、2.6.* 以下の ことせかい と iCloud 同期 ができなくなります。
+* 「Web検索」タブで使っているWebサイト毎の検索周りの定義を色々拡張しました
+  今まで「Web検索」タブで検索することができなかったWebサイト様について追加できるように努力するような変更になります。そのため、追加された機能を使った項目については古いバージョン(Version 2.6.* 以前)の ことせかい では動作しないものになります。
+* 「Web検索」タブの検索結果のリストを選択した時に、その選択した小説をハイライトするように
+  キャンセルした時に「前に選んだのはどれだったかな」というのが見た目でわかるようにした、という物です。
+
+変更点は概ね以上のような物となっています。
+
+さて、残念なことに私はお問い合わせ対応に疲れ果ててしまいましたため、致命的な問題(アプリが強制終了するようなもの)以外への対応は極力しない形にさせていただいています。お問い合わせ窓口の閉鎖等については今の所はしておりませんが、上記のような対応になりますため、新機能のご提案や強制終了を伴わない不都合の報告をされましたとしても、対応はされないものとお考え下さい。なお、今回のように気が向いたら修正する事もあります。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+# Version 2.7.0
+
+Interface change, function addition, etc.
+
+- Avoid problems caused by differences in speaker identity strings between different OSes and OS versions by using a table that absorbs the differences.
+- Added "Long press menu items left behind" displayed when "Settings tab" -> "Long press only pops: corrections for pronounciation" is ON
+- "Settings tab" -> Changed the notation of "Long press only pops: corrections for pronounciation" to "Reduce long-press menu items in the text"
+- Expanded various definitions around searching for each website used in the "Web Search" tab
+
+Fix the problem
+
+- Fixed an issue that may have caused download failures on websites that use cookies, such as websites that require login
+
+Note
+
+From Version 2.7.0, iCloud synchronization cannot be performed because the schema of the internal database has changed from Version 2.6.* and earlier.
+
 「設定タブ」→「本棚に栞の位置を表示する」がONの時に「読み上げが最後に達しました」とのアナウンスがあるにもかかわらず、栞の位置表示のバーの色が紫色にならない問題を修正
 
 TODO:

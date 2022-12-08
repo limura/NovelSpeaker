@@ -884,20 +884,38 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.3
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.0
 
-- Added \"Settings tab\" -> \"File import\"
-- Changed the error message to make it easier to understand when adding a novel to the bookshelf fails
-- When importing a file from the share menu, etc., if it is a text file on this iPhone (or iPad, etc.), check the update of that file.
-- Added HTML to supported file types for file import (import from share menu)
-- Enable to receive WebURL in Share Extension
-- Deprecated Action Extension
-- Add \"Settings tab\" -> \"Follow the rotation of the screen\" on iOS
-- Fixed an issue that caused some websites to skip pages and load
+- Avoid problems caused by differences in speaker identity strings between different OSes and OS versions by using a table that absorbs the differences.
+- Added \"Long press menu items left behind\" displayed when \"Settings tab\" -> \"Long press only pops: corrections for pronounciation\" is ON
+- \"Settings tab\" -> Changed the notation of \"Long press only pops: corrections for pronounciation\" to \"Reduce long-press menu items in the text\"
+- Expanded various definitions around searching for each website used in the \"Web Search\" tab
+- Fixed an issue that may have caused download failures on websites that use cookies, such as websites that require login
+
+Note:
+From Version 2.7.0, iCloud synchronization cannot be performed because the schema of the internal database has changed from Version 2.6.* and earlier.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.7.0
+
+Interface change, function addition, etc.
+
+- Avoid problems caused by differences in speaker identity strings between different OSes and OS versions by using a table that absorbs the differences.
+- Added \"Long press menu items left behind\" displayed when \"Settings tab\" -> \"Long press only pops: corrections for pronounciation\" is ON
+- \"Settings tab\" -> Changed the notation of \"Long press only pops: corrections for pronounciation\" to \"Reduce long-press menu items in the text\"
+- Expanded various definitions around searching for each website used in the \"Web Search\" tab
+
+Fix the problem
+
+- Fixed an issue that may have caused download failures on websites that use cookies, such as websites that require login
+
+Note
+
+From Version 2.7.0, iCloud synchronization cannot be performed because the schema of the internal database has changed from Version 2.6.* and earlier.
+
+
 # Version 2.6.3
 
 Interface change, function addition, etc.

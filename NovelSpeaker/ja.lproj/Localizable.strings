@@ -876,20 +876,31 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.6.3
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.0
 
-- 小説の本棚への追加に失敗した時のエラーメッセージを少しわかりやすく変更
-- 「設定タブ」->「ファイルの取り込み」を追加
-- ファイル取り込み時に、このiPhone(またはiPad等)の上のテキストファイルであった場合はそのファイルの更新確認を行うように
-- ファイル読み込み(シェアメニューからの読み込み)での対応ファイルタイプに HTML を追加
-- Share Extension で WebURL を受け取ることができるように
-- Action Extension(「ことせかい へ読み込む」) を廃止(直上の Share Extension 側(シェアメニュー上のカラーのアイコンのもの)が同様の動作になります)
-- iOSにて、「設定タブ」->「画面の回転に追従する」を追加(iPadではON/OFFできず常にONなので表示されません)
-- 一部のWebサイトでページを飛ばして読み込んでしまう場合のあった問題を修正
+- 異なるOS間やOSバージョン間の話者のIdentity文字列の差異による問題を、その差異を吸収するテーブルを使って回避できるように
+- 「設定タブ」→「本文中の長押しメニューを ことせかい 由来の物のみにする」がONの時に表示される「残される長押しメニュー項目」を追加
+- 「設定タブ」→「本文中の長押しメニューを ことせかい 由来の物のみにする」の表記を「本文中の長押しメニュー項目を減らす」に変更
+- 「Web検索」タブで使っているWebサイト毎の検索周りの定義を色々拡張
+- ログインが必要なWebサイト等のCookieを利用しているWebサイトでダウンロードが失敗していた可能性のある問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.7.0
+
+インタフェースの変更・機能追加等
+
+- 異なるOS間やOSバージョン間の話者のIdentity文字列の差異による問題を、その差異を吸収するテーブルを使って回避できるように
+- 「設定タブ」→「本文中の長押しメニューを ことせかい 由来の物のみにする」がONの時に表示される「残される長押しメニュー項目」を追加
+- 「設定タブ」→「本文中の長押しメニューを ことせかい 由来の物のみにする」の表記を「本文中の長押しメニュー項目を減らす」に変更
+- 「Web検索」タブで使っているWebサイト毎の検索周りの定義を色々拡張
+
+問題の修正
+
+- ログインが必要なWebサイト等のCookieを利用しているWebサイトでダウンロードが失敗していた可能性のある問題を修正
+
+
 Version 2.6.3
 
 インタフェースの変更・機能追加等
