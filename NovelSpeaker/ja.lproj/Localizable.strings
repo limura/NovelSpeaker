@@ -752,6 +752,8 @@
 "NovelSearchViewController_LoadingNextLink_Title" = "追加分を検索中……";
 "NovelSearchViewController_OpenWebSiteButtonText" = "このサイトを Web取込 タブで開く";
 "NovelSearchViewController_OpenWebImportButtonTitle" = "Web取込 タブで開いて確認する";
+"NovelSearchViewController_GenerateQueryURLFailedMessage" = "検索用URLの生成に失敗しています。入力が必要な項目が入力されていない可能性があります。";
+"NovelSearchViewController_GenerateQueryURLFailedTitle" = "エラー";
 
 "BookShelfTableViewController_SortTypeNcode" = "ID順";
 

@@ -752,6 +752,8 @@
 "NovelSearchViewController_LoadingNextLink_Title" = "Searching for additional parts...";
 "NovelSearchViewController_OpenWebSiteButtonText" = "Open in WebImport tab";
 "NovelSearchViewController_OpenWebImportButtonTitle" = "Open in WebImport tab and check";
+"NovelSearchViewController_GenerateQueryURLFailedMessage" = "Failed to generate search URL. Items that require input may not have been entered.";
+"NovelSearchViewController_GenerateQueryURLFailedTitle" = "Error";
 
 
 "BookShelfTreeViewCell_UnknownTitle" = "(unknown novel name)";

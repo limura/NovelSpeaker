@@ -697,7 +697,12 @@ class WebSiteSection : Decodable {
         section <<< ButtonRow() {
             $0.title = NSLocalizedString("NovelSearchViewController_SearchButtonText", comment: "検索")
         }.onCellSelection({ (buttonCellOf, buttonRow) in
-            guard let url = self.GenerateQueryURL() else { return }
+            guard let url = self.GenerateQueryURL() else {
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogMessageDialog(viewController: parentViewController, title: NSLocalizedString("NovelSearchViewController_GenerateQueryURLFailedTitle", comment: "エラー"), message: NSLocalizedString("NovelSearchViewController_GenerateQueryURLFailedMessage", comment: "検索用URLの生成に失敗しています。入力が必要な項目が入力されていない可能性があります。"), completion: nil)
+                }
+                return
+            }
             DispatchQueue.main.async {
                 let allowsCellularAccess:Bool = RealmUtil.RealmBlock {(realm) -> Bool in
                     if let globalData = RealmGlobalState.GetInstanceWith(realm: realm), globalData.IsDisallowsCellularAccess {
