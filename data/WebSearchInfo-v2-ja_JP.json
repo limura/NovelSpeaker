@@ -1,0 +1,1501 @@
+[
+    {
+        "説明": [
+"このファイルは ことせかい の「Web検索」タブで検索対象となるWebサイトの情報を記述するファイルです。",
+"<<リリースまでにこのファイルを自作するための解説文を書く予定>>",
+"",
+"",
+""
+	],
+        "allowDataVersion": 9999999,
+        "disabled": "true",
+        "title": "記述サンプル",
+        "url": "https://www.example.com/",
+        "HTTPMethod": "GET",
+        "values": [
+        ],
+        "result": {
+            "block": "//body",
+            "nextLink": "",
+            "title": "",
+            "url": "//a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://syosetu.com/",
+        "title": "小説家になろう",
+        "HTTPMethod": "GET",
+        "url": "https://yomou.syosetu.com/search.php?",
+        "values": [
+            {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "notword"},
+            {"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "genre", "separator": "-",
+                "multiSelect": {
+                    "異世界": "101",
+                    "現実世界": "102",
+                    "ハイファンタジー": "201",
+                    "ローファンタジー": "202",
+                    "純文学": "301",
+                    "ヒューマンドラマ": "302",
+                    "歴史": "303",
+                    "推理": "304",
+                    "ホラー": "305",
+                    "アクション": "306",
+                    "コメディー": "307",
+                    "VRゲーム": "401",
+                    "宇宙": "402",
+                    "空想科学": "403",
+                    "パニック": "404",
+                    "童話": "9901",
+                    "詩": "9902",
+                    "エッセイ": "9903",
+                    "リプレイ": "9904",
+                    "その他": "9999",
+                    "ノンジャンル": "9801"
+                }
+            },
+            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "order",
+                "radio": {
+                    "新着更新順": "new",
+                    "ブックマーク数の多い順": "favnovelcnt",
+                    "レビュー数の多い順": "reviewcnt",
+                    "総合ポイントの高い順": "hyoka",
+                    "総合ポイントの低い順": "hyokaasc",
+                    "日間ポイントの高い順": "dailypoint",
+                    "週間ポイントの高い順": "weeklypoint",
+                    "月間ポイントの高い順": "monthlypoint",
+                    "四半期ポイントの高い順": "quarterpoint",
+                    "年間ポイントの高い順": "yearlypoint",
+                    "感想の多い順": "impressioncnt",
+                    "評価者数の多い順": "hyokacnt",
+                    "評価者数の少ない順": "hyokacntasc",
+                    "週間ユニークユーザの多い順": "weekly",
+                    "小説本文の文字数が多い順": "lengthdesc",
+                    "小説本文の文字数が少ない順": "lengthasc",
+                    "新着投稿順": "ncodedesc",
+                    "更新が古い順": "old"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='searchkekka_box']",
+            "nextLink": "//div[@class='pager']/a[@class='nextlink']/@href",
+            "title": "//div[@class='novel_h']/a",
+            "url": "//a[contains(@href,'/novelview/infotop/ncode/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://kakuyomu.jp/",
+        "title": "カクヨム",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://kakuyomu.jp/search?",
+        "values": [
+            {"queryType": "text", "displayText": "次のキーワードを含む", "queryName": "q"},
+            {"queryType": "text", "displayText": "次のキーワードを含まない", "queryName": "ex_q"},
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre_name", "radio":
+                {
+                    "異世界ファンタジー": "fantasy",
+                    "現代ファンタジー": "action",
+                    "SF": "sf",
+                    "恋愛": "love_story",
+                    "ラブコメ": "romance",
+                    "現代ドラマ": "drama",
+                    "ホラー": "horror",
+                    "ミステリー": "mystery",
+                    "エッセイ・ノンフィクション": "nonfiction",
+                    "歴史・時代・伝奇": "history",
+                    "創作論・評論": "criticism",
+                    "詩・童話・その他": "others"
+                }
+            },
+            {"queryType": "radio", "displayText": "執筆状況", "queryName": "serial_status", "radio":
+                {
+                    "連載中": "running",
+                    "完結済": "completed"
+                }
+            },
+            {"queryType": "radio", "displayText": "★の数", "queryName": "total_review_point_range", "radio":
+                {
+                    "  0〜9": "-9",
+                    " 10〜": "10-",
+                    "100〜": "100-",
+                    "500〜": "500-"
+                }
+            },
+            {"queryType": "radio", "displayText": "小説の長さ", "queryName": "total_character_count_range", "radio":
+                {
+                    "1: 短編（〜2万文字）": "-20000",
+                    "2: 中編（2万文字〜8万文字）": "20000-80000",
+                    "3: 長編（8万文字〜）": "80000-"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "セルフレイティング(除外する項目を選択)", "queryName": "exclusion_flag_name", "separator": "&exclusion_flag_name=",
+                "multiSelect": {
+                    "残酷描写有り": "cruel",
+                    "暴力描写有り": "violent",
+                    "性描写有り": "sexual"
+                }
+            },
+            {"queryType": "radio", "displayText": "公開日", "queryName": "published_date_range", "radio":
+                {
+                    "1日以内": "1days",
+                    "1週間以内": "7days",
+                    "1ヶ月以内": "1months",
+                    "半年以内": "6months",
+                    "1年以内": "1years"
+                }
+            },
+            {"queryType": "radio", "displayText": "更新日", "queryName": "last_episode_published_date_range", "radio":
+                {
+                    "1日以内": "1days",
+                    "1週間以内": "7days",
+                    "1ヶ月以内": "1months",
+                    "半年以内": "6months",
+                    "1年以内": "1years"
+                }
+            }
+        ],
+        "result": {
+            "block": "//section[@id='searchResult-works']/div[contains(@class,'widget-work')]/div[@class='float-left']",
+            "nextLink": "//div[@class='widget-pager']/p[@class='widget-pagerNext']/a[contains(@href,'/search?')]/@href",
+            "title": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]",
+            "url": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://nazology.net/",
+	"isDisabled": true,
+        "title": "ナゾロジー",
+        "HTTPMethod": "GET",
+        "url": "https://nazology.net/?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "s"}
+        ],
+        "result": {
+            "block": "//ul[contains(@class,'article-list__items')]/li[child::a[contains(@href,'/archives/')]]",
+            "nextLink": "//div[@class='article-list__pagination']/a[contains(@href,'/page/')]",
+            "title": "//a[contains(@href,'/archives/')]//p[@class='listed-article__title']",
+            "url": "//a[contains(@href,'/archives/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://pokemon.sorakaze.info/",
+        "title": "ポケモン小説スクエア",
+        "HTTPMethod": "GET",
+        "url": "https://pokemon.sorakaze.info/novels?",
+        "values": [
+            {"queryType": "hidden", "queryName": "type", "value": "0"},
+            {"queryType": "hidden", "queryName": "state", "value": "0"},
+            {"queryType": "hidden", "queryName": "grotesque", "value": "0"},
+            {"queryType": "hidden", "queryName": "event", "value": "0"},
+            {"queryType": "radio", "displayText": "カテゴリ", "queryName": "category", "defaultValue": "2",
+                "radio": {
+                    "なし": "1",
+                    "冒険": "2",
+                    "文学": "3",
+                    "生態": "4",
+                    "ポケダン": "5",
+                    "コメディ": "7",
+                    "レンジャー": "8",
+                    "ポケスペ": "9",
+                    "学園": "10",
+                    "推理・ホラー": "11",
+                    "アニポケ": "12",
+                    "ファンタジー": "13",
+                    "SF": "14"
+                }
+            }
+        ],
+        "result": {
+            "block": "//section/div[@class='novel-list']/div[@class='item']",
+            "nextLink": "//ul[@id='paginate']/li[@class='next']/a[@rel='next']",
+            "title": "//div[@class='subject']/a",
+            "url": "//div[@class='subject']/a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://www.akatsuki-novels.com/",
+        "title": "暁",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www.akatsuki-novels.com/novels/index/",
+        "memo": "暁はクエリの連結が / で、key=value の = に当たるものが ~ になっていて、POSTで送信すべきとなっているけれど GET でも受け付けてくれるという謎の仕様のようです。また、検索文字列のような文字列を引数とする場合、謎の16進(?)に変換しなければならないようなので、これは使えない事にします。",
+        "querySeparator": "/",
+        "queryJoinner": "~",
+        "values": [
+            {"queryType": "multiSelect", "displayText": "除外条件", "queryName": "", "separator": "/", "multiSelect":
+                {
+                    "R-15": "age_limit_a~1",
+                    "オリ主": "orinusi_a~1",
+                    "神様転生": "kamiten_a~1",
+                    "BL": "boys_love_a~1",
+                    "百合": "girls_love_a~1",
+                    "残酷な描写": "representative_cruel_a~1",
+                    "アンチ": "anti~1",
+                    "ヘイト": "hate~1",
+                    "短編": "serial_story_a~1",
+                    "長編(連載中)": "finished_a~1",
+                    "長編(完結)": "finished_b~1",
+                    "多作品(短期間に大量の投稿をしている)作者の小説": "nl_mkx~1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "絞込条件", "queryName": "", "separator": "/", "multiSelect":
+                {
+                    "R-15": "age_limit_xa~1",
+                    "オリ主": "orinusi_xa~1",
+                    "神様転生": "kamiten_xa~1",
+                    "BL": "boys_love_xa~1",
+                    "百合": "girls_love_xa~1",
+                    "残酷な描写": "representative_cruel_xa~1",
+                    "アンチ": "anti_xa~1",
+                    "ヘイト": "hate_xa~1",
+                    "短編": "serial_story_xa~1",
+                    "長編(連載中)": "finished_xa~1",
+                    "長編(完結)": "finished_xb~1"
+                }
+            },
+            {"queryType": "radio", "displayText": "表示順", "queryName": "so", "defaultValue": "0",
+                "radio": {
+                    "01: 新着順": "0",
+                    "02: 総合評価(話別評価除く)高い順": "17",
+                    "03: 総合評価(話別評価除く)低い順": "18",
+                    "04: 総合評価高い順": "1",
+                    "05: 総合評価低い順": "2",
+                    "06: 評価人数多い順": "3",
+                    "07: 評価人数低い順": "4",
+                    "08: PV数多い順": "5",
+                    "09: PV数少ない順": "6",
+                    "10: UA数多い順": "7",
+                    "11: UA数少ない順": "8",
+                    "12: 文字数多い順": "9",
+                    "13: 文字数少ない順": "10",
+                    "14: 1話当たりの文字数多い順": "11",
+                    "15: 1話当たりの文字数少ない順": "12",
+                    "16: 話数多い順": "13",
+                    "17: 話数少ない順": "14",
+                    "18: お気に入り登録数多い順": "15",
+                    "19: お気に入り登録数少ない順": "16",
+                    "20: 感想数が多い順": "19",
+                    "21: 感想数が少ない順": "20"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='topicsBox']",
+            "nextLink": "//a[@rel='next']/@href",
+            "title": "//strong[@class='novelTitle']/a[contains(@href,'/stories/index/novel_id')]",
+            "url": "//strong[@class='novelTitle']/a[contains(@href,'/stories/index/novel_id')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://syosetu.org/",
+        "title": "ハーメルン",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://syosetu.org/search/?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "word"},
+            {"queryType": "hidden", "queryName": "mode", "value": "search"}
+	],
+        "result": {
+            "block": "//div[contains(@class,'autopagerize_page_element')]/div[@class='section3']",
+            "nextLink": "//div[contains(@class,'autopagerize_page_element')]/div[@class='paging']//a[@rel='next']/@href",
+            "title": "//a[contains(@href,'/novel/')]",
+            "url": "//a[contains(@href,'/novel/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://slib.net/",
+        "title": "星空文庫",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://slib.net/works/?",
+        "values": [
+            {"queryType": "radio", "displayText": "形式", "queryName": "type",
+                "radio": {
+                    "小説": "1",
+                    "随筆・エッセイ": "11",
+                    "韻文詩": "21",
+                    "自由詩": "31"
+                }
+            },
+            {"queryType": "radio", "displayText": "文章量", "queryName": "length",
+                "radio": {
+                    "掌編": "1",
+                    "短編": "2",
+                    "中編": "3",
+                    "長編": "4"
+                }
+            },
+            {"queryType": "radio", "displayText": "権利", "queryName": "copy",
+                "radio": {
+                    "CC BY-NC-ND": "11",
+                    "CC BY-NC-SA": "12",
+                    "CC BY-NC": "13",
+                    "CC BY-ND": "14",
+                    "CC BY-SA": "15",
+                    "CC BY": "16",
+                    "Derivative work": "21",
+                    "Public Domain": "99"
+                }
+            },
+            {"queryType": "radio", "displayText": "レーティング", "queryName": "rating",
+                "radio": {
+                    "全年齢対象": "1",
+                    "幼児向けまで": "-11",
+                    "幼児向けのみ": "11",
+                    "児童向けまで": "-12",
+                    "児童向けのみ": "12",
+                    "青年向けまで": "-13",
+                    "青年向けのみ": "13",
+                    "成人向けまで": "-14",
+                    "成人向けのみ": "14"
+                }
+            },
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "tag[]",
+                "radio": {
+                    "全ての要素": "on",
+                    "ファンタジー": "1",
+                    "青春": "2",
+                    "恋愛": "3",
+                    "冒険": "4",
+                    "アクション": "5",
+                    "サスペンス": "6",
+                    "ミステリー": "7",
+                    "時代・歴史": "8",
+                    "ホラー": "9",
+                    "SF": "10",
+                    "コメディ": "11"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='contents-works']//section[contains(@class,'component-cardwork')]",
+            "nextLink_": "//div[@class='works-navigation']/nav[@class='component-pagination']/ul/li/a[contains(@href,'/works/') and contains(@href,'index=') and child::span[text()='Next']]",
+	    "nextLink": "//div[@class='works-navigation']/nav[@class='component-pagination']/ul/li[preceding-sibling::li[child::a[not(@href)]]][1]/a",
+            "title": "//header/h2/a",
+            "url": "//header/h2/a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://estar.jp/",
+	"isDisabled": true,
+        "title": "エブリスタ(今の所30件目以降の検索ができません)",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://estar.jp/novels?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "keyword"},
+            {"queryType": "text", "displayText": "除外キーワード", "queryName": "excludeKeyword"},
+            {"queryType": "radio", "displayText": "並び順", "queryName": "sort",
+                "radio": {
+                    "人気順": "score_desc",
+                    "更新日が新しい": "sort_modified_at_desc",
+                    "更新日が古い": "modified_at_asc",
+                    "公開日が新しい": "sort_published_at_desc",
+                    "公開日が古い": "published_at_asc",
+                    "スター数が多い": "sort_star_desc",
+                    "本棚追加数が多い": "sort_bookshelf_desc"
+                }
+            },
+            {"queryType": "onOff", "displayText": "連載中", "queryName": "writing", "value": "1"},
+            {"queryType": "onOff", "displayText": "完結", "queryName": "finished", "value": "1"},
+            {"queryType": "onOff", "displayText": "休載", "queryName": "ex_paused", "value": "1"},
+            {"queryType": "onOff", "displayText": "過激表現", "queryName": "ex_r18", "value": "1"},
+            {"queryType": "radio", "displayText": "文字数", "queryName": "characterLengthOption",
+                "radio": {
+                    "2万字以下（短編）": "short",
+                    "8万字以上（長編）": "long"
+                }
+            },
+            {"queryType": "radio", "displayText": "公開日", "queryName": "published",
+                "radio": {
+                    "1: 直近1週間": "7",
+                    "2: 直近1ヶ月": "30",
+                    "3: 1年以内": "365"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "genres", "separator": ",",
+                "multiSelect": {
+                    "恋愛": "1020",
+                    "ファンタジー": "1006",
+                    "現代ファンタジー": "1023",
+                    "ノンフィクション": "1005",
+                    "BL": "1018",
+                    "青春": "1002",
+                    "SF": "1007",
+                    "ミステリー": "1009",
+                    "ホラー": "1008",
+                    "ヒューマンドラマ": "1021",
+                    "エッセイ･HowTo": "1022",
+                    "歴史・時代": "1010",
+                    "コメディ": "1015",
+                    "詩・童話・絵本": "1003",
+                    "設定・プロット": "1016"
+                }
+            },
+            {"queryType": "onOff", "displayText": "書籍化・コミカライズ", "queryName": "is_book_p", "value": "1"},
+            {"queryType": "onOff", "displayText": "コンテスト受賞", "queryName": "awarded", "value": "1"},
+            {"queryType": "onOff", "displayText": "特集掲載", "queryName": "in_selection", "value": "1"}
+        ],
+        "result": {
+            "block": "//div[contains(@class,'novelListItem')]",
+            "memo: TODO:": "nextLinkButton は Erik か何かを使って次のページへのボタンをJavaScriptで .click() させるための物という事にしておきますそのうち実装したいなぁ。(´・ω・`)",
+            "nextLinkButton": ".pager .next .button",
+            "title": "//div[@class='info']/h3[@class='title']",
+            "url": "//a[contains(@href,'/novels/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://novelup.plus/",
+        "title": "ノベルアップ＋",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://novelup.plus/search?",
+        "values": [
+            {"queryType": "text", "displayText": "検索文字列", "queryName": "q"},
+            {"queryType": "text", "displayText": "除外文字列", "queryName": "e"},
+            {"queryType": "multiSelect", "displayText": "キーワード検索対象", "queryName": "", "separator": "&",
+                "memo": "この項目は multiSelect を特殊な形式で利用しています。queryName に空文字列を指定して、separator に & を指定した上で、multiSelect の value に ***=*** の形式の値を設定することで、value に書かれた固定値のクエリを追加するような使い方にしています。",
+                "multiSelect": {
+                    "作品名": "search[story]=1",
+                    "あらすじ": "search[introduction]=1",
+                    "タグ": "search[tag]=1",
+                    "作者名": "search[member]=1",
+                    "原作": "search[license]=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "異世界ファンタジー": "genre[1]=1",
+                    "現代/その他ファンタジー": "genre[2]=1",
+                    "SF": "genre[3]=1",
+                    "恋愛/ラブコメ": "genre[4]=1",
+                    "ホラー": "genre[5]=1",
+                    "ミステリー": "genre[6]=1",
+                    "エッセイ/評論/コラム": "genre[7]=1",
+                    "歴史/時代": "genre[8]=1",
+                    "文芸/純文学": "genre[9]=1",
+                    "ブログ/活動報告": "genre[10]=1",
+                    "現代/青春ドラマ": "genre[11]=1",
+                    "詩/短歌": "genre[12]=1",
+                    "作品紹介": "genre[13]=1",
+                    "コメディ/ギャグ": "genre[14]=1",
+                    "二次創作": "genre[52]=1",
+                    "童話/絵本/その他": "genre[99]=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "作品種別の絞り込み", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "短編 / 短編集": "short=1",
+                    "長編": "not-short=1",
+                    "設定・プロット": "plot=1",
+                    "自主企画": "user_event=1",
+                    "完結済・終了": "finish=1",
+                    "連載中・開催中": "not-finish=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "除外条件", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "長期連載停止中の作品": "pause=1",
+                    "残酷描写あり作品": "rating[1]=1",
+                    "暴力描写あり作品": "rating[2]=1",
+                    "性的表現あり作品": "rating[3]=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "sort", "defaultValue": "1", "radio":
+                {
+                    "更新順（エピソード）": "1",
+                    "新着順（作品）": "2",
+                    "ブックマーク数が多い順": "3",
+                    "ランキング順位（日間）が高い順": "4",
+                    "ランキング順位（累計）が高い順": "8",
+                    "応援ポイントが多い順": "9",
+                    "ノベラポイントが多い順": "10"
+                }
+            },
+            {"queryType": "hidden", "queryName": "length[min]", "value": ""},
+            {"queryType": "hidden", "queryName": "length[max]", "value": ""},
+            {"queryType": "hidden", "queryName": "point[min]", "value": ""},
+            {"queryType": "hidden", "queryName": "point[max]", "value": ""},
+            {"queryType": "hidden", "queryName": "point_pay[min]", "value": ""},
+            {"queryType": "hidden", "queryName": "point_pay[max]", "value": ""},
+            {"queryType": "hidden", "queryName": "update[from]", "value": ""},
+            {"queryType": "hidden", "queryName": "update[to]", "value": ""},
+            {"queryType": "hidden", "queryName": "open[from]", "value": ""},
+            {"queryType": "hidden", "queryName": "open[to]", "value": ""}
+        ],
+        "result": {
+            "block": "//div[contains(@class,'sumally')]",
+            "nextLink": "//div[@class='infinite-scroll-pagination']//a[contains(@class,'infinite-scroll-more')]/@href",
+            "title": "//p[@class='story_name']",
+            "url": "//p[@class='story_name']/a[contains(@href,'/story/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://www.alphapolis.co.jp/novel",
+        "title": "アルファポリス",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www.alphapolis.co.jp/novel/index?",
+        "values": [
+            {"queryType": "text", "displayText": "フリーワード", "queryName": "query"},
+            {"queryType": "radio", "displayText": "長さ", "queryName": "volume", "radio":
+                {
+                    "ショートショート": "1",
+                    "短編": "2",
+                    "長編": "3"
+                }
+            },
+            {"queryType": "radio", "displayText": "進行状況", "queryName": "complete", "radio":
+                {
+                    "連載中": "2",
+                    "完結": "1"
+                }
+            },
+            {"queryType": "hidden", "displayText": "Ｒ指定", "queryName": "rating", "value": "-1,-2",
+                "memo": {
+                    "queryType が radio であればこんな感じのデータを入れれば良い事になってます。": "けれど、ことせかい は一応9歳以上対象なので、Web検索で除外できるのならその時点で除外しておきます。",
+                    "R15･R18を除く": "-1,-2",
+                    "R18を除く": "-2",
+                    "R15": "1",
+                    "R18": "2",
+                    "R15･R18": "1,2"
+                }
+            },
+            {"queryType": "hidden", "queryName": "limit", "value": "40"},
+            {"queryType": "radio", "displayText": "検索結果の並び替え", "queryName": "sort", "defaultValue": "24hpt", "radio":
+                {
+                    "24h. ポイント順": "24hpt",
+                    "週間人気順": "weekly",
+                    "月間人気順": "monthly",
+                    "年間人気順": "yearly",
+                    "累計ポイント順": "total",
+                    "お気に入りの多い順": "favorite",
+                    "新着順": "recent",
+                    "最近更新された順": "episode_recent"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@id='main']/div[contains(@class,'novels')]//div[@class='content-main']",
+            "nextLink": "//div[contains(@class,'paginator')]/span[preceding-sibling::span[@class='current']]/a[contains(@href,'/novel/index?')]/@href",
+            "title": "//div[contains(@class,'content-title')]/h2[@class='title']",
+            "url": "//div[contains(@class,'content-title')]/h2[@class='title']/a[contains(@href,'/novel/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://www.berrys-cafe.jp/",
+        "title": "Berry's Cafe",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www.berrys-cafe.jp/search/book?",
+        "values": [
+            {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude_word"},
+            {"queryType": "multiSelect", "displayText": "検索対象", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "タイトル": "search_targets[]=1",
+                    "キーワード": "search_targets[]=2",
+                    "作家名": "search_targets[]=4",
+                    "表紙コメント": "search_targets[]=8",
+                    "あらすじ": "search_targets[]=16"
+                }, "multiSelectDefaultTargets": ["タイトル", "キーワード", "作家名"]
+            },
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0", "radio":
+                {
+                    " 指定なし": "0",
+                    "恋愛(すべて)": "100",
+                    "恋愛(純愛)": "101",
+                    "恋愛(ラブコメ)": "102",
+                    "恋愛(オフィスラブ)": "103",
+                    "恋愛(学園)": "104",
+                    "恋愛(実話)": "105",
+                    "恋愛(その他)": "199",
+                    "ファンタジー・ＳＦ・冒険": "700",
+                    "実用・エッセイ(すべて)": "1200",
+                    "実用・エッセイ(グルメ・レシピ)": "1201",
+                    "実用・エッセイ(美容・健康)": "1202",
+                    "実用・エッセイ(生活・趣味)": "1203",
+                    "実用・エッセイ(こども)": "1204",
+                    "実用・エッセイ(仕事)": "1205",
+                    "実用・エッセイ(その他)": "1299",
+                    "ミステリー・サスペンス": "400",
+                    "青春・友情": "200",
+                    "ノンフィクション・実話": "300",
+                    "ホラー・オカルト": "600",
+                    "歴史・時代": "1400",
+                    "絵本・童話": "1000",
+                    "コメディ": "900",
+                    "詩・短歌・俳句・川柳": "1300",
+                    "その他": "9900"
+                }
+            },
+            {"queryType": "radio", "displayText": "気持ち", "queryName": "feeling", "defaultValue": "0", "radio":
+                {
+                    " 指定なし": "0",
+                    "泣ける": "1",
+                    "切ない": "2",
+                    "感動した": "3",
+                    "ドキドキ": "4",
+                    "胸キュン": "5",
+                    "おもしろい": "6",
+                    "ワクワクする": "7",
+                    "怖い": "8",
+                    "ほのぼの": "9",
+                    "スカッとする": "10",
+                    "元気が出る": "11",
+                    "夢がある": "12",
+                    "不思議な気分": "13",
+                    "ためになる": "14",
+                    "ビックリ": "15"
+                }
+            },
+            {"queryType": "radio", "displayText": "完結", "queryName": "finished", "defaultValue": "0", "radio":
+                {
+                    "全て": "0",
+                    "完結": "2",
+                    "更新中": "1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "作品の長さ", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "長編": "length[]=4",
+                    "中編": "length[]=2",
+                    "短編": "length[]=1"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='bookList']/div[@class='clm']",
+            "nextLink": "//div[@class='pageList']/ul/li[@class='next']/a/@href",
+            "title": "//div[@class='item']/div[@class='title']/a",
+            "url": "//div[@class='item']/div[@class='title']/a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://www.asahi.com/",
+	"isDisabled": true,
+        "title": "朝日新聞 DIGITAL",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://sitesearch.asahi.com/.cgi/sitesearch/sitesearch.pl?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "Keywords"},
+            {"queryType": "hidden", "queryName": "Searchsubmit", "value": "検索"},
+            {"queryType": "hidden", "queryName": "Searchsubmit2", "value": "検索"},
+            {"queryType": "hidden", "queryName": "iref", "value": "pc_gnavi"}
+        ],
+        "result": {
+            "block": "//*[@id='SiteSearchResult']/li[@class='webronza' or @class='digital' or @class='EduA']",
+            "nextLink": "//div[@class='Section']/div[@class='Pagination']/a[contains(@href,'/sitesearch/index.php?') and @class='Next']/@href",
+            "title": "//span[@class='SearchResult_Headline']/em",
+            "url": "//a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://automaton-media.com/",
+        "title": "AUTOMATON",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://automaton-media.com/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "s"}
+        ],
+        "result": {
+            "block": "//div[contains(@class,'td-main-content')]//div[contains(@class,'td-animation-stack')]",
+            "nextLink": "//div[contains(@class,'page-nav')]/a[contains(@href,'/page/') and child::i[@class='td-icon-menu-right']]/@href",
+            "title": "//h3[contains(@class,'entry-title')]/a[contains(@href,'/articles/') and @title]",
+            "url": "//h3[contains(@class,'entry-title')]/a[contains(@href,'/articles/') and @title]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://news.yahoo.co.jp/",
+	"isDisabled": true,
+        "title": "Yahoo! Japan ニュース",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://news.yahoo.co.jp/search?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "p"},
+            {"queryType": "hidden", "queryName": "ei", "value": "utf-8"}
+        ],
+        "result": {
+            "block": "//div[@class='newsFeed']/ol[@class='newsFeed_list']/li[contains(@class,'newsFeed_item')]",
+            "nextLink": "",
+            "title": "//a//div[@class='newsFeed_item_title']",
+            "url": "//a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://allabout.co.jp/",
+	"isDisabled": true,
+        "title": "All About",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://search.allabout.co.jp/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "q"}
+        ],
+        "result": {
+            "block": "//div[@class='newsFeed']/ol[@class='newsFeed_list']/li[contains(@class,'newsFeed_item')]",
+            "nextLink": "",
+            "title": "//a//div[@class='newsFeed_item_title']",
+            "url": "//a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://mainichi.jp/",
+	"isDisabled": true,
+        "title": "毎日新聞",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://mainichi.jp/search?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(未入力だと検索できません)", "queryName": "q"},
+            {"queryType": "radio", "displayText": "順番", "queryName": "", "defaultValue": "s=date", "radio":
+                {
+                    "新着順": "s=date",
+                    "関連順": ""
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='main-box']/ul/li",
+            "nextLink": "//div[@class='pager']/ul/li[@class='next']/a/@href",
+            "title": "//a/span[contains(@class,'midashi')]",
+            "url": "//a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://novelba.com/",
+        "title": "novelba",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://novelba.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "searchWord"},
+            {"queryType": "hidden", "queryName": "isMajorType", "value": "0"},
+            {"queryType": "hidden", "queryName": "isIndiesType", "value": "1"},
+            {"queryType": "onOff", "displayText": "作品名を検索対象に含まない", "queryName": "isWorkName", "value": "0"},
+            {"queryType": "onOff", "displayText": "作者名を検索対象に含まない", "queryName": "isAuthorName", "value": "0"},
+            {"queryType": "onOff", "displayText": "キーワード名を検索対象に含まない", "queryName": "isKeywords", "value": "0"},
+            {"queryType": "onOff", "displayText": "あらすじを検索対象に含まない", "queryName": "isOutline", "value": "0"},
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genreId", "defaultValue": "", "radio":
+                {
+                    "01: すべて": "",
+                    "02: ファンタジー": "5",
+                    "03: 恋愛": "2",
+                    "04: 現代ドラマ": "18",
+                    "05: 学園": "10",
+                    "06: SF": "6",
+                    "07: エッセイ": "14",
+                    "08: コメディー": "8",
+                    "09: 文学": "1",
+                    "10: ホラー": "7",
+                    "11: 詩": "13",
+                    "12: 現代アクション": "17",
+                    "13: 冒険": "9",
+                    "14: 推理": "4",
+                    "15: 戦記": "11",
+                    "16: 歴史": "3",
+                    "17: 童話": "12",
+                    "18: リプレイ": "15",
+                    "19: その他": "16"
+                }
+            },
+            {"queryType": "radio", "displayText": "話数", "queryName": "episodeCountCohort", "defaultValue": "", "radio":
+                {
+                    "1: すべて": "",
+                    "2: 1話": "0",
+                    "3: 2話〜10話": "1",
+                    "4: 11話〜100話": "2",
+                    "5: 101話以上": "3"
+                }
+            },
+            {"queryType": "radio", "displayText": "種別", "queryName": "serializeStatus", "defaultValue": "", "radio":
+                {
+                    "1: すべて": "",
+                    "2: 連載中": "serializing",
+                    "3: 完結済": "completed"
+                }
+            },
+            {"queryType": "radio", "displayText": "並び順", "queryName": "showOrder", "defaultValue": "", "radio":
+                {
+                    "1: おすすめ順": "",
+                    "2: 更新日が新しい順": "updates",
+                    "3: 話数が多い順": "episodeCount"
+                }
+            }
+        ],
+        "result": {
+            "block": "//section[@class='search_section']/ul[@class='result_list']/li[child::a[contains(@href,'/works/')]]",
+            "nextLink": "//ul[@class='pager']/li[preceding-sibling::li[child::a[@class='picked']]]/a/@href",
+            "title": "//a/div[@class='info_list']/p[@class='title']",
+            "url": "//a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://novelism.jp/",
+	"isDisabled": true,
+        "title": "Novelism",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://novelism.jp/search/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "search"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude"},
+            {"queryType": "multiSelect", "displayText": "舞台", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "異世界": "worldview=6",
+                    "現代世界": "worldview=5",
+                    "歴史・時代": "worldview=4",
+                    "SF": "worldview=3",
+                    "ゲーム(VRMMO)": "worldview=2",
+                    "その他": "worldview=1"
+                }
+            },
+            {"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "冒険・バトル": "category=10",
+                    "恋愛": "category=9",
+                    "戦争": "category=8",
+                    "日常": "category=7",
+                    "スポーツ": "category=6",
+                    "ミステリー": "category=5",
+                    "ホラー": "category=4",
+                    "コメディ": "category=3",
+                    "ヒューマンドラマ": "category=2",
+                    "二次創作": "category=11",
+                    "その他": "category=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "長さ", "queryName": "is_long_piece", "defaultValue": "", "radio":
+                {
+                    "短編": "false",
+                    "長編": "true"
+                }
+            },
+            {"queryType": "radio", "displayText": "完結状態", "queryName": "is_completed", "defaultValue": "", "radio":
+                {
+                    "連載中": "false",
+                    "完結済": "true"
+                }
+            },
+            {"queryType": "radio", "displayText": "作品状態", "queryName": "is_contracted", "defaultValue": "", "radio":
+                {
+                    "一般作品": "false",
+                    "契約作品": "true"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='flex-1' and descendant::div[@class='flex-1']//div[@class='novel-card-title']]",
+            "nextLink": "",
+            "title": "//div[@class='flex-1']//div[@class='novel-card-title']",
+            "url": "//div[@class='flex-1']//div[@class='novel-card-title']/a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://www.qidian.com/",
+	"isDisabled": true,
+        "title": "起点中文网",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://www.qidian.com/search?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "kw"},
+            {"queryType": "radio", "displayText": "順序", "queryName": "", "defaultValue": "", "radio":
+                {
+                    "レコメンド": "sort=",
+                    "更新時間": "sort=1",
+                    "トータルコレクション": "sort=11",
+                    "総単語数": "sort=4"
+                }
+            },
+            {"queryType": "radio", "displayText": "地点", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "男の子": "siteid=1",
+                    "女の子": "siteid=0"
+                }
+            },
+            {"queryType": "radio", "displayText": "分類", "queryName": "chanId", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "ファンタジー": "chanId=21",
+                    "市": "chanId=4",
+                    "現代ロマンス": "chanId=82",
+                    "ライトノベル(1)": "chanId=12",
+                    "SF(科幻)": "chanId=9",
+                    "仙侠": "chanId=22",
+                    "古代ロマンス": "chanId=80",
+                    "ショートストーリー(1)": "chanId=20076",
+                    "ファンタジー": "chanId=1",
+                    "ゲーム": "chanId=7",
+                    "歴史(1)": "chanId=5",
+                    "ショートストーリー(2)": "chanId=30083",
+                    "ファンタジーロマンス": "chanId=84",
+                    "若者ロマンス": "chanId=83",
+                    "武道": "chanId=2",
+                    "おとぎ話": "chanId=81",
+                    "現実": "chanId=15",
+                    "サスペンス": "chanId=10",
+                    "フィクション": "chanId=13100",
+                    "SF空間(科幻空間)": "chanId=86",
+                    "文献": "chanId=14100",
+                    "実生活": "chanId=30120",
+                    "歴史(2)": "chanId=14400",
+                    "体育": "chanId=8",
+                    "ライトノベル(2)": "chanId=87",
+                    "サスペンス推論": "chanId=85",
+                    "青年文学": "chanId=14300",
+                    "軍隊": "chanId=6",
+                    "ゲームの競争": "chanId=88",
+                    "バイオグラフィー": "chanId=14500"
+                }
+            },
+            {"queryType": "radio", "displayText": "連載状態", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "執筆中": "action=0",
+                    "完結": "action=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "属性", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "無料": "vip=0",
+                    "有料": "vip=1"
+                }
+            },
+            {"queryType": "radio", "displayText": "単語数", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "30万語未満": "size=1",
+                    "30〜50万語": "size=2",
+                    "50〜100万語": "size=3",
+                    "100〜200万語": "size=4",
+                    "200万語以上": "size=5"
+                }
+            },
+            {"queryType": "radio", "displayText": "品質", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "署名作品": "sign=1",
+                    "ファインノベル": "sign=2"
+                }
+            },
+            {"queryType": "radio", "displayText": "更新時間", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 未選択": "",
+                    "一ヶ月以内": "update=5",
+                    "半月以内": "update=4",
+                    "7日以内": "update=3",
+                    "3日以内": "update=2"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@id='result-list']//li[@class='res-book-item']",
+            "nextLink": "",
+            "title": "//h4/a[contains(@href,'/info/')]",
+            "url": "//h4/a[contains(@href,'/info/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://monogatary.com/",
+	"isDisabled": true,
+        "title": "monogatary.com",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://monogatary.com/search/story?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(何も入力しないと失敗します)", "queryName": "kw"},
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "", "defaultValue": "", "radio":
+                {
+                    " 全てのジャンル": "",
+                    "恋愛": "genre=2",
+                    "異世界": "genre=3",
+                    "SF・ファンタジー": "genre=4",
+                    "歴史": "genre=5",
+                    "ミステリー": "genre=6",
+                    "青春・学園": "genre=7",
+                    "お仕事": "genre=8",
+                    "アクション・バトル": "genre=9",
+                    "ホラー・サスペンス": "genre=10",
+                    "グルメ・レシピ": "genre=11",
+                    "子供向け・児童文学": "genre=12",
+                    "コメディー・お笑い": "genre=13",
+                    "ヒューマンドラマ・日常系": "genre=14",
+                    "旅・海外": "genre=15",
+                    "エンタメ・カルチャー": "genre=16",
+                    "スポーツ": "genre=17",
+                    "エッセイ・ノンフィクション": "genre=18",
+                    "シナリオ・企画書": "genre=19",
+                    "詩・俳句・短歌など": "genre=20",
+                    "その他": "genre=21"
+                }
+            }
+        ],
+        "result": {
+            "block": "//div[@class='list-thumbnail-card']/div[@class='list-thumbnail-card__item']",
+            "nextLink": "//div[@class='pagination']//a[contains(@class,'active') and contains(@class,'pagination__icon--next') and contains(@href,'/search/story?')]",
+            "title": "//a[@class='thumbnail-card__title-main-link' and contains(@href,'/story/')]/p",
+            "url": "//a[@class='thumbnail-card__title-main-link' and contains(@href,'/story/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://news.denfaminicogamer.jp/",
+	"isDisabled": true,
+        "title": "電ファミニコゲーマー",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+        "url": "https://news.denfaminicogamer.jp/?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(何も入力しないと失敗します)", "queryName": "s"}
+        ],
+        "result": {
+            "block": "//div[@class='gsc-wrapper']//div[contains(@class,' gsc-result')]",
+            "nextLink": "",
+            "title": "//div[@class='gs-title']/a[@class='gs-title' and not(contains(@href,'//www.google.com/'))]",
+            "url": "//div[@class='gs-title']/a[@class='gs-title' and not(contains(@href,'//www.google.com/'))]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://maho.jp/",
+	"isDisabled": true,
+        "title": "魔法のiらんど",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://maho.jp/search?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "q"},
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "", "defaultValue": "", "radio":
+		{
+		    "00: 全て": "",
+		    "01: ラブコメ": "genre_name=love_comedy",
+		    "02: 学園LOVE": "genre_name=love_campus",
+		    "03: オトナLOVE": "genre_name=love_romance",
+		    "04: 歪んだ愛": "genre_name=love_yandere",
+		    "05: 不良LOVE・アウトロー": "genre_name=love_outlaw",
+		    "06: ドラマ": "genre_name=drama",
+		    "07: 恋愛": "genre_name=love",
+		    "08: BL": "genre_name=bl",
+		    "09: ファンタジー": "genre_name=fantasy",
+		    "10: ホラー": "genre_name=horror",
+		    "11: 時代・歴史": "genre_name=history",
+		    "12: ミステリー": "genre_name=mystery",
+		    "13: 青春": "genre_name=youth",
+		    "14: エッセイ": "genre_name=essay",
+		    "15: 料理": "genre_name=cooking",
+		    "16: 旅行": "genre_name=travel",
+		    "17: 文芸": "genre_name=literature",
+		    "18: ショートストーリー": "genre_name=short_story",
+		    "19: キャラクター・プロット": "genre_name=plot",
+		    "20: その他": "genre_name=others"
+		}
+	    },
+            {"queryType": "multiSelect", "displayText": "作品の傾向", "queryName": "", "separator": "&",
+                "multiSelect": {
+		    "溺愛": "situations=溺愛",
+		    "激甘": "situations=激甘",
+		    "切ない": "situations=切ない",
+		    "学園": "situations=学園",
+		    "純愛": "situations=純愛",
+		    "ベタ惚れ": "situations=ベタ惚れ",
+		    "オフィス": "situations=オフィス",
+		    "狂愛": "situations=狂愛",
+		    "セクシーラブ": "situations=セクシーラブ",
+		    "刺激的": "situations=刺激的",
+		    "禁断": "situations=禁断",
+		    "BL": "situations=BL",
+		    "ラブコメ": "situations=ラブコメ",
+		    "泣ける": "situations=泣ける",
+		    "シリアス": "situations=シリアス",
+		    "青春": "situations=青春",
+		    "ホラー": "situations=ホラー",
+		    "裏切り": "situations=裏切り",
+		    "ファンタジー": "situations=ファンタジー",
+		    "ほのぼの": "situations=ほのぼの",
+		    "実話": "situations=実話",
+		    "すれ違い": "situations=すれ違い",
+		    "友情": "situations=友情",
+		    "歴史": "situations=歴史"
+		}
+	    },
+            {"queryType": "multiSelect", "displayText": "キャラ設定", "queryName": "", "separator": "&",
+                "multiSelect": {
+		    "大人": "situations=大人",
+		    "俺様": "situations=俺様",
+		    "ドS": "situations=ドS",
+		    "不良": "situations=不良",
+		    "暴走族": "situations=暴走族",
+		    "美少女": "situations=美少女",
+		    "極道": "situations=極道",
+		    "若頭": "situations=若頭",
+		    "社長": "situations=社長",
+		    "御曹司": "situations=御曹司",
+		    "冷酷": "situations=冷酷",
+		    "変態": "situations=変態",
+		    "王子": "situations=王子",
+		    "天然": "situations=天然",
+		    "お嬢様": "situations=お嬢様",
+		    "モテ男": "situations=モテ男",
+		    "先生": "situations=先生",
+		    "芸能人": "situations=芸能人",
+		    "過保護": "situations=過保護",
+		    "双子": "situations=双子",
+		    "かわいい": "situations=かわいい",
+		    "財閥": "situations=財閥",
+		    "大学": "situations=大学",
+		    "婚約者": "situations=婚約者",
+		    "無愛想": "situations=無愛想",
+		    "秘書": "situations=秘書",
+		    "生徒会": "situations=生徒会",
+		    "トラウマ": "situations=トラウマ",
+		    "シスコン": "situations=シスコン",
+		    "アイドル": "situations=アイドル",
+		    "医者": "situations=医者",
+		    "女嫌い": "situations=女嫌い",
+		    "遊び人": "situations=遊び人",
+		    "転校生": "situations=転校生",
+		    "エリート": "situations=エリート",
+		    "支配者": "situations=支配者",
+		    "男装": "situations=男装",
+		    "部長": "situations=部長",
+		    "ドM": "situations=ドM",
+		    "天才": "situations=天才",
+		    "眼鏡": "situations=眼鏡",
+		    "二重人格": "situations=二重人格",
+		    "ご主人様": "situations=ご主人様",
+		    "ストーカー": "situations=ストーカー",
+		    "ヴァンパイア": "situations=ヴァンパイア",
+		    "悪女": "situations=悪女",
+		    "男性恐怖症": "situations=男性恐怖症",
+		    "余命": "situations=余命",
+		    "転生": "situations=転生",
+		    "復讐": "situations=復讐",
+		    "イケメン": "situations=イケメン",
+		    "毒舌": "situations=毒舌",
+		    "腹黒": "situations=腹黒",
+		    "OL": "situations=OL",
+		    "無自覚": "situations=無自覚",
+		    "ヤンデレ": "situations=ヤンデレ",
+		    "主婦": "situations=主婦",
+		    "貴族": "situations=貴族",
+		    "皇帝": "situations=皇帝"
+		}
+	    },
+            {"queryType": "multiSelect", "displayText": "関連性", "queryName": "", "separator": "&",
+                "multiSelect": {
+		    "束縛": "situations=束縛",
+		    "幼なじみ": "situations=幼なじみ",
+		    "独占欲": "situations=独占欲",
+		    "逆ハー": "situations=逆ハー",
+		    "お仕置き": "situations=お仕置き",
+		    "年の差": "situations=年の差",
+		    "秘密": "situations=秘密",
+		    "無理矢理": "situations=無理矢理",
+		    "初体験": "situations=初体験",
+		    "監禁": "situations=監禁",
+		    "浮気": "situations=浮気",
+		    "上司": "situations=上司",
+		    "兄妹": "situations=兄妹",
+		    "依存": "situations=依存",
+		    "夫婦": "situations=夫婦",
+		    "元カレ": "situations=元カレ",
+		    "政略結婚": "situations=政略結婚",
+		    "不倫": "situations=不倫",
+		    "身分差": "situations=身分差",
+		    "一夜限り": "situations=一夜限り",
+		    "男友達": "situations=男友達",
+		    "お見合い": "situations=お見合い",
+		    "遠距離": "situations=遠距離",
+		    "友達の彼": "situations=友達の彼"
+		}
+	    }
+        ],
+        "result": {
+            "block": "//ul/li[@class='WorkListCell']",
+            "nextLink": "//div[contains(@class,'Pager')]/div[contains(@class,'next')]/a[contains(@class,'Link') and contains(@href,'/search') and contains(@href,'&page=')]/@href",
+            "title": "//h2[contains(@class,'Heading')]",
+            "url": "//a[contains(@class,'Link') and contains(@href,'/works/')]/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://www.no-ichigo.jp/",
+	"isDisabled": false,
+        "title": "野いちご",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://www.no-ichigo.jp/search/book?",
+        "values": [
+            {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude_word"},
+            {"queryType": "multiSelect", "displayText": "検索対象", "queryName": "", "separator": "&",
+                "multiSelect": {
+                    "タイトル": "search_targets[]=1",
+                    "キーワード": "search_targets[]=2",
+                    "作家名": "search_targets[]=4",
+                    "表紙コメント": "search_targets[]=8",
+                    "あらすじ": "search_targets[]=16"
+                }, "multiSelectDefaultTargets": ["タイトル", "キーワード", "作家名"]
+            },
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0",
+                "radio": {
+                    "01: 指定なし": "0",
+                    "02: 恋愛(すべて)": "100",
+                    "03: 恋愛(純愛)": "101",
+                    "04: 恋愛(ラブコメ)": "102",
+                    "05: 恋愛(オフィスラブ)": "103",
+                    "06: 恋愛(学園)": "104",
+                    "07: 恋愛(実話)": "105",
+                    "08: 恋愛(その他)": "199",
+                    "09: 青春・友情": "200",
+                    "10: ノンフィクション・実話": "300",
+                    "11: ミステリー・サスペンス": "400",
+                    "12: ホラー・オカルト": "600",
+                    "13: ファンタジー・ＳＦ・冒険": "700",
+                    "14: 歴史・時代": "1400",
+                    "15: コメディ": "900",
+                    "16: 絵本・童話": "1000",
+                    "17: 実用・エッセイ": "1200",
+                    "18: 詩・短歌・俳句・川柳": "1300",
+                    "19: その他": "9900"
+		}
+	    },
+            {"queryType": "radio", "displayText": "気持ち", "queryName": "feeling", "defaultValue": "0",
+                "radio": {
+                    "01: 指定なし": "0",
+                    "02: 泣ける": "1",
+                    "03: 切ない": "2",
+                    "04: 感動!": "3",
+                    "05: ドキドキ": "4",
+                    "06: 胸キュン": "5",
+                    "07: おもしろい": "6",
+                    "08: ワクワクする": "7",
+                    "09: 怖い": "8",
+                    "10: ほのぼの": "9",
+                    "11: スカッとする": "10",
+                    "12: 元気が出る": "11",
+                    "13: 夢いっぱい": "12",
+                    "14: 不思議な気分": "13",
+                    "15: ためになる": "14",
+                    "16: ビックリ": "15"
+		}
+	    },
+            {"queryType": "radio", "displayText": "完結", "queryName": "finished", "defaultValue": "0",
+                "radio": {
+                    "1: 全て": "0",
+                    "2: 完結": "2",
+                    "3: 更新中": "1"
+		}
+	    },
+            {"queryType": "multiSelect", "displayText": "作品の長さ", "queryName": "", "separator": "&",
+                "multiSelect": {
+		    "1: 長編": "length[]=4",
+		    "2: 中編": "length[]=2",
+		    "3: 短編": "length[]=1"
+		}
+	    }
+        ],
+        "result": {
+            "block": "//main/section/div[@class='bookList']/div[@class='clm']",
+            "nextLink": "//div[@class='pageList']/ul/li[@class='next']/a[contains(@href,'/search/book/')]",
+            "title": "//div[@class='title']/a",
+            "url": "//div[@class='title']/a/@href"
+        }
+    },
+    {
+	"webSiteURL": "https://novema.jp/",
+	"isDisabled": false,
+        "title": "ノベマ！",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://novema.jp/search/book?",
+        "values": [
+            {"queryType": "text", "displayText": "検索ワード", "queryName": "word"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "exclude_word"},
+            {"queryType": "multiSelect", "displayText": "検索対象", "queryName": "", "separator": "&",
+                "multiSelect": {
+		    "タイトル": "search_targets[]=1",
+		    "キーワード": "search_targets[]=2",
+		    "作家名": "search_targets[]=4",
+		    "表紙コメント": "search_targets[]=8",
+		    "あらすじ": "search_targets[]=16"
+		},
+		"enableTargets": ["search_targets[]=1", "search_targets[]=2", "search_targets[]=4"]
+	    },
+            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre", "defaultValue": "0",
+                "radio": {
+                    "01: 指定なし": "0",
+                    "02: 恋愛・青春": "100",
+                    "03: ファンタジー(すべて)": "200",
+                    "04: ファンタジー(恋愛)": "201",
+                    "05: ファンタジー(異世界)": "202",
+                    "06: ミステリー": "300",
+                    "07: ヒューマンドラマ": "400",
+                    "08: ホラー・パニック": "500",
+                    "09: 歴史・時代": "600",
+                    "10: SF・冒険": "700",
+                    "11: その他": "9900"
+		}
+	    },
+            {"queryType": "radio", "displayText": "ステータス", "queryName": "finished", "defaultValue": "0",
+                "radio": {
+                    "1: 全て": "0",
+                    "2: 完結": "2",
+                    "3: 更新中": "1"
+		}
+	    },
+            {"queryType": "multiSelect", "displayText": "作品の長さ", "queryName": "", "separator": "&",
+                "multiSelect": {
+		    "1: 長編": "length[]=4",
+		    "2: 中編": "length[]=2",
+		    "3: 短編": "length[]=1"
+		}
+	    }
+        ],
+        "result": {
+            "block": "//main/section/div[@class='bookList']/div[@class='clm']",
+            "nextLink": "//div[@class='pageList']/ul/li[@class='next']/a[contains(@href,'/search/')]",
+            "title": "//div[@class='title']/a[contains(@href,'/book/')]",
+            "url": "//div[@class='title']/a[contains(@href,'/book/')]/@href"
+        }
+    },
+    {
+	"announce": "注意:\n  ・キーワードが空だと検索を開始できません。",
+	"webSiteURL": "https://novelpia.jp/",
+	"isDisabled": true,
+        "title": "ノベルピア",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "https://novelpia.jp/search/{SEARCHTYPE}/{SORTTYPE}/1/{KEYWORD}",
+	"queryJoinner": "",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(空では検索できません)", "queryName": "", "urlReplaceTarget": "{KEYWORD}"},
+            {"queryType": "radio", "displayText": "検索対象", "queryName": "", "defaultValue": "hash", "urlReplaceTarget": "{SEARCHTYPE}",
+                "radio": {
+                    "タイトル": "keyword",
+                    "タグ": "hash",
+                    "エピソード": "episode",
+                    "作家検索": "writer"
+		}
+	    },
+            {"queryType": "radio", "displayText": "順番", "queryName": "", "defaultValue": "date", "urlReplaceTarget": "{SORTTYPE}",
+                "radio": {
+                    "更新順": "date",
+                    "PV順": "view",
+                    "いいね順": "vote"
+		}
+	    }
+        ],
+        "result": {
+            "block": "//div[@class='row']/div[contains(@class,'mobile_hidden')]/table//tr",
+            "nextLink": "//nav[contains(@aria-label,'navigation')]//li[preceding-sibling::li[1][contains(@class,'active')]]/a[not(contains(@style,'opacity:'))]",
+            "title": "//b[contains(@onclick,'/novel/')]",
+            "url": "//td[contains(@onclick,'location=')]/@onclick",
+	    "urlConvRegexpFrom": "(.*location=')(/novel/\\d+)('.*)",
+	    "urlConvRegexpTo": "$2"
+        }
+    },
+    {
+	"webSiteURL": "https://www.pixiv.net/novel/",
+	"announce": "注意:\n  ・動作が不安定になっています。検索に失敗する場合、同じ操作を何回か繰り返すと動くかもしれません。\n  ・キーワードが空だと検索を開始できません。\n  ・キーワード以外の検索オプションはログイン状態でないと効果がありません。Web取込タブ でログインしてからご利用ください。",
+	"isDisabled": true,
+        "title": "pixiv小説",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": true,
+	"waitSecondInHeadless": 3.0,
+        "url": "https://www.pixiv.net/tags/{KEYWORD}/novels?",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード(空では検索できません)", "queryName": "", "urlReplaceTarget": "{KEYWORD}"},
+            {"queryType": "radio", "displayText": "対象", "queryName": "", "defaultValue": "s_mode=s_tag",
+                "radio": {
+                    "タグ・タイトル・キャプション": "s_mode=s_tag",
+                    "本文": "s_mode=s_tc",
+                    "タグ(完全一致)": "",
+                    "タグ(部分一致)": "s_mode=s_tag_only"
+		}
+	    },
+            {"queryType": "radio", "displayText": "作品の言語", "queryName": "", "defaultValue": "",
+                "radio": {
+                    "すべての言語": "",
+                    "日本語": "work_lang=ja",
+                    "English": "work_lang=en",
+                    "한국어": "work_lang=ko",
+                    "简体中文": "work_lang=zh-cn",
+                    "繁體中文": "work_lang=zh-tw",
+                    "Bahasa Indonesia": "work_lang=id",
+                    "Dansk": "work_lang=da",
+                    "Deutsch": "work_lang=de",
+                    "Español": "work_lang=es",
+                    "Español (Latinoamérica)": "work_lang=es-419",
+                    "Filipino": "work_lang=tl",
+                    "Français": "work_lang=fr",
+                    "Hrvatski": "work_lang=hr",
+                    "Italiano": "work_lang=it",
+                    "Nederlands": "work_lang=nl",
+                    "Polski": "work_lang=pl",
+                    "Português (Brasil)": "work_lang=pt-br",
+                    "Português (Portugal)": "work_lang=pt-pt",
+                    "Tiếng Việt": "work_lang=vi",
+                    "Türkçe": "work_lang=tr",
+                    "Русский": "work_lang=ru",
+                    "العربية": "work_lang=ar",
+                    "ไทย": "work_lang=th",
+                    "その他": "work_lang=other"
+		}
+	    },
+            {"queryType": "radio_", "displayText": "検索モード", "queryName": "", "defaultValue": "",
+                "radio": {
+                    "すべて": "",
+                    "全年齢": "mode=safe",
+                    "R-18": "mode=r18"
+		}
+	    },
+            {"queryType": "radio", "displayText": "本文の文字数", "queryName": "", "defaultValue": "",
+                "radio": {
+                    "1: すべての文字数": "",
+                    "2: SS（4,999 文字以下）": "tlt=0&tgt=4999",
+                    "3: 短編（5,000 – 19,999 文字）": "tlt=5000&tgt=19999",
+                    "4: 中編（20,000 – 79,999 文字）": "tlt=20000&tgt=79999",
+                    "5: 長編（80,000 文字以上）": "tlt=80000"
+		}
+	    },
+            {"queryType": "onOff", "displayText": "オリジナル作品のみ", "queryName": "original_only", "defaultValue": "", "value": "1"},
+            {"queryType": "radio", "displayText": "順番", "queryName": "", "defaultValue": "",
+                "radio": {
+                    "新しい順": "",
+                    "古い順": "order=date"
+		}
+	    }
+        ],
+        "result": {
+	    "block": "//section//ul/li|//div[contains(@class,'works-grid-list')]//div[contains(@class,'list-item')]",
+            "nextLink": "//nav/a[@aria-disabled='false' and position()=last()]|//nav[contains(@class,'pager')]/div[@class='pager']/a[contains(@class,'next') and contains(@class,'router-link-active') and not(contains(@class,'disable'))]",
+            "title": "//div[@title]/a[contains(@href,'/novel/')]|//a[contains(@href,'/novel/') and contains(@class,'novel-title')]",
+            "url": "//div[@title]/a[contains(@href,'/novel/')]/@href|//a[contains(@href,'/novel/') and contains(@class,'novel-title')]/@href"
+        }
+    },
+    {
+	"isDisabled": true,
+	"webSiteURL": "",
+	"announce": "",
+        "title": "雛形",
+        "HTTPMethod": "GET",
+        "isNeedHeadless": false,
+        "url": "",
+        "values": [
+            {"queryType": "text", "displayText": "キーワード", "queryName": "q"}
+        ],
+        "result": {
+            "block": "",
+            "nextLink": "",
+            "title": "",
+            "url": ""
+        }
+    }
+]
