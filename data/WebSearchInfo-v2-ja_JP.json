@@ -1346,7 +1346,7 @@
     {
 	"announce": "注意:\n  ・キーワードが空だと検索を開始できません。",
 	"webSiteURL": "https://novelpia.jp/",
-	"isDisabled": true,
+	"isDisabled": false,
         "title": "ノベルピア",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
@@ -1382,7 +1382,7 @@
     {
 	"webSiteURL": "https://www.pixiv.net/novel/",
 	"announce": "注意:\n  ・動作が不安定になっています。検索に失敗する場合、同じ操作を何回か繰り返すと動くかもしれません。\n  ・キーワードが空だと検索を開始できません。\n  ・キーワード以外の検索オプションはログイン状態でないと効果がありません。Web取込タブ でログインしてからご利用ください。",
-	"isDisabled": true,
+	"isDisabled": false,
         "title": "pixiv小説",
         "HTTPMethod": "GET",
         "isNeedHeadless": true,
