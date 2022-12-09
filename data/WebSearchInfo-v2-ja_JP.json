@@ -1,27 +1,5 @@
 [
     {
-        "説明": [
-"このファイルは ことせかい の「Web検索」タブで検索対象となるWebサイトの情報を記述するファイルです。",
-"<<リリースまでにこのファイルを自作するための解説文を書く予定>>",
-"",
-"",
-""
-	],
-        "allowDataVersion": 9999999,
-        "disabled": "true",
-        "title": "記述サンプル",
-        "url": "https://www.example.com/",
-        "HTTPMethod": "GET",
-        "values": [
-        ],
-        "result": {
-            "block": "//body",
-            "nextLink": "",
-            "title": "",
-            "url": "//a/@href"
-        }
-    },
-    {
 	"webSiteURL": "https://syosetu.com/",
         "title": "小説家になろう",
         "HTTPMethod": "GET",
