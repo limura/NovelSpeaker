@@ -824,7 +824,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
         if let url = URL(string: NSLocalizedString("https://limura.github.io/NovelSpeaker/data/WebSearchInfo-ja_JP.json", comment: "適切にURLを返すように Localizable.strings に設定しておく。言語とか地域とかOS側の言語とかアプリ側の言語とかもうわけわからんので NSLocalizedString() 側で設定された言語の設定ファイルを読み込む、というイメージにする。")) {
             urlQueue.append(url)
         }
-        if let url = URL(string: "https://limura.github.io/NovelSpeaker/data/WebSearchInfo-ja_JP.json") {
+        if let url = URL(string: "https://limura.github.io/NovelSpeaker/data/WebSearchInfo-v2-ja_JP.json") {
             urlQueue.append(url)
         }
         var lastError:Error? = nil

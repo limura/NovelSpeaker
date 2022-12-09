@@ -738,7 +738,7 @@
 "NovelSearchViewController_SearchFailed_Title" = "Search failed";
 "NovelSearchViewController_SearchField_Message" = "The search has failed.\nMaybe the specification change (change of HTML content) on the side of the website used for the search seems to have affected. Please import on the \"Web import\" side or wait for the data for the \"Web search\" tab to be updated.";
 "NovelSearchViewController_SearchFailedTitle" = "Search failed";
-"https://limura.github.io/NovelSpeaker/data/WebSearchInfo-ja_JP.json" = "https://limura.github.io/NovelSpeaker/data/WebSearchInfo-en_US.json";
+"https://limura.github.io/NovelSpeaker/data/WebSearchInfo-ja_JP.json" = "https://limura.github.io/NovelSpeaker/data/WebSearchInfo-v2-en_US.json";
 "NovelSearchViewController_SearchInfoLoadError_Title" = "Failed to load search settings";
 "NovelSearchViewController_SearchInfoLoadError_Message" = "Failed to read the search settings. This can happen if the network connection is poor. Please check the communication status.";
 "NovelSearchViewController_SearchWebSiteTitle" = "Web site to search";
