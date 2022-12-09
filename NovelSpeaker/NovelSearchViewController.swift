@@ -850,7 +850,7 @@ class NovelSearchViewController: FormViewController,ParentViewController {
         guard let result = try? decorder.decode([WebSiteSection].self, from: jsonData) else { return [] }
         if NovelSpeakerUtility.isUseWebSearchTabDisabledSite { return result }
         return result.filter {
-            guard $0.allowDataVersion >= NovelSearchViewController.CURRENT_ALLOW_DATA_VERSION else {return false}
+            guard $0.allowDataVersion <= NovelSearchViewController.CURRENT_ALLOW_DATA_VERSION else {return false}
             guard let isDisabled = $0.isDisabled else {return true}
             return isDisabled == false
         }
