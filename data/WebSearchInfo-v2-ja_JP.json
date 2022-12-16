@@ -167,7 +167,8 @@
             {"queryType": "hidden", "queryName": "state", "value": "0"},
             {"queryType": "hidden", "queryName": "grotesque", "value": "0"},
             {"queryType": "hidden", "queryName": "event", "value": "0"},
-            {"queryType": "radio", "displayText": "カテゴリ", "queryName": "category", "defaultValue": "2",
+            {"queryType": "text", "displayText": "検索ワード(25文字以内)", "queryName": "keyword"},
+            {"queryType": "radio", "displayText": "カテゴリ", "queryName": "category", "defaultValue": "1",
                 "radio": {
                     "なし": "1",
                     "冒険": "2",
@@ -183,11 +184,33 @@
                     "ファンタジー": "13",
                     "SF": "14"
                 }
-            }
+            },
+            {"queryType": "radio", "displayText": "小説種別", "queryName": "type", "defaultValue": "0",
+                "radio": {
+                    "全て": "0",
+                    "連載": "1",
+                    "短編": "2"
+		}
+	    },
+            {"queryType": "radio", "displayText": "ステータス", "queryName": "state", "defaultValue": "0",
+                "radio": {
+                    "指定しない": "0",
+                    "未完": "1",
+                    "完結": "2",
+                    "最近投稿": "3"
+		}
+	    },
+            {"queryType": "radio", "displayText": "残酷描写", "queryName": "grotesque", "defaultValue": "0",
+                "radio": {
+                    "指定しない": "0",
+                    "なし": "1",
+                    "あり": "2"
+		}
+	    }
         ],
         "result": {
             "block": "//section/div[@class='novel-list']/div[@class='item']",
-            "nextLink": "//ul[@id='paginate']/li[@class='next']/a[@rel='next']",
+            "nextLink": "//li[@class='next']/a[@rel='next' and contains(@href,'/novels?')]",
             "title": "//div[@class='subject']/a",
             "url": "//div[@class='subject']/a/@href"
         }
@@ -506,7 +529,7 @@
         ],
         "result": {
             "block": "//div[contains(@class,'sumally')]",
-            "nextLink": "//div[@class='infinite-scroll-pagination']//a[contains(@class,'infinite-scroll-more')]/@href",
+            "nextLink": "//ul[@class='pagination']/li[preceding-sibling::li[1][@class='active']]/a[contains(@href,'/search?')]",
             "title": "//p[@class='story_name']",
             "url": "//p[@class='story_name']/a[contains(@href,'/story/')]/@href"
         }
@@ -984,10 +1007,11 @@
     },
     {
 	"webSiteURL": "https://monogatary.com/",
-	"isDisabled": true,
+	"isDisabled": false,
         "title": "monogatary.com",
         "HTTPMethod": "GET",
         "isNeedHeadless": true,
+	"waitSecondInHeadless": 1.0,
         "url": "https://monogatary.com/search/story?",
         "values": [
             {"queryType": "text", "displayText": "キーワード(何も入力しないと失敗します)", "queryName": "kw"},
@@ -1019,7 +1043,7 @@
         ],
         "result": {
             "block": "//div[@class='list-thumbnail-card']/div[@class='list-thumbnail-card__item']",
-            "nextLink": "//div[@class='pagination']//a[contains(@class,'active') and contains(@class,'pagination__icon--next') and contains(@href,'/search/story?')]",
+            "nextLink": "//div[@class='pagination']//a[contains(@class,'pagination__icon--next') and contains(@href,'/search/story?')]/@href",
             "title": "//a[@class='thumbnail-card__title-main-link' and contains(@href,'/story/')]/p",
             "url": "//a[@class='thumbnail-card__title-main-link' and contains(@href,'/story/')]/@href"
         }
@@ -1346,7 +1370,7 @@
     {
 	"announce": "注意:\n  ・キーワードが空だと検索を開始できません。",
 	"webSiteURL": "https://novelpia.jp/",
-	"isDisabled": false,
+	"isDisabled": true,
         "title": "ノベルピア",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
@@ -1372,7 +1396,7 @@
         ],
         "result": {
             "block": "//div[@class='row']/div[contains(@class,'mobile_hidden')]/table//tr",
-            "nextLink": "//nav[contains(@aria-label,'navigation')]//li[preceding-sibling::li[1][contains(@class,'active')]]/a[not(contains(@style,'opacity:'))]",
+            "nextLink": "//nav[contains(@aria-label,'navigation')]//li[preceding-sibling::li[1][contains(@class,'active')]]/a[not(contains(@style,'opacity:'))]/@href",
             "title": "//b[contains(@onclick,'/novel/')]",
             "url": "//td[contains(@onclick,'location=')]/@onclick",
 	    "urlConvRegexpFrom": "(.*location=')(/novel/\\d+)('.*)",
@@ -1382,8 +1406,8 @@
     {
 	"webSiteURL": "https://www.pixiv.net/novel/",
 	"announce": "注意:\n  ・動作が不安定になっています。検索に失敗する場合、同じ操作を何回か繰り返すと動くかもしれません。\n  ・キーワードが空だと検索を開始できません。\n  ・キーワード以外の検索オプションはログイン状態でないと効果がありません。Web取込タブ でログインしてからご利用ください。",
-	"isDisabled": false,
-        "title": "pixiv小説",
+	"isDisabled": true,
+        "title": "pixiv小説(実験中)",
         "HTTPMethod": "GET",
         "isNeedHeadless": true,
 	"waitSecondInHeadless": 3.0,
@@ -1427,7 +1451,7 @@
                     "その他": "work_lang=other"
 		}
 	    },
-            {"queryType": "radio_", "displayText": "検索モード", "queryName": "", "defaultValue": "",
+            {"queryType": "radio", "displayText": "検索モード", "queryName": "", "defaultValue": "mode=safe",
                 "radio": {
                     "すべて": "",
                     "全年齢": "mode=safe",
@@ -1453,13 +1477,14 @@
         ],
         "result": {
 	    "block": "//section//ul/li|//div[contains(@class,'works-grid-list')]//div[contains(@class,'list-item')]",
-            "nextLink": "//nav/a[@aria-disabled='false' and position()=last()]|//nav[contains(@class,'pager')]/div[@class='pager']/a[contains(@class,'next') and contains(@class,'router-link-active') and not(contains(@class,'disable'))]",
+            "nextLink": "//nav/a[@aria-disabled='false' and position()=last()]|//nav[contains(@class,'pager')]/div[@class='pager']/a[contains(@class,'next') and contains(@class,'router-link-active') and not(contains(@class,'disable'))]/@href",
             "title": "//div[@title]/a[contains(@href,'/novel/')]|//a[contains(@href,'/novel/') and contains(@class,'novel-title')]",
             "url": "//div[@title]/a[contains(@href,'/novel/')]/@href|//a[contains(@href,'/novel/') and contains(@class,'novel-title')]/@href"
         }
     },
     {
 	"isDisabled": true,
+	"allowDataVersion": 999999,
 	"webSiteURL": "",
 	"announce": "",
         "title": "雛形",
