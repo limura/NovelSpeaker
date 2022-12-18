@@ -903,105 +903,165 @@
         "title": "起点中文网",
         "HTTPMethod": "GET",
         "isNeedHeadless": true,
-        "url": "https://www.qidian.com/search?",
+        "url": "https://www.qidian.com/all/",
+        "querySeparator": "-",
         "values": [
-            {"queryType": "text", "displayText": "Keyword", "queryName": "kw"},
-            {"queryType": "radio", "displayText": "Order", "queryName": "", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "分类", "queryName": "", "defaultValue": "", "radio":
                 {
-                    "recommend": "sort=",
-                    "update time": "sort=1",
-                    "total collection": "sort=11",
-                    "total word count": "sort=4"
+                    "全部": "",
+                    "男生:玄幻": "chanId21",
+                    "男生:奇幻": "chanId1",
+                    "男生:武侠": "chanId2",
+                    "男生:仙侠": "chanId22",
+                    "男生:都市": "chanId4",
+                    "男生:现实": "chanId15",
+                    "男生:军事": "chanId6",
+                    "男生:历史": "chanId5",
+                    "男生:游戏": "chanId7",
+                    "男生:体育": "chanId8",
+                    "男生:科幻": "chanId9",
+                    "男生:诸天无限": "chanId20109",
+                    "男生:悬疑": "chanId10",
+                    "男生:轻小说": "chanId12",
+                    "男生:短篇": "chanId20076",
+                    "女生:古代言情": "chanId80",
+                    "女生:仙侠奇缘": "chanId81",
+                    "女生:现代言情": "chanId82",
+                    "女生:浪漫青春": "chanId83",
+                    "女生:玄幻言情": "chanId84",
+                    "女生:悬疑推理": "chanId85",
+                    "女生:短篇": "chanId30083",
+                    "女生:科幻空间": "chanId86",
+                    "女生:游戏竞技": "chanId88",
+                    "女生:轻小说": "chanId87",
+                    "女生:现实生活": "chanId30120"
                 }
             },
-            {"queryType": "radio", "displayText": "地点", "queryName": "", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "状态", "queryName": "", "defaultValue": "", "radio":
                 {
-                    " 未選択": "",
-                    "男の子": "siteid=1",
-                    "女の子": "siteid=0"
-                }
-            },
-            {"queryType": "radio", "displayText": "分類", "queryName": "chanId", "defaultValue": "", "radio":
-                {
-                    " 未選択": "",
-                    "ファンタジー": "chanId=21",
-                    "市": "chanId=4",
-                    "現代ロマンス": "chanId=82",
-                    "ライトノベル(1)": "chanId=12",
-                    "SF(科幻)": "chanId=9",
-                    "仙侠": "chanId=22",
-                    "古代ロマンス": "chanId=80",
-                    "ショートストーリー(1)": "chanId=20076",
-                    "ファンタジー": "chanId=1",
-                    "ゲーム": "chanId=7",
-                    "歴史(1)": "chanId=5",
-                    "ショートストーリー(2)": "chanId=30083",
-                    "ファンタジーロマンス": "chanId=84",
-                    "若者ロマンス": "chanId=83",
-                    "武道": "chanId=2",
-                    "おとぎ話": "chanId=81",
-                    "現実": "chanId=15",
-                    "サスペンス": "chanId=10",
-                    "フィクション": "chanId=13100",
-                    "SF空間(科幻空間)": "chanId=86",
-                    "文献": "chanId=14100",
-                    "実生活": "chanId=30120",
-                    "歴史(2)": "chanId=14400",
-                    "体育": "chanId=8",
-                    "ライトノベル(2)": "chanId=87",
-                    "サスペンス推論": "chanId=85",
-                    "青年文学": "chanId=14300",
-                    "軍隊": "chanId=6",
-                    "ゲームの競争": "chanId=88",
-                    "バイオグラフィー": "chanId=14500"
-                }
-            },
-            {"queryType": "radio", "displayText": "連載状態", "queryName": "", "defaultValue": "", "radio":
-                {
-                    " 未選択": "",
-                    "執筆中": "action=0",
-                    "完結": "action=1"
+                    "全部": "",
+                    "连载": "action0",
+                    "完本": "action1"
                 }
             },
             {"queryType": "radio", "displayText": "属性", "queryName": "", "defaultValue": "", "radio":
                 {
-                    " 未選択": "",
-                    "無料": "vip=0",
-                    "有料": "vip=1"
+                    "全部": "",
+                    "免费": "vip0",
+                    "VIP": "vip1"
                 }
             },
-            {"queryType": "radio", "displayText": "単語数", "queryName": "", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "字数", "queryName": "", "defaultValue": "", "radio":
                 {
-                    " 未選択": "",
-                    "30万語未満": "size=1",
-                    "30〜50万語": "size=2",
-                    "50〜100万語": "size=3",
-                    "100〜200万語": "size=4",
-                    "200万語以上": "size=5"
+                    "全部": "",
+                    "30万字以下": "size1",
+                    "30-50万字": "size2",
+                    "50-100万字": "size3",
+                    "100-200万字": "size4",
+                    "200万字以上": "size5"
                 }
             },
-            {"queryType": "radio", "displayText": "品質", "queryName": "", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "品质", "queryName": "", "defaultValue": "", "radio":
                 {
-                    " 未選択": "",
-                    "署名作品": "sign=1",
-                    "ファインノベル": "sign=2"
+                    "全部": "",
+                    "签约作品": "sign1",
+                    "精品小说": "sign2"
                 }
             },
-            {"queryType": "radio", "displayText": "更新時間", "queryName": "", "defaultValue": "", "radio":
+            {"queryType": "radio", "displayText": "更新时间", "queryName": "", "defaultValue": "", "radio":
                 {
-                    " 未選択": "",
-                    "一ヶ月以内": "update=5",
-                    "半月以内": "update=4",
-                    "7日以内": "update=3",
-                    "3日以内": "update=2"
+                    "全部": "",
+                    "三日内": "update1",
+                    "七日内": "update2",
+                    "半月内": "update3",
+                    "一月内": "update4"
+                }
+            },
+            {"queryType": "radio", "displayText": "标签", "queryName": "", "defaultValue": "", "radio":
+                {
+                    "全部": "",
+                    "豪门": "tag豪门",
+                    "孤儿": "tag孤儿",
+                    "盗贼": "tag盗贼",
+                    "特工": "tag特工",
+                    "黑客": "tag黑客",
+                    "明星": "tag明星",
+                    "特种兵": "tag特种兵",
+                    "杀手": "tag杀手",
+                    "老师": "tag老师",
+                    "学生": "tag学生",
+                    "胖子": "tag胖子",
+                    "宠物": "tag宠物",
+                    "蜀山": "tag蜀山",
+                    "魔王附体": "tag魔王附体",
+                    "LOL": "tagLOL",
+                    "废材流": "tag废材流",
+                    "护短": "tag护短",
+                    "卡片": "tag卡片",
+                    "手游": "tag手游",
+                    "法师": "tag法师",
+                    "医生": "tag医生",
+                    "感情": "tag感情",
+                    "鉴宝": "tag鉴宝",
+                    "亡灵": "tag亡灵",
+                    "职场": "tag职场",
+                    "吸血鬼": "tag吸血鬼",
+                    "龙": "tag龙",
+                    "西游": "tag西游",
+                    "鬼怪": "tag鬼怪",
+                    "阵法": "tag阵法",
+                    "魔兽": "tag魔兽",
+                    "勇猛": "tag勇猛",
+                    "玄学": "tag玄学",
+                    "群穿": "tag群穿",
+                    "丹药": "tag丹药",
+                    "练功流": "tag练功流",
+                    "召唤流": "tag召唤流",
+                    "恶搞": "tag恶搞",
+                    "爆笑": "tag爆笑",
+                    "轻松": "tag轻松",
+                    "冷酷": "tag冷酷",
+                    "腹黑": "tag腹黑",
+                    "阳光": "tag阳光",
+                    "狡猾": "tag狡猾",
+                    "机智": "tag机智",
+                    "猥琐": "tag猥琐",
+                    "嚣张": "tag嚣张",
+                    "淡定": "tag淡定",
+                    "僵尸": "tag僵尸",
+                    "丧尸": "tag丧尸",
+                    "盗墓": "tag盗墓",
+                    "随身流": "tag随身流",
+                    "软饭流": "tag软饭流",
+                    "无敌文": "tag无敌文",
+                    "异兽流": "tag异兽流",
+                    "系统流": "tag系统流",
+                    "洪荒流": "tag洪荒流",
+                    "学院流": "tag学院流",
+                    "位面": "tag位面",
+                    "铁血": "tag铁血",
+                    "励志": "tag励志",
+                    "坚毅": "tag坚毅",
+                    "变身": "tag变身",
+                    "强者回归": "tag强者回归",
+                    "赚钱": "tag赚钱",
+                    "争霸流": "tag争霸流",
+                    "种田文": "tag种田文",
+                    "宅男": "tag宅男",
+                    "无限流": "tag无限流",
+                    "技术流": "tag技术流",
+                    "凡人流": "tag凡人流",
+                    "热血": "tag热血",
+                    "重生": "tag重生",
+                    "穿越": "tag穿越"
                 }
             }
         ],
         "result": {
-            "block": "//div[@id='result-list']//li[@class='res-book-item']",
-            "nextLink": "",
-            "title": "//h4/a[contains(@href,'/info/')]",
-            "url": "//h4/a[contains(@href,'/info/')]/@href"
+            "block": "//div[contains(@class,'main-content-wrap')]/div[@class='all-book-list']//ul/li[@data-rid]",
+            "nextLink": "//div[contains(@class,'pagination')]/div[@class='lbf-pagination']/ul/li[@class='lbf-pagination-item']/a[contains(@href,'/all/') and contains(@class,'pagination-next')]",
+            "title": "//h2/a[contains(@href,'/info/')]",
+            "url": "//h2/a[contains(@href,'/info/')]/@href"
         }
     },
     {
