@@ -1477,7 +1477,7 @@
         ],
         "result": {
 	    "block": "//section//ul/li|//div[contains(@class,'works-grid-list')]//div[contains(@class,'list-item')]",
-            "nextLink": "//nav/a[@aria-disabled='false' and position()=last()]|//nav[contains(@class,'pager')]/div[@class='pager']/a[contains(@class,'next') and contains(@class,'router-link-active') and not(contains(@class,'disable'))]/@href",
+            "nextLink": "//nav/a[@aria-disabled='false' and position()=last()]|//nav[contains(@class,'pager')]/div[@class='pager']/a[contains(@class,'next') and contains(@class,'router-link-active') and not(contains(@class,'disable'))]/@href|//div[@class='pager']//a[@class='next']/@href",
             "title": "//div[@title]/a[contains(@href,'/novel/')]|//a[contains(@href,'/novel/') and contains(@class,'novel-title')]",
             "url": "//div[@title]/a[contains(@href,'/novel/')]/@href|//a[contains(@href,'/novel/') and contains(@class,'novel-title')]/@href"
         }
