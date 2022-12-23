@@ -153,7 +153,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
             $0.title = NSLocalizedString("RemoteDataURLSettingViewController_SpeechModSampleButton", comment: "標準設定データのURLを開く")
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection({ (cellOf, row) in
-            if let url = URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/IceCream/NovelSpeaker/DefaultSpeechModList.json") {
+            if let url = URL(string: "https://limura.github.io/NovelSpeaker/data/DefaultSpeechModList.json") {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
         })
@@ -177,7 +177,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
             $0.title = NSLocalizedString("RemoteDataURLSettingViewController_SearchInfoSampleButton", comment: "標準設定データのURLを開く")
             $0.cell.textLabel?.numberOfLines = 0
         }.onCellSelection({ (cellOf, row) in
-            if let url = URL(string: NSLocalizedString("https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/WebSearchInfo-ja_JP.json", comment: "適切にURLを返すように Localizable.strings に設定しておく。言語とか地域とかOS側の言語とかアプリ側の言語とかもうわけわからんので NSLocalizedString() 側で設定された言語の設定ファイルを読み込む、というイメージにする。")) {
+            if let url = URL(string: NSLocalizedString("https://limura.github.io/NovelSpeaker/data/WebSearchInfo-ja_JP.json", comment: "適切にURLを返すように Localizable.strings に設定しておく。言語とか地域とかOS側の言語とかアプリ側の言語とかもうわけわからんので NSLocalizedString() 側で設定された言語の設定ファイルを読み込む、というイメージにする。")) {
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
         })
