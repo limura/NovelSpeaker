@@ -890,7 +890,7 @@ body.NovelSpeakerBody {
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
         disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
-            StorySpeaker.shared.StopSpeech(realm: realm)
+            StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: true)
             func searchFunc(searchString:String?){
                 NiftyUtility.EasyDialogNoButton(
                     viewController: self,
@@ -1032,7 +1032,7 @@ body.NovelSpeakerBody {
     @objc func startStopButtonClicked(_ sender: UIBarButtonItem) {
         RealmUtil.RealmBlock { (realm) -> Void in
             if StorySpeaker.shared.isPlayng {
-                StorySpeaker.shared.StopSpeech(realm: realm)
+                StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: true)
             }else{
                 self.CheckFolderAndStartSpeech()
             }
@@ -1042,7 +1042,7 @@ body.NovelSpeakerBody {
         if StorySpeaker.shared.isPlayng == false { return }
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                StorySpeaker.shared.StopSpeech(realm: realm) {
+                StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: false) {
                     StorySpeaker.shared.SkipBackward(realm: realm, length: 30) {
                         StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)", isNeedRepeatSpeech: true)
                     }
@@ -1054,7 +1054,7 @@ body.NovelSpeakerBody {
         if StorySpeaker.shared.isPlayng == false { return }
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                StorySpeaker.shared.StopSpeech(realm: realm) {
+                StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: false) {
                     StorySpeaker.shared.SkipForward(realm: realm, length: 30) {
                         StorySpeaker.shared.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面.\(#function)", isNeedRepeatSpeech: true)
                     }

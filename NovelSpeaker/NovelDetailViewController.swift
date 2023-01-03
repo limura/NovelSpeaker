@@ -320,7 +320,7 @@ class NovelDetailViewController: FormViewController, RealmObserverResetDelegate 
                 DispatchQueue.main.async {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         guard let chapterNumber = RealmNovel.SearchNovelWith(realm: realm, novelID: self.novelID)?.readingChapterNumber else { return }
-                        StorySpeaker.shared.StopSpeech(realm: realm)
+                        StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession:true)
                         NovelSpeakerUtility.SearchStoryWithSearchDialog(storyID: RealmStoryBulk.CreateUniqueBulkID(novelID: self.novelID, chapterNumber: chapterNumber), viewController: self) { (story) in
                             StorySpeaker.shared.SetStory(story: story, withUpdateReadDate: true)
                             self.navigationController?.popViewController(animated: true)

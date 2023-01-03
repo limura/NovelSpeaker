@@ -55,7 +55,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
         initWidgets()
         StorySpeaker.shared.AddDelegate(delegate: self)
         RealmUtil.RealmBlock { (realm) -> Void in
-            StorySpeaker.shared.StopSpeech(realm: realm)
+            StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession:true)
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: self.targetNovelID) {
                 applyNovelWith(realm: realm, novelID: novel.novelID)
             }else{
@@ -853,7 +853,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
     @objc func SepakTestButtonClicked(_ sender: Any) {
         if StorySpeaker.shared.isPlayng {
             RealmUtil.Write { realm in
-                StorySpeaker.shared.StopSpeech(realm: realm)
+                StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession:true)
             }
             return
         }

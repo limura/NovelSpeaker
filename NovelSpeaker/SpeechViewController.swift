@@ -717,7 +717,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     @objc func searchButtonClicked(_ sender: UIBarButtonItem) {
         disableCurrentReadingStoryChangeFloatingButton()
         RealmUtil.RealmBlock { (realm) -> Void in
-            self.storySpeaker.StopSpeech(realm: realm)
+            self.storySpeaker.StopSpeech(realm: realm, stopAudioSession:true)
             
             NiftyUtility.EasyDialogTextInput2Button(
                 viewController: self,
@@ -809,7 +809,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
         if self.storySpeaker.isPlayng {
             RealmUtil.RealmBlock { realm in
-                self.storySpeaker.StopSpeech(realm: realm)
+                self.storySpeaker.StopSpeech(realm: realm, stopAudioSession:true)
             }
         }
         guard let topLevelViewController = self.parent?.parent else { return }
@@ -908,7 +908,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     @objc func startStopButtonClicked(_ sender: UIBarButtonItem) {
         RealmUtil.RealmBlock { (realm) -> Void in
             if self.storySpeaker.isPlayng {
-                self.storySpeaker.StopSpeech(realm: realm)
+                self.storySpeaker.StopSpeech(realm: realm, stopAudioSession:true)
             }else{
                 self.CheckFolderAndStartSpeech()
             }
@@ -918,7 +918,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         if self.storySpeaker.isPlayng == false { return }
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                self.storySpeaker.StopSpeech(realm: realm) {
+                self.storySpeaker.StopSpeech(realm: realm, stopAudioSession:false) {
                     self.storySpeaker.SkipBackward(realm: realm, length: 30) {
                         self.clearSearchView()
                         self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し戻すボタン).\(#function)", isNeedRepeatSpeech: true)
@@ -931,7 +931,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         if self.storySpeaker.isPlayng == false { return }
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                self.storySpeaker.StopSpeech(realm: realm) {
+                self.storySpeaker.StopSpeech(realm: realm, stopAudioSession:false) {
                     self.storySpeaker.SkipForward(realm: realm, length: 30) {
                         self.clearSearchView()
                         self.storySpeaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "小説本文画面(少し進めるボタン).\(#function)", isNeedRepeatSpeech: true)

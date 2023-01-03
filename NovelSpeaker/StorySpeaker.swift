@@ -434,7 +434,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 if self.isPlayng == false { return }
                 NiftyUtility.DispatchSyncMainQueue {
                     RealmUtil.RealmBlock { (realm) -> Void in
-                        self.StopSpeech(realm: realm) {
+                        self.StopSpeech(realm: realm, stopAudioSession:true) {
                             self.SkipBackward(realm: realm, length: 25) {
                                 self.setReadLocationWith(realm: realm, location: self.speaker.currentLocation)
                                 self.willSpeakRange(range: NSMakeRange(self.speaker.currentLocation, 0))
@@ -584,20 +584,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         dummySoundLooper.startPlay()
         speaker.StartSpeech()
     }
-    // 読み上げを停止します。読み上げ位置が更新されます。
-    func StopSpeech(realm: Realm, stopSpeechHandler:(()->Void)? = nil) {
-        speaker.StopSpeech(stopSpeechHandler: stopSpeechHandler)
-        announceSpeaker.StopAnnounce()
-        dummySoundLooper.stopPlay()
-        stopMaxSpeechInSecTimer()
-        BehaviorLogger.AddLog(description: "StopSpeech()", data: [
-            "page" : RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID),
-            "novelUrl" : RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID),
-            "location" : self.speaker.currentLocation,
-        ])
-        #if !os(watchOS)
-        UIApplication.shared.isIdleTimerDisabled = false
-        #endif
+    
+    func StopAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setActive(false, options: [AVAudioSession.SetActiveOptions.notifyOthersOnDeactivation])
@@ -613,6 +601,25 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             // で、作り直した後に一度でも発話しておかないと、最初の発話時に時間がかかるんじゃないかな？
             // と、思ったんですがどうやらそういう小細工は必要なさそうでした。どういう事なんだ。(´・ω・`)
             //self.speaker.resetRegisterdVoices()
+        }
+    }
+    
+    // 読み上げを停止します。読み上げ位置が更新されます。
+    func StopSpeech(realm: Realm, stopAudioSession:Bool, stopSpeechHandler:(()->Void)? = nil) {
+        speaker.StopSpeech(stopSpeechHandler: stopSpeechHandler)
+        announceSpeaker.StopAnnounce()
+        dummySoundLooper.stopPlay()
+        stopMaxSpeechInSecTimer()
+        BehaviorLogger.AddLog(description: "StopSpeech()", data: [
+            "page" : RealmStoryBulk.StoryIDToChapterNumber(storyID: self.storyID),
+            "novelUrl" : RealmStoryBulk.StoryIDToNovelID(storyID: self.storyID),
+            "location" : self.speaker.currentLocation,
+        ])
+        #if !os(watchOS)
+        UIApplication.shared.isIdleTimerDisabled = false
+        #endif
+        if stopAudioSession {
+            self.StopAudioSession()
         }
         // 自分に通知されてしまうと readLocation がさらに上書きされてしまう。
         if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) {
@@ -804,12 +811,14 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 // 既に発話が停止している場合はわざわざアナウンスはしません。
                 // けれども、Pause しているだけの場合は Stop を明示的に呼ばないとおかしなことになるはずなので
                 // StopSpeech() は呼び出します
-                self.StopSpeech(realm: realm)
+                self.StopSpeech(realm: realm, stopAudioSession:true)
                 return
             }
-            self.StopSpeech(realm: realm)
+            self.StopSpeech(realm: realm, stopAudioSession:false)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                self.AnnounceSpeech(text: NSLocalizedString("GlobalDataSingleton_AnnounceStopedByTimer", comment: "最大連続再生時間を超えたので、読み上げを停止します。"))
+                self.AnnounceSpeech(text: NSLocalizedString("GlobalDataSingleton_AnnounceStopedByTimer", comment: "最大連続再生時間を超えたので、読み上げを停止します。")) {
+                    self.StopAudioSession()
+                }
             })
         }
     }
@@ -954,7 +963,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     @objc func stopEvent(_ sendor:MPRemoteCommandCenter) -> MPRemoteCommandHandlerStatus {
         print("MPCommandCenter: stopEvent")
         RealmUtil.RealmBlock { (realm) -> Void in
-            StopSpeech(realm: realm)
+            StopSpeech(realm: realm, stopAudioSession: true)
         }
         return .success
     }
@@ -962,7 +971,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func togglePlayPauseEvent() -> Bool {
         RealmUtil.RealmBlock { (realm) -> Void in
             if speaker.isSpeaking {
-                StopSpeech(realm: realm)
+                StopSpeech(realm: realm, stopAudioSession: true)
             }else{
                 StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "再生・停止イベント.\(#function)", isNeedRepeatSpeech: isNeedRepeatSpeech)
             }
@@ -978,7 +987,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func nextTrackEvent() -> Bool {
         self.isSeeking = false
         RealmUtil.RealmBlock { (realm) -> Void in
-            StopSpeech(realm: realm)
+            StopSpeech(realm: realm, stopAudioSession:false)
             LoadNextChapter(realm: realm) { (result) in
                 if result == true {
                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "次の章の読み上げ.\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
@@ -996,7 +1005,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func previousTrackEvent() -> Bool {
         self.isSeeking = false
         RealmUtil.RealmBlock { (realm) -> Void in
-            StopSpeech(realm: realm)
+            StopSpeech(realm: realm, stopAudioSession:false)
             LoadPreviousChapter(realm: realm, completion: { (result) in
                 if result == true {
                     self.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: "前の章の読み上げ.\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
@@ -1018,7 +1027,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         if isNowSkipping == true { return true }
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-               self.StopSpeech(realm: realm) {
+               self.StopSpeech(realm: realm, stopAudioSession:false) {
                     let count = self.skipForwardCount
                     self.skipForwardCount = 0
                     self.isNowSkipping = true
@@ -1042,7 +1051,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         if isNowSkipping == true { return true }
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                self.StopSpeech(realm: realm) {
+                self.StopSpeech(realm: realm, stopAudioSession:false) {
                     let count = self.skipForwardCount
                     self.skipForwardCount = 0
                     self.SkipBackward(realm: realm, length: count) {
@@ -1063,7 +1072,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func seekForwardInterval(){
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                self.StopSpeech(realm: realm) {
+                self.StopSpeech(realm: realm, stopAudioSession:false) {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         self.SkipForward(realm: realm, length: 50) {
                             NiftyUtility.DispatchSyncMainQueue {
@@ -1099,7 +1108,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func seekBackwardInterval(){
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                self.StopSpeech(realm: realm) {
+                self.StopSpeech(realm: realm, stopAudioSession:false) {
                     RealmUtil.RealmBlock { (realm) -> Void in
                         self.SkipBackward(realm: realm, length: 60) {
                             NiftyUtility.DispatchSyncMainQueue {
@@ -1147,7 +1156,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                 newLocation = 0
             }
             
-            StopSpeech(realm: realm)
+            StopSpeech(realm: realm, stopAudioSession:false)
             NiftyUtility.DispatchSyncMainQueue {
                 RealmUtil.RealmBlock { (realm) -> Void in
                     self.setReadLocationWith(realm: realm, location: newLocation)
@@ -1192,7 +1201,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
         
         func speechNextNovelWith(realm:Realm, title:String, story:Story) {
-            self.StopSpeech(realm: realm)
+            self.StopSpeech(realm: realm, stopAudioSession:false)
             AnnounceAndDoNext(realm: realm, announceText: String(format: NSLocalizedString("StorySpeaker_SpeechStopedAndSpeechNextStory_Format", comment: "読み上げが最後に達したため、次に %@ を再生します。"), title)) {
                 DispatchQueue.main.async {
                     self.ringPageTurningSound()
@@ -1261,8 +1270,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                                         }).map({$0.novelID}), runNextSpeechLoop(novelIDArray: Array(nextNovelIDArray)) {
                                 return
                             }
-                            self.StopSpeech(realm: realm)
-                            self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
+                            self.StopSpeech(realm: realm, stopAudioSession: false)
+                            self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。")) {
+                                self.StopAudioSession()
+                            }
                             return
                         }
                         if repeatSpeechType == .RewindToFirstStory {
@@ -1356,8 +1367,10 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
                         }
                     }
                     
-                    self.StopSpeech(realm: realm)
-                    self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。"))
+                    self.StopSpeech(realm: realm, stopAudioSession: false)
+                    self.AnnounceSpeech(text: NSLocalizedString("SpeechViewController_SpeechStopedByEnd", comment: "読み上げが最後に達しました。")) {
+                        self.StopAudioSession()
+                    }
                 }
             }
         }
