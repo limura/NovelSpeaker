@@ -3464,104 +3464,23 @@ Note
 
 From Version 2.7.0, iCloud synchronization cannot be performed because the schema of the internal database has changed from Version 2.6.* and earlier.
 
-「設定タブ」→「本棚に栞の位置を表示する」がONの時に「読み上げが最後に達しました」とのアナウンスがあるにもかかわらず、栞の位置表示のバーの色が紫色にならない問題を修正
 
-TODO:
-- Google スプレッドシートで読み替え辞書を扱えるような何かを考える
+# Version 2.7.1
 
-----
-TestFlight テスト情報
+問題の修正
 
-ベータ版 App の説明
+- 一つの小説を読み上げ終わった後に、「読み上げが最後に〜」というアナウンスがあった後に一部の操作が不能になる問題を修正
 
-インタフェースの変更
+今回の修正は問題の修正1件のみです。この問題が発生すると概ね操作不能になり、アプリを再起動させないとほとんど何もできなくなるというものでありました。
 
-- 「再ダウンロード用データの生成」で保存される設定項目を増加
+さて、残念なことに私はお問い合わせ対応に疲れ果ててしまいましたため、致命的な問題(アプリが強制終了するようなもの)以外への対応は極力しない形にさせていただいています。お問い合わせ窓口の閉鎖等については今の所はしておりませんが、上記のような対応になりますため、新機能のご提案や強制終了を伴わない不都合の報告をされましたとしても、対応はされないものとお考え下さい。なお、今回のように気が向いたら修正する事もあります。
 
-テストでは上記の変更点以外にも、既存の機能で動作しなくなったものなども確認して、不都合の有無を「不都合がなかった場合でも」報告してください。
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
 
-----
-in Japaneze.
+Version 2.7.1
 
-今回のアップデートでは、年齢制限指定の「無制限のWebアクセス」を外すことを目的としたアップデートを行いました。
-修正した事を以下に挙げます。
+Fix the problem
 
-- "Web import"タブのURLバーへのURLや検索文字列の入力をできなくした。
-- "Web import"タブのホームページ(ブックマークリスト)の標準値に設定してある Google へのリンクを削除した。
+- Fixed the problem that some operations became impossible after the announcement "Now that the reading has reached the end ~" after finishing reading one novel.
 
-以上の修正により、"Web import"タブからはURLの入力やGoogle検索などができなくなります。そのため、初期値として保存されているサイトのみの閲覧ができるようになると考えています。
-私達はこれによって、「無制限のWebアクセス」とは言えない状態になると考えております。
-以上の修正をしましたが、これでは「無制限のWebアクセス」を外すことができないのであれば何が問題なのかを教えてください。
-以上よろしくお願いします。
-
-----
-in Japanese.
-
-今回のアップデートでは、ファイル拡張子が .novelspeaker-backup-json となっているファイルについて、アプリとの関連付けを行いました。
-この機能はダウンロードされた小説等のバックアップ用途が目的です。
-このファイルはアプリのSettingsPageにおいて"Create re-download URL"を用いて生成されます。
-ユーザは生成された .novelspeaker-backup-json ファイルをアプリに読み込ませる事で、バックアップされた小説をもう一度ダウンロードし直す事ができるようになります。
-
-.novelspeaker-backup-json ファイルの中身は JSON 形式となっており、おおよそ以下のような形式です。
-
-{
-"data_version" : "1.0.0",
-"word_replacement_dictionary": {
-"from word": "to word", ...
-},
-"bookshelf": [
-{
-"type": "url" or "ncode" or "user",
-"ncode": ..., "title": ..., "id": ..., ...
-]
-}
-
-上記の .novelskeaker-backup-json の中で、暗号化を使用してデータを保存する箇所が追加されました。
-そのため、アプリのレビュー提出の際に暗号化機能の利用を「はい」にしました。
-この暗号化機能はOS側で用意しているsha256(CC_SHA256()関数)を利用しています。
-
-expedited app review に出した時の文言
----begin---
-なろう検索のタブで、検索用文字列を入力できなくなっていた問題を修正しています。
-この部分が入力できないと、検索で好みの小説を探すことができないため、あまり小説が選べないアプリになってしまっています。
-
-問題の再現手順：
-
-1. なろう検索 タブを開く
-2. 一番上の「検索文字列」のテキストボックスを選択
-3. 文字を入力する
-
-3. のステップで、旧バージョンでは文字が入力できませんでした。
-
-In English
-
-In Search tab, Search string is now can editable.
-
-
-The reproduction procedure of the problem:
-
-1. Open the search tab
-2. Choose the text box of a top "search string"
-3. Input a letter
-
-In 3. steppe, It was not able to input a letter in the old version.
-----end----
-
-# メモ
-
-## ナビゲーションバー(上に出てくる「戻る」ボタンとかタイトルとかが表示される領域)に埋まる問題を解消するには、
-インタフェースビルダの Adjust Scroll View Insets っていうチェックボックスを off にするといいっぽい。(理由理解してない)
-http://qiita.com/yimajo/items/7c7372e284e13827c989
-
-## iCloud で同期するには
-CoreData を使う時の初期化に
-NSPersistentStoreUbiquitousContentNameKey と NSPersistentStoreUbiquitousContentURLKey
-というのを使うらしい？
-
-Key-Value store とか Document Storage ってのでもできるっぽい。
-http://blog.gentlesoft.net/article/56456255.html
-
-
-http://d.hatena.ne.jp/glass-_-onion/20120728/1343471940
-
-284話 たいがとの接触

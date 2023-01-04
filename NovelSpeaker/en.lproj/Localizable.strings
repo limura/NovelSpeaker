@@ -884,20 +884,20 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.1
 
-- Avoid problems caused by differences in speaker identity strings between different OSes and OS versions by using a table that absorbs the differences.
-- Added \"Long press menu items left behind\" displayed when \"Settings tab\" -> \"Long press only pops: corrections for pronounciation\" is ON
-- \"Settings tab\" -> Changed the notation of \"Long press only pops: corrections for pronounciation\" to \"Reduce long-press menu items in the text\"
-- Expanded various definitions around searching for each website used in the \"Web Search\" tab
-- Fixed an issue that may have caused download failures on websites that use cookies, such as websites that require login
-
-Note:
-From Version 2.7.0, iCloud synchronization cannot be performed because the schema of the internal database has changed from Version 2.6.* and earlier.
+- Fixed the problem that some operations became impossible after the announcement \"Now that the reading has reached the end ~\" after finishing reading one novel.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.7.1
+
+Fix the problem
+
+- Fixed the problem that some operations became impossible after the announcement \"Now that the reading has reached the end ~\" after finishing reading one novel.
+
+
 Version 2.7.0
 
 Interface change, function addition, etc.

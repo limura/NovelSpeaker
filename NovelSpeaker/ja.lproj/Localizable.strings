@@ -876,17 +876,20 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.1
 
-- 異なるOS間やOSバージョン間の話者のIdentity文字列の差異による問題を、その差異を吸収するテーブルを使って回避できるように
-- 「設定タブ」→「本文中の長押しメニューを ことせかい 由来の物のみにする」がONの時に表示される「残される長押しメニュー項目」を追加
-- 「設定タブ」→「本文中の長押しメニューを ことせかい 由来の物のみにする」の表記を「本文中の長押しメニュー項目を減らす」に変更
-- 「Web検索」タブで使っているWebサイト毎の検索周りの定義を色々拡張
-- ログインが必要なWebサイト等のCookieを利用しているWebサイトでダウンロードが失敗していた可能性のある問題を修正
+- 一つの小説を読み上げ終わった後に、「読み上げが最後に〜」というアナウンスがあった後に一部の操作が不能になる問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.7.1
+
+問題の修正
+
+- 一つの小説を読み上げ終わった後に、「読み上げが最後に〜」というアナウンスがあった後に一部の操作が不能になる問題を修正
+
+
 Version 2.7.0
 
 インタフェースの変更・機能追加等
