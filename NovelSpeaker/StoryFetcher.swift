@@ -499,6 +499,11 @@ class StoryHtmlDecoder {
             if let data = siteInfoData, let siteInfoArray = DecodeSiteInfoData(data: data) {
                 self.lock.lock()
                 self.siteInfoArray = siteInfoArray
+                self.siteInfoArray.sort { (a, b) -> Bool in
+                    guard let aPattern = a.url?.pattern else { return false }
+                    guard let bPattern = b.url?.pattern else { return true }
+                    return aPattern.count > bPattern.count
+                }
                 self.lock.unlock()
             }else{
                 isFail = true
@@ -513,6 +518,11 @@ class StoryHtmlDecoder {
             if let data = customSiteInfoData, let siteInfoArray = DecodeSiteInfoData(data: data) {
                 self.lock.lock()
                 self.customSiteInfoArray = siteInfoArray
+                self.customSiteInfoArray.sort { (a, b) -> Bool in
+                    guard let aPattern = a.url?.pattern else { return false }
+                    guard let bPattern = b.url?.pattern else { return true }
+                    return aPattern.count > bPattern.count
+                }
                 self.lock.unlock()
             }else{
                 isFail = true
@@ -884,6 +894,10 @@ class StoryFetcher {
 
     static func CreateFirstStoryStateWithoutCheckLoadSiteInfo(url:URL, cookieString:String?, previousContent:String?) -> StoryState {
         let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
+        print("\(url.absoluteString)\nsiteInfo.count: \(siteInfoArray.count)")
+        for siteInfo in siteInfoArray {
+            print("--\nurl:\(siteInfo.url?.pattern ?? "nil")\npageElement: \(siteInfo.pageElement)\nresourceUrl: \(siteInfo.resourceUrl ?? "nil")")
+        }
         return CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString, previousContent: previousContent)
     }
     
