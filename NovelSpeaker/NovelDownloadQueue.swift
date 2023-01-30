@@ -775,6 +775,8 @@ class NovelDownloadQueue : NSObject {
         // 30秒で処理を終わらねばならないのでタイマを使います
         let deadlineTimeInterval = timeoutTimeInterval - (Date().timeIntervalSince1970 - startTime.timeIntervalSince1970)
 
+        // バックグラウンドで動く時は並列で動作しないようにします。
+        self.maxSimultaneousDownloadCount = 1
         // この処理は結構重いのでタイマの基準時間はこれよりも先にとっておきます
         self.addQueueArray(novelIDArray: targetNovelIDList)
         
@@ -783,6 +785,8 @@ class NovelDownloadQueue : NSObject {
             // downloadStop() した後、ダウンロードが終了するまで3秒待ちます。
             Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false){ (timer) in
                 NovelDownloader.FlushAllWritePool()
+                // 並列を戻します。
+                self.maxSimultaneousDownloadCount = 5
                 let downloadEndedNovelIDArray = Array(self.downloadEndedNovelIDSet)
                 self.AddNovelIDListToAlreadyBackgroundFetchedNovelIDList(novelIDArray: downloadEndedNovelIDArray)
                 self.downloadEndedNovelIDSet.removeAll()
