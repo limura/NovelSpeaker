@@ -527,7 +527,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             NSLocalizedString("BugReportViewController_SendBugReportMailInformation", comment: "\n\n===============\nここより下の行は編集しないでください。\nなお、問題の発生している場面のスクリーンショットなどを添付して頂けると、より対応しやすくなるかと思われます。")
             + "\n"
             + "\n" + NSLocalizedString("BugReportViewController_SendBugReport_IsNeedResponse", comment: "返信を希望する") + ": " + needResponse
-            + "\niOS version: " + UIDevice.current.systemVersion
+            + "\niOS version: " + ProcessInfo.processInfo.operatingSystemVersionString
             + "\nmodel: " + UIDevice.modelName
             + "\nApp version:" + appVersionString
             + "\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
