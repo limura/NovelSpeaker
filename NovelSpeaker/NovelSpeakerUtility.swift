@@ -3186,4 +3186,38 @@ class NovelSpeakerUtility: NSObject {
         NiftyUtility.FileCachedHttpGet(url: changeTableURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, successAction: nil, failedAction: nil)
         return result
     }
+
+    @objc static func ForceStopSpeech() {
+        DispatchQueue.main.async {
+            RealmUtil.RealmBlock { realm in
+                StorySpeaker.shared.StopSpeech(realm: realm, stopAudioSession: true)
+            }
+        }
+    }
+    static var initialAvailableMemory = 0
+    @objc static func SetInitialAvailableMemory() {
+        initialAvailableMemory = os_proc_available_memory()
+    }
+    static var MemoryUsageValidChecked = false
+    static func CheckMemoryUsageIsValid() -> Bool {
+        if MemoryUsageValidChecked { return true }
+        let maxUsableMemory = 1750 * 1024 * 1024 // なんぼなんでも 1.75G 以上は使わんの助
+        let borderUsableMemory = 100 * 1024 * 1024 // 残りが 100MBytes を下回ったらもう駄目と思う
+        let availableMemory = os_proc_available_memory()
+        print("os_proc_available_memory: \(availableMemory)")
+        // どうやら搭載メモリ量が大きい(iPadで16Gとかある)やつだと
+        // 使えるとして大きなメモリ量を申告してくる事があるらしいんだけども、
+        // 特殊なエンタイトルメントを追加してないと結局2Gの壁は超えられないらしいので
+        // 最初に観測したものから maxUsableMemory 以上使ってたら駄目ということにします。
+        // 参考: https://tech-blog.optim.co.jp/entry/2022/10/26/080000
+        if (initialAvailableMemory - availableMemory) > maxUsableMemory {
+            MemoryUsageValidChecked = true
+            return false
+        }
+        if availableMemory > borderUsableMemory {
+            return true
+        }
+        MemoryUsageValidChecked = true
+        return false
+    }
 }

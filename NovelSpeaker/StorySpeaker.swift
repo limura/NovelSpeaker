@@ -1190,6 +1190,17 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
+    func InterruptByiOS16_3MemoryLeak() {
+        NiftyUtility.DispatchSyncMainQueue {
+            RealmUtil.RealmBlock { realm in
+                self.StopSpeech(realm: realm, stopAudioSession: false)
+                self.AnnounceSpeech(text: NSLocalizedString("StorySpeaker_StartSpeechCountExceeded_in_iOS16.3_Announce", comment: "iOS 16.3 で発話回数が多くなると強制終了する場合がある事に対応して発話を停止します。このまま再生を再開させても良いですが、一旦アプリを終了してから再度再生を開始する事をお勧めします。")) {
+                    self.StopAudioSession()
+                }
+            }
+        }
+    }
+    
     func finishSpeak(isCancel: Bool, speechString: String) {
         let nextStorySpeechWaitSecond = 0.5
         func AnnounceAndDoNext(realm:Realm, announceText: String, block: @escaping (()->Void)) {

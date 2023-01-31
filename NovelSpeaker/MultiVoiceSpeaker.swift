@@ -44,6 +44,12 @@ fileprivate class SpeechQueue {
         speaker.rate = rate
         speaker.volume = volume
         speaker.delay = delay
+        if NovelSpeakerUtility.CheckMemoryUsageIsValid() == false {
+            DispatchQueue.main.async {
+                StorySpeaker.shared.InterruptByiOS16_3MemoryLeak()
+            }
+            return
+        }
         speaker.Speech(text: text)
     }
     

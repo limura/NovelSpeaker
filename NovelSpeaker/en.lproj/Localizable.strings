@@ -580,6 +580,7 @@
 
 "StorySpeaker_SpeechStopedAndSpeechNextStory_Format" = "Now that the reading has reached the end, it's time to play %@";
 "StorySpeaker_SpeechStopedAndRewindFirstStory" = "Since the reading has reached the end, go back to the first chapter and repeat the playback.";
+"StorySpeaker_StartSpeechCountExceeded_in_iOS16.3_Announce" = "The amount of memory being used has increased, and we have determined that it will be forcibly terminated if this continues, so we will stop speaking. You can resume playback as it is, but it is recommended to quit the app once and then start playback again.";
 
 "CoreDataToRealmTool_DefaultSpeaker" = "Default";
 "CoreDataToRealmTool_ProgressNovel" = "Converting novel data";

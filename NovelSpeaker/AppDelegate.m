@@ -113,6 +113,7 @@ void uncaughtExceptionHandler(NSException *exception)
     [NiftyUtility StartiCloudDataVersionChecker];
     [NovelSpeakerUtility CleanBackupFolder];
     [ImportFromWebPageViewController ClearDownloadTemporaryDirectory];
+    [NovelSpeakerUtility SetInitialAvailableMemory];
 
     return YES;
 }
@@ -160,6 +161,7 @@ void uncaughtExceptionHandler(NSException *exception)
     NSLog(@"application will terminate");
     [[GlobalDataSingleton GetInstance] saveContext];
     [NovelDownloadQueue DownloadFlush];
+    [NovelSpeakerUtility ForceStopSpeech];
     if ([RealmUtil IsUseCloudRealm]) {
         [RealmUtil CloudPull];
     }
