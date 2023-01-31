@@ -885,13 +885,27 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.2
 
-- Fixed the problem that some operations became impossible after the announcement \"Now that the reading has reached the end ~\" after finishing reading one novel.
+- When downloading in the background, set the degree of parallelism to 1 (do not download in parallel)
+- Introduced a small trick to monitor the amount of memory used and stop speaking when it is confirmed that it is being used over a certain amount, in response to the problem that it will be forcibly terminated when it is spoken on iOS 16.3.
+- Fixed the problem that ALPHA was [a-z] and [A-Z] was ignored for regular expressions judged as URI in \"Settings tab\" -> \"Ignore URI\".
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.7.2
+
+Behavior change
+
+- When downloading in the background, set the degree of parallelism to 1 (do not download in parallel)
+- Introduced a small trick to monitor the amount of memory used and stop speaking when it is confirmed that it is being used over a certain amount, in response to the problem that it will be forcibly terminated when it is spoken on iOS 16.3.
+
+Fix the problem
+
+- Fixed the problem that ALPHA was [a-z] and [A-Z] was ignored for regular expressions judged as URI in \"Settings tab\" -> \"Ignore URI\".
+
+
 Version 2.7.1
 
 Fix the problem

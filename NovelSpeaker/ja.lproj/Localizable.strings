@@ -877,13 +877,27 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.2
 
-- 一つの小説を読み上げ終わった後に、「読み上げが最後に〜」というアナウンスがあった後に一部の操作が不能になる問題を修正
+- 「設定タブ」->「小説の自動更新」がONの時に自動更新を試みるときのダウンロードの並列度を1(並列ダウンロードしない)に
+- iOS 16.3 で発話させるとそのうち強制終了してしまう問題に対して、利用しているメモリ量を監視してある程度以上使っているのを確認した時には発話を停止するような小細工を導入
+- 「設定タブ」->「URIを読み上げないようにする」で URI と判断される正規表現について、ALPHA が [a-z] となっており、[A-Z] を無視していた問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.7.2
+
+動作の変更
+
+- 「設定タブ」->「小説の自動更新」がONの時に自動更新を試みるときのダウンロードの並列度を1(並列ダウンロードしない)に
+- iOS 16.3 で発話させるとそのうち強制終了してしまう問題に対して、利用しているメモリ量を監視してある程度以上使っているのを確認した時には発話を停止するような小細工を導入
+
+問題の修正
+
+- 「設定タブ」->「URIを読み上げないようにする」で URI と判断される正規表現について、ALPHA が [a-z] となっており、[A-Z] を無視していた問題を修正
+
+
 Version 2.7.1
 
 問題の修正
