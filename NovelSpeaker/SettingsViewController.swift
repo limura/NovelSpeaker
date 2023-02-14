@@ -1116,6 +1116,20 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     }
                 })
             }
+
+            section
+            <<< SwitchRow("isDisableWillSpeakRange") { (row) in
+                row.title = NSLocalizedString("SettingTableViewController_isDisableWillSpeakRange", comment:"読み上げ位置表示しないようにする(iOS 16.3 から発生しているメモリリーク問題に対する対策になります)")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .footnote)
+                row.value = NovelSpeakerUtility.GetIsDisableWillSpeakRange()
+            }.onChange({ row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let value = row.value else { return }
+                    NovelSpeakerUtility.SetIsDisableWillSpeakRange(isDisable: value)
+                }
+            })
+
             section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_AddDefaultCorrectionOfTheReading", comment:"標準の読みの修正を上書き追加")

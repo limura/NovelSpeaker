@@ -239,6 +239,8 @@
 "SettingsViewController_UIDocumentPickerViewTitle" = "Please specify the file to import into NovelSpeaker";
 "SettingTableViewController_menuItemsNotRemoved" = "Long press menu items left behind";
 "SettingsViewController_isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog" = "Add \"Open in WebImport tab and check\" button to each search result dialog in Web Search tab";
+"SettingTableViewController_isDisableWillSpeakRange" = "Skip reading position display (This is a countermeasure to the memory leak problem that has been occurring since iOS 16.3. This option will be removed after the problem is resolved)";
+
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "Define";
 "RealmModels_MenuItemsNotRemoved_Name_translate" = "Translate";

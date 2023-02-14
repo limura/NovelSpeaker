@@ -186,6 +186,7 @@
 "SettingTableViewController_DisableNarouRuby" = "ことせかい 由来のルビ表記のみを対象とする(『|ルビを振られる文字列(ルビ文字列)』という形式のみを対象とするようになるため、『漢字(ひらがなかカタカナ)』という表記をルビと判定される事を避けたい場合等に効果があります)";
 "SettingTableViewController_menuItemsNotRemoved" = "残される長押しメニュー項目";
 "SettingsViewController_isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog" = "Web検索タブでの個々の検索結果ダイアログに「Web取込 タブで開いて確認する」ボタンを追加する";
+"SettingTableViewController_isDisableWillSpeakRange" = "読み上げ位置表示をサボるようにする(iOS 16.3 から発生しているメモリリーク問題に対する対策になります。問題が解消した後はこのオプションは削除される予定です)";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "調べる";

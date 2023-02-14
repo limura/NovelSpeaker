@@ -3204,7 +3204,6 @@ class NovelSpeakerUtility: NSObject {
         let maxUsableMemory = 1750 * 1024 * 1024 // なんぼなんでも 1.75G 以上は使わんの助
         let borderUsableMemory = 100 * 1024 * 1024 // 残りが 100MBytes を下回ったらもう駄目と思う
         let availableMemory = os_proc_available_memory()
-        print("os_proc_available_memory: \(availableMemory)")
         // どうやら搭載メモリ量が大きい(iPadで16Gとかある)やつだと
         // 使えるとして大きなメモリ量を申告してくる事があるらしいんだけども、
         // 特殊なエンタイトルメントを追加してないと結局2Gの壁は超えられないらしいので
@@ -3220,4 +3219,17 @@ class NovelSpeakerUtility: NSObject {
         MemoryUsageValidChecked = true
         return false
     }
+
+    static let isDisableWillSpeakRangeKey = "isDisableWillSpeakRange"
+    static func GetIsDisableWillSpeakRange() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [isDisableWillSpeakRangeKey: false])
+        return defaults.bool(forKey: isDisableWillSpeakRangeKey)
+    }
+    static func SetIsDisableWillSpeakRange(isDisable:Bool) {
+        let defaults = UserDefaults.standard
+        defaults.set(isDisable, forKey: isDisableWillSpeakRangeKey)
+        defaults.synchronize()
+    }
+    
 }

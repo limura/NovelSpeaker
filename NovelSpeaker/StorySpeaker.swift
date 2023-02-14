@@ -19,7 +19,7 @@ protocol StorySpeakerDeletgate {
 }
 
 class AnnounceSpeaker : SpeakRangeDelegate {
-    let speaker = Speaker()
+    let speaker = Speaker_WithoutWillSpeakRange()
     var handler:(()->Void)? = nil
     var isWillSpeakRangeCalled:Bool = false
     
