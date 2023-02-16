@@ -19,27 +19,19 @@ class Speaker {
     var speaker_WithoutWillSpeakRange:Speaker_WithoutWillSpeakRange? = nil
     
     init() {
+        AssignSpeaker()
+    }
+    
+    func AssignSpeaker() {
         if NovelSpeakerUtility.GetIsDisableWillSpeakRange() {
+            print("Speaker init: without willSpeakRange")
             speaker_Original = nil
             speaker_WithoutWillSpeakRange = Speaker_WithoutWillSpeakRange()
         }else{
+            print("Speaker init: original")
             speaker_Original = Speaker_Original()
             speaker_WithoutWillSpeakRange = nil
         }
-    }
-    
-    init(speaker:Speaker_Original) {
-        speaker_Original = speaker
-        speaker_WithoutWillSpeakRange = nil
-    }
-    init(speaker:Speaker_WithoutWillSpeakRange) {
-        speaker_Original = nil
-        speaker_WithoutWillSpeakRange = speaker
-    }
-
-    deinit {
-        speaker_Original = nil
-        speaker_WithoutWillSpeakRange = nil
     }
     
     func Speech(text:String) {
@@ -174,6 +166,28 @@ class Speaker {
     func reloadSynthesizer() {
         speaker_Original?.reloadSynthesizer()
         speaker_WithoutWillSpeakRange?.reloadSynthesizer()
+    }
+    
+    func ChangeSpeakerWillSpeakRangeType() {
+        let prevSpeakerOriginal = speaker_Original
+        let prevSpeakerWithoutWillSpeakRange = speaker_WithoutWillSpeakRange
+        AssignSpeaker()
+        if let speaker = speaker_Original, let prev = prevSpeakerWithoutWillSpeakRange {
+            speaker.delegate = prev.delegate
+            speaker.voice = prev.voice
+            speaker.delay = prev.delay
+            speaker.volume = prev.volume
+            speaker.rate = prev.rate
+            speaker.pitch = prev.pitch
+        }
+        if let speaker = speaker_WithoutWillSpeakRange, let prev = prevSpeakerOriginal {
+            speaker.delegate = prev.delegate
+            speaker.voice = prev.voice
+            speaker.delay = prev.delay
+            speaker.volume = prev.volume
+            speaker.rate = prev.rate
+            speaker.pitch = prev.pitch
+        }
     }
     
     func isPaused() -> Bool {

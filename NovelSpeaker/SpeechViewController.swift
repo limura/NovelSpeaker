@@ -387,6 +387,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 self.navigationController?.popViewController(animated: true)
             }
         }
+        NovelSpeakerNotificationTool.addObserver(selfObject: ObjectIdentifier(self), name: Notification.Name.NovelSpeaker.ForcePopViewControllerForSpeechView, queue: .main) { (notification) in
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
     }
     func unregistNotificationCenter() {
         NovelSpeakerNotificationTool.removeObserver(selfObject: ObjectIdentifier(self))

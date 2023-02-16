@@ -21,6 +21,8 @@ extension Notification.Name {
         static let GlobalStateChanged = Notification.Name("NovelSpeaker_Notification_GlobalStateChanged")
         // 利用する Realm の設定等が変わった時(localRelam から cloud realm になった等)
         static let RealmSettingChanged = Notification.Name("NovelSpeaker_Notification_RealmSettingChanged")
+        // SpeechViewController を popViewController してほしい時に呼ぶ
+        static let ForcePopViewControllerForSpeechView = Notification.Name("NovelSpeaker_Notification_ForcePopViewControllerForSpeechView")
     }
 }
 extension Notification {
@@ -83,6 +85,12 @@ class NovelSpeakerNotificationTool {
     static func AnnounceRealmSettingChanged() {
         let notificationCenter = NotificationCenter.default
         let notification = Notification(name: Notification.Name.NovelSpeaker.RealmSettingChanged)
+        notificationCenter.post(notification)
+    }
+
+    static func AnnounceForcePopViewControllerForSpeechView() {
+        let notificationCenter = NotificationCenter.default
+        let notification = Notification(name: Notification.Name.NovelSpeaker.ForcePopViewControllerForSpeechView)
         notificationCenter.post(notification)
     }
 }

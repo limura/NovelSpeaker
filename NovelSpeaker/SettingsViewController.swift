@@ -1127,6 +1127,28 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 RealmUtil.RealmBlock { (realm) -> Void in
                     guard let value = row.value else { return }
                     NovelSpeakerUtility.SetIsDisableWillSpeakRange(isDisable: value)
+                    StorySpeaker.shared.UpdateMoreSplitMinimumLetterCount()
+                    StorySpeaker.shared.ChangeSpeakerWillSpeakRangeType()
+                }
+            })
+            section
+            <<< AlertRow<Int>("MoreSplitTargetsMinimumCount") { (row) in
+                row.cellStyle = .subtitle
+                row.title = NSLocalizedString("SettingTableViewController_MoreSplitTargetsMinimumCount", comment:"一息で読み上げる範囲が長くなる場合にテキトーな範囲で区切る時に区切られなくなる最小の文字数(iOS 16.3 から発生しているメモリリーク問題に対する対策になります)")
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .footnote)
+                row.options = [1, 25, 50, 100, 200, 9999999]
+                row.value = NovelSpeakerUtility.GetMoreSplitTargetsMinimumCount()
+                row.hidden = .function(["isDisableWillSpeakRange"], { form -> Bool in
+                    let row: RowOf<Bool>! = form.rowBy(tag: "isDisableWillSpeakRange")
+                    return row.value ?? false == false
+                })
+            }.onChange({ row in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let value = row.value else { return }
+                    NovelSpeakerUtility.SetMoreSplitTargetsMinimumCount(newValue: value)
+                    StorySpeaker.shared.UpdateMoreSplitMinimumLetterCount()
+                    StorySpeaker.shared.ChangeSpeakerWillSpeakRangeType()
                 }
             })
 

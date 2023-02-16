@@ -3231,5 +3231,17 @@ class NovelSpeakerUtility: NSObject {
         defaults.set(isDisable, forKey: isDisableWillSpeakRangeKey)
         defaults.synchronize()
     }
-    
+
+    static let MoreSplitTargetsMinimumCountKey = "MoreSplitTargetsMinimumCountKey"
+    static func GetMoreSplitTargetsMinimumCount() -> Int {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [MoreSplitTargetsMinimumCountKey: 50])
+        return defaults.integer(forKey: MoreSplitTargetsMinimumCountKey)
+    }
+    static func SetMoreSplitTargetsMinimumCount(newValue:Int) {
+        let defaults = UserDefaults.standard
+        defaults.set(newValue, forKey: MoreSplitTargetsMinimumCountKey)
+        defaults.synchronize()
+    }
+
 }

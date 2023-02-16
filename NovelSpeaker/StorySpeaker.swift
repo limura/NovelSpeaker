@@ -64,7 +64,7 @@ class AnnounceSpeaker : SpeakRangeDelegate {
 }
 
 class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
-    static let shared = StorySpeaker()
+    public static let shared = StorySpeaker()
     
     let speaker = SpeechBlockSpeaker()
     let announceSpeaker = AnnounceSpeaker()
@@ -98,6 +98,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
 
     private override init() {
         super.init()
+        UpdateMoreSplitMinimumLetterCount()
         EnableMPRemoteCommandCenterEvents()
         speaker.delegate = self
         audioSessionInit(isActive: false)
@@ -118,6 +119,24 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         RealmObserverHandler.shared.RemoveDelegate(delegate: self)
         DisableMPRemoteCommandCenterEvents()
         unregistAudioNotifications()
+    }
+    
+    public func UpdateMoreSplitMinimumLetterCount() {
+        let moreSplitTargetsMinimumCount = NovelSpeakerUtility.GetMoreSplitTargetsMinimumCount()
+        if NovelSpeakerUtility.GetIsDisableWillSpeakRange() && moreSplitTargetsMinimumCount <= 10000 {
+            // willSpeakRange が呼ばれない場合、読み上げが終了するまでは読み上げ位置が更新されないため、
+            // 強引に withMoreSplitTargets の文字で区切らせて、最小 moreSplitMinimumLetterCount の長さの単位までで区切らせて
+            // その区切りで発話をやり直させる事で読み上げ位置を強引に更新させます。
+            // ただ、発話が止まってから再開する時に一旦空白が開くので
+            // moreSplitMinimumLetterCount を小さい値にしてしまうとぶつ切れしてしまうので
+            // そこそこの長さに設定します。
+            // ……まぁアレです。地味にぶつ切れになるけれど我慢しておくんなまし(´・ω・`)
+            self.moreSplitMinimumLetterCount = moreSplitTargetsMinimumCount
+            self.withMoreSplitTargets = ["。", "、", ".", " ", "　", "\n"]
+        }else{
+            self.moreSplitMinimumLetterCount = Int.max
+            self.withMoreSplitTargets = []
+        }
     }
     
     func StopObservers() {
@@ -1445,5 +1464,12 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     func GenerateWholeDisplayText() -> String {
         return speaker.speechBlockArray.reduce("") { $0 + $1.displayText }
+    }
+    
+    func ChangeSpeakerWillSpeakRangeType() {
+        RealmUtil.RealmBlock { realm in
+            guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else { return }
+            self.SetStory(story: story, withUpdateReadDate: false)
+        }
     }
 }
