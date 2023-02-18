@@ -575,7 +575,7 @@
 
 "StorySpeaker_SpeechStopedAndSpeechNextStory_Format" = "読み上げが最後に達したため、次に %@ を再生します。";
 "StorySpeaker_SpeechStopedAndRewindFirstStory" = "読み上げが最後に達したため、最初の章に戻って再生を繰り返します。";
-"StorySpeaker_StartSpeechCountExceeded_in_iOS16.3_Announce" = "利用しているメモリ量が大きくなっており、このままだと強制終了させられてしまうと判断したため、発話を停止します。このまま再生を再開させても良いですが、一旦アプリを終了させてから再度再生を開始する事をお勧めします。";
+"StorySpeaker_StartSpeechCountExceeded_in_iOS16.3_Announce" = "利用しているメモリ量が大きくなっており、このままだと強制終了させられてしまうと判断したため、発話を停止します。このまま再生を再開させても良いですが、一旦アプリを終了させてから再度再生を開始する方が良さそうです。";
 
 "CoreDataToRealmTool_DefaultSpeaker" = "標準";
 "CoreDataToRealmTool_ProgressNovel" = "小説データを変換中";

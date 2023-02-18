@@ -3219,6 +3219,9 @@ class NovelSpeakerUtility: NSObject {
         MemoryUsageValidChecked = true
         return false
     }
+    static func ResetMemoryUsage() {
+        MemoryUsageValidChecked = false
+    }
 
     static let isDisableWillSpeakRangeKey = "isDisableWillSpeakRange"
     static func GetIsDisableWillSpeakRange() -> Bool {

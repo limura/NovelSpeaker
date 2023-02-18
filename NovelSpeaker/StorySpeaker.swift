@@ -1211,11 +1211,25 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     
     func InterruptByiOS16_3MemoryLeak() {
         NiftyUtility.DispatchSyncMainQueue {
+            let available_memory_before = os_proc_available_memory()
             RealmUtil.RealmBlock { realm in
                 self.StopSpeech(realm: realm, stopAudioSession: false)
-                self.AnnounceSpeech(text: NSLocalizedString("StorySpeaker_StartSpeechCountExceeded_in_iOS16.3_Announce", comment: "iOS 16.3 で発話回数が多くなると強制終了する場合がある事に対応して発話を停止します。このまま再生を再開させても良いですが、一旦アプリを終了してから再度再生を開始する事をお勧めします。")) {
-                    self.StopAudioSession()
-                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                    self.speaker.reloadSynthesizer()
+                    NovelSpeakerUtility.ResetMemoryUsage()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                        let available_memory_after = os_proc_available_memory()
+                        if available_memory_before < (available_memory_after - 1024) {
+                            RealmUtil.RealmBlock { realm in
+                                self.StartSpeech(realm: realm, withMaxSpeechTimeReset: false, callerInfo: "メモリリーク問題に対応するため、AVSpeechSynthesizerを一旦開放して再度確保した後に再開した。\(#function)", isNeedRepeatSpeech: self.isNeedRepeatSpeech)
+                            }
+                        }else{
+                            self.AnnounceSpeech(text: NSLocalizedString("StorySpeaker_StartSpeechCountExceeded_in_iOS16.3_Announce", comment: "iOS 16.3 で発話回数が多くなると強制終了する場合がある事に対応して発話を停止します。このまま再生を再開させても良いですが、一旦アプリを終了してから再度再生を開始する事をお勧めします。")) {
+                                self.StopAudioSession()
+                            }
+                        }
+                    })
+                })
             }
         }
     }
