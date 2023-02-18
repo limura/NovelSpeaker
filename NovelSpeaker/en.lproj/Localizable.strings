@@ -890,20 +890,14 @@
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
 "BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.3
 
-- Added \"Setting tab\" -> \"Skip reading position display\"
-- When \"Settings tab\" -> \"Skip the reading position display\" is ON, added the setting \"The minimum number of characters that will not be separated when dividing the reading range in a single breath when the reading range becomes long~\"
-
-These changes are a workaround for a memory leak issue in iOS 16.3 (and iOS 16.3.1). A certain amount of knowledge is required to use it, so please read the explanation in the option item carefully before using it.
+- If too much memory is allocated when speaking, try to free the memory, and resume speaking if it seems to be freed.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
 Version 2.7.3
 
-- Added \"Setting tab\" -> \"Skip reading position display\"
-- When \"Settings tab\" -> \"Skip the reading position display\" is ON, added the setting \"The minimum number of characters that will not be separated when dividing the reading range in a single breath when the reading range becomes long~\"
-
-These changes are a workaround for a memory leak issue in iOS 16.3 (and iOS 16.3.1). As such, it will be removed in the future.
+- If too much memory is allocated when speaking, try to free the memory, and resume speaking if it seems to be freed.
 
 
 Version 2.7.2
