@@ -3223,6 +3223,7 @@ class NovelSpeakerUtility: NSObject {
         MemoryUsageValidChecked = false
     }
 
+    /* AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
     static let isDisableWillSpeakRangeKey = "isDisableWillSpeakRange"
     static func GetIsDisableWillSpeakRange() -> Bool {
         let defaults = UserDefaults.standard
@@ -3246,5 +3247,5 @@ class NovelSpeakerUtility: NSObject {
         defaults.set(newValue, forKey: MoreSplitTargetsMinimumCountKey)
         defaults.synchronize()
     }
-
+    */
 }

@@ -19,7 +19,7 @@ protocol StorySpeakerDeletgate {
 }
 
 class AnnounceSpeaker : SpeakRangeDelegate {
-    let speaker = Speaker_WithoutWillSpeakRange()
+    let speaker = Speaker()
     var handler:(()->Void)? = nil
     var isWillSpeakRangeCalled:Bool = false
     
@@ -98,7 +98,9 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
 
     private override init() {
         super.init()
+        #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
         UpdateMoreSplitMinimumLetterCount()
+        #endif
         EnableMPRemoteCommandCenterEvents()
         speaker.delegate = self
         audioSessionInit(isActive: false)
@@ -121,6 +123,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         unregistAudioNotifications()
     }
     
+    #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
     public func UpdateMoreSplitMinimumLetterCount() {
         let moreSplitTargetsMinimumCount = NovelSpeakerUtility.GetMoreSplitTargetsMinimumCount()
         if NovelSpeakerUtility.GetIsDisableWillSpeakRange() && moreSplitTargetsMinimumCount <= 10000 {
@@ -138,6 +141,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.withMoreSplitTargets = []
         }
     }
+    #endif // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
     
     func StopObservers() {
         globalStateObserverToken = nil
@@ -1480,6 +1484,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         return speaker.speechBlockArray.reduce("") { $0 + $1.displayText }
     }
     
+    #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
     func ChangeSpeakerWillSpeakRangeType() {
         RealmUtil.RealmBlock { realm in
             guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else { return }
@@ -1487,4 +1492,5 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
             self.SetStory(story: story, withUpdateReadDate: false)
         }
     }
+    #endif
 }

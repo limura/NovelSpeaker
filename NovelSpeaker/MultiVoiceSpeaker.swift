@@ -271,12 +271,14 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         }
     }
     
+    #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
     func ChangeSpeakerWillSpeakRangeType() {
         for (_, speaker) in self.speakerCache {
             speaker.ChangeSpeakerWillSpeakRangeType()
         }
     }
-    
+    #endif // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
+
     var isSpeaking:Bool {
         get {
             self.speechQueueLock.lock()

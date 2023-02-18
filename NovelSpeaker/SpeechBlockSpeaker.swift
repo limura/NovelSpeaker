@@ -328,7 +328,9 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         }
         speaker.reloadSynthesizer()
     }
+    #if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
     func ChangeSpeakerWillSpeakRangeType() {
         self.speaker.ChangeSpeakerWillSpeakRangeType()
     }
+    #endif
 }

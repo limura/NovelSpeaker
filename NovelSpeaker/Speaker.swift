@@ -14,6 +14,7 @@ protocol SpeakRangeDelegate {
     func finishSpeak(isCancel:Bool, speechString:String)
 }
 
+#if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
 class Speaker {
     var speaker_Original:Speaker_Original? = nil
     var speaker_WithoutWillSpeakRange:Speaker_WithoutWillSpeakRange? = nil
@@ -216,8 +217,11 @@ class Speaker {
         }
     }
 }
-
 class Speaker_Original: NSObject, AVSpeechSynthesizerDelegate {
+}
+#endif // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
+
+class Speaker: NSObject, AVSpeechSynthesizerDelegate {
     var synthesizer = AVSpeechSynthesizer()
     var m_Voice:AVSpeechSynthesisVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
     var m_Pitch:Float = 1.0
@@ -365,6 +369,7 @@ class Speaker_Original: NSObject, AVSpeechSynthesizerDelegate {
         return self.synthesizer.isPaused
     }
 }
+#if false // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
 class Speaker_WithoutWillSpeakRange: NSObject, AVSpeechSynthesizerDelegate {
     var synthesizer = AVSpeechSynthesizer()
     var m_Voice:AVSpeechSynthesisVoice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
@@ -515,3 +520,4 @@ class Speaker_WithoutWillSpeakRange: NSObject, AVSpeechSynthesizerDelegate {
         return self.synthesizer.isPaused
     }
 }
+#endif // AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました

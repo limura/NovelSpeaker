@@ -1117,6 +1117,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 })
             }
 
+            #if false
+            /* AVSpeechSynthesizer を開放するとメモリ解放できそうなので必要なくなりました
             section
             <<< SwitchRow("isDisableWillSpeakRange") { (row) in
                 row.title = NSLocalizedString("SettingTableViewController_isDisableWillSpeakRange", comment:"読み上げ位置表示しないようにする(iOS 16.3 から発生しているメモリリーク問題に対する対策になります)")
@@ -1151,6 +1153,8 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                     StorySpeaker.shared.ChangeSpeakerWillSpeakRangeType()
                 }
             })
+            */
+            #endif
 
             section
             <<< ButtonRow() {
