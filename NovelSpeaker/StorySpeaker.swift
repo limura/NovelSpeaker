@@ -1469,6 +1469,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     func ChangeSpeakerWillSpeakRangeType() {
         RealmUtil.RealmBlock { realm in
             guard let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID) else { return }
+            self.speaker.ChangeSpeakerWillSpeakRangeType()
             self.SetStory(story: story, withUpdateReadDate: false)
         }
     }

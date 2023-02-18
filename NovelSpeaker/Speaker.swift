@@ -24,11 +24,15 @@ class Speaker {
     
     func AssignSpeaker() {
         if NovelSpeakerUtility.GetIsDisableWillSpeakRange() {
-            print("Speaker init: without willSpeakRange")
+            if speaker_Original == nil && speaker_WithoutWillSpeakRange != nil {
+                return
+            }
             speaker_Original = nil
             speaker_WithoutWillSpeakRange = Speaker_WithoutWillSpeakRange()
         }else{
-            print("Speaker init: original")
+            if speaker_Original != nil && speaker_WithoutWillSpeakRange == nil {
+                return
+            }
             speaker_Original = Speaker_Original()
             speaker_WithoutWillSpeakRange = nil
         }

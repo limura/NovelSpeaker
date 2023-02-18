@@ -271,6 +271,12 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         }
     }
     
+    func ChangeSpeakerWillSpeakRangeType() {
+        for (_, speaker) in self.speakerCache {
+            speaker.ChangeSpeakerWillSpeakRangeType()
+        }
+    }
+    
     var isSpeaking:Bool {
         get {
             self.speechQueueLock.lock()

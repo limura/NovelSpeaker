@@ -328,4 +328,7 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
         }
         speaker.reloadSynthesizer()
     }
+    func ChangeSpeakerWillSpeakRangeType() {
+        self.speaker.ChangeSpeakerWillSpeakRangeType()
+    }
 }
