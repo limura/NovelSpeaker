@@ -11,3 +11,9 @@ Podfile.tmp
 runinfer.sh
 Pods
 novelspeaker.xcworkspace
+
+## User settings
+xcuserdata/
+## Xcode 8 and earlier
+*.xcscmblueprint
+*.xccheckout
