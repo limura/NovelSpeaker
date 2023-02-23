@@ -117,7 +117,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         super.viewWillDisappear(animated)
         resumeTheme()
         let range = self.textView.selectedRange
-        if range.location >= 0 && range.location < self.textView.text.count {
+        if self.storySpeaker.isPlayng == false && range.location >= 0 && range.location < self.textView.text.count {
             RealmUtil.RealmBlock { (realm) -> Void in
                 self.storySpeaker.setReadLocationWith(realm: realm, location: range.location)
             }
