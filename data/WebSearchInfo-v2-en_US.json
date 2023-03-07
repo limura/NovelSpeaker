@@ -71,8 +71,8 @@
         "values": [
             {"queryType": "text", "displayText": "Contains the following keywords", "queryName": "q"},
             {"queryType": "text", "displayText": "Does not contain the following keywords", "queryName": "ex_q"},
-            {"queryType": "radio", "displayText": "Genre", "queryName": "genre_name", "radio":
-                {
+            {"queryType": "multiSelect", "displayText": "Genre", "queryName": "genre_name", "separator": ",",
+                "multiSelect": {
                     "Another world fantasy": "fantasy",
                     "Contemporary fantasy": "action",
                     "SF": "sf",
@@ -84,7 +84,16 @@
                     "Essay nonfiction": "nonfiction",
                     "History, era, bizarre": "history",
                     "Creative theory / criticism": "criticism",
-                    "Poetry, fairy tales, etc.": "others"
+                    "Poetry, fairy tales, etc.": "others",
+                    "Fan fiction": "fan_fiction"
+                }
+            },
+            {"queryType": "radio", "displayText": "Order", "queryName": "order", "defaultValue": "weekly_ranking", "radio":
+                {
+                    "Cumulative ranking": "popular",
+                    "Weekly ranking": "weekly_ranking",
+                    "New order": "published_at",
+                    "Update order": "last_episode_published_at"
                 }
             },
             {"queryType": "radio", "displayText": "Writing status", "queryName": "serial_status", "radio":
@@ -95,10 +104,10 @@
             },
             {"queryType": "radio", "displayText": "Number of star", "queryName": "total_review_point_range", "radio":
                 {
-                    "  0〜9": "-9",
-                    " 10〜": "10-",
-                    "100〜": "100-",
-                    "500〜": "500-"
+                    "   0〜9": "-9",
+                    "  10〜": "10-",
+                    " 100〜": "100-",
+                    "1000〜": "1000-"
                 }
             },
             {"queryType": "radio", "displayText": "Novel length", "queryName": "total_character_count_range", "radio":
@@ -117,28 +126,28 @@
             },
             {"queryType": "radio", "displayText": "release date", "queryName": "published_date_range", "radio":
                 {
-                    "Within 1 day": "1days",
-                    "Within 1 week": "7days",
-                    "Within 1 month": "1months",
-                    "Within half a year": "6months",
-                    "Within 1 year": "1years"
+                    "1: Within 1 day": "1days",
+                    "2: Within 1 week": "7days",
+                    "3: Within 1 month": "1months",
+                    "4: Within half a year": "6months",
+                    "5: Within 1 year": "1years"
                 }
             },
             {"queryType": "radio", "displayText": "Update date", "queryName": "last_episode_published_date_range", "radio":
                 {
-                    "Within 1 day": "1days",
-                    "Within 1 week": "7days",
-                    "Within 1 month": "1months",
-                    "Within half a year": "6months",
-                    "Within 1 year": "1years"
+                    "1: Within 1 day": "1days",
+                    "2: Within 1 week": "7days",
+                    "3: Within 1 month": "1months",
+                    "4: Within half a year": "6months",
+                    "5: Within 1 year": "1years"
                 }
             }
         ],
         "result": {
-            "block": "//section[@id='searchResult-works']/div[contains(@class,'widget-work')]/div[@class='float-left']",
-            "nextLink": "//div[@class='widget-pager']/p[@class='widget-pagerNext']/a[contains(@href,'/search?')]/@href",
-            "title": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]",
-            "url": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]/@href"
+            "block": "//div[not(@class)]/div[contains(@class,'NewBox_box')]",
+            "nextLink": "//div[contains(@class,'Pager_next')]/a[contains(@href,'/search')]",
+            "title": "//h3//a[@title and contains(@href,'/works/')]",
+            "url": "//h3//a[@title and contains(@href,'/works/')]/@href"
         }
     },
     {

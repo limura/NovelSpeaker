@@ -71,8 +71,8 @@
         "values": [
             {"queryType": "text", "displayText": "次のキーワードを含む", "queryName": "q"},
             {"queryType": "text", "displayText": "次のキーワードを含まない", "queryName": "ex_q"},
-            {"queryType": "radio", "displayText": "ジャンル", "queryName": "genre_name", "radio":
-                {
+            {"queryType": "multiSelect", "displayText": "ジャンル", "queryName": "genre_name", "separator": ",",
+                "multiSelect": {
                     "異世界ファンタジー": "fantasy",
                     "現代ファンタジー": "action",
                     "SF": "sf",
@@ -84,21 +84,30 @@
                     "エッセイ・ノンフィクション": "nonfiction",
                     "歴史・時代・伝奇": "history",
                     "創作論・評論": "criticism",
-                    "詩・童話・その他": "others"
+                    "詩・童話・その他": "others",
+                    "二次創作": "fan_fiction"
                 }
             },
-            {"queryType": "radio", "displayText": "執筆状況", "queryName": "serial_status", "radio":
+            {"queryType": "radio", "displayText": "順番", "queryName": "order", "defaultValue": "weekly_ranking", "radio":
+                {
+                    "累計ランキング": "popular",
+                    "週間ランキング": "weekly_ranking",
+                    "新作順": "published_at",
+                    "更新順": "last_episode_published_at"
+                }
+            },
+            {"queryType": "radio", "displayText": "連載状態", "queryName": "serial_status", "radio":
                 {
                     "連載中": "running",
-                    "完結済": "completed"
+                    "完結": "completed"
                 }
             },
             {"queryType": "radio", "displayText": "★の数", "queryName": "total_review_point_range", "radio":
                 {
                     "  0〜9": "-9",
-                    " 10〜": "10-",
-                    "100〜": "100-",
-                    "500〜": "500-"
+                    "  10〜": "10-",
+                    " 100〜": "100-",
+                    "1000〜": "1000-"
                 }
             },
             {"queryType": "radio", "displayText": "小説の長さ", "queryName": "total_character_count_range", "radio":
@@ -108,7 +117,7 @@
                     "3: 長編（8万文字〜）": "80000-"
                 }
             },
-            {"queryType": "multiSelect", "displayText": "セルフレイティング(除外する項目を選択)", "queryName": "exclusion_flag_name", "separator": "&exclusion_flag_name=",
+            {"queryType": "multiSelect", "displayText": "除外条件", "queryName": "exclusion_flag_name", "separator": "&exclusion_flag_name=",
                 "multiSelect": {
                     "残酷描写有り": "cruel",
                     "暴力描写有り": "violent",
@@ -117,28 +126,28 @@
             },
             {"queryType": "radio", "displayText": "公開日", "queryName": "published_date_range", "radio":
                 {
-                    "1日以内": "1days",
-                    "1週間以内": "7days",
-                    "1ヶ月以内": "1months",
-                    "半年以内": "6months",
-                    "1年以内": "1years"
+                    "1: 1日以内": "1days",
+                    "2: 1週間以内": "7days",
+                    "3: 1ヶ月以内": "1months",
+                    "4: 半年以内": "6months",
+                    "5: 1年以内": "1years"
                 }
             },
             {"queryType": "radio", "displayText": "更新日", "queryName": "last_episode_published_date_range", "radio":
                 {
-                    "1日以内": "1days",
-                    "1週間以内": "7days",
-                    "1ヶ月以内": "1months",
-                    "半年以内": "6months",
-                    "1年以内": "1years"
+                    "1: 1日以内": "1days",
+                    "2: 1週間以内": "7days",
+                    "3: 1ヶ月以内": "1months",
+                    "4: 半年以内": "6months",
+                    "5: 1年以内": "1years"
                 }
             }
         ],
         "result": {
-            "block": "//section[@id='searchResult-works']/div[contains(@class,'widget-work')]/div[@class='float-left']",
-            "nextLink": "//div[@class='widget-pager']/p[@class='widget-pagerNext']/a[contains(@href,'/search?')]/@href",
-            "title": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]",
-            "url": "//h3[@class='widget-workCard-title']/a[contains(@href,'/works/')]/@href"
+            "block": "//div[not(@class)]/div[contains(@class,'NewBox_box')]",
+            "nextLink": "//div[contains(@class,'Pager_next')]/a[contains(@href,'/search')]",
+            "title": "//h3//a[@title and contains(@href,'/works/')]",
+            "url": "//h3//a[@title and contains(@href,'/works/')]/@href"
         }
     },
     {
