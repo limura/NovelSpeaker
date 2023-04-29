@@ -89,6 +89,9 @@ class ImportFromWebPageViewController: UIViewController, WKUIDelegate, WKNavigat
 
         let wkWebViewConfiguration = makeWKWebViewConfiguration()
         let wkWebView = WKWebView(frame: .zero, configuration: wkWebViewConfiguration)
+        if #available(iOS 16.4, *) {
+            wkWebView.isInspectable = NovelSpeakerUtility.IsInspectableWkWebview()
+        }
         self.wkWebView = wkWebView
         wkWebView.navigationDelegate = self
         wkWebView.uiDelegate = self

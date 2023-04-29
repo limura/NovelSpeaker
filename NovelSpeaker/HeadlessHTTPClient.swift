@@ -59,6 +59,9 @@ class HeadlessHttpClient {
         dispatch_sync_on_main_thread {
             let frame = CGRect(x: 0, y: 0, width: 1024, height: 1366)
             self.webView = WKWebView(frame: frame, configuration: config)
+            if #available(iOS 16.4, *) {
+                self.webView.isInspectable = NovelSpeakerUtility.IsInspectableWkWebview()
+            }
             erik = Erik(webView: self.webView)
             for scene in UIApplication.shared.connectedScenes {
                 if scene.activationState == .foregroundActive, let targetWindow = ((scene as? UIWindowScene)?.delegate as? UIWindowSceneDelegate)?.window, let tmpWindow = targetWindow {

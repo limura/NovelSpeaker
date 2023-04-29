@@ -241,6 +241,7 @@
 "SettingsViewController_isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog" = "Add \"Open in WebImport tab and check\" button to each search result dialog in Web Search tab";
 "SettingTableViewController_isDisableWillSpeakRange" = "Skip reading position display (This is a countermeasure to the memory leak problem that has been occurring since iOS 16.3. This option will be removed after the problem is resolved)";
 "SettingTableViewController_MoreSplitTargetsMinimumCount" = "The minimum number of characters that will not be separated when dividing the reading range in a single breath when the reading range becomes long.\nSpecifies the number of characters to separate the reading by the number of characters in.\nHowever, if you specify a large value, the reading position will not be updated to the expected position when you stop speaking in the middle of reading. Therefore, please set a value that you think is appropriate (As an individual developer, I think that about 50 can be reasonably used.)\nIn addition, only punctuation marks, spaces, and line breaks are delimited. , so even if you specify \"1\", it will be spoken without a certain length.\nThis option will be removed after the problem is resolved.)";
+"SettingTableViewController_IsInspectableWkWebView" = "Make WkWebView Inspectable from Safari on mac.";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "Define";

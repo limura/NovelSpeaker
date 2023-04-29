@@ -2808,6 +2808,18 @@ class NovelSpeakerUtility: NSObject {
         UserDefaults.standard.set(currentDictionary, forKey: NovelBookmarkUserDefaultsKey)
     }
     
+    static let WkWebviewIsInspectableKey = "WkWebviewIsInspectableKey"
+    static func IsInspectableWkWebview() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [WkWebviewIsInspectableKey: false])
+        return defaults.bool(forKey: WkWebviewIsInspectableKey)
+    }
+    static func SetIsInspectableWkWebview(IsInspectable:Bool) {
+        let defaults = UserDefaults.standard
+        defaults.setValue(IsInspectable, forKey: WkWebviewIsInspectableKey)
+        defaults.synchronize()
+    }
+    
     static let OuterNovelFileAttributesKey = "OuterNovelFileAttributesKey"
     struct OuterNovelFileAttributes: Codable {
         let modificationDate:Date

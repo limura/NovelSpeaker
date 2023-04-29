@@ -1502,6 +1502,15 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 NovelSpeakerUtility.isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog = value
             })
             section
+            <<< SwitchRow("IsInspectableWkWebView") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsInspectableWkWebView", comment:"WkWebViewをmacのSafariからInspectできるようにする。")
+                row.value = NovelSpeakerUtility.IsInspectableWkWebview()
+                row.cell.textLabel?.numberOfLines = 0
+            }.onChange({ row in
+                guard let value = row.value else { return }
+                NovelSpeakerUtility.SetIsInspectableWkWebview(IsInspectable: value)
+            })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
