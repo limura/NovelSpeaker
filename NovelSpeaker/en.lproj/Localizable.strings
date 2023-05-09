@@ -475,7 +475,7 @@
 
 "UriLoader_NSURLConnectionRequestFailed" = "Failed conneting with servers. (Check your internet status)";
 "UriLoader_HTTPResponseIsInvalid" = "The server has not returned a valid response. (Server returned error code: \"%ld\") There may be occasions where login are required.However if this problem proceeds feel free to contact support via e-mails";
-"UriLoader_HTMLParseFailed_Parse" = "Failed to parse HTML. (It seems that it is not a valid HTML or XHTML document.) Currently, NovelSpeaker can not read PDF and other documents)";
+"UriLoader_HTMLParseFailed_Parse" = "Failed to parse document. (It doesn't seem to be a valid HTML or XHTML document, etc. NovelSpeaker currently only supports his HTML, XHTML, PDF, RTF, RTFd files)";
 "UriLoader_HTMLParseFailed_Xpath" = "Failed to parse HTML. (Illegal xpath was specified, probably the \"information registered in wedata\" for use in the analysis of this site is out of date or wrong.) Opinions on the support site side of NovelSpeaker Request form etc. Please report it with the URL where this error occurred or solve it by editing wedata yourself using OpenID)";
 "UriLoader_HTMLParseFailed_ContentIsNil" = "Failed to parse HTML. (I could not get the contents of the document, it may be solved by reporting from the opinion request form etc. on the support site side of NovelSpeaker together with the URL where this error occurred and the procedure until the error occurred. not)";
 
