@@ -880,13 +880,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.3
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.4
 
-- 発話時にメモリを確保しすぎているようであれば、メモリ解放を試みて、開放できているようであれば発話を再開するように
+- 発話中に「本棚タブ」以外のタブへ移動したり、アプリをバックグラウンドに回した後、再度「本棚タブ」を表示すると読み上げ位置表示が読み上げている場所よりも進んだ場所に移動してしまう問題を修正
+- rubyタグ周りでマッチしにくいものがあった問題への暫定的な対応
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.7.4
+
+問題の修正
+
+- 発話中に「本棚タブ」以外のタブへ移動したり、アプリをバックグラウンドに回した後、再度「本棚タブ」を表示すると読み上げ位置表示が読み上げている場所よりも進んだ場所に移動してしまう問題を修正
+- rubyタグ周りでマッチしにくいものがあった問題への暫定的な対応
+
+
 Version 2.7.3
 
 - 発話時にメモリを確保しすぎているようであれば、メモリ解放を試みて、開放できているようであれば発話を再開するように

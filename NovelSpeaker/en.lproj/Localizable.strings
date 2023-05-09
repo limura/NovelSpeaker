@@ -889,13 +889,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.3
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.4
 
-- If too much memory is allocated when speaking, try to free the memory, and resume speaking if it seems to be freed.
+- If you move to a tab other than the \"bookshelf tab\" while speaking, or if you display the \"bookshelf tab\" again after turning the app to the background, the reading position display will move to a place that is ahead of the reading position. Fixed an issue where
+- Temporarily dealt with the problem that it was difficult to match around ruby tags.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.7.4
+
+Fix the problem
+
+- If you move to a tab other than the \"bookshelf tab\" while speaking, or if you display the \"bookshelf tab\" again after turning the app to the background, the reading position display will move to a place that is ahead of the reading position. Fixed an issue where
+- Temporarily dealt with the problem that it was difficult to match around ruby tags.
+
+
 Version 2.7.3
 
 - If too much memory is allocated when speaking, try to free the memory, and resume speaking if it seems to be freed.

@@ -3568,3 +3568,22 @@ iOS 16.3 から発生しているメモリリーク問題なのですが、ど�
 Version 2.7.3
 
 - If too much memory is allocated when speaking, try to free the memory, and resume speaking if it seems to be freed.
+
+Version 2.7.4
+
+問題の修正
+
+- 発話中に「本棚タブ」以外のタブへ移動したり、アプリをバックグラウンドに回した後、再度「本棚タブ」を表示すると読み上げ位置表示が読み上げている場所よりも進んだ場所に移動してしまう問題を修正
+- rubyタグ周りでマッチしにくいものがあった問題への暫定的な対応をしました。
+
+今回は問題の修正のみになります。詳細については割愛します。
+
+さて、残念なことに私はお問い合わせ対応に疲れ果ててしまいましたため、致命的な問題(アプリが強制終了するようなもの)以外への対応は極力しない形にさせていただいています。お問い合わせ窓口の閉鎖等については今の所はしておりませんが、上記のような対応になりますため、新機能のご提案や強制終了を伴わない不都合の報告をされましたとしても、対応はされないものとお考え下さい。なお、今回のように気が向いたら修正する事もあります。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+Version 2.7.4
+
+- If you move to a tab other than the "bookshelf tab" while speaking, or if you display the "bookshelf tab" again after turning the app to the background, the reading position display will move to a place that is ahead of the reading position. Fixed an issue where
+- Temporarily dealt with the problem that it was difficult to match around ruby tags.
