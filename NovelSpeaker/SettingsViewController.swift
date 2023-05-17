@@ -1097,6 +1097,26 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             #endif
+            section
+            <<< AlertRow<String>("likeButtonDialogTypeRow") { row in
+                row.title = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
+                row.selectorTitle = NSLocalizedString("SettingTableViewController_likeButtonDialogType", comment:"本棚でお気に入りボタンを押した時の動作")
+                row.options = NovelSpeakerUtility.GetAllLikeButtonDialogType().map({NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: $0)})
+                row.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: .noDialog)
+                row.cell.textLabel?.numberOfLines = 0
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let type = LikeButtonDialogType(rawValue: globalState.likeButtonDialogType) else { return }
+                    row.value = NovelSpeakerUtility.RepeatLikeButtonDialogTypeToString(type: type)
+                }
+            }.onChange({ (row) in
+                RealmUtil.RealmBlock { (realm) -> Void in
+                    guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let typeString = row.value, let type = NovelSpeakerUtility.LikeButtonDialogTypeStringToType(typeString: typeString) else { return }
+                    RealmUtil.WriteWith(realm: realm, withoutNotifying:[self.globalDataNotificationToken]) { (realm) in
+                        globalState.likeButtonDialogType = type.rawValue
+                    }
+                }
+            })
+
             if UIDevice.current.userInterfaceIdiom == .phone {
                 section
                 <<< SwitchRow("isSupportAutoRotateRow") { (row) in

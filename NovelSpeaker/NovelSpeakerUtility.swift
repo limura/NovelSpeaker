@@ -1570,6 +1570,9 @@ class NovelSpeakerUtility: NSObject {
                         }
                     }
                 }
+                if let likeButtonDialogTypeNumber = dic.object(forKey: "likeButtonDialogType") as? NSNumber, let likeButtonDialogType = LikeButtonDialogType(rawValue: likeButtonDialogTypeNumber.intValue) {
+                    globalState.likeButtonDialogType = likeButtonDialogType.rawValue
+                }
                 realm.add(globalState, update: .modified)
             }
         }
@@ -2084,6 +2087,7 @@ class NovelSpeakerUtility: NSObject {
                 "supportRotationMask": NovelSpeakerUtility.supportRotationMask.rawValue,
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
                 "menuItemsNotRemoved": Array(globalState.menuItemsNotRemoved),
+                "likeButtonDialogType": globalState.likeButtonDialogType,
             ]
         }
     }
@@ -2530,6 +2534,35 @@ class NovelSpeakerUtility: NSObject {
     }
     static func GetAllRepeatSpeechType() -> [RepeatSpeechType] {
         return [.NoRepeat, .RewindToFirstStory, .RewindToThisStory, .GoToNextLikeNovel, .GoToNextSameFolderdNovel, .GoToNextSelectedFolderdNovel, .GoToNextSameWriterNovel, .GoToNextSameWebsiteNovel]
+    }
+    static func RepeatLikeButtonDialogTypeToString(type:LikeButtonDialogType) -> String {
+        switch type {
+        case .noDialog:
+            return NSLocalizedString("SettingTableViewController_LikeButtonDialogType_noDialog", comment: "確認しない")
+        case .dialogOnRequested:
+            return NSLocalizedString("SettingTableViewController_LikeButtonDialogType_dialogOnRequested", comment: "登録する時のみ確認する")
+        case .dialogOffRequested:
+            return NSLocalizedString("SettingTableViewController_LikeButtonDialogType_dialogOffRequested", comment: "削除する時のみ確認する")
+        case .dialogAlwaysRequested:
+            return NSLocalizedString("SettingTableViewController_LikeButtonDialogType_dialogAlwaysRequested:", comment: "いつでも確認する")
+        }
+    }
+    static func LikeButtonDialogTypeStringToType(typeString:String) -> LikeButtonDialogType? {
+        switch typeString {
+        case NSLocalizedString("SettingTableViewController_LikeButtonDialogType_noDialog", comment: "確認しない"):
+            return LikeButtonDialogType.noDialog
+        case NSLocalizedString("SettingTableViewController_LikeButtonDialogType_dialogOnRequested", comment: "登録する時のみ確認する"):
+            return LikeButtonDialogType.dialogOnRequested
+        case NSLocalizedString("SettingTableViewController_LikeButtonDialogType_dialogOffRequested", comment: "削除する時のみ確認する"):
+            return LikeButtonDialogType.dialogOffRequested
+        case NSLocalizedString("SettingTableViewController_LikeButtonDialogType_dialogAlwaysRequested:", comment: "いつでも確認する"):
+            return LikeButtonDialogType.dialogAlwaysRequested
+        default:
+            return nil
+        }
+    }
+    static func GetAllLikeButtonDialogType() -> [LikeButtonDialogType] {
+        return [.noDialog, .dialogOnRequested, .dialogOffRequested, .dialogAlwaysRequested]
     }
 
     static func RepeatSpeechLoopTypeToString(type:RepeatSpeechLoopType) -> String? {

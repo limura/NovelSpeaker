@@ -242,6 +242,11 @@
 "SettingTableViewController_isDisableWillSpeakRange" = "Skip reading position display (This is a countermeasure to the memory leak problem that has been occurring since iOS 16.3. This option will be removed after the problem is resolved)";
 "SettingTableViewController_MoreSplitTargetsMinimumCount" = "The minimum number of characters that will not be separated when dividing the reading range in a single breath when the reading range becomes long.\nSpecifies the number of characters to separate the reading by the number of characters in.\nHowever, if you specify a large value, the reading position will not be updated to the expected position when you stop speaking in the middle of reading. Therefore, please set a value that you think is appropriate (As an individual developer, I think that about 50 can be reasonably used.)\nIn addition, only punctuation marks, spaces, and line breaks are delimited. , so even if you specify \"1\", it will be spoken without a certain length.\nThis option will be removed after the problem is resolved.)";
 "SettingTableViewController_IsInspectableWkWebView" = "Make WkWebView Inspectable from Safari on mac.";
+"SettingTableViewController_likeButtonDialogType" = "Behavior when pressing the favorite button on the bookshelf";
+"SettingTableViewController_LikeButtonDialogType_noDialog" = "don't check";
+"SettingTableViewController_LikeButtonDialogType_dialogOnRequested" = "Confirm only when adding";
+"SettingTableViewController_LikeButtonDialogType_dialogOffRequested" = "Ask only when deleting";
+"SettingTableViewController_LikeButtonDialogType_dialogAlwaysRequested:" = "check anytime";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "Define";
@@ -770,6 +775,12 @@
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_NotRead_Format" = "%@. haven't read it yet";
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_Format" = "%@ reading up to %d%%";
 "BookShelfTreeViewCell_AccessibilityLabel_Folder_Format" = "\"%@\" folder";
+"BookShelfTreeViewCell_LikeButtonClicked_RemoveDialogMessage" = "Do you want to remove favorites?";
+"BookShelfTreeViewCell_LikeButtonClicked_RemoveDialog_Cancel" = "do not remove";
+"BookShelfTreeViewCell_LikeButtonClicked_RemoveDialog_OK" = "remove";
+"BookShelfTreeViewCell_LikeButtonClicked_AddDialogMessage" = "Add to Favorites?";
+"BookShelfTreeViewCell_LikeButtonClicked_AddDialog_Cancel" = "do not add";
+"BookShelfTreeViewCell_LikeButtonClicked_AddDialog_OK" = "add";
 
 "NovelDisplayColorSettingViewController_SampleText" = "If I speak in the tongues of men or of angels, but do not have love, I am only a resounding gong or a clanging cymbal. If I have the gift of prophecy and can fathom all mysteries and all knowledge, and if I have a faith that can move mountains, but do not have love, I am nothing. If I give all I possess to the poor and give over my body to hardship that I may boast,[b] but do not have love, I gain nothing.";
 "NovelDisplayColorSettingViewController_ColorSettingButton_Default" = "Standard (follows dark mode, etc.)";

@@ -13,7 +13,7 @@ import UIKit
 import AVFoundation
 
 @objc class RealmUtil : NSObject {
-    static let currentSchemaVersion : UInt64 = 12
+    static let currentSchemaVersion : UInt64 = 13
     static let deleteRealmIfMigrationNeeded: Bool = false
     static let CKContainerIdentifier = "iCloud.com.limuraproducts.novelspeaker"
 
@@ -95,6 +95,11 @@ import AVFoundation
             newObject?["isNeedDisableIdleTimerWhenSpeechTime"] = false
         }
     }
+    static func Migrate_12_To_13(migration:Migration, oldSchemaVersion:UInt64) {
+        migration.enumerateObjects(ofType: RealmGlobalState.className()) { (oldObject, newObject) in
+            newObject?["likeButtonDialogType"] = LikeButtonDialogType.noDialog.rawValue
+        }
+    }
 
     static func MigrateFunc(migration:Migration, oldSchemaVersion:UInt64) {
         if oldSchemaVersion == 0 {
@@ -126,6 +131,9 @@ import AVFoundation
         }
         if oldSchemaVersion <= 10 {
             Migrate_10_To_11(migration: migration, oldSchemaVersion: oldSchemaVersion)
+        }
+        if oldSchemaVersion <= 12 {
+            Migrate_12_To_13(migration: migration, oldSchemaVersion: oldSchemaVersion)
         }
     }
     
@@ -2666,6 +2674,13 @@ enum RepeatSpeechLoopType: String {
     case noCheckReadingPoint = "NoCheckReadingPoint"
 }
 
+enum LikeButtonDialogType: Int {
+    case noDialog = 0 // ダイアログを出さない
+    case dialogOnRequested = 1 // ONにするときだけダイアログを出す
+    case dialogOffRequested = 2 // OFFにするときだけダイアログを出す
+    case dialogAlwaysRequested = 3 // ONでもOFFでもダイアログを出す
+}
+
 @objc final class RealmGlobalState: Object {
     static public let UniqueID = "only one object"
     @objc dynamic var id = UniqueID
@@ -2711,6 +2726,7 @@ enum RepeatSpeechLoopType: String {
     @objc dynamic var isEnableSwipeOnStoryView = true
     @objc dynamic var isDisableNarouRuby = false
     @objc dynamic var isNeedDisableIdleTimerWhenSpeechTime = false
+    @objc dynamic var likeButtonDialogType: Int = LikeButtonDialogType.noDialog.rawValue
     let novelLikeOrder = List<String>()
     let menuItemsNotRemoved = List<String>()
     

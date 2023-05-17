@@ -499,12 +499,48 @@ class BookShelfTreeViewCell: UITableViewCell, RealmObserverResetDelegate {
     
     @IBAction func likeButtonClicked(_ sender: Any) {
         RealmUtil.RealmBlock { (realm) -> Void in
-            guard self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
-            RealmUtil.WriteWith(realm: realm) { (realm) in
-                if let index = globalState.novelLikeOrder.index(of: novelID) {
-                    globalState.novelLikeOrder.remove(at: index)
-                }else{
-                    globalState.novelLikeOrder.append(novelID)
+            guard self.watchNovelIDArray.count == 1, let novelID = self.watchNovelIDArray.first, let globalState = RealmGlobalState.GetInstanceWith(realm: realm), let dialogType = LikeButtonDialogType(rawValue: globalState.likeButtonDialogType) else { return }
+            if let index = globalState.novelLikeOrder.index(of: novelID) {
+                switch dialogType {
+                case .dialogOffRequested:
+                    fallthrough
+                case .dialogAlwaysRequested:
+                    if let viewController = NiftyUtility.GetRegisterdToplevelViewController() {
+                        NiftyUtility.EasyDialogTwoButton(viewController: viewController, title: RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.title, message: NSLocalizedString("BookShelfTreeViewCell_LikeButtonClicked_RemoveDialogMessage", comment: "お気に入りを解除しますか？"), button1Title: NSLocalizedString("BookShelfTreeViewCell_LikeButtonClicked_RemoveDialog_Cancel", comment: "解除しない"), button1Action: nil, button2Title: NSLocalizedString("BookShelfTreeViewCell_LikeButtonClicked_RemoveDialog_OK", comment: "解除する")) {
+                            RealmUtil.WriteWith(realm: realm) { (realm) in
+                                globalState.novelLikeOrder.remove(at: index)
+                            }
+                        }
+                    }else{
+                        fallthrough
+                    }
+                case .noDialog:
+                    fallthrough
+                case .dialogOnRequested:
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                        globalState.novelLikeOrder.remove(at: index)
+                    }
+                }
+            }else{
+                switch dialogType {
+                case .dialogOnRequested:
+                    fallthrough
+                case .dialogAlwaysRequested:
+                    if let viewController = NiftyUtility.GetRegisterdToplevelViewController() {
+                        NiftyUtility.EasyDialogTwoButton(viewController: viewController, title: RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.title, message: NSLocalizedString("BookShelfTreeViewCell_LikeButtonClicked_AddDialogMessage", comment: "お気に入りに登録しますか？"), button1Title: NSLocalizedString("BookShelfTreeViewCell_LikeButtonClicked_AddDialog_Cancel", comment: "登録しない"), button1Action: nil, button2Title: NSLocalizedString("BookShelfTreeViewCell_LikeButtonClicked_AddDialog_OK", comment: "登録する")) {
+                            RealmUtil.WriteWith(realm: realm) { (realm) in
+                                globalState.novelLikeOrder.append(novelID)
+                            }
+                        }
+                    }else{
+                        fallthrough
+                    }
+                case .noDialog:
+                    fallthrough
+                case .dialogOffRequested:
+                    RealmUtil.WriteWith(realm: realm) { (realm) in
+                        globalState.novelLikeOrder.append(novelID)
+                    }
                 }
             }
         }

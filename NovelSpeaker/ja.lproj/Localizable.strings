@@ -189,7 +189,11 @@
 "SettingTableViewController_isDisableWillSpeakRange" = "読み上げ中の位置表示更新をサボるようにする(ON にすると、iOS 16.3 から発生しているメモリリーク問題を回避できます。そのため、「設定タブ」->「発話変更設定」で会話文などを削除しているなどしていたものを戻すことができるようになります。ただし、読み上げ中に読み上げ位置の更新ができなくなるという問題が別途発生します。なお、iOS 16.2以前 でご利用中の方はONにする必要はありません。また、問題が解消した後はこのオプションは削除される予定です)";
 "SettingTableViewController_MoreSplitTargetsMinimumCount" = "一息で読み上げる範囲が長くなる場合にテキトーな範囲で区切るようにするが、その時に区切られなくなる最小の文字数\n(「読み上げ中の位置表示更新をサボるようにする」がONの時に読み上げ位置を強引に更新しつづけるために、ある程度の文字数で読み上げを区切るための文字数を指定します。\nここで指定される文字数が少なければ少ないほど区切られる数が増えるため、読み上げ位置の更新が頻繁になります\n「が」、読み上げの区切り部分では少し読み上げに間が空いてしまうというデメリットがあります。しかしながら大きな値を指定してしまうと読み上げの途中で発話を停止した時に読み上げ位置が思った位置に更新されないようになるはずです。そのため、ご自身で適切と思われる値を設定してください(開発者個人としては50程度がそこそこ使えるかなぁと思っています)。\nなお、区切られる部分については句読点や空白や改行部分のみで区切られるため、「1」を指定したとしてもある程度の長さは区切られずに発話されます。\nなお、問題が解消した後はこのオプションは削除される予定です)";
 "SettingTableViewController_IsInspectableWkWebView" = "WkWebViewをmacのSafariから調査(Inspect)できるようにする。";
-
+"SettingTableViewController_likeButtonDialogType" = "本棚でお気に入りボタンを押した時の動作";
+"SettingTableViewController_LikeButtonDialogType_noDialog" = "確認しない";
+"SettingTableViewController_LikeButtonDialogType_dialogOnRequested" = "登録する時のみ確認する";
+"SettingTableViewController_LikeButtonDialogType_dialogOffRequested" = "削除する時のみ確認する";
+"SettingTableViewController_LikeButtonDialogType_dialogAlwaysRequested:" = "いつでも確認する";
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "調べる";
 "RealmModels_MenuItemsNotRemoved_Name_translate" = "翻訳";
@@ -725,7 +729,12 @@
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_NotRead_Format" = "%@。まだ読んでいません";
 "BookshelfTreeViewCell_TitleLabel_For_AccessibilityLabel_Format" = "%@ %d%%まで読んでいます";
 "BookShelfTreeViewCell_AccessibilityLabel_Folder_Format" = "%@ フォルダ";
-
+"BookShelfTreeViewCell_LikeButtonClicked_RemoveDialogMessage" = "お気に入りを解除しますか？";
+"BookShelfTreeViewCell_LikeButtonClicked_RemoveDialog_Cancel" = "解除しない";
+"BookShelfTreeViewCell_LikeButtonClicked_RemoveDialog_OK" = "解除する";
+"BookShelfTreeViewCell_LikeButtonClicked_AddDialogMessage" = "お気に入りに登録しますか？";
+"BookShelfTreeViewCell_LikeButtonClicked_AddDialog_Cancel" = "登録しない";
+"BookShelfTreeViewCell_LikeButtonClicked_AddDialog_OK" = "登録する";
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "読み替え辞書を移行中";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "読み上げ時の間の設定を移行中";
 "RealmToRealmCopyTool_Progress_SpeakerSetting" = "発話設定を移行中";
