@@ -693,6 +693,7 @@
 "BookShelfRATreeViewController_SortTypeFolder" = "自作フォルダ順";
 "BookShelfRATreeViewController_SortTypeKeywardTag" = "タグ名順";
 "BookShelfRATreeViewController_SortTypeUpdateDateWithFilder" = "最終ダウンロード日時順(フォルダ分類版)";
+"BookShelfRATreeViewController_SorteTypeCreatedDate" = "本棚登録順";
 "BookShelfRATreeViewController_StoryTypeLastReadDate" = "小説を開いた日時順";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber" = "読み上げ位置がダウンロードされていない章を示しています。この小説の追加の章のダウンロードを試みますか？";
 "BookShelfRATreeViewController_ConifirmDownloadNovelStartBecauseFewStoryNumber_OK" = "ダウンロードする";

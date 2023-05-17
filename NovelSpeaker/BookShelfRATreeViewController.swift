@@ -390,6 +390,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 }
                 return ah < bh
             }))
+        case .CreatedDate:
+            return Array(allNovels.sorted(byKeyPath: "createdDate", ascending: false))
         case .Title:
             fallthrough
         case .SelfCreatedFolder:
@@ -690,6 +692,24 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return (true, result)
         }
     }
+    
+    // 本棚に登録された順でフォルダ分けします(フォルダ分けしない版)
+    func createCreatedDateBookShelfRATreeViewCellDataTreeWithoutFolder() -> (Bool, [BookShelfRATreeViewCellData]) {
+        return RealmUtil.RealmBlock { (realm) -> (Bool, [BookShelfRATreeViewCellData]) in
+            guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.CreatedDate) else { return (false,[]) }
+            var result = [] as [BookShelfRATreeViewCellData]
+            for novel in novels {
+                let data = BookShelfRATreeViewCellData()
+                data.childrens = nil
+                data.novelID = novel.novelID
+                data.title = novel.title
+                result.append(data)
+            }
+            return (false, result)
+        }
+    }
+
+
 
     func getBookShelfRATreeViewCellDataTree() -> (Bool, [BookShelfRATreeViewCellData]) {
         var sortType:NarouContentSortType = .Title
@@ -717,6 +737,8 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             return createLikeLevelBookShelfRATreeViewCellDataTreeWithoutFolder()
         case .WebSite:
             return createWebSiteBookShelfRATreeViewCellDataTree()
+        case .CreatedDate:
+            return createCreatedDateBookShelfRATreeViewCellDataTreeWithoutFolder()
         default:
             break
         }
@@ -870,6 +892,7 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             , NSLocalizedString("BookShelfRATreeViewController_StoryTypeLastReadDate", comment: "小説を開いた日時順"): NarouContentSortType.LastReadDate
             , NSLocalizedString("BookShelfRATreeViewController_SortTypeLikeLevel", comment: "お気に入り順"): NarouContentSortType.LikeLevel
             , NSLocalizedString("BookShelfRATreeViewController_SorteTypeWebSite", comment: "Webサイト順"): NarouContentSortType.WebSite
+            , NSLocalizedString("BookShelfRATreeViewController_SorteTypeCreatedDate", comment: "本棚登録順"): NarouContentSortType.CreatedDate
         ]
     }
 
