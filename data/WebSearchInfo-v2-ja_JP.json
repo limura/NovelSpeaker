@@ -381,9 +381,8 @@
             }
         ],
         "result": {
-            "block": "//div[@class='contents-works']//section[contains(@class,'component-cardwork')]",
-            "nextLink_": "//div[@class='works-navigation']/nav[@class='component-pagination']/ul/li/a[contains(@href,'/works/') and contains(@href,'index=') and child::span[text()='Next']]",
-	    "nextLink": "//div[@class='works-navigation']/nav[@class='component-pagination']/ul/li[preceding-sibling::li[child::a[not(@href)]]][1]/a",
+            "block": "//section[@class='component-work']",
+            "nextLink": "//div[@class='columns-navigation']/div/a[@class='w-button']",
             "title": "//header/h2/a",
             "url": "//header/h2/a/@href"
         }
