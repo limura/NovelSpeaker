@@ -694,6 +694,12 @@ import AVFoundation
         thread.cancel()
     }
     
+    @objc static func sync() {
+        self.RealmBlock { realm in
+            realm.refresh()
+        }
+    }
+    
 }
 
 extension Object {

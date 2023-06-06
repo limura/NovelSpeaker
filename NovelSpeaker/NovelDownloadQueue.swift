@@ -340,6 +340,12 @@ class NovelDownloader : NSObject {
             return
         }
         fetcher.FetchNext(currentState: state, successAction: { (state) in
+            if isDownloadStop {
+                flushWritePool(novelID: novelID)
+                BehaviorLogger.AddLogSimple(description: "NovelDownloader.downloadOnce(): isDownloadStop が true であったのでダウンロードを終了します(FetchNext完了時)。novelID: \(novelID)")
+                successAction(novelID, 0)
+                return
+            }
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else {
                     failedSearchNovel(hint: "SearchNovel failed in FetchNext success handler")
@@ -615,10 +621,12 @@ class NovelDownloadQueue : NSObject {
         self.queueHolder.ClearAllQueue()
     }
     
-    @objc static func DownloadFlush() {
+    @objc static func DownloadFlush() -> Int {
+        let currentQueuedCount = NovelDownloadQueue.shared.GetCurrentQueuedNovelIDArray().count
         NovelDownloadQueue.shared.downloadStop()
         NovelDownloader.FlushAllWritePool()
         HTTPCookieSyncTool.shared.SaveSync()
+        return currentQueuedCount
     }
     
     func GetCurrentDownloadingNovelIDArray() -> [String] {

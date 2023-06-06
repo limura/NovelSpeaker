@@ -160,11 +160,18 @@ void uncaughtExceptionHandler(NSException *exception)
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     NSLog(@"application will terminate");
     [[GlobalDataSingleton GetInstance] saveContext];
-    [NovelDownloadQueue DownloadFlush];
+    int queuedCount = [NovelDownloadQueue DownloadFlush];
     [NovelSpeakerUtility ForceStopSpeech];
     if ([RealmUtil IsUseCloudRealm]) {
         [RealmUtil CloudPull];
     }
+    [RealmUtil sync];
+    if (queuedCount > 0) {
+        // queuedCount が 0以上、つまりダウンロード中であったなら、
+        // ダウンロードが止まるのを3秒待ちつつ祈ってからsyncさせる
+        [NSThread sleepForTimeInterval:3.0];
+    }
+    [RealmUtil sync];
 }
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options{
