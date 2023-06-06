@@ -237,6 +237,9 @@
 "SettingsViewController_ClearAllCookiesDialog_OKButton" = "Delete";
 "SettingsViewController_ImportOuterFile" = "File import";
 "SettingsViewController_UIDocumentPickerViewTitle" = "Please specify the file to import into NovelSpeaker";
+"SettingsViewController_PickRealmData_Title" = "Extract internal database (Realm) files (It will be the last resort in an emergency. Therefore, we can not provide support for the extracted files.)";
+"SettingsViewController_PickRealmData_FailGetFilePath" = "Failed to get internal database file path.";
+
 "SettingTableViewController_menuItemsNotRemoved" = "Long press menu items left behind";
 "SettingsViewController_isNeed_OpenInWebImportTab_ButtonOnNovelSearchTargetCheckDialog" = "Add \"Open in WebImport tab and check\" button to each search result dialog in Web Search tab";
 "SettingTableViewController_isDisableWillSpeakRange" = "Skip reading position display (This is a countermeasure to the memory leak problem that has been occurring since iOS 16.3. This option will be removed after the problem is resolved)";

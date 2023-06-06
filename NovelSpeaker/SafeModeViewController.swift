@@ -48,6 +48,20 @@ class SafeModeViewController: FormViewController {
             nextViewController.modalPresentationStyle = .fullScreen
             self.navigationController?.pushViewController(nextViewController, animated: true)
         })
+        <<< ButtonRow("PickRealmData") {
+            $0.title = NSLocalizedString("SettingsViewController_PickRealmData_Title", comment: "内部データベースを取り出す")
+            $0.cell.textLabel?.numberOfLines = 0
+        }.onCellSelection({ cell, row in
+            guard let dataFileURL = RealmUtil.IsUseCloudRealm() ? RealmUtil.GetCloudRealmFilePath() : RealmUtil.GetLocalRealmFilePath() else {
+                DispatchQueue.main.async {
+                    NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("SettingsViewController_PickRealmData_FailGetFilePath", comment: "内部データベースのファイルパスを入手できませんでした。"))
+                }
+                return
+            }
+            DispatchQueue.main.async {
+                self.ShareToFile(dataFileURL: dataFileURL, fileName: "NovelSpeaker.realm")
+            }
+        })
         <<< ButtonRow() {
             $0.title = NSLocalizedString("SafeModeViewController_ExitSafeModeButton_Title", comment: "セーフモードを終了し、通常起動する")
             $0.cell.textLabel?.numberOfLines = 0

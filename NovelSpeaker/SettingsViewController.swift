@@ -1502,6 +1502,21 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 }
             })
             section
+            <<< ButtonRow("PickRealmData") {
+                $0.title = NSLocalizedString("SettingsViewController_PickRealmData_Title", comment: "内部データベースを取り出す")
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onCellSelection({ cell, row in
+                guard let dataFileURL = RealmUtil.IsUseCloudRealm() ? RealmUtil.GetCloudRealmFilePath() : RealmUtil.GetLocalRealmFilePath() else {
+                    DispatchQueue.main.async {
+                        NiftyUtility.EasyDialogMessageDialog(viewController: self, message: NSLocalizedString("SettingsViewController_PickRealmData_FailGetFilePath", comment: "内部データベースのファイルパスを入手できませんでした。"))
+                    }
+                    return
+                }
+                DispatchQueue.main.async {
+                    self.ShareToFile(dataFileURL: dataFileURL, fileName: "NovelSpeaker.realm")
+                }
+            })
+            section
             <<< SwitchRow("OverrideForceSiteInfoReload") { row in
                 row.title = NSLocalizedString("SettingTableViewController_ForceSiteInfoReload", comment:"SiteInfoを毎回読み直す")
                 row.value = false
