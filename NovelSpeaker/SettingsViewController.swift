@@ -186,7 +186,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
         var result:[Story] = []
         for index in 0..<count {
             var story = Story()
-            story.content = "\(index + startChapterNumber): \(content)"
+            story.content = "\(index + startChapterNumber): \(content)".replacingOccurrences(of: "\u{00}", with: "")
             story.novelID = novelID
             story.chapterNumber = index + startChapterNumber
             result.append(story)

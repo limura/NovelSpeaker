@@ -888,7 +888,7 @@ class NovelSpeakerUtility: NSObject {
                     var story = Story()
                     story.novelID = novelID
                     story.chapterNumber = no
-                    story.content = NormalizeNewlineString(string: content)
+                    story.content = NormalizeNewlineString(string: content).replacingOccurrences(of: "\u{00}", with: "")
                     story.url = CoreDataToRealmTool.NcodeToUrlString(ncode: ncode, no: no, end: end.boolValue)
                     storyArray.append(story)
                     if no == currentReadingChapterNumber {
@@ -993,7 +993,7 @@ class NovelSpeakerUtility: NSObject {
                         var story = Story()
                         story.novelID = novelID
                         story.chapterNumber = no
-                        story.content = NormalizeNewlineString(string: content)
+                        story.content = NormalizeNewlineString(string: content).replacingOccurrences(of: "\u{00}", with: "")
                         if no == currentReadingChapterNumber {
                             realmNovel.m_readingChapterContentCount = story.content.count
                         }
@@ -1051,7 +1051,7 @@ class NovelSpeakerUtility: NSObject {
                 var story = Story()
                 story.novelID = novelID
                 story.chapterNumber = no
-                story.content = NormalizeNewlineString(string: storyText)
+                story.content = NormalizeNewlineString(string: storyText).replacingOccurrences(of: "\u{00}", with: "")
                 storyArray.append(story)
                 if storyArray.count >= RealmStoryBulk.bulkCount {
                     RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
@@ -1677,7 +1677,7 @@ class NovelSpeakerUtility: NSObject {
                         var story = Story()
                         story.novelID = novelID
                         story.chapterNumber = chapterNumber.intValue
-                        story.content = content
+                        story.content = content.replacingOccurrences(of: "\u{00}", with: "")
                         if let url = storyDic.object(forKey: "url") as? String {
                             story.url = url
                         }
@@ -3186,7 +3186,7 @@ class NovelSpeakerUtility: NSObject {
                         var story = Story()
                         story.novelID = novelID
                         story.chapterNumber = 1
-                        story.content = content
+                        story.content = content.replacingOccurrences(of: "\u{00}", with: "")
                         RealmStoryBulk.SetStoryWith(realm: realm, story: story)
                     }
                 }

@@ -379,7 +379,7 @@ class NovelDownloader : NSObject {
                         var story = Story()
                         story.novelID = novelID
                         story.chapterNumber = chapterNumber
-                        story.content = content
+                        story.content = content.replacingOccurrences(of: "\u{00}", with: "")
                         if let subtitle = state.subtitle {
                             story.subtitle = subtitle
                         }

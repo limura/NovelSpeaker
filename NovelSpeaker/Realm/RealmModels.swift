@@ -1827,7 +1827,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             var story = Story()
             story.novelID = novel.novelID
             story.chapterNumber = 1
-            story.content = content
+            story.content = content.replacingOccurrences(of: "\u{00}", with: "")
             RealmUtil.WriteWith(realm: realm) { (realm) in
                 RealmStoryBulk.SetStoryWith(realm: realm, story: story)
                 novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novel.novelID, chapterNumber: 1)
@@ -1850,7 +1850,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
                     var story = Story()
                     story.novelID = novel.novelID
                     story.chapterNumber = chapterNumber
-                    story.content = content
+                    story.content = content.replacingOccurrences(of: "\u{00}", with: "")
                     RealmStoryBulk.SetStoryWith(realm: realm, story: story)
                     chapterNumber += 1
                     novel.AppendDownloadDate(realm: realm, date: Date())
@@ -1870,7 +1870,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             var story = Story()
             story.novelID = novel.novelID
             story.chapterNumber = chapterNumber
-            story.content = content
+            story.content = content.replacingOccurrences(of: "\u{00}", with: "")
             storyArray.append(story)
             chapterNumber += 1
             novel.AppendDownloadDate(realm: realm, date: Date())
@@ -1897,7 +1897,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             novel.type = .URL
             novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: 1)
             var story = Story()
-            story.content = content
+            story.content = content.replacingOccurrences(of: "\u{00}", with: "")
             story.novelID = novel.novelID
             story.chapterNumber = 1
             story.url = novelID

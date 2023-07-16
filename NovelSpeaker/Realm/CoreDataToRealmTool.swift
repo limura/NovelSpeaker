@@ -230,7 +230,7 @@ class CoreDataToRealmTool: NSObject {
                 var story = Story()
                 story.novelID = novelID
                 story.chapterNumber = chapterNumber
-                story.content = NovelSpeakerUtility.NormalizeNewlineString(string: storyText)
+                story.content = NovelSpeakerUtility.NormalizeNewlineString(string: storyText).replacingOccurrences(of: "\u{00}", with: "")
                 if content.isURLContent() == false, content.isUserCreatedContent() == false, let ncode = content.ncode, let end = content.end as? Bool {
                     story.url = NcodeToUrlString(ncode: ncode, no: story.chapterNumber, end: end)
                 }

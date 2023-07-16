@@ -712,7 +712,7 @@ class EditBookViewController: UIViewController, RealmObserverResetDelegate, UITe
                 story.novelID = RealmStoryBulk.StoryIDToNovelID(storyID: self.currentStoryID)
                 story.chapterNumber = 1
             }
-            story.content = content
+            story.content = content.replacingOccurrences(of: "\u{00}", with: "")
             RealmUtil.WriteWith(realm: realm) { (realm) in
                 RealmStoryBulk.SetStoryWith(realm: realm, story: story)
             }
