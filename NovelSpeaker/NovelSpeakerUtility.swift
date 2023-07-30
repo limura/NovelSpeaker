@@ -2853,6 +2853,30 @@ class NovelSpeakerUtility: NSObject {
         defaults.synchronize()
     }
     
+    static let IsDisplaySpeechModChangeKey = "IsDisplaySpeechModChangeKey"
+    static func IsDisplaySpeechModChange() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [IsDisplaySpeechModChangeKey: false])
+        return defaults.bool(forKey: IsDisplaySpeechModChangeKey)
+    }
+    static func SetIsDisplaySpeechModChange(IsDisplay:Bool){
+        let defaults = UserDefaults.standard
+        defaults.setValue(IsDisplay, forKey: IsDisplaySpeechModChangeKey)
+        defaults.synchronize()
+    }
+
+    static let IsNotClearToAboutBlankOnDownloadBrowserUrlKey = "IsNotClearToAboutBlankOnDownloadBrowserUrl"
+    static func IsNotClearToAboutBlankOnDownloadBrowserUrl() -> Bool {
+        let defaults = UserDefaults.standard
+        defaults.register(defaults: [IsNotClearToAboutBlankOnDownloadBrowserUrlKey: false])
+        return defaults.bool(forKey: IsNotClearToAboutBlankOnDownloadBrowserUrlKey)
+    }
+    static func SetIsNotClearToAboutBlankOnDownloadBrowserUrl(IsDisplay:Bool){
+        let defaults = UserDefaults.standard
+        defaults.setValue(IsDisplay, forKey: IsNotClearToAboutBlankOnDownloadBrowserUrlKey)
+        defaults.synchronize()
+    }
+
     static let OuterNovelFileAttributesKey = "OuterNovelFileAttributesKey"
     struct OuterNovelFileAttributes: Codable {
         let modificationDate:Date
