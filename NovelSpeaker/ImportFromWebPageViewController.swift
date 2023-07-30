@@ -544,85 +544,17 @@ li {
             }
             // SecTrustEvaluate() が非推奨になったので SecTrustEvaluateWithError を使うようにします。
             // それに伴って CFError を受け取らずに単に SecTrustEvaluateWithError が true を返すかどうかだけで判定するようにします。
-            if #available(iOS 12.0, *) {
+            DispatchQueue.global(qos: .utility).async {
                 if SecTrustEvaluateWithError(serverTrust, nil) == false {
                     completionHandler(.rejectProtectionSpace, nil)
                     return
                 }
-            } else {
-                // Fallback on earlier versions
-                var trustResult = SecTrustResultType.invalid
-                guard SecTrustEvaluate(serverTrust, &trustResult) == noErr else {
-                    completionHandler(.rejectProtectionSpace, nil)
-                    return
-                }
-                switch trustResult {
-                case .recoverableTrustFailure: // リカバリしてもいいけど問題のあるTrustFailure
-                    print("SecTrustEvaluate: .recoverableTrustFailure")
-                    // recoverable だけれど、結局後で fetch しようとすると失敗するので見せない事にします。
-                    NiftyUtility.EasyDialogBuilder(self)
-                        .label(text: NSLocalizedString("ImportFromWebPageViewController_InvalidServerCertificate", comment: "サーバの証明書に何らかの問題がありました。"))
-                        /*
-                        .addButton(title: NSLocalizedString("Cancel_button", comment: "Cancel"), callback: { (dialog) in
-                            completionHandler(.rejectProtectionSpace, nil)
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: false, completion: nil)
-                            }
-                        })*/
-                        .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: false, completion: nil)
-                            }
-                            /*
-                            self.updateAddressBackgroundColor(color: self.addressBarBackgroundColorInvalid)
-                            let credential = URLCredential(trust: serverTrust)
-                            completionHandler(.useCredential, credential)
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: false, completion: nil)
-                            }
-                            */
-                        })
-                        .build().show()
-                    completionHandler(.rejectProtectionSpace, nil)
-                    return
-                case .fatalTrustFailure: // リカバリしちゃ駄目なTrustFailure
-                    print("SecTrustEvaluate: .fatalTrustFailure")
-                    NiftyUtility.EasyDialogBuilder(self)
-                        .label(text: NSLocalizedString("ImportFromWebPageViewController_InvalidServerCertificate", comment: "サーバの証明書に何らかのエラーがありました。"))
-                        .addButton(title: NSLocalizedString("OK_button", comment: "OK"), callback: { (dialog) in
-                            DispatchQueue.main.async {
-                                dialog.dismiss(animated: false, completion: nil)
-                            }
-                        })
-                        .build().show()
-                    completionHandler(.rejectProtectionSpace, nil)
-                    return
-                case .proceed: // 続けてOK
-                    print("SecTrustEvaluate: .proceed")
-                    break
-                case .deny: // ユーザが駄目と言った
-                    print("SecTrustEvaluate: .deny")
-                    completionHandler(.rejectProtectionSpace, nil)
-                    return
-                case .unspecified: // 問題なかった(通常はこれが返るらしい)
-                    //print("SecTrustEvaluate: .unspecified")
-                    break
-                case .otherError: // その他エラー
-                    print("SecTrustEvaluate: .otherError")
-                    completionHandler(.rejectProtectionSpace, nil)
-                    return
-                case .invalid: // 初期値
-                    print("SecTrustEvaluate: .invalid")
-                    completionHandler(.rejectProtectionSpace, nil)
-                    break
-                default:
-                    print("SecTrustEvaluate: default")
-                    break
+                DispatchQueue.main.async {
+                    self.updateAddressBackgroundColor(color: self.addressBarBackgroundColorValid)
+                    let credential = URLCredential(trust: serverTrust)
+                    completionHandler(.useCredential, credential)
                 }
             }
-            self.updateAddressBackgroundColor(color: self.addressBarBackgroundColorValid)
-            let credential = URLCredential(trust: serverTrust)
-            completionHandler(.useCredential, credential)
             return
         }
         else if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault
