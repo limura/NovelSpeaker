@@ -495,7 +495,9 @@ class NovelDownloadQueue : NSObject {
         fetcherPoolLock.lock()
         defer { fetcherPoolLock.unlock() }
         if let (_, fetcher) = fetcherPool[uuid] {
-            fetcher.LoadAboutPage()
+            if !NovelSpeakerUtility.IsNotClearToAboutBlankOnDownloadBrowserUrl() {
+                fetcher.LoadAboutPage()
+            }
             fetcherPool[uuid] = (false, fetcher)
         }
     }
