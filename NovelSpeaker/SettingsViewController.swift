@@ -1546,6 +1546,24 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                 NovelSpeakerUtility.SetIsInspectableWkWebview(IsInspectable: value)
             })
             section
+            <<< SwitchRow("IsDisplaySpeechModChange") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsDisplaySpeechModChange", comment:"小説本文画面で、読み替えが行われる文字の色を変える")
+                row.value = NovelSpeakerUtility.IsDisplaySpeechModChange()
+                row.cell.textLabel?.numberOfLines = 0
+            }.onChange({ row in
+                guard let value = row.value else { return }
+                NovelSpeakerUtility.SetIsDisplaySpeechModChange(IsDisplay: value)
+            })
+            section
+            <<< SwitchRow("IsNotClearToAboutBlankOnDownloadBrowserUrl") { row in
+                row.title = NSLocalizedString("SettingTableViewController_IsNotClearToAboutBlankOnDownloadBrowserUrl", comment:"ダウンロード終了後に about:blank に移動させない")
+                row.value = NovelSpeakerUtility.IsNotClearToAboutBlankOnDownloadBrowserUrl()
+                row.cell.textLabel?.numberOfLines = 0
+            }.onChange({ row in
+                guard let value = row.value else { return }
+                NovelSpeakerUtility.SetIsNotClearToAboutBlankOnDownloadBrowserUrl(IsDisplay: value)
+            })
+            section
             <<< ButtonRow() {
                 $0.title = NSLocalizedString("SettingTableViewController_ShowDebugLog", comment:"デバッグログの表示")
                 $0.presentationMode = .segueName(segueName: "debugLogViewSegue", onDismiss: nil)
