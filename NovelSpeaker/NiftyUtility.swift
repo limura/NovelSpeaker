@@ -1974,4 +1974,8 @@ extension String {
             return resultLine
         }
     }
+    
+    func getFirstLines(lineCount:Int, maxCharacterCount:Int) -> String {
+        return String(self.split(separator: "\n").prefix(lineCount).joined(separator: "\n").prefix(maxCharacterCount))
+    }
 }
