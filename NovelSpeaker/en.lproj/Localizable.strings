@@ -250,6 +250,8 @@
 "SettingTableViewController_LikeButtonDialogType_dialogOnRequested" = "Confirm only when adding";
 "SettingTableViewController_LikeButtonDialogType_dialogOffRequested" = "Ask only when deleting";
 "SettingTableViewController_LikeButtonDialogType_dialogAlwaysRequested:" = "check anytime";
+"SettingTableViewController_IsDisplaySpeechModChange" = "Change the color of the text that will be replaced on the novel text screen";
+"SettingTableViewController_IsNotClearToAboutBlankOnDownloadBrowserUrl" = "Don't move to about:blank after download finished";
 
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "Copy";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "Define";
@@ -365,6 +367,7 @@
 "SpeechViewController_SearchByText_NotFound" = "The search string could not be found in the page.";
 "SpeechViewController_SearchByText_Found_Announce_to_VoiceOverUser_Formated" = "%@";
 "SpeechViewController_SearchByTextButton_AccessibilityLabel" = "Search within the page";
+"SpeechViewController_KeyboardShortcut_StartStopSpeech_Title" = "Speech start/stop";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "Setting updated.";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "Failed update settings.";

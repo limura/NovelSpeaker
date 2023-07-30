@@ -194,6 +194,9 @@
 "SettingTableViewController_LikeButtonDialogType_dialogOnRequested" = "登録する時のみ確認する";
 "SettingTableViewController_LikeButtonDialogType_dialogOffRequested" = "削除する時のみ確認する";
 "SettingTableViewController_LikeButtonDialogType_dialogAlwaysRequested:" = "いつでも確認する";
+"SettingTableViewController_IsDisplaySpeechModChange" = "小説本文画面で、読み替えが行われる文字の色を変える";
+"SettingTableViewController_IsNotClearToAboutBlankOnDownloadBrowserUrl" = "ダウンロード終了後に about:blank に移動させない";
+
 "RealmModels_MenuItemsNotRemoved_Name_copy" = "コピー";
 "RealmModels_MenuItemsNotRemoved_Name_define" = "調べる";
 "RealmModels_MenuItemsNotRemoved_Name_translate" = "翻訳";
@@ -332,6 +335,7 @@
 "SpeechViewController_SearchByText_NotFound" = "ページ内に検索文字列を発見できませんでした。";
 "SpeechViewController_SearchByText_Found_Announce_to_VoiceOverUser_Formated" = "%@";
 "SpeechViewController_SearchByTextButton_AccessibilityLabel" = "ページ内を検索";
+"SpeechViewController_KeyboardShortcut_StartStopSpeech_Title" = "発話の開始/停止";
 
 "SpeechWaitConfigSettingView_SettingUpdated" = "読み上げ時の間の設定を更新しました。";
 "SpeechWaitConfigSettingView_SettingUpdateFailed" = "読み上げ時の間の設定の更新に失敗しました。";
