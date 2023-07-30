@@ -23,7 +23,7 @@ struct SpeechContorlView: View {
                     let isPlaying = speaker.isPlayng
                     self.storyViewData.setLoadingIndicator(isVisible: true)
                     RealmUtil.RealmBlock { (realm) -> Void in
-                        speaker.StopSpeech(realm: realm)
+                        speaker.StopSpeech(realm: realm, stopAudioSession: true)
                     }
                     DispatchQueue.global(qos: .background).async {
                         RealmUtil.RealmBlock { (realm) -> Void in
@@ -42,7 +42,7 @@ struct SpeechContorlView: View {
                     let isPlaying = speaker.isPlayng
                     self.storyViewData.setLoadingIndicator(isVisible: true)
                     RealmUtil.RealmBlock { (realm) -> Void in
-                        speaker.StopSpeech(realm: realm) {
+                        speaker.StopSpeech(realm: realm, stopAudioSession: false) {
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 speaker.SkipBackward(realm: realm, length: 30) {
                                     if isPlaying {
@@ -64,7 +64,7 @@ struct SpeechContorlView: View {
                     let speaker = StorySpeaker.shared
                     RealmUtil.RealmBlock { (realm) -> Void in
                         if speaker.isPlayng {
-                            speaker.StopSpeech(realm: realm)
+                            speaker.StopSpeech(realm: realm, stopAudioSession: true)
                         }else{
                             speaker.StartSpeech(realm: realm, withMaxSpeechTimeReset: true, callerInfo: nil, isNeedRepeatSpeech: false)
                         }
@@ -88,7 +88,7 @@ struct SpeechContorlView: View {
                     let isPlaying = speaker.isPlayng
                     self.storyViewData.setLoadingIndicator(isVisible: true)
                     RealmUtil.RealmBlock { (realm) -> Void in
-                        speaker.StopSpeech(realm: realm) {
+                        speaker.StopSpeech(realm: realm, stopAudioSession: false) {
                             RealmUtil.RealmBlock { (realm) -> Void in
                                 speaker.SkipForward(realm: realm, length: 30) {
                                     if isPlaying {
@@ -111,7 +111,7 @@ struct SpeechContorlView: View {
                     let isPlaying = speaker.isPlayng
                     self.storyViewData.setLoadingIndicator(isVisible: true)
                     RealmUtil.RealmBlock { (realm) -> Void in
-                        speaker.StopSpeech(realm: realm)
+                        speaker.StopSpeech(realm: realm, stopAudioSession: true)
                     }
                     DispatchQueue.global(qos: .background).async {
                         RealmUtil.RealmBlock { (realm) -> Void in

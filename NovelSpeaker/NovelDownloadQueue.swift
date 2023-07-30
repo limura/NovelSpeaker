@@ -573,10 +573,12 @@ class NovelDownloadQueue : NSObject {
     
     func addQueue(novelID:String) {
         NovelSpeakerUtility.CheckAndRecoverStoryCount(novelID: novelID)
+        #if !os(watchOS)
         if NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novelID) {
             NovelSpeakerUtility.CheckAndUpdateRgisterdOuterNovel(novelID: novelID)
             return
         }
+        #endif
         self.queueHolder.addQueue(novelID: novelID)
         self.downloadStart()
     }
@@ -585,9 +587,11 @@ class NovelDownloadQueue : NSObject {
         self.downloadStop()
         for novel in novelArray {
             if novel.type == .UserCreated {
+                #if !os(watchOS)
                 if NovelSpeakerUtility.IsRegisteredOuterNovel(novelID: novel.novelID) {
                     NovelSpeakerUtility.CheckAndUpdateRgisterdOuterNovel(novelID: novel.novelID)
                 }
+                #endif
                 continue
             }
             if novel.type != .URL { continue }

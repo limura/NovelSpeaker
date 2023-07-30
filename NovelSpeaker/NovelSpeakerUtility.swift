@@ -2691,6 +2691,7 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     
+    #if !os(watchOS)
     @objc static var currentRotation = UIDeviceOrientation.unknown
     fileprivate static let supportRotationMask_Key = "supportRotationMask_Key"
     @objc static var supportRotationMask: UIInterfaceOrientationMask {
@@ -2714,6 +2715,7 @@ class NovelSpeakerUtility: NSObject {
             UserDefaults.standard.synchronize()
         }
     }
+    #endif
     
     #if !os(watchOS)
     static func ShareStory(viewController:UIViewController, novelID:String, barButton:UIBarButtonItem?) {
@@ -3002,6 +3004,7 @@ class NovelSpeakerUtility: NSObject {
         #else
             options = .minimalBookmark
         #endif
+        #if !os(watchOS)
         ReadFileUrlWithCompletionHandler(url: fileUrl) { data in
             guard let bookmark = try? fileUrl.bookmarkData(options: options
                 , includingResourceValuesForKeys: nil, relativeTo: nil) else {
@@ -3029,6 +3032,9 @@ class NovelSpeakerUtility: NSObject {
             _ = UpdateOuterNovelData(novelID: novelID, modificationDate: modificationDate, size: size, bookmark: bookmark, importOptionSeparated:importOptionSeparated, originalUrl: fileUrl, isNeedCheckUpdate: true, fileFormat: fileFormat)
             completion?(true)
         }
+        #else
+        completion?(false)
+        #endif
     }
     static func CheckOuterNovelIsModified(novelID: String) -> Bool {
         guard let attributes = GetOuterNovelAttributes(novelID: novelID) else {
@@ -3074,6 +3080,7 @@ class NovelSpeakerUtility: NSObject {
         print("CheckOuterNovelIsModified return false.")
         return false
     }
+    #if !os(watchOS)
     // url からデータを読み込みます。
     // 最初に Data(contentsOf:) で読み込もうとして失敗したら、
     // UIDocument を使って読み直そうとします。
@@ -3220,7 +3227,8 @@ class NovelSpeakerUtility: NSObject {
             }
         }
     }
-    
+    #endif
+
     // 個々のOS間(場合によってはOSバージョン間)で、同じ名前(?)の話者に別のIdentity文字列が定義されている場合があり、
     // iCloud同期をしている場合や別のOS間でのバックアップファイルの適用をすることで、
     // 同じ話者名なのにIdentity文字列が違う事で話者を選択できない場合がある。

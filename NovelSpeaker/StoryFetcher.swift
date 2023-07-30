@@ -345,10 +345,12 @@ extension StorySiteInfo : Decodable {
             waitSecondInHeadless = 0
         }
         overrideUserAgent = try? values.decode(String.self, forKey: NestedKeys.overrideUserAgent)
+        forceClickButton = try? values.decode(String.self, forKey: NestedKeys.forceClickButton)
         #else
         waitSecondInHeadless = 0
+        overrideUserAgent = nil
+        forceClickButton = nil
         #endif
-        forceClickButton = try? values.decode(String.self, forKey: NestedKeys.forceClickButton)
         forceErrorMessageAndElement = try? values.decode(String.self, forKey: NestedKeys.forceErrorMessageAndElement)
     }
 }
@@ -714,7 +716,7 @@ class StoryFetcher {
                 )
             )
             #else
-            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: pageElement, nextUrl: siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: siteInfo.decodeTitle(xmlDocument: htmlDocument), author: siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: mergeTag(prevTagArray: currentState.tagArray, newTagArray: siteInfo.decodeTag(xmlDocument: htmlDocument)), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent), forceErrorMessage: forceErrorElementIsAlive_ErrorMessage)
+            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: pageElement, nextUrl: siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: siteInfo.decodeTitle(xmlDocument: htmlDocument), author: siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: mergeTag(prevTagArray: currentState.tagArray, newTagArray: siteInfo.decodeTag(xmlDocument: htmlDocument)), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, forceErrorMessage: forceErrorElementIsAlive_ErrorMessage))
             #endif
             return
         }

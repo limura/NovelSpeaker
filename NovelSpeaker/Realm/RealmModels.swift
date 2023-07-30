@@ -2661,8 +2661,13 @@ enum MenuItemsNotRemovedType: String {
     
     func isTargetSelector(selector: Selector) -> Bool {
         switch self {
+            #if !os(watchOS)
         case .copy:
             return selector == #selector(UIResponderStandardEditActions.copy(_:))
+            #else
+        default:
+            return false
+            #endif
         case .define:
             return selector.description == "_define:"
         case .addShortcut:
