@@ -337,7 +337,7 @@ struct SearchResult : Decodable {
         //print("ConvertHTMLToSearchResultDataArray: phase 1: baseURL: \(baseURL.absoluteString), data.count: \(data.count), \(String(bytes: data, encoding: .utf8) ?? "nil")")
         //print("blockXpath: \(self.blockXpath), nextLinkXpath: \(nextLinkXpath ?? "nil"), titleXpath: \(titleXpath ?? "nil"), urlXpath: \(urlXpath ?? "nil"), nextLinkButton: \(nextLinkButton ?? "nil"), urlConvRegexpFrom: \(urlConvRegexpFrom ?? "nil"), urlConvRegexpTo: \(urlConvRegexpTo ?? "nil")")
         for blockHTMLElement in doc.xpath(self.blockXpath) {
-            let blockHTML:XMLElement
+            let blockHTML:Kanna.XMLElement
             if let blockHTMLString = blockHTMLElement.toHTML, let blockHTMLData = blockHTMLString.data(using: .utf8, allowLossyConversion: true), let blockDocument = try? HTML(html: blockHTMLData, encoding: .utf8), let blockElement = blockDocument.body {
                 blockHTML = blockElement
             }else{
