@@ -34,6 +34,7 @@ struct StoryState : CustomStringConvertible {
     let firstPageButton: Element?
     let forceClickButton: Element?
     #endif
+    let forceErrorMessage: String?
     
     var IsNextAlive:Bool {
         get {
@@ -57,17 +58,17 @@ struct StoryState : CustomStringConvertible {
             previousContent = nil
         }
         #if !os(watchOS)
-        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, document: document, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton)
+        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, document: document, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton, forceErrorMessage: forceErrorMessage)
         #else
-        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent)
+        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, forceErrorMessage: forceErrorMessage)
         #endif
     }
     
     func TitleChanged(title:String) -> StoryState {
         #if !os(watchOS)
-        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: self.previousContent, document: document, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton)
+        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: self.previousContent, document: document, nextButton: nextButton, firstPageButton: firstPageButton, forceClickButton: forceClickButton, forceErrorMessage: forceErrorMessage)
         #else
-        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: self.previousContent)
+        return StoryState(url: url, cookieString: cookieString, content: content, nextUrl: nextUrl, firstPageLink: firstPageLink, title: title, author: author, subtitle: subtitle, tagArray: tagArray, siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: isCanFetchNextImmediately, waitSecondInHeadless: waitSecondInHeadless, previousContent: self.previousContent, forceErrorMessage: forceErrorMessage)
         #endif
     }
     
@@ -108,6 +109,9 @@ nextButton: \(nextButton == nil ? "nil" : "not nil")
 firstPageButton: \(firstPageButton == nil ? "nil" : "not nil")
 """
             #endif
+            description += """
+forceErrorElementIsAlive_ErrorMessage: \(forceErrorMessage ?? "nil")
+"""
             return description
         }
     }
@@ -132,8 +136,9 @@ struct StorySiteInfo {
     let forceClickButton:String?
     let resourceUrl:String?
     let overrideUserAgent:String?
+    let forceErrorMessageAndElement: String?
     
-    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?) {
+    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?) {
         self.pageElement = pageElement
         if let urlString = url, let urlRegex = try? NSRegularExpression(pattern: urlString, options: []) {
             self.url = urlRegex
@@ -159,8 +164,30 @@ struct StorySiteInfo {
         self.forceClickButton = forceClickButton
         self.resourceUrl = resourceUrl
         self.overrideUserAgent = overrideUserAgent
+        self.forceErrorMessageAndElement = forceErrorMessageAndElement
     }
     
+    var forceErrorMessage : String? {
+        get {
+            guard let forceErrorMessageAndElement = self.forceErrorMessageAndElement else { return nil }
+            let components = forceErrorMessageAndElement.components(separatedBy: ":")
+            if components.count >= 2 {
+                return components[0]
+            }
+            return nil
+        }
+    }
+    var forceErrorElement : String? {
+        get {
+            guard let forceErrorMessageAndElement = self.forceErrorMessageAndElement else { return nil }
+            let components = forceErrorMessageAndElement.components(separatedBy: ":")
+            if components.count >= 2 {
+                return components[1...].joined(separator: ":")
+            }
+            return nil
+        }
+    }
+
     func isMatchUrl(urlString:String) -> Bool {
         guard let urlRegex = self.url else { return false }
         if urlRegex.matches(in: urlString, options: [], range: NSMakeRange(0, urlString.count)).count > 0 {
@@ -195,6 +222,11 @@ struct StorySiteInfo {
     func decodeTag(xmlDocument:Kanna.XMLDocument) -> [String] {
         guard let xpath = tag else { return [] }
         return Array(NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath))
+    }
+    func decodeForceErrorElement(xmlDocument:Kanna.XMLDocument) -> Bool {
+        guard let xpath = forceErrorElement else { return false }
+        let ret = NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath)
+        return ret.count > 0
     }
     
     // とりあえず pageElement と URL だけある感じの物を返します。
@@ -241,6 +273,7 @@ extension StorySiteInfo: CustomStringConvertible {
         result += "\"\nforceClickButton: \"" + (forceClickButton ?? "nil")
         result += "\"\nresourceUrl: \"" + (resourceUrl ?? "nil")
         result += "\"\noverrideUserAgent: \"" + (overrideUserAgent ?? "nil")
+        result += "\"\nforceErrorMessageAndElement: \"" + (forceErrorMessageAndElement ?? "nil")
         result += "\""
         return result
     }
@@ -267,6 +300,7 @@ extension StorySiteInfo : Decodable {
         case waitSecondInHeadless
         case forceClickButton
         case overrideUserAgent
+        case forceErrorMessageAndElement
     }
     
     init(from decoder: Decoder) throws {
@@ -315,6 +349,7 @@ extension StorySiteInfo : Decodable {
         waitSecondInHeadless = 0
         #endif
         forceClickButton = try? values.decode(String.self, forKey: NestedKeys.forceClickButton)
+        forceErrorMessageAndElement = try? values.decode(String.self, forKey: NestedKeys.forceErrorMessageAndElement)
     }
 }
 
@@ -338,7 +373,7 @@ class StoryHtmlDecoder {
     private init(){
         fallbackSiteInfoArray = [
             //StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(@itemprop,'articleBody')"),
-            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil)
+            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil)
         ]
     }
     
@@ -627,6 +662,12 @@ class StoryFetcher {
             let pageElement = siteInfo.decodePageElement(xmlDocument: htmlDocument).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             let nextUrl = siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url)
             let firstPageLink = siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url)
+            let forceErrorElementIsAlive_ErrorMessage:String?
+            if siteInfo.decodeForceErrorElement(xmlDocument: htmlDocument) == true, let errMessage = siteInfo.forceErrorMessage {
+                forceErrorElementIsAlive_ErrorMessage = errMessage
+            }else{
+                forceErrorElementIsAlive_ErrorMessage = nil
+            }
             #if !os(watchOS)
             let nextButton:Element? = siteInfo.nextButton != nil ? currentState.document?.querySelectorAll(siteInfo.nextButton!).first : nil
             let firstPageButton:Element? = siteInfo.firstPageButton != nil ? currentState.document?.querySelectorAll(siteInfo.firstPageButton!).first : nil
@@ -636,11 +677,11 @@ class StoryFetcher {
             }else{
                 forceClickButton = nil
             }
-            if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil && (forceClickButton == nil && siteInfo.isNeedHeadless) {
+            if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil && (forceClickButton == nil && siteInfo.isNeedHeadless && forceErrorElementIsAlive_ErrorMessage == nil) {
                 continue
             }
             #else
-            if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil {
+            if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && forceErrorElementIsAlive_ErrorMessage == nil {
                 continue
             }
             // pageElement が抽出できなくて、URL全般にマッチしそうな奴は信用しません。
@@ -668,11 +709,12 @@ class StoryFetcher {
                     document: currentState.document,
                     nextButton: nextButton,
                     firstPageButton: firstPageButton,
-                    forceClickButton: forceClickButton
+                    forceClickButton: forceClickButton,
+                    forceErrorMessage: forceErrorElementIsAlive_ErrorMessage
                 )
             )
             #else
-            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: pageElement, nextUrl: siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: siteInfo.decodeTitle(xmlDocument: htmlDocument), author: siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: mergeTag(prevTagArray: currentState.tagArray, newTagArray: siteInfo.decodeTag(xmlDocument: htmlDocument)), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent))
+            successAction?(StoryState(url: currentState.url, cookieString: currentState.cookieString, content: pageElement, nextUrl: siteInfo.decodeNextLink(xmlDocument: htmlDocument, baseURL: currentState.url), firstPageLink: siteInfo.decodeFirstPageLink(xmlDocument: htmlDocument, baseURL: currentState.url), title: siteInfo.decodeTitle(xmlDocument: htmlDocument), author: siteInfo.decodeAuthor(xmlDocument: htmlDocument), subtitle: siteInfo.decodeSubtitle(xmlDocument: htmlDocument), tagArray: mergeTag(prevTagArray: currentState.tagArray, newTagArray: siteInfo.decodeTag(xmlDocument: htmlDocument)), siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent), forceErrorMessage: forceErrorElementIsAlive_ErrorMessage)
             #endif
             return
         }
@@ -751,9 +793,7 @@ class StoryFetcher {
                             }else{
                                 currentUrl = currentState.url
                             }
-                            print("HeadlessHttpClient.shared.GetCurrentContent currentUrl:", currentUrl.absoluteString)
-                            print("HeadlessHttpClient.shared.GetCurrentContent html.count:", html.count)
-                            let newState:StoryState = StoryState(url: currentUrl, cookieString: cookieString ?? currentState.cookieString, content: nil, nextUrl: nil, firstPageLink: nil, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: true, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: document, nextButton: nil, firstPageButton: nil, forceClickButton: nil)
+                            let newState:StoryState = StoryState(url: currentUrl, cookieString: cookieString ?? currentState.cookieString, content: nil, nextUrl: nil, firstPageLink: nil, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: true, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: document, nextButton: nil, firstPageButton: nil, forceClickButton: nil, forceErrorMessage: nil)
                             self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
                                 completionHandler?(state, nil)
                             }) { (_, err) in
@@ -763,6 +803,13 @@ class StoryFetcher {
                     }
                 }
             }
+        }
+        
+        // 失敗だと判定される文字列が設定されていたら失敗とする
+        if let errorMessage = currentState.forceErrorMessage {
+            AppInformationLogger.AddLog(message: errorMessage, isForDebug: false)
+            failedAction?(currentState.url, errorMessage)
+            return
         }
         
         // 押さねばならないボタンがあるのなら押す
@@ -832,7 +879,7 @@ class StoryFetcher {
                 }
                 NiftyUtility.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, successAction: { (doc) in
                     let html = doc.innerHTML
-                    let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton)
+                    let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton, forceErrorMessage: currentState.forceErrorMessage)
                     self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
                         self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, successAction: successAction, failedAction: failedAction)
                     }, failedAction: failedAction)
@@ -849,9 +896,9 @@ class StoryFetcher {
             
             NiftyUtility.httpRequest(url: url, postData: nil, cookieString: currentState.cookieString, isNeedHeadless: currentState.isNeedHeadless, mainDocumentURL: url, allowsCellularAccess: isDisallowsCellularAccess ? false : true, successAction: { (data, encoding) in
                 #if !os(watchOS)
-                let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: currentState.document, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton)
+                let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: currentState.document, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton, forceErrorMessage: currentState.forceErrorMessage)
                 #else
-                let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent)
+                let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, forceErrorMessage: currentState.forceErrorMessage)
                 #endif
                 let (html, guessedEncoding) = NiftyUtility.decodeHTMLStringFrom(data: data, headerEncoding: encoding)
                 self.DecodeDocument(currentState: newState, html: html, encoding: guessedEncoding ?? encoding ?? .utf8, successAction: { (state) in
@@ -873,6 +920,7 @@ class StoryFetcher {
             return
         }
 
+        print("FetchNext() pageElement や nextUrl 等、なにも取り出せなかった: \(currentState.content ?? "currentState.content is nil")")
         failedAction?(currentState.url, NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。"))
     }
     
@@ -886,9 +934,9 @@ class StoryFetcher {
             return result
         }
         #if !os(watchOS)
-        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: url, firstPageLink: nil, title: nil, author: nil, subtitle: nil, tagArray: [], siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: false, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, document: nil, nextButton: nil, firstPageButton: nil, forceClickButton: nil)
+        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: url, firstPageLink: nil, title: nil, author: nil, subtitle: nil, tagArray: [], siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: false, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, document: nil, nextButton: nil, firstPageButton: nil, forceClickButton: nil, forceErrorMessage: nil)
         #else
-        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: url, firstPageLink: nil, title: nil, author: nil, subtitle: nil, tagArray: [], siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: false, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent)
+        return StoryState(url: url, cookieString: cookieString, content: nil, nextUrl: url, firstPageLink: nil, title: nil, author: nil, subtitle: nil, tagArray: [], siteInfoArray: siteInfoArray, isNeedHeadless: isNeedHeadless, isCanFetchNextImmediately: false, waitSecondInHeadless: waitSecondInHeadless, previousContent: previousContent, forceErrorMessage: nil)
         #endif
     }
 
@@ -896,7 +944,7 @@ class StoryFetcher {
         let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
         print("\(url.absoluteString)\nsiteInfo.count: \(siteInfoArray.count)")
         for siteInfo in siteInfoArray {
-            print("--\nurl:\(siteInfo.url?.pattern ?? "nil")\npageElement: \(siteInfo.pageElement)\nresourceUrl: \(siteInfo.resourceUrl ?? "nil")")
+            print("--\nurl:\(siteInfo.url?.pattern ?? "nil")\npageElement: \(siteInfo.pageElement)\nresourceUrl: \(siteInfo.resourceUrl ?? "nil")\nforceErrorMessageAndElement: \(siteInfo.forceErrorMessageAndElement ?? "nil")")
         }
         return CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString, previousContent: previousContent)
     }
