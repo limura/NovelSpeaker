@@ -832,7 +832,8 @@ class StoryFetcher {
         if let element = currentState.nextButton {
             buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
                 if let state = state {
-                    successAction?(state)
+                    // TTL を減らして再取得したつもりになって評価しなおします。
+                    self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, successAction: successAction, failedAction: failedAction)
                     return
                 }
                 failedAction?(currentState.url, err?.localizedDescription ?? NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。") + "(nextButtonClick)")
@@ -843,7 +844,8 @@ class StoryFetcher {
         if let element = currentState.firstPageButton {
             buttonClick(buttonElement: element, currentState: currentState) { (state, err) in
                 if let state = state {
-                    successAction?(state)
+                    // TTL を減らして再取得したつもりになって評価しなおします。
+                    self.FetchNext(currentState: state, fetchTimeToLive: fetchTimeToLive - 1, successAction: successAction, failedAction: failedAction)
                     return
                 }
                 failedAction?(currentState.url, err?.localizedDescription ?? NSLocalizedString("StoryFetcher_CanNotFindPageElementAndNextLink", comment: "指定されたURLからは本文や次ページを示すURLなどを取得できませんでした。") + "(firstPageClick)")
