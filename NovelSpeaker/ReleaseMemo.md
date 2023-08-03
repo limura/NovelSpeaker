@@ -3587,3 +3587,71 @@ Version 2.7.4
 
 - If you move to a tab other than the "bookshelf tab" while speaking, or if you display the "bookshelf tab" again after turning the app to the background, the reading position display will move to a place that is ahead of the reading position. Fixed an issue where
 - Temporarily dealt with the problem that it was difficult to match around ruby tags.
+
+
+Version 2.8.0
+
+インタフェース等の変更
+
+- 「本棚画面」の「順番」に「本棚登録順」を追加
+- 「設定タブ」->「本棚でお気に入りボタンを押した時の動作」を追加
+- 小説本文画面にキーボードショートカットを追加
+- 標準の辞書を更新
+
+問題の修正
+
+- 小説本文の保存時にNUL文字(0x00の文字)を排除するように
+- 「設定タブ」->「内部データ参照用URLの設定」内の「標準の読み替え設定」で一旦何か文字を入れてしまうと空文字列を設定できない問題を修正
+
+今回はいくつかの機能改善と問題の修正、それと標準の読み替え設定の更新などになります。
+以下個別にざっくりと説明致します。
+
+
+- 「本棚画面」の「順番」に「本棚登録順」を追加
+
+これは単純に「本棚に登録された順」の物を増やした形になります。
+
+- 「設定タブ」->「本棚でお気に入りボタンを押した時の動作」を追加
+
+こちらはお気に入りボタンを誤って押してしまう場合があるとのことでしたので、ダイアログを出して確認を促す事ができるようにしました。
+
+- 小説本文画面にキーボードショートカットを追加
+
+こちらはキーボードで操作していない方には意味のない機能になります。小説の本文表示画面で小説本文が選択されている時に動作します。Commandキーを長押しすると、設定されているキーボードショートカットが表示されるはずです。こちらはmacのユニバーサルコントロールなどでキーボードからの操作の形で動作確認をしていますので、iPadでしか動作確認されていません。その他の環境で動作しないなどありましたらお手柔らかにお問い合わせ下さい。
+
+- 標準の辞書を更新
+
+こちらはアプリ内のお知らせでも掲示しておりましたものになります。このアップデートからアプリ内に組み込まれている読み替え辞書も新しいものになりましたので、新規インストールした後に「設定タブ」→「標準の読みの修正を上書き追加」を選ぶような必要がなくなります。
+また、こちらの読み替え辞書の作成にご協力頂いた方々には本当に感謝しています。ありがとうございます。ご協力のかいもありまして、5000件を超える読み替えを登録することができました。ありがとうございます。助かりました。
+
+問題の修正
+
+- 小説本文の保存時にNUL文字(0x00の文字)を排除するように
+
+どの経路からかはわかりませんが、小説本文部分にNUL文字が入るという報告がありましたので、保存時にそれらは排除するようにします。なお、経路の開示はしていただけませんでしたので、抜けがあるかもしれません。
+
+- 「設定タブ」->「内部データ参照用URLの設定」内の「標準の読み替え設定」で一旦何か文字を入れてしまうと空文字列を設定できない問題を修正
+
+こちらはそのままの意味です。具体的には、空文字列になった時に値が保存されない、という問題でした。
+
+
+さて、残念なことに私はお問い合わせ対応に疲れ果ててしまいましたため、致命的な問題(アプリが強制終了するようなもの)以外への対応は極力しない形にさせていただいています。お問い合わせ窓口の閉鎖等については今の所はしておりませんが、上記のような対応になりますため、新機能のご提案や強制終了を伴わない不都合の報告をされましたとしても、対応はされないものとお考え下さい。なお、今回のように気が向いたら修正する事もあります。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+
+Version 2.8.0
+
+Behavior changes
+
+- Added "Bookshelf registration order" to "order" of "bookshelf screen"
+- Added "Settings tab" -> "Behavior when pressing the favorite button on the bookshelf"
+- Added keyboard shortcuts to the novel text screen
+- Update standard dictionary
+
+Fix the problem
+
+- Eliminate NUL characters (0x00 characters) when saving novel text
+- Fixed a problem that an empty string could not be set once some characters were entered in "Standard replacement settings" in "Setting tab" -> "Setting URL for internal data reference"
+
