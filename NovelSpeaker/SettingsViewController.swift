@@ -2100,16 +2100,76 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
             .build().show()
         }
     }
-    
+    // 同期の途中で強制的に停止させられたのでこの後どうするかを全てユーザに委ねる
+    func ChooseiCloudDataProcessForInterruptedSync() {
+        DispatchQueue.main.async {
+            NiftyUtility.EasyDialogBuilder(self)
+            .textView(content: NSLocalizedString("SettingsViewController_ChooseiCloudDataProcessForInterruptedSync_Message", comment: "iCloud 側のデータ取得中に中断されました。\nネットワークの状態が悪い場合やiCloud側に保存されているデータの量が多かった場合にはiCloud上のデータの読み込みにかなりの時間がかかる場合があり、そのような場合などで中断される場合がこの動作に当たります。ただし、iCloud側に正しいデータが保存されていることが確認できていません。このままiCloud側のデータを信用して「iCloud側のデータをそのまま利用する」こともできますが、動作がおかしくなる可能性があります(単にデータの受信ができていないだけで、問題なく動作する可能性もなきにしもあらずです)。また、「現在のデータでiCloud上のデータを上書きする」事で現在iCloud側に保存されているデータは破壊されますが、このままのデータで使い続けることもできます。"), heightMultiplier: 0.45)
+            .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseiCloud", comment: "iCloudのデータをそのまま利用する"), callback: { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false) {
+                        DispatchQueue.main.async {
+                            NiftyUtility.EasyDialogTwoButton(
+                                viewController: self,
+                                title: nil,
+                                message: NSLocalizedString("SettingsViewController_IsUseiCloud_ConifirmRemoveLocalData", comment: "iCloud上のデータを利用する事にします。現在のデータは破棄されます。この操作は元に戻せません。よろしいですか？"),
+                                button1Title: nil, // cancel
+                                button1Action: {
+                                    DispatchQueue.main.async {
+                                        guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                                        row.value = false
+                                        row.updateCell()
+                                        RealmUtil.ChangeToLocalRealm()
+                                    }
+                                },
+                                button2Title: nil, // OK
+                                button2Action: {
+                                    DispatchQueue.main.async {
+                                        RealmUtil.ChangeToCloudRealm()
+                                        NiftyUtility.StartiCloudDataVersionChecker()
+                                        NiftyUtility.EasyDialogLongMessageDialog(
+                                            viewController: self,
+                                            message: NSLocalizedString("SettingsViewController_iCloudEnable_done", comment: "iCloud同期を開始しました"))
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            })
+            .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_ChooseLocal", comment: "現在のデータでiCloud上のデータを上書きする"), callback: { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: {
+                        self.overrideLocalToiCloud()
+                    })
+                }
+            })
+            .addButton(title: NSLocalizedString("SettingsViewController_IsUseiCloud_ChooseiCloudDataOrLocalData_Cancel", comment: "iCloud同期をやめる(キャンセル)"), callback: { (dialog) in
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false, completion: nil)
+                    guard let row = self.form.rowBy(tag: "IsUseiCloud") as? SwitchRow else { return }
+                    row.value = false
+                    row.updateCell()
+                    RealmUtil.ChangeToLocalRealm()
+                }
+            })
+            .build().show()
+        }
+    }
+
     func CheckiCloudDataForiCloudEnable() {
         DispatchQueue.main.async {
             // 全てのダウンロードを止めてから作業を行います。
             NovelDownloadQueue.shared.ClearAllDownloadQueue()
-            NiftyUtility.EasyDialogNoButton(
-                viewController: self,
+            NiftyUtility.EasyDialogOneButton(viewController: self,
                 title: NSLocalizedString("SettingsViewController_IsUseiCloud_CheckiCloudData_pulling_Title", comment: "iCloud側のデータを確認しています"),
                 message: NSLocalizedString("SettingsViewController_IsUseiCloud_CheckiCloudData_pulling", comment: "iCloud側のデータを確認しています"),
-                completion: { (dialog) in
+                buttonTitle: NSLocalizedString("SettingsViewController_IsUseiCloud_CheckiCloudData_pulling_cancelButton", comment: "データ確認を止める"),
+                buttonAction: {
+                    DispatchQueue.main.async {
+                        self.ChooseiCloudDataProcessForInterruptedSync()
+                    }
+                }, completion: { dialog in
                     // SyncEngine 周りを綺麗さっぱり消しておきます
                     RealmUtil.stopSyncEngine()
                     RealmUtil.ForceRemoveIceCreamDatabaseSyncTokens()
@@ -2134,7 +2194,7 @@ class SettingsViewController: FormViewController, MFMailComposeViewControllerDel
                         return
                     }
                     DispatchQueue.main.async {
-                        RealmUtil.CheckCloudDataIsValid { (result) in
+                        RealmUtil.CheckCloudDataIsValid(timeoutLimit: 60.0*60*24*7) { (result) in
                             func checkCloudVersionIsInvalid() -> Bool {
                                 // iCloud側のデータバージョンが実行中のバイナリよりも新しかった場合は拒否します
                                 if RealmCloudVersionChecker.CheckCloudDataHasInvalidVersion() == true {

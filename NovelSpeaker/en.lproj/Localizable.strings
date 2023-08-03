@@ -183,6 +183,8 @@
 "SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Message" = "The data stored on the iCloud side was created with the new version of NovelSpeaker. To perform iCloud synchronization, you need to upgrade the app version.";
 "SettingsViewController_FailedCheck_NetworkError" = "Failed to check the data on iCloud side. It doesn't seem to be connected to the network. There may be problems such as being in airplane mode or being out of reach of radio waves. Please perform the first check of iCloud synchronization in an environment where you can have a stable internet connection.";
 "SettingsViewController_ChooseInvalidiCloudData_Message" = "I confirmed that the data existed on the iCloud side, but I couldn't get the necessary data to use it in the world.\n\nThere are various cases such as when the network condition is bad, the amount of data stored on the iCloud side is large, the data of the terminal that has previously performed iCloud synchronization has not been completely transferred to the iCloud side, etc. However, it is unlikely that it will be able to be used normally as it is.\n\nYou can also turn on iCloud synchronization by overwriting the data on this device on the iCloud side. When overwriting and saving on the iCloud side, the settings and novels that exist on both the iCloud side and this terminal side will remain in the values on this terminal side, and the settings and novels that exist only on the iCloud side will remain on the iCloud side. I will.\n\nDo you want to start iCloud sync by overwriting?";
+"SettingsViewController_ChooseiCloudDataProcessForInterruptedSync_Message" = "It was interrupted while acquiring data on the iCloud side. \nIf the network condition is bad or the amount of data stored on the iCloud side is large, it may take a considerable amount of time to read the data on the iCloud side, and in such cases it will be interrupted. This behavior occurs when: However, it has not been confirmed that the correct data is stored on the iCloud side. You can trust the data on the iCloud side and \"use the data on the iCloud side as it is\", but there is a possibility that the operation will be strange (it may work without problems just because the data has not been received) It's not without gender). Also, by \"overwriting the data on iCloud with the current data\", the data currently stored on the iCloud side will be destroyed, but you can continue to use the data as it is.";
+"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling_cancelButton" = "Stop checking data";
 "SettingsViewController_ClearWebSearchSiteInfoCache" = "Reread the search data on the Web Search tab";
 "SettingsViewController_ClearWebSearchSiteInfoCache_done" = "I set it to reload when I return to the Web search tab.";
 "SettingsViewController_AutoSplitStringSetting" = "Text segmentation character string setting (setting to divide and read by a specific character string when trying to read a sentence of only one page)";
@@ -907,14 +909,33 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.4
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.0
 
-- If you move to a tab other than the \"bookshelf tab\" while speaking, or if you display the \"bookshelf tab\" again after turning the app to the background, the reading position display will move to a place that is ahead of the reading position. Fixed an issue where
-- Temporarily dealt with the problem that it was difficult to match around ruby tags.
+- Added \"Bookshelf registration order\" to \"order\" of \"bookshelf screen\"
+- Added \"Settings tab\" -> \"Behavior when pressing the favorite button on the bookshelf\"
+- Added keyboard shortcuts to the novel text screen
+- Update standard dictionary
+- Eliminate NUL characters (0x00 characters) when saving novel text
+- Fixed a problem that an empty string could not be set once some characters were entered in \"Standard replacement settings\" in \"Setting tab\" -> \"Setting URL for internal data reference\"
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.8.0
+
+Behavior changes
+
+- Added \"Bookshelf registration order\" to \"order\" of \"bookshelf screen\"
+- Added \"Settings tab\" -> \"Behavior when pressing the favorite button on the bookshelf\"
+- Added keyboard shortcuts to the novel text screen
+- Update standard dictionary
+
+Fix the problem
+
+- Eliminate NUL characters (0x00 characters) when saving novel text
+- Fixed a problem that an empty string could not be set once some characters were entered in \"Standard replacement settings\" in \"Setting tab\" -> \"Setting URL for internal data reference\"
+
+
 Version 2.7.4
 
 Fix the problem

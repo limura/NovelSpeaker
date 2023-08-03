@@ -166,6 +166,8 @@
 "SettingsViewController_FailediCloudEnableBecauseDataVersionInvalid_Message" = "iCloud側に保存されているデータは新しいバージョンで作成された物でした。iCloud同期を行うにはアプリのバージョンアップを行う必要があります。";
 "SettingsViewController_FailedCheck_NetworkError" = "iCloud側のデータ確認に失敗しました。ネットワークに接続されていないようです。機内モードになっていたり電波の届かない場所に居るなどの問題があるかもしれません。iCloud同期の初回チェックは安定したインターネット接続ができる環境で行ってください。";
 "SettingsViewController_ChooseInvalidiCloudData_Message" = "iCloud 側にデータが存在する事は確認したのですが、ことせかい で利用するために必須のデータを取得できませんでした。\n\nネットワークの状態が悪い場合や iCloud側 に保存されているデータの量が多かった場合、以前 iCloud同期 を行った端末のデータが iCloud側 へ転送しきれていなかった場合といったような色々な場合が考えられますが、とにかくこのままでは正常に利用する事はできそうにありません。\n\nなお、この端末にあるデータを iCloud側 に上書き保存する形で iCloud同期 を ON にする事もできます。iCloud側 に上書き保存する場合、iCloud側とこの端末側の両方に存在する設定や小説はこの端末側の値に、iCloud側にしか存在しない設定や小説はiCloud側の物が残るような動作になります(場合によってはそうならない場合もあります)。\n\n上書き保存する形でiCloud同期を開始しますか？";
+"SettingsViewController_ChooseiCloudDataProcessForInterruptedSync_Message" = "iCloud 側のデータ取得中に中断されました。\nネットワークの状態が悪い場合やiCloud側に保存されているデータの量が多かった場合にはiCloud上のデータの読み込みにかなりの時間がかかる場合があり、そのような場合などで中断される場合がこの動作に当たります。ただし、iCloud側に正しいデータが保存されていることが確認できていません。このままiCloud側のデータを信用して「iCloud側のデータをそのまま利用する」こともできますが、動作がおかしくなる可能性があります(単にデータの受信ができていないだけで、問題なく動作する可能性もなきにしもあらずです)。また、「現在のデータでiCloud上のデータを上書きする」事で現在iCloud側に保存されているデータは破壊されますが、このままのデータで使い続けることもできます。";
+"SettingsViewController_IsUseiCloud_CheckiCloudData_pulling_cancelButton" = "データ確認を止める";
 "SettingsViewController_ClearWebSearchSiteInfoCache" = "Web検索タブの検索データを読み直す";
 "SettingsViewController_ClearWebSearchSiteInfoCache_done" = "Web検索タブに戻ると読み込み直すように設定しました。";
 "SettingsViewController_AutoSplitStringSetting" = "テキスト分割文字列の設定(1ページのみの文章を読み込もうとした時に、特定の文字列で分割して読み込むための設定)";
@@ -897,14 +899,33 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.7.4
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.0
 
-- 発話中に「本棚タブ」以外のタブへ移動したり、アプリをバックグラウンドに回した後、再度「本棚タブ」を表示すると読み上げ位置表示が読み上げている場所よりも進んだ場所に移動してしまう問題を修正
-- rubyタグ周りでマッチしにくいものがあった問題への暫定的な対応
+- 「本棚画面」の「順番」に「本棚登録順」を追加
+- 「設定タブ」->「本棚でお気に入りボタンを押した時の動作」を追加
+- 小説本文画面にキーボードショートカットを追加
+- 標準の辞書を更新
+- 小説本文の保存時にNUL文字(0x00の文字)を排除するように
+- 「設定タブ」->「内部データ参照用URLの設定」内の「標準の読み替え設定」で一旦何か文字を入れてしまうと空文字列を設定できない問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.8.0
+
+インタフェース等の変更
+
+- 「本棚画面」の「順番」に「本棚登録順」を追加
+- 「設定タブ」->「本棚でお気に入りボタンを押した時の動作」を追加
+- 小説本文画面にキーボードショートカットを追加
+- 標準の辞書を更新
+
+問題の修正
+
+- 小説本文の保存時にNUL文字(0x00の文字)を排除するように
+- 「設定タブ」->「内部データ参照用URLの設定」内の「標準の読み替え設定」で一旦何か文字を入れてしまうと空文字列を設定できない問題を修正
+
+
 Version 2.7.4
 
 問題の修正
