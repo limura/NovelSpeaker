@@ -40,7 +40,7 @@ class NovelSpeakerUtility: NSObject {
         var speechModSettings:[SpeechModSetting]? = nil
         RealmUtil.RealmBlock { (realm) -> Void in
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-                if let url = URL(string: globalState.defaultSpeechModURL), let data = try? Data(contentsOf: url), let result = try? JSONDecoder().decode([SpeechModSetting].self, from: data) {
+                if let url = URL(string: globalState.defaultSpeechModURL) ?? URL(string: "https://raw.githubusercontent.com/limura/NovelSpeaker/master/NovelSpeaker/DefaultSpeechModList.json"), let data = try? Data(contentsOf: url), let result = try? JSONDecoder().decode([SpeechModSetting].self, from: data) {
                     speechModSettings = result
                 }
             }
