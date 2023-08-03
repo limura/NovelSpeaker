@@ -11,7 +11,7 @@ import RealmSwift
 import IceCream
 import Eureka
 
-class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate {
+class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserverResetDelegate /*, UIEditMenuInteractionDelegate */ {
     
     public var storyID : String? = nil
     public var isNeedResumeSpeech : Bool = false
@@ -79,6 +79,13 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         registNotificationCenter()
         RealmObserverHandler.shared.AddDelegate(delegate: self)
         searchTextCache = ""
+        
+        /* // TODO: UIEditMenuInteraction をサポートする場合用。「設定タブ」→「本文中の長押しメニュー項目を減らす」がうまく実装できていないの一旦封印しておきます。
+        if #available(iOS 16.0, *) {
+            let editMenuInteraction = UIEditMenuInteraction(delegate: self)
+            self.textView.addInteraction(editMenuInteraction)
+        }
+         */
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -337,6 +344,27 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         reloadStoryText()
     }
     
+    func applyStoryTextWithSpeechModAttribute(){
+        let displayAttributedString = NSMutableAttributedString()
+        let normalAttribute = self.storyTextAttribute
+        var redAttribute:[NSAttributedString.Key:Any] = [.foregroundColor : UIColor.systemRed, .strokeWidth: -5.0, .strokeColor: UIColor.systemRed]
+        normalAttribute.forEach {redAttribute[$0.key] = $0.value}
+        for block in self.storySpeaker.speechBlockArray {
+            if block.displayText != block.speechText {
+                for block2 in block.speechBlockArray {
+                    if block2.speechText != nil {
+                        displayAttributedString.append(NSMutableAttributedString(string: block2.displayText, attributes: redAttribute))
+                    }else{
+                        displayAttributedString.append(NSMutableAttributedString(string: block2.displayText, attributes: normalAttribute))
+                    }
+                }
+            }else{
+                displayAttributedString.append(NSMutableAttributedString(string: block.displayText, attributes: normalAttribute))
+            }
+        }
+        self.textView.attributedText = displayAttributedString
+        self.applyTheme()
+    }
     func applyStoryText(text:String) {
         self.displayTextCache = text
         self.reloadStoryText()
@@ -370,7 +398,11 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     // スクロールした状態で .attributedText を更新すると怪しい動きをするようなので、
                     // .attributedText を書き換える前にスクロール位置を先頭に移動しておきます
                     self.textView.setContentOffset(CGPoint(x: 0, y: 0), animated: false)
-                    self.applyStoryText(text: story.content)
+                    if NovelSpeakerUtility.IsDisplaySpeechModChange() {
+                        self.applyStoryTextWithSpeechModAttribute()
+                    }else{
+                        self.applyStoryText(text: story.content)
+                    }
                     // textView.select() すると、選択範囲の上にメニューが出るようになるのでこの時点では select() はしない。
                     // でも、textView.becomeFirstResponder() しておかないと選択範囲自体が表示されないようなので becomeFirstResponder() はどこかでしておかないと駄目っぽい。
                     //self.textView.select(self)
@@ -910,7 +942,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         }
     }
     
-    @objc func startStopButtonClicked(_ sender: UIBarButtonItem) {
+    @objc func startStopSpeech() {
         RealmUtil.RealmBlock { (realm) -> Void in
             if self.storySpeaker.isPlayng {
                 self.storySpeaker.StopSpeech(realm: realm, stopAudioSession:true)
@@ -918,6 +950,10 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                 self.CheckFolderAndStartSpeech()
             }
         }
+    }
+    
+    @objc func startStopButtonClicked(_ sender: UIBarButtonItem) {
+        startStopSpeech()
     }
     @objc func skipBackwardButtonClicked(_ sender: UIBarButtonItem) {
         if self.storySpeaker.isPlayng == false { return }
@@ -1081,5 +1117,32 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
             self.storySpeaker.LoadNextChapter(realm: realm)
         }
     }
-
+    @available(iOS 16.0, *)
+    func editMenuInteraction(_ interaction: UIEditMenuInteraction, menuFor configuration: UIEditMenuConfiguration, suggestedActions: [UIMenuElement]) -> UIMenu? {
+        print("HOGEHOGE: editMenuInteraction: \(configuration.identifier) \(suggestedActions.map({"\($0.title):\($0.subtitle ?? "nil"):\($0.debugDescription)"}).joined(separator: ", "))")
+        if self.storySpeaker.isPlayng {
+            return nil
+        }
+        
+        let addActions: [UIMenuElement] = [
+            UIAction(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), handler: { _ in
+                self.setSpeechModSetting(sender: UIMenuItem())
+             }),
+            UIAction(title: NSLocalizedString("SpeechViewController_AddSpeechModSettingsForThisNovel", comment: "この小説用の読み替え辞書へ登録"), handler: { _ in
+                self.setSpeechModForThisNovelSetting(sender: UIMenuItem())
+            }),
+            UIAction(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), handler: { _ in
+                self.checkSpeechText(sender:UIMenuItem())
+            })
+        ]
+        return UIMenu(children: suggestedActions + addActions)
+    }
+    
+    override var keyCommands: [UIKeyCommand]? {
+        return [
+            .init(title: NSLocalizedString("SpeechViewController_KeyboardShortcut_StartStopSpeech_Title", comment: "発話の開始/停止"), action: #selector(startStopSpeech), input: "s", modifierFlags: [.control]),
+            .init(title: NSLocalizedString("SpeechViewController_AddSpeechModSettings", comment: "読み替え辞書へ登録"), action: #selector(setSpeechModSetting(sender:)), input: "r", modifierFlags: [.control]),
+            .init(title: NSLocalizedString("SpeechViewController_AddCheckSpeechText", comment: "読み替え後の文字列を確認する"), action: #selector(checkSpeechText(sender:)), input: "c", modifierFlags: [.control]),
+        ]
+    }
 }
