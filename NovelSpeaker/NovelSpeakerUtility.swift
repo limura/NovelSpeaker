@@ -3277,7 +3277,7 @@ class NovelSpeakerUtility: NSObject {
     }
     static var MemoryUsageValidChecked = false
     static func CheckMemoryUsageIsValid() -> Bool {
-        if MemoryUsageValidChecked { return true }
+        if MemoryUsageValidChecked || initialAvailableMemory == 0 { return true }
         let maxUsableMemory = 1750 * 1024 * 1024 // なんぼなんでも 1.75G 以上は使わんの助
         let borderUsableMemory = 100 * 1024 * 1024 // 残りが 100MBytes を下回ったらもう駄目と思う
         let availableMemory = os_proc_available_memory()
