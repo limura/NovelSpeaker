@@ -101,7 +101,22 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
                 self.pushNextView(novelID: novel.novelID, isNeedSpeech: false, isNeedUpdateReadDate: false)
             }
         }
-        reloadAllDataAndScrollToCurrentReadingContent()
+        // reloadAllDataAndScrollToCurrentReadingContent() がかなり時間かかる場合があるので、
+        // 初期値を置いてからロードは別threadでやらせます。
+        // ここで時間を取られて起動に時間がかかったとみなされてシステムから殺されるという挙動が確認されたための対処になります。
+        do {
+            let dummyCell = BookShelfRATreeViewCellData()
+            dummyCell.childrens = nil
+            dummyCell.novelID = nil
+            dummyCell.title = NSLocalizedString("BookShelfRATreeViewController_InitialDummyCellTitle", comment: "本棚の小説を読み込んでいます……")
+            self.displayDataArray = [
+                dummyCell
+            ]
+            self.treeView?.reloadData()
+            DispatchQueue.main.async {
+                self.reloadAllDataAndScrollToCurrentReadingContent()
+            }
+        }
         
         NiftyUtility.CheckNewImportantImformation(hasNewInformationAlive: { (text) in
             if text.count > 0 {

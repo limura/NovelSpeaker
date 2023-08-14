@@ -739,6 +739,7 @@
 "BookShelfRATreeViewController_iCloudPushButton_Clicked" = "We have started uploading data to iCloud.";
 "BookShelfRATreeViewController_stopDownloadButton_VoiceOverText" = "Stop download";
 "BookShelfRATreeViewController_stopDownloadButtonTitle" = "Stop";
+"BookShelfRATreeViewController_InitialDummyCellTitle" = "Reading a novel on the bookshelf...";
 
 "RealmToRealmCopyTool_Progress_SpeechModSetting" = "Migrating transliteration dictionary";
 "RealmToRealmCopyTool_Progress_SpeechWaitConfig" = "Migrating settings during reading";

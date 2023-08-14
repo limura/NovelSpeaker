@@ -731,6 +731,7 @@
 "BookShelfRATreeViewController_iCloudPushButton_Clicked" = "iCloudへのデータのアップロードを開始しました。";
 "BookShelfRATreeViewController_stopDownloadButton_VoiceOverText" = "ダウンロードを停止";
 "BookShelfRATreeViewController_stopDownloadButtonTitle" = "停止";
+"BookShelfRATreeViewController_InitialDummyCellTitle" = "本棚の小説を読み込んでいます……";
 
 "BookShelfTreeViewCell_UnknownTitle" = "(小説名不明)";
 "BookShelfTreeViewCell_LikeStar_AccessibilityLabel" = "お気に入り、現在は設定中";
