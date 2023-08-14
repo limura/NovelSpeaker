@@ -911,18 +911,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.1
 
-- Added \"Bookshelf registration order\" to \"order\" of \"bookshelf screen\"
-- Added \"Settings tab\" -> \"Behavior when pressing the favorite button on the bookshelf\"
-- Added keyboard shortcuts to the novel text screen
-- Update standard dictionary
-- Eliminate NUL characters (0x00 characters) when saving novel text
-- Fixed a problem that an empty string could not be set once some characters were entered in \"Standard replacement settings\" in \"Setting tab\" -> \"Setting URL for internal data reference\"
+- Fixed the part where the dialog message when applying the backup file was strange
+- Fixed the problem that it took a long time to start and was forced to quit from the system side.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.8.1
+
+Fix the problem
+
+- Fixed the part where the dialog message when applying the backup file was strange
+- Fixed the problem that it took a long time to start and was forced to quit from the system side.
+
+
 Version 2.8.0
 
 Behavior changes

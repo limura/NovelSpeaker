@@ -901,18 +901,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.0
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.1
 
-- 「本棚画面」の「順番」に「本棚登録順」を追加
-- 「設定タブ」->「本棚でお気に入りボタンを押した時の動作」を追加
-- 小説本文画面にキーボードショートカットを追加
-- 標準の辞書を更新
-- 小説本文の保存時にNUL文字(0x00の文字)を排除するように
-- 「設定タブ」->「内部データ参照用URLの設定」内の「標準の読み替え設定」で一旦何か文字を入れてしまうと空文字列を設定できない問題を修正
+- バックアップファイルを適用している時のダイアログメッセージがおかしかった部分を修正
+- 起動時に時間がかかってシステム側から強制終了される場合があった問題に対応
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.8.1
+
+問題の修正
+
+- バックアップファイルを適用している時のダイアログメッセージがおかしかった部分を修正
+- 起動時に時間がかかってシステム側から強制終了される場合があった問題に対応
+
+
 Version 2.8.0
 
 インタフェース等の変更

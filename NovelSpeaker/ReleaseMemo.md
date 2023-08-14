@@ -3655,3 +3655,34 @@ Fix the problem
 - Eliminate NUL characters (0x00 characters) when saving novel text
 - Fixed a problem that an empty string could not be set once some characters were entered in "Standard replacement settings" in "Setting tab" -> "Setting URL for internal data reference"
 
+Version 2.8.1
+
+問題の修正
+
+- バックアップファイルを適用している時のダイアログメッセージがおかしかった部分を修正
+- 起動時に時間がかかってシステム側から強制終了される場合があった問題に対応
+
+今回は問題の修正のみです。
+
+- バックアップファイルを適用している時のダイアログメッセージがおかしかった部分を修正
+
+こちらはバックアップファイルを適用している時に表示されるメッセージの一部が、バックアップファイルを生成している時のメッセージが使われてしまっていたのを修正した物になります。
+
+- 起動時に時間がかかってシステム側から強制終了される場合があった問題に対応
+
+こちらは、本棚の並べ替え処理に時間がかかるものがあり、そちらを選択されている時にアプリが起動時にその時間のかかる処理を行う事でアプリが正常に起動していないとみなされてシステム側から強制終了させられてしまうという挙動が確認されましたので、そちらに対処したものになります。
+この修正により、起動時に本棚の並べ替え処理が完了しないまま起動してくる場合がありますので、その場合は本棚の並べ替え処理が終わるまで暫くは本棚が正しく表示されない、という事になります。そうなってしまっている場合は暫くお待ち下さい。
+
+
+さて、残念なことに私はお問い合わせ対応に疲れ果ててしまいましたため、致命的な問題(アプリが強制終了するようなもの)以外への対応は極力しない形にさせていただいています。お問い合わせ窓口の閉鎖等については今の所はしておりませんが、上記のような対応になりますため、新機能のご提案や強制終了を伴わない不都合の報告をされましたとしても、対応はされないものとお考え下さい。なお、今回のように気が向いたら修正する事もあります。
+
+以上となります。
+それでは、これからも ことせかい をよろしくお願いいたします。
+
+Version 2.8.1
+
+Fix the problem
+
+- Fixed the part where the dialog message when applying the backup file was strange
+- Fixed the problem that it took a long time to start and was forced to quit from the system side.
+
