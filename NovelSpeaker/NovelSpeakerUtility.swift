@@ -1585,7 +1585,7 @@ class NovelSpeakerUtility: NSObject {
         var novelCount = 0
         for novelDic in bookshelf {
             novelCount += 1
-            let progressString = NSLocalizedString("NovelSpeakerUtility_ExportingNovelData", comment: "小説を抽出中") + " (\(novelCount)/\(novelArrayCount))"
+            let progressString = NSLocalizedString("NovelSpeakerUtility_RestoreingNovelData", comment: "工程 3/3\n小説を抽出中") + " (\(novelCount)/\(novelArrayCount))"
             progressUpdate(progressString)
             guard let novelDic = novelDic as? NSDictionary,
                 let novelID = novelDic.object(forKey: "novelID") as? String,
@@ -1653,7 +1653,7 @@ class NovelSpeakerUtility: NSObject {
                     let max = storys.count
                     for storyDic in storys {
                         index += 1
-                        progressUpdate(progressString + " (\(index)/\(max))")
+                        //progressUpdate(progressString + " (\(index)/\(max))")
                         guard let storyDic = storyDic as? NSDictionary,
                             let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber else { continue }
                         let data:Data
@@ -1801,10 +1801,15 @@ class NovelSpeakerUtility: NSObject {
         let dialog = builder.build()
         DispatchQueue.main.async {
             dialog.show {
+                var prevMessageLabelText = ""
+                var displayMessageDate = Date(timeIntervalSinceNow: -1.0)
                 func applyProgress(text:String) {
+                    if prevMessageLabelText == text || displayMessageDate > Date() { return }
                     DispatchQueue.main.async {
                         guard let messageLabel = dialog.view.viewWithTag(messageTag) as? UILabel else { return }
                         messageLabel.text = text
+                        prevMessageLabelText = text
+                        displayMessageDate = Date(timeIntervalSinceNow: 0.5)
                     }
                 }
                 DispatchQueue.global(qos: .userInitiated).async {

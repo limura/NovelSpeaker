@@ -209,6 +209,7 @@
 "NovelSpeakerUtility_ExportOtherSettings" = "工程 2/4\n設定情報の抽出中";
 "NovelSpeakerUtility_UnzipProgress" = "工程 1/3\nバックアップファイルを解凍しています";
 "NovelSpeakerUtility_RestoreingJSONType" = "工程 2/3\nバックアップファイルから設定を読み込んでいます。";
+"NovelSpeakerUtility_RestoreingNovelData" = "工程 3/3\n小説を抽出中(注:対象が多い場合は表示が更新されない場合があります)";
 "NovelSpeakerUtility_RestoreBackupTitle" = "バックアップデータを読み込んでいます";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
 "NovelSpeakerUtility_FirstStoryURLString" = "https://limura.github.io/NovelSpeaker/topics/jp/00001.html";

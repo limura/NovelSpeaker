@@ -166,6 +166,7 @@
 "NovelSpeakerUtility_ExportingNovelData" = "Exporting novel";
 "NovelSpeakerUtility_ExportOtherSettings" = "Exporting settings";
 "NovelSpeakerUtility_RestoreingJSONType" = "Loading settings from backup file.";
+"NovelSpeakerUtility_RestoreingNovelData" = "Loading novels from backup file.";
 "NovelSpeakerUtility_UnzipProgress" = "Decompressing backup file";
 "NovelSpeakerUtility_RestoreBackupTitle" = "Loading backup data";
 "NovelSpeakerUtility_RestoreBackupMessage" = "-";
