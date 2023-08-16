@@ -3058,13 +3058,12 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
     }
     
     func targetNovelArrayWith(realm:Realm) -> [RealmNovel]? {
-        return realm.objects(RealmNovel.self).filter({ (novel) -> Bool in
-            return !(novel.isDeleted) && self.targetNovelIDArray.contains(novel.novelID)
-        }).sorted { (a, b) -> Bool in
-            guard let aIndex = self.targetNovelIDArray.index(of: a.novelID) else { return false }
-            guard let bIndex = self.targetNovelIDArray.index(of: b.novelID) else { return true }
-            return aIndex < bIndex
+        let novels = realm.objects(RealmNovel.self)
+        var novelID2NovelMap = [String:RealmNovel]()
+        for novel in novels {
+            novelID2NovelMap[novel.novelID] = novel
         }
+        return targetNovelArrayFrom(novelID2NovelMap: novelID2NovelMap)
     }
     
     func targetNovelArrayFrom(novelID2NovelMap:[String:RealmNovel]) -> [RealmNovel]? {
