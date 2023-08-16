@@ -915,6 +915,7 @@
 
 - Fixed the part where the dialog message when applying the backup file was strange
 - Fixed the problem that it took a long time to start and was forced to quit from the system side.
+- Fixed a slow processing problem in \"Sort\" of \"Bookshelf Screen\" in \"Original folder order\".
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
@@ -925,7 +926,7 @@ Fix the problem
 
 - Fixed the part where the dialog message when applying the backup file was strange
 - Fixed the problem that it took a long time to start and was forced to quit from the system side.
-
+- Fixed a slow processing problem in \"Sort\" of \"Bookshelf Screen\" in \"Original folder order\".
 
 Version 2.8.0
 
