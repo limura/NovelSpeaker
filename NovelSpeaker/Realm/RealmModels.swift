@@ -3067,6 +3067,17 @@ extension RealmDisplaySetting: CanWriteIsDeleted {
         }
     }
     
+    func targetNovelArrayFrom(novelID2NovelMap:[String:RealmNovel]) -> [RealmNovel]? {
+        var result = [RealmNovel]()
+        for novelID in self.targetNovelIDArray {
+            if let novel = novelID2NovelMap[novelID] {
+                result.append(novel)
+            }
+        }
+        if result.count <= 0 { return nil }
+        return result
+    }
+    
     static func CreateNewTag(name:String, type:String) -> RealmNovelTag {
         let tag = RealmNovelTag()
         tag.id = CreateUniqueID(name: name, type: type)

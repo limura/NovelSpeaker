@@ -534,8 +534,12 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             guard let novels = getNovelArray(realm: realm, sortType: NarouContentSortType.Title), let tags = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return (false,[]) }
             var result = [BookShelfRATreeViewCellData]()
             var listedNovelIDSet = Set<String>()
+            var novelID2NovelMap = [String:RealmNovel]()
+            for novel in novels {
+                novelID2NovelMap[novel.novelID] = novel
+            }
             for tag in tags {
-                guard let novels = tag.targetNovelArrayWith(realm: realm) else { continue }
+                guard let novels = tag.targetNovelArrayFrom(novelID2NovelMap: novelID2NovelMap) else { continue }
                 let folder = BookShelfRATreeViewCellData()
                 folder.childrens = [BookShelfRATreeViewCellData]()
                 folder.title = tag.name
