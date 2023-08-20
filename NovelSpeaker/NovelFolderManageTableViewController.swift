@@ -498,13 +498,17 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
             RealmUtil.RealmBlock { (realm) -> Void in
                 guard let folderArray = RealmNovelTag.GetObjectsFor(realm: realm, type: RealmNovelTag.TagType.Folder) else { return }
                 var newFolderSectionArray:[TableViewSection] = [ManageSection(parentViewController: self)]
+                var novelID2NovelTitleTable:[String:String] = [:]
+                if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) {
+                    for novel in novelArray {
+                        novelID2NovelTitleTable[novel.novelID] = novel.title
+                    }
+                }
                 for folder in folderArray {
                     var rows:[FolderRow] = []
-                    if let novelArray = RealmNovel.SearchNovelWith(realm: realm, novelIDArray: Array(folder.targetNovelIDArray)){
-                        for novelID in folder.targetNovelIDArray {
-                            if let novel = novelArray.filter({$0.novelID == novelID}).first {
-                                rows.append(FolderRow(novelTitle: novel.title, novelID: novel.novelID))
-                            }
+                    for novelID in folder.targetNovelIDArray {
+                        if let novelTitle = novelID2NovelTitleTable[novelID] {
+                            rows.append(FolderRow(novelTitle: novelTitle, novelID: novelID))
                         }
                     }
                     let section = FolderSection(folderName: folder.name, rows: rows, parentViewController: self)
