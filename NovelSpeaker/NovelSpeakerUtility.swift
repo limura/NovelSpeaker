@@ -1876,15 +1876,15 @@ class NovelSpeakerUtility: NSObject {
             return result
         }
     }
-    fileprivate static func CreateBackupDataDictionary_Bookshelf(forNovelIDArray:[String], contentWriteTo:URL, progress:((_ description:String)->Void)?) -> ([[String:Any]], [URL]) {
-        let withAllStoryContent = (forNovelIDArray.count > 0)
+    fileprivate static func CreateBackupDataDictionary_Bookshelf(forNovelIDArray:[String], forStorySaveNovelIDArray:[String], contentWriteTo:URL, progress:((_ description:String)->Void)?) -> ([[String:Any]], [URL]) {
+        let targetNovelIDArray = Array(Set(forNovelIDArray).union(Set(forStorySaveNovelIDArray)))
         var result:[[String:Any]] = []
         var fileArray:[URL] = []
         return RealmUtil.RealmBlock { (realm) -> ([[String:Any]], [URL]) in
             guard let novelArrayTmp = RealmNovel.GetAllObjectsWith(realm: realm) else { return (result, []) }
             let novelArray:Array<RealmNovel>
-            if forNovelIDArray.count > 0 {
-                novelArray = novelArrayTmp.filter({forNovelIDArray.contains($0.novelID)})
+            if targetNovelIDArray.count > 0 {
+                novelArray = novelArrayTmp.filter({targetNovelIDArray.contains($0.novelID)})
             }else{
                 novelArray = Array(novelArrayTmp)
             }
@@ -1916,12 +1916,12 @@ class NovelSpeakerUtility: NSObject {
                     "readingChapterContentCount": novel.m_readingChapterContentCount,
                     "contentDirectory": "\(novelCount)"
                 ]
-                if !withAllStoryContent && novel.m_type != NovelType.UserCreated.rawValue {
+                if !forStorySaveNovelIDArray.contains(novel.novelID) && novel.m_type != NovelType.UserCreated.rawValue {
                     result.append(novelData)
                     continue
                 }
                 let contentDirectory:URL?
-                if !withAllStoryContent && novel.m_type == NovelType.UserCreated.rawValue {
+                if !forStorySaveNovelIDArray.contains(novel.novelID) && novel.m_type == NovelType.UserCreated.rawValue {
                     contentDirectory = nil
                 }else{
                     contentDirectory = NiftyUtility.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
@@ -2152,7 +2152,7 @@ class NovelSpeakerUtility: NSObject {
             let result = RealmUtil.RealmBlock { (realm) -> URL? in
                 if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) {
                     let novelIDArray = Array(novelArray.map({$0.novelID}))
-                    return CreateBackupData(forNovelIDArray: novelIDArray, progress: progress)
+                    return CreateBackupData(forNovelIDArray: novelIDArray, forStorySaveNovelIDArray: novelIDArray, progress: progress)
                 }
                 return nil
             }
@@ -2160,7 +2160,7 @@ class NovelSpeakerUtility: NSObject {
                 return result
             }
         }
-        return CreateBackupData(forNovelIDArray: [], progress: progress)
+        return CreateBackupData(forNovelIDArray: [], forStorySaveNovelIDArray: [], progress: progress)
     }
     
     static let backupDirectoryName = "NovelSpeakerBackup"
@@ -2180,7 +2180,7 @@ class NovelSpeakerUtility: NSObject {
         NiftyUtility.RemoveDirectory(directoryPath: temporaryDirectoryPath)
     }
 
-    static func CreateBackupData(forNovelIDArray:[String], isOnlyNovelData:Bool = false, fileNamePrefix:String = "", progress:((_ description:String)->Void)?) -> URL? {
+    static func CreateBackupData(forNovelIDArray:[String], forStorySaveNovelIDArray: [String], isOnlyNovelData:Bool = false, fileNamePrefix:String = "", progress:((_ description:String)->Void)?) -> URL? {
         NovelDownloadQueue.shared.downloadStop()
         let directoryName = backupDirectoryName
         CleanBackupFolder()
@@ -2188,7 +2188,7 @@ class NovelSpeakerUtility: NSObject {
         guard let outputPath = NiftyUtility.CreateTemporaryDirectory(directoryName: directoryName) else {
             return nil
         }
-        let bookshelfResult = CreateBackupDataDictionary_Bookshelf(forNovelIDArray: forNovelIDArray, contentWriteTo: outputPath, progress: progress)
+        let bookshelfResult = CreateBackupDataDictionary_Bookshelf(forNovelIDArray: forNovelIDArray, forStorySaveNovelIDArray: forStorySaveNovelIDArray, contentWriteTo: outputPath, progress: progress)
         defer { NiftyUtility.RemoveDirectory(directoryPath: outputPath) }
         if isOnlyNovelData && forNovelIDArray.count > 0 && bookshelfResult.0.count <= 0 {
             // forNovelIDArray が 0以上 で bookshelfResult に内容が無いようであるなら、それは失敗している(恐らくは指定されたNovelIDの小説が全て存在しなかった)
@@ -2406,7 +2406,7 @@ class NovelSpeakerUtility: NSObject {
             fileNamePrefix = ""
         }
         DispatchQueue.global(qos: .utility).async {
-            guard let backupData = NovelSpeakerUtility.CreateBackupData(forNovelIDArray: novelIDArray, isOnlyNovelData: true, fileNamePrefix: fileNamePrefix, progress: { (description) in
+            guard let backupData = NovelSpeakerUtility.CreateBackupData(forNovelIDArray: novelIDArray, forStorySaveNovelIDArray: novelIDArray, isOnlyNovelData: true, fileNamePrefix: fileNamePrefix, progress: { (description) in
                 DispatchQueue.main.async {
                     if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
                         label.text = NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……") + "\r\n"

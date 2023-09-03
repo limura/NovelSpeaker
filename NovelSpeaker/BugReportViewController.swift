@@ -10,6 +10,22 @@ import UIKit
 import MessageUI
 import Eureka
 
+struct NovelTitle2ID: Hashable, CustomStringConvertible {
+    let title:String
+    let novelID:String
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(novelID)
+    }
+    
+    var description:String
+    {
+        get {
+            return title
+        }
+    }
+}
+
 struct BugReportViewInputData {
     var TimeOfOccurence = Date.init(timeIntervalSinceNow: 60*60*24) // 1日後にしておく(DatePickerで日付を一回戻すだけでいいので)
     var DescriptionOfTheProblem = ""
@@ -18,7 +34,8 @@ struct BugReportViewInputData {
     var DescriptionOfNewFeature = ""
     var IsEnabledLogSend = false
     var IsEnabledBackupFileSend = false
-    var TargetNovelNameSet:Set<RealmNovel> = Set<RealmNovel>()
+    var TargetNovelNameSet:Set<NovelTitle2ID> = Set<NovelTitle2ID>()
+    var IsAppendTargetNovelStoryText = false
     var IsNeedAppLog = false
 }
 
@@ -258,12 +275,12 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     BugReportViewController.value.ProblemOccurenceProcedure = value
                 }
             })
-            <<< MultipleSelectorRow<RealmNovel>("TargetNovelAlertRow") { (row) in
+            <<< MultipleSelectorRow<NovelTitle2ID>("TargetNovelAlertRow") { (row) in
                 row.title = NSLocalizedString("BugReportViewController_TargetNovelName", comment: "問題が発生する小説(もしあれば)")
                 row.selectorTitle = NSLocalizedString("BugReportViewController_TargetNovelName_SelectorTitle", comment: "問題が発生する小説")
                 RealmUtil.RealmBlock { (realm) -> Void in
                     if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) {
-                        row.options = Array(novelArray)
+                        row.options = novelArray.map({NovelTitle2ID(title: $0.title, novelID: $0.novelID)})
                     }
                 }
                 row.value = BugReportViewController.value.TargetNovelNameSet
@@ -276,6 +293,53 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     BugReportViewController.value.TargetNovelNameSet = []
                 }
             }
+            <<< SwitchRow("IsEnableBackupFileSend") {
+                $0.title = NSLocalizedString("BugReportViewController_IsEnableBackupFileSend", comment: "軽量バックアップファイルを添付する")
+                $0.value = BugReportViewController.value.IsEnabledBackupFileSend
+                $0.cell.textLabel?.numberOfLines = 0
+            }.onChange({ (row) in
+                let judge = row.value
+                if judge! {
+                    NiftyUtility.EasyDialogBuilder(self)
+                        .title(title: NSLocalizedString("BugReportViewController_ConfirmEnableBackupFileSend_title", comment:"確認"))
+                        .textView(content: NSLocalizedString("BugReportViewController_ConfirmEnableBackupFileSend", comment:"ことせかい の軽量バックアップファイルを不都合報告mailに添付しますか？\n\n軽量バックアップファイルにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合にはOFFのままにしておく必要があります。\nなお、軽量バックアップファイルが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), heightMultiplier: 0.6)
+                        .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
+                            row.value = false
+                            BugReportViewController.value.IsEnabledBackupFileSend = false
+                            row.updateCell()
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: true, completion: nil)
+                            }
+                        })
+                        .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
+                            BugReportViewController.value.IsEnabledBackupFileSend = true
+                            DispatchQueue.main.async {
+                                dialog.dismiss(animated: true)
+                            }
+                        })
+                        .build().show()
+                }else{
+                    BugReportViewController.value.IsEnabledBackupFileSend = false
+                }
+            })
+            <<< SwitchRow("IsAppendTargetNovelStoryText") { (row) in
+                row.title = NSLocalizedString("BugReportViewController_IsAppendTargetNovelStoryText_Title", comment: "問題が発生する小説の本文も添付する")
+                row.value = BugReportViewController.value.IsAppendTargetNovelStoryText
+                row.cell.textLabel?.numberOfLines = 0
+                row.cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .subheadline)
+                row.hidden = .function(["IsEnableBackupFileSend", "TargetNovelAlertRow"], { form -> Bool in
+                    if let isBackupFileSend = (form.rowBy(tag: "IsEnableBackupFileSend") as? RowOf<Bool>)?.value, let targetNovelAlertSet = (form.rowBy(tag: "TargetNovelAlertRow") as? RowOf<Set<NovelTitle2ID>>)?.value {
+                        if isBackupFileSend == false || targetNovelAlertSet.isEmpty {
+                            return true
+                        }
+                    }
+                    return false
+                })
+            }.onChange({ (row) in
+                if let judge = row.value {
+                    BugReportViewController.value.IsAppendTargetNovelStoryText = judge
+                }
+            })
             <<< SwitchRow("IsEnableLogSend") {
                 $0.title = NSLocalizedString("BugReportViewController_IsEnableLogSend", comment: "内部に保存されている操作ログを添付する")
                 $0.value = BugReportViewController.value.IsEnabledLogSend
@@ -312,35 +376,6 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                 }.onChange({ (row) in
                     if let isEnable = row.value {
                         BugReportViewController.value.IsNeedAppLog = isEnable
-                    }
-                })
-            <<< SwitchRow("IsEnableBackupFileSend") {
-                $0.title = NSLocalizedString("BugReportViewController_IsEnableBackupFileSend", comment: "軽量バックアップファイルを添付する")
-                $0.value = BugReportViewController.value.IsEnabledBackupFileSend
-                $0.cell.textLabel?.numberOfLines = 0
-                }.onChange({ (row) in
-                    let judge = row.value
-                    if judge! {
-                        NiftyUtility.EasyDialogBuilder(self)
-                            .title(title: NSLocalizedString("BugReportViewController_ConfirmEnableBackupFileSend_title", comment:"確認"))
-                            .textView(content: NSLocalizedString("BugReportViewController_ConfirmEnableBackupFileSend", comment:"ことせかい の軽量バックアップファイルを不都合報告mailに添付しますか？\n\n軽量バックアップファイルにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合にはOFFのままにしておく必要があります。\nなお、軽量バックアップファイルが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), heightMultiplier: 0.6)
-                            .addButton(title: NSLocalizedString("Cancel_button", comment: "cancel"), callback: { dialog in
-                                row.value = false
-                                BugReportViewController.value.IsEnabledBackupFileSend = false
-                                row.updateCell()
-                                DispatchQueue.main.async {
-                                    dialog.dismiss(animated: true, completion: nil)
-                                }
-                            })
-                            .addButton(title: NSLocalizedString("OK_button", comment:"OK"), callback: {dialog in
-                                BugReportViewController.value.IsEnabledBackupFileSend = true
-                                DispatchQueue.main.async {
-                                    dialog.dismiss(animated: true)
-                                }
-                            })
-                            .build().show()
-                    }else{
-                        BugReportViewController.value.IsEnabledBackupFileSend = false
                     }
                 })
             <<< AlertRow<String>() { row in
@@ -389,14 +424,14 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     NiftyUtility.EasyDialogBuilder(self)
                         .label(text: NSLocalizedString("BugReportViewController_AddBehaviourLogAnnounce", comment: "ことせかい 内部に保存されている操作ログを不都合報告mailに添付しますか？\n\n操作ログにはダウンロードされた小説の詳細(URL等)が含まれるため、開発者に公開されてしまっては困るような情報を ことせかい に含めてしまっている場合には「いいえ」を選択する必要があります。\nまた、操作ログが添付されておりませんと、開発者側で状況の再現が取りにくくなるため、対応がしにくくなる可能性があります。(添付して頂いても対応できない場合もあります)"), textAlignment: .left)
                         .addButton(title: NSLocalizedString("BugReportViewController_NO", comment: "いいえ"), callback: { (dialog) in
-                            self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend, isNeedAppLog: BugReportViewController.value.IsNeedAppLog, completion: {
+                            self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend, isAppendTargetNovelStoryText: BugReportViewController.value.IsAppendTargetNovelStoryText, isNeedAppLog: BugReportViewController.value.IsNeedAppLog, completion: {
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false, completion: nil)
                                 }
                             })
                         })
                         .addButton(title: NSLocalizedString("BugReportViewController_YES", comment: "はい"), callback: { (dialog) in
-                            self.sendBugReportMail(log: BehaviorLogger.LoadLog(), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend, isNeedAppLog: BugReportViewController.value.IsNeedAppLog, completion: {
+                            self.sendBugReportMail(log: BehaviorLogger.LoadLog(), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend, isAppendTargetNovelStoryText: BugReportViewController.value.IsAppendTargetNovelStoryText, isNeedAppLog: BugReportViewController.value.IsNeedAppLog, completion: {
                                 DispatchQueue.main.async {
                                     dialog.dismiss(animated: false, completion: nil)
                                 }
@@ -405,9 +440,9 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
                     .build().show()
                 }else{
                     if BugReportViewController.value.IsEnabledLogSend {
-                        self.sendBugReportMail(log: NiftyUtility.getLogText(searchString: nil), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend, isNeedAppLog: BugReportViewController.value.IsNeedAppLog)
+                        self.sendBugReportMail(log: NiftyUtility.getLogText(searchString: nil), description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend, isAppendTargetNovelStoryText: BugReportViewController.value.IsAppendTargetNovelStoryText, isNeedAppLog: BugReportViewController.value.IsNeedAppLog)
                     }else{
-                        self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend, isNeedAppLog: BugReportViewController.value.IsNeedAppLog)
+                        self.sendBugReportMail(log: nil, description: BugReportViewController.value.DescriptionOfTheProblem, procedure: BugReportViewController.value.ProblemOccurenceProcedure, date: BugReportViewController.value.TimeOfOccurence, needResponse: BugReportViewController.value.IsNeedResponse, targetNovelSet: BugReportViewController.value.TargetNovelNameSet, isNeedBackupFile: BugReportViewController.value.IsEnabledBackupFileSend, isAppendTargetNovelStoryText: BugReportViewController.value.IsAppendTargetNovelStoryText, isNeedAppLog: BugReportViewController.value.IsNeedAppLog)
                     }
                 }
             })
@@ -498,7 +533,7 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
     }
 
     @discardableResult
-    func sendBugReportMail(log:String?, description:String, procedure:String, date:Date, needResponse:String, targetNovelSet:Set<RealmNovel>, isNeedBackupFile:Bool, isNeedAppLog:Bool, completion:(() -> Void)? = nil) -> Bool {
+    func sendBugReportMail(log:String?, description:String, procedure:String, date:Date, needResponse:String, targetNovelSet:Set<NovelTitle2ID>, isNeedBackupFile:Bool, isAppendTargetNovelStoryText:Bool, isNeedAppLog:Bool, completion:(() -> Void)? = nil) -> Bool {
         if !MFMailComposeViewController.canSendMail() {
             return false;
         }
@@ -549,12 +584,24 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         if isNeedBackupFile == true {
             DispatchQueue.main.async {
                 let labelTag = 100
+                let allNovelIDArray = RealmUtil.RealmBlock { (realm) -> [String] in
+                    if let novelArray = RealmNovel.GetAllObjectsWith(realm: realm) {
+                        return novelArray.map({$0.novelID})
+                    }
+                    return []
+                }
                 let dialog = NiftyUtility.EasyDialogBuilder(self)
                     .label(text: NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……"), textAlignment: NSTextAlignment.center, tag: labelTag)
                     .build()
                 dialog.show()
                 DispatchQueue.global(qos: .userInitiated).async {
-                    if let backupDataURL = NovelSpeakerUtility.CreateBackupData(withAllStoryContent: false, progress: { (description) in
+                    let targetNovelIDArray:[String]
+                    if isAppendTargetNovelStoryText && targetNovelSet.count > 0 {
+                        targetNovelIDArray = targetNovelSet.map({$0.novelID})
+                    }else{
+                        targetNovelIDArray = []
+                    }
+                    if let backupDataURL = NovelSpeakerUtility.CreateBackupData(forNovelIDArray: allNovelIDArray, forStorySaveNovelIDArray: targetNovelIDArray, progress: { (description) in
                         DispatchQueue.main.async {
                             if let label = dialog.view.viewWithTag(labelTag) as? UILabel {
                                 label.text = NSLocalizedString("SettingsViewController_CreatingBackupData", comment: "バックアップデータ作成中です。\r\nしばらくお待ち下さい……") + "\r\n"
