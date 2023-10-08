@@ -659,7 +659,7 @@ class NiftyUtility: NSObject {
             client.LoadAboutPage()
         }
     }
-    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, withWaitSecond:TimeInterval? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
+    static func httpHeadlessRequest(url: URL, postData:Data? = nil, timeoutInterval:TimeInterval = 10, cookieString: String? = nil, mainDocumentURL:URL? = nil, httpClient:HeadlessHttpClient? = nil, withWaitSecond:TimeInterval? = nil, injectJavaScript:String? = nil, successAction:((Document)->Void)? = nil, failedAction:((Error?)->Void)? = nil) {
         // TODO: おおよそ関係の無い所で Realm を触る必要があってうぅむ。
         let allowsCellularAccess:Bool = RealmUtil.RealmBlock { (realm) -> Bool in
             if let globalData = RealmGlobalState.GetInstanceWith(realm: realm), globalData.IsDisallowsCellularAccess {
@@ -678,18 +678,29 @@ class NiftyUtility: NSObject {
                 headlessHttpClientObj = client
             }
             client.HttpRequest(url: url, postData: postData, timeoutInterval: timeoutInterval, cookieString: cookieString, mainDocumentURL: mainDocumentURL, allowsCellularAccess: allowsCellularAccess, successResultHandler: { (doc) in
-                if let withWaitSecond = withWaitSecond, withWaitSecond > 0.0 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + withWaitSecond) {
-                        client.GetCurrentContent { (document, err) in
-                            if let document = document {
-                                successAction?(document)
-                            }else{
-                                failedAction?(err)
+                func waitProcess() {
+                    if let withWaitSecond = withWaitSecond, withWaitSecond > 0.0 {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + withWaitSecond) {
+                            client.GetCurrentContent { (document, err) in
+                                if let document = document {
+                                    successAction?(document)
+                                }else{
+                                    failedAction?(err)
+                                }
                             }
+                        }
+                    }else{
+                        successAction?(doc)
+                    }
+                }
+                if let injectJavaScript = injectJavaScript {
+                    DispatchQueue.main.async {
+                        client.ExecuteJavaScript(javaScript: injectJavaScript) { result, err in
+                            waitProcess()
                         }
                     }
                 }else{
-                    successAction?(doc)
+                    waitProcess()
                 }
             }) { (err) in
                 failedAction?(err)

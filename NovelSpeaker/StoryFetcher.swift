@@ -137,8 +137,9 @@ struct StorySiteInfo {
     let resourceUrl:String?
     let overrideUserAgent:String?
     let forceErrorMessageAndElement: String?
+    let scrollTo: String?
     
-    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?) {
+    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?) {
         self.pageElement = pageElement
         if let urlString = url, let urlRegex = try? NSRegularExpression(pattern: urlString, options: []) {
             self.url = urlRegex
@@ -165,6 +166,7 @@ struct StorySiteInfo {
         self.resourceUrl = resourceUrl
         self.overrideUserAgent = overrideUserAgent
         self.forceErrorMessageAndElement = forceErrorMessageAndElement
+        self.scrollTo = scrollTo
     }
     
     var forceErrorMessage : String? {
@@ -274,6 +276,7 @@ extension StorySiteInfo: CustomStringConvertible {
         result += "\"\nresourceUrl: \"" + (resourceUrl ?? "nil")
         result += "\"\noverrideUserAgent: \"" + (overrideUserAgent ?? "nil")
         result += "\"\nforceErrorMessageAndElement: \"" + (forceErrorMessageAndElement ?? "nil")
+        result += "\"\nscrollTo: \"" + (scrollTo ?? "nil")
         result += "\""
         return result
     }
@@ -301,6 +304,7 @@ extension StorySiteInfo : Decodable {
         case forceClickButton
         case overrideUserAgent
         case forceErrorMessageAndElement
+        case scrollTo
     }
     
     init(from decoder: Decoder) throws {
@@ -346,10 +350,12 @@ extension StorySiteInfo : Decodable {
         }
         overrideUserAgent = try? values.decode(String.self, forKey: NestedKeys.overrideUserAgent)
         forceClickButton = try? values.decode(String.self, forKey: NestedKeys.forceClickButton)
+        scrollTo = try? values.decode(String.self, forKey: NestedKeys.scrollTo)
         #else
         waitSecondInHeadless = 0
         overrideUserAgent = nil
         forceClickButton = nil
+        scrollTo = nil
         #endif
         forceErrorMessageAndElement = try? values.decode(String.self, forKey: NestedKeys.forceErrorMessageAndElement)
     }
@@ -375,7 +381,7 @@ class StoryHtmlDecoder {
     private init(){
         fallbackSiteInfoArray = [
             //StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(@itemprop,'articleBody')"),
-            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil)
+            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil, scrollTo: nil)
         ]
     }
     
@@ -881,7 +887,13 @@ class StoryFetcher {
                     //print("httpClient.overrideUserAgent: nil")
                     self.httpClient.overrideUserAgent(userAgentString: nil)
                 }
-                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, successAction: { (doc) in
+                let scrollToJavaScript:String?
+                if let scrollTo = currentState.siteInfoArray.filter({$0.scrollTo != nil}).first?.scrollTo {
+                    scrollToJavaScript = "document.evaluate(\"\(scrollTo)\", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)?.singleNodeValue?.scrollIntoView({ behavior: 'auto' })"
+                }else{
+                    scrollToJavaScript = nil
+                }
+                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, injectJavaScript: scrollToJavaScript, successAction: { (doc) in
                     let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton, forceErrorMessage: currentState.forceErrorMessage)
                     self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
