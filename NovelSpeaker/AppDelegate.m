@@ -23,7 +23,7 @@ void uncaughtExceptionHandler(NSException *exception)
     [BehaviorLogger AddLogWithDescription:@"UncaughtException" data:@{
        @"description": [exception description],
        @"stack trace": [[exception callStackSymbols] componentsJoinedByString:@"\n"]
-       }];
+       } withUseNSLog:true];
 }
 
 - (void)setPreferredFontForTextStyleByAppearance{

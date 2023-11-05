@@ -52,7 +52,7 @@
 
 // 実機log用
 - (NSString*)GetLogString;
-- (void)AddLogString:(NSString*)string;
+- (void)AddLogString:(NSString*)string withUseNSLog:(bool)withUseNSLog;
 - (void)ClearLogString;
 - (NSArray*)GetLogStringArray;
 

@@ -17,7 +17,7 @@ class BehaviorLogger: NSObject {
     /// ログを追加します。ログは UserDefaults の特定のSuiteに最大 n件(default 1000件) 保存されます。
     /// ログには AddLog() を呼び出した時間が追加されます。
     /// 注意：何らかの失敗をした場合でも、特に何もエラーをすることなくこの関数は終了します。
-    @objc static public func AddLog(description: String, data: Dictionary<String, Any>) -> Void {
+    @objc static public func AddLog(description: String, data: Dictionary<String, Any>, withUseNSLog: Bool = true) -> Void {
         var logDictionary = ["description": description,
                              "dateTime": Date().description(with: Locale.init(identifier: "ja_JP"))] as [String : Any];
         if data.count > 0 {
@@ -35,7 +35,7 @@ class BehaviorLogger: NSObject {
             return;
         }
         #if !os(watchOS)
-        GlobalDataSingleton.getInstance()?.addLogString(logJSONString)
+        GlobalDataSingleton.getInstance()?.addLogString(logJSONString, withUseNSLog: false)
         #endif
         if !LOGGER_ENABLED {
             return

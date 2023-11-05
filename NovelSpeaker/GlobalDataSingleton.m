@@ -655,14 +655,16 @@ static DummySoundLooper* dummySoundLooper = nil;
     }
     return string;
 }
-- (void)AddLogString:(NSString*)string
+- (void)AddLogString:(NSString*)string withUseNSLog:(bool)withUseNSLog
 {
     NSDate* date = [NSDate date];
     NSDateFormatter* formatter = [NSDateFormatter new];
     [formatter setDateFormat:@"HH:mm:ss"];
     [formatter setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
     NSString* logString = [[NSString alloc] initWithFormat:@"%@ %@", [formatter stringFromDate:date], string];
-    NSLog(@"%p, %@", m_LogStringArray, logString);
+    if (withUseNSLog) {
+        NSLog(@"%p, %@", m_LogStringArray, logString);
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
         [self->m_LogStringArray addObject:logString];
         while ([self->m_LogStringArray count] > 1024) {

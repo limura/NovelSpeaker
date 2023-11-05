@@ -958,8 +958,8 @@ class StoryFetcher {
 
     static func CreateFirstStoryStateWithoutCheckLoadSiteInfo(url:URL, cookieString:String?, previousContent:String?) -> StoryState {
         let siteInfoArray = StoryHtmlDecoder.shared.SearchSiteInfoArrayFrom(urlString: url.absoluteString)
-        print("\(url.absoluteString)\nsiteInfo.count: \(siteInfoArray.count)")
-        for siteInfo in siteInfoArray {
+        print("\(url.absoluteString)\nsiteInfo.count: \(siteInfoArray.count) (最初のだけ表示します)")
+        if let siteInfo = siteInfoArray.first {
             print("--\nurl:\(siteInfo.url?.pattern ?? "nil")\npageElement: \(siteInfo.pageElement)\nresourceUrl: \(siteInfo.resourceUrl ?? "nil")\nforceErrorMessageAndElement: \(siteInfo.forceErrorMessageAndElement ?? "nil")")
         }
         return CreateFirstStoryStateWithoutCheckLoadSiteInfoWith(siteInfoArray: siteInfoArray, url: url, cookieString: cookieString, previousContent: previousContent)
