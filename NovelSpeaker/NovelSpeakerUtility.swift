@@ -2292,6 +2292,51 @@ class NovelSpeakerUtility: NSObject {
         UserDefaults.standard.set(isRead, forKey: LicenseReadKey)
     }
 
+    /*
+     iOSが再起動した後、パスコードでロックを解除する前にアプリが起動した場合、
+     RealmのデータやUserDefaultsに保存されている値が読み込めなくなるようです。
+     この場合、例えば、iCloudを使う(true)と設定されているはずなものが、iCloudは使わない(false)と設定されているかのように読み出されてしまう
+     (UserDefaultsの初期値としてfalseを入れてから値を参照しているため、初期値が返っているぽい)事が発生します。
+     こうなると色々と誤作動が起こるため、事前にこのような問題が発生するか否かを確認する必要があります。
+     今(2023年11月25日)確認したところだと、ファイルの存在は確認できるが、UserDefaultsの値は読めないということらしいので、
+     local用のRealmファイルとiCloud用のRealmファイルのそれぞれの存在確認をした上で、
+     isUseCloud の値と照合して iCloud を使う設定になっていないとおかしいのに〜という部分を確認します。
+     */
+    @discardableResult
+    @objc static func CheckRealmReadable() -> Bool {
+        // まず UIApplication.shared.isProtectedDataAvailable が true を返すならロックされてないのでOKとします
+        let isProtectedDataAvailable:Bool
+        if Thread.isMainThread {
+            isProtectedDataAvailable = UIApplication.shared.isProtectedDataAvailable
+        }else{
+            isProtectedDataAvailable = DispatchQueue.main.sync {
+                return UIApplication.shared.isProtectedDataAvailable
+            }
+        }
+        if isProtectedDataAvailable == true {
+            return true
+        }
+
+        // ロックされているようなのでファイルの存在とUserDefaultsの設定の差異を確認する
+        let localExists = RealmUtil.CheckIsLocalRealmCreated()
+        let cloudExists = RealmUtil.CheckIsCloudRealmCreated()
+        let isUseCloud = RealmUtil.IsUseCloudRealm()
+        //MemoryLog.shared.AddLog(log: "local: \(localExists), cloud: \(cloudExists), useCloud: \(isUseCloud)")
+        if isUseCloud {
+            // IsUseCloudRealm で確認している値の初期値は false のため、ここで true が読めているのであれば正しい値が読めているので良しとします。
+            return true
+        }
+        // iCloud は使わないのに cloud があるのはなにかおかしいです。
+        if cloudExists == true {
+            return false
+        }
+        // iCloud は使わないのに local が無いのもなにかおかしいです。
+        if localExists == false {
+            return false
+        }
+        return true
+    }
+
     #if !os(watchOS)
     static let LongLivedOperationIDWatcherID = "AllLongLivedOperationIDWatcher"
     static func GetLongLivedOperationIDWatcherID() -> String {
