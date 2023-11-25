@@ -40,7 +40,7 @@ protocol AppInformationAliveDelegate {
 
 /// アプリ側からユーザへ通知するためのログを保存しておくための物
 /// ログは UserDefaults に保存されます。
-class AppInformationLogger {
+class AppInformationLogger : NSObject {
     static let USERDEFAULTS_NAME = "AppInformationLoggerUserDefaults";
     static let LOG_KEY = "log";
     static let READ_DATE_KEY = "readDate";
@@ -48,7 +48,7 @@ class AppInformationLogger {
     static let MAX_LOG_COUNTS = 1000;
     static var delegate:AppInformationAliveDelegate? = nil
     
-    static func AddLog(message:String, appendix:[String:String] = [:], isForDebug:Bool, file:String = #file, line:Int = #line, function:String = #function) {
+    @objc static func AddLog(message:String, appendix:[String:String] = [:], isForDebug:Bool, file:String = #file, line:Int = #line, function:String = #function) {
         let log = AppInformationLog(message: message, date: Date(), appendix: appendix, isForDebug: isForDebug, file: file, line: line, function: function)
         print(log)
         let encoder = JSONEncoder()
