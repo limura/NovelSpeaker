@@ -362,15 +362,14 @@ extension StorySiteInfo : Decodable {
 }
 
 class StoryHtmlDecoder {
-    var siteInfoArray:[StorySiteInfo] = []
-    var customSiteInfoArray:[StorySiteInfo] = []
+    var siteInfoArrayArray:[[StorySiteInfo]] = []
     let fallbackSiteInfoArray:[StorySiteInfo]
     let lock = NSLock()
     var siteInfoLoadDoneHandlerArray:[(_ errorString:String?)->Void] = []
     var cacheFileExpireTimeinterval:Double = 60*60*24
     var nextExpireDate:Date = Date(timeIntervalSince1970: 0)
-    let cacheFileName = "AutopagerizeSiteInfoCache"
-    let customCacheFileName = "NovelSpeakerSiteInfoCache"
+    //let cacheFileName = "AutopagerizeSiteInfoCache"
+    //let customCacheFileName = "NovelSpeakerSiteInfoCache"
     var siteInfoNowLoading:Bool = false
     
     static let AutopagerizeSiteInfoJSONURL = "http://wedata.net/databases/AutoPagerize/items.json"
@@ -387,7 +386,7 @@ class StoryHtmlDecoder {
     
     var IsSiteInfoReady: Bool {
         get {
-            return customSiteInfoArray.count > 0
+            return siteInfoArrayArray.reduce(0, {$0 + $1.count}) > 0
         }
     }
     
@@ -396,40 +395,59 @@ class StoryHtmlDecoder {
         return result
     }
     
-    @discardableResult
-    func AddSiteInfoFromData(data:Data) -> Bool {
-        guard let infoArray = DecodeSiteInfoData(data: data) else { return false }
-        self.lock.lock()
-        defer { self.lock.unlock() }
-        siteInfoArray.append(contentsOf: infoArray)
-        siteInfoArray.sort { (a, b) -> Bool in
-            guard let aPattern = a.url?.pattern else { return false }
-            guard let bPattern = b.url?.pattern else { return true }
-            return aPattern.count > bPattern.count
+    func generateCacheFileName(url:URL, index:Int) -> String {
+        switch(url.absoluteString) {
+        case StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL:
+            return "AutopagerizeSiteInfoCache"
+        case StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL:
+            return "NovelSpeakerSiteInfoCache"
+        default:
+            break
         }
-        return true
+        return "SiteInfoCache_\(index)"
     }
-    @discardableResult
-    func AddCustomSiteInfoFromData(data:Data) -> Bool {
-        guard let siteInfoArray = DecodeSiteInfoData(data: data) else { return false}
-        self.lock.lock()
-        defer { self.lock.unlock() }
-        customSiteInfoArray.append(contentsOf: siteInfoArray)
-        customSiteInfoArray.sort { (a, b) -> Bool in
-            guard let aPattern = a.url?.pattern else { return false }
-            guard let bPattern = b.url?.pattern else { return true }
-            return aPattern.count > bPattern.count
+    
+    func getLoadTargetURLs() -> [URL?] {
+        var loadTargetUrls:[URL?] = []
+        RealmUtil.RealmBlock { realm in
+            // 優先度の高いSiteInfoArrayを先に登録します。
+            if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                if let novelSpeakerURL = URL(string: globalState.novelSpeakerSiteInfoURL) {
+                    loadTargetUrls.append(novelSpeakerURL)
+                }else{
+                    loadTargetUrls.append(URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL))
+                    if globalState.novelSpeakerSiteInfoURL != "" {
+                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL", comment: "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.novelSpeakerSiteInfoURL], isForDebug: false)
+                    }
+                }
+                // Autopagerize の SiteInfo を読み込むと読み込むだけで 2MBytes 以上使ってしまうので
+                // watchOS では Autopagerize の SiteInfo については読み込まないようにします
+                // WARN: TODO: つまり、ことせかい用の SiteInfo が巨大になった場合同様に問題が発生しえます
+                #if !os(watchOS)
+                if let autopagerizeURL = URL(string: globalState.autopagerizeSiteInfoURL) {
+                    loadTargetUrls.append(autopagerizeURL)
+                }else{
+                    loadTargetUrls.append(URL(string: StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL))
+                    if globalState.autopagerizeSiteInfoURL != "" {
+                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL", comment: "次点のSiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.autopagerizeSiteInfoURL], isForDebug: false)
+                    }
+                }
+                #endif
+            }
         }
-        return true
+        return loadTargetUrls
     }
     
     func ClearSiteInfo() {
         self.lock.lock()
-        siteInfoArray.removeAll()
-        customSiteInfoArray.removeAll()
+        siteInfoArrayArray.removeAll()
         self.lock.unlock()
-        NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: cacheFileName)
-        NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: customCacheFileName)
+        let targetURLArray = getLoadTargetURLs()
+        for (index, url) in targetURLArray.enumerated() {
+            if let url = url {
+                NiftyUtility.FileCachedHttpGet_RemoveCacheFile(cacheFileName: generateCacheFileName(url: url, index: index))
+            }
+        }
         URLCache.shared.removeAllCachedResponses()
         LoadSiteInfoIfNeeded()
     }
@@ -438,16 +456,14 @@ class StoryHtmlDecoder {
         var result:[StorySiteInfo] = []
         self.lock.lock()
         defer { self.lock.unlock() }
-        for siteInfo in customSiteInfoArray {
-            if siteInfo.isMatchUrl(urlString: urlString) {
-                result.append(siteInfo)
+        for siteInfoArray in siteInfoArrayArray {
+            for siteInfo in siteInfoArray {
+                if siteInfo.isMatchUrl(urlString: urlString) {
+                    result.append(siteInfo)
+                }
             }
         }
-        for siteInfo in siteInfoArray {
-            if siteInfo.isMatchUrl(urlString: urlString) {
-                result.append(siteInfo)
-            }
-        }
+        
         for siteInfo in fallbackSiteInfoArray {
             if siteInfo.isMatchUrl(urlString: urlString) {
                 result.append(siteInfo)
@@ -489,147 +505,73 @@ class StoryHtmlDecoder {
     
     // 標準のSiteInfoを非同期で読み込みます。
     func LoadSiteInfo(completion:((Error?)->Void)? = nil) {
-        var cacheFileExpireTimeinterval:Double = self.cacheFileExpireTimeinterval
+        print("LoadSiteInfo in.")
+        var errorMessage:String? = nil
         func announceLoadEnd(errorString:String?) {
             lock.lock()
             siteInfoNowLoading = false
             let targetArray = siteInfoLoadDoneHandlerArray
             siteInfoLoadDoneHandlerArray.removeAll()
             lock.unlock()
+            print("LoadSiteInfo end: count: \(self.siteInfoArrayArray.count), first.count: \(self.siteInfoArrayArray.first?.count ?? -1)")
             for handler in targetArray {
                 handler(errorString)
             }
         }
-        var userDefinedSiteInfoURL:URL? = nil
-        var userDefinedCustomSiteInfoURL:URL? = nil
-        if let realm = try? RealmUtil.GetRealm(), let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
-            if globalState.autopagerizeSiteInfoURL.count > 0 {
-                if let autopagerizeURL = URL(string: globalState.autopagerizeSiteInfoURL) {
-                    userDefinedSiteInfoURL = autopagerizeURL
+
+        var loadTargetUrls = getLoadTargetURLs()
+        func siteInfoFetchAndUpdate(index:Int, targetURLArray:[URL?], cacheFileExpireTimeinterval:Double) {
+            if index >= targetURLArray.count {
+                // INFO: LoadSiteInfo() の終了処理をここでやっています
+                announceLoadEnd(errorString: errorMessage)
+                if let errorMessage = errorMessage {
+                    completion?(NovelSpeakerUtility.GenerateNSError(msg: errorMessage))
                 }else{
-                    AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL", comment: "次点のSiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.autopagerizeSiteInfoURL], isForDebug: false)
+                    completion?(nil)
                 }
+                return
             }
-            if globalState.novelSpeakerSiteInfoURL.count > 0 {
-                if let novelSpeakerURL = URL(string: globalState.novelSpeakerSiteInfoURL) {
-                   userDefinedCustomSiteInfoURL = novelSpeakerURL
-                }else{
-                    AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL", comment: "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.novelSpeakerSiteInfoURL], isForDebug: false)
-                }
-            }
-        }
-        guard let siteInfoURL = userDefinedSiteInfoURL ?? URL(string: StoryHtmlDecoder.AutopagerizeSiteInfoJSONURL),
-              let customSiteInfoURL = userDefinedCustomSiteInfoURL ?? URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL) else {
-            let errorMessage = "unknown error. default url decode error."
-            completion?(NovelSpeakerUtility.GenerateNSError(msg: errorMessage))
-            announceLoadEnd(errorString: errorMessage)
-            return
-        }
-        if RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled() {
-            cacheFileExpireTimeinterval = 0
-        }
-        var siteInfoData:Data? = nil
-        var customSiteInfoData:Data? = nil
-        
-        // SiteInfoのデータを受け取って新しい物に置き換えます。
-        // その際、デコードに失敗するなどした場合にはエラーを返しますが、
-        // エラーを返したにしても、利用可能なデータが残るように努力します。
-        // 例えば与えられたデータ全てが壊れていた場合、エラーを返し、
-        // 既存のデータが残ります。
-        func updateSiteInfo(siteInfoData:Data?, customSiteInfoData:Data?) -> Error? {
-            var isFail:Bool = false
-            var errorMessage:String? = nil
-            if let data = siteInfoData, let siteInfoArray = DecodeSiteInfoData(data: data) {
-                self.lock.lock()
-                self.siteInfoArray = siteInfoArray
-                self.siteInfoArray.sort { (a, b) -> Bool in
-                    guard let aPattern = a.url?.pattern else { return false }
-                    guard let bPattern = b.url?.pattern else { return true }
-                    return aPattern.count > bPattern.count
-                }
-                self.lock.unlock()
-            }else{
-                isFail = true
-                #if !os(watchOS)
-                let msg = NSLocalizedString("StoryFetcher_FetchSiteInfoError_SiteInfo", comment: "次点のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。")
-                //errorMessage = msg
-                AppInformationLogger.AddLog(message: msg, appendix: [
-                        "siteInfoURL": siteInfoURL.absoluteString
-                    ], isForDebug: false)
-                #endif
-            }
-            if let data = customSiteInfoData, let siteInfoArray = DecodeSiteInfoData(data: data) {
-                self.lock.lock()
-                self.customSiteInfoArray = siteInfoArray
-                self.customSiteInfoArray.sort { (a, b) -> Bool in
-                    guard let aPattern = a.url?.pattern else { return false }
-                    guard let bPattern = b.url?.pattern else { return true }
-                    return aPattern.count > bPattern.count
-                }
-                self.lock.unlock()
-            }else{
-                isFail = true
-                let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_CustomSiteInfo", comment: "ことせかい 用のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。")
-                AppInformationLogger.AddLog(message: message, appendix: [
-                        "customSiteInfoURL": customSiteInfoURL.absoluteString
-                    ], isForDebug: false)
-                if let oldErrorMessage = errorMessage {
-                    errorMessage = oldErrorMessage.appending("\n\(message)")
-                }else{
-                    errorMessage = message
-                }
-            }
-            announceLoadEnd(errorString: errorMessage)
-            if isFail {
-                return NovelSpeakerUtility.GenerateNSError(msg: errorMessage ?? "siteInfo or customSiteInfo decode error.")
-            }
-            return nil
-        }
-        
-        // Autopagerize の SiteInfo を読み込むと読み込むだけで 2MBytes 以上使ってしまうので
-        // watchOS では Autopagerize の SiteInfo については読み込まないようにします
-        // WARN: TODO: つまり、ことせかい用の SiteInfo が巨大になった場合同様に問題が発生しえます
-        #if !os(watchOS)
-        NiftyUtility.FileCachedHttpGet(url: siteInfoURL, cacheFileName: cacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
-            siteInfoData = data
-            NiftyUtility.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
-                customSiteInfoData = data
-                let result = updateSiteInfo(siteInfoData: siteInfoData, customSiteInfoData: customSiteInfoData)
-                completion?(result)
-            }) { (err) in
-                let result = updateSiteInfo(siteInfoData: siteInfoData, customSiteInfoData: nil)
-                completion?(result)
-            }
-        }) { (err) in
-            NiftyUtility.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: self.customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
-                customSiteInfoData = data
-                let result = updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData)
-                completion?(result)
-            }) { (err) in
-                let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。")
-                AppInformationLogger.AddLog(message: message, appendix: [
-                        "siteInfoURL": siteInfoURL.absoluteString,
-                        "customSiteInfoURL": customSiteInfoURL.absoluteString,
+            if let targetURL = targetURLArray[index] {
+                NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: generateCacheFileName(url: targetURL, index: index), expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
+                    guard var siteInfoArray = self.DecodeSiteInfoData(data: data) else {
+                        siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
+                        return
+                    }
+                    siteInfoArray.sort { (a, b) -> Bool in
+                        guard let aPattern = a.url?.pattern else { return false }
+                        guard let bPattern = b.url?.pattern else { return true }
+                        return aPattern.count > bPattern.count
+                    }
+                    self.lock.lock()
+                    if index < self.siteInfoArrayArray.count {
+                        self.siteInfoArrayArray[index] = siteInfoArray
+                    }else{
+                        self.siteInfoArrayArray.append(siteInfoArray)
+                    }
+                    self.lock.unlock()
+                    siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
+                }) { (err) in
+                    let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "SiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nもし、「設定タブ」→「内部データ参照用URLの設定」で設定値を書き換えている場合、それらの値が正しいものかどうかを再度確認してください。それでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。")
+                    AppInformationLogger.AddLog(message: message, appendix: [
+                        "targetURL": targetURL.absoluteString,
                         "lastError": err?.localizedDescription ?? "nil"
                     ], isForDebug: false)
-                announceLoadEnd(errorString: message)
-                completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
+                    if let currentMessage = errorMessage {
+                        errorMessage = currentMessage + "\n" + message
+                    }else{
+                        errorMessage = message
+                    }
+                    siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
+                }
             }
         }
-        #else
-        NiftyUtility.FileCachedHttpGet(url: customSiteInfoURL, cacheFileName: customCacheFileName, expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
-            customSiteInfoData = data
-            completion?(updateSiteInfo(siteInfoData: nil, customSiteInfoData: customSiteInfoData))
-        }) { (err) in
-            let message = NSLocalizedString("StoryFetcher_FetchSiteInfoError_FetchError", comment: "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージを添えてお問い合わせください。")
-            AppInformationLogger.AddLog(message: message, appendix: [
-                    "customSiteInfoURL": customSiteInfoURL.absoluteString,
-                    "lastError": err?.localizedDescription ?? "nil"
-                ], isForDebug: false)
-            announceLoadEnd(errorString: message)
-            completion?(NovelSpeakerUtility.GenerateNSError(msg: "siteInfo and customSiteInfo fetch failed."))
+        var cacheFileExpireTimeinterval:Double
+        if RealmGlobalState.GetIsForceSiteInfoReloadIsEnabled() {
+            cacheFileExpireTimeinterval = 0
+        }else{
+            cacheFileExpireTimeinterval = self.cacheFileExpireTimeinterval
         }
-        #endif
+        siteInfoFetchAndUpdate(index: 0, targetURLArray: loadTargetUrls, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
     }
 }
 
