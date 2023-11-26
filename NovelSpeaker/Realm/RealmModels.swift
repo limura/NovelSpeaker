@@ -653,14 +653,14 @@ import AVFoundation
         realm.delete(model)
     }
     
-    static func CheckIsLocalRealmCreated() -> Bool {
+    @objc static func CheckIsLocalRealmCreated() -> Bool {
         let filePath = GetLocalRealmFilePath()
         if let path = filePath?.path {
             return FileManager.default.fileExists(atPath: path)
         }
         return false
     }
-    static func CheckIsCloudRealmCreated() -> Bool {
+    @objc static func CheckIsCloudRealmCreated() -> Bool {
         let filePath = GetCloudRealmFilePath()
         if let path = filePath?.path {
             return FileManager.default.fileExists(atPath: path)

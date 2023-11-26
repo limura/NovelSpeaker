@@ -79,9 +79,13 @@ void uncaughtExceptionHandler(NSException *exception)
     // realm の data file は
     // 起動時に iCloud か local の realm file しか無い状態にしておきます。
     if ([RealmUtil IsUseCloudRealm]) {
-        [RealmUtil RemoveLocalRealmFile];
+        if ([RealmUtil CheckIsCloudRealmCreated]) {
+            [RealmUtil RemoveLocalRealmFile];
+        }
     }else{
-        [RealmUtil RemoveCloudRealmFile];
+        if ([RealmUtil CheckIsLocalRealmCreated]) {
+            [RealmUtil RemoveCloudRealmFile];
+        }
     }
     
     UIViewController* toplevelViewController = nil;
