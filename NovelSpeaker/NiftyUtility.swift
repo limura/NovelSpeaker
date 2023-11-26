@@ -15,6 +15,7 @@ import UserNotifications
 import Kanna
 import DataCompression
 import StoreKit
+import AVFoundation
 
 #if !os(watchOS)
 import PDFKit
@@ -1990,3 +1991,80 @@ extension String {
         return String(self.split(separator: "\n").prefix(lineCount).joined(separator: "\n").prefix(maxCharacterCount))
     }
 }
+
+// ログをURL、発話、通知に飛ばします。何らかの問題でprintをデバッガから参照できない場合に使います。
+// 一応、メモリ内に蓄えて後から参照するようなものもつけてます。
+class DebugLogger: NSObject {
+    @objc public static let shared = DebugLogger()
+    var log:[String] = []
+    let synthe = AVSpeechSynthesizer()
+    var count = 0
+    
+    @objc static func SendLogToWeb(log:String, urlBase:String = "http://172.21.139.2/DebugLogger/") {
+        if let url = URL(string: "\(urlBase)\(log)") {
+            let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+                if let error = error {
+                    print("Error: \(error.localizedDescription)")
+                } else if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                    print("HTTP Error: \(httpResponse.statusCode)")
+                } else if let responseData = data {
+                    let responseString = String(data: responseData, encoding: .utf8)
+                    print("Response: \(responseString ?? "")")
+                }
+            }
+            task.resume()
+        } else {
+            print("SendLogToWeb: Invalid URL")
+        }
+    }
+    @objc static func SendLogToSpeech(log:String) {
+        print("SendLogToSpeech: \(log)")
+        let utt = AVSpeechUtterance(string: log)
+        utt.voice = AVSpeechSynthesisVoice(language: "ja-JP") ?? AVSpeechSynthesisVoice()
+        DebugLogger.shared.synthe.speak(utt)
+    }
+    @objc static func SendLogToNotification(log:String){
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm.ss"
+        let currentTime = formatter.string(from: Date())
+        
+        let content = UNMutableNotificationContent()
+        content.body = log
+        
+        // identifier は被らないようにします。そうすると複数の通知を流しても全部表示されるはずです(multithread で同時に呼ばれた場合はケアしてません)
+        let request = UNNotificationRequest(identifier: "DebugLogger-\(currentTime)+\(DebugLogger.shared.count)", content: content, trigger: nil)
+        DebugLogger.shared.count+=1
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("通知のスケジュールに失敗: \(error.localizedDescription)")
+            } else {
+                print(log)
+            }
+        }
+    }
+    
+    @objc func AddLogToMemory(log:String) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm.ss"
+        let currentTime = formatter.string(from: Date())
+        let isProtectedDataAvailable:Bool
+        if Thread.isMainThread {
+            isProtectedDataAvailable = UIApplication.shared.isProtectedDataAvailable
+        }else{
+            isProtectedDataAvailable = DispatchQueue.main.sync {
+                return UIApplication.shared.isProtectedDataAvailable
+            }
+        }
+        let logString = "\(currentTime):\n\(log)\nisProtectedDataAvailable: \(isProtectedDataAvailable)"
+        self.log.append(logString)
+    }
+    @objc func GetMemoryLog() -> [String] {
+        return self.log
+    }
+    @objc func GetMemoryLogString() -> String {
+        return self.log.joined(separator: "\n\n")
+    }
+}
+
+
