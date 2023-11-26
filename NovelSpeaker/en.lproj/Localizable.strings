@@ -275,6 +275,10 @@
 "RemoteDataURLSettingViewController_SearchInfoSection_Title" = "Search hint information for web search tab";
 "RemoteDataURLSettingViewController_SearchInfoSampleButton" = "Open the URL of the standard setting data";
 "RemoteDataURLSettingViewController_URLTextFieldPlaceholder" = "Please enter the URL";
+"RemoteDataURLSettingViewController_preferredSiteInfoSection_Title" = "Preferred SiteInfo List";
+"RemoteDataURLSettingViewController_preferredSiteInfoList_AddButtonTitle" = "Add URL";
+"RemoteDataURLSettingViewController_preferredSiteInfoList_AddURLPlaceholder" = "Enter URL";
+
 
 "NovelSpeakerBackup_InitializeBackup" = "Initializing";
 "NovelSpeakerBackup_ExportingNovelText" = "Step 1/2\r\nExtracting texts from novels";
@@ -809,10 +813,16 @@
 "StoryFetcher_FetchError_RobotsText" = "Since the website is a site with mechanical access restricted, we cannot obtain it due to the facts. (rejected by robots.txt)";
 "StoryFetcher_FetchSiteInfoError_SiteInfo" = "Failed to read the next SiteInfo data. Due to this failure, when downloading a novel, it is more likely that the body part of the novel cannot be extracted and characters other than the body will also be imported.\nAfter checking the network status, execute \"Settings tab\" -> \"Get SiteInfo again\" and try to get it again.\nIf the same problem is still reported, I attached this error by turning on \"Attach the contents of \'Notification of in-app error\'\" in \"Settings tab\" -> \"Contact developer\". Please contact us in the state.";
 "StoryFetcher_FetchSiteInfoError_CustomSiteInfo" = "Failed to read SiteInfo data for novelspeakers. Due to this failure, when downloading a novel, it is more likely that the body part of the novel cannot be extracted and characters other than the body will also be imported.\nAfter checking the network status, execute \"Settings tab\" -> \"Get SiteInfo again\" and try to get it again.\nIf the same problem is still reported, I attached this error by turning on \"Attach the contents of \'Notification of in-app error\'\" in \"Settings tab\" -> \"Contact developer\". Please contact us in the state.";
-"StoryFetcher_FetchSiteInfoError_FetchError" = "Failed to read all SiteInfo data. Due to this failure, when downloading a novel, it is more likely that the body part of the novel cannot be extracted and characters other than the body will also be imported.\nAfter checking the network status, execute \"Settings tab\" -> \"Get SiteInfo again\" and try to get it again.\nIf the same problem is still reported, I attached this error by turning on \"Attach the contents of \'Notification of in-app error\'\" in \"Settings tab\" -> \"Contact developer\". Please contact us in the state.";
+"StoryFetcher_FetchSiteInfoError_FetchError" = "Failed to load SiteInfo data. This failure increases the possibility that when downloading a novel, the text portion of the novel cannot be extracted, and strings other than the text will also be imported.\nPlease check your network status and try to retrieve the data again by executing \"Settings Tab\" -> \"Retrieve SiteInfo\". \nIf you have rewritten the setting values in the \"Settings Tab\" -> \"Internal Data Reference URL Settings\", please check again if those values are correct.\nIf the same problem is still reported, please contact us with this error attached by turning on the \"Attach the contents of the 'Notification of error in the application'\" in the \"Settings tab\" -> \"Contact the developer\".";
 "StoryFetcher_FetchNext_ErrorSameContent" = "It seems that the same content is loaded. It is considered that the detection of the next page has failed and it fails.\nIf this error appears, it is possible that the information for detecting the \"next page\" for the target website is out of date and malfunctioning. You probably aren't aware that you're having this problem, so please contact us by going to the Settings tab -> Contact Developer with this error message and the URL of the novel you're trying to capture.";
 "StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL" = "Since the URL format set as the runner-up SiteInfo was invalid (a character string that cannot be read as a URL), ignore it and use the standard one.";
-"StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL" = "Since the URL format set as SiteInfo for NovelSpeakers was invalid (a character string that cannot be read as a URL), ignore it and use the standard one.";
+"StoryFetcher_InvalidURLString_for_NovelSPeakerSiteInfoURL" = "Since the URL format set as SiteInfo for NovelSpeakers was invalid (a character string that cannot be read as a URL), ignore it and use the standard one.";
+"StoryFetcher_InvalidURLString_preferredSiteInfoURLList" = "There seems to be a string in the \"Preferred SiteInfo List\" that is not a web URL.";
+
+"StoryHtmlDecoder_testSiteInfoURLValid_Error_InvalidURL" = "It does not appear to be a valid URL string.";
+"StoryHtmlDecoder_testSiteInfoURLValid_Error_GetURLFailed" = "It appears that reading from the specified URL was successful, but reading SiteInfo from JSON failed instead of the expected content. Please verify that it is the correct data.";
+"StoryHtmlDecoder_testSiteInfoURLValid_Error_GetRequestError" = "Failed to read from the specified URL. Please check that you have filled in the correct URL, network connection status, etc.";
+"StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData" = "Failed to fetch SiteInfo data.\nI was able to read the data for the target URL, but it does not seem to be in the expected JSON format.";
 
 "AutoSplitStringSettingViewController_Title" = "Text segmentation string settings";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_Error_NoText" = "Empty string cannot be specified";

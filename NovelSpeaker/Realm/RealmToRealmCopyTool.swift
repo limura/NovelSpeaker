@@ -197,6 +197,8 @@ class RealmToRealmCopyTool: NSObject {
             newObj.novelLikeOrder.append(objectsIn: obj.novelLikeOrder)
             newObj.menuItemsNotRemoved.removeAll()
             newObj.menuItemsNotRemoved.append(objectsIn: obj.menuItemsNotRemoved)
+            newObj.preferredSiteInfoURLList.removeAll()
+            newObj.preferredSiteInfoURLList.append(objectsIn: obj.preferredSiteInfoURLList)
 
             to.add(newObj, update: .modified)
             try to.commitWrite()

@@ -368,8 +368,6 @@ class StoryHtmlDecoder {
     var siteInfoLoadDoneHandlerArray:[(_ errorString:String?)->Void] = []
     var cacheFileExpireTimeinterval:Double = 60*60*24
     var nextExpireDate:Date = Date(timeIntervalSince1970: 0)
-    //let cacheFileName = "AutopagerizeSiteInfoCache"
-    //let customCacheFileName = "NovelSpeakerSiteInfoCache"
     var siteInfoNowLoading:Bool = false
     
     static let AutopagerizeSiteInfoJSONURL = "http://wedata.net/databases/AutoPagerize/items.json"
@@ -390,9 +388,32 @@ class StoryHtmlDecoder {
         }
     }
     
-    func DecodeSiteInfoData(data:Data) -> [StorySiteInfo]? {
+    static func DecodeSiteInfoData(data:Data) -> [StorySiteInfo]? {
         guard let result = try? JSONDecoder().decode([StorySiteInfo].self, from: data) else { return nil }
         return result
+    }
+    
+    static func testSiteInfoURLValid(urlString:String, completion: @escaping (_ errorString: String?, _ urlString: String)->Void) {
+        guard let url = URL(string: urlString) else {
+            completion(NSLocalizedString("StoryHtmlDecoder_testSiteInfoURLValid_Error_InvalidURL", comment: "有効なURL文字列ではないようです。"), urlString)
+            return
+        }
+        NiftyUtility.httpGet(url: url) {
+            content,
+            headerCharset in
+            guard DecodeSiteInfoData(data: content) != nil else {
+                completion(
+                    NSLocalizedString(
+                        "StoryHtmlDecoder_testSiteInfoURLValid_Error_GetURLFailed",
+                        comment: "指定されたURLからの読み出しには成功したようですが、期待されている内容ではなく、JSONからSiteInfoの読み出しに失敗しています。正しいデータであるかどうか確認してください。"
+                    ), urlString
+                )
+                return
+            }
+            completion(nil, urlString)
+        } failedAction: { err in
+            completion(NSLocalizedString("StoryHtmlDecoder_testSiteInfoURLValid_Error_GetRequestError", comment: "指定されたURLからの読み出しに失敗しています。正しいURLを記入していることや、ネットワーク接続状態などを確認してください。"), urlString)
+        }
     }
     
     func generateCacheFileName(url:URL, index:Int) -> String {
@@ -412,12 +433,19 @@ class StoryHtmlDecoder {
         RealmUtil.RealmBlock { realm in
             // 優先度の高いSiteInfoArrayを先に登録します。
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
+                for urlString in globalState.preferredSiteInfoURLList {
+                    if let url = URL(string: urlString) {
+                        loadTargetUrls.append(url)
+                    }else{
+                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_preferredSiteInfoURLList", comment: "「優先SiteInfoリスト」に含まれる文字列にWebのURLではない文字列があるようです。"), appendix: ["invalid URL String" : urlString], isForDebug: false)
+                    }
+                }
                 if let novelSpeakerURL = URL(string: globalState.novelSpeakerSiteInfoURL) {
                     loadTargetUrls.append(novelSpeakerURL)
                 }else{
                     loadTargetUrls.append(URL(string: StoryHtmlDecoder.NovelSpeakerSiteInfoJSONURL))
                     if globalState.novelSpeakerSiteInfoURL != "" {
-                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL", comment: "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.novelSpeakerSiteInfoURL], isForDebug: false)
+                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_InvalidURLString_for_NovelSPeakerSiteInfoURL", comment: "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。"), appendix: ["invalidURLText": globalState.novelSpeakerSiteInfoURL], isForDebug: false)
                     }
                 }
                 // Autopagerize の SiteInfo を読み込むと読み込むだけで 2MBytes 以上使ってしまうので
@@ -518,8 +546,15 @@ class StoryHtmlDecoder {
                 handler(errorString)
             }
         }
+        func addErrorMessage(message:String) {
+            if let currentMessage = errorMessage {
+                errorMessage = currentMessage + "\n" + message
+            }else{
+                errorMessage = message
+            }
+        }
 
-        var loadTargetUrls = getLoadTargetURLs()
+        let loadTargetUrls = getLoadTargetURLs()
         func siteInfoFetchAndUpdate(index:Int, targetURLArray:[URL?], cacheFileExpireTimeinterval:Double) {
             if index >= targetURLArray.count {
                 // INFO: LoadSiteInfo() の終了処理をここでやっています
@@ -533,7 +568,10 @@ class StoryHtmlDecoder {
             }
             if let targetURL = targetURLArray[index] {
                 NiftyUtility.FileCachedHttpGet(url: targetURL, cacheFileName: generateCacheFileName(url: targetURL, index: index), expireTimeinterval: cacheFileExpireTimeinterval, canRecoverOldFile: true, successAction: { (data) in
-                    guard var siteInfoArray = self.DecodeSiteInfoData(data: data) else {
+                    guard var siteInfoArray = StoryHtmlDecoder.DecodeSiteInfoData(data: data) else {
+                        AppInformationLogger.AddLog(message: NSLocalizedString("StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData", comment: "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSON形式ではないようです。"), appendix: [
+                            "targetURL": targetURL.absoluteString,
+                        ], isForDebug: false)
                         siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
                         return
                     }
@@ -556,11 +594,7 @@ class StoryHtmlDecoder {
                         "targetURL": targetURL.absoluteString,
                         "lastError": err?.localizedDescription ?? "nil"
                     ], isForDebug: false)
-                    if let currentMessage = errorMessage {
-                        errorMessage = currentMessage + "\n" + message
-                    }else{
-                        errorMessage = message
-                    }
+                    addErrorMessage(message: message)
                     siteInfoFetchAndUpdate(index: index+1, targetURLArray: targetURLArray, cacheFileExpireTimeinterval: cacheFileExpireTimeinterval)
                 }
             }

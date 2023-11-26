@@ -12,6 +12,7 @@ import RealmSwift
 
 class RemoteDataURLSettingViewController: FormViewController, RealmObserverResetDelegate {
     var globalDataNotificationToken:NotificationToken? = nil
+    let preferredSiteInfoSectionTag = "preferredSiteInfoSectionTag"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +31,20 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        if let items = self.form.sectionBy(tag: self.preferredSiteInfoSectionTag) as? MultivaluedSection {
+            let filterdItems = items.values().compactMap {
+                if let url = $0 as? URL {
+                    return url.absoluteString
+                } else {
+                    return nil
+                }
+            }
+            RealmUtil.Write { realm in
+                guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
+                globalState.preferredSiteInfoURLList.removeAll()
+                globalState.preferredSiteInfoURLList.append(objectsIn: filterdItems)
+            }
+        }
     }
     
     deinit {
@@ -45,7 +60,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
     }
     
     func registerObserver() {
-        let targets:[String] = ["autopagerizeSiteInfoURL", "novelSpeakerSiteInfoURL", "defaultSpeechModURL", "searchInfoURL"]
+        let targets:[String] = ["autopagerizeSiteInfoURL", "novelSpeakerSiteInfoURL", "defaultSpeechModURL", "searchInfoURL", "preferredSiteInfoURLList"]
         
         RealmUtil.RealmBlock { (realm) -> Void in
             if let globalData = RealmGlobalState.GetInstanceWith(realm: realm) {
@@ -84,6 +99,34 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
         <<< LabelRow() {
             $0.title = NSLocalizedString("RemoteDataURLSettingViewController_Information", comment: "注意: ここにある設定は下手に書き換えると ことせかい が正常に動作しなくなる可能性があります。書き換えを行う場合は内容を理解した上で行ってください。\nなお、標準設定は全て「空(なにも書かれていない)」状態ですので問題が起こった場合には全ての項目の内容を消すことで標準設定に戻すことができます。")
             $0.cell.textLabel?.numberOfLines = 0
+        }
+        +++ MultivaluedSection(multivaluedOptions: [.Insert, .Delete, .Reorder],
+            header: NSLocalizedString("RemoteDataURLSettingViewController_preferredSiteInfoSection_Title", comment: "優先SiteInfo"),
+            footer: "") {
+            // 削除イベントを取るのが面倒くさそうだったので、viewDidDisappearでこのタグから内容を取り出してDBを更新することにします。
+            $0.tag = self.preferredSiteInfoSectionTag
+            $0.addButtonProvider = { section in
+                return ButtonRow(){
+                    $0.title = NSLocalizedString("RemoteDataURLSettingViewController_preferredSiteInfoList_AddButtonTitle", comment: "新しいURLを追加")
+                }
+            }
+            $0.multivaluedRowToInsertAt = { index in
+                return URLRow() { (row) in
+                    row.placeholder = NSLocalizedString("RemoteDataURLSettingViewController_preferredSiteInfoList_AddURLPlaceholder", comment: "URLを入力してください")
+                }
+            }
+            let currentForm = $0
+            RealmUtil.RealmBlock { realm in
+                if let preferredSiteInfoURLList = RealmGlobalState.GetInstanceWith(realm: realm)?.preferredSiteInfoURLList {
+                    for urlString in preferredSiteInfoURLList {
+                        if let url = URL(string: urlString) {
+                            currentForm <<< URLRow() {
+                                $0.value = url
+                            }
+                        }
+                    }
+                }
+            }
         }
         +++ Section(NSLocalizedString("RemoteDataURLSettingViewController_NovelSpeakerSiteInfoSection_Title", comment: "ことせかい用SiteInfo"))
         <<< TextRow() {

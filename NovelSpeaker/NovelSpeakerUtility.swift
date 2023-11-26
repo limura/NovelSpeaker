@@ -1573,6 +1573,14 @@ class NovelSpeakerUtility: NSObject {
                 if let likeButtonDialogTypeNumber = dic.object(forKey: "likeButtonDialogType") as? NSNumber, let likeButtonDialogType = LikeButtonDialogType(rawValue: likeButtonDialogTypeNumber.intValue) {
                     globalState.likeButtonDialogType = likeButtonDialogType.rawValue
                 }
+                if let preferredSiteInfoURLList = dic.object(forKey: "preferredSiteInfoURLList") as? NSArray {
+                    globalState.preferredSiteInfoURLList.removeAll()
+                    for target in preferredSiteInfoURLList {
+                        if let target = target as? String {
+                            globalState.preferredSiteInfoURLList.append(target)
+                        }
+                    }
+                }
                 realm.add(globalState, update: .modified)
             }
         }
@@ -2093,6 +2101,7 @@ class NovelSpeakerUtility: NSObject {
                 "novelLikeOrder": Array(globalState.novelLikeOrder),
                 "menuItemsNotRemoved": Array(globalState.menuItemsNotRemoved),
                 "likeButtonDialogType": globalState.likeButtonDialogType,
+                "preferredSiteInfoURLList": Array(globalState.preferredSiteInfoURLList),
             ]
         }
     }
@@ -2321,7 +2330,6 @@ class NovelSpeakerUtility: NSObject {
         let localExists = RealmUtil.CheckIsLocalRealmCreated()
         let cloudExists = RealmUtil.CheckIsCloudRealmCreated()
         let isUseCloud = RealmUtil.IsUseCloudRealm()
-        //MemoryLog.shared.AddLog(log: "local: \(localExists), cloud: \(cloudExists), useCloud: \(isUseCloud)")
         if isUseCloud {
             // IsUseCloudRealm で確認している値の初期値は false のため、ここで true が読めているのであれば正しい値が読めているので良しとします。
             return true

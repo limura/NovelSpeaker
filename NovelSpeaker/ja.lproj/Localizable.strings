@@ -272,6 +272,9 @@
 "RemoteDataURLSettingViewController_SearchInfoSection_Title" = "Web検索タブ用検索ヒント情報";
 "RemoteDataURLSettingViewController_SearchInfoSampleButton" = "標準設定データのURLを開く";
 "RemoteDataURLSettingViewController_URLTextFieldPlaceholder" = "URLを入力してください";
+"RemoteDataURLSettingViewController_preferredSiteInfoSection_Title" = "優先SiteInfo";
+"RemoteDataURLSettingViewController_preferredSiteInfoList_AddButtonTitle" = "新しいURLを追加";
+"RemoteDataURLSettingViewController_preferredSiteInfoList_AddURLPlaceholder" = "URLを入力してください";
 
 "NovelSpeakerBackup_InitializeBackup" = "初期化中";
 "NovelSpeakerBackup_ExportingNovelText" = "工程 3/5\r\n小説本文を抽出中";
@@ -801,10 +804,16 @@
 "StoryFetcher_FetchError_RobotsText" = "Webサイト様側で機械的なアクセスを制限されているサイトであったため、ことせかい による取得ができません。(robots.txt で拒否されています)";
 "StoryFetcher_FetchSiteInfoError_SiteInfo" = "次点のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。";
 "StoryFetcher_FetchSiteInfoError_CustomSiteInfo" = "ことせかい 用のSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。";
-"StoryFetcher_FetchSiteInfoError_FetchError" = "全てのSiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nそれでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。";
+"StoryFetcher_FetchSiteInfoError_FetchError" = "SiteInfoデータの読み込みに失敗しました。この失敗により、小説をダウンロードする時に、小説の本文部分を抽出できず、本文以外の文字列も取り込む事になる可能性が高まります。\nネットワーク状況を確認の上、「設定タブ」→「SiteInfoを取得し直す」を実行して再取得を試みてください。\nもし、「設定タブ」→「内部データ参照用URLの設定」で設定値を書き換えている場合、それらの値が正しいものかどうかを再度確認してください。それでも同様の問題が報告される場合には、「設定タブ」→「開発者に問い合わせる」内の『「アプリ内エラーのお知らせ」の内容を添付する』をONにする事でこのエラーを添付した状態でお問い合わせください。";
 "StoryFetcher_FetchNext_ErrorSameContent" = "同じ内容が読み込まれているようです。次のページの検出に失敗しているとみなして失敗とします。\nこのエラーが出るという事は、対象のWebサイト様用の「次のページ」を検出するための情報が古くなっていて誤動作している可能性が考えられます。恐らくはこの問題が発生していることに気づかれておりませんので、「設定タブ」→「開発者に問い合わせる」よりこのエラーメッセージと、取り込もうとした小説のURLを添えてお問い合わせください。";
 "StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL" = "次点のSiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。";
-"StoryFetcher_InvalidURLString_for_AutopagerizeSiteInfoURL" = "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。";
+"StoryFetcher_InvalidURLString_for_NovelSPeakerSiteInfoURL" = "ことせかい用SiteInfo として設定されていたURLの形式が不正(URLとして読み込めない文字列)であったため、無視して標準の物を使います。";
+"StoryFetcher_InvalidURLString_preferredSiteInfoURLList" = "「優先SiteInfoリスト」に含まれる文字列にWebのURLではない文字列があるようです。";
+
+"StoryHtmlDecoder_testSiteInfoURLValid_Error_InvalidURL" = "有効なURL文字列ではないようです。";
+"StoryHtmlDecoder_testSiteInfoURLValid_Error_GetURLFailed" = "指定されたURLからの読み出しには成功したようですが、期待されている内容ではなく、JSONからSiteInfoの読み出しに失敗しています。正しいデータであるかどうか確認してください。";
+"StoryHtmlDecoder_testSiteInfoURLValid_Error_GetRequestError" = "指定されたURLからの読み出しに失敗しています。正しいURLを記入していることや、ネットワーク接続状態などを確認してください。";
+"StoryFetcher_FetchSiteInfoError_DecodeSiteInfoData" = "SiteInfoデータの取り込みに失敗しています。\n対象のURLのデータは読み出せましたが、期待されているJSON形式ではないようです。";
 
 "AutoSplitStringSettingViewController_Title" = "テキスト分割文字列の設定";
 "AutoSplitStringSettingViewController_AddSplitTargetDialog_Error_NoText" = "空文字列は指定できません";
