@@ -50,14 +50,12 @@ void uncaughtExceptionHandler(NSException *exception)
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     if ([NovelSpeakerUtility CheckRealmReadable] == false) {
-        //[[MemoryLog shared] AddLogWithLog:@"CheckRealmReadable return false. exit."];
         int zero = 0;
         int nv = 1 / zero; // 0除算で死亡
         NSLog(@"%d", nv); // 形の上では使っておきます
         // 念のため false を返しておく
         return false;
     }
-    //[[MemoryLog shared] AddLogWithLog:@"app start."];
     NSSetUncaughtExceptionHandler(&uncaughtExceptionHandler);
     
     // Override point for customization after application launch.
