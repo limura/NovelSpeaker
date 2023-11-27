@@ -911,15 +911,29 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.2
 
-- バックアップファイルを適用している時のダイアログメッセージがおかしかった部分を修正
-- 起動時に時間がかかってシステム側から強制終了される場合があった問題に対応
-− 「本棚画面」の「順番」の「自作フォルダ順」での処理が遅かった問題を修正
+- SiteInfo に scrollTo という概念を追加
+- 「設定タブ」->「内部データ参照用URLの設定」に「優先SiteInfo」を追加
+- 「設定タブ」->「開発者に問い合わせる」画面に「問題が発生する小説の本文も添付する」のON/OFF設定を追加
+- 内部データが読み込めなくなって誤動作した時の問題に対応します
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.8.2
+
+インタフェース・内部動作の変更
+
+- SiteInfo に scrollTo という概念を追加
+- 「設定タブ」->「内部データ参照用URLの設定」に「優先SiteInfo」を追加
+- 「設定タブ」->「開発者に問い合わせる」画面に「問題が発生する小説の本文も添付する」のON/OFF設定を追加
+
+問題の修正
+
+- 内部データが読み込めなくなって誤動作した時の問題に対応します
+
+
 Version 2.8.1
 
 問題の修正

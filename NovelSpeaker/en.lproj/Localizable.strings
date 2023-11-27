@@ -922,15 +922,29 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.2
 
-- Fixed the part where the dialog message when applying the backup file was strange
-- Fixed the problem that it took a long time to start and was forced to quit from the system side.
-- Fixed a slow processing problem in \"Sort\" of \"Bookshelf Screen\" in \"Original folder order\".
+- Added scrollTo concept to SiteInfo
+- Added \"Preferred SiteInfo\" to \"Settings tab\" -> \"Internal data reference URL settings\"
+- Added ON/OFF setting for \"Attach the text of the novel where the problem occurs\" to the \"Settings tab\" -> \"Contact developer\" screen.
+- Corresponds to problems when internal data cannot be read and malfunctions occur.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.8.2
+
+Changes in interface/internal operation
+
+- Added scrollTo concept to SiteInfo
+- Added \"Preferred SiteInfo\" to \"Settings tab\" -> \"Internal data reference URL settings\"
+- Added ON/OFF setting for \"Attach the text of the novel where the problem occurs\" to the \"Settings tab\" -> \"Contact developer\" screen.
+
+Fixing the problem
+
+- Corresponds to problems when internal data cannot be read and malfunctions occur.
+
+
 Version 2.8.1
 
 Fix the problem

@@ -3692,3 +3692,51 @@ Fix the problem
 - Fixed the problem that it took a long time to start and was forced to quit from the system side.
 - Fixed a slow processing problem in "Sort" of "Bookshelf Screen" in "Original folder order".
 
+
+Version 2.8.2
+
+インタフェース・内部動作の変更
+
+- SiteInfo に scrollTo という概念を追加
+- 「設定タブ」->「内部データ参照用URLの設定」に「優先SiteInfo」を追加
+- 「設定タブ」->「開発者に問い合わせる」画面に「問題が発生する小説の本文も添付する」のON/OFF設定を追加
+
+問題の修正
+
+- 内部データが読み込めなくなって誤動作した時の問題に対応します
+
+今回の修正は、致命的な問題の修正が一つ、少し使い勝手が上がるものがいくつかといった感じのものになります。
+
+まずは致命的な問題の修正について。
+こちらは、内部データが読み出せなくなるという事が起きた場合で、iCloud同期を利用している場合に、内部データベースファイルを削除してしまうという問題でした。これが発生すると全てのデータが消えた形となり、初期状態のデータの書き込みをして起動することになるため、本棚から本が全て消え、標準の話者の設定などが初期化されるというような挙動を取ることになります。今回の修正でファイルを削除することはなくなったはずです。
+なお、この条件が発生するのは「iPhone(やiPad)を再起動した後、一度もパスコードによるロック解除を行っていない」時に、「Bluetoothオーディオなどで ことせかい を呼び出す」と発生します。この状態で ことせかい が呼び出された場合、内部データベースなどを参照できませんので ことせかい は正しく動作しないという問題については解決していません(恐らく解決できないのでそこについては諦めてロック解除してからご利用ください)。
+
+次に、SiteInfo に scrollTo という概念を追加 したことについて。
+こちらの設定が追加されたSiteInfoの適用されるWebサイト様では、小説の本文を取り込む前にscrollToで指定されるelementが画面内に入るようにスクロールしてから本文を評価するようになります。この変更によって、画面をスクロールしないと内容が表示されないコンテンツがあるWebサイト様について、今までよりは対応範囲が増えるという形になります。
+
+次に、「設定タブ」->「内部データ参照用URLの設定」に「優先SiteInfo」を追加したことについて。
+こちらは「このWebサイトでの」「小説の本文部分はどこなのか」といったことを定義している SiteInfo について、今まで使用していた「ことせかい 用 SiteInfo」と「Autopagerize 用 SiteInfo」よりも先に適用される SiteInfo のURLを複数指定できるようになる、というものです。SiteInfo の定義を書くことができて、アクセスできるURLを提供できる方に限られますが、独自に定義した SiteInfo を提供していただいて、ユーザの皆様で共有するなどで使っていただければと思います。
+これを使う場合の例として、現時点(2023年11月27日)の ことせかい 用 の SiteInfo をもとに、小説家になろう様とPixiv小説様について、前書きや後書き、キャプションについて取り込まないように設定されたSiteInfoを
+  https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/Provisional-SimpleSiteInfo.json
+にて提供します。こちらのURLを「設定タブ」->内部データ参照用URLの設定」内の「優先SiteInfo」に設定し、「設定タブ」->「SiteInfoを取得し直す」を選択して正しく読み込みが完了すれば、小説家になろう様とPixiv小説様について、前書きや後書き、キャプションについて取り込まなくなるはずです。
+なお、上記のURLを設定するのが面倒な場合、
+  https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/Provisional-SimpleSiteInfo.novelspeaker-backup-json
+にある(優先SiteInfoだけが書かれた)軽量バックアップファイルを適用するのでも良いです。(一応この軽量バックアップファイルを適用した後は「設定タブ」->内部データ参照用URLの設定」内の「優先SiteInfo」に設定が入っていることを確認してください。また、その後「設定タブ」->「SiteInfoを取得し直す」を選択する必要があります)
+
+次に、「設定タブ」->「開発者に問い合わせる」画面に「問題が発生する小説の本文も添付する」のON/OFF設定を追加した事について。
+こちらは、「読み上げがうまくいかない」といったお問い合わせの時に利用していただけますととても助かります。
+
+  
+  さて、残念なことに私はお問い合わせ対応に疲れ果てていますため、致命的な問題(アプリが強制終了するようなもの)以外への対応は極力しない形にさせていただいています。お問い合わせ窓口の閉鎖等については今の所はしておりませんが、上記のような対応になりますため、新機能のご提案や強制終了を伴わない不都合の報告をされましたとしても、対応はされないものとお考え下さい。ただ、現在は開発をほぼ停止しておりますので、お問い合わせされない問題についてはただ待っていても直りませんのでお問い合わせしていただいたほうが良さそうに思います。とはいっても、私がお問い合わせへの対応に疲れ果てていて嫌がっているという事はご理解の上、お問い合わせいただけますと助かります。特に、不都合報告の場合は可能な限りの情報を書いてください。簡単に設定や問題の起きている小説やその本文を送信できる仕組みもつけています。できるだけ利用してください。再現手順を書くのが面倒くさいのはわかりますが、その情報量の少ないお問い合わせを読んで私が推測に推測を重ねて実験して再現しなくて「誠に申し訳ありませんが詳しく教えてください」と返信メールを書くという形で疲弊するのにはもう飽きたので。本当に勘弁してください。よろしくお願いいたします。
+
+Version 2.8.2
+
+Changes in interface/internal operation
+
+- Added scrollTo concept to SiteInfo
+- Added "Preferred SiteInfo" to "Settings tab" -> "Internal data reference URL settings"
+- Added ON/OFF setting for ``Attach the text of the novel where the problem occurs'' to the ``Settings tab'' -> ``Contact developer'' screen.
+
+Fixing the problem
+
+- Corresponds to problems when internal data cannot be read and malfunctions occur.
