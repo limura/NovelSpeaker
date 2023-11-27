@@ -80,6 +80,7 @@
 		214D96E925D007DB0004F8D9 /* NovelSpeakerIcon-color-1024x1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 214D96E825D007DB0004F8D9 /* NovelSpeakerIcon-color-1024x1024.png */; };
 		214E60D725493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */; };
 		214E60D825493E5100097AB3 /* HTTPCookieSyncTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */; };
+		215A668F2AA4C2DF00207383 /* SpeechModCheckViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215A668E2AA4C2DF00207383 /* SpeechModCheckViewController.swift */; };
 		215B4DE81FB8E2C400602DB6 /* ImportFromWebPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */; };
 		215B4DEA1FB928AA00602DB6 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 215B4DE91FB928A900602DB6 /* WebKit.framework */; };
 		215BFB3F23ED5DAB0078E158 /* StoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215BFB3E23ED5DAB0078E158 /* StoryView.swift */; };
@@ -382,6 +383,7 @@
 		21429D85209F45FD001426F5 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		214D96E825D007DB0004F8D9 /* NovelSpeakerIcon-color-1024x1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "NovelSpeakerIcon-color-1024x1024.png"; path = "images/NovelSpeakerIcon-color-1024x1024.png"; sourceTree = "<group>"; };
 		214E60D625493E5100097AB3 /* HTTPCookieSyncTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPCookieSyncTool.swift; sourceTree = "<group>"; };
+		215A668E2AA4C2DF00207383 /* SpeechModCheckViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModCheckViewController.swift; sourceTree = "<group>"; };
 		215B4DE71FB8E2C400602DB6 /* ImportFromWebPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportFromWebPageViewController.swift; sourceTree = "<group>"; };
 		215B4DE91FB928A900602DB6 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		215BFB3E23ED5DAB0078E158 /* StoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryView.swift; sourceTree = "<group>"; };
@@ -1063,6 +1065,7 @@
 				210DD99725840D1000F2B907 /* BookshelfViewButtonSettingsViewController.swift */,
 				212F6175258723C200822737 /* NovelLikeOrderSettingViewController.swift */,
 				21E26FEA260E066F009018B6 /* SafeModeViewController.swift */,
+				215A668E2AA4C2DF00207383 /* SpeechModCheckViewController.swift */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -1682,6 +1685,7 @@
 				21C759FA2287123500956B73 /* RealmModels.swift in Sources */,
 				21C74F9E1965A5300039A706 /* NarouContentCacheData.m in Sources */,
 				21648002228F180E00A183DF /* BookShelfRATreeViewController.swift in Sources */,
+				215A668F2AA4C2DF00207383 /* SpeechModCheckViewController.swift in Sources */,
 				210EFEE123C8A92D007C3016 /* Speaker.swift in Sources */,
 				210EFEDC23C80694007C3016 /* StoryTextClassifier.swift in Sources */,
 				21A291F322A13CDD000AA58C /* RealmToRealmCopyTool.swift in Sources */,
