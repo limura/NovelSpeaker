@@ -1,0 +1,48 @@
+[
+{
+  "resource_url": "http://wedata.net/items/81627",
+  "data": {
+    "pageElement": "//main/div/p|//section[@id='novel-text-container']|//div[@class='novel-details-view']//div[contains(@class,'comment-text') and contains(@class,'f-caption-s')]",
+    "title": "//main/section//h1[not(preceding::div[child::a[contains(@href,'/series/')]])]|//div[@class='title-scroller']|//main/section//div[following::h1]/a[contains(@href,'/series/')]",
+    "waitSecondInHeadless": "2.0",
+    "subtitle": "//main/section//main//h2",
+    "nextButton": "div[direction=\"next\"] button, nav.novel-pager-container span:nth-child(3):not(.invisible)",
+    "forceClickButton": "main div.charcoal-token > div > div > div > div > button, #wrapper #contents #spa-contents > div > div.novel-details-view > div.swipe-detector > div > div > .button-link",
+    "firstPageLink": "//main/section//div[preceding-sibling::nav]//a[contains(@href,'/novel/show.php?id=')]|//div[@id='spa-contents']//div[@class='works-grid-list']//div[contains(@class,'list-item') and contains(@class,'is-list')]//a[contains(@href,'/novel/show.php?') and @class='novel-title']",
+    "firstPageButton": "div#spa-contents div.novel-details-view .navigation-container button:not(button[disabled=disabled])",
+    "memo": "pixiv小説の個々の小説は通常(?)とはちょっと違う形でカテゴライズされているため、かなりややこしい SiteInfo になっているため、メモを残す。\r\n\r\nまず、isNeedHeadless は true である必要がある。これは本文がHTML上に現れるためには JavaScript が動作する必要があるためである。\r\n\r\n次に、pixiv小説におけるページは「>次へ」といった感じのボタン(<a> ではないのでJavaScriptで .click() する必要がある)を押してめくるのであるが、この時URLは変化しない(正確に言うと # より後ろの部分が変化する)。\r\nそのため、まず最初に検索すべきはこの「>次へ」のボタンである。\r\nこれは nextButton に CSS selector を書く事によって行う。\r\n\r\nこのボタンが確認できるのは例えばこのURLである。\r\nhttps://www.pixiv.net/novel/show.php?id=8919908#3\r\n\r\n次に、「>次へ」といったボタンで手繰って行った後に開くべきページについて。\r\npixiv小説は「シリーズ」という物で続きの話が投稿される場合がある。\r\nこのシリーズの次の話を手繰るのは <a> で行けそうであるので nextLink を用いる(余談だがシリーズの次の話はIDが異なる。どうやらそれぞれの小説は個々に独立していて、シリーズとして関連性を与えているという概念らしい)。\r\n\r\nこのシリーズの次の話へのリンクが確認できるのは例えばこのURLである。\r\nhttps://www.pixiv.net/novel/show.php?id=13381749\r\nこの中の、「#41 強くてニューゲームは都市伝説。上手に「待て」が出来るかな？」というボタンがそれである。\r\n\r\n次に、firstPageLink と firstPageButton について。\r\n\r\npixiv小説では個々の小説のタイトルページ(表紙？)も存在する。\r\nこれは例えば\r\nhttps://www.pixiv.net/novel/show.php?id=8919908\r\nといった物がそれに当たるのであるが、これはブラウザで開くと勝手に最初のページを開くような動作を取ることがあるため、この挙動に当たってしまうとタイトルページの解析はできない。\r\n\r\nまた、シリーズの一覧ページというものもあり、こちらは例えばこのURL\r\nhttps://www.pixiv.net/novel/series/1270584\r\nで確認できる。\r\nこのシリーズ一覧での最初の小説へのリンクについては firstPageButton で対応する。\r\n\r\nなお、pixiv小説はスマホのような狭い画面とPCのような広い画面でHTMLのDOM構造が大きく異るタイプであるので、どちらの側でも動作するような値を指定する必要がある事を注記しておく。(Chromeのdevtoolでクライアントを変えてリロードすればそれぞれのDOM構造を確認できるはずである)",
+    "overrideUserAgent": "Mozilla/5.0 (Mac OS X) AppleWebKit (KHTML, like Gecko)",
+    "isNeedHeadless": "true",
+    "nextLink": "//div[@id='spa-contents']//div[contains(@class,'series-navigation')]/div[@class='navigation-container']/a[contains(@href,'/novel/show.php?') and contains(@class,'gtm-novel-work-series-next')]|//a[contains(@href,'/novel/show.php?') and contains(@class,'gtm-novel-work-series-next')]",
+    "url": "^https://(www|touch)\\.pixiv\\.net/novel/(show\\.php|series/\\d+)",
+    "tag": "//main/section//footer//li//a[contains(@href,'/tags/')]|//div[@id='spa-contents']//div[@class='novel-details-view']//div[contains(@class,'display-tags')]/span[following-sibling::div[@class='tags-editor']]/a[contains(@href,'/tags/')]",
+    "author": "//div[contains(@class,'user-details-card')]/a[contains(@href,'/users/') and @class='user-details-name']|//main/section//h2//div[preceding-sibling::a]/a[contains(@href,'/users/')]",
+    "injectStyle": "main {white-space:pre-wrap;} p.novel-paragraph{white-space:pre-wrap;}",
+    "exampleUrl": "https://www.pixiv.net/novel/show.php?id=8919908#1"
+  },
+  "database_resource_url": "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1",
+  "created_by": "limura",
+  "name": "pixiv小説",
+  "created_at": "2017-11-20T16:19:11+09:00",
+  "updated_at": "2023-10-07T12:59:58+09:00"
+},
+{
+  "resource_url": "http://wedata.net/items/81619",
+  "data": {
+    "pageElement": "//div[@id='novel_honbun']|//p[contains(@class,'novel_subtitle')]",
+    "title": "//div[@class='contents1']/a[not(@href='https://syosetu.com')][1]|//div[@id='novel_contents']//p[contains(@class,'novel_title')]",
+    "subtitle": "//p[contains(@class,'novel_subtitle')]",
+    "firstPageLink": "//div[@id='container']//div[@id='novelindex_button']/a|//div[@id='novel_contents']//div[@class='index_box']/dl/dd/a[contains(@href,'/1/')]",
+    "nextLink": "//div[@class='novel_bn'][1]/a[contains(., '次へ')]",
+    "url": "^https?://ncode\\.syosetu\\.com/",
+    "tag": "//th[text()='キーワード']/following-sibling::td",
+    "author": "//table[@id='noveltable1']//tr[child::th[text()='作者名']]/td|//div[@class='novel_writername' and not(child::a)]|//div[@class='novel_writername']/a|//body[not(descendant::div[@class='novel_writername'])]//div[@class='contents1']/a[contains(@href,'mypage.syosetu.com')]/text()|//body[not(descendant::div[@class='novel_writername'])]//div[@class='contents1' and not(child::a[contains(@href,'mypage.syosetu.com')])]/text()",
+    "exampleUrl": "https://ncode.syosetu.com/n2251cd/29/ https://ncode.syosetu.com/n2251cd/"
+  },
+  "database_resource_url": "http://wedata.net/databases/%E3%81%93%E3%81%A8%E3%81%9B%E3%81%8B%E3%81%84Web%E3%83%9A%E3%83%BC%E3%82%B8%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E7%94%A8%E6%83%85%E5%A0%B1",
+  "created_by": "limura",
+  "name": "小説家になろう",
+  "created_at": "2017-11-20T11:27:02+09:00",
+  "updated_at": "2022-12-19T16:34:37+09:00"
+}
+]
