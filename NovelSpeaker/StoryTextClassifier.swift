@@ -19,6 +19,7 @@ struct SpeechBlockInfo {
     let rate:Float
     let volume:Float
     let delay:TimeInterval
+    let isMod:Bool
 }
 
 struct SpeechSectionConfig {
@@ -81,6 +82,7 @@ class CombinedSpeechBlock: Identifiable {
     struct speechBlock {
         let displayText:String
         let speechText:String? // displayText と同じ場合は nil を入れるという事にします。
+        let isMod:Bool
     }
     var speechBlockArray:[speechBlock] = []
     let voiceIdentifier:String?
@@ -103,7 +105,7 @@ class CombinedSpeechBlock: Identifiable {
         }else{
             speechText = block.speechText
         }
-        speechBlockArray = [speechBlock(displayText: block.displayText, speechText: speechText)]
+        speechBlockArray = [speechBlock(displayText: block.displayText, speechText: speechText, isMod: block.isMod)]
     }
     
     var displayText:String {
@@ -150,7 +152,7 @@ class CombinedSpeechBlock: Identifiable {
         }else{
             speechText = block.speechText
         }
-        speechBlockArray.append(speechBlock(displayText: block.displayText, speechText: speechText))
+        speechBlockArray.append(speechBlock(displayText: block.displayText, speechText: speechText, isMod: block.isMod))
         return true
     }
     
@@ -438,10 +440,6 @@ class StoryTextClassifier {
             }
         }
 
-        func createBlockInfo(speechText:String, displayText:String, speakerSetting:SpeakerSetting, waitConfig:SpeechWaitConfig?) -> SpeechBlockInfo {
-            return SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: TimeInterval(waitConfig?.delayTimeInSec ?? 0.0))
-        }
-        
         var index = content.startIndex
         var currentTextStartIndex = index
         var currentCharacterTarget = Set<Character>()
@@ -640,14 +638,14 @@ class StoryTextClassifier {
                     if currentStartIndex != index {
                         let displayText = String(text[currentStartIndex..<index])
                         let speechText = displayText
-                        let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec)
+                        let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: false)
                         waitConfing_delayTimeInSec = TimeInterval(0.0)
                         result.append(blockInfo)
                     }
                     let nextIndex = text.index(index, offsetBy: speechMod.before.count)
                     let displayText = String(text[index..<nextIndex])
                     let speechText = speechMod.after
-                    let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec)
+                    let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: true)
                     waitConfing_delayTimeInSec = TimeInterval(0.0)
                     result.append(blockInfo)
                     index = nextIndex
@@ -660,7 +658,7 @@ class StoryTextClassifier {
         if currentStartIndex != index {
             let displayText = String(text[currentStartIndex..<index])
             let speechText = displayText
-            let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec)
+            let blockInfo = SpeechBlockInfo(speechText: speechText, displayText: displayText, voiceIdentifier: speakerSetting.voiceIdentifier, locale: speakerSetting.locale, pitch: speakerSetting.pitch, rate: speakerSetting.rate, volume: speakerSetting.volume, delay: waitConfing_delayTimeInSec, isMod: false)
             waitConfing_delayTimeInSec = TimeInterval(0.0)
             result.append(blockInfo)
         }

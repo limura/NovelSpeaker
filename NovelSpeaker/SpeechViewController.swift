@@ -609,6 +609,12 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
         let endOffset = self.textView.offset(from: self.textView.beginningOfDocument, to: range.end)
         let speechText = storySpeaker.GenerateSpeechTextFrom(displayTextRange: NSMakeRange(startOffset, endOffset - startOffset))
         NiftyUtility.EasyDialogLongMessageDialog(viewController: self, message: speechText)
+
+        /*
+        let nextViewController = SpeechModCheckViewController()
+        nextViewController.targetStoryID = self.storyID
+        self.navigationController?.pushViewController(nextViewController, animated: true)
+         */
     }
 
     func textViewScrollTo(readLocation:Int) {
