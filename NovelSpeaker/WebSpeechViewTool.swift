@@ -150,9 +150,11 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
         guard let wkWebView = self.wkWebView else {
             return
         }
+        var finish = false;
         wkWebView.evaluateJavaScript(jsString) { (node, err) in
             var result:String? = nil;
             defer {
+                finish = true;
                 if let completionHandler = completionHandler {
                     completionHandler(result)
                 }
@@ -169,14 +171,19 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             }
             result = nodeString
         }
+        while !finish {
+            RunLoop.current.run(mode: .default, before: Date.distantFuture)
+        }
     }
     func evaluateJsToDouble(jsString:String, completionHandler:((Double?) -> Void)?){
         guard let wkWebView = self.wkWebView else {
             return
         }
+        var finish = false;
         wkWebView.evaluateJavaScript(jsString) { (node, err) in
             var result:Double? = nil;
             defer {
+                finish = true;
                 if let completionHandler = completionHandler {
                     completionHandler(result)
                 }
@@ -193,14 +200,19 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
             }
             result = resultDouble
         }
+        while !finish {
+            RunLoop.current.run(mode: .default, before: Date.distantFuture)
+        }
     }
     func evaluateJsToStringDoubleDictionary(jsString:String, completionHandler:(([String:Double]?) -> Void)?){
         guard let wkWebView = self.wkWebView else {
             return
         }
+        var finish = false;
         wkWebView.evaluateJavaScript(jsString) { (node, err) in
             var result:[String:Double]? = nil;
             defer {
+                finish = true;
                 completionHandler?(result)
             }
             if let err = err {
@@ -214,6 +226,9 @@ class WebSpeechViewTool: NSObject, WKNavigationDelegate {
                 return
             }
             result = resultDouble
+        }
+        while !finish {
+            RunLoop.current.run(mode: .default, before: Date.distantFuture)
         }
     }
 
