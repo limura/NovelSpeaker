@@ -3716,12 +3716,14 @@ Version 2.8.2
 
 次に、「設定タブ」->「内部データ参照用URLの設定」に「優先SiteInfo」を追加したことについて。
 こちらは「このWebサイトでの」「小説の本文部分はどこなのか」といったことを定義している SiteInfo について、今まで使用していた「ことせかい 用 SiteInfo」と「Autopagerize 用 SiteInfo」よりも先に適用される SiteInfo のURLを複数指定できるようになる、というものです。SiteInfo の定義を書くことができて、アクセスできるURLを提供できる方に限られますが、独自に定義した SiteInfo を提供していただいて、ユーザの皆様で共有するなどで使っていただければと思います。
-これを使う場合の例として、現時点(2023年11月27日)の ことせかい 用 の SiteInfo をもとに、小説家になろう様とPixiv小説様について、前書きや後書き、キャプションについて取り込まないように設定されたSiteInfoを
-  https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/Provisional-SimpleSiteInfo.json
-にて提供します。こちらのURLを「設定タブ」->内部データ参照用URLの設定」内の「優先SiteInfo」に設定し、「設定タブ」->「SiteInfoを取得し直す」を選択して正しく読み込みが完了すれば、小説家になろう様とPixiv小説様について、前書きや後書き、キャプションについて取り込まなくなるはずです。
+これを使う場合の例えばの例として、現時点(2023年11月28日)の ことせかい 用 の SiteInfo をもとに、小説家になろう様とPixiv小説様について、前書きや後書き、キャプションについて取り込まないように設定されたSiteInfoを
+  https://limura.github.io/NovelSpeaker/data/Provisional-SimpleSiteInfo.json
+に置きました。こちらのURLを「設定タブ」->内部データ参照用URLの設定」内の「優先SiteInfo」に設定し、「設定タブ」->「SiteInfoを取得し直す」を選択して正しく読み込みが完了すれば、小説家になろう様とPixiv小説様について、前書きや後書き、キャプションについて取り込まなくなるというものになります。
 なお、上記のURLを設定するのが面倒な場合、
-  https://raw.githubusercontent.com/limura/NovelSpeaker/gh-pages/data/Provisional-SimpleSiteInfo.novelspeaker-backup-json
+  https://limura.github.io/NovelSpeaker/data/Provisional-SimpleSiteInfo.novelspeaker-backup-json
 にある(優先SiteInfoだけが書かれた)軽量バックアップファイルを適用するのでも良いです。(一応この軽量バックアップファイルを適用した後は「設定タブ」->内部データ参照用URLの設定」内の「優先SiteInfo」に設定が入っていることを確認してください。また、その後「設定タブ」->「SiteInfoを取得し直す」を選択する必要があります)
+このような形で色々と取り込み設定を書き換えたものを用意していただければ、ことせかい の動作を制御できるようになりますのでご利用ください。
+なお、上記のURLのものについてはなるべく更新を続けようかとは思っていますが、wedata側の「ことせかい 用 SiteInfo」と同様に更新を保証はいたしませんのでご了承ください。
 
 次に、「設定タブ」->「開発者に問い合わせる」画面に「問題が発生する小説の本文も添付する」のON/OFF設定を追加した事について。
 こちらは、「読み上げがうまくいかない」といったお問い合わせの時に利用していただけますととても助かります。
