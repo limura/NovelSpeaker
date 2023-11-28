@@ -141,11 +141,18 @@ class NiftyUtility: NSObject {
                         //picker.mailComposeDelegate = self;
                         picker.setToRecipients(["limuraproducts@gmail.com"])
                         picker.setSubject(NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Title", comment:"ことせかい 取り込み失敗レポート"))
+                        let (preferredSiteInfoURLList,novelSpeakerSiteInfoURL,autopagerizeSiteInfoURL) = RealmUtil.RealmBlock { realm -> ([String], String, String) in
+                            guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return ([], "", "") }
+                            return (globalState.preferredSiteInfoURLList.map{$0}, globalState.novelSpeakerSiteInfoURL, globalState.autopagerizeSiteInfoURL)
+                        }
                         let messageBody = NSLocalizedString("NiftyUtility_ImportError_SendProblemReport_Mail_Body", comment:"このまま編集せずに送信してください。\nなお、このメールへの返信は基本的には行っておりません。\n\nエラーメッセージ:\n") + error
                             + "\n\n------\nurl: \(url?.absoluteString ?? "-")"
                             + "\napp version: \(NiftyUtility.GetAppVersionString())"
                             + "\niOS version: \(UIDevice.current.systemVersion)"
                             + "\ndevice model: \(UIDevice.modelName)"
+                            + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
+                            + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
+                            + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
                         picker.setMessageBody(messageBody, isHTML: false)
                         DummyMailComposeViewController.shared.currentViewController = viewController
                         picker.mailComposeDelegate = DummyMailComposeViewController.shared

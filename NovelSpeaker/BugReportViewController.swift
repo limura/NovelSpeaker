@@ -503,13 +503,13 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             return false;
         }
         let appVersionString = NiftyUtility.GetAppVersionString()
-        let (isBackgroundFetchEnabled, preferredSiteInfoURLList) = RealmUtil.RealmBlock { (realm) -> (Bool, [String]) in
+        let (isBackgroundFetchEnabled, preferredSiteInfoURLList, novelSpeakerSiteInfoURL, autopagerizeSiteInfoURL) = RealmUtil.RealmBlock { (realm) -> (Bool, [String], String, String) in
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                 var p:[String] = []
                 p.append(contentsOf: globalState.preferredSiteInfoURLList)
-                return (globalState.isBackgroundNovelFetchEnabled, p)
+                return (globalState.isBackgroundNovelFetchEnabled, p, globalState.novelSpeakerSiteInfoURL, globalState.autopagerizeSiteInfoURL)
             }
-            return (false, [])
+            return (false, [], "", "")
         }
         let additionalHint:String
         if let hint = self.additionalHintString {
@@ -531,6 +531,8 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             + "\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
             + "\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
             + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
+            + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
+            + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
             + additionalHint
         , isHTML: false)
         present(picker, animated: true, completion: nil)
@@ -550,13 +552,13 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
         let novelData = targetNovelSet.map { (content) -> String in
             return content.title + "\n" + content.novelID
         }.joined(separator: "\n---\n")
-        let (isBackgroundFetchEnabled, preferredSiteInfoURLList) = RealmUtil.RealmBlock { (realm) -> (Bool, [String]) in
+        let (isBackgroundFetchEnabled, preferredSiteInfoURLList, novelSpeakerSiteInfoURL, autopagerizeSiteInfoURL) = RealmUtil.RealmBlock { (realm) -> (Bool, [String], String, String) in
             if let globalState = RealmGlobalState.GetInstanceWith(realm: realm) {
                 var p:[String] = []
                 p.append(contentsOf: globalState.preferredSiteInfoURLList)
-                return (globalState.isBackgroundNovelFetchEnabled, p)
+                return (globalState.isBackgroundNovelFetchEnabled, p, globalState.novelSpeakerSiteInfoURL, globalState.autopagerizeSiteInfoURL)
             }
-            return (false, [])
+            return (false, [], "", "")
         }
         let additionalHint:String
         if let hint = self.additionalHintString {
@@ -579,6 +581,8 @@ class BugReportViewController: FormViewController, MFMailComposeViewControllerDe
             + "\nuse iCloud sync: \(RealmUtil.IsUseCloudRealm())"
             + "\nAutomatic updates for novels: \(isBackgroundFetchEnabled)"
             + "\npreferredSiteInfoURLList: \(preferredSiteInfoURLList)"
+            + "\nnovelSpeakerSiteInfoURL: \(novelSpeakerSiteInfoURL)"
+            + "\nautopagerizeSiteInfoURL: \(autopagerizeSiteInfoURL)"
             + additionalHint
             + "\n" + NSLocalizedString("BugReportViewController_TimeOfOccurrence", comment: "問題発生日時") + ": " + date.description(with: Locale.init(identifier: "ja_JP"))
             + "\n-----\n" + NSLocalizedString("BugReportViewController_SendBugReport_Description", comment: "不都合の概要") + ":\n" + description
