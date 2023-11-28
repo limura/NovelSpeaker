@@ -2,7 +2,7 @@
   "data_version" : "2.0.0",
   "misc_settings" : {
     "preferredSiteInfoURLList" : [
-      "https:\/\/raw.githubusercontent.com\/limura\/NovelSpeaker\/gh-pages\/data\/Provisional-SimpleSiteInfo.json"
+      "https:\/\/limura.github.io\/NovelSpeaker\/data\/Provisional-SimpleSiteInfo.json"
     ]
   }
 }
