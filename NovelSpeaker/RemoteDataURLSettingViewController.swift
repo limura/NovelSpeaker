@@ -13,6 +13,7 @@ import RealmSwift
 class RemoteDataURLSettingViewController: FormViewController, RealmObserverResetDelegate {
     var globalDataNotificationToken:NotificationToken? = nil
     let preferredSiteInfoSectionTag = "preferredSiteInfoSectionTag"
+    var startPreferredSiteInfoURLList:[String] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,11 +40,16 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
                     return nil
                 }
             }
+            if startPreferredSiteInfoURLList == filterdItems { return }
+            // キャッシュファイルの対象が変わる前に一旦キャッシュファイルを削除させるために ClearSiteInfo() を呼び出します。
+            StoryHtmlDecoder.shared.ClearSiteInfo()
             RealmUtil.Write { realm in
                 guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
                 globalState.preferredSiteInfoURLList.removeAll()
                 globalState.preferredSiteInfoURLList.append(objectsIn: filterdItems)
             }
+            // 念のため改めて ClearSiteInfo() を呼んでおきます。
+            StoryHtmlDecoder.shared.ClearSiteInfo()
         }
     }
     
@@ -90,6 +96,7 @@ class RemoteDataURLSettingViewController: FormViewController, RealmObserverReset
         let globalState:RealmGlobalState?
         if let realm = try? RealmUtil.GetRealm(), let state = RealmGlobalState.GetInstanceWith(realm: realm) {
             globalState = state
+            startPreferredSiteInfoURLList = state.preferredSiteInfoURLList.map({$0})
         }else{
             globalState = nil
         }
