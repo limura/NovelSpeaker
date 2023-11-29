@@ -1496,9 +1496,11 @@ class NovelSpeakerUtility: NSObject {
                     }
                 }
                 if let novelSpeakerSiteInfoURL = dic.object(forKey: "novelSpeakerSiteInfoURL") as? String {
+                    StoryHtmlDecoder.shared.ClearSiteInfo()
                     globalState.novelSpeakerSiteInfoURL = novelSpeakerSiteInfoURL
                 }
                 if let autopagerizeSiteInfoURL = dic.object(forKey: "autopagerizeSiteInfoURL") as? String {
+                    StoryHtmlDecoder.shared.ClearSiteInfo()
                     globalState.autopagerizeSiteInfoURL = autopagerizeSiteInfoURL
                 }
                 if let defaultSpeechModURL = dic.object(forKey: "defaultSpeechModURL") as? String {
@@ -1547,7 +1549,6 @@ class NovelSpeakerUtility: NSObject {
                     globalState.isNeedDisableIdleTimerWhenSpeechTime = isNeedDisableIdleTimerWhenSpeechTime.boolValue
                 }
                 if let supportRotationMask = dic.object(forKey: "supportRotationMask") as? NSNumber {
-                    let mask:UIInterfaceOrientationMask
                     if supportRotationMask.uintValue == UIInterfaceOrientationMask.all.rawValue {
                         NovelSpeakerUtility.supportRotationMask = .all
                     }else{
@@ -1574,6 +1575,7 @@ class NovelSpeakerUtility: NSObject {
                     globalState.likeButtonDialogType = likeButtonDialogType.rawValue
                 }
                 if let preferredSiteInfoURLList = dic.object(forKey: "preferredSiteInfoURLList") as? NSArray {
+                    StoryHtmlDecoder.shared.ClearSiteInfo()
                     globalState.preferredSiteInfoURLList.removeAll()
                     for target in preferredSiteInfoURLList {
                         if let target = target as? String {
