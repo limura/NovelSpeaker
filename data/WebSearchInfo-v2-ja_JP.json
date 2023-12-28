@@ -547,10 +547,11 @@
         "title": "アルファポリス",
         "HTTPMethod": "GET",
         "isNeedHeadless": false,
-        "url": "https://www.alphapolis.co.jp/novel/index?",
+        "url": "https://www.alphapolis.co.jp/novel/index?is_inside=1&free_words_kind=1&ng_free_words_kind=1&last_update_kind=5&first_publish_kind=5&",
         "values": [
-            {"queryType": "text", "displayText": "フリーワード", "queryName": "query"},
-            {"queryType": "radio", "displayText": "長さ", "queryName": "volume", "radio":
+            {"queryType": "text", "displayText": "フリーワード", "queryName": "free_words"},
+            {"queryType": "text", "displayText": "除外ワード", "queryName": "ng_free_words"},
+            {"queryType": "radio", "displayText": "長さ", "queryName": "volumes", "radio":
                 {
                     "ショートショート": "1",
                     "短編": "2",
@@ -563,7 +564,7 @@
                     "完結": "1"
                 }
             },
-            {"queryType": "hidden", "displayText": "Ｒ指定", "queryName": "rating", "value": "-1,-2",
+            {"queryType": "hidden", "displayText": "Ｒ指定", "queryName": "ratings", "value": "3",
                 "memo": {
                     "queryType が radio であればこんな感じのデータを入れれば良い事になってます。": "けれど、ことせかい は一応9歳以上対象なので、Web検索で除外できるのならその時点で除外しておきます。",
                     "R15･R18を除く": "-1,-2",
