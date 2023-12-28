@@ -32,7 +32,7 @@
     "pageElement": "//div[@id='novel_honbun']|//p[contains(@class,'novel_subtitle')]",
     "title": "//div[@class='contents1']/a[not(@href='https://syosetu.com')][1]|//div[@id='novel_contents']//p[contains(@class,'novel_title')]",
     "subtitle": "//p[contains(@class,'novel_subtitle')]",
-    "firstPageLink": "//div[@id='container']//div[@id='novelindex_button']/a|//div[@id='novel_contents']//div[@class='index_box']/dl/dd/a[contains(@href,'/1/')]",
+    "firstPageLink": "//div[@id='container']//div[@id='novelindex_button']/a|//div[@id='novel_contents']//div[contains(@class,'novel_sublist')]/ul/li/a[contains(@href,'/1/')]|//div[@id='novel_contents']//div[@class='index_box']/dl/dd/a[contains(@href,'/1/')]",
     "nextLink": "//div[@class='novel_bn'][1]/a[contains(., '次へ')]",
     "url": "^https?://ncode\\.syosetu\\.com/",
     "tag": "//th[text()='キーワード']/following-sibling::td",
