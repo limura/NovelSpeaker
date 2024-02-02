@@ -1018,7 +1018,17 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         }
         return RealmStoryBulk.StoryCreamAssetToStoryArray(asset: asset)
     }
-    
+    func LoadCreamAssetBinary() -> Data? {
+        guard let asset = self.storyListAsset else {
+            print("LoadStoryArray storyListAsset is nil")
+            return nil
+        }
+        return asset.storedData()
+    }
+
+    func OverrideCreamAssetBinary(data: Data) {
+        self.storyListAsset = CreamAsset.create(object: self, propName: "", data: data)
+    }
     func OverrideStoryListAsset(storyArray:[Story]) {
         guard let data = try? JSONEncoder().encode(storyArray) else {
             print("WARN: [Story] の JSONEncode に失敗")

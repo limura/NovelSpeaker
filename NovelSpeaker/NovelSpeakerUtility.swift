@@ -1714,6 +1714,105 @@ class NovelSpeakerUtility: NSObject {
             }
         }
     }
+    
+    static func RestoreNovel_V_2_1_0(bookshelf:NSArray, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) {
+        NovelDownloadQueue.shared.downloadStop()
+        defer { NovelDownloadQueue.shared.downloadStart() }
+        let novelArrayCount = bookshelf.count
+        var novelCount = 0
+        for novelDic in bookshelf {
+            novelCount += 1
+            let progressString = NSLocalizedString("NovelSpeakerUtility_RestoreingNovelData", comment: "工程 3/3\n小説を抽出中") + " (\(novelCount)/\(novelArrayCount))"
+            progressUpdate(progressString)
+            guard let novelDic = novelDic as? NSDictionary,
+                let novelID = novelDic.object(forKey: "novelID") as? String,
+                let type = novelDic.object(forKey: "type") as? NSNumber else { continue }
+            RealmUtil.Write { (realm) in
+                let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) ?? RealmNovel()
+                if novel.novelID != novelID {
+                    novel.novelID = novelID
+                }
+                novel.type = NovelType(rawValue: type.intValue) ?? NovelType.UserCreated
+                if let writer = novelDic.object(forKey: "writer") as? String {
+                    novel.writer = writer
+                }
+                if let title = novelDic.object(forKey: "title") as? String {
+                    novel.title = title
+                }
+                if let url = novelDic.object(forKey: "url") as? String {
+                    novel.url = url
+                }
+                if let createdDateString = novelDic.object(forKey: "createdDate") as? String, let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
+                    novel.createdDate = createdDate
+                }
+                if let isNeedSpeechAfterDelete = novelDic.object(forKey: "isNeedSpeechAfterDelete") as? NSNumber {
+                    novel.isNeedSpeechAfterDelete = isNeedSpeechAfterDelete.boolValue
+                }
+                if let defaultSpeakerID = novelDic.object(forKey: "defaultSpeakerID") as? String {
+                    novel.defaultSpeakerID = defaultSpeakerID
+                }
+                if let isNotNeedUpdateCheck = novelDic.object(forKey: "isNotNeedUpdateCheck") as? Bool {
+                    novel.isNotNeedUpdateCheck = isNotNeedUpdateCheck
+                }
+                if let lastChapterStoryID = novelDic.object(forKey: "lastChapterStoryID") as? String {
+                    novel.m_lastChapterStoryID = lastChapterStoryID
+                }
+                if let lastDownloadDateString = novelDic.object(forKey: "lastDownloadDate") as? String, let lastDownloadDate = NiftyUtility.ISO8601String2Date(iso8601String: lastDownloadDateString) {
+                    novel.lastDownloadDate = lastDownloadDate
+                }
+                if let readingChapterStoryID = novelDic.object(forKey: "readingChapterStoryID") as? String {
+                    novel.m_readingChapterStoryID = readingChapterStoryID
+                }
+                if let lastReadDateString = novelDic.object(forKey: "lastReadDate") as? String, let lastReadDate = NiftyUtility.ISO8601String2Date(iso8601String: lastReadDateString) {
+                    novel.lastReadDate = lastReadDate
+                }
+                if let downloadDateArray = novelDic.object(forKey: "downloadDateArray") as? NSArray {
+                    novel.downloadDateArray.removeAll()
+                    for downloadDateStringObj in downloadDateArray {
+                        if let downloadDateString = downloadDateStringObj as? String, let downloadDate = NiftyUtility.ISO8601String2Date(iso8601String: downloadDateString) {
+                            novel.AppendDownloadDate(realm: realm, date: downloadDate)
+                        }
+                    }
+                }
+                if let readingChapterReadingPoint = novelDic.object(forKey: "readingChapterReadingPoint") as? NSNumber {
+                    novel.m_readingChapterReadingPoint = readingChapterReadingPoint.intValue
+                }
+                if let readingChapterContentCount = novelDic.object(forKey: "readingChapterContentCount") as? NSNumber {
+                    novel.m_readingChapterContentCount = readingChapterContentCount.intValue
+                }
+                realm.add(novel, update: .modified)
+            }
+            var hasInvalidData = false
+            if let storys = novelDic.object(forKey: "storys") as? NSArray {
+                RealmUtil.Write { (realm) in
+                    for storyDic in storys {
+                        guard let storyDic = storyDic as? NSDictionary,
+                              let id = storyDic.object(forKey: "id") as? String,
+                              let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber,
+                              let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
+                              let extractedDirectory = extractedDirectory
+                        else { continue }
+                        let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
+                        let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
+                        guard let storyListAssetBinary = try? Data(contentsOf: contentFilePath) else {
+                            hasInvalidData = true
+                            continue
+                        }
+                        let storyBulk = RealmStoryBulk()
+                        storyBulk.id = id
+                        storyBulk.novelID = novelID
+                        storyBulk.chapterNumber = chapterNumber.intValue
+                        storyBulk.isDeleted = false
+                        storyBulk.OverrideCreamAssetBinary(data: storyListAssetBinary)
+                        realm.add(storyBulk, update: .modified)
+                    }
+                }
+            }
+            if hasInvalidData {
+                NovelDownloadQueue.shared.addQueue(novelID: novelID)
+            }
+        }
+    }
 
     static func ProcessNovelSpeakerBackupJSONData_V_2_0_0(toplevelDictionary:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> Bool {
         if let word_replacement_dictionary = toplevelDictionary.object(forKey: "word_replacement_dictionary") as? NSDictionary {
@@ -1749,6 +1848,40 @@ class NovelSpeakerUtility: NSObject {
         return true
     }
 
+    static func ProcessNovelSpeakerBackupJSONData_V_2_1_0(toplevelDictionary:NSDictionary, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> Bool {
+        if let word_replacement_dictionary = toplevelDictionary.object(forKey: "word_replacement_dictionary") as? NSDictionary {
+            RestoreSpeechMod_V_2_0_0(dic: word_replacement_dictionary, progressUpdate: progressUpdate)
+        }
+        if let speech_wait_config = toplevelDictionary.object(forKey: "speech_wait_config") as? NSArray {
+            RestoreSpeechWaitConfig_V_2_0_0(waitArray: speech_wait_config, progressUpdate: progressUpdate)
+        }
+        if let speech_section_config = toplevelDictionary.object(forKey: "speech_section_config") as? NSArray {
+            RestoreSpeechSectionConfig_V_2_0_0(sectionConfigArray:speech_section_config, progressUpdate: progressUpdate)
+        }
+        if let novel_tag = toplevelDictionary.object(forKey: "novel_tag") as? NSArray {
+            RestoreNovelTag_V_2_0_0(novelTagArray: novel_tag, progressUpdate: progressUpdate)
+        }
+        if let bookmarks = toplevelDictionary.object(forKey: "bookmark") as? NSArray {
+            RestoreBookmark_V_2_0_0(bookmarkArray: bookmarks, progressUpdate: progressUpdate)
+        }
+        // misc_settings には defaultDisplaySettingID,defaultSpeakerID が入っているので
+        // 先に取り出しておかないと良くないことがおきます(´・ω・`)
+        if let globalStateDic = toplevelDictionary.object(forKey: "misc_settings") as? NSDictionary {
+            if let defaultSpeakerID = globalStateDic.object(forKey: "defaultSpeakerID") as? String, let speaker_setting = toplevelDictionary.object(forKey: "speaker_setting") as? NSArray {
+                RestoreSpeakerSettings_V_2_0_0(speakerArray:speaker_setting, defaultSpeakerSettingID:defaultSpeakerID, progressUpdate: progressUpdate)
+            }
+            if let defaultDisplaySettingID = globalStateDic.object(forKey: "defaultDisplaySettingID") as? String, let display_setting = toplevelDictionary.object(forKey: "display_setting") as? NSArray {
+                RestoreDisplaySettings_V_2_0_0(displaySettingArray:display_setting, defaultSpeakerSettingID:defaultDisplaySettingID, progressUpdate: progressUpdate)
+            }
+            
+            RestoreGlobalState_V_2_0_0(dic:globalStateDic, progressUpdate: progressUpdate)
+        }
+        if let bookshelf = toplevelDictionary.object(forKey: "bookshelf") as? NSArray {
+            RestoreNovel_V_2_1_0(bookshelf:bookshelf, progressUpdate:progressUpdate, extractedDirectory:extractedDirectory)
+        }
+        return true
+    }
+
     // MARK: バックアップファイルからの書き戻し
     @discardableResult
     static func ProcessNovelSpeakerBackupFile_JSONType(url:URL, progressUpdate:@escaping(String)->Void, extractedDirectory:URL?) -> Bool {
@@ -1760,6 +1893,8 @@ class NovelSpeakerUtility: NSObject {
             return ProcessNovelSpeakerBackupJSONData_V_1_1_0(toplevelDictionary: jsonObj, progressUpdate: progressUpdate, extractedDirectory: extractedDirectory)
         }else if dataVersion == "2.0.0" {
             return ProcessNovelSpeakerBackupJSONData_V_2_0_0(toplevelDictionary: jsonObj, progressUpdate: progressUpdate, extractedDirectory: extractedDirectory)
+        }else if dataVersion == "2.1.0" {
+            return ProcessNovelSpeakerBackupJSONData_V_2_1_0(toplevelDictionary: jsonObj, progressUpdate: progressUpdate, extractedDirectory: extractedDirectory)
         }else{
             return false
         }
@@ -1846,42 +1981,26 @@ class NovelSpeakerUtility: NSObject {
 
     // MARK: バックアップデータ生成
     #if !os(watchOS)
-    fileprivate static func CreateBackupDataDictionary_Story(novelID:String, contentWriteTo:URL?, progressString:String, progress:((_ description:String)->Void)?) -> [[String:Any]] {
+    fileprivate static func CreateBackupDataDictionary_Story(novelID:String, contentWriteTo:URL, progressString:String, progress:((_ description:String)->Void)?) -> [[String:Any]] {
         return RealmUtil.RealmBlock { (realm) -> [[String:Any]] in
-            var index = 0
             var result:[[String:Any]] = []
-            let max = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID)?.lastChapterNumber?.description ?? "?"
-            RealmStoryBulk.SearchAllStoryFor(realm: realm, novelID: novelID) { (story) in
-                index += 1
-                if let progress = progress {
-                    progress(progressString + " (\(index)/\(max))")
-                }
-                var storyData:[String:Any] = [
-                    "chapterNumber": story.chapterNumber,
-                    "readLocation": story.readLocation(realm: realm),
-                ]
-                if story.url.count > 0 {
-                    storyData["url"] = story.url
-                }
-                if story.subtitle.count > 0 {
-                    storyData["subtitle"] = story.subtitle
-                }
-                if story.downloadDate > Date(timeIntervalSince1970: 0) {
-                    storyData["downloadDate"] = NiftyUtility.Date2ISO8601String(date: story.downloadDate)
-                }
-                if let contentZiped = NiftyUtility.stringCompress(string: story.content) {
-                    if let contentWriteTo = contentWriteTo {
-                        do {
-                            let filePath = contentWriteTo.appendingPathComponent("\(story.chapterNumber)")
-                            try contentZiped.write(to: filePath)
-                        }catch{
-                            print("\(novelID) chapter: \(story.chapterNumber) content write failed.")
-                        }
-                    }else{
-                        storyData["contentZiped"] = contentZiped.base64EncodedString()
+            let storyBulkArray = RealmStoryBulk.SearchStoryBulkWith(realm: realm, novelID: novelID)
+            if let storyBulkArray = storyBulkArray {
+                for storyBulk in storyBulkArray {
+                    if storyBulk.isDeleted { continue }
+                    guard let storyListAssetBinary = storyBulk.LoadCreamAssetBinary() else { continue }
+                    do {
+                        let filePath = contentWriteTo.appendingPathComponent("\(storyBulk.chapterNumber)")
+                        try storyListAssetBinary.write(to: filePath)
+                    }catch{
+                        print("\(novelID) chapter: \(storyBulk.chapterNumber) content write failed.")
                     }
+                    let storyBulkData:[String:Any] = [
+                        "id": storyBulk.id,
+                        "chapterNumber": storyBulk.chapterNumber,
+                    ]
+                    result.append(storyBulkData)
                 }
-                result.append(storyData)
             }
             return result
         }
@@ -1930,23 +2049,11 @@ class NovelSpeakerUtility: NSObject {
                     result.append(novelData)
                     continue
                 }
-                let contentDirectory:URL?
-                if !forStorySaveNovelIDArray.contains(novel.novelID) && novel.m_type == NovelType.UserCreated.rawValue {
-                    contentDirectory = nil
-                }else{
-                    contentDirectory = NiftyUtility.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)")
+                guard let contentDirectory:URL = NiftyUtility.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)") else {
+                    continue
                 }
-                switch novel.type {
-                case .URL:
-                    novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory, progressString: progressString, progress: progress)
-                    break
-                case .UserCreated:
-                    novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory, progressString: progressString, progress: progress)
-                    break
-                }
-                if let contentDirectory = contentDirectory {
-                    fileArray.append(contentDirectory)
-                }
+                novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory, progressString: progressString, progress: progress)
+                fileArray.append(contentDirectory)
                 result.append(novelData)
                 novelCount += 1
             }
@@ -2209,12 +2316,12 @@ class NovelSpeakerUtility: NSObject {
         let jsonDictionary:[String:Any]
         if isOnlyNovelData {
             jsonDictionary = [
-                "data_version": "2.0.0",
+                "data_version": "2.1.0",
                 "bookshelf": bookshelfResult.0,
             ]
         }else{
             jsonDictionary = [
-                "data_version": "2.0.0",
+                "data_version": "2.1.0",
                 "bookshelf": bookshelfResult.0,
                 "word_replacement_dictionary": CreateBackupDataDictionary_SpeechModSetting(),
                 "speech_wait_config": CreateBackupDataDictionary_SpeechWaitConfig(),
@@ -2232,13 +2339,8 @@ class NovelSpeakerUtility: NSObject {
         dateFormatter.dateFormat = "yyyyMMddHHmm"
         let dateString = dateFormatter.string(from: Date())
         var ziptargetFiles:[URL] = bookshelfResult.1
-        let backupDataFilePath:URL
-        if forNovelIDArray.count > 0 {
-            backupDataFilePath = outputPath.appendingPathComponent("backup_data.json")
-            ziptargetFiles.append(backupDataFilePath)
-        }else{
-            backupDataFilePath = NiftyUtility.GetTemporaryFilePath(fileName: String.init(format: "%@.novelspeaker-backup-json", dateString))
-        }
+        let backupDataFilePath:URL = outputPath.appendingPathComponent("backup_data.json")
+        ziptargetFiles.append(backupDataFilePath)
         
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: jsonDictionary, options: [.prettyPrinted])
@@ -2246,9 +2348,6 @@ class NovelSpeakerUtility: NSObject {
         }catch{
             print("JSONSerizization.data() failed. or jsonData.write() failed.")
             return nil
-        }
-        if forNovelIDArray.count <= 0 {
-            return backupDataFilePath
         }
         progress?(NSLocalizedString("NovelSpeakerBackup_CompressingBackupData", comment: "圧縮準備中"))
         let zipFilePath = NiftyUtility.GetTemporaryFilePath(fileName: NiftyUtility.Date2ISO8601String(date: Date()) + ".zip")
