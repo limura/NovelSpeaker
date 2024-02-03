@@ -211,17 +211,36 @@ class NiftyUtility: NSObject {
                         dialog.dismiss(animated: false, completion: nil)
                     }
                 })
-            builder = builder.addButton(title: NSLocalizedString("NiftyUtility_Import", comment: "このまま取り込む"), callback: { (dialog) in
-                    let titleTextField = dialog.view.viewWithTag(100) as! UITextField
-                    let titleString = titleTextField.text ?? titleString
-                    DispatchQueue.main.async {
-                        
-                        dialog.dismiss(animated: false, completion: {
-                            let (novelIDTmp, errorString) = RealmNovel.AddNewNovelWithFirstStoryState(state:state.TitleChanged(title:titleString))
-                            guard let novelID = novelIDTmp else {
-                                DispatchQueue.main.async {
-                                    let errorMessage = errorString ?? NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryMessage", comment: "既に登録されている小説などの原因が考えられます。")
-                                    NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"), message: errorMessage, buttonTitle: nil, buttonAction: nil)
+            builder = builder.addButton(title: NSLocalizedString("NiftyUtility_Import", comment: "このまま取り込む"),
+                                        callback: {
+                (dialog) in
+                let titleTextField = dialog.view.viewWithTag(100) as! UITextField
+                let titleString = titleTextField.text ?? titleString
+                DispatchQueue.main.async {
+                    dialog.dismiss(animated: false,
+                                   completion: {
+                        let (novelIDTmp, errorString, duplicatedNovelID) = RealmNovel.AddNewNovelWithFirstStoryState(state:state.TitleChanged(title:titleString))
+                        guard let novelID = novelIDTmp else {
+                            DispatchQueue.main.async {
+                                let errorMessage = errorString ?? NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryMessage", comment: "既に登録されている小説などの原因が考えられます。")
+                                if let duplicatedNovelID = duplicatedNovelID {
+                                    NiftyUtility.EasyDialogTwoButton(
+                                        viewController: viewController,
+                                        title: NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"),
+                                        message: errorMessage,
+                                        button1Title: NSLocalizedString(
+                                            "NiftyUtility_FailedAboutAddNewNovel_DuplicateNovelID_OpenNovelButton",
+                                            comment: "既存の小説を開く"
+                                        ),
+                                        button1Action: {
+                                            BookShelfRATreeViewController.OpenNovelOnBookShelf(novelID: duplicatedNovelID)
+                                        },
+                                        button2Title: nil,
+                                        button2Action: nil
+                                    )
+                                }else{
+                                        NiftyUtility.EasyDialogOneButton(viewController: viewController, title: NSLocalizedString("NiftyUtility_FailedAboutAddNewNovelFromWithStoryTitle", comment: "小説の本棚への追加に失敗しました。"), message: errorMessage, buttonTitle: nil, buttonAction: nil)
+                                    }
                                 }
                                 return
                             }

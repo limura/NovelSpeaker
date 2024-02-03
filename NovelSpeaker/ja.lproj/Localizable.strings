@@ -500,6 +500,7 @@
 "NiftyUtility_ImportedButNoTextFound" = "取り込みは完了しましたが、内容が空でした。全ての内容がJavaScriptで生成されるHTML文書の場合などに起こることがあるかもしれません。ことせかい の開発側でできることはあまりないかもしれませんが、一応、ことせかい のサポートサイト側のご意見ご要望フォーム等から、このエラーの起こったURLとエラーが起こるまでの手順を添えて報告して頂くことで解決できるかもしれません";
 "NiftyUtility_FailedAboutAddNewNovelFromWithStoryTitle" = "小説の本棚への追加に失敗しました。";
 "NiftyUtility_FailedAboutAddNewNovelFromWithStoryMessage" = "既に登録されている小説などの原因が考えられます。";
+"NiftyUtility_FailedAboutAddNewNovel_DuplicateNovelID_OpenNovelButton" = "本棚側の小説を開く";
 "NiftyUtility_AddNewNovelToBookshelfTitle" = "本棚に小説を追加しました";
 "NiftyUtility_AddNewNovelToBookshelfMessage" = "続く章があればダウンロードを続けます。";
 "NiftyUtility_ImportSeparatedContent" = "テキトーに分割して取り込む";

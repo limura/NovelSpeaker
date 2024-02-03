@@ -1498,4 +1498,21 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
             viewController.reloadWebView()
         }
     }
+    static func OpenNovelOnBookShelf(novelID:String){
+        guard let instance = instance else { return  }
+        DispatchQueue.main.async {
+            return RealmUtil.RealmBlock { realm in
+                guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) else { return }
+                let targetTabIndex = 0
+                guard let navigationController = instance.tabBarController?.viewControllers?[targetTabIndex] as? UINavigationController, let bookShelfTreeViewController = navigationController.viewControllers.first as? BookShelfRATreeViewController else {
+                    return
+                }
+                navigationController.popToRootViewController(animated: false)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute:{
+                    bookShelfTreeViewController.pushNextView(novelID: novelID, isNeedSpeech: false, isNeedUpdateReadDate: true)
+                    instance.tabBarController?.selectedIndex = targetTabIndex
+                })
+            }
+        }
+    }
 }
