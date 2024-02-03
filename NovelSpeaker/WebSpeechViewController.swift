@@ -78,6 +78,7 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
     
     deinit {
+        StopObservers()
         WebSpeechViewController.instance = nil
         RealmObserverHandler.shared.RemoveDelegate(delegate: self)
     }
@@ -133,6 +134,9 @@ class WebSpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObs
     }
 
     func StopObservers() {
+        if let token = self.novelObserverToken {
+            StorySpeaker.shared.RemoveUpdateReadDateWithoutNotifiningToken(token: token)
+        }
         novelObserverToken = nil
         storyObserverToken = nil
         displaySettingObserverToken = nil
@@ -751,6 +755,9 @@ body.NovelSpeakerBody {
                     break
                 }
             })
+            if let token = self.novelObserverToken {
+                StorySpeaker.shared.AddUpdateReadDateWithoutNotificationToken(token: token)
+            }
         }
     }
     

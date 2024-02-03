@@ -109,6 +109,7 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     deinit {
+        StopObservers()
         self.unregistNotificationCenter()
         RealmObserverHandler.shared.RemoveDelegate(delegate: self)
     }
@@ -136,6 +137,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
     }
     
     func StopObservers() {
+        if let token = self.novelObserverToken {
+            StorySpeaker.shared.RemoveUpdateReadDateWithoutNotifiningToken(token: token)
+        }
         novelObserverToken = nil
         storyObserverToken = nil
         displaySettingObserverToken = nil
@@ -495,6 +499,9 @@ class SpeechViewController: UIViewController, StorySpeakerDeletgate, RealmObserv
                     break
                 }
             })
+            if let token = self.novelObserverToken {
+                StorySpeaker.shared.AddUpdateReadDateWithoutNotificationToken(token: token)
+            }
         }
     }
     func observeStory(storyID:String) {

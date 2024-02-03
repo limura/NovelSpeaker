@@ -95,6 +95,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     var moreSplitMinimumLetterCount:Int = Int.max
     
     var targetFolderNameForGoToNextSelectedFolderdNovel:String? = nil
+    var updateDateWithoutNotifyingTokens:[NotificationToken?] = []
 
     private override init() {
         super.init()
@@ -469,9 +470,19 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         }
     }
     
+    func RemoveUpdateReadDateWithoutNotifiningToken(token: NotificationToken) {
+        self.updateDateWithoutNotifyingTokens.removeAll(where: {$0 == token})
+    }
+    
+    func AddUpdateReadDateWithoutNotificationToken(token: NotificationToken) {
+        if !self.updateDateWithoutNotifyingTokens.contains(token) {
+            self.updateDateWithoutNotifyingTokens.append(token)
+        }
+    }
+    
     func updateReadDate(realm: Realm, storyID:String, contentCount:Int, readLocation:Int) {
         let novelID = RealmStoryBulk.StoryIDToNovelID(storyID: storyID)
-        RealmUtil.WriteWith(realm: realm) { (realm) in
+        RealmUtil.WriteWith(realm: realm, withoutNotifying: self.updateDateWithoutNotifyingTokens) { (realm) in
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
                 novel.lastReadDate = Date()
                 novel.m_readingChapterStoryID = storyID
