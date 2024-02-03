@@ -230,11 +230,10 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
             self.speechQueueLock.unlock()
             finishDelegate?.finishSpeak(isCancel: isCancel, speechString: speechString)
         }
+        var isDummy = false
         if speechQueue.count > 0 {
             let queue = speechQueue.removeFirst()
-            if queue.isDummy == false {
-                finishDelegate = delegate
-            }
+            isDummy = queue.isDummy
         }
         if isStopping {
             speechQueue.removeAll()
@@ -243,6 +242,10 @@ class MultiVoiceSpeaker: SpeakRangeDelegate {
         }
         if let queue = speechQueue.first {
             startSpeech(queue: queue)
+        }else{
+            if isDummy == false {
+                finishDelegate = delegate
+            }
         }
     }
 
