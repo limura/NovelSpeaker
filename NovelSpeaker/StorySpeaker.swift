@@ -1266,6 +1266,22 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
+                // 何故かそのページの最後まで読み上げていないのに finishSpeak が呼び出されることがあるらしいので、
+                // 読み上げている位置が末尾に到達していない場合を検知する形で怪しく回避します
+                let currentLocation = self.speaker.currentLocation
+                if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.unicodeScalars.count > (currentLocation+3) {
+                    DispatchQueue.main.async {
+                        RealmUtil.RealmBlock { realm in
+                            self.StartSpeech(
+                                realm: realm,
+                                withMaxSpeechTimeReset: false,
+                                callerInfo: "finishSpeak が発生したけれどそのページの最後まで読み上げていないようなので再度再生を開始します。",
+                                isNeedRepeatSpeech: self.isNeedRepeatSpeech
+                            )
+                        }
+                    }
+                    return
+                }
                 let globalState = RealmGlobalState.GetInstanceWith(realm: realm)
                 let repeatSpeechType = globalState?.repeatSpeechType
                 if self.isNeedRepeatSpeech, let repeatSpeechType = repeatSpeechType, repeatSpeechType == .RewindToThisStory {
