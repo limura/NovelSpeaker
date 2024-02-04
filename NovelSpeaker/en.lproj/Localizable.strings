@@ -923,16 +923,29 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.1
 
-- Added scrollTo concept to SiteInfo
-- Added \"Preferred SiteInfo\" to \"Settings tab\" -> \"Internal data reference URL settings\"
-- Added ON/OFF setting for \"Attach the text of the novel where the problem occurs\" to the \"Settings tab\" -> \"Contact developer\" screen.
-- Corresponds to problems when internal data cannot be read and malfunctions occur.
+- Changed the format of the output backup file
+- Added a \"Open existed novel\" button to the dialog when trying to import a novel using the \"Web import\" function and the same novel is registered on the bookshelf and fails.
+- Reduces the possibility of transitioning to the next page while reading aloud even if you are in the middle of the page
+- Reduces the possibility that the message \"Go to the updated XX chapter on the other device\" will be displayed even if iCloud sync is turned off.
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.9.1
+
+Changes in interface/internal operation
+
+- Changed the format of the output backup file
+- Added a \"Open existed novel\" button to the dialog when trying to import a novel using the \"Web import\" function and the same novel is registered on the bookshelf and fails.
+
+Fixing the problem
+
+- Reduces the possibility of transitioning to the next page while reading aloud even if you are in the middle of the page
+- Reduces the possibility that the message \"Go to the updated XX chapter on the other device\" will be displayed even if iCloud sync is turned off.
+
+
 Version 2.8.2
 
 Changes in interface/internal operation

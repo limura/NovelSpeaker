@@ -912,16 +912,29 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.8.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.1
 
-- SiteInfo に scrollTo という概念を追加
-- 「設定タブ」->「内部データ参照用URLの設定」に「優先SiteInfo」を追加
-- 「設定タブ」->「開発者に問い合わせる」画面に「問題が発生する小説の本文も添付する」のON/OFF設定を追加
-- 内部データが読み込めなくなって誤動作した時の問題に対応します
+- 出力されるバックアップファイルのフォーマットを変更
+- 「Web取込」機能で小説を取り込もうとした時に同じ小説が本棚に登録されていて失敗した場合のダイアログに「本棚側の小説を開く」ボタンを追加
+- 読み上げ中に、ページの途中にも関わらず次のページへと移行してしまう可能性を減らします
+- iCloud同期をOFFにしている状態にも関わらず、「他端末で更新された XX章 へ移動」というメッセージが表示される可能性を減らします
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.9.1
+
+インタフェース・内部動作の変更
+
+- 出力されるバックアップファイルのフォーマットを変更
+- 「Web取込」機能で小説を取り込もうとした時に同じ小説が本棚に登録されていて失敗した場合のダイアログに「本棚側の小説を開く」ボタンを追加
+
+問題の修正
+
+- 読み上げ中に、ページの途中にも関わらず次のページへと移行してしまう可能性を減らします
+- iCloud同期をOFFにしている状態にも関わらず、「他端末で更新された XX章 へ移動」というメッセージが表示される可能性を減らします
+
+
 Version 2.8.2
 
 インタフェース・内部動作の変更
