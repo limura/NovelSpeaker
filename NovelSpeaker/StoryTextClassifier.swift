@@ -342,19 +342,33 @@ class StoryTextClassifier {
     // ただ、元々の文字列長が長すぎる場合はそのままの長さで残ってしまいますし、
     // 日本語として切れて良い場所かどうかは考慮に入れていないために不自然な所で区切られた文になる可能性もある
     // という事を理解しておいてください。
-    static func ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray:[SpeechBlockInfo], moreSplitMinimumLetterCount:Int) -> [CombinedSpeechBlock] {
+    static func ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray:[SpeechBlockInfo], moreSplitMinimumLetterCount:Int, splitTargetLastLetters:[String]) -> [CombinedSpeechBlock] {
         var result:[CombinedSpeechBlock] = []
         var currentBlock:CombinedSpeechBlock? = nil
         var currentDisplayTextCount = 0
         for block in speechBlockArray {
-            let blockDisplayTextCount = block.displayText.count
-            if let current = currentBlock,
-                (currentDisplayTextCount + blockDisplayTextCount) < moreSplitMinimumLetterCount
-                    && current.Add(block: block) {
-                currentDisplayTextCount += blockDisplayTextCount
-                continue
+            let displayText = block.displayText
+            let blockDisplayTextCount = displayText.count
+            var hasValidSuffix = false
+            for lastLetter in splitTargetLastLetters {
+                if displayText.hasSuffix(lastLetter) {
+                    hasValidSuffix = true
+                    break
+                }
             }
             if let current = currentBlock {
+                if ((currentDisplayTextCount + blockDisplayTextCount) < moreSplitMinimumLetterCount || hasValidSuffix == false)
+                    && current.Add(block: block) {
+                    currentDisplayTextCount += blockDisplayTextCount
+                    continue
+                }
+                if ((currentDisplayTextCount + blockDisplayTextCount) >= moreSplitMinimumLetterCount && hasValidSuffix == true)
+                    && current.Add(block: block) {
+                    result.append(current)
+                    currentBlock = nil
+                    currentDisplayTextCount = 0
+                    continue
+                }
                 result.append(current)
             }
             currentBlock = CombinedSpeechBlock(block: block)
@@ -550,7 +564,7 @@ class StoryTextClassifier {
             let newBlockArray = generateBlockFromSpeechMod(text: displayText, indexedSpeechModArray: indexedSpeechModArray, speakerSetting: currentSpeaker, waitConfig: currentWaitconfig)
             result.append(contentsOf: newBlockArray)
         }
-        let combinedResult = ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: result, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount)
+        let combinedResult = ConcatinateSameVoiceSettingSpeechBlock(speechBlockArray: result, moreSplitMinimumLetterCount: moreSplitMinimumLetterCount, splitTargetLastLetters: withMoreSplitTargets)
         //print("diffDate: \(Date().timeIntervalSince(startDate))")
         return combinedResult
     }

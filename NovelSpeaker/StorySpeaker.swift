@@ -91,8 +91,8 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     // SpeechBlockSpeaker 内部で分割されているblockの大きさを制御する値なのだけれど、
     // 残念なことに StorySpeaker は次の Story を自動で読み込んで SpeechBlockSpeakr に渡す事をするため、
     // この制御値を保存しておく必要があります。
-    var withMoreSplitTargets:[String] = []
-    var moreSplitMinimumLetterCount:Int = Int.max
+    var withMoreSplitTargets:[String] = ["。", "、", ".", "　", "\n"]
+    var moreSplitMinimumLetterCount:Int = 200 //Int.max
     
     var targetFolderNameForGoToNextSelectedFolderdNovel:String? = nil
     var updateDateWithoutNotifyingTokens:[NotificationToken?] = []
@@ -1277,8 +1277,6 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
         
         NiftyUtility.DispatchSyncMainQueue {
             RealmUtil.RealmBlock { (realm) -> Void in
-                // 何故かそのページの最後まで読み上げていないのに finishSpeak が呼び出されることがあるらしいので、
-                // 読み上げている位置が末尾に到達していない場合を検知する形で怪しく回避します
                 let currentLocation = self.speaker.currentLocation
                 if let story = RealmStoryBulk.SearchStoryWith(realm: realm, storyID: self.storyID), story.content.unicodeScalars.count > (currentLocation+3) {
                     DispatchQueue.main.async {

@@ -292,6 +292,20 @@ class SpeechBlockSpeaker: NSObject, SpeakRangeDelegate {
             self.stopSpeechHandler = nil
             return
         }
+        /* // 一応読み上げ途中で Cancel が発生する問題は回避できた(一度にSpeak()にわたす文字列の長さを短くする事で回避できるぽい)
+         // ので、この再開するあたりの処理は封印しておきます。
+         // 実際、再開させるようにしても、発話が停止してから2,3拍おいた後に少し戻って発話する感じになるのであまりうれしくないです
+        if isCancel == true {
+            // isCancel で finishSpeak が来た場合で、かつ、読み上げ中の途中でfinishSpeakが発生している場合、
+            // 怪しくその時点で発話を再開します。
+            print("currentSpeakingLocation: \(currentSpeakingLocation), displayText.count: \(displayText.unicodeScalars.count)")
+            if (currentSpeakingLocation + 3) < displayText.unicodeScalars.count {
+                SetSpeechLocation(location: currentSpeakingLocation)
+                enqueueSpeechBlock()
+                return
+            }
+        }
+        */
         if setNextSpeechBlock() != true {
             m_IsSpeaking = false
             self.delegate?.finishSpeak(isCancel: isCancel, speechString: speechString)
