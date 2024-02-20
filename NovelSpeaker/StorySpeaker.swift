@@ -91,7 +91,7 @@ class StorySpeaker: NSObject, SpeakRangeDelegate, RealmObserverResetDelegate {
     // SpeechBlockSpeaker 内部で分割されているblockの大きさを制御する値なのだけれど、
     // 残念なことに StorySpeaker は次の Story を自動で読み込んで SpeechBlockSpeakr に渡す事をするため、
     // この制御値を保存しておく必要があります。
-    var withMoreSplitTargets:[String] = ["。", "、", ".", "　", "\n"]
+    var withMoreSplitTargets:[String] = ["。", "、", "　", "\n"]
     var moreSplitMinimumLetterCount:Int = 200 //Int.max
     
     var targetFolderNameForGoToNextSelectedFolderdNovel:String? = nil
