@@ -1295,36 +1295,49 @@ class NovelSpeakerUtility: NSObject {
         }
     }
     static func RestoreSpeechSectionConfig_V_2_0_0(sectionConfigArray:NSArray, progressUpdate:@escaping(String)->Void){
-        for sectionConfig in sectionConfigArray {
-            guard
-                let sectionConfigDic = sectionConfig as? NSDictionary,
-                let name = sectionConfigDic.object(forKey: "name") as? String,
-                let startText = sectionConfigDic.object(forKey: "startText") as? String,
-                let endText = sectionConfigDic.object(forKey: "endText") as? String,
-                let speakerID = sectionConfigDic.object(forKey: "speakerID") as? String
+        RealmUtil.Write { realm in
+            if let oldSectionConfigs = RealmSpeechSectionConfig.GetAllObjectsWith(realm: realm) {
+                for c in oldSectionConfigs {
+                    realm.delete(c)
+                }
+            }
+            struct configTmp {
+                var sectionConfigDic:NSDictionary
+                var name:String
+                var startText:String
+                var endText:String
+                var speakerID:String
+            }
+            var newConfigs:[configTmp] = []
+            for sectionConfig in sectionConfigArray {
+                guard
+                    let sectionConfigDic = sectionConfig as? NSDictionary,
+                    let name = sectionConfigDic.object(forKey: "name") as? String,
+                    let startText = sectionConfigDic.object(forKey: "startText") as? String,
+                    let endText = sectionConfigDic.object(forKey: "endText") as? String,
+                    let speakerID = sectionConfigDic.object(forKey: "speakerID") as? String
                 else { continue }
-            RealmUtil.RealmBlock { (realm) -> Void in
-                let sectionConfig = RealmSpeechSectionConfig.SearchFromWith(realm: realm, name: name) ?? RealmSpeechSectionConfig()
-                if sectionConfig.name != name {
-                    sectionConfig.name = name
+                newConfigs.append(configTmp(sectionConfigDic: sectionConfigDic, name: name, startText: startText, endText: endText, speakerID: speakerID))
+            }
+            if newConfigs.count <= 0 { return }
+            for newConfig in newConfigs {
+                let sectionConfig = RealmSpeechSectionConfig()
+                sectionConfig.name = newConfig.name
+                sectionConfig.startText = newConfig.startText
+                sectionConfig.endText = newConfig.endText
+                if let createdDateString = newConfig.sectionConfigDic.object(forKey: "createdDate") as? String,
+                   let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
+                    sectionConfig.createdDate = createdDate
                 }
-                RealmUtil.WriteWith(realm: realm) { (realm) in
-                    sectionConfig.startText = startText
-                    sectionConfig.endText = endText
-                    if let createdDateString = sectionConfigDic.object(forKey: "createdDate") as? String,
-                        let createdDate = NiftyUtility.ISO8601String2Date(iso8601String: createdDateString) {
-                        sectionConfig.createdDate = createdDate
+                sectionConfig.speakerID = newConfig.speakerID
+                sectionConfig.targetNovelIDArray.removeAll()
+                if let targetNovelIDArray = newConfig.sectionConfigDic.object(forKey: "targetNovelIDArray") as? NSArray {
+                    for novel in targetNovelIDArray {
+                        guard let novel = novel as? String else { continue }
+                        sectionConfig.targetNovelIDArray.append(novel)
                     }
-                    sectionConfig.speakerID = speakerID
-                    sectionConfig.targetNovelIDArray.removeAll()
-                    if let targetNovelIDArray = sectionConfigDic.object(forKey: "targetNovelIDArray") as? NSArray {
-                        for novel in targetNovelIDArray {
-                            guard let novel = novel as? String else { continue }
-                            sectionConfig.targetNovelIDArray.append(novel)
-                        }
-                    }
-                    realm.add(sectionConfig, update: .modified)
                 }
+                realm.add(sectionConfig, update: .modified)
             }
         }
     }
