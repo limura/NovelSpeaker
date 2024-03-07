@@ -2,6 +2,7 @@
     {
         "webSiteURL": "https://syosetu.com/",
         "title": "Become a novelist",
+        "isNeedHeadless": true,
         "HTTPMethod": "GET",
         "url": "https://yomou.syosetu.com/search.php?",
         "values": [
@@ -56,10 +57,10 @@
             }
         ],
         "result": {
-            "block": "//div[@class='searchkekka_box']",
-            "nextLink": "//div[@class='pager']/a[@class='nextlink']/@href",
-            "title": "//div[@class='novel_h']/a",
-            "url": "//a[contains(@href,'/novelview/infotop/ncode/')]/@href"
+            "block": "//div[@id='accordion']/div[@class='smpnovel_list']",
+            "nextLink": "//div[@class='page_bar']/a[@class='nextlink']/@href",
+            "title": "//div[contains(@class,'head')]/span[@class='novel_h']",
+            "url": "//a[@class='read_button']"
         }
     },
     {

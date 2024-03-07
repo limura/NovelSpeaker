@@ -29,11 +29,12 @@
 {
   "resource_url": "http://wedata.net/items/81619",
   "data": {
-    "pageElement": "//div[@id='novel_honbun']|//p[contains(@class,'novel_subtitle')]",
+    "pageElement": "//div[@id='novel_honbun']|//p[contains(@class,'novel_subtitle')]|//div[@id='novel_p']|//div[@id='novel_a']",
     "title": "//div[@class='contents1']/a[not(@href='https://syosetu.com')][1]|//div[@id='novel_contents']//p[contains(@class,'novel_title')]",
     "subtitle": "//p[contains(@class,'novel_subtitle')]",
-    "firstPageLink": "//div[@id='container']//div[@id='novelindex_button']/a|//div[@id='novel_contents']//div[contains(@class,'novel_sublist')]/ul/li/a[contains(@href,'/1/')]|//div[@id='novel_contents']//div[@class='index_box']/dl/dd/a[contains(@href,'/1/')]",
-    "nextLink": "//div[@class='novel_bn'][1]/a[contains(., '次へ')]",
+    "firstPageLink": "//div[@id='container']//div[@id='novelindex_button']/a|//div[@id='novel_contents']//div[contains(@class,'novel_sublist')]/ul/li/a[contains(@href,'/n')][1]|//div[@id='novel_contents']//div[@class='index_box']/dl/dd/a[contains(@href,'/n')][1]",
+    "isNeedHeadless": "true",
+    "nextLink": "//div[@class='novel_bn'][1]//a[@rel='next']",
     "url": "^https?://ncode\\.syosetu\\.com/",
     "tag": "//th[text()='キーワード']/following-sibling::td",
     "author": "//table[@id='noveltable1']//tr[child::th[text()='作者名']]/td|//div[@class='novel_writername' and not(child::a)]|//div[@class='novel_writername']/a|//body[not(descendant::div[@class='novel_writername'])]//div[@class='contents1']/a[contains(@href,'mypage.syosetu.com')]/text()|//body[not(descendant::div[@class='novel_writername'])]//div[@class='contents1' and not(child::a[contains(@href,'mypage.syosetu.com')])]/text()",
@@ -43,6 +44,6 @@
   "created_by": "limura",
   "name": "小説家になろう",
   "created_at": "2017-11-20T11:27:02+09:00",
-  "updated_at": "2022-12-19T16:34:37+09:00"
+  "updated_at": "2024-03-07T13:19:24+09:00"
 }
 ]
