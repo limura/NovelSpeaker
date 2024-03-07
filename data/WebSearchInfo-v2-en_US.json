@@ -57,10 +57,10 @@
             }
         ],
         "result": {
-            "block": "//div[@id='accordion']/div[@class='smpnovel_list']",
-            "nextLink": "//div[@class='page_bar']/a[@class='nextlink']/@href",
-            "title": "//div[contains(@class,'head')]/span[@class='novel_h']",
-            "url": "//a[@class='read_button']"
+            "block": "//div[@id='accordion']/div[@class='smpnovel_list']|//div[@id='main_search']/div[@class='searchkekka_box']",
+            "nextLink": "//div[@class='page_bar']/a[@class='nextlink']/@href|//div[@class='pager']/a[@class='nextlink']/@href",
+            "title": "//div[contains(@class,'head')]/span[@class='novel_h']|//div[@class='novel_h']/a",
+            "url": "//a[@class='read_button']|//div[@class='novel_h']/a"
         }
     },
     {
