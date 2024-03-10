@@ -995,11 +995,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         return CreateUniqueBulkID(novelID: StoryIDToNovelID(storyID: storyID), chapterNumber: StoryIDToChapterNumber(storyID: storyID))
     }
     
-    static func StoryCreamAssetToStoryArray(asset:CreamAsset) -> [Story]? {
-        guard let zipedData = asset.storedData() else {
-            print("LoadStoryArray storedData() return nil. filePath: \(asset.filePath.absoluteString)")
-            return nil
-        }
+    static func StoryZipedAssetToStoryArray(zipedData:Data) -> [Story]? {
         guard let data = NiftyUtility.decompress(data: zipedData) else {
             print("LoadStoryArray dataInflate() failed.")
             return nil
@@ -1009,6 +1005,14 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             return nil
         }
         return storyDict
+    }
+    
+    static func StoryCreamAssetToStoryArray(asset:CreamAsset) -> [Story]? {
+        guard let zipedData = asset.storedData() else {
+            print("LoadStoryArray storedData() return nil. filePath: \(asset.filePath.absoluteString)")
+            return nil
+        }
+        return StoryZipedAssetToStoryArray(zipedData: zipedData)
     }
     
     func LoadStoryArray() -> [Story]? {
@@ -1212,6 +1216,71 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         }
     }
     #endif
+    
+    // 一つのBulkに属するStoryの配列を一度に追加します。
+    // 追加される storyArray は chapterNumber の小さい順に sort されている必要があります。
+    // 以前に登録されているものについては上書きの形式で保存されます。
+    // 追加されたStoryのうち最後のもののChapterNumberを返します
+    private static func SetStoryArrayOneBulkWith(realm:Realm, novelID: String, chapterNumber:Int, storyArray:[Story]) -> Int? {
+        // とりあえず古いものがあるなら取り出す
+        let targetBulk:RealmStoryBulk
+        let oldStoryArray:[Story]
+        if let oldBulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber), let bulkStoryArray = oldBulk.LoadStoryArray() {
+            oldStoryArray = bulkStoryArray
+            targetBulk = oldBulk
+        }else{
+            // 古いものが無いなら空のものを作っておく
+            oldStoryArray = []
+            targetBulk = RealmStoryBulk()
+            targetBulk.id = CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber)
+            targetBulk.chapterNumber = chapterNumber
+            targetBulk.novelID = novelID
+            targetBulk.isDeleted = false
+        }
+
+        // [ChapterNumber:Story] というものを作ってそこで新しいもので上書きしたStoryArrayを作る
+        var newStorySet:[Int:Story] = [:]
+        for story in oldStoryArray {
+            newStorySet[story.chapterNumber] = story
+        }
+        for story in storyArray {
+            newStorySet[story.chapterNumber] = story
+        }
+        let newStoryArray = newStorySet.keys.sorted().compactMap({newStorySet[$0]})
+        targetBulk.OverrideStoryListAsset(storyArray: newStoryArray)
+        realm.add(targetBulk, update: .modified)
+        RealmStoryBulk.bulkCache = nil
+        RealmStoryBulk.storyCache = nil
+        return newStoryArray.last?.chapterNumber
+    }
+    // storyArray をDBに保存します。ただし、指定した novelID 以外のStoryは無視されます。
+    // 追加されたStoryのうち最後のもののChapterNumberを返します。
+    @discardableResult
+    static func SetStoryArrayWith_new2(realm:Realm, novelID:String, storyArray:[Story]) -> Int? {
+        let storyArray = storyArray.filter({$0.novelID == novelID}).sorted { $0.chapterNumber < $1.chapterNumber }
+        var bulkStoryArray:[Story] = []
+        var currentBulkId = -1
+        var lastChapterNumber:Int? = nil
+        for story in storyArray {
+            let bulkID = CalcBulkChapterNumber(chapterNumber: story.chapterNumber)
+            if currentBulkId != bulkID, let firstStory = bulkStoryArray.first {
+                let lastChapter = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId, storyArray: bulkStoryArray)
+                bulkStoryArray = []
+                currentBulkId = bulkID
+                if let lastChapter = lastChapter {
+                    lastChapterNumber = lastChapter
+                }
+            }
+            bulkStoryArray.append(story)
+        }
+        if currentBulkId >= 0, let firstStory = bulkStoryArray.first {
+            let lastChapter = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId, storyArray: bulkStoryArray)
+            if let lastChapter = lastChapter {
+                lastChapterNumber = lastChapter
+            }
+        }
+        return lastChapterNumber
+    }
     
     /// Story を複数同時に登録する場合に使います。
     /// 注意: storyArray は chapterNumber が小さい順に sort されており、かつ、chapterNumber に抜けが無い事が必要です。

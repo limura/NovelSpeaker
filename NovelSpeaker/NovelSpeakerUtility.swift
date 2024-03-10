@@ -1793,36 +1793,36 @@ class NovelSpeakerUtility: NSObject {
                 if let readingChapterContentCount = novelDic.object(forKey: "readingChapterContentCount") as? NSNumber {
                     novel.m_readingChapterContentCount = readingChapterContentCount.intValue
                 }
-                realm.add(novel, update: .modified)
-            }
-            var hasInvalidData = false
-            if let storys = novelDic.object(forKey: "storys") as? NSArray {
-                RealmUtil.Write { (realm) in
-                    for storyDic in storys {
-                        guard let storyDic = storyDic as? NSDictionary,
-                              let id = storyDic.object(forKey: "id") as? String,
-                              let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber,
-                              let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
-                              let extractedDirectory = extractedDirectory
-                        else { continue }
-                        let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
-                        let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
-                        guard let storyListAssetBinary = try? Data(contentsOf: contentFilePath) else {
-                            hasInvalidData = true
-                            continue
+                var hasInvalidData = false
+                if let storys = novelDic.object(forKey: "storys") as? NSArray {
+                    RealmUtil.Write { (realm) in
+                        for storyDic in storys {
+                            guard let storyDic = storyDic as? NSDictionary,
+                                  let id = storyDic.object(forKey: "id") as? String,
+                                  let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber,
+                                  let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
+                                  let extractedDirectory = extractedDirectory
+                            else { continue }
+                            let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
+                            let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
+                            guard let storyListAssetBinary = try? Data(contentsOf: contentFilePath) else {
+                                hasInvalidData = true
+                                continue
+                            }
+                            if let storyArray = RealmStoryBulk.StoryZipedAssetToStoryArray(zipedData: storyListAssetBinary) {
+                                let lastChapterNumber = RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
+                                // 既に本棚に登録されている小説のほうが多いChapterNumberが保存されているならその値で上書きしておきます。
+                                if let lastChapterNumber = lastChapterNumber, RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_lastChapterStoryID) < lastChapterNumber {
+                                    novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastChapterNumber)
+                                }
+                            }
                         }
-                        let storyBulk = RealmStoryBulk()
-                        storyBulk.id = id
-                        storyBulk.novelID = novelID
-                        storyBulk.chapterNumber = chapterNumber.intValue
-                        storyBulk.isDeleted = false
-                        storyBulk.OverrideCreamAssetBinary(data: storyListAssetBinary)
-                        realm.add(storyBulk, update: .modified)
                     }
                 }
-            }
-            if hasInvalidData {
-                NovelDownloadQueue.shared.addQueue(novelID: novelID)
+                if hasInvalidData {
+                    NovelDownloadQueue.shared.addQueue(novelID: novelID)
+                }
+                realm.add(novel, update: .modified)
             }
         }
     }
