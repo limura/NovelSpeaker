@@ -1671,7 +1671,6 @@ class NovelSpeakerUtility: NSObject {
                     RealmUtil.Write { (realm) in
                         var storyArray:[Story] = []
                         var index = 0
-                        var lastStoryChapterNumber:Int? = nil
                         for storyDic in storys {
                             index += 1
                             //progressUpdate(progressString + " (\(index)/\(max))")
@@ -1710,23 +1709,20 @@ class NovelSpeakerUtility: NSObject {
                             }
                             storyArray.append(story)
                             if storyArray.count >= RealmStoryBulk.bulkCount {
-                                let lastChapter = RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
+                                RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                                 storyArray.removeAll()
-                                if let lastChapter = lastChapter {
-                                    lastStoryChapterNumber = lastChapter
-                                }
                             }
                         }
                         if storyArray.count > 0 {
-                            let lastChapter = RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
+                            RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                             storyArray.removeAll()
-                            if let lastChapter = lastChapter {
-                                lastStoryChapterNumber = lastChapter
-                            }
                         }
-                        if let lastStoryChapterNumber = lastStoryChapterNumber, lastStoryChapterNumber > RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_lastChapterStoryID) {
-                            novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStoryChapterNumber)
-                        }
+                    }
+                }
+                // 既に登録されているChapterNumberの方が大きい場合は m_lastChapterNumber をそちらの値で上書きしておきます。
+                if let lastChapterNumber = RealmStoryBulk.GetAllChapterNumberFor(realm: realm, novelID: novelID).flatMap({$0}).sorted().last {
+                    if RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_lastChapterStoryID) < lastChapterNumber {
+                        novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastChapterNumber)
                     }
                 }
                 if hasInvalidData {
@@ -1819,13 +1815,15 @@ class NovelSpeakerUtility: NSObject {
                                 continue
                             }
                             if let storyArray = RealmStoryBulk.StoryZipedAssetToStoryArray(zipedData: storyListAssetBinary) {
-                                let lastChapterNumber = RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
-                                // 既に本棚に登録されている小説のほうが多いChapterNumberが保存されているならその値で上書きしておきます。
-                                if let lastChapterNumber = lastChapterNumber, RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_lastChapterStoryID) < lastChapterNumber {
-                                    novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastChapterNumber)
-                                }
+                                RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                             }
                         }
+                    }
+                }
+                // 既に登録されているChapterNumberの方が大きい場合は m_lastChapterNumber をそちらの値で上書きしておきます。
+                if let lastChapterNumber = RealmStoryBulk.GetAllChapterNumberFor(realm: realm, novelID: novelID).flatMap({$0}).sorted().last {
+                    if RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_lastChapterStoryID) < lastChapterNumber {
+                        novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastChapterNumber)
                     }
                 }
                 if hasInvalidData {
