@@ -1666,64 +1666,73 @@ class NovelSpeakerUtility: NSObject {
                 if let readingChapterContentCount = novelDic.object(forKey: "readingChapterContentCount") as? NSNumber {
                     novel.m_readingChapterContentCount = readingChapterContentCount.intValue
                 }
-                realm.add(novel, update: .modified)
-            }
-            var hasInvalidData = false
-            if let storys = novelDic.object(forKey: "storys") as? NSArray {
-                RealmUtil.Write { (realm) in
-                    var storyArray:[Story] = []
-                    var index = 0
-                    let max = storys.count
-                    for storyDic in storys {
-                        index += 1
-                        //progressUpdate(progressString + " (\(index)/\(max))")
-                        guard let storyDic = storyDic as? NSDictionary,
-                            let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber else { continue }
-                        let data:Data
-                        if let contentZipedString = storyDic.object(forKey: "contentZiped") as? String, let contentZiped = Data(base64Encoded: contentZipedString) {
-                            data = contentZiped
-                        }else{
-                            guard let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
-                                let extractedDirectory = extractedDirectory else {
-                                hasInvalidData = true
-                                continue
+                var hasInvalidData = false
+                if let storys = novelDic.object(forKey: "storys") as? NSArray {
+                    RealmUtil.Write { (realm) in
+                        var storyArray:[Story] = []
+                        var index = 0
+                        var lastStoryChapterNumber:Int? = nil
+                        for storyDic in storys {
+                            index += 1
+                            //progressUpdate(progressString + " (\(index)/\(max))")
+                            guard let storyDic = storyDic as? NSDictionary,
+                                let chapterNumber = storyDic.object(forKey: "chapterNumber") as? NSNumber else { continue }
+                            let data:Data
+                            if let contentZipedString = storyDic.object(forKey: "contentZiped") as? String, let contentZiped = Data(base64Encoded: contentZipedString) {
+                                data = contentZiped
+                            }else{
+                                guard let contentDirectoryString = novelDic.object(forKey: "contentDirectory") as? String,
+                                    let extractedDirectory = extractedDirectory else {
+                                    hasInvalidData = true
+                                    continue
+                                }
+                                let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
+                                let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
+                                guard let contentData = try? Data(contentsOf: contentFilePath) else {
+                                    hasInvalidData = true
+                                    continue
+                                }
+                                data = contentData
                             }
-                            let contentDirectory = extractedDirectory.appendingPathComponent(contentDirectoryString, isDirectory: true)
-                            let contentFilePath = contentDirectory.appendingPathComponent("\(chapterNumber.intValue)")
-                            guard let contentData = try? Data(contentsOf: contentFilePath) else {
-                                hasInvalidData = true
-                                continue
+                            guard let content = NiftyUtility.stringDecompress(data: data) else { continue }
+                            var story = Story()
+                            story.novelID = novelID
+                            story.chapterNumber = chapterNumber.intValue
+                            story.content = content.replacingOccurrences(of: "\u{00}", with: "")
+                            if let url = storyDic.object(forKey: "url") as? String {
+                                story.url = url
                             }
-                            data = contentData
+                            if let subtitle = storyDic.object(forKey: "subtitle") as? String {
+                                story.subtitle = subtitle
+                            }
+                            if let downloadDateString = storyDic.object(forKey: "downloadDate") as? String, let downloadDate = NiftyUtility.ISO8601String2Date(iso8601String: downloadDateString) {
+                                story.downloadDate = downloadDate
+                            }
+                            storyArray.append(story)
+                            if storyArray.count >= RealmStoryBulk.bulkCount {
+                                let lastChapter = RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
+                                storyArray.removeAll()
+                                if let lastChapter = lastChapter {
+                                    lastStoryChapterNumber = lastChapter
+                                }
+                            }
                         }
-                        guard let content = NiftyUtility.stringDecompress(data: data) else { continue }
-                        var story = Story()
-                        story.novelID = novelID
-                        story.chapterNumber = chapterNumber.intValue
-                        story.content = content.replacingOccurrences(of: "\u{00}", with: "")
-                        if let url = storyDic.object(forKey: "url") as? String {
-                            story.url = url
-                        }
-                        if let subtitle = storyDic.object(forKey: "subtitle") as? String {
-                            story.subtitle = subtitle
-                        }
-                        if let downloadDateString = storyDic.object(forKey: "downloadDate") as? String, let downloadDate = NiftyUtility.ISO8601String2Date(iso8601String: downloadDateString) {
-                            story.downloadDate = downloadDate
-                        }
-                        storyArray.append(story)
-                        if storyArray.count >= RealmStoryBulk.bulkCount {
-                            RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                        if storyArray.count > 0 {
+                            let lastChapter = RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                             storyArray.removeAll()
+                            if let lastChapter = lastChapter {
+                                lastStoryChapterNumber = lastChapter
+                            }
                         }
-                    }
-                    if storyArray.count > 0 {
-                        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
-                        storyArray.removeAll()
+                        if let lastStoryChapterNumber = lastStoryChapterNumber, lastStoryChapterNumber > RealmStoryBulk.StoryIDToChapterNumber(storyID: novel.m_lastChapterStoryID) {
+                            novel.m_lastChapterStoryID = RealmStoryBulk.CreateUniqueID(novelID: novelID, chapterNumber: lastStoryChapterNumber)
+                        }
                     }
                 }
-            }
-            if hasInvalidData {
-                NovelDownloadQueue.shared.addQueue(novelID: novelID)
+                if hasInvalidData {
+                    NovelDownloadQueue.shared.addQueue(novelID: novelID)
+                }
+                realm.add(novel, update: .modified)
             }
         }
     }
