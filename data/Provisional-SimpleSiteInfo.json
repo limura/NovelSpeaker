@@ -31,7 +31,7 @@
   "data": {
     "pageElement": "//div[@id='novel_honbun']",
     "title": "//div[@class='contents1']/a[not(@href='https://syosetu.com')][1]|//div[@id='novel_contents']//p[contains(@class,'novel_title')]|//div[@id='novel_contents']//div[@class='novel_title']",
-    "subtitle": "//p[contains(@class,'novel_subtitle')]|//div[@class='novel_subtitle']",
+    "subtitle": "//p[contains(@class,'novel_subtitle')]|//div[@class='novel_subtitle']/text()",
     "firstPageLink": "//div[@id='container']//div[@id='novelindex_button']/a|//div[@id='novel_contents']//div[contains(@class,'novel_sublist')]/ul/li/a[contains(@href,'/n')][1]|//div[@id='novel_contents']//div[@class='index_box']/dl/dd/a[contains(@href,'/n')][1]",
     "isNeedHeadless": "true",
     "nextLink": "//div[@class='novel_bn'][1]//a[@rel='next' or @class='novelview_pager-next']",
@@ -44,6 +44,6 @@
   "created_by": "limura",
   "name": "小説家になろう",
   "created_at": "2017-11-20T11:27:02+09:00",
-  "updated_at": "2024-03-15T09:01:16+09:00"
+  "updated_at": "2024-03-15T09:32:34+09:00"
 }
 ]
