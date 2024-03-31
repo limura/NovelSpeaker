@@ -138,8 +138,9 @@ struct StorySiteInfo {
     let overrideUserAgent:String?
     let forceErrorMessageAndElement: String?
     let scrollTo: String?
+    let isNeedWhitespaceSplitForTag: Bool
     
-    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?) {
+    init(pageElement:String, url:String?, title:String?, subtitle:String?, firstPageLink:String?, nextLink:String?, tag:String?, author:String?, isNeedHeadless:String?, injectStyle:String?, nextButton: String?, firstPageButton: String?, waitSecondInHeadless: Double?, forceClickButton:String?, resourceUrl:String?, overrideUserAgent:String?, forceErrorMessageAndElement:String?, scrollTo:String?, isNeedWhitespaceSplitForTag:String?) {
         self.pageElement = pageElement
         if let urlString = url, let urlRegex = try? NSRegularExpression(pattern: urlString, options: []) {
             self.url = urlRegex
@@ -167,6 +168,11 @@ struct StorySiteInfo {
         self.overrideUserAgent = overrideUserAgent
         self.forceErrorMessageAndElement = forceErrorMessageAndElement
         self.scrollTo = scrollTo
+        if let isNeedWhitespaceSplitForTagString = isNeedWhitespaceSplitForTag, isNeedWhitespaceSplitForTagString.count > 0 && !falseValues.contains(isNeedWhitespaceSplitForTagString) {
+            self.isNeedWhitespaceSplitForTag = true
+        }else{
+            self.isNeedWhitespaceSplitForTag = false
+        }
     }
     
     var forceErrorMessage : String? {
@@ -223,11 +229,11 @@ struct StorySiteInfo {
     }
     func decodeTag(xmlDocument:Kanna.XMLDocument) -> [String] {
         guard let xpath = tag else { return [] }
-        return Array(NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath))
+        return Array(NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath, isNeedWhitespaceSplitForTag: isNeedWhitespaceSplitForTag))
     }
     func decodeForceErrorElement(xmlDocument:Kanna.XMLDocument) -> Bool {
         guard let xpath = forceErrorElement else { return false }
-        let ret = NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath)
+        let ret = NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath, isNeedWhitespaceSplitForTag: isNeedWhitespaceSplitForTag)
         return ret.count > 0
     }
     
@@ -277,6 +283,7 @@ extension StorySiteInfo: CustomStringConvertible {
         result += "\"\noverrideUserAgent: \"" + (overrideUserAgent ?? "nil")
         result += "\"\nforceErrorMessageAndElement: \"" + (forceErrorMessageAndElement ?? "nil")
         result += "\"\nscrollTo: \"" + (scrollTo ?? "nil")
+        result += "\"\nisNeedWhitespaceSplitForTag: \"" + (isNeedWhitespaceSplitForTag ? "true" : "false")
         result += "\""
         return result
     }
@@ -305,6 +312,7 @@ extension StorySiteInfo : Decodable {
         case overrideUserAgent
         case forceErrorMessageAndElement
         case scrollTo
+        case isNeedWhitespaceSplitForTag
     }
     
     init(from decoder: Decoder) throws {
@@ -328,6 +336,8 @@ extension StorySiteInfo : Decodable {
         if let isNeedHeadlessString = isNeedHeadlessString, isNeedHeadlessString.count > 0 {
             switch isNeedHeadlessString.lowercased() {
             case "false":
+                isNeedHeadless = false
+            case "False":
                 isNeedHeadless = false
             case "nil":
                 isNeedHeadless = false
@@ -358,6 +368,23 @@ extension StorySiteInfo : Decodable {
         scrollTo = nil
         #endif
         forceErrorMessageAndElement = try? values.decode(String.self, forKey: NestedKeys.forceErrorMessageAndElement)
+        let isNeedWhitespaceSplitForTagString = try? values.decode(String.self, forKey: NestedKeys.isNeedWhitespaceSplitForTag)
+        if let isNeedWhitespaceSplitForTagString = isNeedWhitespaceSplitForTagString, isNeedWhitespaceSplitForTagString.count > 0 {
+            switch isNeedWhitespaceSplitForTagString.lowercased() {
+            case "false":
+                isNeedWhitespaceSplitForTag = false
+            case "False":
+                isNeedWhitespaceSplitForTag = false
+            case "nil":
+                isNeedWhitespaceSplitForTag = false
+            case "0":
+                isNeedWhitespaceSplitForTag = false
+            default:
+                isNeedWhitespaceSplitForTag = true
+            }
+        }else{
+            isNeedWhitespaceSplitForTag = false
+        }
     }
 }
 
@@ -378,7 +405,7 @@ class StoryHtmlDecoder {
     private init(){
         fallbackSiteInfoArray = [
             //StorySiteInfo(pageElement: "//*[contains(@class,'autopagerize_page_element') or contains(@itemprop,'articleBody') or contains(concat(' ', normalize-space(@class), ' '), ' hentry ') or contains(concat(' ', normalize-space(@class), ' '), ' h-entry ')]", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: "(//link|//a)[contains(concat(' ', translate(normalize-space(@rel),'NEXT','next'), ' '), ' next ')]", tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(@itemprop,'articleBody')"),
-            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil, scrollTo: nil)
+            StorySiteInfo(pageElement: "//body", url: ".*", title: "//title", subtitle: nil, firstPageLink: nil, nextLink: nil, tag: nil, author: nil, isNeedHeadless: nil, injectStyle: nil, nextButton: nil, firstPageButton: nil, waitSecondInHeadless: nil, forceClickButton: nil, resourceUrl: "fallbackSiteInfoArray(//body)", overrideUserAgent: nil, forceErrorMessageAndElement: nil, scrollTo: nil, isNeedWhitespaceSplitForTag: nil)
         ]
     }
     

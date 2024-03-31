@@ -1791,25 +1791,29 @@ class NiftyUtility: NSObject {
         return URL(string: urlString, relativeTo: baseURL)
     }
     
-    static func FilterXpathWithExtructTagString(xmlDocument:Kanna.XMLDocument, xpath:String) -> Set<String> {
+    static func FilterXpathWithExtructTagString(xmlDocument:Kanna.XMLDocument, xpath:String, isNeedWhitespaceSplitForTag:Bool) -> Set<String> {
         var tagSet = Set<String>()
         for element in xmlDocument.xpath(xpath) {
             guard let elementXML = element.toHTML, let tagString = HTMLToString(htmlString: elementXML) else { continue }
             let trimedString = tagString.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "#＃♯"))
             if trimedString.count <= 0 { continue }
-            // 空白で分割する場合は components() で分割したのをセットすれば良いのだけれど、今までそうではなかったので今からそうするのは如何なものか
-            //tagSet.formUnion(Set<String>(trimedString.components(separatedBy: " 　\u{C2A0}"))) // C2A0 == &nbsp;
+            if isNeedWhitespaceSplitForTag {
+                tagSet.formUnion(Set<String>(trimedString.components(separatedBy: " 　\u{C2A0}"))) // C2A0 == &nbsp;
+            }
             tagSet.insert(trimedString)
         }
         return tagSet
     }
 
-    static func FilterXpathWithExtructTagString(xmlElement:Kanna.XMLElement, xpath:String) -> Set<String> {
+    static func FilterXpathWithExtructTagString(xmlElement:Kanna.XMLElement, xpath:String, isNeedWhitespaceSplitForTag:Bool) -> Set<String> {
         var tagSet = Set<String>()
         for element in xmlElement.xpath(xpath) {
             guard let elementXML = element.toHTML, let tagString = HTMLToString(htmlString: elementXML) else { continue }
             let trimedString = tagString.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "#＃♯"))
             if trimedString.count <= 0 { continue }
+            if isNeedWhitespaceSplitForTag {
+                tagSet.formUnion(Set<String>(trimedString.components(separatedBy: " 　\u{C2A0}"))) // C2A0 == &nbsp;
+            }
             tagSet.insert(trimedString)
         }
         return tagSet
