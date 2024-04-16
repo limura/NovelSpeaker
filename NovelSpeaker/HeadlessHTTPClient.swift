@@ -15,6 +15,7 @@ class HeadlessHttpClient {
     var webView : WKWebView!
     var erik:Erik!
     var config:WKWebViewConfiguration
+    var pageLoadTimeout:TimeInterval = 60*5 // TODO: 後で「正しい値(要定義)」を設定できるようにしたい。StoryFetcher 側にも同じ値が設定されている箇所がある
     
     //static let shared = HeadlessHttpClient()
 
@@ -63,6 +64,9 @@ class HeadlessHttpClient {
                 self.webView.isInspectable = NovelSpeakerUtility.IsInspectableWkWebview()
             }
             erik = Erik(webView: self.webView)
+            if let layoutEngine = erik.layoutEngine as? WebKitLayoutEngine {
+                layoutEngine.pageLoadTimeout = pageLoadTimeout
+            }
             for scene in UIApplication.shared.connectedScenes {
                 if scene.activationState == .foregroundActive, let targetWindow = ((scene as? UIWindowScene)?.delegate as? UIWindowSceneDelegate)?.window, let tmpWindow = targetWindow {
                     self.webView.alpha = 0.0001
