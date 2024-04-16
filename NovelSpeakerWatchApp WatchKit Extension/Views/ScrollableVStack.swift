@@ -148,12 +148,15 @@ struct ScrollableVStack<Content:Hashable>: View {
         //print("onDragEnded: value: \(value), outerGeometry: \(outerGeometry)")
         scrollTo(height: self.data.scrollOffset + value.predictedEndTranslation.height, isAnimationEnable: true)
     }
+    func calcOffsetY(geometry:GeometryProxy) -> CGFloat {
+        return self.data.scrollOffset + self.data.dragHeight + self.CalcTotalContentHeight() / 2 - geometry.size.height / 2
+    }
     var body: some View {
         GeometryReader { geometry in
             ScrollView {
                 ScrollableVStackInnerView<Content>(data: self.data, converter: self.converter, parent: self)
             }
-            .content.offset(x: 0, y: self.data.scrollOffset + self.data.dragHeight + self.CalcTotalContentHeight() / 2 - geometry.size.height / 2)
+            .content.offset(x: 0, y: self.calcOffsetY(geometry: geometry))
             .onAppear(perform: {
                 self.data.toplevelSize = geometry.size
             })
@@ -162,7 +165,7 @@ struct ScrollableVStack<Content:Hashable>: View {
                 .onEnded({ self.onDragEnded(value: $0) })
             )
             .focusable(true)
-            .digitalCrownRotation(self.$scrollAmount, from: 0.0, through: 1.0, by: 0.01, sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: false)
+            .digitalCrownRotation(self.$scrollAmount, from: Float(0.0), through: Float(1.0), by: Float(0.01), sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: false)
         }
     }
 }

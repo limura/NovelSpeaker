@@ -2078,6 +2078,7 @@ class DebugLogger: NSObject {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm.ss"
         let currentTime = formatter.string(from: Date())
+        #if !os(watchOS)
         let isProtectedDataAvailable:Bool
         if Thread.isMainThread {
             isProtectedDataAvailable = UIApplication.shared.isProtectedDataAvailable
@@ -2087,6 +2088,9 @@ class DebugLogger: NSObject {
             }
         }
         let logString = "\(currentTime):\n\(log)\nisProtectedDataAvailable: \(isProtectedDataAvailable)"
+        #else
+        let logString = "\(currentTime):\n\(log)"
+        #endif
         self.log.append(logString)
     }
     @objc func GetMemoryLog() -> [String] {
