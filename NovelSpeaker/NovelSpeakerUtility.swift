@@ -895,12 +895,12 @@ class NovelSpeakerUtility: NSObject {
                         realmNovel.m_readingChapterContentCount = story.content.count
                     }
                     if storyArray.count >= RealmStoryBulk.bulkCount {
-                        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                        RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                         storyArray.removeAll()
                     }
                 }while(true)
                 if storyArray.count > 0 {
-                    RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                    RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                     storyArray.removeAll()
                 }
                 no -= 1
@@ -1000,7 +1000,7 @@ class NovelSpeakerUtility: NSObject {
                         storyArray.append(story)
                         if storyArray.count >= RealmStoryBulk.bulkCount {
                             autoreleasepool {
-                                RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                                _ = RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                             }
                             storyArray.removeAll()
                         }
@@ -1009,7 +1009,7 @@ class NovelSpeakerUtility: NSObject {
                     if result == false { break }
                 }while(true)
                 if storyArray.count > 0 {
-                    RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                    RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                     storyArray.removeAll()
                 }
                 no -= 1
@@ -1054,12 +1054,12 @@ class NovelSpeakerUtility: NSObject {
                 story.content = NormalizeNewlineString(string: storyText).replacingOccurrences(of: "\u{00}", with: "")
                 storyArray.append(story)
                 if storyArray.count >= RealmStoryBulk.bulkCount {
-                    RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                    RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                     storyArray.removeAll()
                 }
             }
             if storyArray.count > 0 {
-                RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+                RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
                 storyArray.removeAll()
             }
             if no > 0 {
@@ -2434,6 +2434,7 @@ class NovelSpeakerUtility: NSObject {
      */
     @discardableResult
     @objc static func CheckRealmReadable() -> Bool {
+        #if !os(watchOS)
         // まず UIApplication.shared.isProtectedDataAvailable が true を返すならロックされてないのでOKとします
         let isProtectedDataAvailable:Bool
         if Thread.isMainThread {
@@ -2446,6 +2447,7 @@ class NovelSpeakerUtility: NSObject {
         if isProtectedDataAvailable == true {
             return true
         }
+        #endif
 
         // ロックされているようなのでファイルの存在とUserDefaultsの設定の差異を確認する
         let localExists = RealmUtil.CheckIsLocalRealmCreated()
@@ -2799,7 +2801,7 @@ class NovelSpeakerUtility: NSObject {
                 }
                 if validStoryArray.count != storyArray.count {
                     realm.delete(storyBulk)
-                    RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: validStoryArray)
+                    RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: validStoryArray)
                     isInvalidFound = true
                 }
             }

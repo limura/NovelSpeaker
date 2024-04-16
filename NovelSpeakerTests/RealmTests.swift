@@ -100,7 +100,7 @@ class RealmTests: XCTestCase {
         RealmUtil.Write { (realm) in
             let storyArray = createDummyStoryArray(content: content, novelID: novelID, count: count, startChapterNumber: startChapterNumber)
             guard let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID), let lastStory = storyArray.last else { return }
-            RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+            RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
             novel.m_lastChapterStoryID = lastStory.storyID
         }
     }

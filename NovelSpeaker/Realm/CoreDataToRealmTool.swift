@@ -237,12 +237,12 @@ class CoreDataToRealmTool: NSObject {
                 lastStory = story
                 newStoryArray.append(story)
                 if newStoryArray.count >= RealmStoryBulk.bulkCount {
-                    RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: newStoryArray)
+                    RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: newStoryArray)
                     newStoryArray.removeAll()
                 }
             }
         }
-        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: newStoryArray)
+        RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: newStoryArray)
         return lastStory
     }
     

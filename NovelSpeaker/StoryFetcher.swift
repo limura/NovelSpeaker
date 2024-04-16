@@ -208,31 +208,31 @@ struct StorySiteInfo {
         return NovelSpeakerUtility.NormalizeNewlineString(string: NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: pageElement, injectStyle: injectStyle).trimmingCharacters(in: .whitespacesAndNewlines) )
     }
     func decodeTitle(xmlDocument:Kanna.XMLDocument) -> String? {
-        guard let xpath = title else { return nil }
+        guard let xpath = title, xpath.count > 0 else { return nil }
         return NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     func decodeSubtitle(xmlDocument:Kanna.XMLDocument) -> String? {
-        guard let xpath = subtitle else { return nil }
+        guard let xpath = subtitle, xpath.count > 0 else { return nil }
         return NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     func decodeFirstPageLink(xmlDocument:Kanna.XMLDocument, baseURL: URL) -> URL? {
-        guard let xpath = firstPageLink else { return nil }
+        guard let xpath = firstPageLink, xpath.count > 0 else { return nil }
         return NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlDocument: xmlDocument, xpath: xpath, baseURL: baseURL)
     }
     func decodeNextLink(xmlDocument:Kanna.XMLDocument, baseURL: URL) -> URL? {
-        guard let xpath = nextLink else { return nil }
+        guard let xpath = nextLink, xpath.count > 0 else { return nil }
         return NiftyUtility.FilterXpathWithExtructFirstHrefLink(xmlDocument: xmlDocument, xpath: xpath, baseURL: baseURL)
     }
     func decodeAuthor(xmlDocument:Kanna.XMLDocument) -> String? {
-        guard let xpath = author else { return nil }
+        guard let xpath = author, xpath.count > 0 else { return nil }
         return NiftyUtility.FilterXpathWithConvertString(xmlDocument: xmlDocument, xpath: xpath).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     func decodeTag(xmlDocument:Kanna.XMLDocument) -> [String] {
-        guard let xpath = tag else { return [] }
+        guard let xpath = tag, xpath.count > 0 else { return [] }
         return Array(NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath, isNeedWhitespaceSplitForTag: isNeedWhitespaceSplitForTag))
     }
     func decodeForceErrorElement(xmlDocument:Kanna.XMLDocument) -> Bool {
-        guard let xpath = forceErrorElement else { return false }
+        guard let xpath = forceErrorElement, xpath.count > 0 else { return false }
         let ret = NiftyUtility.FilterXpathWithExtructTagString(xmlDocument: xmlDocument, xpath: xpath, isNeedWhitespaceSplitForTag: isNeedWhitespaceSplitForTag)
         return ret.count > 0
     }
@@ -880,6 +880,7 @@ class StoryFetcher {
         func fetchUrl(url:URL, currentState:StoryState) {
             print("fetchUrl:", url.absoluteString, "isNeedHeadless:", currentState.isNeedHeadless ? "true" : "false")
             BehaviorLogger.AddLog(description: "Fetch URL", data: ["url": url.absoluteString, "isNeedHeadless": currentState.isNeedHeadless])
+            let timeoutInterval:TimeInterval = 60*5 // TODO: 後で「正しい値(要定義)」をなんらかの方法で設定できるようにしたい。HeadlessHTTPClient 側にも同じ値が設定されている箇所がある
             #if !os(watchOS)
             if currentState.isNeedHeadless {
                 // あまりよろしくない感じですが、siteInfoArray の中に overrideUserAgent が指定されているものがあれば、その最初の物を使うという事をしています。
@@ -896,7 +897,7 @@ class StoryFetcher {
                 }else{
                     scrollToJavaScript = nil
                 }
-                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, injectJavaScript: scrollToJavaScript, successAction: { (doc) in
+                NiftyUtility.httpHeadlessRequest(url: url, postData: nil, timeoutInterval: timeoutInterval, cookieString: currentState.cookieString, mainDocumentURL: url, httpClient: self.httpClient, withWaitSecond: withWaitSecond, injectJavaScript: scrollToJavaScript, successAction: { (doc) in
                     let html = doc.innerHTML
                     let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: doc, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton, forceErrorMessage: currentState.forceErrorMessage)
                     self.DecodeDocument(currentState: newState, html: html, encoding: .utf8, successAction: { (state) in
@@ -913,7 +914,7 @@ class StoryFetcher {
                 return RealmGlobalState.GetInstanceWith(realm: realm)?.IsDisallowsCellularAccess ?? false
             }
             
-            NiftyUtility.httpRequest(url: url, postData: nil, cookieString: currentState.cookieString, isNeedHeadless: currentState.isNeedHeadless, mainDocumentURL: url, allowsCellularAccess: isDisallowsCellularAccess ? false : true, successAction: { (data, encoding) in
+            NiftyUtility.httpRequest(url: url, postData: nil, timeoutInterval: timeoutInterval, cookieString: currentState.cookieString, isNeedHeadless: currentState.isNeedHeadless, mainDocumentURL: url, allowsCellularAccess: isDisallowsCellularAccess ? false : true, successAction: { (data, encoding) in
                 #if !os(watchOS)
                 let newState:StoryState = StoryState(url: url, cookieString: currentState.cookieString, content: currentState.content, nextUrl: nil, firstPageLink: currentState.firstPageLink, title: currentState.title, author: currentState.author, subtitle: currentState.subtitle, tagArray: currentState.tagArray, siteInfoArray: currentState.siteInfoArray, isNeedHeadless: currentState.isNeedHeadless, isCanFetchNextImmediately: currentState.isCanFetchNextImmediately, waitSecondInHeadless: currentState.waitSecondInHeadless, previousContent: currentState.previousContent, document: currentState.document, nextButton: currentState.nextButton, firstPageButton: currentState.firstPageButton, forceClickButton: currentState.forceClickButton, forceErrorMessage: currentState.forceErrorMessage)
                 #else

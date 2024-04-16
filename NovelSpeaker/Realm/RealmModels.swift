@@ -1218,10 +1218,10 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     #endif
     
     // 一つのBulkに属するStoryの配列を一度に追加します。
-    // 追加される storyArray は chapterNumber の小さい順に sort されている必要があります。
-    // 以前に登録されているものについては上書きの形式で保存されます。
+    // 以前に登録されているものが残る形で保存されます。
     // 追加されたStoryのうち最後のもののChapterNumberを返します
-    private static func SetStoryArrayOneBulkWith(realm:Realm, novelID: String, chapterNumber:Int, storyArray:[Story]) -> Int? {
+    // bulk の中にchapterの抜けがあっても気にせず単にsortしたものを入れます。
+    private static func SetStoryArrayOneBulkWith(realm:Realm, novelID: String, chapterNumber:Int, storyArray:[Story]) -> Story? {
         // とりあえず古いものがあるなら取り出す
         let targetBulk:RealmStoryBulk
         let oldStoryArray:[Story]
@@ -1238,54 +1238,57 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             targetBulk.isDeleted = false
         }
 
-        // [ChapterNumber:Story] というものを作ってそこで新しいもので上書きしたStoryArrayを作る
+        // [ChapterNumber:Story] というものを作ってそこで古いもので上書きしたStoryArrayを作る
         var newStorySet:[Int:Story] = [:]
-        for story in oldStoryArray {
-            newStorySet[story.chapterNumber] = story
-        }
         for story in storyArray {
             newStorySet[story.chapterNumber] = story
         }
+        for story in oldStoryArray {
+            newStorySet[story.chapterNumber] = story
+        }
+        // その古いものが優先されたStoryArrayでBulkを更新する
         let newStoryArray = newStorySet.keys.sorted().compactMap({newStorySet[$0]})
         targetBulk.OverrideStoryListAsset(storyArray: newStoryArray)
         realm.add(targetBulk, update: .modified)
         RealmStoryBulk.bulkCache = nil
         RealmStoryBulk.storyCache = nil
-        return newStoryArray.last?.chapterNumber
+        return newStoryArray.last
     }
     // storyArray をDBに保存します。ただし、指定した novelID 以外のStoryは無視されます。
+    // bulk の中にchapterの抜けがあっても気にせず単にsortしたものを入れます。
     // 追加されたStoryのうち最後のもののChapterNumberを返します。
+    // なお、同じStoryID(chapterNumber)に既に保存されているものがある場合、そちら(既存のもの)が優先され、指定したStoryは無視されます
     @discardableResult
-    static func SetStoryArrayWith_new2(realm:Realm, novelID:String, storyArray:[Story]) -> Int? {
+    static func SetStoryArrayWith_new2(realm:Realm, novelID:String, storyArray:[Story]) -> Story? {
         let storyArray = storyArray.filter({$0.novelID == novelID}).sorted { $0.chapterNumber < $1.chapterNumber }
         var bulkStoryArray:[Story] = []
         var currentBulkId = -1
-        var lastChapterNumber:Int? = nil
+        var lastStory:Story? = nil
         for story in storyArray {
             let bulkID = CalcBulkChapterNumber(chapterNumber: story.chapterNumber)
             if currentBulkId != bulkID, let firstStory = bulkStoryArray.first {
-                let lastChapter = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId, storyArray: bulkStoryArray)
+                let lastStoryRet = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId, storyArray: bulkStoryArray)
                 bulkStoryArray = []
-                currentBulkId = bulkID
-                if let lastChapter = lastChapter {
-                    lastChapterNumber = lastChapter
+                if let lastStoryRet = lastStoryRet {
+                    lastStory = lastStoryRet
                 }
             }
+            currentBulkId = bulkID
             bulkStoryArray.append(story)
         }
         if currentBulkId >= 0, let firstStory = bulkStoryArray.first {
-            let lastChapter = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId, storyArray: bulkStoryArray)
-            if let lastChapter = lastChapter {
-                lastChapterNumber = lastChapter
+            let lastStoryRet = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId, storyArray: bulkStoryArray)
+            if lastStoryRet != nil {
+                lastStory = lastStoryRet
             }
         }
-        return lastChapterNumber
+        return lastStory
     }
     
     /// Story を複数同時に登録する場合に使います。
     /// 注意: storyArray は chapterNumber が小さい順に sort されており、かつ、chapterNumber に抜けが無い事が必要です。
     /// SetStoryArrayWith() 内部ではその事実を"確認しません"。
-    static func SetStoryArrayWith(realm:Realm, storyArray:[Story]) {
+    static func SetStoryArrayWith_old(realm:Realm, storyArray:[Story]) {
         var index = 0
         while storyArray.count > index {
             let story = storyArray[index]
@@ -1629,6 +1632,25 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
     static func SearchStoryWith(realm:Realm, storyID:String) -> Story? {
         return SearchStoryWith(realm:realm, novelID: StoryIDToNovelID(storyID: storyID), chapterNumber: StoryIDToChapterNumber(storyID: storyID))
     }
+
+    static func FindMissingOrLastPreviousStoryWith(realm:Realm, novelID: String) -> Story? {
+        guard let bulkList = SearchStoryBulkWith(realm: realm, novelID: novelID) else { return nil }
+        var lastStory:Story? = nil
+        for bulk in bulkList {
+            guard let storyArray = bulk.LoadStoryArray() else {
+                return lastStory
+            }
+            var prevChapter = lastStory?.chapterNumber ?? (storyArray.first?.chapterNumber ?? 1) - 1
+            for story in storyArray {
+                if story.chapterNumber != prevChapter + 1 {
+                    return lastStory
+                }
+                prevChapter = story.chapterNumber
+                lastStory = story
+            }
+        }
+        return lastStory
+    }
     
     // 対象の小説について保存されている Story の個数と最後のStoryの chapterNumber のタプルを返します
     static func CountStoryFor(realm:Realm, novelID:String) -> (Int, Int, Story?) {
@@ -1954,7 +1976,7 @@ extension RealmStoryBulk: CanWriteIsDeleted {
             chapterNumber += 1
             novel.AppendDownloadDate(realm: realm, date: Date())
         }
-        RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
+        RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
         return true
     }
     
@@ -2740,13 +2762,6 @@ enum MenuItemsNotRemovedType: String {
     
     func isTargetSelector(selector: Selector) -> Bool {
         switch self {
-            #if !os(watchOS)
-        case .copy:
-            return selector == #selector(UIResponderStandardEditActions.copy(_:))
-            #else
-        default:
-            return false
-            #endif
         case .define:
             return selector.description == "_define:"
         case .addShortcut:
@@ -2755,6 +2770,13 @@ enum MenuItemsNotRemovedType: String {
             return selector.description == "_translate:"
         case .share:
             return selector.description == "_share:"
+            #if !os(watchOS)
+        case .copy:
+            return selector == #selector(UIResponderStandardEditActions.copy(_:))
+            #else
+        default:
+            return false
+            #endif
         }
     }
 }

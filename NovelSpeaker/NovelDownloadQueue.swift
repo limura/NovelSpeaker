@@ -159,8 +159,8 @@ class StoryBulkWritePool {
         defer { lock.unlock() }
         RealmUtil.Write { (realm) in
             if let novel = RealmNovel.SearchNovelWith(realm: realm, novelID: novelID) {
-                RealmStoryBulk.SetStoryArrayWith(realm: realm, storyArray: storyArray)
-                if let lastStory = storyArray.last {
+                let lastStory = RealmStoryBulk.SetStoryArrayWith_new2(realm: realm, novelID: novelID, storyArray: storyArray)
+                if let lastStory = lastStory {
                     novel.m_lastChapterStoryID = lastStory.storyID
                     novel.lastDownloadDate = lastStory.downloadDate
                 }
@@ -177,15 +177,17 @@ class StoryBulkWritePool {
     }
     
     public func AddStory(story:Story) {
+        /* // 同じStoryが登録されていても無視して古いのを優先して保存するようにしたのでチェックは外します
         // TODO: 同じStoryが登録されている場合があるのでチェックしています。
         // 本来ならこの操作は必要無いはずです。
         if storyArray.count <= 0 {
             if RealmUtil.RealmBlock(block: { (realm) -> Bool in
                 let (_, lastChapterNumber, _) = RealmStoryBulk.CountStoryFor(realm: realm, novelID: story.novelID)
+                print("novel.lastChapterNumber: \(lastChapterNumber), story.chapterNumber: \(story.chapterNumber)")
                 if story.chapterNumber != (lastChapterNumber + 1) {
                     AppInformationLogger.AddLog(message: "StoryBulkWritePool.AddStory() で不正なchapterNumberのStoryが登録されようとしている", appendix: [
                         "StoryID": story.storyID,
-                        "novel.lastChapterNumber": "\(lastChapterNumber)",
+                        "novel.lastChapterNumber +1 != story.chapterNumber": "\(lastChapterNumber) +1 != \(story.chapterNumber)",
                         "既に writePool に保存されている Story の数": "なし",
                         "stackTrace": NiftyUtility.GetStackTrace(),
                     ], isForDebug: true)
@@ -210,6 +212,7 @@ class StoryBulkWritePool {
                 return
             }
         }
+         */
         lock.lock()
         storyArray.append(story)
         let storyArrayCount:Int = storyArray.count
@@ -701,7 +704,7 @@ class NovelDownloadQueue : NSObject {
             guard let globalState = RealmGlobalState.GetInstanceWith(realm: realm) else { return }
             if !globalState.isBackgroundNovelFetchEnabled {
                 DispatchQueue.main.async {
-                    // TODO: setMinimumBackgroundFetchInterval は deprecated らしいので対応すべき
+                    // TODO: setMinimumBackgroundFetchInterval は deprecated らしいので対応すべき(直上のscheduleBackgroundProcess辺りで実装済みなので、ビルドできなくなったらStartBackgroundFetchIfNeeded()自体を削除する感じかしらん。どうやらscheduleBackgroundProcess()はこの関数内からは呼び出してないみたいなので)
                     UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplication.backgroundFetchIntervalNever)
                 }
                 return
