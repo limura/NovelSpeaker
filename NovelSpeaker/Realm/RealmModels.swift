@@ -1233,7 +1233,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             oldStoryArray = []
             targetBulk = RealmStoryBulk()
             targetBulk.id = CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber)
-            targetBulk.chapterNumber = chapterNumber
+            targetBulk.chapterNumber = CalcBulkChapterNumber(chapterNumber: chapterNumber)
             targetBulk.novelID = novelID
             targetBulk.isDeleted = false
         }
@@ -1241,6 +1241,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         // [ChapterNumber:Story] というものを作ってそこで古いもので上書きしたStoryArrayを作る
         var newStorySet:[Int:Story] = [:]
         for story in storyArray {
+            if CalcBulkChapterNumber(chapterNumber: story.chapterNumber) != targetBulk.chapterNumber { continue }
             newStorySet[story.chapterNumber] = story
         }
         for story in oldStoryArray {
@@ -1248,10 +1249,10 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         }
         // その古いものが優先されたStoryArrayでBulkを更新する
         let newStoryArray = newStorySet.keys.sorted().compactMap({newStorySet[$0]})
-        targetBulk.OverrideStoryListAsset(storyArray: newStoryArray)
-        realm.add(targetBulk, update: .modified)
         RealmStoryBulk.bulkCache = nil
         RealmStoryBulk.storyCache = nil
+        targetBulk.OverrideStoryListAsset(storyArray: newStoryArray)
+        realm.add(targetBulk, update: .modified)
         return newStoryArray.last
     }
     // storyArray をDBに保存します。ただし、指定した novelID 以外のStoryは無視されます。
@@ -1267,7 +1268,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
         for story in storyArray {
             let bulkID = CalcBulkChapterNumber(chapterNumber: story.chapterNumber)
             if currentBulkId != bulkID, let firstStory = bulkStoryArray.first {
-                let lastStoryRet = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId, storyArray: bulkStoryArray)
+                let lastStoryRet = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId + 1, storyArray: bulkStoryArray)
                 bulkStoryArray = []
                 if let lastStoryRet = lastStoryRet {
                     lastStory = lastStoryRet
@@ -1277,7 +1278,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             bulkStoryArray.append(story)
         }
         if currentBulkId >= 0, let firstStory = bulkStoryArray.first {
-            let lastStoryRet = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId, storyArray: bulkStoryArray)
+            let lastStoryRet = SetStoryArrayOneBulkWith(realm: realm, novelID: firstStory.novelID, chapterNumber: currentBulkId + 1, storyArray: bulkStoryArray)
             if lastStoryRet != nil {
                 lastStory = lastStoryRet
             }
@@ -1623,6 +1624,7 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             return cachedStory
         }
         guard let bulk = SearchStoryBulkWith(realm: realm, novelID: novelID, chapterNumber: chapterNumber), let storyArray = bulk.LoadStoryArray() else { return nil }
+        print("bulk.LoadStoryArray(): storyArray.count \(storyArray.count)")
         let bulkIndex = (chapterNumber - 1) % bulkCount
         if bulkIndex < 0 || storyArray.count <= bulkIndex {
             return nil
