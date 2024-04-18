@@ -1232,8 +1232,8 @@ extension RealmCloudVersionChecker: CanWriteIsDeleted {
             // 古いものが無いなら空のものを作っておく
             oldStoryArray = []
             targetBulk = RealmStoryBulk()
-            targetBulk.id = CreateUniqueID(novelID: novelID, chapterNumber: chapterNumber)
-            targetBulk.chapterNumber = CalcBulkChapterNumber(chapterNumber: chapterNumber)
+            targetBulk.id = CreateUniqueBulkID(novelID: novelID, chapterNumber: chapterNumber)
+            targetBulk.chapterNumber = StoryIDToChapterNumber(storyID: targetBulk.id)
             targetBulk.novelID = novelID
             targetBulk.isDeleted = false
         }
