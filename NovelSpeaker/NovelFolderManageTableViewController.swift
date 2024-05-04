@@ -142,6 +142,84 @@ class FolderDeleteFolderButtonRow: TableViewRow {
     }
 }
 
+class FolderNameChangeButtonRow: TableViewRow {
+    let folderName:String
+    weak var parentViewController:UIViewController?
+    
+    init(folderName:String, parentViewController:UIViewController?) {
+        self.folderName = folderName
+        self.parentViewController = parentViewController
+    }
+    
+    func getIdentifier() -> String {
+        return "NovelFolderManageTableViewController_FolderNameChangeButtonRow"
+    }
+    func assignCell(cell: UITableViewCell) {
+        cell.textLabel?.text = NSLocalizedString(
+            "NovelFolderManageTableViewController_FolderNameChangeButtonTitle",
+            comment: "このフォルダの名前を変更する"
+        )
+        cell.textLabel?.textAlignment = .center
+        cell.textLabel?.textColor = UIColor.link
+        cell.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(FolderNameChangeButtonRow.tapGestureEvent)))
+    }
+    func canEditable() -> Bool {
+        return false
+    }
+    func getEditingStyle() -> UITableViewCell.EditingStyle {
+        return .none
+    }
+    
+    @objc func tapGestureEvent() {
+        DispatchQueue.main.async {
+            guard let parentViewController = self.parentViewController else { return }
+            NiftyUtility.EasyDialogTextInput(
+                viewController: parentViewController,
+                title: nil,
+                message: NSLocalizedString(
+                    "NovelFolderManageTableViewController_FolderNameChangeButton_Message",
+                    comment: "新しいフォルダ名を入力してください"
+                ),
+                textFieldText: self.folderName,
+                placeHolder: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_PlaceHolderMessage", comment: "既に存在する名前や空文字列は指定できません"),
+                action: {
+                    newFolderName in
+                    let oldFolderName = self.folderName
+                    RealmUtil.Write { realm in
+                        if newFolderName.count <= 0 {
+                            guard let parentViewController = self.parentViewController else { return }
+                            NiftyUtility.EasyDialogOneButton(viewController: parentViewController, title: nil, message: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_Error_NoName", comment: "空文字列は指定できません"), buttonTitle: nil, buttonAction: nil)
+                            return
+                        }
+                        if let _ = RealmNovelTag.SearchWith(
+                            realm: realm,
+                            name:  newFolderName,
+                            type: RealmNovelTag.TagType.Folder
+                        ) {
+                            guard let parentViewController = self.parentViewController else { return }
+                            NiftyUtility.EasyDialogOneButton(viewController: parentViewController, title: nil, message: NSLocalizedString("NovelFolderManageTableViewController_CreateNewFolder_Error_SameNameAlive", comment: "同じ名前のフォルダが既に定義されています"), buttonTitle: nil, buttonAction: nil)
+                            return
+                        }
+                        RealmUtil.WriteWith(realm: realm) { (realm) in
+                            let tag = RealmNovelTag.CreateNewTag(name: newFolderName, type: RealmNovelTag.TagType.Folder)
+                            if let prevTag = RealmNovelTag.SearchWith(realm: realm, name: oldFolderName, type: RealmNovelTag.TagType.Folder) {
+                                let novelIDArray = Array(prevTag.targetNovelIDArray)
+                                prevTag.targetNovelIDArray.removeAll()
+                                realm.delete(prevTag)
+                                tag.targetNovelIDArray.append(objectsIn: novelIDArray)
+                            }
+                            realm.add(tag, update: .modified)
+                        }
+                        guard let parentTableViewController = self.parentViewController as? NovelFolderManageTableViewController else { return }
+                        parentTableViewController.LoadFolder()
+                    }
+                },
+                completion: nil
+            )
+        }
+    }
+}
+
 struct FolderRow: TableViewRow {
     let novelTitle:String
     let novelID:String
@@ -172,6 +250,7 @@ class FolderSection:TableViewSection {
         self.rows = rows
         self.parentViewController = parentViewController
         self.rows.append(FolderAddButtonRow(folderName: folderName, parentViewController: parentViewController))
+        self.rows.append(FolderNameChangeButtonRow(folderName: folderName, parentViewController: parentViewController))
         self.rows.append(FolderDeleteFolderButtonRow(folderName: folderName, parentViewController: parentViewController))
     }
     
@@ -338,6 +417,7 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "NovelFolderManageTableViewController_FolderRow")
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "NovelFolderManageTableViewController_ManageRow")
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "NovelFolderManageTableViewController_DeleteFolderButtonRow")
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "NovelFolderManageTableViewController_FolderNameChangeButtonRow")
         self.tableView.isEditing = true
         
         self.title = NSLocalizedString("NovelFolderManageTableViewController_Title", comment: "フォルダ内小説の並び替え")
