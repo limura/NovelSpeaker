@@ -688,7 +688,7 @@ class StoryFetcher {
             }else{
                 forceClickButton = nil
             }
-            if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil && (forceClickButton == nil && siteInfo.isNeedHeadless && forceErrorElementIsAlive_ErrorMessage == nil) {
+            if pageElement.count <= 0 && nextUrl == nil && firstPageLink == nil && nextButton == nil && firstPageButton == nil && forceClickButton == nil && forceErrorElementIsAlive_ErrorMessage == nil {
                 continue
             }
             #else
