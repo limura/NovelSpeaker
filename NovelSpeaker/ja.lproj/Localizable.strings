@@ -914,16 +914,30 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.1
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.2
 
-- 出力されるバックアップファイルのフォーマットを変更
-- 「Web取込」機能で小説を取り込もうとした時に同じ小説が本棚に登録されていて失敗した場合のダイアログに「本棚側の小説を開く」ボタンを追加
-- 読み上げ中に、ページの途中にも関わらず次のページへと移行してしまう可能性を減らします
-- iCloud同期をOFFにしている状態にも関わらず、「他端末で更新された XX章 へ移動」というメッセージが表示される可能性を減らします
+- Version 2.0.0 以降のバックアップファイルの適用時には、全ての発話変更設定を削除してから適用するようにします
+- SiteInfo に isNeedWhitespaceSplitForTag を追加します
+- 小説のダウンロード時のうち、内部データベースへの保存時の挙動を変更します
+- 内蔵ブラウザでの読み込み時に、ページ読み込み時のタイムアウト時間を5分にします
+- 「設定タブ」→「自作フォルダを編集する」画面にフォルダの名前を変えるボタンを追加します
+- Version 2.* 以降で作成されたバックアップファイルの適用時に、新しくダウンロードされていた小説の章(ページ)がなかったことにされていた問題を修正
+- 複数のSiteInfoが設定されている場合、優先度が一番高いものしか採用していなかった場合のある問題を修正します
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.9.2
+
+- Version 2.0.0 以降のバックアップファイルの適用時には、全ての発話変更設定を削除してから適用するようにします
+- SiteInfo に isNeedWhitespaceSplitForTag を追加します
+- 小説のダウンロード時のうち、内部データベースへの保存時の挙動を変更します
+- 内蔵ブラウザでの読み込み時に、ページ読み込み時のタイムアウト時間を5分にします
+- 「設定タブ」→「自作フォルダを編集する」画面にフォルダの名前を変えるボタンを追加します
+- Version 2.* 以降で作成されたバックアップファイルの適用時に、新しくダウンロードされていた小説の章(ページ)がなかったことにされていた問題を修正
+- 複数のSiteInfoが設定されている場合、優先度が一番高いものしか採用していなかった場合のある問題を修正します
+
+
 Version 2.9.1
 
 インタフェース・内部動作の変更
