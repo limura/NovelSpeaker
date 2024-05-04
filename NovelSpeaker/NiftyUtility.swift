@@ -2101,4 +2101,47 @@ class DebugLogger: NSObject {
     }
 }
 
+/*
+ let startTime = DispatchTime.now()
+ defer { FunctionExecutionMetrics.shared.recordExecutionTime(startTime: startTime, functionName: #function) }
+ とかして使う。
+ で、情報を集めた後に
+ FunctionExecutionMetrics.shared.PrintMetrics()
+ で表示する。
+ */
+class FunctionExecutionMetrics {
+    static let shared = FunctionExecutionMetrics()
 
+    private var executionMetrics:[String:[TimeInterval]] = [:]
+    private init() {}
+
+    func RecordExecutionTime(startTime:DispatchTime, functionName: String = #function) {
+        let endTime = DispatchTime.now()
+        let nanoSeconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+        let executionTime = TimeInterval(nanoSeconds / 1_000_000_000)
+
+        if var metrics = executionMetrics[functionName] {
+            metrics.append(executionTime)
+        }else{
+            executionMetrics[functionName] = [executionTime]
+        }
+    }
+
+    func ClearMetrics() {
+        executionMetrics = [:]
+    }
+
+    func PrintMetrics() {
+        print("=== Function Execution Metrics ===")
+        for (functionName, metrics) in executionMetrics {
+            if metrics.isEmpty {
+                print("\(functionName): not called?")
+            }else{
+                let sum = metrics.reduce(0.0, +)
+                let count = metrics.count
+                let average = sum / Double(metrics.count)
+                print("\(functionName): \(count) called. average: \(average)")
+            }
+        }
+    }
+}
