@@ -67,10 +67,10 @@ class BookShelfRATreeViewController: UIViewController, RATreeViewDataSource, RAT
         } else {
             guide = self.view.layoutMarginsGuide
         }
-        treeView.topAnchor.constraint(equalTo: guide.topAnchor, constant: 8).isActive = true
-        treeView.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 8).isActive = true
-        treeView.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: 8).isActive = true
-        treeView.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: 8).isActive = true
+        treeView.topAnchor.constraint(equalTo: guide.topAnchor, constant: 0).isActive = true
+        treeView.leftAnchor.constraint(equalTo: guide.leftAnchor, constant: 2).isActive = true
+        treeView.rightAnchor.constraint(equalTo: guide.rightAnchor, constant: -2).isActive = true
+        treeView.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: 0).isActive = true
         treeView.translatesAutoresizingMaskIntoConstraints = false
         treeView.estimatedRowHeight = 44
         treeView.rowHeight = UITableView.automaticDimension
