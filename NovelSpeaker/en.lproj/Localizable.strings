@@ -925,19 +925,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "Do you want to delete the book?\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "Delete";
 "BookShelfTableViewController_Resume:" = "▶︎ Resume: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.3
 
-- When applying a backup file of version 2.0.0 or later, delete all utterance change settings before applying it.
-- Add isNeedWhitespaceSplitForTag to SiteInfo
-- We will change the behavior when saving novels to the internal database when downloading them.
-- Set the page load timeout to 5 minutes when loading in the built-in browser
-- Added a button to change the folder name on the \"Settings tab\" -> \"Edit self-created folder\" screen
-- Fixed an issue where newly downloaded novel chapters (pages) were missing when applying a backup file created with Version 2.* or later.
-- Fixed an issue where when multiple SiteInfos were set, only the one with the highest priority was selected.
+- Fixed an issue where a-f in hexadecimal notation matched only lowercase letters when identifying URIs.
+- Fixed an issue where the scroll bar was not displayed on the bookshelf screen
 
 Please refer to \"the update history\" of the \"setting\" tab for the detailed information about the update to date.";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.9.3
+
+Fixing the problem
+
+- Fixed an issue where a-f in hexadecimal notation matched only lowercase letters when identifying URIs.
+- Fixed an issue where the scroll bar was not displayed on the bookshelf screen
+
+
 Version 2.9.2
 
 - When applying a backup file of version 2.0.0 or later, delete all utterance change settings before applying it.

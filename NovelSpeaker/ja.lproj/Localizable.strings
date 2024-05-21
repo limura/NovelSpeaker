@@ -914,19 +914,22 @@
 "BookShelfTableViewController_WarningDeleteBookMessage" = "小説を削除しますか？\n";
 "BookShelfTableViewController_WarningDeleteBookOKButtonTitle" = "削除";
 "BookShelfTableViewController_Resume:" = "▶︎ 再生: %@";
-"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.2
+"BookShelfTableViewController_AnnounceNewVersionMessage" = "Version 2.9.3
 
-- Version 2.0.0 以降のバックアップファイルの適用時には、全ての発話変更設定を削除してから適用するようにします
-- SiteInfo に isNeedWhitespaceSplitForTag を追加します
-- 小説のダウンロード時のうち、内部データベースへの保存時の挙動を変更します
-- 内蔵ブラウザでの読み込み時に、ページ読み込み時のタイムアウト時間を5分にします
-- 「設定タブ」→「自作フォルダを編集する」画面にフォルダの名前を変えるボタンを追加します
-- Version 2.* 以降で作成されたバックアップファイルの適用時に、新しくダウンロードされていた小説の章(ページ)がなかったことにされていた問題を修正
-- 複数のSiteInfoが設定されている場合、優先度が一番高いものしか採用していなかった場合のある問題を修正します
+- URIと識別するものについて、16進数表記の a-f が小文字のみにマッチしている問題を解消
+- 本棚画面でスクロールバーが表示されていなかった問題を修正
 
 現在までのアップデートについての詳しい情報は「設定」タブの「更新履歴」を参照してください。";
 
 "UpdateLogViewController_UpdateLog" = "
+Version 2.9.3
+
+問題の修正
+
+- URIと識別するものについて、16進数表記の a-f が小文字のみにマッチしている問題を解消
+- 本棚画面でスクロールバーが表示されていなかった問題を修正
+
+
 Version 2.9.2
 
 - Version 2.0.0 以降のバックアップファイルの適用時には、全ての発話変更設定を削除してから適用するようにします
