@@ -861,6 +861,7 @@
 "NovelFolderManageTableViewController_MultipleNovelIDSelectorViewControllerTitle_Formated" = "「%@」フォルダに登録される小説";
 "NovelFolderManageTableViewController_FolderNameChangeButton_Message" = "新しいフォルダ名を入力してください";
 "NovelFolderManageTableViewController_FolderNameChangeButtonTitle" = "このフォルダの名前を変更する";
+"NovelFolderManageTableViewController_SearchByTextButton_AccessibilityLabel" = "登録済みフォルダや小説の検索";
 
 "BookshelfViewButtonSettingsViewController_Title" = "本棚画面の右上に表示されるボタン群の編集";
 "BookshelfViewButtonType_DownloadStatus" = "ダウンロード状態の確認";

@@ -871,6 +871,7 @@
 "NovelFolderManageTableViewController_MultipleNovelIDSelectorViewControllerTitle_Formated" = "Novels registered in the \"%@\" folder";
 "NovelFolderManageTableViewController_FolderNameChangeButton_Message" = "Please enter a new folder name";
 "NovelFolderManageTableViewController_FolderNameChangeButtonTitle" = "Rename this folder";
+"NovelFolderManageTableViewController_SearchByTextButton_AccessibilityLabel" = "Search registered folders and novels";
 
 "BookshelfViewButtonSettingsViewController_Title" = "Settings for the buttons displayed in the upper right corner of the bookshelf screen";
 "BookshelfViewButtonType_DownloadStatus" = "Check download status";

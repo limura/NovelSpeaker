@@ -237,6 +237,7 @@ struct FolderRow: TableViewRow {
         return .delete
     }
     func getNovelID() -> String { return novelID }
+    func getNovelTitle() -> String { return novelTitle }
 }
 
 class FolderSection:TableViewSection {
@@ -402,9 +403,10 @@ class ManageSection:TableViewSection {
 }
 
 class NovelFolderManageTableViewController: UITableViewController, RealmObserverResetDelegate {
-    
     var folderSectionArray:[TableViewSection] = []
     var realmNovelTagObserverToken:NotificationToken? = nil
+    var searchView:SearchFloatingView? = nil
+    var searchTextCache = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -421,6 +423,13 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
         self.tableView.isEditing = true
         
         self.title = NSLocalizedString("NovelFolderManageTableViewController_Title", comment: "フォルダ内小説の並び替え")
+        
+        let searchButton = UIBarButtonItem(image: UIImage(systemName: "doc.text.magnifyingglass"), style: .plain, target: self, action: #selector(searchByTextButtonClicked(_:)))
+        searchButton.accessibilityLabel = NSLocalizedString(
+            "NovelFolderManageTableViewController_SearchByTextButton_AccessibilityLabel",
+            comment: "登録済みフォルダや小説の検索"
+        )
+        navigationItem.rightBarButtonItems = [searchButton]
         
         folderSectionArray = [ManageSection(parentViewController: self)]
         LoadFolder()
@@ -441,6 +450,7 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
         super.viewWillDisappear(animated)
         StopObservers()
         saveFolderOrder()
+        clearSearchView()
     }
     
     func StopObservers(){
@@ -619,6 +629,117 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
                 folder.targetNovelIDArray.append(objectsIn: newNovelIDArray)
                 realm.add(folder, update: .modified)
             }
+        })
+    }
+    
+    func clearSearchView(){
+        if let searchView = self.searchView {
+            self.searchView = nil
+            searchView.removeFromSuperview()
+        }
+    }
+    
+    var currentSearchIndex = -1
+    func searchNextIndexFromString(startIndex: Int, searchString: String) -> (Int?, IndexPath, FolderSection?, FolderRow?) {
+        var currentIndex = -1
+        var sectionIndex = -1
+        for section in self.folderSectionArray {
+            sectionIndex += 1
+            guard let section = section as? FolderSection else { continue }
+            currentIndex += 1
+            if currentIndex > startIndex && section.folderName.contains(searchString) {
+                return (currentIndex, IndexPath(row:0, section: sectionIndex), section, nil)
+            }
+            var rowIndex = -1
+            for row in section.rows {
+                currentIndex += 1
+                rowIndex += 1
+                guard let row = row as? FolderRow else { continue }
+                if currentIndex > startIndex && row.novelTitle.contains(searchString) {
+                    return (currentIndex, IndexPath(row:rowIndex, section: sectionIndex), section, row)
+                }
+            }
+        }
+        return (nil, IndexPath(row:0, section:0), nil, nil)
+    }
+    func searchPreviousIndexFromString(startIndex: Int, searchString: String) -> (Int?, IndexPath, FolderSection?, FolderRow?) {
+        var currentIndex = -1
+        var previousSection: FolderSection? = nil
+        var previousRow: FolderRow? = nil
+        var previousIndex: Int? = nil
+        var sectionIndex = -1
+        var rowIndex = -1
+        var previousSectionIndex = -1
+        var previousRowIndex = -1
+        
+        for section in self.folderSectionArray {
+            sectionIndex += 1
+            guard let section = section as? FolderSection else { continue }
+            currentIndex += 1
+            
+            if currentIndex < startIndex && section.folderName.contains(searchString) {
+                previousIndex = currentIndex
+                previousSection = section
+                previousRow = nil
+                previousSectionIndex = sectionIndex
+                previousRowIndex = -1
+            }
+
+            rowIndex = -1
+            for row in section.rows {
+                rowIndex += 1
+                currentIndex += 1
+                guard let row = row as? FolderRow else { continue }
+                
+                if currentIndex < startIndex && row.novelTitle.contains(searchString) {
+                    previousIndex = currentIndex
+                    previousSection = section
+                    previousRow = row
+                    previousSectionIndex = sectionIndex
+                    previousRowIndex = rowIndex
+                }
+            }
+        }
+        
+        return (previousIndex, IndexPath(row: previousRowIndex, section: previousSectionIndex), previousSection, previousRow)
+    }
+    func prevSearchByText(searchString: String) {
+        let (prevIndex, indexPath, prevSection, prevRow) = searchPreviousIndexFromString(startIndex: self.currentSearchIndex, searchString: searchString)
+        if let prevIndex = prevIndex {
+            DispatchQueue.main.async {
+                self.currentSearchIndex = prevIndex
+                self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+            }
+        }else{
+            self.currentSearchIndex = -1
+        }
+    }
+    func nextSearchByText(searchString: String) {
+        let (nextIndex, indexPath, nextSection, nextRow) = searchNextIndexFromString(startIndex: self.currentSearchIndex, searchString: searchString)
+        if let nextIndex = nextIndex {
+            DispatchQueue.main.async {
+                self.currentSearchIndex = nextIndex
+                self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+            }
+        }else{
+            self.currentSearchIndex = -1
+        }
+    }
+
+    @objc func searchByTextButtonClicked(_ sender: UIBarButtonItem) {
+        if self.searchView != nil {
+            clearSearchView()
+            return
+        }
+        guard let topLevelViewController = self.parent else { return }
+        self.searchView = SearchFloatingView.generate(parentView: topLevelViewController.view, firstText: searchTextCache, leftButtonClickHandler: { searchString in
+            guard let searchString = searchString else { return }
+            self.prevSearchByText(searchString: searchString)
+        }, rightButtonClickHandler: { searchString in
+            guard let searchString = searchString else { return }
+            self.nextSearchByText(searchString: searchString)
+        }, isDeletedHandler: {
+            self.searchView = nil
         })
     }
 }
