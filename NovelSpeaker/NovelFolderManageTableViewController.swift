@@ -639,95 +639,96 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
         }
     }
     
-    var currentSearchIndex = -1
-    func searchNextIndexFromString(startIndex: Int, searchString: String) -> (Int?, IndexPath, FolderSection?, FolderRow?) {
-        var currentIndex = -1
-        var sectionIndex = -1
+    var currentSearchIndexPath = IndexPath(row: -1, section: -1)
+    func searchNearestIndexFromString(startIndexPath: IndexPath, searchString: String, isForward: Bool) -> IndexPath? {
+        var foundIndexPathes = [IndexPath]()
+        var currentIndexPath = IndexPath(row: -1, section: -1)
         for section in self.folderSectionArray {
-            sectionIndex += 1
+            currentIndexPath.section += 1
             guard let section = section as? FolderSection else { continue }
-            currentIndex += 1
-            if currentIndex > startIndex && section.folderName.contains(searchString) {
-                return (currentIndex, IndexPath(row:0, section: sectionIndex), section, nil)
+            if section.folderName.contains(searchString) {
+                foundIndexPathes.append(IndexPath(row:0, section: currentIndexPath.section))
             }
-            var rowIndex = -1
+            currentIndexPath.row = -1
             for row in section.rows {
-                currentIndex += 1
-                rowIndex += 1
+                currentIndexPath.row += 1
                 guard let row = row as? FolderRow else { continue }
-                if currentIndex > startIndex && row.novelTitle.contains(searchString) {
-                    return (currentIndex, IndexPath(row:rowIndex, section: sectionIndex), section, row)
+                if row.novelTitle.contains(searchString) {
+                    foundIndexPathes.append(currentIndexPath)
                 }
             }
         }
-        return (nil, IndexPath(row:0, section:0), nil, nil)
+        if !isForward {
+            foundIndexPathes.reverse()
+        }
+        var hit = false
+        for indexPath in foundIndexPathes {
+            if hit {
+                return indexPath
+            }
+            if indexPath.row == startIndexPath.row && indexPath.section == startIndexPath.section {
+                hit = true
+            }
+        }
+        return foundIndexPathes.first
     }
-    func searchPreviousIndexFromString(startIndex: Int, searchString: String) -> (Int?, IndexPath, FolderSection?, FolderRow?) {
-        var currentIndex = -1
-        var previousSection: FolderSection? = nil
-        var previousRow: FolderRow? = nil
-        var previousIndex: Int? = nil
-        var sectionIndex = -1
-        var rowIndex = -1
-        var previousSectionIndex = -1
-        var previousRowIndex = -1
-        
-        for section in self.folderSectionArray {
-            sectionIndex += 1
-            guard let section = section as? FolderSection else { continue }
-            currentIndex += 1
-            
-            if currentIndex < startIndex && section.folderName.contains(searchString) {
-                previousIndex = currentIndex
-                previousSection = section
-                previousRow = nil
-                previousSectionIndex = sectionIndex
-                previousRowIndex = -1
-            }
-
-            rowIndex = -1
-            for row in section.rows {
-                rowIndex += 1
-                currentIndex += 1
-                guard let row = row as? FolderRow else { continue }
-                
-                if currentIndex < startIndex && row.novelTitle.contains(searchString) {
-                    previousIndex = currentIndex
-                    previousSection = section
-                    previousRow = row
-                    previousSectionIndex = sectionIndex
-                    previousRowIndex = rowIndex
-                }
-            }
-        }
-        
-        return (previousIndex, IndexPath(row: previousRowIndex, section: previousSectionIndex), previousSection, previousRow)
+    func bounceTableViewScroll() {
+        let offset:CGFloat = 16.0
+        self.tableView.contentOffset.y += offset
+        UIView.animate(withDuration: 0.2,
+                       delay: 0.0,
+                       usingSpringWithDamping: 1.0,
+                       initialSpringVelocity: 0.2,
+                       animations: {
+            self.tableView.contentOffset.y -= offset
+       })
     }
     func highlightAndMoveToRow(indexPath: IndexPath) {
         DispatchQueue.main.async {
-            //self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
             if let prevIndexPath = self.tableView.indexPathForSelectedRow {
                 self.tableView.deselectRow(at: prevIndexPath, animated: false)
+                if prevIndexPath.row == indexPath.row && prevIndexPath.section == indexPath.section {
+                    self.bounceTableViewScroll()
+                    return
+                }
             }
             self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: .middle)
         }
     }
     func prevSearchByText(searchString: String) {
-        let (prevIndex, indexPath, prevSection, prevRow) = searchPreviousIndexFromString(startIndex: self.currentSearchIndex, searchString: searchString)
-        if let prevIndex = prevIndex {
-            self.currentSearchIndex = prevIndex
+        if let selectedIndexPath = self.tableView.indexPathForSelectedRow {
+            self.currentSearchIndexPath = selectedIndexPath
+        }
+        let indexPath = searchNearestIndexFromString(startIndexPath: self.currentSearchIndexPath, searchString: searchString, isForward: false)
+        if let indexPath = indexPath {
+            self.currentSearchIndexPath = indexPath
             highlightAndMoveToRow(indexPath: indexPath)
         }else{
-            self.currentSearchIndex = -1
+            DispatchQueue.main.async {
+                self.bounceTableViewScroll()
+            }
+            self.currentSearchIndexPath = IndexPath(row: -1, section: -1)
+            if let prevIndexPath = self.tableView.indexPathForSelectedRow {
+                self.tableView.deselectRow(at: prevIndexPath, animated: false)
+            }
         }
     }
     func nextSearchByText(searchString: String) {
-        let (nextIndex, indexPath, nextSection, nextRow) = searchNextIndexFromString(startIndex: self.currentSearchIndex, searchString: searchString)
-        if let nextIndex = nextIndex {
-            self.currentSearchIndex = nextIndex
+        if let selectedIndexPath = self.tableView.indexPathForSelectedRow {
+            self.currentSearchIndexPath = selectedIndexPath
+        }
+        let indexPath = searchNearestIndexFromString(startIndexPath: self.currentSearchIndexPath, searchString: searchString, isForward: true)
+        if let indexPath = indexPath {
+            self.currentSearchIndexPath = indexPath
             highlightAndMoveToRow(indexPath: indexPath)
         }else{
-            self.currentSearchIndex = -1
+            DispatchQueue.main.async {
+                self.bounceTableViewScroll()
+            }
+            self.currentSearchIndexPath = IndexPath(row: -1, section: -1)
+            if let prevIndexPath = self.tableView.indexPathForSelectedRow {
+                self.tableView.deselectRow(at: prevIndexPath, animated: false)
+            }
         }
     }
 
