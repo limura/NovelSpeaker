@@ -703,13 +703,20 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
         
         return (previousIndex, IndexPath(row: previousRowIndex, section: previousSectionIndex), previousSection, previousRow)
     }
+    func highlightAndMoveToRow(indexPath: IndexPath) {
+        DispatchQueue.main.async {
+            //self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+            if let prevIndexPath = self.tableView.indexPathForSelectedRow {
+                self.tableView.deselectRow(at: prevIndexPath, animated: false)
+            }
+            self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: .middle)
+        }
+    }
     func prevSearchByText(searchString: String) {
         let (prevIndex, indexPath, prevSection, prevRow) = searchPreviousIndexFromString(startIndex: self.currentSearchIndex, searchString: searchString)
         if let prevIndex = prevIndex {
-            DispatchQueue.main.async {
-                self.currentSearchIndex = prevIndex
-                self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
-            }
+            self.currentSearchIndex = prevIndex
+            highlightAndMoveToRow(indexPath: indexPath)
         }else{
             self.currentSearchIndex = -1
         }
@@ -717,10 +724,8 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
     func nextSearchByText(searchString: String) {
         let (nextIndex, indexPath, nextSection, nextRow) = searchNextIndexFromString(startIndex: self.currentSearchIndex, searchString: searchString)
         if let nextIndex = nextIndex {
-            DispatchQueue.main.async {
-                self.currentSearchIndex = nextIndex
-                self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
-            }
+            self.currentSearchIndex = nextIndex
+            highlightAndMoveToRow(indexPath: indexPath)
         }else{
             self.currentSearchIndex = -1
         }
@@ -731,6 +736,8 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
             clearSearchView()
             return
         }
+        // ハイライトするのに selection を使うので、一時的に(編集中でも)選択できるようにします。
+        self.tableView.allowsSelectionDuringEditing = true
         guard let topLevelViewController = self.parent else { return }
         self.searchView = SearchFloatingView.generate(parentView: topLevelViewController.view, firstText: searchTextCache, leftButtonClickHandler: { searchString in
             guard let searchString = searchString else { return }
@@ -740,6 +747,11 @@ class NovelFolderManageTableViewController: UITableViewController, RealmObserver
             self.nextSearchByText(searchString: searchString)
         }, isDeletedHandler: {
             self.searchView = nil
+            // 検索窓を閉じたら選択できないように戻します
+            if let prevIndexPath = self.tableView.indexPathForSelectedRow {
+                self.tableView.deselectRow(at: prevIndexPath, animated: false)
+            }
+            self.tableView.allowsSelectionDuringEditing = false
         })
     }
 }
