@@ -2122,6 +2122,7 @@ class FunctionExecutionMetrics {
 
         if var metrics = executionMetrics[functionName] {
             metrics.append(executionTime)
+            executionMetrics[functionName] = metrics
         }else{
             executionMetrics[functionName] = [executionTime]
         }
@@ -2130,18 +2131,24 @@ class FunctionExecutionMetrics {
     func ClearMetrics() {
         executionMetrics = [:]
     }
-
-    func PrintMetrics() {
-        print("=== Function Execution Metrics ===")
+    
+    func GetMetricsByString() -> String {
+        var result = ""
+        result += "=== Function Execution Metrics ===\n"
         for (functionName, metrics) in executionMetrics {
             if metrics.isEmpty {
-                print("\(functionName): not called?")
+                result += "\(functionName): not called?\n"
             }else{
                 let sum = metrics.reduce(0.0, +)
                 let count = metrics.count
                 let average = sum / Double(metrics.count)
-                print("\(functionName): \(count) called. average: \(average)")
+                result += "\(functionName): \(count) called. average: \(average), all: \(metrics)\n"
             }
         }
+        return result
+    }
+
+    func PrintMetrics() {
+        print(GetMetricsByString())
     }
 }
