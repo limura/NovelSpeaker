@@ -2063,7 +2063,6 @@ class NovelSpeakerUtility: NSObject {
                     })),
                     "readingChapterReadingPoint": novel.m_readingChapterReadingPoint,
                     "readingChapterContentCount": novel.m_readingChapterContentCount,
-                    "contentDirectory": "\(novelCount)"
                 ]
                 if !forStorySaveNovelIDArray.contains(novel.novelID) && novel.m_type != NovelType.UserCreated.rawValue {
                     result.append(novelData)
@@ -2072,6 +2071,7 @@ class NovelSpeakerUtility: NSObject {
                 guard let contentDirectory:URL = NiftyUtility.CreateDirectoryFor(path: contentWriteTo, directoryName: "\(novelCount)") else {
                     continue
                 }
+                novelData["contentDirectory"] = "\(novelCount)"
                 novelData["storys"] = CreateBackupDataDictionary_Story(novelID: novel.novelID, contentWriteTo: contentDirectory, progressString: progressString, progress: progress)
                 fileArray.append(contentDirectory)
                 result.append(novelData)
